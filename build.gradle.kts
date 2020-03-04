@@ -6,7 +6,7 @@ group = "no.nav.helse"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
