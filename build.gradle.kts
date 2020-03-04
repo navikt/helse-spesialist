@@ -13,6 +13,9 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.ktor:ktor-server-cio:1.3.1")
     implementation("net.logstash.logback:logstash-logback-encoder:6.3")
+    implementation("com.zaxxer:HikariCP:3.4.2")
+    implementation("no.nav:vault-jdbc:1.3.7")
+    implementation("org.flywaydb:flyway-core:6.2.4")
 }
 
 tasks {

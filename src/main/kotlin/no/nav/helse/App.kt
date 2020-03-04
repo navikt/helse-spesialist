@@ -14,6 +14,10 @@ import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
 fun main(): Unit = runBlocking {
+    val dataSourceBuilder = DataSourceBuilder(System.getenv())
+    dataSourceBuilder.migrate()
+    val dataSource = dataSourceBuilder.getDataSource(DataSourceBuilder.Role.User)
+
     val embeddedServer = embeddedServer(CIO, port = 8080) {
         routing {
             get("/isalive") {
