@@ -1,0 +1,55 @@
+name: master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: create image tag
+        run: echo ::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/spesialist:$(echo ${{ github.sha }} | cut -c1-7)
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - name: test and build
+        run: ./gradlew test build
+        env:
+          ORG_GRADLE_PROJECT_githubUser: x-access-token
+          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+      - name: build docker image
+        run: docker build . --pull -t ${IMAGE}
+      - name: push docker image
+        run: |
+          docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} https://docker.pkg.github.com
+          docker push ${IMAGE}
+  deployDev:
+    name: Deploy to dev
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create image tag
+        run: echo ::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/spesialist:$(echo ${{ github.sha }} | cut -c1-7)
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: deploy/dev.yml
+
+  deployProd:
+    name: Deploy to prod
+    needs: [build, deployDev]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create image tag
+        run: echo ::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/spesialist:$(echo ${{ github.sha }} | cut -c1-7)
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: deploy/prod.yml
