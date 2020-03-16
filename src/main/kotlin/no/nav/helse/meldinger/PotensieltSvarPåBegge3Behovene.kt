@@ -6,19 +6,22 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 
-internal class AvventerGodkjenningBehov(
+internal class PotensieltSvarPåBegge3Behovene(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
-    val vedtaksperiodeId: String
+    val vedtaksperiodeId: String,
+    val spleisBehovId: String,
+    val behandlendeEnhet: String
 ) {
     internal class Factory(rapidsConnection: RapidsConnection, private val spleisBehovMediator: SpleisBehovMediator) : River.PacketListener {
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireAll("@behov", listOf("Godkjenning"))
+                    it.requireAll("@behov", listOf("BehandlendeEnhet"))
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")
                     it.requireKey("vedtaksperiodeId")
+                    it.requireValue("final", true)
                 }
             }
         }
