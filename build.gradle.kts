@@ -4,8 +4,19 @@ plugins {
 
 group = "no.nav.helse"
 
+val githubUser: String by project
+val githubPassword: String by project
+
 repositories {
     jcenter()
+
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/rapids-and-rivers")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 dependencies {
@@ -16,6 +27,8 @@ dependencies {
     implementation("com.zaxxer:HikariCP:3.4.2")
     implementation("no.nav:vault-jdbc:1.3.7")
     implementation("org.flywaydb:flyway-core:6.2.4")
+
+    implementation("com.github.navikt:rapids-and-rivers:1.a468ae5")
 }
 
 tasks {
