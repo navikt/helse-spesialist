@@ -1,11 +1,16 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentNavnLøsning
+import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class OppdaterPersonOppgave(private val collector: SpleisBehov): Oppgave() {
+internal class OppdaterPersonOppgave(
+    private val spleisBehov: SpleisBehov,
+    private val personDao: PersonDao
+): Oppgave() {
     override val ferdigstilt: LocalDateTime? = null
     private val oppgaver: List<Oppgave> = listOf(
         HentNavnOppgave(),
@@ -16,15 +21,16 @@ internal class OppdaterPersonOppgave(private val collector: SpleisBehov): Oppgav
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
-            if (true) { // TODO: If Navn ikke er oppdatert siste 14 dager
-                collector.håndter(Behovtype.HentNavn)
+            val sistOppdatert = personDao.navnSistOppdatert(spleisBehov.fødselsnummer)
+            if (sistOppdatert.plusDays(14) < LocalDate.now()) {
+                spleisBehov.håndter(Behovtype.HentNavn)
             } else {
                 ferdigstilt = LocalDateTime.now()
             }
         }
 
         override fun fortsett(løsning: HentNavnLøsning) {
-            // UPDATE TABLE SET fornavn=? [...]
+            personDao.setNavn(spleisBehov.fødselsnummer, løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
             ferdigstilt = LocalDateTime.now()
         }
     }
@@ -33,15 +39,16 @@ internal class OppdaterPersonOppgave(private val collector: SpleisBehov): Oppgav
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
-            if ( true ) { // TODO: If Enhet ikke er oppdatert siste 5 dager
-                collector.håndter(Behovtype.HentEnhet)
+            val sistOppdatert = personDao.enhetSistOppdatert(spleisBehov.fødselsnummer)
+            if (sistOppdatert.plusDays(5) < LocalDate.now()) {
+                spleisBehov.håndter(Behovtype.HentEnhet)
             } else {
                 ferdigstilt = LocalDateTime.now()
             }
         }
 
         override fun fortsett(løsning: HentEnhetLøsning) {
-            // UPDATE TABLE SET enhetsnr = ? [...]
+            personDao.oppdaterEnhet(spleisBehov.fødselsnummer, løsning.enhetNr.toInt())
             ferdigstilt = LocalDateTime.now()
         }
     }

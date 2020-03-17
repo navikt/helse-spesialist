@@ -1,25 +1,29 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentNavnLøsning
 import java.time.LocalDateTime
 
-internal class OpprettPersonOppgave(private val collector: SpleisBehov) : Oppgave() {
+internal class OpprettPersonOppgave(
+    private val spleisBehov: SpleisBehov,
+    private val personDao: PersonDao
+) : Oppgave() {
     override var ferdigstilt: LocalDateTime? = null
     private var navnId: Int? = null
     private var enhetId: Int? = null
 
     override fun execute() {
-        if (true) { // Person eksisterer
+        if (personDao.finnPerson(spleisBehov.fødselsnummer)) {
             ferdigstilt = LocalDateTime.now()
         } else if (navnId != null && enhetId != null) {
-            // INSERT PERSON
+            personDao.insertPerson(spleisBehov.fødselsnummer, spleisBehov.aktørId, navnId!!, enhetId!!)
             ferdigstilt = LocalDateTime.now()
         }
         else {
-            collector.håndter(Behovtype.HentNavn)
-            collector.håndter(Behovtype.HentEnhet)
+            spleisBehov.håndter(Behovtype.HentNavn)
+            spleisBehov.håndter(Behovtype.HentEnhet)
         }
     }
 
@@ -28,7 +32,7 @@ internal class OpprettPersonOppgave(private val collector: SpleisBehov) : Oppgav
     }
 
     override fun fortsett(hentNavnLøsning: HentNavnLøsning) {
-        // navnId = INSERT NAVN
+        navnId = personDao.insertNavn(hentNavnLøsning.fornavn, hentNavnLøsning.mellomnavn, hentNavnLøsning.etternavn)
     }
 
 }

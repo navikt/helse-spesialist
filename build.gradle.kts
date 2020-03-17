@@ -27,6 +27,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:3.4.2")
     implementation("no.nav:vault-jdbc:1.3.7")
     implementation("org.flywaydb:flyway-core:6.2.4")
+    implementation("com.github.seratch:kotliquery:1.3.1")
 
     implementation("com.github.navikt:rapids-and-rivers:1.a468ae5")
 }

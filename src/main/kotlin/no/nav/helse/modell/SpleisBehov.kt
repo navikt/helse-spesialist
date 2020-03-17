@@ -1,18 +1,21 @@
 package no.nav.helse.modell
 
+import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentNavnLøsning
 import no.nav.helse.modell.oppgave.*
 import java.util.UUID.randomUUID
 
 internal class SpleisBehov(
-    private val fødselsnummer: String,
-    private val orgnummer: String
+    internal val fødselsnummer: String,
+    internal val aktørId: String,
+    private val orgnummer: String,
+    private val personDao: PersonDao
 ) {
     internal val uuid = randomUUID()
     internal val oppgaver: List<Oppgave> = listOf(
-        OpprettPersonOppgave(this),
-        OppdaterPersonOppgave(this)
+        OpprettPersonOppgave(this, personDao),
+        OppdaterPersonOppgave(this, personDao)
     )
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
