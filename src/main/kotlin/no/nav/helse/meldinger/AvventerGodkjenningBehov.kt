@@ -11,6 +11,8 @@ internal class AvventerGodkjenningBehov(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: String
 ) {
+    fun asSpleisBehov() = SpleisBehov(fødselsnummer, organisasjonsnummer)
+
     internal class Factory(rapidsConnection: RapidsConnection, private val spleisBehovMediator: SpleisBehovMediator) : River.PacketListener {
         init {
             River(rapidsConnection).apply {
@@ -29,7 +31,7 @@ internal class AvventerGodkjenningBehov(
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
             )
-            spleisBehovMediator.håndter(SpleisBehov(behov.fødselsnummer, behov.organisasjonsnummer))
+            spleisBehovMediator.håndter(context, behov.asSpleisBehov())
         }
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.meldinger
 
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
-import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.løsning.BehandlendeEnhetLøsning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -13,6 +13,11 @@ internal class PotensieltSvarPåBegge3Behovene(
     val spleisBehovId: String,
     val behandlendeEnhet: String
 ) {
+    private fun asBehandlendeEnhet() = BehandlendeEnhetLøsning(
+        spleisBehovId = spleisBehovId,
+        enhetNr = behandlendeEnhet
+    )
+
     internal class Factory(rapidsConnection: RapidsConnection, private val spleisBehovMediator: SpleisBehovMediator) : River.PacketListener {
         init {
             River(rapidsConnection).apply {
@@ -27,12 +32,14 @@ internal class PotensieltSvarPåBegge3Behovene(
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val behov = AvventerGodkjenningBehov(
+            val behov = PotensieltSvarPåBegge3Behovene(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-                vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+                vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
+                spleisBehovId = packet["@id"].asText(),
+                behandlendeEnhet = packet["BehandlendeEnhet"].asText()
             )
-            spleisBehovMediator.håndter(SpleisBehov(behov.fødselsnummer, behov.organisasjonsnummer))
+            spleisBehovMediator.håndter(behov.asBehandlendeEnhet())
         }
     }
 }
