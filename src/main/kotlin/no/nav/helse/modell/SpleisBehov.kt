@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
-import no.nav.helse.modell.løsning.BehandlendeEnhetLøsning
+import no.nav.helse.modell.løsning.HentEnhetLøsning
+import no.nav.helse.modell.løsning.HentNavnLøsning
 import no.nav.helse.modell.oppgave.*
 import no.nav.helse.modell.oppgave.OppdaterPersonOppgave
 import no.nav.helse.modell.oppgave.execute
@@ -22,7 +23,11 @@ internal class SpleisBehov(
         behovstyper.add(behovtype)
     }
 
-    internal fun fortsett(behandlendeEnhet: BehandlendeEnhetLøsning) {
+    internal fun fortsett(behandlendeEnhet: HentEnhetLøsning) {
+
+    }
+
+    internal fun fortsett(hentNavnLøsning: HentNavnLøsning) {
 
     }
 

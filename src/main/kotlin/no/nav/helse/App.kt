@@ -3,8 +3,8 @@ package no.nav.helse
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
-import no.nav.helse.meldinger.AvventerGodkjenningBehov
-import no.nav.helse.meldinger.PotensieltSvarPåBegge3Behovene
+import no.nav.helse.mediator.kafka.meldinger.AvventerGodkjenningBehov
+import no.nav.helse.mediator.kafka.meldinger.PotensieltSvarPåBegge3Behovene
 import no.nav.helse.rapids_rivers.RapidApplication
 
 @KtorExperimentalAPI

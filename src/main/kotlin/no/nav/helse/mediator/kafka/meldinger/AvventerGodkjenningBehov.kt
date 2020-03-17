@@ -1,4 +1,4 @@
-package no.nav.helse.meldinger
+package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.modell.SpleisBehov
