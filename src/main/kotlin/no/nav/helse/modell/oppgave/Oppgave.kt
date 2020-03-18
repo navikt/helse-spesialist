@@ -7,13 +7,13 @@ import java.time.LocalDateTime
 
 abstract class Oppgave {
     internal open val oppgaver: List<Oppgave> = listOf()
-    internal abstract val ferdigstilt: LocalDateTime?
+    internal abstract var ferdigstilt: LocalDateTime?
     internal abstract fun execute()
-    internal open fun fortsett(løsning: HentEnhetLøsning) {
-        oppgaver.forEach { it.fortsett(løsning) }
+    internal open fun fortsett(hentEnhetLøsning: HentEnhetLøsning) {
+        oppgaver.forEach { it.fortsett(hentEnhetLøsning) }
     }
-    internal open fun fortsett(løsning: HentPersoninfoLøsning) {
-        oppgaver.forEach { it.fortsett(løsning) }
+    internal open fun fortsett(hentPersoninfoLøsning: HentPersoninfoLøsning) {
+        oppgaver.forEach { it.fortsett(hentPersoninfoLøsning) }
     }
 
     internal open fun fortsett(løsning: ArbeidsgiverLøsning) {

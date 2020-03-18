@@ -2,29 +2,37 @@ package no.nav.helse.modell
 
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.oppgave.*
+import java.time.LocalDate
+import java.util.*
 import java.util.UUID.randomUUID
 
 internal class SpleisBehov(
     internal val fødselsnummer: String,
+    internal val periodeFom: LocalDate,
+    internal val periodeTom: LocalDate,
+    internal val vedtaksperiodeId: UUID,
     internal val aktørId: String,
     internal val orgnummer: String,
     personDao: PersonDao,
-    arbeidsgiverDao: ArbeidsgiverDao
+    arbeidsgiverDao: ArbeidsgiverDao,
+    vedtakDao: VedtakDao
 ) {
     internal val uuid = randomUUID()
     internal val oppgaver: List<Oppgave> = listOf(
         OpprettPersonOppgave(this, personDao),
         OppdaterPersonOppgave(this, personDao),
         OpprettArbeidsgiverOppgave(this, arbeidsgiverDao),
-        OppdatertArbeidsgiverOppgave(this, arbeidsgiverDao)
+        OppdatertArbeidsgiverOppgave(this, arbeidsgiverDao),
+        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao)
     )
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
-    internal fun start() {
+    internal fun execute() {
         oppgaver.executeAsSequence()
     }
 

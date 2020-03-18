@@ -7,13 +7,13 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 class ArbeidsgiverDao(private val dataSource: DataSource) {
-    fun finnArbeidsgiver(orgnummer: Long): Boolean = using(sessionOf(dataSource)) { session ->
+    fun finnArbeidsgiver(orgnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer)
-                .map { true }
+                .map { it.int("id") }
                 .asSingle
         )
-    } == true
+    }
 
     fun opprettArbeidsgiver(orgnummer: Long, navn: String) =
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
@@ -32,7 +32,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
     fun navnSistOppdatert(orgnummer: Long): LocalDate = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                "SELECT navn_oppdatert FROM arbeidsiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
+                "SELECT navn_oppdatert FROM arbeidsgiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
                 orgnummer
             ).map {
                 it.localDate("navn_oppdatert")

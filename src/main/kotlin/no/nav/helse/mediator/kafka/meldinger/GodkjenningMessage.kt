@@ -4,25 +4,42 @@ import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import java.time.LocalDate
+import java.util.*
 
 internal class GodkjenningMessage(
     val fødselsnummer: String,
     val aktørId: String,
     val organisasjonsnummer: String,
-    val vedtaksperiodeId: String
+    val vedtaksperiodeId: UUID,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate
 ) {
     fun asSpleisBehov(
         personDao: PersonDao,
-        arbeidsgiverDao: ArbeidsgiverDao
-    ) = SpleisBehov(fødselsnummer, organisasjonsnummer, aktørId, personDao, arbeidsgiverDao)
+        arbeidsgiverDao: ArbeidsgiverDao,
+        vedtakDao: VedtakDao
+    ) = SpleisBehov(
+        fødselsnummer = fødselsnummer,
+        periodeFom = periodeFom,
+        periodeTom = periodeTom,
+        vedtaksperiodeId = vedtaksperiodeId,
+        aktørId = aktørId,
+        orgnummer = organisasjonsnummer,
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        vedtakDao = vedtakDao
+    )
 
     internal class Factory(
         rapidsConnection: RapidsConnection,
         private val personDao: PersonDao,
         private val arbeidsgiverDao: ArbeidsgiverDao,
+        private val vedtakDao: VedtakDao,
         private val spleisBehovMediator: SpleisBehovMediator
     ) : River.PacketListener {
         init {
@@ -42,9 +59,11 @@ internal class GodkjenningMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 aktørId = packet["aktørId"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-                vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+                periodeFom = LocalDate.parse(packet["periodeFom"].asText()),
+                periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
+                vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
-            spleisBehovMediator.håndter(context, behov.asSpleisBehov(personDao, arbeidsgiverDao))
+            spleisBehovMediator.håndter(context, behov.asSpleisBehov(personDao, arbeidsgiverDao, vedtakDao))
         }
     }
 }

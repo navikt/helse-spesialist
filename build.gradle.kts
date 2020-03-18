@@ -3,6 +3,7 @@ plugins {
 }
 
 val junitJupiterVersion = "5.6.0"
+val ktorVersion = "1.3.1"
 
 group = "no.nav.helse"
 
@@ -24,12 +25,13 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("io.ktor:ktor-server-cio:1.3.1")
+    implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:6.3")
     implementation("com.zaxxer:HikariCP:3.4.2")
     implementation("no.nav:vault-jdbc:1.3.7")
     implementation("org.flywaydb:flyway-core:6.2.4")
     implementation("com.github.seratch:kotliquery:1.3.1")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
 
     implementation("com.github.navikt:rapids-and-rivers:1.a468ae5")
 

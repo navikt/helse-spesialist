@@ -13,7 +13,7 @@ internal class OpprettArbeidsgiverOppgave(
     override var ferdigstilt: LocalDateTime? = null
 
     override fun execute() {
-        if (arbeidsgiverDao.finnArbeidsgiver(spleisBehov.orgnummer.toLong())) {
+        if (arbeidsgiverDao.finnArbeidsgiver(spleisBehov.orgnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else {
             spleisBehov.håndter(Behovtype.HentArbeidsgiverNavn)

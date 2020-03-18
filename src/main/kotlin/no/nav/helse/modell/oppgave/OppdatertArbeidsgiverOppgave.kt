@@ -15,7 +15,7 @@ internal class OppdatertArbeidsgiverOppgave(
 
     override fun execute() {
         val sistOppdatert = arbeidsgiverDao.navnSistOppdatert(spleisBehov.orgnummer.toLong())
-        if (sistOppdatert.plusMonths(1) > LocalDate.now()) {
+        if (sistOppdatert.plusMonths(1) < LocalDate.now()) {
             spleisBehov.håndter(Behovtype.HentArbeidsgiverNavn)
         } else {
             ferdigstilt = LocalDateTime.now()
@@ -24,5 +24,6 @@ internal class OppdatertArbeidsgiverOppgave(
 
     override fun fortsett(løsning: ArbeidsgiverLøsning) {
         arbeidsgiverDao.oppdaterNavn(spleisBehov.orgnummer, løsning.navn)
+        ferdigstilt = LocalDateTime.now()
     }
 }

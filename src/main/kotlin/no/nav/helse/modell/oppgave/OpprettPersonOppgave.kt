@@ -16,7 +16,7 @@ internal class OpprettPersonOppgave(
     private var enhetId: Int? = null
 
     override fun execute() {
-        if (personDao.finnPerson(spleisBehov.fødselsnummer.toLong())) {
+        if (personDao.finnPerson(spleisBehov.fødselsnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else if (navnId != null && enhetId != null) {
             personDao.insertPerson(spleisBehov.fødselsnummer.toLong(), spleisBehov.aktørId.toLong(), navnId!!, enhetId!!)

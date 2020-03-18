@@ -6,14 +6,18 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.PersonEgenskap
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
+import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SpleisBehovTest {
@@ -43,17 +47,81 @@ internal class SpleisBehovTest {
     }
 
     @Test
-    fun maybe() {
+    fun `godkjenningsbehov for ny person legger inn ny person i DB`() {
+        val vedtaksperiodeId = randomUUID()
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        val spleisBehov = SpleisBehov("12345", "6789", "98765432", personDao, arbeidsgiverDao)
-        spleisBehov.start()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        val vedtakDao = VedtakDao(dataSource)
+        val spleisBehov = SpleisBehov(
+            fødselsnummer = "12345",
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 20),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123455",
+            orgnummer = "98765432",
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao
+        )
+        spleisBehov.execute()
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
-        spleisBehov.start()
+        spleisBehov.execute()
 
-        assertTrue(personDao.finnPerson(12345))
+        assertNotNull(personDao.finnPerson(12345))
+    }
+
+    @Test
+    fun `godkjenningsbehov for person med ny arbeidsgiver legger inn ny arbeidsgiver i DB`() {
+        val vedtaksperiodeId = randomUUID()
+        val personDao = PersonDao(dataSource)
+        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+        val vedtakDao = VedtakDao(dataSource)
+        val spleisBehov = SpleisBehov(
+            fødselsnummer = "12345",
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 20),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123455",
+            orgnummer = "98765432",
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao
+        )
+        spleisBehov.execute()
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentEnhetLøsning("3417"))
+        spleisBehov.execute()
+
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
-        assertTrue(arbeidsgiverDao.finnArbeidsgiver(98765432))
+        assertNotNull(arbeidsgiverDao.finnArbeidsgiver(98765432))
+    }
+
+    @Test
+    fun `Ved nytt godkjenningsbehov opprettes et nytt vedtak i DB`() {
+        val vedtaksperiodeId = randomUUID()
+        val personDao = PersonDao(dataSource)
+        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+        val vedtakDao = VedtakDao(dataSource)
+        val spleisBehov = SpleisBehov(
+            fødselsnummer = "12345",
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 20),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123455",
+            orgnummer = "98765432",
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao
+        )
+        spleisBehov.execute()
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentEnhetLøsning("3417"))
+        spleisBehov.execute()
+        spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
+        spleisBehov.execute()
+
+        assertNotNull(vedtakDao.finnVedtaksperiode(vedtaksperiodeId))
+
     }
 }

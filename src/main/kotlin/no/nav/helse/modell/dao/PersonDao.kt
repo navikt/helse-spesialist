@@ -7,12 +7,12 @@ import no.nav.helse.modell.løsning.PersonEgenskap
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
-    internal fun finnPerson(fødselsnummer: Long): Boolean = using(sessionOf(dataSource)) { session ->
+    internal fun finnPerson(fødselsnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)
-                .map { true }
+                .map { it.int("id") }
                 .asSingle
-        ) == true
+        )
     }
 
     internal fun insertNavn(fornavn: String, mellomnavn: String?, etternavn: String): Int =
@@ -60,13 +60,13 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun navnSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    internal fun personinfoSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                "SELECT oppdatert FROM person_navn WHERE id=(SELECT navn_ref FROM person WHERE fodselsnummer=?);",
+                "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
                 fødselsnummer
             ).map {
-                it.sqlDate("oppdatert").toLocalDate()
+                it.sqlDate("personinfo_oppdatert").toLocalDate()
             }.asSingle
         )
     })
@@ -107,4 +107,5 @@ class PersonDao(private val dataSource: DataSource) {
             }
 
         }
+
 }

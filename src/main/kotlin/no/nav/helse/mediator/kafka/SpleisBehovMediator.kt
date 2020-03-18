@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 
 internal class SpleisBehovMediator {
     internal fun håndter(context: RapidsConnection.MessageContext, spleisBehov: SpleisBehov) {
-        spleisBehov.start()
+        spleisBehov.execute()
         spleisBehov.behov()?.also { behov ->
             context.send(behov.fødselsnummer, behov.toJson())
         }
@@ -21,12 +21,13 @@ internal class SpleisBehovMediator {
         val spleisBehov: SpleisBehov = null!!
         behandlendeEnhet?.also(spleisBehov::fortsett)
         hentPersoninfoLøsning?.also(spleisBehov::fortsett)
-        spleisBehov.start()
+        spleisBehov.execute()
         // TODO: Persister spleisBehov til databasen
     }
 
     fun håndter(løsning: ArbeidsgiverLøsning) {
         val spleisBehov: SpleisBehov = null!!
         spleisBehov.fortsett(løsning)
+        spleisBehov.execute()
     }
 }

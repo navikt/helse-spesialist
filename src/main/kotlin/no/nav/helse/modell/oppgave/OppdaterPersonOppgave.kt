@@ -22,7 +22,7 @@ internal class OppdaterPersonOppgave(
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
-            val sistOppdatert = personDao.navnSistOppdatert(spleisBehov.fødselsnummer.toLong())
+            val sistOppdatert = personDao.personinfoSistOppdatert(spleisBehov.fødselsnummer.toLong())
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
                 spleisBehov.håndter(Behovtype.HentPersoninfo)
             } else {
@@ -32,6 +32,7 @@ internal class OppdaterPersonOppgave(
 
         override fun fortsett(løsning: HentPersoninfoLøsning) {
             personDao.setNavn(spleisBehov.fødselsnummer.toLong(), løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
+            personDao.oppdaterEgenskap(spleisBehov.fødselsnummer.toLong(), løsning.egenskap)
             ferdigstilt = LocalDateTime.now()
         }
     }
