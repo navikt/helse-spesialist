@@ -8,7 +8,7 @@ import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentNavnLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -48,7 +48,7 @@ internal class SpleisBehovTest {
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val spleisBehov = SpleisBehov("12345", "6789", "98765432", personDao, arbeidsgiverDao)
         spleisBehov.start()
-        spleisBehov.fortsett(HentNavnLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.start()
 

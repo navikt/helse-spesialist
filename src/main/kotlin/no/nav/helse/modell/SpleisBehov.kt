@@ -4,7 +4,7 @@ import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentNavnLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.oppgave.*
 import java.util.UUID.randomUUID
 
@@ -36,7 +36,7 @@ internal class SpleisBehov(
         oppgaver.current().fortsett(løsning)
     }
 
-    internal fun fortsett(løsning: HentNavnLøsning) {
+    internal fun fortsett(løsning: HentPersoninfoLøsning) {
         oppgaver.current().fortsett(løsning)
     }
 

@@ -1,9 +1,10 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentNavnLøsning
 import no.nav.helse.modell.Behovtype
+import no.nav.helse.modell.løsning.HentEnhetLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.PersonEgenskap
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -16,23 +17,26 @@ internal class PersoninfoMessage(
     val enhetNr: String,
     val fornavn: String,
     val mellomnavn: String?,
-    val etternavn: String
+    val etternavn: String,
+    val egenskap: PersonEgenskap?
 ) {
     private fun asBehandlendeEnhet() = HentEnhetLøsning(
         enhetNr = enhetNr
     )
 
-    private fun asHentNavnLøsning() = HentNavnLøsning(
+    private fun asHentNavnLøsning() = HentPersoninfoLøsning(
         fornavn = fornavn,
         mellomnavn = mellomnavn,
-        etternavn = etternavn
+        etternavn = etternavn,
+        egenskap = egenskap
     )
 
-    internal class Factory(rapidsConnection: RapidsConnection, private val spleisBehovMediator: SpleisBehovMediator) : River.PacketListener {
+    internal class Factory(rapidsConnection: RapidsConnection, private val spleisBehovMediator: SpleisBehovMediator) :
+        River.PacketListener {
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireAll("@behov", Behovtype.HentEnhet, Behovtype.HentNavn)
+                    it.requireAll("@behov", Behovtype.HentEnhet, Behovtype.HentPersoninfo)
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")
                     it.requireKey("vedtaksperiodeId")
@@ -44,7 +48,7 @@ internal class PersoninfoMessage(
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hentEnhet = packet["HentEnhet"].asText()
-            val hentNavn = packet["HentNavn"]
+            val hentPersoninfo = packet["HentNavn"]
 
             val behov = PersoninfoMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
@@ -52,9 +56,10 @@ internal class PersoninfoMessage(
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
                 spleisBehovId = packet["@id"].asText(),
                 enhetNr = hentEnhet,
-                fornavn = hentNavn["fornavn"].asText(),
-                mellomnavn = hentNavn.takeIf { it.hasNonNull("mellomavn") }?.get("mellomnavn")?.asText(),
-                etternavn = hentNavn["etternavn"].asText()
+                fornavn = hentPersoninfo["fornavn"].asText(),
+                mellomnavn = hentPersoninfo.takeIf { it.hasNonNull("mellomavn") }?.get("mellomnavn")?.asText(),
+                etternavn = hentPersoninfo["etternavn"].asText(),
+                egenskap = hentPersoninfo ["diskresjonskode"]?.let { PersonEgenskap.find(it.asText()) }
             )
 
             spleisBehovMediator.håndter(behov.spleisBehovId, behov.asBehandlendeEnhet(), behov.asHentNavnLøsning())

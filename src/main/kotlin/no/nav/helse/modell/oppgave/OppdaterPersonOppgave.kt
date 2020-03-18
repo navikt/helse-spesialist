@@ -4,7 +4,7 @@ import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentNavnLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -14,23 +14,23 @@ internal class OppdaterPersonOppgave(
 ): Oppgave() {
     override var ferdigstilt: LocalDateTime? = null
     override val oppgaver: List<Oppgave> = listOf(
-        HentNavnOppgave(),
+        HentPersoninfoOppgave(),
         HentEnhetOppgave()
     )
 
-    private inner class HentNavnOppgave: Oppgave() {
+    private inner class HentPersoninfoOppgave: Oppgave() {
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
             val sistOppdatert = personDao.navnSistOppdatert(spleisBehov.fødselsnummer.toLong())
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
-                spleisBehov.håndter(Behovtype.HentNavn)
+                spleisBehov.håndter(Behovtype.HentPersoninfo)
             } else {
                 ferdigstilt = LocalDateTime.now()
             }
         }
 
-        override fun fortsett(løsning: HentNavnLøsning) {
+        override fun fortsett(løsning: HentPersoninfoLøsning) {
             personDao.setNavn(spleisBehov.fødselsnummer.toLong(), løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
             ferdigstilt = LocalDateTime.now()
         }

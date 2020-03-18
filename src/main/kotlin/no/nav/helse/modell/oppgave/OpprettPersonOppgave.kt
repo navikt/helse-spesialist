@@ -4,7 +4,7 @@ import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentNavnLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDateTime
 
 internal class OpprettPersonOppgave(
@@ -22,7 +22,7 @@ internal class OpprettPersonOppgave(
             personDao.insertPerson(spleisBehov.fødselsnummer.toLong(), spleisBehov.aktørId.toLong(), navnId!!, enhetId!!)
             ferdigstilt = LocalDateTime.now()
         } else {
-            spleisBehov.håndter(Behovtype.HentNavn)
+            spleisBehov.håndter(Behovtype.HentPersoninfo)
             spleisBehov.håndter(Behovtype.HentEnhet)
         }
     }
@@ -31,8 +31,8 @@ internal class OpprettPersonOppgave(
         enhetId = hentEnhetLøsning.enhetNr.toInt()
     }
 
-    override fun fortsett(hentNavnLøsning: HentNavnLøsning) {
-        navnId = personDao.insertNavn(hentNavnLøsning.fornavn, hentNavnLøsning.mellomnavn, hentNavnLøsning.etternavn)
+    override fun fortsett(hentPersoninfoLøsning: HentPersoninfoLøsning) {
+        navnId = personDao.insertNavn(hentPersoninfoLøsning.fornavn, hentPersoninfoLøsning.mellomnavn, hentPersoninfoLøsning.etternavn)
     }
 
 }

@@ -21,6 +21,6 @@ class Behov(val typer: List<Behovtype>, val fødselsnummer: String, val orgnumme
 
 enum class Behovtype{
     HentEnhet,
-    HentNavn,
+    HentPersoninfo,
     HentArbeidsgiverNavn
 }

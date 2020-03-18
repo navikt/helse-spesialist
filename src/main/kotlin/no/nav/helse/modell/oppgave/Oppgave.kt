@@ -2,7 +2,7 @@ package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentNavnLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDateTime
 
 abstract class Oppgave {
@@ -12,7 +12,7 @@ abstract class Oppgave {
     internal open fun fortsett(løsning: HentEnhetLøsning) {
         oppgaver.forEach { it.fortsett(løsning) }
     }
-    internal open fun fortsett(løsning: HentNavnLøsning) {
+    internal open fun fortsett(løsning: HentPersoninfoLøsning) {
         oppgaver.forEach { it.fortsett(løsning) }
     }
 
