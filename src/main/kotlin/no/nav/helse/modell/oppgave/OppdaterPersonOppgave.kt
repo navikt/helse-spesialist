@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
@@ -11,8 +12,8 @@ internal class OppdaterPersonOppgave(
     private val spleisBehov: SpleisBehov,
     private val personDao: PersonDao
 ): Oppgave() {
-    override val ferdigstilt: LocalDateTime? = null
-    private val oppgaver: List<Oppgave> = listOf(
+    override var ferdigstilt: LocalDateTime? = null
+    override val oppgaver: List<Oppgave> = listOf(
         HentNavnOppgave(),
         HentEnhetOppgave()
     )
@@ -56,5 +57,8 @@ internal class OppdaterPersonOppgave(
 
     override fun execute() {
         oppgaver.execute()
+        if (oppgaver.all { it.ferdigstilt != null }) {
+            ferdigstilt = LocalDateTime.now()
+        }
     }
 }

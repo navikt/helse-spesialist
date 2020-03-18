@@ -4,11 +4,12 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentNavnLøsning
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -44,12 +45,15 @@ internal class SpleisBehovTest {
     @Test
     fun maybe() {
         val personDao = PersonDao(dataSource)
-        val spleisBehov = SpleisBehov("12345", "6789", "98765432", personDao)
+        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+        val spleisBehov = SpleisBehov("12345", "6789", "98765432", personDao, arbeidsgiverDao)
         spleisBehov.start()
         spleisBehov.fortsett(HentNavnLøsning("Test", "Mellomnavn", "Etternavnsen"))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.start()
 
         assertTrue(personDao.finnPerson(12345))
+        spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
+        assertTrue(arbeidsgiverDao.finnArbeidsgiver(98765432))
     }
 }

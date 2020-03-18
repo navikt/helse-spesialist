@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning

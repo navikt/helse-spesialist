@@ -1,4 +1,4 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -19,4 +19,8 @@ class Behov(val typer: List<Behovtype>, val fødselsnummer: String, val orgnumme
     ))
 }
 
-enum class Behovtype{HentEnhet, HentNavn}
+enum class Behovtype{
+    HentEnhet,
+    HentNavn,
+    HentArbeidsgiverNavn
+}

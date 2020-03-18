@@ -3,12 +3,12 @@ package no.nav.helse.mediator.kafka.meldinger
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentNavnLøsning
-import no.nav.helse.modell.oppgave.Behovtype
+import no.nav.helse.modell.Behovtype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 
-internal class PotensieltSvarPåBegge3Behovene(
+internal class PersoninfoMessage(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val vedtaksperiodeId: String,
@@ -46,7 +46,7 @@ internal class PotensieltSvarPåBegge3Behovene(
             val hentEnhet = packet["HentEnhet"].asText()
             val hentNavn = packet["HentNavn"]
 
-            val behov = PotensieltSvarPåBegge3Behovene(
+            val behov = PersoninfoMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),

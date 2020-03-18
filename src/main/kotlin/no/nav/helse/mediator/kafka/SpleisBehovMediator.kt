@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka
 
 import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentNavnLøsning
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,5 +23,10 @@ internal class SpleisBehovMediator {
         hentNavnLøsning?.also(spleisBehov::fortsett)
         spleisBehov.start()
         // TODO: Persister spleisBehov til databasen
+    }
+
+    fun håndter(løsning: ArbeidsgiverLøsning) {
+        val spleisBehov: SpleisBehov = null!!
+        spleisBehov.fortsett(løsning)
     }
 }
