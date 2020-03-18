@@ -21,7 +21,7 @@ internal class OppdaterPersonOppgave(
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
-            val sistOppdatert = personDao.navnSistOppdatert(spleisBehov.fødselsnummer)
+            val sistOppdatert = personDao.navnSistOppdatert(spleisBehov.fødselsnummer.toLong())
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
                 spleisBehov.håndter(Behovtype.HentNavn)
             } else {
@@ -30,7 +30,7 @@ internal class OppdaterPersonOppgave(
         }
 
         override fun fortsett(løsning: HentNavnLøsning) {
-            personDao.setNavn(spleisBehov.fødselsnummer, løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
+            personDao.setNavn(spleisBehov.fødselsnummer.toLong(), løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
             ferdigstilt = LocalDateTime.now()
         }
     }
@@ -39,7 +39,7 @@ internal class OppdaterPersonOppgave(
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
-            val sistOppdatert = personDao.enhetSistOppdatert(spleisBehov.fødselsnummer)
+            val sistOppdatert = personDao.enhetSistOppdatert(spleisBehov.fødselsnummer.toLong())
             if (sistOppdatert.plusDays(5) < LocalDate.now()) {
                 spleisBehov.håndter(Behovtype.HentEnhet)
             } else {
@@ -48,7 +48,7 @@ internal class OppdaterPersonOppgave(
         }
 
         override fun fortsett(løsning: HentEnhetLøsning) {
-            personDao.oppdaterEnhet(spleisBehov.fødselsnummer, løsning.enhetNr.toInt())
+            personDao.oppdaterEnhet(spleisBehov.fødselsnummer.toLong(), løsning.enhetNr.toInt())
             ferdigstilt = LocalDateTime.now()
         }
     }

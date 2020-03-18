@@ -27,14 +27,12 @@ internal class SpleisBehov(
         behovstyper.add(behovtype)
     }
 
-    internal fun fortsett(behandlendeEnhet: HentEnhetLøsning) {
-        oppgaver.forEach { it.fortsett(behandlendeEnhet) }
-        start()
+    internal fun fortsett(løsning: HentEnhetLøsning) {
+        oppgaver.current().fortsett(løsning)
     }
 
-    internal fun fortsett(hentNavnLøsning: HentNavnLøsning) {
-        oppgaver.forEach { it.fortsett(hentNavnLøsning) }
-        start()
+    internal fun fortsett(løsning: HentNavnLøsning) {
+        oppgaver.current().fortsett(løsning)
     }
 
 

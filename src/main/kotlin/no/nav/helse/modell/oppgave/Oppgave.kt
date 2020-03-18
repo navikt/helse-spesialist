@@ -16,6 +16,11 @@ internal fun List<Oppgave>.execute() = this
     .forEach { it.execute() }
 
 internal fun List<Oppgave>.executeAsSequence() = this
+    .asSequence()
     .filter { it.ferdigstilt == null }
     .onEach { it.execute() }
     .takeWhile { it.ferdigstilt != null }
+    .forEach { println("Ferdigstilt oppgave") } // TODO
+
+internal fun List<Oppgave>.current() = asSequence()
+    .first { it.ferdigstilt == null }

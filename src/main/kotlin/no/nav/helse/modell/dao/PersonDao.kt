@@ -6,7 +6,7 @@ import kotliquery.using
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
-    fun finnPerson(fødselsnummer: String): Boolean = using(sessionOf(dataSource)) { session ->
+    fun finnPerson(fødselsnummer: Long): Boolean = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)
                 .map { true }
@@ -15,7 +15,7 @@ class PersonDao(private val dataSource: DataSource) {
     }
 
     fun insertNavn(fornavn: String, mellomnavn: String?, etternavn: String): Int =
-        requireNotNull(using(sessionOf(dataSource)) { session ->
+        requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.run(
                 queryOf(
                     "INSERT INTO person_navn(fornavn, mellomnavn, etternavn) VALUES(?, ?, ?);",
@@ -26,11 +26,11 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }?.toInt())
 
-    fun insertPerson(fødselsnummer: String, aktørId: String, navnId: Int, enhetId: Int) =
+    fun insertPerson(fødselsnummer: Long, aktørId: Long, navnId: Int, enhetId: Int) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO person(fodselsnumer, aktor_id, navn_ref, enhet_ref) VALUES(?, ?, ?, ?);",
+                    "INSERT INTO person(fodselsnummer, aktor_id, navn_ref, enhet_ref) VALUES(?, ?, ?, ?);",
                     fødselsnummer,
                     aktørId,
                     navnId,
@@ -39,7 +39,7 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    fun setNavn(fødselsnummer: String, fornavn: String, mellomnavn: String?, etternavn: String) =
+    fun setNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
@@ -49,7 +49,7 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    fun oppdaterEnhet(fødselsnummer: String, enhetNr: Int) = using(sessionOf(dataSource)) { session ->
+    fun oppdaterEnhet(fødselsnummer: Long, enhetNr: Int) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "UPDATE person SET enhet_ref=?, enhet_ref_oppdatert=now() WHERE fodselsnummer=?;",
@@ -59,24 +59,24 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    fun navnSistOppdatert(fødselsnummer: String) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun navnSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT oppdatert FROM person_navn WHERE id=(SELECT navn_ref FROM person WHERE fodselsnummer=?);",
                 fødselsnummer
             ).map {
-                it.localDate("oppdatert")
+                it.sqlDate("oppdatert").toLocalDate()
             }.asSingle
         )
     })
 
-    fun enhetSistOppdatert(fødselsnummer: String) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun enhetSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;",
                 fødselsnummer
             ).map {
-                it.localDate("enhet_ref_oppdatert")
+                it.sqlDate("enhet_ref_oppdatert").toLocalDate()
             }.asSingle
         )
     })

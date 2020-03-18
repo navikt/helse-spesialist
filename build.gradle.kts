@@ -2,6 +2,8 @@ plugins {
     kotlin("jvm") version "1.3.70"
 }
 
+val junitJupiterVersion = "5.6.0"
+
 group = "no.nav.helse"
 
 val githubUser: String by project
@@ -30,6 +32,12 @@ dependencies {
     implementation("com.github.seratch:kotliquery:1.3.1")
 
     implementation("com.github.navikt:rapids-and-rivers:1.a468ae5")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+
+    testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
 }
 
 tasks {
@@ -39,7 +47,6 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
-
 
     named<Jar>("jar") {
         archiveBaseName.set("app")
@@ -57,6 +64,13 @@ tasks {
                 if (!file.exists())
                     it.copyTo(file)
             }
+        }
+    }
+
+    withType<Test> {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
         }
     }
 }

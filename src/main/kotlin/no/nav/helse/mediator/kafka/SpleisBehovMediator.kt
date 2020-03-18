@@ -20,6 +20,7 @@ internal class SpleisBehovMediator {
         val spleisBehov: SpleisBehov = null!!
         behandlendeEnhet?.also(spleisBehov::fortsett)
         hentNavnLøsning?.also(spleisBehov::fortsett)
+        spleisBehov.start()
         // TODO: Persister spleisBehov til databasen
     }
 }

@@ -15,13 +15,12 @@ internal class OpprettPersonOppgave(
     private var enhetId: Int? = null
 
     override fun execute() {
-        if (personDao.finnPerson(spleisBehov.fødselsnummer)) {
+        if (personDao.finnPerson(spleisBehov.fødselsnummer.toLong())) {
             ferdigstilt = LocalDateTime.now()
         } else if (navnId != null && enhetId != null) {
-            personDao.insertPerson(spleisBehov.fødselsnummer, spleisBehov.aktørId, navnId!!, enhetId!!)
+            personDao.insertPerson(spleisBehov.fødselsnummer.toLong(), spleisBehov.aktørId.toLong(), navnId!!, enhetId!!)
             ferdigstilt = LocalDateTime.now()
-        }
-        else {
+        } else {
             spleisBehov.håndter(Behovtype.HentNavn)
             spleisBehov.håndter(Behovtype.HentEnhet)
         }
