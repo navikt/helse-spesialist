@@ -1,14 +1,19 @@
 package no.nav.helse
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.Url
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PersoninfoMessage
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -23,12 +28,27 @@ fun main(): Unit = runBlocking {
     val personDao = PersonDao(dataSource)
     val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     val vedtakDao = VedtakDao(dataSource)
+    val azureAdClient = HttpClient {
+        engine {
+            proxy = ProxyBuilder.http(Url(System.getenv("https_proxy")))
+        }
+    }
     val spleisClient = HttpClient {
-        install(JsonFeature) { serializer = JacksonSerializer() } }
-    val oidcDiscovery = AzureAad(spleisClient).oidcDiscovery(System.getenv("AZURE_CONFIG_URL"))
-    val accessTokenClient = AccessTokenClient(oidcDiscovery.token_endpoint, readClientId(), readClientSecret(), spleisClient)
+        install(JsonFeature) { serializer = JacksonSerializer() }
+    }
+    val oidcDiscovery = AzureAad(azureAdClient).oidcDiscovery(System.getenv("AZURE_CONFIG_URL"))
+    val accessTokenClient = AccessTokenClient(
+        aadAccessTokenUrl = oidcDiscovery.token_endpoint,
+        clientId = readClientId(),
+        clientSecret = readClientSecret(),
+        httpClient = azureAdClient
+    )
     val snapshotDao = SnapshotDao(dataSource)
-    val speilSnapshotRestDao = SpeilSnapshotRestDao(spleisClient, accessTokenClient, System.getenv("SPLEIS_CLIENT_ID"))
+    val speilSnapshotRestDao = SpeilSnapshotRestDao(
+        httpClient = spleisClient,
+        accessTokenClient = accessTokenClient,
+        spleisClientId = System.getenv("SPLEIS_CLIENT_ID")
+    )
     val oppgaveDao = OppgaveDao(dataSource)
 
     RapidApplication.create(System.getenv()).apply {
