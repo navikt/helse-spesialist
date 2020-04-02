@@ -1,7 +1,6 @@
 package no.nav.helse.modell
 
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
@@ -22,6 +21,7 @@ internal class SpleisBehov(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
+    snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao
 ) {
     internal val uuid = randomUUID()
@@ -30,7 +30,7 @@ internal class SpleisBehov(
         OppdaterPersonOppgave(this, personDao),
         OpprettArbeidsgiverOppgave(this, arbeidsgiverDao),
         OppdatertArbeidsgiverOppgave(this, arbeidsgiverDao),
-        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao, speilSnapshotRestDao)
+        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao)
     )
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 

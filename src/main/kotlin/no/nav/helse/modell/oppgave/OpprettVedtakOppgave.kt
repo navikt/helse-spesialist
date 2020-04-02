@@ -1,8 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.SpleisBehov
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import org.slf4j.LoggerFactory
@@ -13,6 +12,7 @@ internal class OpprettVedtakOppgave(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
+    private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao
 ) : Oppgave() {
     override var ferdigstilt: LocalDateTime? = null
@@ -20,8 +20,7 @@ internal class OpprettVedtakOppgave(
     override fun execute() {
         log.info("Henter snapshot for vedtaksperiode: ${spleisBehov.vedtaksperiodeId}")
         val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(spleisBehov.fødselsnummer)
-        // Oppdater speil_snapshot
-        val speilSnapshotRef = 123
+        val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
         val personRef = requireNotNull(personDao.finnPerson(spleisBehov.fødselsnummer.toLong()))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.finnArbeidsgiver(spleisBehov.orgnummer.toLong()))
         val id = vedtakDao.insertVedtak(
@@ -30,7 +29,7 @@ internal class OpprettVedtakOppgave(
             tom = spleisBehov.periodeTom,
             personRef = personRef,
             arbeidsgiverRef = arbeidsgiverRef,
-            speilSnapshotRef = speilSnapshotRef
+            speilSnapshotRef = snapshotId
         )
         ferdigstilt = LocalDateTime.now()
     }

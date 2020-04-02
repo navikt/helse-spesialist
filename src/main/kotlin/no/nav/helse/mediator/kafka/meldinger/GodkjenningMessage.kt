@@ -2,8 +2,7 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.modell.SpleisBehov
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,6 +23,7 @@ internal class GodkjenningMessage(
         personDao: PersonDao,
         arbeidsgiverDao: ArbeidsgiverDao,
         vedtakDao: VedtakDao,
+        snapshotDao: SnapshotDao,
         speilSnapshotRestDao: SpeilSnapshotRestDao
     ) = SpleisBehov(
         fødselsnummer = fødselsnummer,
@@ -35,6 +35,7 @@ internal class GodkjenningMessage(
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
         vedtakDao = vedtakDao,
+        snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao
     )
 
@@ -43,6 +44,7 @@ internal class GodkjenningMessage(
         private val personDao: PersonDao,
         private val arbeidsgiverDao: ArbeidsgiverDao,
         private val vedtakDao: VedtakDao,
+        private val snapshotDao: SnapshotDao,
         private val spleisBehovMediator: SpleisBehovMediator,
         private val speilSnapshotRestDao: SpeilSnapshotRestDao
     ) : River.PacketListener {
@@ -67,7 +69,7 @@ internal class GodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
-            spleisBehovMediator.håndter(context, behov.asSpleisBehov(personDao, arbeidsgiverDao, vedtakDao, speilSnapshotRestDao))
+            spleisBehovMediator.håndter(context, behov.asSpleisBehov(personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao))
         }
     }
 }

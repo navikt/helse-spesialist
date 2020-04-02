@@ -1,11 +1,20 @@
 package no.nav.helse.model
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.headersOf
+import no.nav.helse.AccessTokenClient
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
@@ -46,12 +55,41 @@ internal class SpleisBehovTest {
             .migrate()
     }
 
+    private val httpClientForSpleis = HttpClient(MockEngine) {
+        install(JsonFeature) {
+            this.serializer = JacksonSerializer()
+        }
+        engine {
+            addHandler {
+                respond("{}")
+            }
+        }
+    }
+
+    private val accessTokenClient = AccessTokenClient(
+                "http://localhost.no",
+        "",
+        "",
+        HttpClient(MockEngine) {
+            install(JsonFeature) {
+                this.serializer = JacksonSerializer { registerModule(JavaTimeModule()) }
+            }
+            engine {
+                addHandler {
+                    respond(content = """{"access_token": "token", "expires_on": "0"}""", headers = headersOf("Content-Type" to listOf("application/json")))
+                }
+            }
+        }
+    )
+
+
     @Test
     fun `godkjenningsbehov for ny person legger inn ny person i DB`() {
         val vedtaksperiodeId = randomUUID()
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
+        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
             fødselsnummer = "12345",
             periodeFom = LocalDate.of(2018, 1, 1),
@@ -61,7 +99,8 @@ internal class SpleisBehovTest {
             orgnummer = "98765432",
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            speilSnapshotRestDao = speilSnapshotRestDao
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -77,6 +116,7 @@ internal class SpleisBehovTest {
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
+        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
             fødselsnummer = "12345",
             periodeFom = LocalDate.of(2018, 1, 1),
@@ -86,7 +126,8 @@ internal class SpleisBehovTest {
             orgnummer = "98765432",
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            speilSnapshotRestDao = speilSnapshotRestDao
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -103,6 +144,7 @@ internal class SpleisBehovTest {
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
+        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
             fødselsnummer = "12345",
             periodeFom = LocalDate.of(2018, 1, 1),
@@ -112,7 +154,8 @@ internal class SpleisBehovTest {
             orgnummer = "98765432",
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            speilSnapshotRestDao = speilSnapshotRestDao
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
