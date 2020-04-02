@@ -1,11 +1,8 @@
 package no.nav.helse
 
-import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.features.ContentNegotiation
-import io.ktor.http.ContentType
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
@@ -32,11 +29,21 @@ fun main(): Unit = runBlocking {
     val accessTokenClient = AccessTokenClient(oidcDiscovery.token_endpoint, readClientId(), readClientSecret(), spleisClient)
     val snapshotDao = SnapshotDao(dataSource)
     val speilSnapshotRestDao = SpeilSnapshotRestDao(spleisClient, accessTokenClient, System.getenv("SPLEIS_CLIENT_ID"))
+    val oppgaveDao = OppgaveDao(dataSource)
 
     RapidApplication.create(System.getenv()).apply {
         val spleisBehovMediator = SpleisBehovMediator()
 
-        GodkjenningMessage.Factory(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, spleisBehovMediator, speilSnapshotRestDao)
+        GodkjenningMessage.Factory(
+            rapidsConnection = this,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            spleisBehovMediator = spleisBehovMediator,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao
+        )
         PersoninfoMessage.Factory(this, spleisBehovMediator)
     }.start()
 }

@@ -13,6 +13,7 @@ import io.ktor.http.headersOf
 import no.nav.helse.AccessTokenClient
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -91,8 +93,10 @@ internal class SpleisBehovTest {
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
+        val oppgaveDao = OppgaveDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
+            id = randomUUID(),
             fødselsnummer = "12345",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -103,7 +107,8 @@ internal class SpleisBehovTest {
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -121,7 +126,9 @@ internal class SpleisBehovTest {
         val vedtakDao = VedtakDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
+        val oppgaveDao = OppgaveDao(dataSource)
         val spleisBehov = SpleisBehov(
+            id = randomUUID(),
             fødselsnummer = "23456",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -132,7 +139,8 @@ internal class SpleisBehovTest {
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -151,7 +159,9 @@ internal class SpleisBehovTest {
         val vedtakDao = VedtakDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
+        val oppgaveDao = OppgaveDao(dataSource)
         val spleisBehov = SpleisBehov(
+            id = randomUUID(),
             fødselsnummer = "34567",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -162,7 +172,8 @@ internal class SpleisBehovTest {
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))

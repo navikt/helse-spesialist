@@ -12,6 +12,7 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 internal class SpleisBehov(
+    internal val id: UUID,
     internal val fødselsnummer: String,
     internal val periodeFom: LocalDate,
     internal val periodeTom: LocalDate,
@@ -22,7 +23,8 @@ internal class SpleisBehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
-    speilSnapshotRestDao: SpeilSnapshotRestDao
+    speilSnapshotRestDao: SpeilSnapshotRestDao,
+    oppgaveDao: OppgaveDao
 ) {
     internal val uuid = randomUUID()
     internal val oppgaver: List<Oppgave> = listOf(
@@ -30,7 +32,8 @@ internal class SpleisBehov(
         OppdaterPersonOppgave(this, personDao),
         OpprettArbeidsgiverOppgave(this, arbeidsgiverDao),
         OppdatertArbeidsgiverOppgave(this, arbeidsgiverDao),
-        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao)
+        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao),
+        OpprettOppgaveOppgave(this, oppgaveDao)
     )
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
