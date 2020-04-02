@@ -8,10 +8,10 @@ import no.nav.helse.modell.dao.OppgaveDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-internal class OpprettOppgaveOppgave(
+internal class OpprettOppgaveCommand(
     private val spleisBehov: SpleisBehov,
     private val oppgaveDao: OppgaveDao
-) : Oppgave() {
+) : Command() {
     private val log = LoggerFactory.getLogger("opprett-oppgave-logger")
     override var ferdigstilt: LocalDateTime? = null
 

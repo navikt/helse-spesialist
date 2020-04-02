@@ -4,24 +4,26 @@ import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
+import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class OpprettArbeidsgiverOppgave(
+internal class OppdatertArbeidsgiverCommand(
     private val spleisBehov: SpleisBehov,
     private val arbeidsgiverDao: ArbeidsgiverDao
-) : Oppgave() {
+) : Command() {
     override var ferdigstilt: LocalDateTime? = null
 
     override fun execute() {
-        if (arbeidsgiverDao.finnArbeidsgiver(spleisBehov.orgnummer.toLong()) != null) {
-            ferdigstilt = LocalDateTime.now()
-        } else {
+        val sistOppdatert = arbeidsgiverDao.navnSistOppdatert(spleisBehov.orgnummer.toLong())
+        if (sistOppdatert.plusMonths(1) < LocalDate.now()) {
             spleisBehov.håndter(Behovtype.HentArbeidsgiverNavn)
+        } else {
+            ferdigstilt = LocalDateTime.now()
         }
     }
 
     override fun fortsett(løsning: ArbeidsgiverLøsning) {
-        arbeidsgiverDao.opprettArbeidsgiver(spleisBehov.orgnummer.toLong(), løsning.navn)
+        arbeidsgiverDao.oppdaterNavn(spleisBehov.orgnummer, løsning.navn)
         ferdigstilt = LocalDateTime.now()
     }
 }

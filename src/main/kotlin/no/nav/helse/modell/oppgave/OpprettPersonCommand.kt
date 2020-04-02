@@ -7,10 +7,10 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDateTime
 
-internal class OpprettPersonOppgave(
+internal class OpprettPersonCommand(
     private val spleisBehov: SpleisBehov,
     private val personDao: PersonDao
-) : Oppgave() {
+) : Command() {
     override var ferdigstilt: LocalDateTime? = null
     private var navnId: Int? = null
     private var enhetId: Int? = null

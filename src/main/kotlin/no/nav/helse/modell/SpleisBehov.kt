@@ -27,13 +27,13 @@ internal class SpleisBehov(
     oppgaveDao: OppgaveDao
 ) {
     internal val uuid = randomUUID()
-    internal val oppgaver: List<Oppgave> = listOf(
-        OpprettPersonOppgave(this, personDao),
-        OppdaterPersonOppgave(this, personDao),
-        OpprettArbeidsgiverOppgave(this, arbeidsgiverDao),
-        OppdatertArbeidsgiverOppgave(this, arbeidsgiverDao),
-        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao),
-        OpprettOppgaveOppgave(this, oppgaveDao)
+    internal val oppgaver: List<Command> = listOf(
+        OpprettPersonCommand(this, personDao),
+        OppdaterPersonCommand(this, personDao),
+        OpprettArbeidsgiverCommand(this, arbeidsgiverDao),
+        OppdatertArbeidsgiverCommand(this, arbeidsgiverDao),
+        OpprettVedtakCommand(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao),
+        OpprettOppgaveCommand(this, oppgaveDao)
     )
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 

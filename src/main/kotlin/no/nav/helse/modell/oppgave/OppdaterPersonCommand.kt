@@ -8,17 +8,17 @@ import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class OppdaterPersonOppgave(
+internal class OppdaterPersonCommand(
     private val spleisBehov: SpleisBehov,
     private val personDao: PersonDao
-): Oppgave() {
+): Command() {
     override var ferdigstilt: LocalDateTime? = null
-    override val oppgaver: List<Oppgave> = listOf(
-        HentPersoninfoOppgave(),
-        HentEnhetOppgave()
+    override val oppgaver: List<Command> = listOf(
+        HentPersoninfoCommand(),
+        HentEnhetCommand()
     )
 
-    private inner class HentPersoninfoOppgave: Oppgave() {
+    private inner class HentPersoninfoCommand: Command() {
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {
@@ -37,7 +37,7 @@ internal class OppdaterPersonOppgave(
         }
     }
 
-    private inner class HentEnhetOppgave : Oppgave() {
+    private inner class HentEnhetCommand : Command() {
         override var ferdigstilt: LocalDateTime? = null
 
         override fun execute() {

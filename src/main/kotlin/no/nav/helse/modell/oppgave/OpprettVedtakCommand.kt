@@ -7,16 +7,16 @@ import no.nav.helse.modell.dao.VedtakDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-internal class OpprettVedtakOppgave(
+internal class OpprettVedtakCommand(
     private val spleisBehov: SpleisBehov,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao
-) : Oppgave() {
+) : Command() {
     override var ferdigstilt: LocalDateTime? = null
-    private val log = LoggerFactory.getLogger(OpprettVedtakOppgave::class.java)
+    private val log = LoggerFactory.getLogger(OpprettVedtakCommand::class.java)
     override fun execute() {
         log.info("Henter snapshot for vedtaksperiode: ${spleisBehov.vedtaksperiodeId}")
         val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(spleisBehov.fødselsnummer)
