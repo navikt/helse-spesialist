@@ -55,3 +55,5 @@ spec:
       value: postgresql/prod-fss/
     - name: AZURE_CONFIG_URL
       value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
+    - name: SPLEIS_CLIENT_ID
+      value: 60a60e52-7c16-459d-a288-7cc2911c6f81

@@ -4,19 +4,23 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.ContentType
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import no.nav.helse.AccessTokenClient
 
-internal class SpeilSnapshotRest(private val httpClient: HttpClient) {
-    internal fun hentSpeilSpapshot(vedtaksperiodeId: UUID): String {
+internal class SpeilSnapshotRestDao(
+    private val httpClient: HttpClient,
+    private val accessTokenClient: AccessTokenClient,
+    private val spleisClientId: String
+) {
+
+    internal fun hentSpeilSpapshot(aktørId: String): String {
         return runBlocking {
-            httpClient.get<HttpStatement> {
-                header("Authorization", "Bearer token")
+            val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
+            httpClient.get<HttpStatement>("http://spleis-api/api/person/$aktørId") {
+                header("Authorization", "Bearer $accessToken")
                 accept(ContentType.Application.Json)
-                parameter("vedtaksperiodeId", vedtaksperiodeId)
             }.let { it.receive<String>() }
         }
     }

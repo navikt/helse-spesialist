@@ -1,12 +1,13 @@
 package no.nav.helse.mediator.kafka
 
 import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.rapids_rivers.RapidsConnection
 
-internal class SpleisBehovMediator {
+internal class SpleisBehovMediator() {
     internal fun håndter(context: RapidsConnection.MessageContext, spleisBehov: SpleisBehov) {
         spleisBehov.execute()
         spleisBehov.behov()?.also { behov ->

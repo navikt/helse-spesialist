@@ -4,6 +4,7 @@ import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,7 +23,8 @@ internal class GodkjenningMessage(
     fun asSpleisBehov(
         personDao: PersonDao,
         arbeidsgiverDao: ArbeidsgiverDao,
-        vedtakDao: VedtakDao
+        vedtakDao: VedtakDao,
+        speilSnapshotRestDao: SpeilSnapshotRestDao
     ) = SpleisBehov(
         fødselsnummer = fødselsnummer,
         periodeFom = periodeFom,
@@ -32,7 +34,8 @@ internal class GodkjenningMessage(
         orgnummer = organisasjonsnummer,
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao
+        vedtakDao = vedtakDao,
+        speilSnapshotRestDao = speilSnapshotRestDao
     )
 
     internal class Factory(
@@ -40,7 +43,8 @@ internal class GodkjenningMessage(
         private val personDao: PersonDao,
         private val arbeidsgiverDao: ArbeidsgiverDao,
         private val vedtakDao: VedtakDao,
-        private val spleisBehovMediator: SpleisBehovMediator
+        private val spleisBehovMediator: SpleisBehovMediator,
+        private val speilSnapshotRestDao: SpeilSnapshotRestDao
     ) : River.PacketListener {
         init {
             River(rapidsConnection).apply {
@@ -63,7 +67,7 @@ internal class GodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
-            spleisBehovMediator.håndter(context, behov.asSpleisBehov(personDao, arbeidsgiverDao, vedtakDao))
+            spleisBehovMediator.håndter(context, behov.asSpleisBehov(personDao, arbeidsgiverDao, vedtakDao, speilSnapshotRestDao))
         }
     }
 }

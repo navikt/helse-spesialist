@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
@@ -20,7 +21,8 @@ internal class SpleisBehov(
     internal val orgnummer: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
-    vedtakDao: VedtakDao
+    vedtakDao: VedtakDao,
+    speilSnapshotRestDao: SpeilSnapshotRestDao
 ) {
     internal val uuid = randomUUID()
     internal val oppgaver: List<Oppgave> = listOf(
@@ -28,7 +30,7 @@ internal class SpleisBehov(
         OppdaterPersonOppgave(this, personDao),
         OpprettArbeidsgiverOppgave(this, arbeidsgiverDao),
         OppdatertArbeidsgiverOppgave(this, arbeidsgiverDao),
-        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao)
+        OpprettVedtakOppgave(this, personDao, arbeidsgiverDao, vedtakDao, speilSnapshotRestDao)
     )
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
