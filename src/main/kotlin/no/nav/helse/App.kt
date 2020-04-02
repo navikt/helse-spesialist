@@ -30,12 +30,13 @@ fun main(): Unit = runBlocking {
         install(JsonFeature) { serializer = JacksonSerializer() } }
     val oidcDiscovery = AzureAad(spleisClient).oidcDiscovery(System.getenv("AZURE_CONFIG_URL"))
     val accessTokenClient = AccessTokenClient(oidcDiscovery.token_endpoint, readClientId(), readClientSecret(), spleisClient)
+    val snapshotDao = SnapshotDao(dataSource)
     val speilSnapshotRestDao = SpeilSnapshotRestDao(spleisClient, accessTokenClient, System.getenv("SPLEIS_CLIENT_ID"))
 
     RapidApplication.create(System.getenv()).apply {
         val spleisBehovMediator = SpleisBehovMediator()
 
-        GodkjenningMessage.Factory(this, personDao, arbeidsgiverDao, vedtakDao, spleisBehovMediator, speilSnapshotRestDao)
+        GodkjenningMessage.Factory(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, spleisBehovMediator, speilSnapshotRestDao)
         PersoninfoMessage.Factory(this, spleisBehovMediator)
     }.start()
 }

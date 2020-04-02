@@ -12,7 +12,7 @@ class SnapshotDao(private val dataSource: DataSource) {
         requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO speil_snapshot(data) VALUES(?);",
+                    "INSERT INTO speil_snapshot(data) VALUES(CAST(? as json));",
                     personBlob
                 ).asUpdateAndReturnGeneratedKey
             )

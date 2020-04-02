@@ -14,6 +14,7 @@ import no.nav.helse.AccessTokenClient
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
@@ -89,6 +90,7 @@ internal class SpleisBehovTest {
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
+        val snapshotDao = SnapshotDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
             fødselsnummer = "12345",
@@ -100,6 +102,7 @@ internal class SpleisBehovTest {
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao
         )
         spleisBehov.execute()
@@ -116,9 +119,10 @@ internal class SpleisBehovTest {
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
+        val snapshotDao = SnapshotDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
-            fødselsnummer = "12345",
+            fødselsnummer = "23456",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -127,6 +131,7 @@ internal class SpleisBehovTest {
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao
         )
         spleisBehov.execute()
@@ -144,17 +149,19 @@ internal class SpleisBehovTest {
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val vedtakDao = VedtakDao(dataSource)
+        val snapshotDao = SnapshotDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
-            fødselsnummer = "12345",
+            fødselsnummer = "34567",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = "123455",
-            orgnummer = "98765432",
+            orgnummer = "98765433",
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao
         )
         spleisBehov.execute()
