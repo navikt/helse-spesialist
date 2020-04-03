@@ -2,6 +2,7 @@ package no.nav.helse
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.ProxyBuilder
+import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.Url
@@ -17,6 +18,8 @@ import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.RapidApplication
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner
+import java.net.ProxySelector
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -28,9 +31,11 @@ fun main(): Unit = runBlocking {
     val personDao = PersonDao(dataSource)
     val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     val vedtakDao = VedtakDao(dataSource)
-    val azureAdClient = HttpClient {
+    val azureAdClient = HttpClient(Apache) {
         engine {
-            proxy = ProxyBuilder.http(Url(System.getenv("https_proxy")))
+            customizeClient {
+                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+            }
         }
     }
     val spleisClient = HttpClient {
