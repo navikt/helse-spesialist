@@ -37,6 +37,7 @@ fun main(): Unit = runBlocking {
                 setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
             }
         }
+        install(JsonFeature) { serializer = JacksonSerializer() }
     }
     val spleisClient = HttpClient {
         install(JsonFeature) { serializer = JacksonSerializer() }
