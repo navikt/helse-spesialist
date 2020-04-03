@@ -35,7 +35,7 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
 
-    implementation("com.github.navikt:rapids-and-rivers:1.a468ae5")
+    implementation("com.github.navikt:rapids-and-rivers:1.dc8c89a")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
