@@ -7,7 +7,7 @@ import no.nav.helse.modell.løsning.PersonEgenskap
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
-    internal fun finnPerson(fødselsnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
+    internal fun findPerson(fødselsnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)
                 .map { it.int("id") }
@@ -40,7 +40,7 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun setNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String) =
+    internal fun updateNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
@@ -50,7 +50,7 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun oppdaterEnhet(fødselsnummer: Long, enhetNr: Int) = using(sessionOf(dataSource)) { session ->
+    internal fun updateEnhet(fødselsnummer: Long, enhetNr: Int) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "UPDATE person SET enhet_ref=?, enhet_ref_oppdatert=now() WHERE fodselsnummer=?;",
@@ -60,7 +60,7 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun personinfoSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    internal fun findPersoninfoSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
@@ -71,7 +71,7 @@ class PersonDao(private val dataSource: DataSource) {
         )
     })
 
-    internal fun enhetSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    internal fun findEnhetSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;",
@@ -82,7 +82,7 @@ class PersonDao(private val dataSource: DataSource) {
         )
     })
 
-    internal fun oppdaterEgenskap(fødselsnummer: Long, egenskap: PersonEgenskap?) =
+    internal fun updateEgenskap(fødselsnummer: Long, egenskap: PersonEgenskap?) =
         using(sessionOf(dataSource)) { session ->
             val id = requireNotNull(session.run(
                 queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)

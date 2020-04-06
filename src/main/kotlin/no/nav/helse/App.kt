@@ -6,7 +6,7 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.kafka.SpleisBehovMediator
+import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PersoninfoMessage
 import no.nav.helse.modell.dao.*
@@ -24,6 +24,7 @@ fun main(): Unit = runBlocking {
     val personDao = PersonDao(dataSource)
     val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     val vedtakDao = VedtakDao(dataSource)
+    val spleisbehovDao = SpleisbehovDao(dataSource)
     val azureAdClient = HttpClient(Apache) {
         engine {
             customizeClient {
@@ -51,29 +52,31 @@ fun main(): Unit = runBlocking {
     val oppgaveDao = OppgaveDao(dataSource)
 
     RapidApplication.create(System.getenv()).apply {
-        val spleisBehovMediator = SpleisBehovMediator()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao,
+            personDao,
+            arbeidsgiverDao,
+            vedtakDao,
+            snapshotDao,
+            speilSnapshotRestDao,
+            oppgaveDao
+        )
 
         GodkjenningMessage.Factory(
             rapidsConnection = this,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            spleisBehovMediator = spleisBehovMediator,
-            speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            spleisbehovMediator = spleisbehovMediator
         )
-        PersoninfoMessage.Factory(this, spleisBehovMediator)
+        PersoninfoMessage.Factory(this, spleisbehovMediator)
     }.start()
 }
 
 
 val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 
-fun readClientId(): String {
+private fun readClientId(): String {
     return Files.readString(Paths.get(azureMountPath, "client_id"))
 }
 
-fun readClientSecret(): String {
+private fun readClientSecret(): String {
     return Files.readString(Paths.get(azureMountPath, "client_secret"))
 }

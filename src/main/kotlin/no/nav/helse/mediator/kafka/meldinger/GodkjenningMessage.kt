@@ -1,8 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import no.nav.helse.mediator.kafka.SpleisBehovMediator
-import no.nav.helse.modell.SpleisBehov
-import no.nav.helse.modell.dao.*
+import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -18,38 +16,10 @@ internal class GodkjenningMessage(
     val periodeFom: LocalDate,
     val periodeTom: LocalDate
 ) {
-    fun asSpleisBehov(
-        personDao: PersonDao,
-        arbeidsgiverDao: ArbeidsgiverDao,
-        vedtakDao: VedtakDao,
-        snapshotDao: SnapshotDao,
-        speilSnapshotRestDao: SpeilSnapshotRestDao,
-        oppgaveDao: OppgaveDao
-    ) = SpleisBehov(
-        id = id,
-        fødselsnummer = fødselsnummer,
-        periodeFom = periodeFom,
-        periodeTom = periodeTom,
-        vedtaksperiodeId = vedtaksperiodeId,
-        aktørId = aktørId,
-        orgnummer = organisasjonsnummer,
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao,
-        snapshotDao = snapshotDao,
-        speilSnapshotRestDao = speilSnapshotRestDao,
-        oppgaveDao = oppgaveDao
-    )
 
     internal class Factory(
         rapidsConnection: RapidsConnection,
-        private val personDao: PersonDao,
-        private val arbeidsgiverDao: ArbeidsgiverDao,
-        private val vedtakDao: VedtakDao,
-        private val snapshotDao: SnapshotDao,
-        private val spleisBehovMediator: SpleisBehovMediator,
-        private val speilSnapshotRestDao: SpeilSnapshotRestDao,
-        private val oppgaveDao: OppgaveDao
+        private val spleisbehovMediator: SpleisbehovMediator
     ) : River.PacketListener {
         init {
             River(rapidsConnection).apply {
@@ -73,16 +43,7 @@ internal class GodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
-            spleisBehovMediator.håndter(
-                context, behov.asSpleisBehov(
-                    personDao = personDao,
-                    arbeidsgiverDao = arbeidsgiverDao,
-                    vedtakDao = vedtakDao,
-                    snapshotDao = snapshotDao,
-                    speilSnapshotRestDao = speilSnapshotRestDao,
-                    oppgaveDao = oppgaveDao
-                )
-            )
+            spleisbehovMediator.håndter(behov)
         }
     }
 }

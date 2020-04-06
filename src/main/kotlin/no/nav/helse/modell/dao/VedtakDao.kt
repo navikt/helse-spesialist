@@ -9,7 +9,7 @@ import javax.sql.DataSource
 
 internal class VedtakDao(private val dataSource: DataSource) {
 
-    internal fun finnVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
+    internal fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
                 .map { it.int("id") }

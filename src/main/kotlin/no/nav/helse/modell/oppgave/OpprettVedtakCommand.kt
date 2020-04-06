@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 internal class OpprettVedtakCommand(
-    private val spleisBehov: SpleisBehov,
+    private val spleisbehov: Spleisbehov,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
@@ -18,15 +18,15 @@ internal class OpprettVedtakCommand(
     override var ferdigstilt: LocalDateTime? = null
     private val log = LoggerFactory.getLogger(OpprettVedtakCommand::class.java)
     override fun execute() {
-        log.info("Henter snapshot for vedtaksperiode: ${spleisBehov.vedtaksperiodeId}")
-        val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(spleisBehov.fødselsnummer)
+        log.info("Henter snapshot for vedtaksperiode: ${spleisbehov.vedtaksperiodeId}")
+        val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(spleisbehov.fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
-        val personRef = requireNotNull(personDao.finnPerson(spleisBehov.fødselsnummer.toLong()))
-        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.finnArbeidsgiver(spleisBehov.orgnummer.toLong()))
+        val personRef = requireNotNull(personDao.findPerson(spleisbehov.fødselsnummer.toLong()))
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiver(spleisbehov.orgnummer.toLong()))
         val id = vedtakDao.insertVedtak(
-            vedtaksperiodeId = spleisBehov.vedtaksperiodeId,
-            fom = spleisBehov.periodeFom,
-            tom = spleisBehov.periodeTom,
+            vedtaksperiodeId = spleisbehov.vedtaksperiodeId,
+            fom = spleisbehov.periodeFom,
+            tom = spleisbehov.periodeTom,
             personRef = personRef,
             arbeidsgiverRef = arbeidsgiverRef,
             speilSnapshotRef = snapshotId

@@ -1,17 +1,18 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import no.nav.helse.mediator.kafka.SpleisBehovMediator
+import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import java.util.*
 
 class ArbeidsgiverMessage(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val vedtaksperiodeId: String,
-    val spleisBehovId: String,
+    val spleisbehovId: UUID,
     val arbeidsgiverNavn: String
 ) {
     fun asArbeidsgiverLøsning() = ArbeidsgiverLøsning(
@@ -20,7 +21,7 @@ class ArbeidsgiverMessage(
 
     internal class Factory(
         rapidsConnection: RapidsConnection,
-        private val spleisBehovMediator: SpleisBehovMediator
+        private val spleisbehovMediator: SpleisbehovMediator
     ) : River.PacketListener {
         init {
             River(rapidsConnection).apply {
@@ -40,11 +41,11 @@ class ArbeidsgiverMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
-                spleisBehovId = packet["spleisBehovId"].asText(),
+                spleisbehovId = UUID.fromString(packet["spleisBehovId"].asText()),
                 arbeidsgiverNavn = packet["HentArbeidsgiverNavn"].asText()
             )
 
-            spleisBehovMediator.håndter(behov.asArbeidsgiverLøsning())
+            spleisbehovMediator.håndter(behov.spleisbehovId, behov.asArbeidsgiverLøsning())
         }
     }
 }

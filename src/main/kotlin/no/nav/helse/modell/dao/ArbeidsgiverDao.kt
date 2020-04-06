@@ -7,7 +7,7 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 class ArbeidsgiverDao(private val dataSource: DataSource) {
-    fun finnArbeidsgiver(orgnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
+    fun findArbeidsgiver(orgnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer)
                 .map { it.int("id") }
@@ -15,7 +15,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    fun opprettArbeidsgiver(orgnummer: Long, navn: String) =
+    fun insertArbeidsgiver(orgnummer: Long, navn: String) =
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             val navnRef = requireNotNull(
                 session.run(
@@ -29,7 +29,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
             )
         }
 
-    fun navnSistOppdatert(orgnummer: Long): LocalDate = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun findNavnSistOppdatert(orgnummer: Long): LocalDate = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT navn_oppdatert FROM arbeidsgiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
@@ -40,7 +40,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     })
 
-    fun oppdaterNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) { session ->
+    fun updateNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "UPDATE arbeidsgiver_navn SET navn=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",

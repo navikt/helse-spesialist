@@ -9,7 +9,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) {
-    fun opprettOppgave(behovId: UUID, oppgavetype: Oppgavetype, statusType: Statustype): Long? =
+    fun insertOppgave(behovId: UUID, oppgavetype: Oppgavetype, statusType: Statustype): Long? =
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.run(
                 queryOf(

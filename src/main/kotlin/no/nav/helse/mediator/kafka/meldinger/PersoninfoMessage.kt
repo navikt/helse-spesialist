@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import no.nav.helse.mediator.kafka.SpleisBehovMediator
+import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
@@ -8,12 +8,13 @@ import no.nav.helse.modell.løsning.PersonEgenskap
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import java.util.*
 
 internal class PersoninfoMessage(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val vedtaksperiodeId: String,
-    val spleisBehovId: String,
+    val spleisbehovId: UUID,
     val enhetNr: String,
     val fornavn: String,
     val mellomnavn: String?,
@@ -31,7 +32,7 @@ internal class PersoninfoMessage(
         egenskap = egenskap
     )
 
-    internal class Factory(rapidsConnection: RapidsConnection, private val spleisBehovMediator: SpleisBehovMediator) :
+    internal class Factory(rapidsConnection: RapidsConnection, private val spleisbehovMediator: SpleisbehovMediator) :
         River.PacketListener {
         init {
             River(rapidsConnection).apply {
@@ -54,7 +55,7 @@ internal class PersoninfoMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
-                spleisBehovId = packet["spleisBehovId"].asText(),
+                spleisbehovId = UUID.fromString(packet["spleisBehovId"].asText()),
                 enhetNr = hentEnhet,
                 fornavn = hentPersoninfo["fornavn"].asText(),
                 mellomnavn = hentPersoninfo.takeIf { it.hasNonNull("mellomavn") }?.get("mellomnavn")?.asText(),
@@ -62,7 +63,7 @@ internal class PersoninfoMessage(
                 egenskap = hentPersoninfo ["diskresjonskode"]?.let { PersonEgenskap.find(it.asText()) }
             )
 
-            spleisBehovMediator.håndter(behov.spleisBehovId, behov.asBehandlendeEnhet(), behov.asHentNavnLøsning())
+            spleisbehovMediator.håndter(behov.spleisbehovId, behov.asBehandlendeEnhet(), behov.asHentNavnLøsning())
         }
     }
 }

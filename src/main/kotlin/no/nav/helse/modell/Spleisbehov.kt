@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
@@ -11,7 +12,7 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.reflect.KClass
 
-internal class SpleisBehov(
+internal class Spleisbehov(
     internal val id: UUID,
     internal val fødselsnummer: String,
     internal val periodeFom: LocalDate,
@@ -27,7 +28,7 @@ internal class SpleisBehov(
     speilSnapshotRestDao: SpeilSnapshotRestDao,
     oppgaveDao: OppgaveDao
 ) {
-    private val log = LoggerFactory.getLogger(SpleisBehov::class.java)
+    private val log = LoggerFactory.getLogger(Spleisbehov::class.java)
     private var nåværendeOppgave: KClass<out Command>
     private val oppgaver: List<Command> = listOf(
         OpprettPersonCommand(this, personDao),
@@ -87,7 +88,7 @@ internal class SpleisBehov(
 
     fun toJson() =
         jacksonObjectMapper().writeValueAsString(
-            SpleisBehovDTO(
+            SpleisbehovDTO(
                 id,
                 fødselsnummer,
                 periodeFom,
@@ -98,9 +99,39 @@ internal class SpleisBehov(
                 nåværendeOppgave.simpleName!!
             )
         )
+
+    companion object {
+        fun restore(
+            id: UUID, data: String,
+            personDao: PersonDao,
+            arbeidsgiverDao: ArbeidsgiverDao,
+            vedtakDao: VedtakDao,
+            snapshotDao: SnapshotDao,
+            speilSnapshotRestDao: SpeilSnapshotRestDao,
+            oppgaveDao: OppgaveDao
+        ): Spleisbehov {
+            val spleisbehovDTO = jacksonObjectMapper().readValue<SpleisbehovDTO>(data)
+            return Spleisbehov(
+                id = id,
+                fødselsnummer = spleisbehovDTO.fødselsnummer,
+                periodeFom = spleisbehovDTO.periodeFom,
+                periodeTom = spleisbehovDTO.periodeTom,
+                vedtaksperiodeId = spleisbehovDTO.vedtaksperiodeId,
+                aktørId = spleisbehovDTO.aktørId,
+                orgnummer = spleisbehovDTO.orgnummer,
+                nåværendeOppgavenavn = spleisbehovDTO.oppgavenavn,
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = speilSnapshotRestDao,
+                oppgaveDao = oppgaveDao
+            )
+        }
+    }
 }
 
-data class SpleisBehovDTO(
+data class SpleisbehovDTO(
     val id: UUID,
     val fødselsnummer: String,
     val periodeFom: LocalDate,

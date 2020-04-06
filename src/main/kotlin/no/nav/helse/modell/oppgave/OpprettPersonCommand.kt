@@ -1,14 +1,14 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.Behovtype
-import no.nav.helse.modell.SpleisBehov
+import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDateTime
 
 internal class OpprettPersonCommand(
-    private val spleisBehov: SpleisBehov,
+    private val spleisbehov: Spleisbehov,
     private val personDao: PersonDao
 ) : Command() {
     override var ferdigstilt: LocalDateTime? = null
@@ -16,14 +16,14 @@ internal class OpprettPersonCommand(
     private var enhetId: Int? = null
 
     override fun execute() {
-        if (personDao.finnPerson(spleisBehov.fødselsnummer.toLong()) != null) {
+        if (personDao.findPerson(spleisbehov.fødselsnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else if (navnId != null && enhetId != null) {
-            personDao.insertPerson(spleisBehov.fødselsnummer.toLong(), spleisBehov.aktørId.toLong(), navnId!!, enhetId!!)
+            personDao.insertPerson(spleisbehov.fødselsnummer.toLong(), spleisbehov.aktørId.toLong(), navnId!!, enhetId!!)
             ferdigstilt = LocalDateTime.now()
         } else {
-            spleisBehov.håndter(Behovtype.HentPersoninfo)
-            spleisBehov.håndter(Behovtype.HentEnhet)
+            spleisbehov.håndter(Behovtype.HentPersoninfo)
+            spleisbehov.håndter(Behovtype.HentEnhet)
         }
     }
 
