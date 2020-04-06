@@ -54,7 +54,7 @@ internal class PersoninfoMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
-                spleisBehovId = packet["@id"].asText(),
+                spleisBehovId = packet["spleisBehovId"].asText(),
                 enhetNr = hentEnhet,
                 fornavn = hentPersoninfo["fornavn"].asText(),
                 mellomnavn = hentPersoninfo.takeIf { it.hasNonNull("mellomavn") }?.get("mellomnavn")?.asText(),

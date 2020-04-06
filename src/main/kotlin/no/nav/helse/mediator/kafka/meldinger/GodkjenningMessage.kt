@@ -3,8 +3,6 @@ package no.nav.helse.mediator.kafka.meldinger
 import no.nav.helse.mediator.kafka.SpleisBehovMediator
 import no.nav.helse.modell.SpleisBehov
 import no.nav.helse.modell.dao.*
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -75,14 +73,16 @@ internal class GodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
-            spleisBehovMediator.håndter(context, behov.asSpleisBehov(
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao,
-                oppgaveDao = oppgaveDao
-            ))
+            spleisBehovMediator.håndter(
+                context, behov.asSpleisBehov(
+                    personDao = personDao,
+                    arbeidsgiverDao = arbeidsgiverDao,
+                    vedtakDao = vedtakDao,
+                    snapshotDao = snapshotDao,
+                    speilSnapshotRestDao = speilSnapshotRestDao,
+                    oppgaveDao = oppgaveDao
+                )
+            )
         }
     }
 }

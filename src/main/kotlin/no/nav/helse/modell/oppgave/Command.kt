@@ -24,13 +24,3 @@ abstract class Command {
 internal fun List<Command>.execute() = this
     .filter { it.ferdigstilt == null }
     .forEach { it.execute() }
-
-internal fun List<Command>.executeAsSequence() = this
-    .asSequence()
-    .filter { it.ferdigstilt == null }
-    .onEach { it.execute() }
-    .takeWhile { it.ferdigstilt != null }
-    .forEach { println("Ferdigstilt oppgave") } // TODO
-
-internal fun List<Command>.current() = asSequence()
-    .first { it.ferdigstilt == null }

@@ -23,7 +23,7 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.PersonEgenskap
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -36,6 +36,13 @@ internal class SpleisBehovTest {
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var hikariConfig: HikariConfig
     private lateinit var dataSource: HikariDataSource
+    private lateinit var personDao: PersonDao
+    private lateinit var arbeidsgiverDao: ArbeidsgiverDao
+    private lateinit var vedtakDao: VedtakDao
+    private lateinit var snapshotDao: SnapshotDao
+    private lateinit var oppgaveDao: OppgaveDao
+    private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
+    private lateinit var testDao: TestPersonDao
 
     @BeforeAll
     fun setup() {
@@ -56,6 +63,14 @@ internal class SpleisBehovTest {
             .dataSource(dataSource)
             .load()
             .migrate()
+
+        personDao = PersonDao(dataSource)
+        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+        vedtakDao = VedtakDao(dataSource)
+        snapshotDao = SnapshotDao(dataSource)
+        oppgaveDao = OppgaveDao(dataSource)
+        speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
+        testDao = TestPersonDao(dataSource)
     }
 
     private val httpClientForSpleis = HttpClient(MockEngine) {
@@ -89,12 +104,6 @@ internal class SpleisBehovTest {
     @Test
     fun `godkjenningsbehov for ny person legger inn ny person i DB`() {
         val vedtaksperiodeId = randomUUID()
-        val personDao = PersonDao(dataSource)
-        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        val vedtakDao = VedtakDao(dataSource)
-        val snapshotDao = SnapshotDao(dataSource)
-        val oppgaveDao = OppgaveDao(dataSource)
-        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         val spleisBehov = SpleisBehov(
             id = randomUUID(),
             fødselsnummer = "12345",
@@ -119,14 +128,37 @@ internal class SpleisBehovTest {
     }
 
     @Test
+    fun `godkjenningsbehov for person oppdaterer person i DB`() {
+        val vedtaksperiodeId = randomUUID()
+        val spleisBehov = SpleisBehov(
+            id = randomUUID(),
+            fødselsnummer = "12345",
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 20),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123455",
+            orgnummer = "98765432",
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao
+        )
+        spleisBehov.execute()
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentEnhetLøsning("3417"))
+        testDao.setEnhetOppdatert(12345, LocalDate.of(2020, 1, 1))
+        spleisBehov.execute()
+        spleisBehov.fortsett(HentEnhetLøsning("3117"))
+
+        assertNotNull(personDao.finnPerson(12345))
+        assertEquals(LocalDate.now(), personDao.enhetSistOppdatert(12345))
+    }
+
+    @Test
     fun `godkjenningsbehov for person med ny arbeidsgiver legger inn ny arbeidsgiver i DB`() {
         val vedtaksperiodeId = randomUUID()
-        val personDao = PersonDao(dataSource)
-        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        val vedtakDao = VedtakDao(dataSource)
-        val snapshotDao = SnapshotDao(dataSource)
-        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
-        val oppgaveDao = OppgaveDao(dataSource)
         val spleisBehov = SpleisBehov(
             id = randomUUID(),
             fødselsnummer = "23456",
@@ -154,12 +186,6 @@ internal class SpleisBehovTest {
     @Test
     fun `Ved nytt godkjenningsbehov opprettes et nytt vedtak i DB`() {
         val vedtaksperiodeId = randomUUID()
-        val personDao = PersonDao(dataSource)
-        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        val vedtakDao = VedtakDao(dataSource)
-        val snapshotDao = SnapshotDao(dataSource)
-        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
-        val oppgaveDao = OppgaveDao(dataSource)
         val spleisBehov = SpleisBehov(
             id = randomUUID(),
             fødselsnummer = "34567",

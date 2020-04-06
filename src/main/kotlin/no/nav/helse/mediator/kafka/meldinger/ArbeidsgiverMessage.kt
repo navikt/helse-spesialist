@@ -40,7 +40,7 @@ class ArbeidsgiverMessage(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
-                spleisBehovId = packet["@id"].asText(),
+                spleisBehovId = packet["spleisBehovId"].asText(),
                 arbeidsgiverNavn = packet["HentArbeidsgiverNavn"].asText()
             )
 
