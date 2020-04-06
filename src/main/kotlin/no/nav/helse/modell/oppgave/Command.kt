@@ -3,6 +3,7 @@ package no.nav.helse.modell.oppgave
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import java.time.LocalDateTime
 
 abstract class Command {
@@ -17,6 +18,10 @@ abstract class Command {
     }
 
     internal open fun fortsett(løsning: ArbeidsgiverLøsning) {
+        oppgaver.forEach { it.fortsett(løsning) }
+    }
+
+    internal open fun fortsett(løsning: SaksbehandlerLøsning) {
         oppgaver.forEach { it.fortsett(løsning) }
     }
 }

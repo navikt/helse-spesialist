@@ -6,6 +6,7 @@ import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.modell.oppgave.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -36,7 +37,7 @@ internal class Spleisbehov(
         OpprettArbeidsgiverCommand(this, arbeidsgiverDao),
         OppdatertArbeidsgiverCommand(this, arbeidsgiverDao),
         OpprettVedtakCommand(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao),
-        OpprettOppgaveCommand(this, oppgaveDao)
+        SaksbehandlerGodkjenningCommand(this, oppgaveDao)
     )
 
     init {
@@ -52,9 +53,9 @@ internal class Spleisbehov(
                 nåværendeOppgave = it::class
                 it.execute()
             }
-            .takeWhile { behov() == null }
+            .takeWhile { it.ferdigstilt != null }
             .forEach {
-                log.info("Oppgave ${it::class.simpleName} utført. Nåværende oppgave er ${nåværendeOppgave::class.simpleName}")
+                log.info("Oppgave ${it::class.simpleName} utført. Nåværende oppgave er ${nåværendeOppgave.simpleName}")
             }
     }
 
@@ -74,10 +75,14 @@ internal class Spleisbehov(
         current().fortsett(løsning)
     }
 
+    fun fortsett(løsning: SaksbehandlerLøsning) {
+        current().fortsett(løsning)
+    }
+
     private fun current() = oppgaver.first { it::class == nåværendeOppgave }
 
 
-    fun behov() = behovstyper.takeIf { it.isNotEmpty() }?.let { typer ->
+    private fun behov() = behovstyper.takeIf { it.isNotEmpty() }?.let { typer ->
         Behov(
             typer = typer,
             fødselsnummer = fødselsnummer,

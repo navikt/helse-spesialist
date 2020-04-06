@@ -55,14 +55,6 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    override fun fortsett(hentEnhetLøsning: HentEnhetLøsning) {
-        oppgaver.forEach { it.fortsett(hentEnhetLøsning) }
-    }
-
-    override fun fortsett(hentPersoninfoLøsning: HentPersoninfoLøsning) {
-        oppgaver.forEach { it.fortsett(hentPersoninfoLøsning) }
-    }
-
 
     override fun execute() {
         oppgaver.forEach { it.execute() }

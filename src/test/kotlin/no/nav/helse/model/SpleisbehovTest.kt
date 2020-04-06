@@ -154,6 +154,5 @@ internal class SpleisbehovTest {
         spleisBehov.execute()
 
         assertNotNull(vedtakDao.findVedtaksperiode(vedtaksperiodeId))
-
     }
 }
