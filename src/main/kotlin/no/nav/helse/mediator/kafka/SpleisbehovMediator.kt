@@ -87,6 +87,10 @@ internal class SpleisbehovMediator(
             log.error("Fant ikke behov med id $spleisbehovId")
             return
         }
+        if (oppgaveDao.findNåværendeOppgave(spleisbehovId) == null) {
+            log.warn("TEMP: ignorerer svar på behov uten oppgave")
+            return
+        }
         val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
         behandlendeEnhet?.also(spleisbehov::fortsett)
         hentPersoninfoLøsning?.also(spleisbehov::fortsett)
