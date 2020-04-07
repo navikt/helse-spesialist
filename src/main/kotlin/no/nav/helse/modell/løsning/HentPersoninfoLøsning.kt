@@ -3,8 +3,7 @@ package no.nav.helse.modell.løsning
 internal class HentPersoninfoLøsning(
     val fornavn: String,
     val mellomnavn: String?,
-    val etternavn: String,
-    val egenskap: PersonEgenskap?
+    val etternavn: String
 )
 
 internal enum class PersonEgenskap(private val diskresjonskode: String) {

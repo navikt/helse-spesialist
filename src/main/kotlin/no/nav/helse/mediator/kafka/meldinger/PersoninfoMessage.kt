@@ -18,8 +18,7 @@ internal class PersoninfoMessage(
     val enhetNr: String,
     val fornavn: String,
     val mellomnavn: String?,
-    val etternavn: String,
-    val egenskap: PersonEgenskap?
+    val etternavn: String
 ) {
     private fun asBehandlendeEnhet() = HentEnhetLøsning(
         enhetNr = enhetNr
@@ -28,8 +27,7 @@ internal class PersoninfoMessage(
     private fun asHentNavnLøsning() = HentPersoninfoLøsning(
         fornavn = fornavn,
         mellomnavn = mellomnavn,
-        etternavn = etternavn,
-        egenskap = egenskap
+        etternavn = etternavn
     )
 
     internal class Factory(rapidsConnection: RapidsConnection, private val spleisbehovMediator: SpleisbehovMediator) :
@@ -59,8 +57,7 @@ internal class PersoninfoMessage(
                 enhetNr = hentEnhet,
                 fornavn = hentPersoninfo["fornavn"].asText(),
                 mellomnavn = hentPersoninfo.takeIf { it.hasNonNull("mellomavn") }?.get("mellomnavn")?.asText(),
-                etternavn = hentPersoninfo["etternavn"].asText(),
-                egenskap = hentPersoninfo ["diskresjonskode"]?.let { PersonEgenskap.find(it.asText()) }
+                etternavn = hentPersoninfo["etternavn"].asText()
             )
 
             spleisbehovMediator.håndter(behov.spleisbehovId, behov.asBehandlendeEnhet(), behov.asHentNavnLøsning())

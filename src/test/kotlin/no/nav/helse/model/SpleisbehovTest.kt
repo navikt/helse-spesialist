@@ -66,7 +66,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
 
@@ -93,7 +93,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         testDao.setEnhetOppdatert(13245, LocalDate.of(2020, 1, 1))
         spleisBehov.execute()
@@ -123,7 +123,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
 
@@ -151,7 +151,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))

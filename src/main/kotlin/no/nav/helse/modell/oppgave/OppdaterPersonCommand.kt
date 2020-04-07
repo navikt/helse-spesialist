@@ -39,7 +39,6 @@ internal class OppdaterPersonCommand(
                 mellomnavn = løsning.mellomnavn,
                 etternavn = løsning.etternavn
             )
-            personDao.updateEgenskap(fødselsnummer.toLong(), løsning.egenskap)
             ferdigstilt = LocalDateTime.now()
         }
     }
