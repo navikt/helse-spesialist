@@ -42,7 +42,7 @@ internal class PersoninfoMessage(
                     it.requireKey("HentNavn")
                     it.requireValue("final", true)
                 }
-            }
+            }.register(this)
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {

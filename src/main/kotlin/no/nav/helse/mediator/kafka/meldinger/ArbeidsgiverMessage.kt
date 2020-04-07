@@ -33,7 +33,7 @@ class ArbeidsgiverMessage(
                     it.requireKey("HentArbeidsgiverNavn")
                     it.requireValue("final", true)
                 }
-            }
+            }.register(this)
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {

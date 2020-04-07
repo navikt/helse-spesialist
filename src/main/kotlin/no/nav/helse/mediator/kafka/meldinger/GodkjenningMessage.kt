@@ -34,7 +34,7 @@ internal class GodkjenningMessage(
                     it.requireKey("organisasjonsnummer")
                     it.requireKey("vedtaksperiodeId")
                 }
-            }
+            }.register(this)
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
