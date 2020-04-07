@@ -62,7 +62,8 @@ internal class SpleisbehovTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            nåværendeOppgave = null
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -88,7 +89,8 @@ internal class SpleisbehovTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            nåværendeOppgave = null
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -117,7 +119,8 @@ internal class SpleisbehovTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            nåværendeOppgave = null
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))
@@ -144,7 +147,8 @@ internal class SpleisbehovTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            nåværendeOppgave = null
         )
         spleisBehov.execute()
         spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", PersonEgenskap.Kode6))

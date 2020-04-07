@@ -2,61 +2,81 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
+import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dto.OppgaveDto
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
-import no.nav.helse.modell.oppgave.*
+import no.nav.helse.modell.oppgave.Command
+import no.nav.helse.modell.oppgave.OppdaterPersonCommand
+import no.nav.helse.modell.oppgave.OppdatertArbeidsgiverCommand
+import no.nav.helse.modell.oppgave.OpprettArbeidsgiverCommand
+import no.nav.helse.modell.oppgave.OpprettPersonCommand
+import no.nav.helse.modell.oppgave.OpprettVedtakCommand
+import no.nav.helse.modell.oppgave.SaksbehandlerGodkjenningCommand
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.*
-import kotlin.reflect.KClass
+import java.util.UUID
 
 internal class Spleisbehov(
-    internal val id: UUID,
-    internal val fødselsnummer: String,
-    internal val periodeFom: LocalDate,
-    internal val periodeTom: LocalDate,
-    internal val vedtaksperiodeId: UUID,
-    internal val aktørId: String,
-    internal val orgnummer: String,
-    nåværendeOppgavenavn: String = OpprettPersonCommand::class.simpleName!!,
+    private val id: UUID,
+    private val fødselsnummer: String,
+    private val periodeFom: LocalDate,
+    private val periodeTom: LocalDate,
+    private val vedtaksperiodeId: UUID,
+    private val aktørId: String,
+    private val orgnummer: String,
+    nåværendeOppgave: OppgaveDto?,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao,
-    oppgaveDao: OppgaveDao
+    private val oppgaveDao: OppgaveDao
 ) {
     private val log = LoggerFactory.getLogger(Spleisbehov::class.java)
-    private var nåværendeOppgave: KClass<out Command>
-    private val oppgaver: List<Command> = listOf(
-        OpprettPersonCommand(this, personDao),
-        OppdaterPersonCommand(this, personDao),
-        OpprettArbeidsgiverCommand(this, arbeidsgiverDao),
-        OppdatertArbeidsgiverCommand(this, arbeidsgiverDao),
-        OpprettVedtakCommand(this, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestDao),
-        SaksbehandlerGodkjenningCommand(this, oppgaveDao)
+    private val oppgaver = setOf(
+        OpprettPersonCommand(this, personDao, fødselsnummer, aktørId, id),
+        OppdaterPersonCommand(this, personDao, fødselsnummer, id),
+        OpprettArbeidsgiverCommand(this, arbeidsgiverDao, orgnummer, id),
+        OppdatertArbeidsgiverCommand(this, arbeidsgiverDao, orgnummer, id),
+        OpprettVedtakCommand(
+            personDao,
+            arbeidsgiverDao,
+            vedtakDao,
+            snapshotDao,
+            speilSnapshotRestDao,
+            fødselsnummer,
+            orgnummer,
+            vedtaksperiodeId,
+            periodeFom,
+            periodeTom,
+            id
+        ),
+        SaksbehandlerGodkjenningCommand(id)
     )
-
-    init {
-        nåværendeOppgave = oppgaver.first { it::class.simpleName == nåværendeOppgavenavn }::class
-    }
+    private var nåværendeOppgavetype = nåværendeOppgave?.oppgaveType ?: oppgaver.first().oppgavetype
 
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
     internal fun execute() {
         behovstyper.clear()
-        oppgaver.asSequence().dropWhile { it::class != nåværendeOppgave }
-            .onEach {
-                nåværendeOppgave = it::class
-                it.execute()
-            }
-            .takeWhile { it.ferdigstilt != null }
+        oppgaver.asSequence()
+            .dropWhile { it.oppgavetype != nåværendeOppgavetype }
+            .onEach(Command::execute)
+            .onEach { nåværendeOppgavetype = it.oppgavetype }
+            .takeWhile { !it.trengerExecute() }
             .forEach {
-                log.info("Oppgave ${it::class.simpleName} utført. Nåværende oppgave er ${nåværendeOppgave.simpleName}")
+                log.info("Oppgave ${it::class.simpleName} ferdigstilt. Nåværende oppgave er $nåværendeOppgavetype")
+                it.oppdaterFerdigstilt(oppgaveDao)
             }
+        current().persister(oppgaveDao)
     }
 
     internal fun håndter(behovtype: Behovtype) {
@@ -79,7 +99,7 @@ internal class Spleisbehov(
         current().fortsett(løsning)
     }
 
-    private fun current() = oppgaver.first { it::class == nåværendeOppgave }
+    private fun current() = oppgaver.first { it.oppgavetype == nåværendeOppgavetype }
 
 
     private fun behov() = behovstyper.takeIf { it.isNotEmpty() }?.let { typer ->
@@ -100,8 +120,7 @@ internal class Spleisbehov(
                 periodeTom,
                 vedtaksperiodeId,
                 aktørId,
-                orgnummer,
-                nåværendeOppgave.simpleName!!
+                orgnummer
             )
         )
 
@@ -113,7 +132,8 @@ internal class Spleisbehov(
             vedtakDao: VedtakDao,
             snapshotDao: SnapshotDao,
             speilSnapshotRestDao: SpeilSnapshotRestDao,
-            oppgaveDao: OppgaveDao
+            oppgaveDao: OppgaveDao,
+            nåværendeOppgave: OppgaveDto
         ): Spleisbehov {
             val spleisbehovDTO = jacksonObjectMapper().readValue<SpleisbehovDTO>(data)
             return Spleisbehov(
@@ -124,13 +144,13 @@ internal class Spleisbehov(
                 vedtaksperiodeId = spleisbehovDTO.vedtaksperiodeId,
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
-                nåværendeOppgavenavn = spleisbehovDTO.oppgavenavn,
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
                 vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao,
-                oppgaveDao = oppgaveDao
+                oppgaveDao = oppgaveDao,
+                nåværendeOppgave = nåværendeOppgave
             )
         }
     }
@@ -143,6 +163,5 @@ data class SpleisbehovDTO(
     val periodeTom: LocalDate,
     val vedtaksperiodeId: UUID,
     val aktørId: String,
-    val orgnummer: String,
-    val oppgavenavn: String
+    val orgnummer: String
 )

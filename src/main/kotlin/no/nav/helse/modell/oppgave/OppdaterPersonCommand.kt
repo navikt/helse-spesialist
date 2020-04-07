@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.Løsningstype
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.PersonDao
@@ -7,22 +8,23 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class OppdaterPersonCommand(
     private val spleisbehov: Spleisbehov,
-    private val personDao: PersonDao
-): Command() {
-    override var ferdigstilt: LocalDateTime? = null
+    private val personDao: PersonDao,
+    private val fødselsnummer: String,
+    behovId: UUID,
+    ferdigstilt: LocalDateTime? = null
+) : Command(behovId, ferdigstilt, Løsningstype.System) {
     override val oppgaver: List<Command> = listOf(
         HentPersoninfoCommand(),
         HentEnhetCommand()
     )
 
-    private inner class HentPersoninfoCommand: Command() {
-        override var ferdigstilt: LocalDateTime? = null
-
+    private inner class HentPersoninfoCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System) {
         override fun execute() {
-            val sistOppdatert = personDao.findPersoninfoSistOppdatert(spleisbehov.fødselsnummer.toLong())
+            val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer.toLong())
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
                 spleisbehov.håndter(Behovtype.HentPersoninfo)
             } else {
@@ -31,17 +33,20 @@ internal class OppdaterPersonCommand(
         }
 
         override fun fortsett(løsning: HentPersoninfoLøsning) {
-            personDao.updateNavn(spleisbehov.fødselsnummer.toLong(), løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
-            personDao.updateEgenskap(spleisbehov.fødselsnummer.toLong(), løsning.egenskap)
+            personDao.updateNavn(
+                fødselsnummer = fødselsnummer.toLong(),
+                fornavn = løsning.fornavn,
+                mellomnavn = løsning.mellomnavn,
+                etternavn = løsning.etternavn
+            )
+            personDao.updateEgenskap(fødselsnummer.toLong(), løsning.egenskap)
             ferdigstilt = LocalDateTime.now()
         }
     }
 
-    private inner class HentEnhetCommand : Command() {
-        override var ferdigstilt: LocalDateTime? = null
-
+    private inner class HentEnhetCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System) {
         override fun execute() {
-            val sistOppdatert = personDao.findEnhetSistOppdatert(spleisbehov.fødselsnummer.toLong())
+            val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer.toLong())
             if (sistOppdatert.plusDays(5) < LocalDate.now()) {
                 spleisbehov.håndter(Behovtype.HentEnhet)
             } else {
@@ -50,7 +55,7 @@ internal class OppdaterPersonCommand(
         }
 
         override fun fortsett(løsning: HentEnhetLøsning) {
-            personDao.updateEnhet(spleisbehov.fødselsnummer.toLong(), løsning.enhetNr.toInt())
+            personDao.updateEnhet(fødselsnummer.toLong(), løsning.enhetNr.toInt())
             ferdigstilt = LocalDateTime.now()
         }
     }
@@ -58,7 +63,7 @@ internal class OppdaterPersonCommand(
 
     override fun execute() {
         oppgaver.forEach { it.execute() }
-        if (oppgaver.all { it.ferdigstilt != null }) {
+        if (oppgaver.none { it.trengerExecute() }) {
             ferdigstilt = LocalDateTime.now()
         }
     }

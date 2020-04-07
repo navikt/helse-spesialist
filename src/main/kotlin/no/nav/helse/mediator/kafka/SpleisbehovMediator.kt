@@ -9,7 +9,6 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -38,13 +37,14 @@ internal class SpleisbehovMediator(
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            nåværendeOppgave = null
         )
         spleisbehov.execute()
 //        spleisbehov.behov()?.also { behov ->
 //            context.send(behov.fødselsnummer, behov.toJson())
 //        }
-        spleisbehovDao.insertBehov(spleisbehov.id, spleisbehov.toJson())
+        spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson())
     }
 
     internal fun håndter(
@@ -82,6 +82,7 @@ internal class SpleisbehovMediator(
         vedtakDao,
         snapshotDao,
         speilSnapshotRestDao,
-        oppgaveDao
+        oppgaveDao,
+        requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
     )
 }

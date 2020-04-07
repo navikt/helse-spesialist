@@ -1,32 +1,40 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.Løsningstype
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class OpprettVedtakCommand(
-    private val spleisbehov: Spleisbehov,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
-    private val speilSnapshotRestDao: SpeilSnapshotRestDao
-) : Command() {
-    override var ferdigstilt: LocalDateTime? = null
-    private val log = LoggerFactory.getLogger(OpprettVedtakCommand::class.java)
+    private val speilSnapshotRestDao: SpeilSnapshotRestDao,
+    private val fødselsnummer: String,
+    private val orgnummer: String,
+    private val vedtaksperiodeId: UUID,
+    private val periodeFom: LocalDate,
+    private val periodeTom: LocalDate,
+    behovId: UUID,
+    ferdigstilt: LocalDateTime? = null
+) : Command(behovId, ferdigstilt, Løsningstype.System) {
+
     override fun execute() {
-        log.info("Henter snapshot for vedtaksperiode: ${spleisbehov.vedtaksperiodeId}")
-        val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(spleisbehov.fødselsnummer)
+        log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
+        val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
-        val personRef = requireNotNull(personDao.findPerson(spleisbehov.fødselsnummer.toLong()))
-        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiver(spleisbehov.orgnummer.toLong()))
+        val personRef = requireNotNull(personDao.findPerson(fødselsnummer.toLong()))
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiver(orgnummer.toLong()))
         val id = vedtakDao.insertVedtak(
-            vedtaksperiodeId = spleisbehov.vedtaksperiodeId,
-            fom = spleisbehov.periodeFom,
-            tom = spleisbehov.periodeTom,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = periodeFom,
+            tom = periodeTom,
             personRef = personRef,
             arbeidsgiverRef = arbeidsgiverRef,
             speilSnapshotRef = snapshotId

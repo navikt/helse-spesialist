@@ -1,25 +1,30 @@
 package no.nav.helse.modell.oppgave
 
+import no.nav.helse.Løsningstype
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class OpprettPersonCommand(
     private val spleisbehov: Spleisbehov,
-    private val personDao: PersonDao
-) : Command() {
-    override var ferdigstilt: LocalDateTime? = null
+    private val personDao: PersonDao,
+    private val fødselsnummer: String,
+    private val aktørId: String,
+    behovId: UUID,
+    ferdigstilt: LocalDateTime? = null
+) : Command(behovId, ferdigstilt, Løsningstype.System) {
     private var navnId: Int? = null
     private var enhetId: Int? = null
 
     override fun execute() {
-        if (personDao.findPerson(spleisbehov.fødselsnummer.toLong()) != null) {
+        if (personDao.findPerson(fødselsnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else if (navnId != null && enhetId != null) {
-            personDao.insertPerson(spleisbehov.fødselsnummer.toLong(), spleisbehov.aktørId.toLong(), navnId!!, enhetId!!)
+            personDao.insertPerson(fødselsnummer.toLong(), aktørId.toLong(), navnId!!, enhetId!!)
             ferdigstilt = LocalDateTime.now()
         } else {
             spleisbehov.håndter(Behovtype.HentPersoninfo)
