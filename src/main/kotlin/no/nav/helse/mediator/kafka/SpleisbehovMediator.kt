@@ -36,6 +36,7 @@ internal class SpleisbehovMediator(
                 keyValue("spleisBehovId", godkjenningMessage.id),
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
             )
+            return
         }
         val spleisbehov = Spleisbehov(
             id = godkjenningMessage.id,
