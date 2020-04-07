@@ -30,7 +30,7 @@ internal class SpleisbehovMediator(
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage) {
-        if (spleisbehovDao.findBehov(godkjenningMessage.id) == null) {
+        if (spleisbehovDao.findBehov(godkjenningMessage.id) != null) {
             log.warn(
                 "Mottok duplikat godkjenning behov, {}, {}",
                 keyValue("spleisBehovId", godkjenningMessage.id),
