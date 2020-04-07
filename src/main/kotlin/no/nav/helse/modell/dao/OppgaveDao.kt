@@ -51,10 +51,10 @@ class OppgaveDao(private val dataSource: DataSource) {
         session.run(queryOf("SELECT * FROM oppgave WHERE behov_id=? AND ferdigstilt IS NULL", behovId)
             .map {
                 OppgaveDto(
-                    it.long("id"),
-                    it.localDateTimeOrNull("ferdigstilt"),
-                    it.string("type"),
-                    UUID.fromString(it.string("behov_id"))
+                    id = it.long("id"),
+                    ferdigstilt = it.localDateTimeOrNull("ferdigstilt"),
+                    oppgaveType = it.string("type"),
+                    behovId = UUID.fromString(it.string("behov_id"))
                 )
             }
             .asSingle)
