@@ -77,8 +77,8 @@ internal class Spleisbehov(
                 log.info("Oppgave ${it::class.simpleName} ferdigstilt. Nåværende oppgave er $nåværendeOppgavetype")
                 it.oppdaterFerdigstilt(oppgaveDao)
             }
-        log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}")
         current().persister(oppgaveDao)
+        log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}")
     }
 
     internal fun håndter(behovtype: Behovtype) {
@@ -129,7 +129,8 @@ internal class Spleisbehov(
 
     companion object {
         fun restore(
-            id: UUID, data: String,
+            id: UUID,
+            data: String,
             personDao: PersonDao,
             arbeidsgiverDao: ArbeidsgiverDao,
             vedtakDao: VedtakDao,
