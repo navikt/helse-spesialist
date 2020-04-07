@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class GodkjenningMessage(
     val id: UUID,
@@ -25,14 +25,15 @@ internal class GodkjenningMessage(
         private val spleisbehovMediator: SpleisbehovMediator
     ) : River.PacketListener {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+
         init {
             River(rapidsConnection).apply {
                 validate {
                     it.requireAll("@behov", listOf("Godkjenning"))
-                    it.requireKey("fødselsnummer")
-                    it.requireKey("aktørId")
-                    it.requireKey("organisasjonsnummer")
-                    it.requireKey("vedtaksperiodeId")
+                    it.requireKey(
+                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
+                        "periodeTom"
+                    )
                 }
             }.register(this)
         }
