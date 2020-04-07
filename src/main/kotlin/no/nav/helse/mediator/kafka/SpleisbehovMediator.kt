@@ -67,7 +67,8 @@ internal class SpleisbehovMediator(
     private fun publiserBehov(spleisbehov: Spleisbehov) {
         spleisbehov.behov()?.also { behov ->
             log.info(
-                "Sender ut behov for {}, {}",
+                "Sender ut behov for {}, {}, {}",
+                keyValue("vedtaksperiodeId", behov.vedtaksperiodeId),
                 keyValue("spleisBehovId", behov.spleisBehovId),
                 keyValue("behov", behov.typer.toString())
             )

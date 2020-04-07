@@ -109,7 +109,8 @@ internal class Spleisbehov(
             typer = typer,
             fødselsnummer = fødselsnummer,
             orgnummer = orgnummer,
-            spleisBehovId = id
+            spleisBehovId = id,
+            vedtaksperiodeId = vedtaksperiodeId
         )
     }
 
