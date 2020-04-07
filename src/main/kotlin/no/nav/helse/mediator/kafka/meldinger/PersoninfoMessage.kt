@@ -33,7 +33,7 @@ internal class PersoninfoMessage(
             River(rapidsConnection).apply {
                 validate {
                     it.requireAll("@behov", Behovtype.HentEnhet, Behovtype.HentPersoninfo)
-                    it.requireKey("@løsning")
+                    it.requireKey("@løsning", "spleisBehovId")
                     it.requireValue("@final", true)
                 }
             }.register(this)
