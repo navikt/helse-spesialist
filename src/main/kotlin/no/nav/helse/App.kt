@@ -53,13 +53,14 @@ fun main(): Unit = runBlocking {
 
     RapidApplication.create(System.getenv()).apply {
         val spleisbehovMediator = SpleisbehovMediator(
-            spleisbehovDao,
-            personDao,
-            arbeidsgiverDao,
-            vedtakDao,
-            snapshotDao,
-            speilSnapshotRestDao,
-            oppgaveDao
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            rapidsConnection = this
         )
 
         GodkjenningMessage.Factory(

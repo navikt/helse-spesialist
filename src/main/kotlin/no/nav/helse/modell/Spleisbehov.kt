@@ -102,7 +102,7 @@ internal class Spleisbehov(
     private fun current() = oppgaver.first { it.oppgavetype == nåværendeOppgavetype }
 
 
-    private fun behov() = behovstyper.takeIf { it.isNotEmpty() }?.let { typer ->
+    internal fun behov() = behovstyper.takeIf { it.isNotEmpty() }?.let { typer ->
         Behov(
             typer = typer,
             fødselsnummer = fødselsnummer,

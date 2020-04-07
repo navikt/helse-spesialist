@@ -9,6 +9,7 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -19,7 +20,8 @@ internal class SpleisbehovMediator(
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
-    private val oppgaveDao: OppgaveDao
+    private val oppgaveDao: OppgaveDao,
+    private val rapidsConnection: RapidsConnection
 ) {
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
 
@@ -41,10 +43,14 @@ internal class SpleisbehovMediator(
             nåværendeOppgave = null
         )
         spleisbehov.execute()
-//        spleisbehov.behov()?.also { behov ->
-//            context.send(behov.fødselsnummer, behov.toJson())
-//        }
+        publiserBehov(spleisbehov)
         spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson())
+    }
+
+    private fun publiserBehov(spleisbehov: Spleisbehov) {
+        spleisbehov.behov()?.also { behov ->
+            rapidsConnection.publish(behov.fødselsnummer, behov.toJson())
+        }
     }
 
     internal fun håndter(
@@ -61,6 +67,7 @@ internal class SpleisbehovMediator(
         behandlendeEnhet?.also(spleisbehov::fortsett)
         hentPersoninfoLøsning?.also(spleisbehov::fortsett)
         spleisbehov.execute()
+        publiserBehov(spleisbehov)
         spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
     }
 
@@ -73,6 +80,7 @@ internal class SpleisbehovMediator(
         val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
         spleisbehov.fortsett(løsning)
         spleisbehov.execute()
+        publiserBehov(spleisbehov)
         spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
     }
 

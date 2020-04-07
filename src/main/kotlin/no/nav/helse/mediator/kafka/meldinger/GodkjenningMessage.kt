@@ -2,8 +2,11 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -21,9 +24,10 @@ internal class GodkjenningMessage(
         rapidsConnection: RapidsConnection,
         private val spleisbehovMediator: SpleisbehovMediator
     ) : River.PacketListener {
+        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
         init {
             River(rapidsConnection).apply {
-                validate { it ->
+                validate {
                     it.requireAll("@behov", listOf("Godkjenning"))
                     it.requireKey("fødselsnummer")
                     it.requireKey("aktørId")
@@ -44,6 +48,10 @@ internal class GodkjenningMessage(
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
             spleisbehovMediator.håndter(behov)
+        }
+
+        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+            sikkerLogg.info(problems.toExtendedReport())
         }
     }
 }
