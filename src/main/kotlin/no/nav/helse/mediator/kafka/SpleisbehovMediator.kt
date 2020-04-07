@@ -1,8 +1,12 @@
 package no.nav.helse.mediator.kafka
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.Spleisbehov
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.SpleisbehovDao
 import no.nav.helse.modell.dao.VedtakDao
@@ -11,7 +15,7 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class SpleisbehovMediator(
     private val spleisbehovDao: SpleisbehovDao,
@@ -42,6 +46,11 @@ internal class SpleisbehovMediator(
             oppgaveDao = oppgaveDao,
             nåværendeOppgave = null
         )
+        log.info(
+            "Mottok Godkjenning behov med {}, {}",
+            keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
+            keyValue("spleisBehovId", godkjenningMessage.id)
+        )
         spleisbehov.execute()
         publiserBehov(spleisbehov)
         spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson())
@@ -49,6 +58,11 @@ internal class SpleisbehovMediator(
 
     private fun publiserBehov(spleisbehov: Spleisbehov) {
         spleisbehov.behov()?.also { behov ->
+            log.info(
+                "Sender ut behov for {}, {}",
+                keyValue("spleisBehovId", behov.spleisBehovId),
+                keyValue("behov", behov.typer.toString())
+            )
             rapidsConnection.publish(behov.fødselsnummer, behov.toJson())
         }
     }
@@ -58,6 +72,7 @@ internal class SpleisbehovMediator(
         behandlendeEnhet: HentEnhetLøsning?,
         hentPersoninfoLøsning: HentPersoninfoLøsning?
     ) {
+        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
         val spleisbehovJson = spleisbehovDao.findBehov(spleisbehovId)
         if (spleisbehovJson == null) {
             log.error("Fant ikke behov med id $spleisbehovId")
@@ -72,6 +87,7 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
+        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
         val spleisbehovJson = spleisbehovDao.findBehov(spleisbehovId)
         if (spleisbehovJson == null) {
             log.error("Fant ikke behov med id $spleisbehovId")

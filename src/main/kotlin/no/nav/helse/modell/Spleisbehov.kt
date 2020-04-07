@@ -66,6 +66,7 @@ internal class Spleisbehov(
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
     internal fun execute() {
+        val førsteOppgave = current()
         behovstyper.clear()
         oppgaver.asSequence()
             .dropWhile { it.oppgavetype != nåværendeOppgavetype }
@@ -76,6 +77,7 @@ internal class Spleisbehov(
                 log.info("Oppgave ${it::class.simpleName} ferdigstilt. Nåværende oppgave er $nåværendeOppgavetype")
                 it.oppdaterFerdigstilt(oppgaveDao)
             }
+        log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}")
         current().persister(oppgaveDao)
     }
 
