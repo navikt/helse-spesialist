@@ -20,6 +20,7 @@ import no.nav.helse.modell.oppgave.OpprettArbeidsgiverCommand
 import no.nav.helse.modell.oppgave.OpprettPersonCommand
 import no.nav.helse.modell.oppgave.OpprettVedtakCommand
 import no.nav.helse.modell.oppgave.SaksbehandlerGodkjenningCommand
+import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -115,7 +116,7 @@ internal class Spleisbehov(
     }
 
     fun toJson() =
-        jacksonObjectMapper().writeValueAsString(
+        objectMapper.writeValueAsString(
             SpleisbehovDTO(
                 id,
                 fødselsnummer,
@@ -139,7 +140,7 @@ internal class Spleisbehov(
             oppgaveDao: OppgaveDao,
             nåværendeOppgave: OppgaveDto
         ): Spleisbehov {
-            val spleisbehovDTO = jacksonObjectMapper().readValue<SpleisbehovDTO>(data)
+            val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
             return Spleisbehov(
                 id = id,
                 fødselsnummer = spleisbehovDTO.fødselsnummer,
