@@ -30,6 +30,7 @@ internal class GodkjenningMessage(
             River(rapidsConnection).apply {
                 validate {
                     it.requireAll("@behov", listOf("Godkjenning"))
+                    it.forbid("@løsning")
                     it.requireKey(
                         "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
                         "periodeTom"
