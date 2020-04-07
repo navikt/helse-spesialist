@@ -11,9 +11,6 @@ import no.nav.helse.rapids_rivers.River
 import java.util.*
 
 internal class PersoninfoMessage(
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
-    val vedtaksperiodeId: String,
     val spleisbehovId: UUID,
     val enhetNr: String,
     val fornavn: String,
@@ -36,23 +33,17 @@ internal class PersoninfoMessage(
             River(rapidsConnection).apply {
                 validate {
                     it.requireAll("@behov", Behovtype.HentEnhet, Behovtype.HentPersoninfo)
-                    it.requireKey("fødselsnummer")
-                    it.requireKey("organisasjonsnummer")
-                    it.requireKey("vedtaksperiodeId")
-                    it.requireKey("HentNavn")
-                    it.requireValue("final", true)
+                    it.requireKey("@løsning")
+                    it.requireValue("@final", true)
                 }
             }.register(this)
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val hentEnhet = packet["HentEnhet"].asText()
-            val hentPersoninfo = packet["HentNavn"]
+            val hentEnhet = packet["@løsning"]["HentEnhet"].asText()
+            val hentPersoninfo = packet["@løsning"]["HentNavn"]
 
             val behov = PersoninfoMessage(
-                fødselsnummer = packet["fødselsnummer"].asText(),
-                organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-                vedtaksperiodeId = packet["vedtaksperiodeId"].asText(),
                 spleisbehovId = UUID.fromString(packet["spleisBehovId"].asText()),
                 enhetNr = hentEnhet,
                 fornavn = hentPersoninfo["fornavn"].asText(),
