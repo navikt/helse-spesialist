@@ -52,7 +52,7 @@ class OppgaveDao(private val dataSource: DataSource) {
             .map {
                 OppgaveDto(
                     it.long("id"),
-                    it.localDateTime("ferdigstilt"),
+                    it.localDateTimeOrNull("ferdigstilt"),
                     it.string("type"),
                     UUID.fromString(it.string("behov_id"))
                 )
