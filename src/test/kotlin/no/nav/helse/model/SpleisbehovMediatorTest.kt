@@ -2,13 +2,20 @@ package no.nav.helse.model
 
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
+import no.nav.helse.modell.dao.SpleisbehovDao
+import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.rapids_rivers.inMemoryRapid
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -47,7 +54,8 @@ internal class SpleisbehovMediatorTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            rapidsConnection = inMemoryRapid { }
         )
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
