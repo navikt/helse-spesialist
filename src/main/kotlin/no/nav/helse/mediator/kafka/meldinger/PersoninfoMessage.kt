@@ -41,7 +41,7 @@ internal class PersoninfoMessage(
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hentEnhet = packet["@løsning"]["HentEnhet"].asText()
-            val hentPersoninfo = packet["@løsning"]["HentNavn"]
+            val hentPersoninfo = packet["@løsning"]["HentPersoninfo"]
 
             val behov = PersoninfoMessage(
                 spleisbehovId = UUID.fromString(packet["spleisBehovId"].asText()),
