@@ -47,7 +47,10 @@ abstract class Command(
 
     fun persister(oppgaveDao: OppgaveDao) {
         val oppgave = oppgaveDao.findOppgave(behovId, oppgavetype)
-        require(oppgave == null) { "Prøvde å persistere en oppgave som allerede ligger i databasen" }
+        if (oppgave == null) {
+            log.warn("Prøvde å persistere en oppgave som allerede ligger i databasen")
+            return
+        }
         oppgaveDao.insertOppgave(behovId, oppgavetype, løsningstype)
     }
 }
