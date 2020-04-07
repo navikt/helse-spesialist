@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
 import java.util.*
 
 private val objectMapper = jacksonObjectMapper()
@@ -13,6 +14,7 @@ class Behov(val typer: List<Behovtype>, val fødselsnummer: String, val orgnumme
     fun toJson() = objectMapper.writeValueAsString(mapOf(
         "@behov" to typer,
         "@id" to UUID.randomUUID(),
+        "@opprettet" to LocalDateTime.now(),
         "spleisBehovId" to spleisBehovId,
         "fødselsnummer" to fødselsnummer,
         "orgnummer" to orgnummer
