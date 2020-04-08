@@ -18,12 +18,13 @@ internal class OppdatertArbeidsgiverCommand(
 ) : Command(behovId, ferdigstilt, Løsningstype.System) {
 
     override fun execute() {
-        val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer.toLong())
+        ferdigstilt = LocalDateTime.now()
+        /*val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer.toLong())
         if (sistOppdatert.plusMonths(1) < LocalDate.now()) {
             spleisbehov.håndter(Behovtype.HentArbeidsgiverNavn)
         } else {
             ferdigstilt = LocalDateTime.now()
-        }
+        }*/
     }
 
     override fun fortsett(løsning: ArbeidsgiverLøsning) {

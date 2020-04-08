@@ -1,7 +1,6 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.Løsningstype
-import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
@@ -20,12 +19,13 @@ internal class OpprettArbeidsgiverCommand(
         if (arbeidsgiverDao.findArbeidsgiver(orgnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else {
-            spleisbehov.håndter(Behovtype.HentArbeidsgiverNavn)
+            arbeidsgiverDao.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")
+            ferdigstilt = LocalDateTime.now()
+            //spleisbehov.håndter(Behovtype.HentArbeidsgiverNavn)
         }
     }
 
     override fun fortsett(løsning: ArbeidsgiverLøsning) {
-        arbeidsgiverDao.insertArbeidsgiver(orgnummer.toLong(), løsning.navn)
-        ferdigstilt = LocalDateTime.now()
+        // TODO: Faktisk hente arbeidsgiver info
     }
 }

@@ -4,6 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class ArbeidsgiverDao(private val dataSource: DataSource) {
@@ -19,7 +20,11 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             val navnRef = requireNotNull(
                 session.run(
-                    queryOf("INSERT INTO arbeidsgiver_navn(navn) VALUES(?);", navn)
+                    queryOf(
+                        "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
+                        navn,
+                        LocalDateTime.now().minusYears(1)
+                    )
                         .asUpdateAndReturnGeneratedKey
                 )
             )
@@ -43,9 +48,10 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
     fun updateNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                "UPDATE arbeidsgiver_navn SET navn=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
+                "UPDATE arbeidsgiver_navn SET navn=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?, navn_oppdatert=?);",
                 navn,
-                orgnummer
+                orgnummer,
+                LocalDateTime.now().minusYears(1)
             ).asUpdate
         )
     }
