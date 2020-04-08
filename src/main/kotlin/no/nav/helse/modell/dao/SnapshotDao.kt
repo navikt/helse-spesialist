@@ -1,5 +1,6 @@
 package no.nav.helse.modell.dao
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -17,4 +18,16 @@ class SnapshotDao(private val dataSource: DataSource) {
                 ).asUpdateAndReturnGeneratedKey
             )
         }?.toInt())
+
+    internal fun findSpeilSnapshot(
+        id: Long
+    ): String? =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT * FROM data WHERE id=?;",
+                    id
+                ).map { it.string("data") }.asSingle
+            )
+        }
 }

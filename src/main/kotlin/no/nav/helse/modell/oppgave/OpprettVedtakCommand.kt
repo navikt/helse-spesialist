@@ -1,11 +1,9 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.Løsningstype
-import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -29,8 +27,8 @@ internal class OpprettVedtakCommand(
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
-        val personRef = requireNotNull(personDao.findPerson(fødselsnummer.toLong()))
-        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiver(orgnummer.toLong()))
+        val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
         val id = vedtakDao.insertVedtak(
             vedtaksperiodeId = vedtaksperiodeId,
             fom = periodeFom,

@@ -16,7 +16,7 @@ internal class OpprettArbeidsgiverCommand(
 ) : Command(behovId, ferdigstilt, Løsningstype.System) {
 
     override fun execute() {
-        if (arbeidsgiverDao.findArbeidsgiver(orgnummer.toLong()) != null) {
+        if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else {
             arbeidsgiverDao.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")

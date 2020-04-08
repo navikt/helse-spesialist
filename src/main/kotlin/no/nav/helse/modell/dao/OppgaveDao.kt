@@ -1,5 +1,6 @@
 package no.nav.helse.modell.dao
 
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -48,15 +49,29 @@ class OppgaveDao(private val dataSource: DataSource) {
         }
 
     fun findNåværendeOppgave(behovId: UUID): OppgaveDto? = using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT * FROM oppgave WHERE behov_id=? AND ferdigstilt IS NULL", behovId)
-            .map {
-                OppgaveDto(
-                    id = it.long("id"),
-                    ferdigstilt = it.localDateTimeOrNull("ferdigstilt"),
-                    oppgaveType = it.string("type"),
-                    behovId = UUID.fromString(it.string("behov_id"))
-                )
-            }
-            .asSingle)
+        session.run(
+            queryOf("SELECT * FROM oppgave WHERE behov_id=? AND ferdigstilt IS NULL", behovId)
+                .map(::oppgaveDto)
+                .asSingle
+        )
+    }
+
+    fun findSaksbehandlerOppgaver(): List<OppgaveDto>? = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf("SELECT * FROM oppgave WHERE løsningstype='Saksbehandler'::løsningstype_type AND ferdigstilt IS NULL AND vedtak_ref IS NOT NULL")
+                .map(::oppgaveDto)
+                .asList
+        )
+    }
+
+    private fun oppgaveDto(it: Row): OppgaveDto {
+        return OppgaveDto(
+            id = it.long("id"),
+            ferdigstilt = it.localDateTimeOrNull("ferdigstilt"),
+            oppgaveType = it.string("type"),
+            behovId = UUID.fromString(it.string("behov_id")),
+            løsningstype = Løsningstype.valueOf(it.string("løsningstype")),
+            vedtaksref = it.long("vedtak_ref")
+        )
     }
 }

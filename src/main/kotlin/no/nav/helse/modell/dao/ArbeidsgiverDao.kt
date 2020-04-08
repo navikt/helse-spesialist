@@ -3,12 +3,13 @@ package no.nav.helse.modell.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.modell.dto.ArbeidsgiverDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class ArbeidsgiverDao(private val dataSource: DataSource) {
-    fun findArbeidsgiver(orgnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
+    fun findArbeidsgiverByOrgnummer(orgnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer)
                 .map { it.int("id") }
@@ -44,6 +45,21 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
             }.asSingle
         )
     })
+
+
+    fun findArbeidsgiver(arbeidsgiverId: Long): ArbeidsgiverDto? = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "SELECT an.navn, a.orgnummer FROM arbeidsgiver AS a JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id WHERE a.id=?;",
+                arbeidsgiverId
+            ).map {
+                ArbeidsgiverDto(
+                    organisasjonsnummer = it.string("orgnummer"),
+                    navn = it.string("navn")
+                )
+            }.asSingle
+        )
+    }
 
     fun updateNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) { session ->
         session.run(

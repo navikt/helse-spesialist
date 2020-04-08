@@ -10,7 +10,6 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.PersonEgenskap
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -70,7 +69,7 @@ internal class SpleisbehovTest {
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
 
-        assertNotNull(personDao.findPerson(12345))
+        assertNotNull(personDao.findPersonByFødselsnummer(12345))
     }
 
     @Test
@@ -99,7 +98,7 @@ internal class SpleisbehovTest {
         spleisBehov.execute()
         spleisBehov.fortsett(HentEnhetLøsning("3117"))
 
-        assertNotNull(personDao.findPerson(13245))
+        assertNotNull(personDao.findPersonByFødselsnummer(13245))
         assertEquals(LocalDate.now(), personDao.findEnhetSistOppdatert(13245))
     }
 
@@ -128,7 +127,7 @@ internal class SpleisbehovTest {
         spleisBehov.execute()
 
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
-        assertNotNull(arbeidsgiverDao.findArbeidsgiver(98765432))
+        assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(98765432))
     }
 
     @Test

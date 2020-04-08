@@ -1,0 +1,13 @@
+package no.nav.helse.modell.dto
+
+import java.time.LocalDate
+import java.util.*
+
+data class NavnDto(val fornavn: String, val mellomnavn: String?, val etternavn: String)
+data class SaksbehandleroppgaveDto(
+    val vedtaksperiodeId: UUID,
+    val periodeFom: LocalDate,
+    val periodeTom: LocalDate,
+    val navn: NavnDto,
+    val fødselsnummer: String
+)

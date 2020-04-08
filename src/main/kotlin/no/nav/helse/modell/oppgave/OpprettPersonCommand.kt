@@ -21,7 +21,7 @@ internal class OpprettPersonCommand(
     private var enhetId: Int? = null
 
     override fun execute() {
-        if (personDao.findPerson(fødselsnummer.toLong()) != null) {
+        if (personDao.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
             ferdigstilt = LocalDateTime.now()
         } else if (navnId != null && enhetId != null) {
             personDao.insertPerson(fødselsnummer.toLong(), aktørId.toLong(), navnId!!, enhetId!!)

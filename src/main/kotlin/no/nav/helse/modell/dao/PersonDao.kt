@@ -3,14 +3,31 @@ package no.nav.helse.modell.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.modell.dto.NavnDto
+import no.nav.helse.modell.dto.PersonDto
 import no.nav.helse.modell.løsning.PersonEgenskap
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
-    internal fun findPerson(fødselsnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
+    internal fun findPersonByFødselsnummer(fødselsnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)
                 .map { it.int("id") }
+                .asSingle
+        )
+    }
+
+    internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf("SELECT p.fødselsnummer, n.fornavn, n.mellomnavn, n.etternavn FROM person AS p JOIN person_navn AS n ON p.navn_ref = n.id WHERE p.id=?;", id)
+                .map { PersonDto(
+                    fødselsnummer = it.long("fødselsnummer").toFødselsnummer(),
+                    navn = NavnDto(
+                        fornavn = it.string("fornavn"),
+                        mellomnavn = it.stringOrNull("mellomnavn"),
+                        etternavn = it.string("etternavn")
+                    )
+                ) }
                 .asSingle
         )
     }
@@ -60,16 +77,17 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findPersoninfoSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf(
-                "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
-                fødselsnummer
-            ).map {
-                it.sqlDate("personinfo_oppdatert").toLocalDate()
-            }.asSingle
-        )
-    })
+    internal fun findPersoninfoSistOppdatert(fødselsnummer: Long) =
+        requireNotNull(using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
+                    fødselsnummer
+                ).map {
+                    it.sqlDate("personinfo_oppdatert").toLocalDate()
+                }.asSingle
+            )
+        })
 
     internal fun findEnhetSistOppdatert(fødselsnummer: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
@@ -107,5 +125,7 @@ class PersonDao(private val dataSource: DataSource) {
             }
 
         }
+
+    private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 
 }
