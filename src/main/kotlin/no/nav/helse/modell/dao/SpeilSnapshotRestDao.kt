@@ -8,6 +8,7 @@ import io.ktor.client.statement.HttpStatement
 import io.ktor.http.ContentType
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AccessTokenClient
+import org.slf4j.LoggerFactory
 
 internal class SpeilSnapshotRestDao(
     private val httpClient: HttpClient,
@@ -18,6 +19,7 @@ internal class SpeilSnapshotRestDao(
     internal fun hentSpeilSpapshot(aktørId: String): String {
         return runBlocking {
             val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
+            LoggerFactory.getLogger("tjenestekall").info("Kaller spleis api med acessToken=$accessToken")
             httpClient.get<HttpStatement>("http://spleis-api/api/person/$aktørId") {
                 header("Authorization", "Bearer $accessToken")
                 accept(ContentType.Application.Json)
