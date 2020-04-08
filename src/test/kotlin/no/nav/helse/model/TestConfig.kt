@@ -57,7 +57,7 @@ internal fun accessTokenClient() = AccessTokenClient(
         }
         engine {
             addHandler {
-                respond(content = """{"access_token": "token", "expires_on": "0"}""", headers = headersOf("Content-Type" to listOf("application/json")))
+                respond(content = """{"access_token": "token", "expires_in": 3600}""", headers = headersOf("Content-Type" to listOf("application/json")))
             }
         }
     }
