@@ -12,7 +12,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PersoninfoMessage
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
+import no.nav.helse.modell.dao.SpleisbehovDao
+import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import java.net.ProxySelector
@@ -38,7 +44,11 @@ fun main(): Unit = runBlocking {
                 setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
             }
         }
-        install(JsonFeature) { serializer = JacksonSerializer() }
+        install(JsonFeature) {
+            serializer = JacksonSerializer {
+                registerModule(JavaTimeModule())
+            }
+        }
     }
     val spleisClient = HttpClient {
         install(JsonFeature) { serializer = JacksonSerializer() }
