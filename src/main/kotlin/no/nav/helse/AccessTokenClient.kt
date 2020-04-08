@@ -38,7 +38,7 @@ class AccessTokenClient(
                         method = HttpMethod.Post
                         body = FormDataContent(Parameters.build {
                             append("client_id", clientId)
-                            append("resource", resource)
+                            append("scope", "api://$resource/.default")
                             append("grant_type", "client_credentials")
                             append("client_secret", clientSecret)
                         })
