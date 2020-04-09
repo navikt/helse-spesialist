@@ -25,7 +25,7 @@ class SnapshotDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM data WHERE id=?;",
+                    "SELECT data FROM speil_snapshot WHERE id=?;",
                     id
                 ).map { it.string("data") }.asSingle
             )
