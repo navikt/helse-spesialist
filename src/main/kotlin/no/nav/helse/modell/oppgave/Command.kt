@@ -1,6 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.Løsningstype
+import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
@@ -14,10 +15,12 @@ import java.util.UUID
 abstract class Command(
     protected val behovId: UUID,
     protected var ferdigstilt: LocalDateTime?,
-    private val løsningstype: Løsningstype
+    private val løsningstype: Løsningstype,
+    private val parent: Command?
 ) {
+    private var vedtaksperiodeRef: Long? = null
     protected val log: Logger = LoggerFactory.getLogger("command")
-    internal open val oppgaver: List<Command> = listOf()
+    internal open val oppgaver: Set<Command> = setOf()
     internal val oppgavetype: String = requireNotNull(this::class.simpleName)
     internal abstract fun execute()
     internal open fun fortsett(hentEnhetLøsning: HentEnhetLøsning) {
@@ -38,6 +41,20 @@ abstract class Command(
 
     internal fun trengerExecute() = this.ferdigstilt == null
 
+    private fun findRootCommand(): Command {
+        var current = this
+        while (current.parent != null) {
+            current = current.parent!!
+        }
+        return current
+    }
+
+    internal fun oppgaver(): Set<Command> = (oppgaver.flatMap { it.oppgaver() } + this).toSet()
+
+    protected fun oppdaterVedtakRef(vedtakRef: Int) {
+        (findRootCommand() as Spleisbehov).vedtakRef = vedtakRef
+    }
+
     fun oppdaterFerdigstilt(oppgaveDao: OppgaveDao) {
         val oppgave = oppgaveDao.findOppgave(behovId, oppgavetype)
         if (oppgave != null) {
@@ -45,13 +62,13 @@ abstract class Command(
         }
     }
 
-    fun persister(oppgaveDao: OppgaveDao) {
+    internal fun persister(oppgaveDao: OppgaveDao, vedtakRef: Int?) {
         val oppgave = oppgaveDao.findOppgave(behovId, oppgavetype)
         if (oppgave != null) {
             log.warn("Prøvde å persistere en oppgave som allerede ligger i databasen")
             return
         }
-        oppgaveDao.insertOppgave(behovId, oppgavetype, løsningstype)
+        oppgaveDao.insertOppgave(behovId, oppgavetype, løsningstype, vedtakRef)
     }
 }
 

@@ -56,6 +56,7 @@ internal class SpleisbehovTest {
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = "123455",
             orgnummer = "98765432",
+            vedtakRef = null,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
@@ -83,6 +84,7 @@ internal class SpleisbehovTest {
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = "13245",
             orgnummer = "98765432",
+            vedtakRef = null,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
@@ -113,6 +115,7 @@ internal class SpleisbehovTest {
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = "123455",
             orgnummer = "98765432",
+            vedtakRef = null,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
@@ -141,6 +144,7 @@ internal class SpleisbehovTest {
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = "123455",
             orgnummer = "98765433",
+            vedtakRef = null,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
@@ -157,5 +161,7 @@ internal class SpleisbehovTest {
         spleisBehov.execute()
 
         assertNotNull(vedtakDao.findVedtaksperiode(vedtaksperiodeId))
+        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        assertFalse(saksbehandlerOppgaver.isNullOrEmpty())
     }
 }

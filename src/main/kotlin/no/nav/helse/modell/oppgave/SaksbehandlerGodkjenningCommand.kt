@@ -7,8 +7,9 @@ import java.util.UUID
 
 internal class SaksbehandlerGodkjenningCommand(
     behovId: UUID,
+    parent: Command,
     ferdigstilt: LocalDateTime? = null
-) : Command(behovId, ferdigstilt, Løsningstype.Saksbehandler) {
+) : Command(behovId, ferdigstilt, Løsningstype.Saksbehandler, parent) {
     override fun execute() {}
 
     override fun fortsett(saksbehandlerLøsning: SaksbehandlerLøsning) {

@@ -46,6 +46,7 @@ internal class SpleisbehovMediator(
             vedtaksperiodeId = godkjenningMessage.vedtaksperiodeId,
             aktørId = godkjenningMessage.aktørId,
             orgnummer = godkjenningMessage.organisasjonsnummer,
+            vedtakRef = null,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,

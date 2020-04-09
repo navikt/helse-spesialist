@@ -12,14 +12,15 @@ import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) {
 
-    fun insertOppgave(behovId: UUID, oppgavetype: String, løsningstype: Løsningstype) =
+    fun insertOppgave(behovId: UUID, oppgavetype: String, løsningstype: Løsningstype, vedtakRef: Int?) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO oppgave(behov_id, type, løsningstype) VALUES(?, ?, CAST(? as løsningstype_type));",
+                    "INSERT INTO oppgave(behov_id, type, løsningstype, vedtak_ref) VALUES(?, ?, CAST(? as løsningstype_type), ?);",
                     behovId,
                     oppgavetype,
-                    løsningstype.name
+                    løsningstype.name,
+                    vedtakRef
                 ).asUpdate
             )
         }

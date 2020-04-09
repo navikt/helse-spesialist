@@ -20,8 +20,9 @@ internal class OpprettVedtakCommand(
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
     behovId: UUID,
+    parent: Command,
     ferdigstilt: LocalDateTime? = null
-) : Command(behovId, ferdigstilt, Løsningstype.System) {
+) : Command(behovId, ferdigstilt, Løsningstype.System, parent) {
 
     override fun execute() {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
@@ -37,6 +38,9 @@ internal class OpprettVedtakCommand(
             arbeidsgiverRef = arbeidsgiverRef,
             speilSnapshotRef = snapshotId
         )
+
+        oppdaterVedtakRef(id)
+
         ferdigstilt = LocalDateTime.now()
     }
 

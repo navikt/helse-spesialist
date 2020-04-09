@@ -15,14 +15,15 @@ internal class OppdaterPersonCommand(
     private val personDao: PersonDao,
     private val fødselsnummer: String,
     behovId: UUID,
+    parent: Command,
     ferdigstilt: LocalDateTime? = null
-) : Command(behovId, ferdigstilt, Løsningstype.System) {
-    override val oppgaver: List<Command> = listOf(
+) : Command(behovId, ferdigstilt, Løsningstype.System, parent) {
+    override val oppgaver: Set<Command> = setOf(
         HentPersoninfoCommand(),
         HentEnhetCommand()
     )
 
-    private inner class HentPersoninfoCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System) {
+    private inner class HentPersoninfoCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System, this@OppdaterPersonCommand) {
         override fun execute() {
             val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer.toLong())
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
@@ -43,7 +44,7 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private inner class HentEnhetCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System) {
+    private inner class HentEnhetCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System, this@OppdaterPersonCommand) {
         override fun execute() {
             val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer.toLong())
             if (sistOppdatert.plusDays(5) < LocalDate.now()) {

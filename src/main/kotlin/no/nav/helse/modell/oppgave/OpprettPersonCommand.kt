@@ -15,8 +15,9 @@ internal class OpprettPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
     behovId: UUID,
+    parent: Command,
     ferdigstilt: LocalDateTime? = null
-) : Command(behovId, ferdigstilt, Løsningstype.System) {
+) : Command(behovId, ferdigstilt, Løsningstype.System, parent) {
     private var navnId: Int? = null
     private var enhetId: Int? = null
 

@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.Løsningstype
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.dao.PersonDao
@@ -34,19 +35,19 @@ internal class Spleisbehov(
     private val aktørId: String,
     private val orgnummer: String,
     nåværendeOppgave: OppgaveDto?,
+    internal var vedtakRef: Int?,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao,
     private val oppgaveDao: OppgaveDao
-) {
-    private val log = LoggerFactory.getLogger(Spleisbehov::class.java)
-    private val oppgaver = setOf(
-        OpprettPersonCommand(this, personDao, fødselsnummer, aktørId, id),
-        OppdaterPersonCommand(this, personDao, fødselsnummer, id),
-        OpprettArbeidsgiverCommand(this, arbeidsgiverDao, orgnummer, id),
-        OppdatertArbeidsgiverCommand(this, arbeidsgiverDao, orgnummer, id),
+) : Command(id, null, Løsningstype.System, null) {
+    override val oppgaver = setOf(
+        OpprettPersonCommand(this, personDao, fødselsnummer, aktørId, id, this),
+        OppdaterPersonCommand(this, personDao, fødselsnummer, id, this),
+        OpprettArbeidsgiverCommand(this, arbeidsgiverDao, orgnummer, id, this),
+        OppdatertArbeidsgiverCommand(this, arbeidsgiverDao, orgnummer, id, this),
         OpprettVedtakCommand(
             personDao,
             arbeidsgiverDao,
@@ -58,15 +59,16 @@ internal class Spleisbehov(
             vedtaksperiodeId,
             periodeFom,
             periodeTom,
-            id
+            id,
+            this
         ),
-        SaksbehandlerGodkjenningCommand(id)
+        SaksbehandlerGodkjenningCommand(id, this)
     )
     private var nåværendeOppgavetype = nåværendeOppgave?.oppgaveType ?: oppgaver.first().oppgavetype
 
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
 
-    internal fun execute() {
+    override fun execute() {
         val førsteOppgave = current()
         behovstyper.clear()
         oppgaver.asSequence()
@@ -78,7 +80,7 @@ internal class Spleisbehov(
                 log.info("Oppgave ${it::class.simpleName} ferdigstilt. Nåværende oppgave er $nåværendeOppgavetype")
                 it.oppdaterFerdigstilt(oppgaveDao)
             }
-        current().persister(oppgaveDao)
+        current().persister(oppgaveDao, vedtakRef)
         log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}")
     }
 
@@ -86,19 +88,19 @@ internal class Spleisbehov(
         behovstyper.add(behovtype)
     }
 
-    internal fun fortsett(løsning: HentEnhetLøsning) {
+    override fun fortsett(løsning: HentEnhetLøsning) {
         current().fortsett(løsning)
     }
 
-    internal fun fortsett(løsning: HentPersoninfoLøsning) {
+    override fun fortsett(løsning: HentPersoninfoLøsning) {
         current().fortsett(løsning)
     }
 
-    fun fortsett(løsning: ArbeidsgiverLøsning) {
+    override fun fortsett(løsning: ArbeidsgiverLøsning) {
         current().fortsett(løsning)
     }
 
-    fun fortsett(løsning: SaksbehandlerLøsning) {
+    override fun fortsett(løsning: SaksbehandlerLøsning) {
         current().fortsett(løsning)
     }
 
@@ -124,7 +126,8 @@ internal class Spleisbehov(
                 periodeTom,
                 vedtaksperiodeId,
                 aktørId,
-                orgnummer
+                orgnummer,
+                vedtakRef
             )
         )
 
@@ -150,6 +153,7 @@ internal class Spleisbehov(
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
                 personDao = personDao,
+                vedtakRef = spleisbehovDTO.vedtakRef,
                 arbeidsgiverDao = arbeidsgiverDao,
                 vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
@@ -168,5 +172,6 @@ data class SpleisbehovDTO(
     val periodeTom: LocalDate,
     val vedtaksperiodeId: UUID,
     val aktørId: String,
-    val orgnummer: String
+    val orgnummer: String,
+    val vedtakRef: Int?
 )

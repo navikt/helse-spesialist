@@ -14,8 +14,9 @@ internal class OppdatertArbeidsgiverCommand(
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val orgnummer: String,
     behovId: UUID,
+    parent: Command,
     ferdigstilt: LocalDateTime? = null
-) : Command(behovId, ferdigstilt, Løsningstype.System) {
+) : Command(behovId, ferdigstilt, Løsningstype.System, parent) {
 
     override fun execute() {
         ferdigstilt = LocalDateTime.now()
