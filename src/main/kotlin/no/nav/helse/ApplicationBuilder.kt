@@ -76,7 +76,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
 
     private val azureConfig = AzureAdAppConfig(
-        clientId = System.getenv("SPLEIS_CLIENT_ID"),//readClientId(),
+        clientId = System.getenv("SPEIL_CLIENT_ID"),//readClientId(),
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("sikkerLogg")
