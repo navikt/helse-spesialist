@@ -43,7 +43,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
                     .map {
                         VedtakDto(
                             id = it.long("id"),
-                            vedtaksperiodeId = UUID.fromString(it.string("UUID")),
+                            vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
                             fom = it.localDate("fom"),
                             tom = it.localDate("fom"),
                             arbeidsgiverRef = it.long("arbeidsgiver_ref"),
