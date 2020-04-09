@@ -19,9 +19,9 @@ class PersonDao(private val dataSource: DataSource) {
 
     internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("SELECT p.fødselsnummer, n.fornavn, n.mellomnavn, n.etternavn FROM person AS p JOIN person_navn AS n ON p.navn_ref = n.id WHERE p.id=?;", id)
+            queryOf("SELECT p.fodselsnummer, n.fornavn, n.mellomnavn, n.etternavn FROM person AS p JOIN person_navn AS n ON p.navn_ref = n.id WHERE p.id=?;", id)
                 .map { PersonDto(
-                    fødselsnummer = it.long("fødselsnummer").toFødselsnummer(),
+                    fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
                     navn = NavnDto(
                         fornavn = it.string("fornavn"),
                         mellomnavn = it.stringOrNull("mellomnavn"),
