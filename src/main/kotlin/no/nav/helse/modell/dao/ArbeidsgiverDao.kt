@@ -64,10 +64,10 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
     fun updateNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                "UPDATE arbeidsgiver_navn SET navn=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?, navn_oppdatert=?);",
+                "UPDATE arbeidsgiver_navn SET navn=?, navn_oppdatert=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
                 navn,
-                orgnummer,
-                LocalDateTime.now().minusYears(1)
+                LocalDateTime.now().minusYears(1),
+                orgnummer
             ).asUpdate
         )
     }
