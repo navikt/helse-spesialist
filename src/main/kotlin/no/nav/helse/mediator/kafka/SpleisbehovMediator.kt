@@ -1,5 +1,9 @@
 package no.nav.helse.mediator.kafka
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.Spleisbehov
@@ -13,6 +17,8 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -29,7 +35,7 @@ internal class SpleisbehovMediator(
 ) {
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
 
-    internal fun håndter(godkjenningMessage: GodkjenningMessage) {
+    internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
         if (spleisbehovDao.findBehov(godkjenningMessage.id) != null) {
             log.warn(
                 "Mottok duplikat godkjenning behov, {}, {}",
@@ -61,11 +67,11 @@ internal class SpleisbehovMediator(
             keyValue("spleisBehovId", godkjenningMessage.id)
         )
         spleisbehov.execute()
-        publiserBehov(spleisbehov)
-        spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson())
+        spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson(), originalJson)
+        publiserBehov(godkjenningMessage.id, spleisbehov)
     }
 
-    private fun publiserBehov(spleisbehov: Spleisbehov) {
+    private fun publiserBehov(spleisbehovId: UUID, spleisbehov: Spleisbehov) {
         spleisbehov.behov()?.also { behov ->
             log.info(
                 "Sender ut behov for {}, {}, {}",
@@ -73,7 +79,13 @@ internal class SpleisbehovMediator(
                 keyValue("spleisBehovId", behov.spleisBehovId),
                 keyValue("behov", behov.typer.toString())
             )
-            rapidsConnection.publish(behov.fødselsnummer, behov.toJson())
+            rapidsConnection.publish(spleisbehov.fødselsnummer, behov.toJson())
+        }
+        spleisbehov.løsning()?.also { løsning ->
+            val originalJson = requireNotNull(spleisbehovDao.findOriginalBehov(spleisbehovId))
+            val løsningJson = objectMapper.readValue<ObjectNode>(originalJson)
+            løsningJson.set<ObjectNode>("@løsning", objectMapper.convertValue<JsonNode>(løsning))
+            rapidsConnection.publish(spleisbehov.fødselsnummer, løsningJson.toString())
         }
     }
 
@@ -96,8 +108,8 @@ internal class SpleisbehovMediator(
         behandlendeEnhet?.also(spleisbehov::fortsett)
         hentPersoninfoLøsning?.also(spleisbehov::fortsett)
         spleisbehov.execute()
-        publiserBehov(spleisbehov)
         spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
+        publiserBehov(spleisbehovId, spleisbehov)
     }
 
     fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
@@ -110,8 +122,20 @@ internal class SpleisbehovMediator(
         val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
         spleisbehov.fortsett(løsning)
         spleisbehov.execute()
-        publiserBehov(spleisbehov)
         spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
+        publiserBehov(spleisbehovId, spleisbehov)
+    }
+
+    fun håndter(spleisbehovId: UUID, løsning: SaksbehandlerLøsning) {
+        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        val spleisbehovJson = requireNotNull(spleisbehovDao.findBehov(spleisbehovId)) {
+            "Fant ikke behov med id $spleisbehovId"
+        }
+        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
+        spleisbehov.fortsett(løsning)
+        spleisbehov.execute()
+        spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
+        publiserBehov(spleisbehovId, spleisbehov)
     }
 
     private fun spleisbehov(id: UUID, spleisbehovJson: String) = Spleisbehov.restore(

@@ -49,7 +49,7 @@ internal class GodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             )
-            spleisbehovMediator.håndter(behov)
+            spleisbehovMediator.håndter(behov, packet.toJson())
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {

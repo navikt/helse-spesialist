@@ -10,11 +10,13 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
@@ -163,5 +165,40 @@ internal class SpleisbehovTest {
         assertNotNull(vedtakDao.findVedtaksperiode(vedtaksperiodeId))
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertFalse(saksbehandlerOppgaver.isNullOrEmpty())
+    }
+
+    @Test
+    fun `ved godkjenning har spleisbehovet en løsning`() {
+        val vedtaksperiodeId = randomUUID()
+        val spleisBehov = Spleisbehov(
+            id = randomUUID(),
+            fødselsnummer = "3457812",
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 20),
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123455",
+            orgnummer = "98765433",
+            vedtakRef = null,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            nåværendeOppgave = null
+        )
+        spleisBehov.execute()
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentEnhetLøsning("3417"))
+        spleisBehov.execute()
+        spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
+        spleisBehov.execute()
+        spleisBehov.fortsett(SaksbehandlerLøsning(
+            godkjent = true,
+            saksbehandlerIdent = "abcd",
+            godkjenttidspunkt = LocalDateTime.now()
+        ))
+
+        assertNotNull(spleisBehov.løsning())
     }
 }

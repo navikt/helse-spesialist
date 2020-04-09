@@ -72,7 +72,7 @@ class OppgaveDao(private val dataSource: DataSource) {
             oppgaveType = it.string("type"),
             behovId = UUID.fromString(it.string("behov_id")),
             løsningstype = Løsningstype.valueOf(it.string("løsningstype")),
-            vedtaksref = it.long("vedtak_ref")
+            vedtaksref = it.longOrNull("vedtak_ref")
         )
     }
 }

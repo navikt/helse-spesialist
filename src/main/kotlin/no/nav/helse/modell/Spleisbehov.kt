@@ -1,6 +1,5 @@
 package no.nav.helse.modell
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.Løsningstype
 import no.nav.helse.modell.dao.ArbeidsgiverDao
@@ -22,13 +21,12 @@ import no.nav.helse.modell.oppgave.OpprettPersonCommand
 import no.nav.helse.modell.oppgave.OpprettVedtakCommand
 import no.nav.helse.modell.oppgave.SaksbehandlerGodkjenningCommand
 import no.nav.helse.objectMapper
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
 internal class Spleisbehov(
     private val id: UUID,
-    private val fødselsnummer: String,
+    internal val fødselsnummer: String,
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
     private val vedtaksperiodeId: UUID,
@@ -67,6 +65,7 @@ internal class Spleisbehov(
     private var nåværendeOppgavetype = nåværendeOppgave?.oppgaveType ?: oppgaver.first().oppgavetype
 
     private val behovstyper: MutableList<Behovtype> = mutableListOf()
+    private var løsning: Map<String, Any>? = null
 
     override fun execute() {
         val førsteOppgave = current()
@@ -102,6 +101,13 @@ internal class Spleisbehov(
 
     override fun fortsett(løsning: SaksbehandlerLøsning) {
         current().fortsett(løsning)
+        this.løsning = mapOf(
+            "Godkjenning" to mapOf(
+                "saksbehandlerIdent" to løsning.saksbehandlerIdent,
+                "godkjentTidspunkt" to løsning.godkjenttidspunkt,
+                "godkjent" to løsning.godkjent
+            )
+        )
     }
 
     private fun current() = oppgaver.first { it.oppgavetype == nåværendeOppgavetype }
@@ -116,6 +122,8 @@ internal class Spleisbehov(
             vedtaksperiodeId = vedtaksperiodeId
         )
     }
+
+    internal fun løsning(): Map<String, Any>? = løsning
 
     fun toJson() =
         objectMapper.writeValueAsString(
