@@ -1,5 +1,6 @@
 package no.nav.helse.modell.dto
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.util.*
 
 
@@ -14,5 +15,5 @@ data class ArbeidsgiverForSpeilDto(
     val organisasjonsnummer: String,
     val navn: String,
     val id: UUID,
-    val vedtaksperioder: List<VedtaksperiodeDTOBase>
+    val vedtaksperioder: List<JsonNode>
 )
