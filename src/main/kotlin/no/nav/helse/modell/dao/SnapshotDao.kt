@@ -1,6 +1,5 @@
 package no.nav.helse.modell.dao
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using

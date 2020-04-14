@@ -1,5 +1,6 @@
-package no.nav.helse.model
+package no.nav.helse
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
@@ -11,7 +12,12 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.headersOf
 import no.nav.helse.AccessTokenClient
+import no.nav.helse.modell.dto.ArbeidsgiverFraSpleisDto
+import no.nav.helse.modell.dto.PersonForSpeilDto
+import no.nav.helse.modell.dto.PersonFraSpleisDto
 import org.flywaydb.core.Flyway
+import java.io.File
+import java.util.*
 import javax.sql.DataSource
 
 internal fun setupDataSource(): DataSource {
@@ -36,15 +42,30 @@ internal fun setupDataSource(): DataSource {
     return dataSource
 }
 
-internal fun httpClientForSpleis() = HttpClient(MockEngine) {
+internal fun httpClientForSpleis(): HttpClient {
+    val vedtaksperiode = objectMapper.readTree(
+        File("src/test/resources/vedtaksperiode.json").readText()) as ObjectNode
+    return HttpClient(MockEngine) {
     install(JsonFeature) {
         this.serializer = JacksonSerializer()
     }
     engine {
         addHandler {
-            respond("{}")
+            respond(
+                objectMapper.writeValueAsString(
+                PersonFraSpleisDto(
+                    aktørId = "123", fødselsnummer = "01129342684", arbeidsgivere = listOf(
+                        ArbeidsgiverFraSpleisDto(
+                            organisasjonsnummer = "888",
+                            id = UUID.randomUUID(),
+                            vedtaksperioder = listOf(vedtaksperiode)
+                        )
+                    )
+                ))
+            )
         }
     }
+}
 }
 
 internal fun accessTokenClient() = AccessTokenClient(

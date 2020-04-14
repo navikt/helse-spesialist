@@ -47,6 +47,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
+    testImplementation("io.mockk:mockk:1.9.3")
 }
 
 tasks {

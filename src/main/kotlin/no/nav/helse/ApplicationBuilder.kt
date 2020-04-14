@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -80,6 +81,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("sikkerLogg")
+    private lateinit var app: Application
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -97,12 +99,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(oidcDiscovery, azureConfig)
             oppgaveApi(oppgaveDao = oppgaveDao, personDao = personDao, vedtakDao = vedtakDao)
-            vedtaksperiodeApi(
-                personDao = personDao,
-                vedtakDao = vedtakDao,
-                snapshotDao = snapshotDao,
-                arbeidsgiverDao = arbeidsgiverDao
-            )
+            app = this
         }.build()
 
     init {
@@ -116,6 +113,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             speilSnapshotRestDao = speilSnapshotRestDao,
             oppgaveDao = oppgaveDao,
             rapidsConnection = rapidsConnection
+        )
+        app.vedtaksperiodeApi(
+            personDao = personDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            spleisbehovMediator = spleisbehovMediator
         )
 
         GodkjenningMessage.Factory(

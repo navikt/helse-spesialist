@@ -38,7 +38,6 @@ internal fun Application.oppgaveApi(
                     }.filterNotNull()
                 call.respond(saksbehandlerOppgaver)
             }
-
         }
     }
 }

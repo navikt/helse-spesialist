@@ -1,4 +1,4 @@
-package no.nav.helse.model
+package no.nav.helse
 
 import java.nio.file.Files
 import java.nio.file.Paths

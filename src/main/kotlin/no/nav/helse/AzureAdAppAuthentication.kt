@@ -1,5 +1,6 @@
 package no.nav.helse
 
+import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.application.Application
 import io.ktor.application.install
@@ -9,8 +10,7 @@ import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import java.net.URL
 
-internal fun Application.azureAdAppAuthentication(oidcDiscovery: OidcDiscovery, config: AzureAdAppConfig) {
-    val jwkProvider = JwkProviderBuilder(URL(oidcDiscovery.jwks_uri)).build()
+internal fun Application.azureAdAppAuthentication(oidcDiscovery: OidcDiscovery, config: AzureAdAppConfig, jwkProvider: JwkProvider = JwkProviderBuilder(URL(oidcDiscovery.jwks_uri)).build()) {
     install(Authentication) {
         jwt {
             verifier(jwkProvider, oidcDiscovery.issuer)

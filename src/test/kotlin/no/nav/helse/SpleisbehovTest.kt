@@ -1,4 +1,4 @@
-package no.nav.helse.model
+package no.nav.helse
 
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao

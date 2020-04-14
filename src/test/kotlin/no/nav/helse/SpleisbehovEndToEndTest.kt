@@ -1,5 +1,8 @@
-package no.nav.helse.model
+package no.nav.helse
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.dao.ArbeidsgiverDao
@@ -9,17 +12,24 @@ import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.SpleisbehovDao
 import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.løsning.HentEnhetLøsning
+import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.inMemoryRapid
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SpleisbehovMediatorTest {
+internal class SpleisbehovEndToEndTest {
     private lateinit var dataSource: DataSource
     private lateinit var personDao: PersonDao
     private lateinit var arbeidsgiverDao: ArbeidsgiverDao
@@ -46,8 +56,11 @@ internal class SpleisbehovMediatorTest {
         testDao = TestPersonDao(dataSource)
     }
 
+    @ExperimentalContracts
     @Test
     fun `Spleisbehov persisteres`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val rapid = inMemoryRapid {}
         val spleisbehovMediator = SpleisbehovMediator(
             spleisbehovDao = spleisbehovDao, personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
@@ -55,7 +68,7 @@ internal class SpleisbehovMediatorTest {
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
             oppgaveDao = oppgaveDao,
-            rapidsConnection = inMemoryRapid { }
+            rapidsConnection = rapid
         )
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
@@ -63,12 +76,41 @@ internal class SpleisbehovMediatorTest {
             fødselsnummer = "12345",
             aktørId = "12345",
             organisasjonsnummer = "89123",
-            vedtaksperiodeId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 31)
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        assertEquals(1, rapid.outgoingMessages.size)
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen")
+        )
+        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        val vedtakRef = vedtakDao.findVedtaksperiode(vedtaksperiodeId)
+        customAssertNotNull(vedtakRef)
+        customAssertNotNull(saksbehandlerOppgaver)
+        assertTrue(saksbehandlerOppgaver.any { it.vedtaksref == vedtakRef.toLong() })
 
+        spleisbehovMediator.håndter(spleisbehovId, SaksbehandlerLøsning(
+            godkjent = true,
+            saksbehandlerIdent = "abcd",
+            godkjenttidspunkt = LocalDateTime.now()
+        ))
+        assertEquals(2, rapid.outgoingMessages.size)
+        val løsning = objectMapper.readValue<JsonNode>(rapid.outgoingMessages.last().value)["@løsning"]
+
+        customAssertNotNull(løsning)
+
+        løsning as ObjectNode
+        assertEquals(listOf("Godkjenning"), løsning.fieldNames().asSequence().toList())
     }
+}
+
+@ExperimentalContracts
+fun customAssertNotNull(value: Any?) {
+    contract { returns() implies (value is Any) }
+    assertNotNull(value)
 }

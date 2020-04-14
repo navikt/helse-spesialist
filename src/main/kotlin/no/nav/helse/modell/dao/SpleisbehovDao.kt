@@ -29,7 +29,6 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
                     "UPDATE spleisbehov SET data=CAST(? as json) WHERE id=?", behov, id
                 ).asUpdate
             )
-
         }
     }
 

@@ -1,4 +1,4 @@
-package no.nav.helse.model
+package no.nav.helse
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
