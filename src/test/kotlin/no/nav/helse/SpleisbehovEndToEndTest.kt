@@ -67,9 +67,8 @@ internal class SpleisbehovEndToEndTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
-            rapidsConnection = rapid
-        )
+            oppgaveDao = oppgaveDao
+        ).apply { init(rapid) }
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,

@@ -54,9 +54,8 @@ internal class SpleisbehovMediatorTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
-            rapidsConnection = inMemoryRapid { }
-        )
+            oppgaveDao = oppgaveDao
+        ).apply { init(inMemoryRapid {  }) }
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,

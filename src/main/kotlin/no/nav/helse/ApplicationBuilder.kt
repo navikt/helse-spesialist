@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -20,7 +19,10 @@ import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PersoninfoMessage
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.SpleisbehovDao
 import no.nav.helse.modell.dao.VedtakDao
@@ -32,7 +34,7 @@ import org.slf4j.event.Level
 import java.net.ProxySelector
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
+import java.util.UUID
 
 const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 
@@ -81,7 +83,15 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("sikkerLogg")
-    private lateinit var app: Application
+    private val spleisbehovMediator = SpleisbehovMediator(
+        spleisbehovDao = spleisbehovDao,
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        vedtakDao = vedtakDao,
+        snapshotDao = snapshotDao,
+        speilSnapshotRestDao = speilSnapshotRestDao,
+        oppgaveDao = oppgaveDao
+    )
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -99,28 +109,18 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(oidcDiscovery, azureConfig)
             oppgaveApi(oppgaveDao = oppgaveDao, personDao = personDao, vedtakDao = vedtakDao)
-            app = this
+            vedtaksperiodeApi(
+                personDao = personDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                spleisbehovMediator = spleisbehovMediator
+            )
         }.build()
 
     init {
+        spleisbehovMediator.init(rapidsConnection)
         rapidsConnection.register(this)
-        val spleisbehovMediator = SpleisbehovMediator(
-            spleisbehovDao = spleisbehovDao,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
-            rapidsConnection = rapidsConnection
-        )
-        app.vedtaksperiodeApi(
-            personDao = personDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            spleisbehovMediator = spleisbehovMediator
-        )
 
         GodkjenningMessage.Factory(
             rapidsConnection = rapidsConnection,

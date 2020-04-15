@@ -30,10 +30,14 @@ internal class SpleisbehovMediator(
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
-    private val oppgaveDao: OppgaveDao,
-    private val rapidsConnection: RapidsConnection
+    private val oppgaveDao: OppgaveDao
 ) {
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
+    private lateinit var rapidsConnection: RapidsConnection
+
+    internal fun init(rapidsConnection: RapidsConnection) {
+        this.rapidsConnection = rapidsConnection
+    }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
         if (spleisbehovDao.findBehov(godkjenningMessage.id) != null) {

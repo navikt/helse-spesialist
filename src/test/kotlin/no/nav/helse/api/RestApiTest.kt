@@ -123,9 +123,8 @@ internal class RestApiTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
-            rapidsConnection = rapid
-        )
+            oppgaveDao = oppgaveDao
+        ).apply { init(rapid) }
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
         val azureConfig = AzureAdAppConfig(clientId = clientId, requiredGroup = requiredGroup)
