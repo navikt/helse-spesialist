@@ -9,7 +9,11 @@ import io.ktor.client.call.receive
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.*
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.host
+import io.ktor.client.request.port
+import io.ktor.client.request.post
 import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
@@ -21,42 +25,52 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.*
+import no.nav.helse.AzureAdAppConfig
+import no.nav.helse.OidcDiscovery
 import no.nav.helse.accessTokenClient
+import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.httpClientForSpleis
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.OppgaveDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
+import no.nav.helse.modell.dao.SpeilSnapshotRestDao
+import no.nav.helse.modell.dao.SpleisbehovDao
+import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.dto.PersonForSpeilDto
 import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.inMemoryRapid
 import no.nav.helse.setupDataSource
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.io.TempDir
 import java.net.ServerSocket
 import java.nio.file.Path
 import java.sql.Connection
-import java.time.Duration
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
 import javax.sql.DataSource
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
-    private companion object {
-    }
-
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
 
     private lateinit var app: ApplicationEngine
     private lateinit var spleisbehovMediator: SpleisbehovMediator
+    private val rapid = inMemoryRapid {}
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
@@ -78,6 +92,7 @@ internal class RestApiTest {
             }
         }
     }
+    var vedtaksperiodeId = UUID.randomUUID()
 
     @BeforeAll
     internal fun `start embedded environment`(@TempDir postgresPath: Path) {
@@ -95,11 +110,15 @@ internal class RestApiTest {
         val spleisbehovDao = SpleisbehovDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
         val oppgaveDao = OppgaveDao(dataSource)
-        val speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis(), accessTokenClient(), "spleisClientId")
+        val speilSnapshotRestDao = SpeilSnapshotRestDao(
+            httpClientForSpleis(vedtaksperiodeId = { vedtaksperiodeId }),
+            accessTokenClient(),
+            "spleisClientId"
+        )
 
-        val rapid = inMemoryRapid { }
         spleisbehovMediator = SpleisbehovMediator(
-            spleisbehovDao = spleisbehovDao, personDao = personDao,
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
@@ -122,6 +141,11 @@ internal class RestApiTest {
         app.start(wait = false)
     }
 
+    @BeforeEach
+    internal fun updateVedtaksperiodeId() {
+        vedtaksperiodeId = UUID.randomUUID()
+    }
+
     @AfterAll
     internal fun `stop embedded environment`() {
         app.stop(1L, 1L, SECONDS)
@@ -132,7 +156,6 @@ internal class RestApiTest {
 
     @Test
     fun `hent oppgaver`() {
-        val vedtaksperiodeId = UUID.randomUUID()
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,
@@ -152,12 +175,11 @@ internal class RestApiTest {
         val response = runBlocking { client.get<HttpStatement>("/api/oppgaver").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
         val oppgaver = runBlocking { response.receive<List<SaksbehandleroppgaveDto>>() }
-        assertEquals(vedtaksperiodeId, oppgaver.first().vedtaksperiodeId)
+        assertTrue(oppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
     }
 
     @Test
     fun `hent vedtaksperiode`() {
-        val vedtaksperiodeId = UUID.fromString("a9951ae7-52ca-4b05-9219-eebbbc73a9dc")
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,
@@ -183,32 +205,40 @@ internal class RestApiTest {
         )
     }
 
-//    @Test
-//    fun `godkjenning av vedtaksperiode`() {
-//        val vedtaksperiodeId = UUID.fromString("a9951ae7-52ca-4b05-9219-eebbbc73a9dc")
-//        val spleisbehovId = UUID.randomUUID()
-//        val godkjenningMessage = GodkjenningMessage(
-//            id = spleisbehovId,
-//            fødselsnummer = "12345",
-//            aktørId = "12345",
-//            organisasjonsnummer = "89123",
-//            vedtaksperiodeId = vedtaksperiodeId,
-//            periodeFom = LocalDate.of(2018, 1, 1),
-//            periodeTom = LocalDate.of(2018, 1, 31)
-//        )
-//        spleisbehovMediator.håndter(godkjenningMessage, "{}")
-//        spleisbehovMediator.håndter(
-//            spleisbehovId,
-//            HentEnhetLøsning("1234"),
-//            HentPersoninfoLøsning("Test", null, "Testsen")
-//        )
-//        val response = runBlocking {
-//            client.post<HttpStatement>("/api/vedtaksperiode/$spleisbehovId/vedtak") {
-//                body = TextContent(
-//                    objectMapper.writeValueAsString(Godkjenning(true)), contentType = ContentType.Application.Json
-//                )
-//            }.execute()
-//        }
-//        assertEquals(HttpStatusCode.OK, response.status)
-//    }
+    @Test
+    fun `godkjenning av vedtaksperiode`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen")
+        )
+        val response = runBlocking {
+            client.post<HttpStatement>("/api/vedtaksperiode/$spleisbehovId/vedtak") {
+                body = TextContent(
+                    objectMapper.writeValueAsString(Godkjenning(true)), contentType = ContentType.Application.Json
+                )
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Created, response.status)
+        val løsning = rapid.outgoingMessages
+            .map { objectMapper.readTree(it.value) }
+            .filter { it.hasNonNull("@løsning") }
+            .firstOrNull { it["@id"]?.asText() == spleisbehovId.toString() }
+            ?.get("@løsning")
+        assertNotNull(løsning)
+        løsning!!
+        assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
+        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), navIdent)
+    }
 }

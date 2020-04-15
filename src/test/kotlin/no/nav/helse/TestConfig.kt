@@ -11,13 +11,11 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.headersOf
-import no.nav.helse.AccessTokenClient
 import no.nav.helse.modell.dto.ArbeidsgiverFraSpleisDto
-import no.nav.helse.modell.dto.PersonForSpeilDto
 import no.nav.helse.modell.dto.PersonFraSpleisDto
 import org.flywaydb.core.Flyway
 import java.io.File
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 internal fun setupDataSource(): DataSource {
@@ -42,30 +40,35 @@ internal fun setupDataSource(): DataSource {
     return dataSource
 }
 
-internal fun httpClientForSpleis(): HttpClient {
+
+internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUID() }): HttpClient {
     val vedtaksperiode = objectMapper.readTree(
-        File("src/test/resources/vedtaksperiode.json").readText()) as ObjectNode
+        File("src/test/resources/vedtaksperiode.json").readText()
+    ) as ObjectNode
     return HttpClient(MockEngine) {
-    install(JsonFeature) {
-        this.serializer = JacksonSerializer()
-    }
-    engine {
-        addHandler {
-            respond(
-                objectMapper.writeValueAsString(
-                PersonFraSpleisDto(
-                    aktørId = "123", fødselsnummer = "01129342684", arbeidsgivere = listOf(
-                        ArbeidsgiverFraSpleisDto(
-                            organisasjonsnummer = "888",
-                            id = UUID.randomUUID(),
-                            vedtaksperioder = listOf(vedtaksperiode)
+        install(JsonFeature) {
+            this.serializer = JacksonSerializer()
+        }
+        engine {
+            addHandler { request ->
+                respond(
+                    objectMapper.writeValueAsString(
+                        PersonFraSpleisDto(
+                            aktørId = "123", fødselsnummer = "01129342684", arbeidsgivere = listOf(
+                                ArbeidsgiverFraSpleisDto(
+                                    organisasjonsnummer = "888",
+                                    id = UUID.randomUUID(),
+                                    vedtaksperioder = listOf(
+                                        vedtaksperiode.deepCopy().put("id", vedtaksperiodeId().toString())
+                                    )
+                                )
+                            )
                         )
                     )
-                ))
-            )
+                )
+            }
         }
     }
-}
 }
 
 internal fun accessTokenClient() = AccessTokenClient(
@@ -78,7 +81,10 @@ internal fun accessTokenClient() = AccessTokenClient(
         }
         engine {
             addHandler {
-                respond(content = """{"access_token": "token", "expires_in": 3600}""", headers = headersOf("Content-Type" to listOf("application/json")))
+                respond(
+                    content = """{"access_token": "token", "expires_in": 3600}""",
+                    headers = headersOf("Content-Type" to listOf("application/json"))
+                )
             }
         }
     }

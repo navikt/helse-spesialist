@@ -13,15 +13,17 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dao.ArbeidsgiverDao
+import no.nav.helse.modell.dao.PersonDao
+import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.dto.ArbeidsgiverForSpeilDto
-import no.nav.helse.modell.dto.PersonFraSpleisDto
 import no.nav.helse.modell.dto.PersonForSpeilDto
+import no.nav.helse.modell.dto.PersonFraSpleisDto
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.objectMapper
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal fun Application.vedtaksperiodeApi(
     personDao: PersonDao,
@@ -88,6 +90,7 @@ internal fun Application.vedtaksperiodeApi(
                 )
 
                 spleisbehovMediator.håndter(behovId, løsning)
+                call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
         }
     }
