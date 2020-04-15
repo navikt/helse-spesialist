@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Løsningstype
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
@@ -76,11 +77,17 @@ internal class Spleisbehov(
             .onEach { nåværendeOppgavetype = it.oppgavetype }
             .takeWhile { !it.trengerExecute() }
             .forEach {
-                log.info("Oppgave ${it::class.simpleName} ferdigstilt. Nåværende oppgave er $nåværendeOppgavetype")
+                log.info(
+                    "Oppgave ${it::class.simpleName} ble executed. Nåværende oppgave er $nåværendeOppgavetype, {}, {}",
+                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                    keyValue("behovId", id)
+                )
                 it.oppdaterFerdigstilt(oppgaveDao)
             }
         current().persister(oppgaveDao, vedtakRef)
-        log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}")
+        log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}, {}, {}",
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("behovId", id))
     }
 
     internal fun håndter(behovtype: Behovtype) {

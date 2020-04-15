@@ -71,6 +71,43 @@ internal class SpleisbehovMediator(
         publiserBehov(godkjenningMessage.id, spleisbehov)
     }
 
+    internal fun håndter(
+        spleisbehovId: UUID,
+        behandlendeEnhet: HentEnhetLøsning?,
+        hentPersoninfoLøsning: HentPersoninfoLøsning?
+    ) {
+        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        restoreAndInvoke(spleisbehovId) {
+            behandlendeEnhet?.also(::fortsett)
+            hentPersoninfoLøsning?.also(::fortsett)
+        }
+    }
+
+    fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
+        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        restoreAndInvoke(spleisbehovId) {
+            fortsett(løsning)
+        }
+    }
+
+    fun håndter(spleisbehovId: UUID, løsning: SaksbehandlerLøsning) {
+        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        restoreAndInvoke(spleisbehovId) {
+            fortsett(løsning)
+        }
+    }
+
+    fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {
+        val spleisbehovJson = requireNotNull(spleisbehovDao.findBehov(spleisbehovId)) {
+            "Fant ikke behov med id $spleisbehovId"
+        }
+        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
+        spleisbehov.invoke()
+        spleisbehov.execute()
+        spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
+        publiserBehov(spleisbehovId, spleisbehov)
+    }
+
     private fun publiserBehov(spleisbehovId: UUID, spleisbehov: Spleisbehov) {
         spleisbehov.behov()?.also { behov ->
             log.info(
@@ -87,55 +124,6 @@ internal class SpleisbehovMediator(
             løsningJson.set<ObjectNode>("@løsning", objectMapper.convertValue<JsonNode>(løsning))
             rapidsConnection.publish(spleisbehov.fødselsnummer, løsningJson.toString())
         }
-    }
-
-    internal fun håndter(
-        spleisbehovId: UUID,
-        behandlendeEnhet: HentEnhetLøsning?,
-        hentPersoninfoLøsning: HentPersoninfoLøsning?
-    ) {
-        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
-        val spleisbehovJson = spleisbehovDao.findBehov(spleisbehovId)
-        if (spleisbehovJson == null) {
-            log.error("Fant ikke behov med id $spleisbehovId")
-            return
-        }
-        if (oppgaveDao.findNåværendeOppgave(spleisbehovId) == null) {
-            log.warn("TEMP: ignorerer svar på behov uten oppgave")
-            return
-        }
-        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
-        behandlendeEnhet?.also(spleisbehov::fortsett)
-        hentPersoninfoLøsning?.also(spleisbehov::fortsett)
-        spleisbehov.execute()
-        spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
-        publiserBehov(spleisbehovId, spleisbehov)
-    }
-
-    fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
-        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
-        val spleisbehovJson = spleisbehovDao.findBehov(spleisbehovId)
-        if (spleisbehovJson == null) {
-            log.error("Fant ikke behov med id $spleisbehovId")
-            return
-        }
-        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
-        spleisbehov.fortsett(løsning)
-        spleisbehov.execute()
-        spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
-        publiserBehov(spleisbehovId, spleisbehov)
-    }
-
-    fun håndter(spleisbehovId: UUID, løsning: SaksbehandlerLøsning) {
-        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
-        val spleisbehovJson = requireNotNull(spleisbehovDao.findBehov(spleisbehovId)) {
-            "Fant ikke behov med id $spleisbehovId"
-        }
-        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
-        spleisbehov.fortsett(løsning)
-        spleisbehov.execute()
-        spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
-        publiserBehov(spleisbehovId, spleisbehov)
     }
 
     private fun spleisbehov(id: UUID, spleisbehovJson: String) = Spleisbehov.restore(
