@@ -13,10 +13,11 @@ fun findNr(input: String) = pattern.matcher(input).let {
 fun main() {
     val a = Files.readAllLines(Paths.get("src/main/resources/db/migration/V2__legg_til_enheter.sql"))
     val b = Files.readAllLines(Paths.get("src/main/resources/db/migration/V12__utgåtte_enheter.sql"))
-    val enheter = (a + b).map(::findNr)
+    val c = Files.readAllLines(Paths.get("src/main/resources/db/migration/V13__tjenestesteder.sql"))
+    val enheter = (a + b + c).map(::findNr)
     println(enheter.sorted().distinct())
 
-    val ny = Files.readAllLines(Paths.get("src/main/resources/db/migration/V13__tjenestesteder.sql_original"))
+    val ny = Files.readAllLines(Paths.get("src/main/resources/db/migration/V16__manglende_enheter.sql"))
     println(ny.sorted().distinct())
 
     val result = ny.map { nyEnhet -> nyEnhet to findNr(nyEnhet) }
