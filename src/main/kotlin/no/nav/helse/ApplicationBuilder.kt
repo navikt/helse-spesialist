@@ -2,6 +2,9 @@ package no.nav.helse
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.install
+import io.ktor.application.*
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.principal
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
@@ -13,6 +16,7 @@ import io.ktor.features.callIdMdc
 import io.ktor.http.ContentType
 import io.ktor.jackson.JacksonConverter
 import io.ktor.request.path
+import io.ktor.request.uri
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
@@ -37,6 +41,7 @@ import java.nio.file.Paths
 import java.util.UUID
 
 const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
+private val auditLog = LoggerFactory.getLogger("auditLogger")
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val dataSourceBuilder = DataSourceBuilder(System.getenv())
@@ -104,6 +109,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 level = Level.INFO
                 callIdMdc("callId")
                 filter { call -> call.request.path().startsWith("/api/") }
+            }
+            intercept(ApplicationCallPipeline.Call) {
+                call.principal<JWTPrincipal>()?.let { principal ->
+                    log.info("Bruker=\"${principal.payload.getClaim("NAVident").asString()}\" gjør kall mot url=\"${call.request.uri}\"")
+                    auditLog.info("Bruker=\"${principal.payload.getClaim("NAVident").asString()}\" gjør kall mot url=\"${call.request.uri}\"")
+                }
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
