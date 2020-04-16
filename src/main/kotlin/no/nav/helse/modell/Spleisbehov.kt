@@ -71,20 +71,24 @@ internal class Spleisbehov(
     override fun execute() {
         val førsteOppgave = current()
         behovstyper.clear()
-        oppgaver.asSequence()
-            .dropWhile { it.oppgavetype != nåværendeOppgavetype }
-            .onEach(Command::execute)
-            .onEach { nåværendeOppgavetype = it.oppgavetype }
-            .takeWhile { !it.trengerExecute() }
-            .forEach {
-                log.info(
-                    "Oppgave ${it::class.simpleName} ble executed. Nåværende oppgave er $nåværendeOppgavetype, {}, {}",
-                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                    keyValue("behovId", id)
-                )
-                it.oppdaterFerdigstilt(oppgaveDao)
-            }
-        current().persister(oppgaveDao, vedtakRef)
+        try {
+            oppgaver.asSequence()
+                .dropWhile { it.oppgavetype != nåværendeOppgavetype }
+                .onEach(Command::execute)
+                .onEach { nåværendeOppgavetype = it.oppgavetype }
+                .takeWhile { !it.trengerExecute() }
+                .forEach {
+                    log.info(
+                        "Oppgave ${it::class.simpleName} ble executed. Nåværende oppgave er $nåværendeOppgavetype, {}, {}",
+                        keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                        keyValue("behovId", id)
+                    )
+                    it.oppdaterFerdigstilt(oppgaveDao)
+                }
+        } finally {
+            current().persister(oppgaveDao, vedtakRef)
+        }
+
         log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}, {}, {}",
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("behovId", id))
