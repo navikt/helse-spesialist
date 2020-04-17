@@ -9,6 +9,7 @@ import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -16,7 +17,8 @@ abstract class Command(
     protected val behovId: UUID,
     protected var ferdigstilt: LocalDateTime?,
     private val løsningstype: Løsningstype,
-    private val parent: Command?
+    private val parent: Command?,
+    internal val timeout: Duration
 ) {
     private var vedtaksperiodeRef: Long? = null
     protected val log: Logger = LoggerFactory.getLogger("command")

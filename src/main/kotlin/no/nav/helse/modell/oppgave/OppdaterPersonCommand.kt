@@ -6,6 +6,7 @@ import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,13 +18,25 @@ internal class OppdaterPersonCommand(
     behovId: UUID,
     parent: Command,
     ferdigstilt: LocalDateTime? = null
-) : Command(behovId, ferdigstilt, Løsningstype.System, parent) {
+) : Command(
+    behovId = behovId,
+    ferdigstilt = ferdigstilt,
+    løsningstype = Løsningstype.System,
+    parent = parent,
+    timeout = Duration.ofHours(1)
+) {
     override val oppgaver: Set<Command> = setOf(
         HentPersoninfoCommand(),
         HentEnhetCommand()
     )
 
-    private inner class HentPersoninfoCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System, this@OppdaterPersonCommand) {
+    private inner class HentPersoninfoCommand(ferdigstilt: LocalDateTime? = null) : Command(
+        behovId = behovId,
+        ferdigstilt = ferdigstilt,
+        løsningstype = Løsningstype.System,
+        parent = this@OppdaterPersonCommand,
+        timeout = Duration.ofHours(1)
+    ) {
         override fun execute() {
             val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer.toLong())
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
@@ -44,7 +57,13 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private inner class HentEnhetCommand(ferdigstilt: LocalDateTime? = null) : Command(behovId, ferdigstilt, Løsningstype.System, this@OppdaterPersonCommand) {
+    private inner class HentEnhetCommand(ferdigstilt: LocalDateTime? = null) : Command(
+        behovId = behovId,
+        ferdigstilt = ferdigstilt,
+        løsningstype = Løsningstype.System,
+        parent = this@OppdaterPersonCommand,
+        timeout = Duration.ofHours(1)
+    ) {
         override fun execute() {
             val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer.toLong())
             if (sistOppdatert.plusDays(5) < LocalDate.now()) {

@@ -21,6 +21,7 @@ import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class SpleisbehovMediator(
@@ -128,6 +129,23 @@ internal class SpleisbehovMediator(
             løsningJson.set<ObjectNode>("@løsning", objectMapper.convertValue<JsonNode>(løsning))
             rapidsConnection.publish(spleisbehov.fødselsnummer, løsningJson.toString())
         }
+        log.info(
+            "Produserer oppgave endret event for {}, {}",
+            keyValue("spleisbehovId", spleisbehovId),
+            keyValue("vedtaksperiodeId", spleisbehov.vedtaksperiodeId)
+        )
+        rapidsConnection.publish(
+            objectMapper.writeValueAsString(
+                mapOf(
+                    "@event_name" to "oppgave_oppdatert",
+                    "timeout" to spleisbehov.currentTimeout().toSeconds(),
+                    "spleisbehovId" to spleisbehovId,
+                    "fødselsnummer" to spleisbehov.fødselsnummer,
+                    "endringstidspunkt" to LocalDateTime.now(),
+                    "ferdigstilt" to spleisbehov.ferdigstilt()
+                )
+            )
+        )
     }
 
     private fun spleisbehov(id: UUID, spleisbehovJson: String) = Spleisbehov.restore(

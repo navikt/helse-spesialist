@@ -22,6 +22,7 @@ import no.nav.helse.modell.oppgave.OpprettPersonCommand
 import no.nav.helse.modell.oppgave.OpprettVedtakCommand
 import no.nav.helse.modell.oppgave.SaksbehandlerGodkjenningCommand
 import no.nav.helse.objectMapper
+import java.time.Duration
 import java.time.LocalDate
 import java.util.UUID
 
@@ -30,7 +31,7 @@ internal class Spleisbehov(
     internal val fødselsnummer: String,
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
-    private val vedtaksperiodeId: UUID,
+    internal val vedtaksperiodeId: UUID,
     private val aktørId: String,
     private val orgnummer: String,
     nåværendeOppgave: OppgaveDto?,
@@ -41,7 +42,7 @@ internal class Spleisbehov(
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao,
     private val oppgaveDao: OppgaveDao
-) : Command(id, null, Løsningstype.System, null) {
+) : Command(id, null, Løsningstype.System, null, Duration.ofDays(14)) {
     override val oppgaver = setOf(
         OpprettPersonCommand(this, personDao, fødselsnummer, aktørId, id, this),
         OppdaterPersonCommand(this, personDao, fødselsnummer, id, this),
@@ -133,6 +134,10 @@ internal class Spleisbehov(
             vedtaksperiodeId = vedtaksperiodeId
         )
     }
+
+    fun currentTimeout() = current().timeout
+
+    fun ferdigstilt() = !current().trengerExecute()
 
     internal fun løsning(): Map<String, Any>? = løsning
 
