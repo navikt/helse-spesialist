@@ -148,7 +148,6 @@ internal class Spleisbehov(
                 fødselsnummer,
                 periodeFom,
                 periodeTom,
-                vedtaksperiodeId,
                 aktørId,
                 orgnummer,
                 vedtaksperiodeReferanse
@@ -158,6 +157,7 @@ internal class Spleisbehov(
     companion object {
         fun restore(
             id: UUID,
+            vedtaksperiodeId: UUID,
             data: String,
             personDao: PersonDao,
             arbeidsgiverDao: ArbeidsgiverDao,
@@ -170,10 +170,10 @@ internal class Spleisbehov(
             val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
             return Spleisbehov(
                 id = id,
+                vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = spleisbehovDTO.fødselsnummer,
                 periodeFom = spleisbehovDTO.periodeFom,
                 periodeTom = spleisbehovDTO.periodeTom,
-                vedtaksperiodeId = spleisbehovDTO.vedtaksperiodeId,
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
                 personDao = personDao,
@@ -194,7 +194,6 @@ data class SpleisbehovDTO(
     val fødselsnummer: String,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
-    val vedtaksperiodeId: UUID,
     val aktørId: String,
     val orgnummer: String,
     val vedtakRef: Int?

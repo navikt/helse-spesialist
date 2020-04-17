@@ -3,17 +3,19 @@ package no.nav.helse.modell.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.modell.dto.SpleisbehovDBDto
 import java.util.UUID
 import javax.sql.DataSource
 
 internal class SpleisbehovDao(private val dataSource: DataSource) {
 
-    internal fun insertBehov(id: UUID, behov: String, original: String) {
+    internal fun insertBehov(id: UUID, spleisReferanse: UUID, behov: String, original: String) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO spleisbehov(id, data, original) VALUES(?, CAST(? as json), CAST(? as json))",
+                    "INSERT INTO spleisbehov(id, spleis_referanse, data, original) VALUES(?, ?, CAST(? as json), CAST(? as json))",
                     id,
+                    spleisReferanse,
                     behov,
                     original
                 ).asUpdate
@@ -32,9 +34,14 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun findBehov(id: UUID): String? = using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT data FROM spleisbehov WHERE id=?", id)
-            .map { it.string("data") }
+    internal fun findBehov(id: UUID): SpleisbehovDBDto? = using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT spleis_referanse, data FROM spleisbehov WHERE id=?", id)
+            .map {
+                SpleisbehovDBDto(
+                    spleisReferanse = UUID.fromString(it.string("spleis_referanse")),
+                    data = it.string("data")
+                )
+            }
             .asSingle
         )
     }

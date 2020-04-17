@@ -74,7 +74,12 @@ internal class SpleisbehovMediator(
             keyValue("spleisbehovId", godkjenningMessage.id)
         )
         spleisbehov.execute()
-        spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson(), originalJson)
+        spleisbehovDao.insertBehov(
+            godkjenningMessage.id,
+            godkjenningMessage.vedtaksperiodeId,
+            spleisbehov.toJson(),
+            originalJson
+        )
         publiserBehov(godkjenningMessage.id, spleisbehov)
     }
 
@@ -114,10 +119,10 @@ internal class SpleisbehovMediator(
     }
 
     fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {
-        val spleisbehovJson = requireNotNull(spleisbehovDao.findBehov(spleisbehovId)) {
+        val spleisbehovDBDto = requireNotNull(spleisbehovDao.findBehov(spleisbehovId)) {
             "Fant ikke behov med id $spleisbehovId"
         }
-        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovJson)
+        val spleisbehov = spleisbehov(spleisbehovId, spleisbehovDBDto.spleisReferanse, spleisbehovDBDto.data)
         spleisbehov.invoke()
         spleisbehov.execute()
         spleisbehovDao.updateBehov(spleisbehovId, spleisbehov.toJson())
@@ -159,13 +164,16 @@ internal class SpleisbehovMediator(
         )
     }
 
-    private fun spleisbehov(id: UUID, spleisbehovJson: String) = Spleisbehov.restore(
-        id, spleisbehovJson, personDao,
-        arbeidsgiverDao,
-        vedtakDao,
-        snapshotDao,
-        speilSnapshotRestDao,
-        oppgaveDao,
-        requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
+    private fun spleisbehov(id: UUID, spleisReferanse: UUID, spleisbehovJson: String) = Spleisbehov.restore(
+        id = id,
+        vedtaksperiodeId = spleisReferanse,
+        data = spleisbehovJson,
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        vedtakDao = vedtakDao,
+        snapshotDao = snapshotDao,
+        speilSnapshotRestDao = speilSnapshotRestDao,
+        oppgaveDao = oppgaveDao,
+        nåværendeOppgave = requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
     )
 }
