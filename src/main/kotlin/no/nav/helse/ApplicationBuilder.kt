@@ -21,8 +21,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.meldinger.ArbeidsgiverMessage
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PersoninfoMessage
+import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.dao.PersonDao
@@ -133,11 +135,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         spleisbehovMediator.init(rapidsConnection)
         rapidsConnection.register(this)
 
-        GodkjenningMessage.Factory(
-            rapidsConnection = rapidsConnection,
-            spleisbehovMediator = spleisbehovMediator
-        )
+        ArbeidsgiverMessage.Factory(rapidsConnection, spleisbehovMediator)
+        GodkjenningMessage.Factory(rapidsConnection, spleisbehovMediator)
         PersoninfoMessage.Factory(rapidsConnection, spleisbehovMediator)
+        PåminnelseMessage.Factory(rapidsConnection, spleisbehovMediator)
     }
 
     fun start() = rapidsConnection.start()

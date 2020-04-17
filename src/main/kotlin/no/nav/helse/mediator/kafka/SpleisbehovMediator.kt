@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
@@ -44,7 +45,7 @@ internal class SpleisbehovMediator(
         if (spleisbehovDao.findBehov(godkjenningMessage.id) != null) {
             log.warn(
                 "Mottok duplikat godkjenning behov, {}, {}",
-                keyValue("spleisBehovId", godkjenningMessage.id),
+                keyValue("spleisbehovId", godkjenningMessage.id),
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
             )
             return
@@ -69,7 +70,7 @@ internal class SpleisbehovMediator(
         log.info(
             "Mottok Godkjenning behov med {}, {}",
             keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
-            keyValue("spleisBehovId", godkjenningMessage.id)
+            keyValue("spleisbehovId", godkjenningMessage.id)
         )
         spleisbehov.execute()
         spleisbehovDao.insertBehov(godkjenningMessage.id, spleisbehov.toJson(), originalJson)
@@ -81,7 +82,7 @@ internal class SpleisbehovMediator(
         behandlendeEnhet: HentEnhetLøsning?,
         hentPersoninfoLøsning: HentPersoninfoLøsning?
     ) {
-        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
         restoreAndInvoke(spleisbehovId) {
             behandlendeEnhet?.also(::fortsett)
             hentPersoninfoLøsning?.also(::fortsett)
@@ -89,17 +90,22 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
-        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
         restoreAndInvoke(spleisbehovId) {
             fortsett(løsning)
         }
     }
 
     fun håndter(spleisbehovId: UUID, løsning: SaksbehandlerLøsning) {
-        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisBehovId", spleisbehovId))
+        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
         restoreAndInvoke(spleisbehovId) {
             fortsett(løsning)
         }
+    }
+
+    fun håndter(spleisbehovId: UUID, påminnelseMessage: PåminnelseMessage) {
+        log.info("Mottok påminnelse for spleisbehov", keyValue("spleisbehovId", spleisbehovId))
+        restoreAndInvoke(spleisbehovId) {}
     }
 
     fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {
@@ -118,7 +124,7 @@ internal class SpleisbehovMediator(
             log.info(
                 "Sender ut behov for {}, {}, {}",
                 keyValue("vedtaksperiodeId", behov.vedtaksperiodeId),
-                keyValue("spleisBehovId", behov.spleisBehovId),
+                keyValue("spleisbehovId", behov.spleisBehovId),
                 keyValue("behov", behov.typer.toString())
             )
             rapidsConnection.publish(spleisbehov.fødselsnummer, behov.toJson())
