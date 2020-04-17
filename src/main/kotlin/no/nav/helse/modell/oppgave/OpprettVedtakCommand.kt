@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.Løsningstype
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.dao.SnapshotDao
@@ -27,8 +27,7 @@ internal class OpprettVedtakCommand(
     ferdigstilt: LocalDateTime? = null
 ) : Command(
     behovId = behovId,
-    ferdigstilt = ferdigstilt,
-    løsningstype = Løsningstype.System,
+    initiellStatus = Oppgavestatus.AvventerSystem,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
@@ -50,7 +49,7 @@ internal class OpprettVedtakCommand(
 
         oppdaterVedtakRef(id)
 
-        ferdigstilt = LocalDateTime.now()
+        ferdigstillSystem()
     }
 
 }

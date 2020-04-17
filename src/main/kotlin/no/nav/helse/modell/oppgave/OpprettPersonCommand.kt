@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.Løsningstype
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.PersonDao
@@ -20,8 +20,7 @@ internal class OpprettPersonCommand(
     ferdigstilt: LocalDateTime? = null
 ) : Command(
     behovId = behovId,
-    ferdigstilt = ferdigstilt,
-    løsningstype = Løsningstype.System,
+    initiellStatus = Oppgavestatus.AvventerSystem,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
@@ -30,10 +29,10 @@ internal class OpprettPersonCommand(
 
     override fun execute() {
         if (personDao.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
-            ferdigstilt = LocalDateTime.now()
+            ferdigstillSystem()
         } else if (navnId != null && enhetId != null) {
             personDao.insertPerson(fødselsnummer.toLong(), aktørId.toLong(), navnId!!, enhetId!!)
-            ferdigstilt = LocalDateTime.now()
+            ferdigstillSystem()
         } else {
             spleisbehov.håndter(Behovtype.HentPersoninfo)
             spleisbehov.håndter(Behovtype.HentEnhet)

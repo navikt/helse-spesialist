@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
+import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
@@ -58,7 +59,7 @@ internal class SpleisbehovMediator(
             vedtaksperiodeId = godkjenningMessage.vedtaksperiodeId,
             aktørId = godkjenningMessage.aktørId,
             orgnummer = godkjenningMessage.organisasjonsnummer,
-            vedtakRef = null,
+            vedtaksperiodeReferanse = null,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
@@ -106,6 +107,10 @@ internal class SpleisbehovMediator(
     fun håndter(spleisbehovId: UUID, påminnelseMessage: PåminnelseMessage) {
         log.info("Mottok påminnelse for spleisbehov", keyValue("spleisbehovId", spleisbehovId))
         restoreAndInvoke(spleisbehovId) {}
+    }
+
+    fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
+        log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
     }
 
     fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {

@@ -6,7 +6,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import java.util.UUID
 
-internal class PåminnelseMessage {
+internal class TilInfotrygdMessage {
     internal class Factory(
         rapidsConnection: RapidsConnection,
         private val spleisbehovMediator: SpleisbehovMediator
@@ -14,16 +14,16 @@ internal class PåminnelseMessage {
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireValue("@event_name", "spesialist_påminnelse")
-                    it.requireKey("referanse")
+                    it.requireValue("@event_type", "vedtaksperiode_endret")
+                    it.requireKey("vedtaksperiodeId")
+                    it.requireValue("gjeldendeTilstand", "TIL_INFOTRYGD")
                 }
             }.register(this)
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val spleisbehovId = UUID.fromString(packet["referanse"].asText())
-            spleisbehovMediator.håndter(spleisbehovId, PåminnelseMessage())
+            val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
+            spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
         }
-
     }
 }

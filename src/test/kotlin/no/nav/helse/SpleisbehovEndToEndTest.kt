@@ -16,6 +16,7 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.InMemoryRapid
 import no.nav.helse.rapids_rivers.inMemoryRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
@@ -80,7 +81,7 @@ internal class SpleisbehovEndToEndTest {
             periodeTom = LocalDate.of(2018, 1, 31)
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
-        assertEquals(1, rapid.outgoingMessages.size)
+        assertEquals(2, rapid.outgoingMessages.size)
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
         spleisbehovMediator.håndter(
             spleisbehovId,
@@ -98,8 +99,12 @@ internal class SpleisbehovEndToEndTest {
             saksbehandlerIdent = "abcd",
             godkjenttidspunkt = LocalDateTime.now()
         ))
-        assertEquals(2, rapid.outgoingMessages.size)
-        val løsning = objectMapper.readValue<JsonNode>(rapid.outgoingMessages.last().value)["@løsning"]
+        assertEquals(5, rapid.outgoingMessages.size)
+        val løsninger = rapid.outgoingMessages
+            .map(InMemoryRapid.RapidMessage::value)
+            .map(objectMapper::readTree)
+            .filter { it.hasNonNull("@løsning") }
+        val løsning = løsninger.first()["@løsning"]
 
         customAssertNotNull(løsning)
 

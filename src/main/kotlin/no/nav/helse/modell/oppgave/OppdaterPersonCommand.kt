@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.Løsningstype
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.PersonDao
@@ -20,8 +20,7 @@ internal class OppdaterPersonCommand(
     ferdigstilt: LocalDateTime? = null
 ) : Command(
     behovId = behovId,
-    ferdigstilt = ferdigstilt,
-    løsningstype = Løsningstype.System,
+    initiellStatus = Oppgavestatus.AvventerSystem,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
@@ -30,10 +29,9 @@ internal class OppdaterPersonCommand(
         HentEnhetCommand()
     )
 
-    private inner class HentPersoninfoCommand(ferdigstilt: LocalDateTime? = null) : Command(
+    private inner class HentPersoninfoCommand : Command(
         behovId = behovId,
-        ferdigstilt = ferdigstilt,
-        løsningstype = Løsningstype.System,
+        initiellStatus = Oppgavestatus.AvventerSystem,
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
@@ -42,7 +40,7 @@ internal class OppdaterPersonCommand(
             if (sistOppdatert.plusDays(14) < LocalDate.now()) {
                 spleisbehov.håndter(Behovtype.HentPersoninfo)
             } else {
-                ferdigstilt = LocalDateTime.now()
+                ferdigstillSystem()
             }
         }
 
@@ -53,14 +51,13 @@ internal class OppdaterPersonCommand(
                 mellomnavn = løsning.mellomnavn,
                 etternavn = løsning.etternavn
             )
-            ferdigstilt = LocalDateTime.now()
+            ferdigstillSystem()
         }
     }
 
-    private inner class HentEnhetCommand(ferdigstilt: LocalDateTime? = null) : Command(
+    private inner class HentEnhetCommand : Command(
         behovId = behovId,
-        ferdigstilt = ferdigstilt,
-        løsningstype = Løsningstype.System,
+        initiellStatus = Oppgavestatus.AvventerSystem,
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
@@ -69,13 +66,13 @@ internal class OppdaterPersonCommand(
             if (sistOppdatert.plusDays(5) < LocalDate.now()) {
                 spleisbehov.håndter(Behovtype.HentEnhet)
             } else {
-                ferdigstilt = LocalDateTime.now()
+                ferdigstillSystem()
             }
         }
 
         override fun fortsett(løsning: HentEnhetLøsning) {
             personDao.updateEnhet(fødselsnummer.toLong(), løsning.enhetNr.toInt())
-            ferdigstilt = LocalDateTime.now()
+            ferdigstillSystem()
         }
     }
 
@@ -83,7 +80,7 @@ internal class OppdaterPersonCommand(
     override fun execute() {
         oppgaver.forEach { it.execute() }
         if (oppgaver.none { it.trengerExecute() }) {
-            ferdigstilt = LocalDateTime.now()
+            ferdigstillSystem()
         }
     }
 }

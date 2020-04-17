@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.Løsningstype
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.dao.PersonDao
@@ -35,14 +35,14 @@ internal class Spleisbehov(
     private val aktørId: String,
     private val orgnummer: String,
     nåværendeOppgave: OppgaveDto?,
-    internal var vedtakRef: Int?,
+    internal var vedtaksperiodeReferanse: Int?,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao,
     private val oppgaveDao: OppgaveDao
-) : Command(id, null, Løsningstype.System, null, Duration.ofDays(14)) {
+) : Command(id, Oppgavestatus.AvventerSystem, null, Duration.ofDays(14)) {
     override val oppgaver = setOf(
         OpprettPersonCommand(this, personDao, fødselsnummer, aktørId, id, this),
         OppdaterPersonCommand(this, personDao, fødselsnummer, id, this),
@@ -84,10 +84,10 @@ internal class Spleisbehov(
                         keyValue("vedtaksperiodeId", vedtaksperiodeId),
                         keyValue("behovId", id)
                     )
-                    it.oppdaterFerdigstilt(oppgaveDao)
+                    it.persisterEndring(oppgaveDao)
                 }
         } finally {
-            current().persister(oppgaveDao, vedtakRef)
+            current().persister(oppgaveDao, vedtaksperiodeReferanse)
         }
 
         log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}, {}, {}",
@@ -151,7 +151,7 @@ internal class Spleisbehov(
                 vedtaksperiodeId,
                 aktørId,
                 orgnummer,
-                vedtakRef
+                vedtaksperiodeReferanse
             )
         )
 
@@ -177,7 +177,7 @@ internal class Spleisbehov(
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
                 personDao = personDao,
-                vedtakRef = spleisbehovDTO.vedtakRef,
+                vedtaksperiodeReferanse = spleisbehovDTO.vedtakRef,
                 arbeidsgiverDao = arbeidsgiverDao,
                 vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,

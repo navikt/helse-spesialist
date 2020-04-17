@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.Løsningstype
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
@@ -10,17 +10,16 @@ import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.UUID
 
 abstract class Command(
     protected val behovId: UUID,
-    protected var ferdigstilt: LocalDateTime?,
-    private val løsningstype: Løsningstype,
+    initiellStatus: Oppgavestatus,
     private val parent: Command?,
     internal val timeout: Duration
 ) {
-    private var vedtaksperiodeRef: Long? = null
+    private var status = initiellStatus
+    private var ferdigstiltAv: String? = null
     protected val log: Logger = LoggerFactory.getLogger("command")
     internal open val oppgaver: Set<Command> = setOf()
     internal val oppgavetype: String = requireNotNull(this::class.simpleName)
@@ -41,7 +40,14 @@ abstract class Command(
         oppgaver.forEach { it.fortsett(løsning) }
     }
 
-    internal fun trengerExecute() = this.ferdigstilt == null
+    protected fun ferdigstill(ident: String) {
+        ferdigstiltAv = ident
+        status = Oppgavestatus.Ferdigstilt
+    }
+
+    internal fun ferdigstillSystem() = ferdigstill("System")
+
+    internal fun trengerExecute() = this.ferdigstiltAv == null
 
     private fun findRootCommand(): Command {
         var current = this
@@ -51,17 +57,12 @@ abstract class Command(
         return current
     }
 
-    internal fun oppgaver(): Set<Command> = (oppgaver.flatMap { it.oppgaver() } + this).toSet()
-
     protected fun oppdaterVedtakRef(vedtakRef: Int) {
-        (findRootCommand() as Spleisbehov).vedtakRef = vedtakRef
+        (findRootCommand() as Spleisbehov).vedtaksperiodeReferanse = vedtakRef
     }
 
-    fun oppdaterFerdigstilt(oppgaveDao: OppgaveDao) {
-        val oppgave = oppgaveDao.findOppgave(behovId, oppgavetype)
-        if (oppgave != null) {
-            oppgaveDao.updateOppgave(behovId, oppgavetype, ferdigstilt)
-        }
+    fun persisterEndring(oppgaveDao: OppgaveDao) {
+        oppgaveDao.updateOppgave(behovId, oppgavetype, status, ferdigstiltAv)
     }
 
     internal fun persister(oppgaveDao: OppgaveDao, vedtakRef: Int?) {
@@ -70,7 +71,7 @@ abstract class Command(
             log.warn("Prøvde å persistere en oppgave som allerede ligger i databasen")
             return
         }
-        oppgaveDao.insertOppgave(behovId, oppgavetype, løsningstype, vedtakRef)
+        oppgaveDao.insertOppgave(behovId, oppgavetype, status, vedtakRef)
     }
 }
 
