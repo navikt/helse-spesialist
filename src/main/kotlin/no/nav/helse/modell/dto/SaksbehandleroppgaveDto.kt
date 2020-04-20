@@ -5,6 +5,7 @@ import java.util.*
 
 data class NavnDto(val fornavn: String, val mellomnavn: String?, val etternavn: String)
 data class SaksbehandleroppgaveDto(
+    val spleisbehovId: UUID,
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,

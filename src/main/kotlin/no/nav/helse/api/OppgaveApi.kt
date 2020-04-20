@@ -26,14 +26,15 @@ internal fun Application.oppgaveApi(
                 }
                 val saksbehandlerOppgaver = oppgaver
                     .map { it to vedtakDao.findVedtak(it.vedtaksref!!) }
-                    .map {
-                        val personDto = personDao.findPerson(it.second.personRef) ?: return@map null
+                    .map { (oppgave, vedtak) ->
+                        val personDto = personDao.findPerson(vedtak.personRef) ?: return@map null
                         SaksbehandleroppgaveDto(
-                            it.second.vedtaksperiodeId,
-                            it.second.fom,
-                            it.second.tom,
-                            personDto.navn,
-                            personDto.fødselsnummer
+                            spleisbehovId = oppgave.behovId,
+                            vedtaksperiodeId = vedtak.vedtaksperiodeId,
+                            periodeFom = vedtak.fom,
+                            periodeTom = vedtak.tom,
+                            navn = personDto.navn,
+                            fødselsnummer = personDto.fødselsnummer
                         )
                     }.filterNotNull()
                 call.respond(saksbehandlerOppgaver)
