@@ -36,7 +36,7 @@ dependencies {
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
 
-    implementation("com.github.navikt:rapids-and-rivers:1.dc8c89a")
+    implementation("com.github.navikt:rapids-and-rivers:1.fa8a52f")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
         exclude(group = "junit")
     }

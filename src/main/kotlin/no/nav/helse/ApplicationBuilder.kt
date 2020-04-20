@@ -1,8 +1,10 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.application.ApplicationCallPipeline
+import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.application.*
+import io.ktor.application.log
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.principal
 import io.ktor.client.HttpClient
@@ -23,7 +25,7 @@ import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.ArbeidsgiverMessage
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.PersoninfoMessage
+import no.nav.helse.mediator.kafka.meldinger.PersoninfoLøsningMessage
 import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
@@ -114,8 +116,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
-                    log.info("Bruker=\"${principal.payload.getClaim("NAVident").asString()}\" gjør kall mot url=\"${call.request.uri}\"")
-                    auditLog.info("Bruker=\"${principal.payload.getClaim("NAVident").asString()}\" gjør kall mot url=\"${call.request.uri}\"")
+                    log.info(
+                        "Bruker=\"${principal.payload.getClaim("NAVident")
+                            .asString()}\" gjør kall mot url=\"${call.request.uri}\""
+                    )
+                    auditLog.info(
+                        "Bruker=\"${principal.payload.getClaim("NAVident")
+                            .asString()}\" gjør kall mot url=\"${call.request.uri}\""
+                    )
                 }
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
@@ -137,7 +145,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
         ArbeidsgiverMessage.Factory(rapidsConnection, spleisbehovMediator)
         GodkjenningMessage.Factory(rapidsConnection, spleisbehovMediator)
-        PersoninfoMessage.Factory(rapidsConnection, spleisbehovMediator)
+        PersoninfoLøsningMessage.Factory(rapidsConnection, spleisbehovMediator)
         PåminnelseMessage.Factory(rapidsConnection, spleisbehovMediator)
     }
 
