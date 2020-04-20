@@ -30,6 +30,7 @@ internal fun Application.oppgaveApi(
                         val personDto = personDao.findPerson(vedtak.personRef) ?: return@map null
                         SaksbehandleroppgaveDto(
                             spleisbehovId = oppgave.behovId,
+                            opprettet = oppgave.opprettet,
                             vedtaksperiodeId = vedtak.vedtaksperiodeId,
                             periodeFom = vedtak.fom,
                             periodeTom = vedtak.tom,

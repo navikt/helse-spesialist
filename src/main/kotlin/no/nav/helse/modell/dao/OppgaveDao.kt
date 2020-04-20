@@ -68,7 +68,8 @@ class OppgaveDao(private val dataSource: DataSource) {
     private fun oppgaveDto(it: Row): OppgaveDto {
         return OppgaveDto(
             id = it.long("id"),
-            oppdatert = it.localDateTimeOrNull("oppdatert"),
+            opprettet = it.localDateTime("opprettet"),
+            oppdatert = it.localDateOrNull("oppdatert"),
             oppgaveType = it.string("type"),
             behovId = UUID.fromString(it.string("behov_id")),
             status = Oppgavestatus.valueOf(it.string("status")),
