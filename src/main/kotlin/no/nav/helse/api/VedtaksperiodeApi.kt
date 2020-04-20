@@ -1,5 +1,6 @@
 package no.nav.helse.api
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -96,4 +97,5 @@ internal fun Application.vedtaksperiodeApi(
     }
 }
 
+@JsonIgnoreProperties
 data class Godkjenning(val godkjent: Boolean)
