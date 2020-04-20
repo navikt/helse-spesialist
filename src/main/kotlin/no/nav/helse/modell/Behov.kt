@@ -6,6 +6,7 @@ import java.util.*
 
 class Behov(val typer: List<Behovtype>, val fødselsnummer: String, val orgnummer: String, val spleisBehovId: UUID, val vedtaksperiodeId: UUID) {
     fun toJson() = objectMapper.writeValueAsString(mapOf(
+        "@event_name" to "behov",
         "@behov" to typer,
         "@id" to UUID.randomUUID(),
         "@opprettet" to LocalDateTime.now(),

@@ -154,6 +154,8 @@ internal class SpleisbehovMediator(
             objectMapper.writeValueAsString(
                 mapOf(
                     "@event_name" to "oppgave_oppdatert",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
                     "timeout" to spleisbehov.currentTimeout().toSeconds(),
                     "spleisbehovId" to spleisbehovId,
                     "fødselsnummer" to spleisbehov.fødselsnummer,

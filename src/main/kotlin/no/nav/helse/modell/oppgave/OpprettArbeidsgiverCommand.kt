@@ -13,8 +13,7 @@ internal class OpprettArbeidsgiverCommand(
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val orgnummer: String,
     behovId: UUID,
-    parent: Command,
-    ferdigstilt: LocalDateTime? = null
+    parent: Command
 ) : Command(
     behovId = behovId,
     initiellStatus = Oppgavestatus.AvventerSystem,
