@@ -28,7 +28,6 @@ internal class PersoninfoLøsningMessage {
                             "Løsning må være av typen HentEnhet eller HentPersoninfo"
                         }
                     }
-                    it.requireAll("@behov", Behovtype.HentPersoninfo)
                     it.requireKey("@løsning", "spleisBehovId")
                     it.requireValue("@final", true)
                 }
