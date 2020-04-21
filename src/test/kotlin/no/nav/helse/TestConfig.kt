@@ -18,7 +18,7 @@ import java.io.File
 import java.util.UUID
 import javax.sql.DataSource
 
-internal fun setupDataSource(): DataSource {
+internal fun setupDataSourceMedFlyway(): DataSource {
     val embeddedPostgres = EmbeddedPostgres.builder().start()
 
     val hikariConfig = HikariConfig().apply {
@@ -38,6 +38,21 @@ internal fun setupDataSource(): DataSource {
         .migrate()
 
     return dataSource
+}
+
+internal fun setupDataSource(): DataSource {
+    val embeddedPostgres = EmbeddedPostgres.builder().start()
+
+    val hikariConfig = HikariConfig().apply {
+        this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
+        maximumPoolSize = 3
+        minimumIdle = 1
+        idleTimeout = 10001
+        connectionTimeout = 1000
+        maxLifetime = 30001
+    }
+
+    return HikariDataSource(hikariConfig)
 }
 
 

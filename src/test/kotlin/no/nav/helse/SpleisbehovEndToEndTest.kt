@@ -1,8 +1,6 @@
 package no.nav.helse
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.dao.ArbeidsgiverDao
@@ -15,7 +13,6 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
-import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.InMemoryRapid
 import no.nav.helse.rapids_rivers.inMemoryRapid
 import org.junit.jupiter.api.Assertions.*
@@ -46,7 +43,7 @@ internal class SpleisbehovEndToEndTest {
 
     @BeforeAll
     fun setup() {
-        dataSource = setupDataSource()
+        dataSource = setupDataSourceMedFlyway()
         personDao = PersonDao(dataSource)
         arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         vedtakDao = VedtakDao(dataSource)

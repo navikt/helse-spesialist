@@ -4,7 +4,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.application.log
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.principal
 import io.ktor.client.HttpClient
@@ -91,7 +90,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         clientId = System.getenv("SPEIL_CLIENT_ID"),//readClientId(),
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
-    private val httpTraceLog = LoggerFactory.getLogger("sikkerLogg")
+    private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private val spleisbehovMediator = SpleisbehovMediator(
         spleisbehovDao = spleisbehovDao,
         personDao = personDao,
@@ -116,10 +115,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
-                    log.info(
-                        "Bruker=\"${principal.payload.getClaim("NAVident")
-                            .asString()}\" gjør kall mot url=\"${call.request.uri}\""
-                    )
                     auditLog.info(
                         "Bruker=\"${principal.payload.getClaim("NAVident")
                             .asString()}\" gjør kall mot url=\"${call.request.uri}\""

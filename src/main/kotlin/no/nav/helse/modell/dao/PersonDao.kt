@@ -17,6 +17,14 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
+    internal fun findPersonByAktørId(aktørId: Long): Int? = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf("SELECT id FROM person WHERE aktor_id=?;", aktørId)
+                .map { it.int("id") }
+                .asSingle
+        )
+    }
+
     internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT p.fodselsnummer, n.fornavn, n.mellomnavn, n.etternavn FROM person AS p JOIN person_navn AS n ON p.navn_ref = n.id WHERE p.id=?;", id)
@@ -31,6 +39,17 @@ class PersonDao(private val dataSource: DataSource) {
                 .asSingle
         )
     }
+
+    internal fun findNavn(personId: Int): NavnDto? =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT * from person_navn WHERE id=(SELECT navn_ref FROM person where id =?);",
+                    personId
+                ).map { NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")) }.asSingle
+            )
+        }
+
 
     internal fun insertNavn(fornavn: String, mellomnavn: String?, etternavn: String): Int =
         requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->

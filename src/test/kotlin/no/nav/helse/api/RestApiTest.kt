@@ -25,10 +25,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.AzureAdAppConfig
-import no.nav.helse.OidcDiscovery
+import no.nav.helse.*
 import no.nav.helse.accessTokenClient
-import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.httpClientForSpleis
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
@@ -43,9 +41,8 @@ import no.nav.helse.modell.dto.PersonForSpeilDto
 import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.inMemoryRapid
-import no.nav.helse.setupDataSource
+import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
@@ -70,6 +67,7 @@ internal class RestApiTest {
 
     private lateinit var app: ApplicationEngine
     private lateinit var spleisbehovMediator: SpleisbehovMediator
+    private lateinit var flyway: Flyway
     private val rapid = inMemoryRapid {}
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
@@ -103,6 +101,10 @@ internal class RestApiTest {
         postgresConnection = embeddedPostgres.postgresDatabase.connection
 
         dataSource = setupDataSource()
+
+        flyway = Flyway.configure()
+            .dataSource(dataSource)
+            .load()
 
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
@@ -142,6 +144,8 @@ internal class RestApiTest {
 
     @BeforeEach
     internal fun updateVedtaksperiodeId() {
+        flyway.clean()
+        flyway.migrate()
         vedtaksperiodeId = UUID.randomUUID()
     }
 
@@ -178,7 +182,7 @@ internal class RestApiTest {
     }
 
     @Test
-    fun `hent vedtaksperiode`() {
+    fun `hent vedtaksperiode med vedtaksperiodeId`() {
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,
@@ -196,6 +200,62 @@ internal class RestApiTest {
             HentPersoninfoLøsning("Test", null, "Testsen")
         )
         val response = runBlocking { client.get<HttpStatement>("/api/vedtaksperiode/$vedtaksperiodeId").execute() }
+        assertEquals(HttpStatusCode.OK, response.status)
+        val personForSpeilDto = runBlocking { response.receive<PersonForSpeilDto>() }
+        assertEquals(
+            vedtaksperiodeId.toString(),
+            personForSpeilDto.arbeidsgivere.first().vedtaksperioder.first()["id"].asText()
+        )
+    }
+
+    @Test
+    fun `hent vedtaksperiode med aktørId`() {
+        val spleisbehovId = UUID.randomUUID()
+        val aktørId = "98765"
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = aktørId,
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen")
+        )
+        val response = runBlocking { client.get<HttpStatement>("/api/vedtaksperiode/aktorId/$aktørId").execute() }
+        assertEquals(HttpStatusCode.OK, response.status)
+        val personForSpeilDto = runBlocking { response.receive<PersonForSpeilDto>() }
+        assertEquals(
+            vedtaksperiodeId.toString(),
+            personForSpeilDto.arbeidsgivere.first().vedtaksperioder.first()["id"].asText()
+        )
+    }
+
+    @Test
+    fun `hent vedtaksperiode med fødselsnummer`() {
+        val spleisbehovId = UUID.randomUUID()
+        val fødselsnummer = "42167376532"
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = fødselsnummer,
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen")
+        )
+        val response = runBlocking { client.get<HttpStatement>("/api/vedtaksperiode/fnr/$fødselsnummer").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
         val personForSpeilDto = runBlocking { response.receive<PersonForSpeilDto>() }
         assertEquals(

@@ -18,9 +18,7 @@ import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.VedtakDao
-import no.nav.helse.modell.dto.ArbeidsgiverForSpeilDto
-import no.nav.helse.modell.dto.PersonForSpeilDto
-import no.nav.helse.modell.dto.PersonFraSpleisDto
+import no.nav.helse.modell.dto.*
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.objectMapper
 import java.time.LocalDateTime
@@ -79,6 +77,96 @@ internal fun Application.vedtaksperiodeApi(
                 )
                 call.respond(personForSpeil)
             }
+            get("/api/vedtaksperiode/aktorId/{aktørId}") {
+                val aktørId = call.parameters["aktørId"]!!.toLong()
+                val personId = personDao.findPersonByAktørId(aktørId)
+                if (personId == null) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Fant ikke person"
+                    )
+                    return@get
+                }
+                val vedtak = vedtakDao.findVedtakByPersonRef(personId)
+                if (vedtak == null) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Fant ikke vedtaksperiode"
+                    )
+                    return@get
+                }
+                val arbeidsgiverDto =
+                    requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
+                val speilSnapshot =
+                    requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
+                        .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
+                val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
+                    if (it.organisasjonsnummer == arbeidsgiverDto.organisasjonsnummer) ArbeidsgiverForSpeilDto(
+                        it.organisasjonsnummer,
+                        arbeidsgiverDto.navn,
+                        it.id,
+                        it.vedtaksperioder
+                    ) else ArbeidsgiverForSpeilDto(
+                        it.organisasjonsnummer,
+                        "Ikke tilgjengelig",
+                        it.id,
+                        it.vedtaksperioder
+                    )
+                }
+                val navnDto = requireNotNull(personDao.findNavn(personId)){ "Fant ikke navn for person" }
+                val personForSpeil = PersonForSpeilDto(
+                    speilSnapshot.aktørId,
+                    speilSnapshot.fødselsnummer,
+                    navnDto,
+                    arbeidsgivere
+                )
+                call.respond(personForSpeil)
+            }
+            get("/api/vedtaksperiode/fnr/{fødselsnummer}") {
+                val fødselsnummer = call.parameters["fødselsnummer"]!!.toLong()
+                val personId = personDao.findPersonByFødselsnummer(fødselsnummer)
+                if (personId == null) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Fant ikke person"
+                    )
+                    return@get
+                }
+                val vedtak = vedtakDao.findVedtakByPersonRef(personId)
+                if (vedtak == null) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Fant ikke vedtaksperiode"
+                    )
+                    return@get
+                }
+                val arbeidsgiverDto =
+                    requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
+                val speilSnapshot =
+                    requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
+                        .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
+                val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
+                    if (it.organisasjonsnummer == arbeidsgiverDto.organisasjonsnummer) ArbeidsgiverForSpeilDto(
+                        it.organisasjonsnummer,
+                        arbeidsgiverDto.navn,
+                        it.id,
+                        it.vedtaksperioder
+                    ) else ArbeidsgiverForSpeilDto(
+                        it.organisasjonsnummer,
+                        "Ikke tilgjengelig",
+                        it.id,
+                        it.vedtaksperioder
+                    )
+                }
+                val navnDto = requireNotNull(personDao.findNavn(personId)){ "Fant ikke navn for person" }
+                val personForSpeil = PersonForSpeilDto(
+                    speilSnapshot.aktørId,
+                    speilSnapshot.fødselsnummer,
+                    navnDto,
+                    arbeidsgivere
+                )
+                call.respond(personForSpeil)
+            }
             post("/api/vedtaksperiode/{behovId}/vedtak") {
                 val behovId = UUID.fromString(call.parameters["behovId"]!!)
                 val godkjenning = call.receive<Godkjenning>()
@@ -93,9 +181,11 @@ internal fun Application.vedtaksperiodeApi(
                 spleisbehovMediator.håndter(behovId, løsning)
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
+
         }
     }
 }
+
 
 @JsonIgnoreProperties
 data class Godkjenning(val godkjent: Boolean)

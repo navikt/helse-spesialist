@@ -35,7 +35,7 @@ internal class SpleisbehovMediatorTest {
 
     @BeforeAll
     fun setup() {
-        dataSource = setupDataSource()
+        dataSource = setupDataSourceMedFlyway()
         personDao = PersonDao(dataSource)
         arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         vedtakDao = VedtakDao(dataSource)

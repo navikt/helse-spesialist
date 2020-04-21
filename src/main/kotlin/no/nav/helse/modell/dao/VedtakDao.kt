@@ -1,5 +1,6 @@
 package no.nav.helse.modell.dao
 
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -21,17 +22,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
     internal fun findVedtak(id: Long): VedtakDto = using(sessionOf(dataSource)) { session ->
         requireNotNull(session.run(
             queryOf("SELECT * FROM vedtak WHERE id=?;", id)
-                .map {
-                    VedtakDto(
-                        id = it.long("id"),
-                        vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-                        fom = it.localDate("fom"),
-                        tom = it.localDate("fom"),
-                        arbeidsgiverRef = it.long("arbeidsgiver_ref"),
-                        personRef = it.long("person_ref"),
-                        speilSnapshotRef = it.long("speil_snapshot_ref")
-                    )
-                }
+                .map (::vedtakDto)
                 .asSingle
         ))
     }
@@ -40,20 +31,30 @@ internal class VedtakDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf("SELECT * FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
-                    .map {
-                        VedtakDto(
-                            id = it.long("id"),
-                            vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-                            fom = it.localDate("fom"),
-                            tom = it.localDate("fom"),
-                            arbeidsgiverRef = it.long("arbeidsgiver_ref"),
-                            personRef = it.long("person_ref"),
-                            speilSnapshotRef = it.long("speil_snapshot_ref")
-                        )
-                    }
+                    .map (::vedtakDto)
                     .asSingle
             )
         }
+    internal fun findVedtakByPersonRef(personRef: Int): VedtakDto? =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf("SELECT * FROM vedtak WHERE person_ref=?;", personRef)
+                    .map (::vedtakDto)
+                    .asSingle
+            )
+        }
+
+    private fun vedtakDto(row: Row): VedtakDto {
+        return VedtakDto(
+            id = row.long("id"),
+            vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+            fom = row.localDate("fom"),
+            tom = row.localDate("fom"),
+            arbeidsgiverRef = row.long("arbeidsgiver_ref"),
+            personRef = row.long("person_ref"),
+            speilSnapshotRef = row.long("speil_snapshot_ref")
+        )
+    }
 
     internal fun insertVedtak(
         vedtaksperiodeId: UUID,
