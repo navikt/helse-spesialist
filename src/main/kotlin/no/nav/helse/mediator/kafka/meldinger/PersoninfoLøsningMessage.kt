@@ -6,8 +6,10 @@ import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class PersoninfoLøsningMessage {
@@ -15,6 +17,7 @@ internal class PersoninfoLøsningMessage {
         rapidsConnection: RapidsConnection,
         private val spleisbehovMediator: SpleisbehovMediator
     ) : River.PacketListener {
+        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         init {
             River(rapidsConnection).apply {
                 validate {
@@ -30,6 +33,10 @@ internal class PersoninfoLøsningMessage {
                     it.requireValue("@final", true)
                 }
             }.register(this)
+        }
+
+        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+            sikkerLog.info(problems.toExtendedReport())
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
