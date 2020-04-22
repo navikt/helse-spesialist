@@ -33,7 +33,7 @@ internal fun Application.vedtaksperiodeApi(
 ) {
     routing {
         authenticate {
-            get("/api/vedtaksperiode/{vedtaksperiodeId}") {
+            get("/api/person/{vedtaksperiodeId}") {
                 val vedtaksperiodeId = UUID.fromString(call.parameters["vedtaksperiodeId"]!!)
                 val vedtak = vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)
                 if (vedtak == null) {

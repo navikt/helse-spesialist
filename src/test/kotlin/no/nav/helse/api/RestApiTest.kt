@@ -199,7 +199,7 @@ internal class RestApiTest {
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning("Test", null, "Testsen")
         )
-        val response = runBlocking { client.get<HttpStatement>("/api/vedtaksperiode/$vedtaksperiodeId").execute() }
+        val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
         val personForSpeilDto = runBlocking { response.receive<PersonForSpeilDto>() }
         assertEquals(
