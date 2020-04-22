@@ -77,7 +77,7 @@ internal fun Application.vedtaksperiodeApi(
                 )
                 call.respond(personForSpeil)
             }
-            get("/api/vedtaksperiode/aktorId/{aktørId}") {
+            get("/api/person/aktorId/{aktørId}") {
                 val aktørId = call.parameters["aktørId"]!!.toLong()
                 val personId = personDao.findPersonByAktørId(aktørId)
                 if (personId == null) {
@@ -122,7 +122,7 @@ internal fun Application.vedtaksperiodeApi(
                 )
                 call.respond(personForSpeil)
             }
-            get("/api/vedtaksperiode/fnr/{fødselsnummer}") {
+            get("/api/person/fnr/{fødselsnummer}") {
                 val fødselsnummer = call.parameters["fødselsnummer"]!!.toLong()
                 val personId = personDao.findPersonByFødselsnummer(fødselsnummer)
                 if (personId == null) {

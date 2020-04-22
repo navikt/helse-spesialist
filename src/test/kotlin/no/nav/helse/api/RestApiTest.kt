@@ -227,7 +227,7 @@ internal class RestApiTest {
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning("Test", null, "Testsen")
         )
-        val response = runBlocking { client.get<HttpStatement>("/api/vedtaksperiode/aktorId/$aktørId").execute() }
+        val response = runBlocking { client.get<HttpStatement>("/api/person/aktorId/$aktørId").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
         val personForSpeilDto = runBlocking { response.receive<PersonForSpeilDto>() }
         assertEquals(
@@ -255,7 +255,7 @@ internal class RestApiTest {
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning("Test", null, "Testsen")
         )
-        val response = runBlocking { client.get<HttpStatement>("/api/vedtaksperiode/fnr/$fødselsnummer").execute() }
+        val response = runBlocking { client.get<HttpStatement>("/api/person/fnr/$fødselsnummer").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
         val personForSpeilDto = runBlocking { response.receive<PersonForSpeilDto>() }
         assertEquals(
