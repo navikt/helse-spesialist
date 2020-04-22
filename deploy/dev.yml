@@ -61,5 +61,3 @@ spec:
       value: f844f535-2174-445c-a0db-b6c55f2e4780
     - name: SPLEIS_CLIENT_ID
       value: db11b132-a015-41df-8593-53f8d50eda31
-    - name: SPEIL_CLIENT_ID
-      value: 0f5ceb2a-6752-409b-a4a0-a5c80c277a05
