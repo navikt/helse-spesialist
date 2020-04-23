@@ -7,6 +7,7 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.parseAuthorizationHeader
 import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
@@ -177,12 +178,7 @@ internal fun Application.vedtaksperiodeApi(
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
 
-                sikkerLogg.info("payload" + accessToken.payload.claims)
-                accessToken.payload.takeIf { it is DecodedJWT }?.also {
-                    it as DecodedJWT
-                    sikkerLogg.info("Decoded token: " + it.token)
-                }
-                sikkerLogg.info("Token: " + call.response.headers["Authorization"])
+                sikkerLogg.info("Token: " + call.request.parseAuthorizationHeader())
 
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
