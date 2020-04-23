@@ -78,12 +78,14 @@ class PersonDao(private val dataSource: DataSource) {
 
     internal fun updateNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String) =
         using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    "UPDATE person_navn SET fornavn=?, mellomnavn=?, etternavn=?, oppdatert=now() WHERE id=(SELECT navn_ref FROM person WHERE fodselsnummer=?);",
-                    fornavn, mellomnavn, etternavn, fødselsnummer
-                ).asUpdate
-            )
+            session.transaction { tx ->
+                tx.run(
+                    queryOf(
+                        "UPDATE person_navn SET fornavn=?, mellomnavn=?, etternavn=? WHERE id=(SELECT navn_ref FROM person WHERE fodselsnummer=?);",
+                        fornavn, mellomnavn, etternavn, fødselsnummer
+                    ).asUpdate
+                )
+                tx.run(queryOf("UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;", fødselsnummer).asUpdate) }
         }
 
     internal fun updateEnhet(fødselsnummer: Long, enhetNr: Int) = using(sessionOf(dataSource)) { session ->
