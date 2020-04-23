@@ -34,6 +34,7 @@ internal fun setupDataSourceMedFlyway(): DataSource {
 
     Flyway.configure()
         .dataSource(dataSource)
+        .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
         .load()
         .migrate()
 

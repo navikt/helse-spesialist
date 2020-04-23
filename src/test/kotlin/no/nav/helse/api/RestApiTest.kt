@@ -9,11 +9,7 @@ import io.ktor.client.call.receive
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.host
-import io.ktor.client.request.port
-import io.ktor.client.request.post
+import io.ktor.client.request.*
 import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
@@ -26,36 +22,24 @@ import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
-import no.nav.helse.accessTokenClient
-import no.nav.helse.httpClientForSpleis
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.SpleisbehovDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dto.PersonForSpeilDto
 import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.rapids_rivers.inMemoryRapid
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.io.TempDir
 import java.net.ServerSocket
 import java.nio.file.Path
 import java.sql.Connection
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import javax.sql.DataSource
 
@@ -72,7 +56,9 @@ internal class RestApiTest {
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
-    private val navIdent = "abcd"
+    private val saksbehandlerIdent = "1234"
+    private val oid = "abcd"
+    private val epostadresse = "epostadresse"
     private val clientId = "client_id"
     private val issuer = "https://jwt-provider-domain"
     private val client = HttpClient {
@@ -81,7 +67,7 @@ internal class RestApiTest {
             port = httpPort
             header(
                 "Authorization",
-                "Bearer ${jwtStub.getToken(arrayOf(requiredGroup), navIdent, clientId, issuer)}".also { println(it) })
+                "Bearer ${jwtStub.getToken(arrayOf(requiredGroup), oid, epostadresse, clientId, issuer)}".also { println(it) })
         }
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -104,6 +90,7 @@ internal class RestApiTest {
 
         flyway = Flyway.configure()
             .dataSource(dataSource)
+            .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
             .load()
 
         val personDao = PersonDao(dataSource)
@@ -285,7 +272,8 @@ internal class RestApiTest {
         val response = runBlocking {
             client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
-                    objectMapper.writeValueAsString(Godkjenning(spleisbehovId, true)), contentType = ContentType.Application.Json
+                    objectMapper.writeValueAsString(Godkjenning(spleisbehovId, true, saksbehandlerIdent = saksbehandlerIdent)),
+                    contentType = ContentType.Application.Json
                 )
             }.execute()
         }
@@ -298,6 +286,6 @@ internal class RestApiTest {
         assertNotNull(løsning)
         løsning!!
         assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
-        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), navIdent)
+        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
     }
 }

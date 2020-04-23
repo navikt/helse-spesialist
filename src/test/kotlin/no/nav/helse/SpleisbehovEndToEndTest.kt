@@ -94,7 +94,9 @@ internal class SpleisbehovEndToEndTest {
         spleisbehovMediator.håndter(spleisbehovId, SaksbehandlerLøsning(
             godkjent = true,
             saksbehandlerIdent = "abcd",
-            godkjenttidspunkt = LocalDateTime.now()
+            godkjenttidspunkt = LocalDateTime.now(),
+            oid = UUID.randomUUID().toString(),
+            epostadresse = "epost"
         ))
         assertEquals(5, rapid.outgoingMessages.size)
         val løsninger = rapid.outgoingMessages

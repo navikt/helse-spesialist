@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
@@ -196,7 +197,9 @@ internal class SpleisbehovTest {
         spleisBehov.fortsett(SaksbehandlerLøsning(
             godkjent = true,
             saksbehandlerIdent = "abcd",
-            godkjenttidspunkt = LocalDateTime.now()
+            godkjenttidspunkt = LocalDateTime.now(),
+            oid = UUID.randomUUID().toString(),
+            epostadresse = "epost"
         ))
 
         assertNotNull(spleisBehov.løsning())

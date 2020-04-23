@@ -61,3 +61,5 @@ spec:
       value: f844f535-2174-445c-a0db-b6c55f2e4780
     - name: SPLEIS_CLIENT_ID
       value: db11b132-a015-41df-8593-53f8d50eda31
+    - name: SPESIALIST_OID
+      value: be87b958-4ff0-405d-80b5-f47e836f0a0e

@@ -5,7 +5,7 @@ import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil.createHikariDataSourceWithVa
 import org.flywaydb.core.Flyway
 import javax.sql.DataSource
 
-internal class DataSourceBuilder(env: Map<String, String>) {
+internal class DataSourceBuilder(private val env: Map<String, String>) {
     private val databaseName =
         requireNotNull(env["DATABASE_NAME"]) { "database name must be set if jdbc url is not provided" }
     private val databaseHost =
@@ -37,6 +37,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
     private fun runMigration(dataSource: DataSource, initSql: String? = null) =
         Flyway.configure()
             .dataSource(dataSource)
+            .placeholders(mapOf("spesialist_oid" to requireNotNull(env["SPESIALIST_OID"])))
             .initSql(initSql)
             .load()
             .migrate()

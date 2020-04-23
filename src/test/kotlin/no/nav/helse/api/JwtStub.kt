@@ -27,9 +27,10 @@ internal class JwtStub {
         }
     }
 
-    internal fun getToken(groups: Array<String>, navIdent: String, clientId: String, issuer: String) = JWT.create()
+    internal fun getToken(groups: Array<String>, oid: String, epostadresse: String, clientId: String, issuer: String) = JWT.create()
         .withArrayClaim("groups", groups)
-        .withClaim("NAVident", navIdent)
+        .withClaim("oid", oid)
+        .withClaim("preferred_name", epostadresse)
         .withAudience(clientId)
         .withKeyId("randomString")
         .withIssuer(issuer)

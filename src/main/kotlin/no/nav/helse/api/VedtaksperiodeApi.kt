@@ -174,14 +174,16 @@ internal fun Application.vedtaksperiodeApi(
             post("/api/vedtak") {
                 val godkjenning = call.receive<Godkjenning>()
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
-                val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
-
-                sikkerLogg.info(call.response.headers["Authorization"])
+                val saksbehandlerIdent = godkjenning.saksbehandlerIdent
+                val oid = accessToken.payload.getClaim("oid").asString()
+                val epostadresse = accessToken.payload.getClaim("preferred_name").asString()
 
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
                     godkjenttidspunkt = LocalDateTime.now(),
-                    saksbehandlerIdent = saksbehandlerIdent
+                    saksbehandlerIdent = saksbehandlerIdent,
+                    oid = oid,
+                    epostadresse = epostadresse
                 )
 
                 spleisbehovMediator.håndter(godkjenning.behovId, løsning)
@@ -194,4 +196,4 @@ internal fun Application.vedtaksperiodeApi(
 
 
 @JsonIgnoreProperties
-data class Godkjenning(val behovId: UUID, val godkjent: Boolean)
+data class Godkjenning(val behovId: UUID, val godkjent: Boolean, val saksbehandlerIdent: String)
