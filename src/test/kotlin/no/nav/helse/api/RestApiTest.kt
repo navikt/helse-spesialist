@@ -283,9 +283,9 @@ internal class RestApiTest {
             HentPersoninfoLøsning("Test", null, "Testsen")
         )
         val response = runBlocking {
-            client.post<HttpStatement>("/api/vedtaksperiode/$spleisbehovId/vedtak") {
+            client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
-                    objectMapper.writeValueAsString(Godkjenning(true)), contentType = ContentType.Application.Json
+                    objectMapper.writeValueAsString(Godkjenning(spleisbehovId, true)), contentType = ContentType.Application.Json
                 )
             }.execute()
         }

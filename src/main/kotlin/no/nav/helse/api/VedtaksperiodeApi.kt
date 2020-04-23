@@ -167,8 +167,7 @@ internal fun Application.vedtaksperiodeApi(
                 )
                 call.respond(personForSpeil)
             }
-            post("/api/vedtaksperiode/{behovId}/vedtak") {
-                val behovId = UUID.fromString(call.parameters["behovId"]!!)
+            post("/api/vedtak") {
                 val godkjenning = call.receive<Godkjenning>()
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
@@ -178,7 +177,7 @@ internal fun Application.vedtaksperiodeApi(
                     saksbehandlerIdent = saksbehandlerIdent
                 )
 
-                spleisbehovMediator.håndter(behovId, løsning)
+                spleisbehovMediator.håndter(godkjenning.behovId, løsning)
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
 
@@ -188,4 +187,4 @@ internal fun Application.vedtaksperiodeApi(
 
 
 @JsonIgnoreProperties
-data class Godkjenning(val godkjent: Boolean)
+data class Godkjenning(val behovId: UUID, val godkjent: Boolean)
