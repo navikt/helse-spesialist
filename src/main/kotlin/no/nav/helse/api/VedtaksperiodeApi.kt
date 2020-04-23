@@ -178,7 +178,7 @@ internal fun Application.vedtaksperiodeApi(
                 val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
 
                 sikkerLogg.info("payload" + accessToken.payload.claims)
-                accessToken.payload.takeIf { it is DecodedJWT }.also {
+                accessToken.payload.takeIf { it is DecodedJWT }?.also {
                     it as DecodedJWT
                     sikkerLogg.info("Decoded token: " + it.token)
                 }
