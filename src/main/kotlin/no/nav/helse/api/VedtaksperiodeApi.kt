@@ -1,5 +1,6 @@
 package no.nav.helse.api
 
+import com.auth0.jwt.interfaces.DecodedJWT
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.application.Application
@@ -176,7 +177,12 @@ internal fun Application.vedtaksperiodeApi(
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
 
-                sikkerLogg.info(call.response.headers["Authorization"])
+                sikkerLogg.info("payload" + accessToken.payload.claims)
+                accessToken.payload.takeIf { it is DecodedJWT }.also {
+                    it as DecodedJWT
+                    sikkerLogg.info("Decoded token: " + it.token)
+                }
+                sikkerLogg.info("Token: " + call.response.headers["Authorization"])
 
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
