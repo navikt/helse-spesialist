@@ -21,6 +21,8 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.dto.*
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.objectMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -31,6 +33,8 @@ internal fun Application.vedtaksperiodeApi(
     arbeidsgiverDao: ArbeidsgiverDao,
     spleisbehovMediator: SpleisbehovMediator
 ) {
+    val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+
     routing {
         authenticate {
             get("/api/person/{vedtaksperiodeId}") {
@@ -171,6 +175,9 @@ internal fun Application.vedtaksperiodeApi(
                 val godkjenning = call.receive<Godkjenning>()
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
+
+                sikkerLogg.info(call.response.headers["Authorization"])
+
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
                     godkjenttidspunkt = LocalDateTime.now(),
