@@ -2,7 +2,6 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
-import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -10,7 +9,7 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 internal class PersoninfoLøsningMessage {
     internal class Factory(
@@ -21,7 +20,8 @@ internal class PersoninfoLøsningMessage {
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireValue("@event_name", "behov")
+                    it.demandValue("@event_name", "behov")
+                    it.demandValue("@final", true)
                     it.require("@behov") { node ->
                         require(node.isArray) { "@behov må være et array" }
                         require(node.any { item -> item.asText() in arrayOf("HentEnhet", "HentPersoninfo") }) {
@@ -29,13 +29,12 @@ internal class PersoninfoLøsningMessage {
                         }
                     }
                     it.requireKey("@løsning", "spleisBehovId")
-                    it.requireValue("@final", true)
                 }
             }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-            sikkerLog.info(problems.toExtendedReport())
+            sikkerLog.debug("forstod ikke HentEnhet eller HentPersoninfo:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {

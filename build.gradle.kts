@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.3.72"
 }
 
 val junitJupiterVersion = "5.6.0"
@@ -23,10 +23,8 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("com.github.navikt:rapids-and-rivers:1.73dddb5")
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
-    implementation("net.logstash.logback:logstash-logback-encoder:6.3")
     implementation("com.papertrailapp:logback-syslog4j:1.0.0")
     implementation("com.zaxxer:HikariCP:3.4.2")
     implementation("no.nav:vault-jdbc:1.3.7")
@@ -37,7 +35,6 @@ dependencies {
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
 
-    implementation("com.github.navikt:rapids-and-rivers:1.fa8a52f")
     implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
         exclude(group = "junit")
     }

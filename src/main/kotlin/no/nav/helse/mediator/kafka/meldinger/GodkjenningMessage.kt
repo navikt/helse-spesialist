@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class GodkjenningMessage(
     val id: UUID,
@@ -29,8 +29,8 @@ internal class GodkjenningMessage(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireAll("@behov", listOf("Godkjenning"))
-                    it.forbid("@løsning")
+                    it.demandAll("@behov", listOf("Godkjenning"))
+                    it.rejectKey("@løsning")
                     it.requireKey(
                         "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
                         "periodeTom"
@@ -53,7 +53,7 @@ internal class GodkjenningMessage(
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-            sikkerLogg.debug(problems.toExtendedReport())
+            sikkerLogg.error("Forstod ikke Godkjenning-behov:\n${problems.toExtendedReport()}")
         }
     }
 }
