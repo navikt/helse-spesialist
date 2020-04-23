@@ -22,19 +22,14 @@ internal class PersoninfoLøsningMessage {
                 validate {
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
-                    it.require("@behov") { node ->
-                        require(node.isArray) { "@behov må være et array" }
-                        require(node.any { item -> item.asText() in arrayOf("HentEnhet", "HentPersoninfo") }) {
-                            "Løsning må være av typen HentEnhet eller HentPersoninfo"
-                        }
-                    }
+                    it.demandAllOrAny("@behov", listOf("HentEnhet", "HentPersoninfo"))
                     it.requireKey("@løsning", "spleisBehovId")
                 }
             }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-            sikkerLog.debug("forstod ikke HentEnhet eller HentPersoninfo:\n${problems.toExtendedReport()}")
+            sikkerLog.error("forstod ikke HentEnhet eller HentPersoninfo:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
