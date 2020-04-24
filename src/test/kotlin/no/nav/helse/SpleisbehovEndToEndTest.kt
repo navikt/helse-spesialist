@@ -111,7 +111,7 @@ internal class SpleisbehovEndToEndTest {
         customAssertNotNull(løsning)
 
         løsning as ObjectNode
-        assertEquals(listOf("Godkjenning", "saksbehandlerIdent", "godkjenttidspunkt"), løsning.fieldNames().asSequence().toList())
+        assertEquals(listOf("Godkjenning"), løsning.fieldNames().asSequence().toList())
     }
 }
 

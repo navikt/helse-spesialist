@@ -29,6 +29,7 @@ import no.nav.helse.modell.dto.PersonForSpeilDto
 import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.inMemoryRapid
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
@@ -68,7 +69,13 @@ internal class RestApiTest {
             port = httpPort
             header(
                 "Authorization",
-                "Bearer ${jwtStub.getToken(arrayOf(requiredGroup), oid.toString(), epostadresse, clientId, issuer)}".also { println(it) })
+                "Bearer ${jwtStub.getToken(
+                    arrayOf(requiredGroup),
+                    oid.toString(),
+                    epostadresse,
+                    clientId,
+                    issuer
+                )}".also { println(it) })
         }
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -274,7 +281,13 @@ internal class RestApiTest {
         val response = runBlocking {
             client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
-                    objectMapper.writeValueAsString(Godkjenning(spleisbehovId, true, saksbehandlerIdent = saksbehandlerIdent)),
+                    objectMapper.writeValueAsString(
+                        Godkjenning(
+                            spleisbehovId,
+                            true,
+                            saksbehandlerIdent = saksbehandlerIdent
+                        )
+                    ),
                     contentType = ContentType.Application.Json
                 )
             }.execute()
@@ -285,9 +298,9 @@ internal class RestApiTest {
             .filter { it.hasNonNull("@løsning") }
             .firstOrNull { it["@id"]?.asText() == spleisbehovId.toString() }
             ?.get("@løsning")
-        assertNotNull(løsning)
-        løsning!!
+        requireNotNull(løsning)
         assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
-        assertEquals(løsning["saksbehandlerIdent"].asText(), saksbehandlerIdent)
+        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
+        assertNotNull(løsning["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
     }
 }
