@@ -115,10 +115,10 @@ internal class Spleisbehov(
         current().fortsett(løsning)
         this.løsning = mapOf(
             "Godkjenning" to mapOf(
-                "saksbehandlerIdent" to løsning.saksbehandlerIdent,
-                "godkjentTidspunkt" to løsning.godkjenttidspunkt,
                 "godkjent" to løsning.godkjent
-            )
+            ),
+            "saksbehandlerIdent" to løsning.saksbehandlerIdent,
+            "godkjenttidspunkt" to løsning.godkjenttidspunkt
         )
     }
 

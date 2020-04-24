@@ -179,13 +179,6 @@ internal fun Application.vedtaksperiodeApi(
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
-                sikkerLogg.info("payload" + accessToken.payload.claims)
-                accessToken.payload.takeIf { it is DecodedJWT }?.also {
-                    it as DecodedJWT
-                    sikkerLogg.info("Decoded token: " + it.token)
-                }
-                sikkerLogg.info("Token: " + call.response.headers["Authorization"])
-
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
                     godkjenttidspunkt = LocalDateTime.now(),

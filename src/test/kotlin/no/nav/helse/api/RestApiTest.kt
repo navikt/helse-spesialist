@@ -288,6 +288,6 @@ internal class RestApiTest {
         assertNotNull(løsning)
         løsning!!
         assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
-        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
+        assertEquals(løsning["saksbehandlerIdent"].asText(), saksbehandlerIdent)
     }
 }
