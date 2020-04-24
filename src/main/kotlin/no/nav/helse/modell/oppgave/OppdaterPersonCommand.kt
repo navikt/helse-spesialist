@@ -8,7 +8,6 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OppdaterPersonCommand(
@@ -16,8 +15,7 @@ internal class OppdaterPersonCommand(
     private val personDao: PersonDao,
     private val fødselsnummer: String,
     behovId: UUID,
-    parent: Command,
-    ferdigstilt: LocalDateTime? = null
+    parent: Command
 ) : Command(
     behovId = behovId,
     initiellStatus = Oppgavestatus.AvventerSystem,
@@ -75,7 +73,6 @@ internal class OppdaterPersonCommand(
             ferdigstillSystem()
         }
     }
-
 
     override fun execute() {
         oppgaver.forEach { it.execute() }

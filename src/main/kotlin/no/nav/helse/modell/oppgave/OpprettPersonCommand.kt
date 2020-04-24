@@ -7,7 +7,6 @@ import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OpprettPersonCommand(
@@ -16,8 +15,7 @@ internal class OpprettPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
     behovId: UUID,
-    parent: Command,
-    ferdigstilt: LocalDateTime? = null
+    parent: Command
 ) : Command(
     behovId = behovId,
     initiellStatus = Oppgavestatus.AvventerSystem,
@@ -39,12 +37,12 @@ internal class OpprettPersonCommand(
         }
     }
 
-    override fun fortsett(hentEnhetLøsning: HentEnhetLøsning) {
-        enhetId = hentEnhetLøsning.enhetNr.toInt()
+    override fun fortsett(løsning: HentEnhetLøsning) {
+        enhetId = løsning.enhetNr.toInt()
     }
 
-    override fun fortsett(hentPersoninfoLøsning: HentPersoninfoLøsning) {
-        navnId = personDao.insertNavn(hentPersoninfoLøsning.fornavn, hentPersoninfoLøsning.mellomnavn, hentPersoninfoLøsning.etternavn)
+    override fun fortsett(løsning: HentPersoninfoLøsning) {
+        navnId = personDao.insertNavn(løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
     }
 
 }

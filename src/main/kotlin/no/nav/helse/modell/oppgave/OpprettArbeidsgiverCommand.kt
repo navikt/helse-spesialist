@@ -5,7 +5,6 @@ import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OpprettArbeidsgiverCommand(

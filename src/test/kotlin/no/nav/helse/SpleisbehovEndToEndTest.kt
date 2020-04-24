@@ -41,6 +41,8 @@ internal class SpleisbehovEndToEndTest {
     private val httpClientForSpleis = httpClientForSpleis()
     private val accessTokenClient = accessTokenClient()
 
+    private val spesialistOID: UUID = UUID.randomUUID()
+
     @BeforeAll
     fun setup() {
         dataSource = setupDataSourceMedFlyway()
@@ -65,7 +67,8 @@ internal class SpleisbehovEndToEndTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
         ).apply { init(rapid) }
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
@@ -95,7 +98,7 @@ internal class SpleisbehovEndToEndTest {
             godkjent = true,
             saksbehandlerIdent = "abcd",
             godkjenttidspunkt = LocalDateTime.now(),
-            oid = UUID.randomUUID().toString(),
+            oid = UUID.randomUUID(),
             epostadresse = "epost"
         ))
         assertEquals(5, rapid.outgoingMessages.size)

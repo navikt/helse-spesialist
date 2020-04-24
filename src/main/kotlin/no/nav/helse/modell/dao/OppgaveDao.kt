@@ -24,15 +24,22 @@ class OppgaveDao(private val dataSource: DataSource) {
             )
         }
 
-    fun updateOppgave(behovId: UUID, oppgavetype: String, oppgavestatus: Oppgavestatus, ferdigstiltAv: String?) =
+    fun updateOppgave(
+        behovId: UUID,
+        oppgavetype: String,
+        oppgavestatus: Oppgavestatus,
+        ferdigstiltAv: String?,
+        oid: UUID?
+    ) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, status=?::oppgavestatus WHERE behov_id=? AND type=?;",
+                    "UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus WHERE behov_id=? AND type=?;",
                     ferdigstiltAv,
-                    oppgavetype,
+                    oid,
+                    oppgavestatus.name,
                     behovId,
-                    oppgavestatus.name
+                    oppgavetype
                 ).asUpdate
             )
         }
@@ -69,7 +76,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         return OppgaveDto(
             id = it.long("id"),
             opprettet = it.localDateTime("opprettet"),
-            oppdatert = it.localDateOrNull("oppdatert"),
+            oppdatert = it.localDateTimeOrNull("oppdatert"),
             oppgaveType = it.string("type"),
             behovId = UUID.fromString(it.string("behov_id")),
             status = Oppgavestatus.valueOf(it.string("status")),

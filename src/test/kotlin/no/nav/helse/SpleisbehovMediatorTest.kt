@@ -33,6 +33,8 @@ internal class SpleisbehovMediatorTest {
     private val httpClientForSpleis = httpClientForSpleis()
     private val accessTokenClient = accessTokenClient()
 
+    private val spesialistOID: UUID = UUID.randomUUID()
+
     @BeforeAll
     fun setup() {
         dataSource = setupDataSourceMedFlyway()
@@ -54,7 +56,8 @@ internal class SpleisbehovMediatorTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
         ).apply { init(inMemoryRapid {  }) }
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(

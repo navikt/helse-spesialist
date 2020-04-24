@@ -3,7 +3,6 @@ package no.nav.helse.modell.oppgave
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class SaksbehandlerGodkjenningCommand(
@@ -17,7 +16,7 @@ internal class SaksbehandlerGodkjenningCommand(
 ) {
     override fun execute() {}
 
-    override fun fortsett(saksbehandlerLøsning: SaksbehandlerLøsning) {
-        ferdigstill(saksbehandlerLøsning.saksbehandlerIdent)
+    override fun fortsett(løsning: SaksbehandlerLøsning) {
+        ferdigstill(løsning.epostadresse, løsning.oid)
     }
 }

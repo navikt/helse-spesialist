@@ -175,7 +175,7 @@ internal fun Application.vedtaksperiodeApi(
                 val godkjenning = call.receive<Godkjenning>()
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = godkjenning.saksbehandlerIdent
-                val oid = accessToken.payload.getClaim("oid").asString()
+                val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_name").asString()
 
                 val løsning = SaksbehandlerLøsning(
@@ -189,7 +189,6 @@ internal fun Application.vedtaksperiodeApi(
                 spleisbehovMediator.håndter(godkjenning.behovId, løsning)
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
-
         }
     }
 }

@@ -18,9 +18,7 @@ class ArbeidsgiverMessage(
     val spleisbehovId: UUID,
     val arbeidsgiverNavn: String
 ) {
-    fun asArbeidsgiverLøsning() = ArbeidsgiverLøsning(
-        arbeidsgiverNavn
-    )
+    fun asArbeidsgiverLøsning() = ArbeidsgiverLøsning(arbeidsgiverNavn)
 
     internal class Factory(
         rapidsConnection: RapidsConnection,

@@ -83,7 +83,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val speilSnapshotRestDao = SpeilSnapshotRestDao(
         httpClient = spleisClient,
         accessTokenClient = accessTokenClient,
-        spleisClientId = System.getenv("SPLEIS_CLIENT_ID")
+        spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
     )
 
     private val azureConfig = AzureAdAppConfig(
@@ -98,7 +98,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         vedtakDao = vedtakDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
-        oppgaveDao = oppgaveDao
+        oppgaveDao = oppgaveDao,
+        spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {

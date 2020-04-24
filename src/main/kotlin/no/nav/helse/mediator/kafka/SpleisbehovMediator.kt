@@ -33,10 +33,14 @@ internal class SpleisbehovMediator(
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
-    private val oppgaveDao: OppgaveDao
+    private val oppgaveDao: OppgaveDao,
+    spesialistOID: UUID
 ) {
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
+
+    init { oid = spesialistOID }
+    companion object { lateinit var oid: UUID }
 
     internal fun init(rapidsConnection: RapidsConnection) {
         this.rapidsConnection = rapidsConnection
@@ -97,21 +101,17 @@ internal class SpleisbehovMediator(
 
     fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
         log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) {
-            fortsett(løsning)
-        }
+        restoreAndInvoke(spleisbehovId) { fortsett(løsning) }
     }
 
     fun håndter(spleisbehovId: UUID, løsning: SaksbehandlerLøsning) {
         log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) {
-            fortsett(løsning)
-        }
+        restoreAndInvoke(spleisbehovId) { fortsett(løsning) }
     }
 
     fun håndter(spleisbehovId: UUID, påminnelseMessage: PåminnelseMessage) {
         log.info("Mottok påminnelse for spleisbehov", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) {}
+        restoreAndInvoke(spleisbehovId, {})
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {

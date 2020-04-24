@@ -57,9 +57,10 @@ internal class RestApiTest {
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
     private val saksbehandlerIdent = "1234"
-    private val oid = "abcd"
     private val epostadresse = "epostadresse"
     private val clientId = "client_id"
+    private val oid: UUID = UUID.randomUUID()
+    private val spesialistOID: UUID = UUID.randomUUID()
     private val issuer = "https://jwt-provider-domain"
     private val client = HttpClient {
         defaultRequest {
@@ -67,7 +68,7 @@ internal class RestApiTest {
             port = httpPort
             header(
                 "Authorization",
-                "Bearer ${jwtStub.getToken(arrayOf(requiredGroup), oid, epostadresse, clientId, issuer)}".also { println(it) })
+                "Bearer ${jwtStub.getToken(arrayOf(requiredGroup), oid.toString(), epostadresse, clientId, issuer)}".also { println(it) })
         }
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -112,7 +113,8 @@ internal class RestApiTest {
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
         ).apply { init(rapid) }
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)

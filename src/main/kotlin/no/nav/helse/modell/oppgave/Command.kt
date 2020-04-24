@@ -1,6 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
@@ -20,16 +21,18 @@ abstract class Command(
 ) {
     private var status = initiellStatus
     private var ferdigstiltAv: String? = null
+    private var oid: UUID? = null
     protected val log: Logger = LoggerFactory.getLogger("command")
     internal open val oppgaver: Set<Command> = setOf()
     internal val oppgavetype: String = requireNotNull(this::class.simpleName)
+
     internal abstract fun execute()
-    internal open fun fortsett(hentEnhetLøsning: HentEnhetLøsning) {
-        oppgaver.forEach { it.fortsett(hentEnhetLøsning) }
+    internal open fun fortsett(løsning: HentEnhetLøsning) {
+        oppgaver.forEach { it.fortsett(løsning) }
     }
 
-    internal open fun fortsett(hentPersoninfoLøsning: HentPersoninfoLøsning) {
-        oppgaver.forEach { it.fortsett(hentPersoninfoLøsning) }
+    internal open fun fortsett(løsning: HentPersoninfoLøsning) {
+        oppgaver.forEach { it.fortsett(løsning) }
     }
 
     internal open fun fortsett(løsning: ArbeidsgiverLøsning) {
@@ -40,12 +43,13 @@ abstract class Command(
         oppgaver.forEach { it.fortsett(løsning) }
     }
 
-    protected fun ferdigstill(ident: String) {
+    protected fun ferdigstill(ident: String, oid: UUID) {
         ferdigstiltAv = ident
+        this.oid = oid
         status = Oppgavestatus.Ferdigstilt
     }
 
-    internal fun ferdigstillSystem() = ferdigstill("System")
+    internal fun ferdigstillSystem() = ferdigstill("Spesialist", SpleisbehovMediator.oid)
 
     internal fun trengerExecute() = this.ferdigstiltAv == null
 
@@ -62,7 +66,7 @@ abstract class Command(
     }
 
     fun persisterEndring(oppgaveDao: OppgaveDao) {
-        oppgaveDao.updateOppgave(behovId, oppgavetype, status, ferdigstiltAv)
+        oppgaveDao.updateOppgave(behovId, oppgavetype, status, ferdigstiltAv, oid)
     }
 
     internal fun persister(oppgaveDao: OppgaveDao, vedtakRef: Int?) {

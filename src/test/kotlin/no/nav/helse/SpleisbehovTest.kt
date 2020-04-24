@@ -1,5 +1,6 @@
 package no.nav.helse
 
+import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
@@ -7,6 +8,7 @@ import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dao.SpleisbehovDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
@@ -17,8 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import java.util.UUID.randomUUID
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,9 +32,12 @@ internal class SpleisbehovTest {
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
     private lateinit var testDao: TestPersonDao
+    private lateinit var spleisbehovDao: SpleisbehovDao
 
     private val httpClientForSpleis = httpClientForSpleis()
     private val accessTokenClient = accessTokenClient()
+
+    private val spesialistOID: UUID = UUID.randomUUID()
 
     @BeforeAll
     fun setup() {
@@ -45,14 +49,25 @@ internal class SpleisbehovTest {
         oppgaveDao = OppgaveDao(dataSource)
         speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
         testDao = TestPersonDao(dataSource)
-    }
+        spleisbehovDao = SpleisbehovDao(dataSource)
 
+        SpleisbehovMediator(
+            spleisbehovDao,
+            personDao,
+            arbeidsgiverDao,
+            vedtakDao,
+            snapshotDao,
+            speilSnapshotRestDao,
+            oppgaveDao,
+            spesialistOID
+        )
+    }
 
     @Test
     fun `godkjenningsbehov for ny person legger inn ny person i DB`() {
-        val vedtaksperiodeId = randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehov = Spleisbehov(
-            id = randomUUID(),
+            id = UUID.randomUUID(),
             fødselsnummer = "12345",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -78,9 +93,9 @@ internal class SpleisbehovTest {
 
     @Test
     fun `godkjenningsbehov for person oppdaterer person i DB`() {
-        val vedtaksperiodeId = randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehov = Spleisbehov(
-            id = randomUUID(),
+            id = UUID.randomUUID(),
             fødselsnummer = "13245",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -109,9 +124,9 @@ internal class SpleisbehovTest {
 
     @Test
     fun `godkjenningsbehov for person med ny arbeidsgiver legger inn ny arbeidsgiver i DB`() {
-        val vedtaksperiodeId = randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehov = Spleisbehov(
-            id = randomUUID(),
+            id = UUID.randomUUID(),
             fødselsnummer = "23456",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -138,9 +153,9 @@ internal class SpleisbehovTest {
 
     @Test
     fun `Ved nytt godkjenningsbehov opprettes et nytt vedtak i DB`() {
-        val vedtaksperiodeId = randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehov = Spleisbehov(
-            id = randomUUID(),
+            id = UUID.randomUUID(),
             fødselsnummer = "34567",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -170,9 +185,9 @@ internal class SpleisbehovTest {
 
     @Test
     fun `ved godkjenning har spleisbehovet en løsning`() {
-        val vedtaksperiodeId = randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehov = Spleisbehov(
-            id = randomUUID(),
+            id = UUID.randomUUID(),
             fødselsnummer = "3457812",
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 20),
@@ -194,13 +209,15 @@ internal class SpleisbehovTest {
         spleisBehov.execute()
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         spleisBehov.execute()
-        spleisBehov.fortsett(SaksbehandlerLøsning(
-            godkjent = true,
-            saksbehandlerIdent = "abcd",
-            godkjenttidspunkt = LocalDateTime.now(),
-            oid = UUID.randomUUID().toString(),
-            epostadresse = "epost"
-        ))
+        spleisBehov.fortsett(
+            SaksbehandlerLøsning(
+                godkjent = true,
+                saksbehandlerIdent = "abcd",
+                godkjenttidspunkt = LocalDateTime.now(),
+                oid = UUID.randomUUID(),
+                epostadresse = "epost"
+            )
+        )
 
         assertNotNull(spleisBehov.løsning())
     }
