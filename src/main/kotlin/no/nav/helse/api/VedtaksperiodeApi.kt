@@ -177,7 +177,7 @@ internal fun Application.vedtaksperiodeApi(
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = godkjenning.saksbehandlerIdent
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-                val epostadresse = accessToken.payload.getClaim("preferred_name").asString()
+                val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
                 sikkerLogg.info("payload" + accessToken.payload.claims)
                 accessToken.payload.takeIf { it is DecodedJWT }?.also {
