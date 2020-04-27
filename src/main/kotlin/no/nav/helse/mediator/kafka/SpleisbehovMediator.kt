@@ -39,8 +39,13 @@ internal class SpleisbehovMediator(
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
 
-    init { oid = spesialistOID }
-    companion object { lateinit var oid: UUID }
+    init {
+        oid = spesialistOID
+    }
+
+    companion object {
+        lateinit var oid: UUID
+    }
 
     internal fun init(rapidsConnection: RapidsConnection) {
         this.rapidsConnection = rapidsConnection
@@ -111,11 +116,16 @@ internal class SpleisbehovMediator(
 
     fun håndter(spleisbehovId: UUID, påminnelseMessage: PåminnelseMessage) {
         log.info("Mottok påminnelse for spleisbehov", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId, {})
+        restoreAndInvoke(spleisbehovId) {}
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
         log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
+        val spleisbehovDBDto = requireNotNull(spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)) {
+            "Fant ikke behov med spleis referanse $vedtaksperiodeId"
+        }
+        val spleisbehov = spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data)
+        spleisbehov.invalider()
     }
 
     fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {

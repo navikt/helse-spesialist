@@ -38,7 +38,21 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
         session.run(queryOf("SELECT spleis_referanse, data FROM spleisbehov WHERE id=?", id)
             .map {
                 SpleisbehovDBDto(
+                    id = id,
                     spleisReferanse = UUID.fromString(it.string("spleis_referanse")),
+                    data = it.string("data")
+                )
+            }
+            .asSingle
+        )
+    }
+
+    internal fun findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? = using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT  id, data FROM spleisbehov WHERE id=?", spleisReferanse)
+            .map {
+                SpleisbehovDBDto(
+                    id = UUID.fromString(it.string("id")),
+                    spleisReferanse = spleisReferanse,
                     data = it.string("data")
                 )
             }

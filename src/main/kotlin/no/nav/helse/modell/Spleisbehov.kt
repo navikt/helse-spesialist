@@ -70,6 +70,15 @@ internal class Spleisbehov(
     private var løsning: Map<String, Any>? = null
 
     override fun execute() {
+        if (oppgaver.any { it.invalidert }) {
+            log.info(
+                "Utfører ikke oppgaver siden noen er invalidert, {}, {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("behovId", id)
+            )
+            return
+        }
+
         val førsteOppgave = current()
         behovstyper.clear()
         try {
@@ -90,9 +99,11 @@ internal class Spleisbehov(
             current().persister(oppgaveDao, vedtaksperiodeReferanse)
         }
 
-        log.info("Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}, {}, {}",
+        log.info(
+            "Oppgaver utført, gikk fra ${førsteOppgave.oppgavetype} til ${current().oppgavetype}, {}, {}",
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("behovId", id))
+            keyValue("behovId", id)
+        )
     }
 
     internal fun håndter(behovtype: Behovtype) {
@@ -122,8 +133,12 @@ internal class Spleisbehov(
         )
     }
 
-    private fun current() = oppgaver.first { it.oppgavetype == nåværendeOppgavetype }
+    override fun invalider() {
+        current().invalider()
+        current().persisterEndring(oppgaveDao)
+    }
 
+    private fun current() = oppgaver.first { it.oppgavetype == nåværendeOppgavetype }
 
     internal fun behov() = behovstyper.takeIf { it.isNotEmpty() }?.let { typer ->
         Behov(

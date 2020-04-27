@@ -25,6 +25,7 @@ abstract class Command(
     protected val log: Logger = LoggerFactory.getLogger("command")
     internal open val oppgaver: Set<Command> = setOf()
     internal val oppgavetype: String = requireNotNull(this::class.simpleName)
+    internal val invalidert: Boolean = status == Oppgavestatus.Invalidert
 
     internal abstract fun execute()
     internal open fun fortsett(løsning: HentEnhetLøsning) {
@@ -47,6 +48,12 @@ abstract class Command(
         ferdigstiltAv = ident
         this.oid = oid
         status = Oppgavestatus.Ferdigstilt
+    }
+
+    internal open fun invalider() {
+        status = Oppgavestatus.Invalidert
+        ferdigstiltAv = null
+        oid = null
     }
 
     internal fun ferdigstillSystem() = ferdigstill("Spesialist", SpleisbehovMediator.oid)
