@@ -84,8 +84,8 @@ internal class Spleisbehov(
         try {
             oppgaver.asSequence()
                 .dropWhile { it.oppgavetype != nåværendeOppgavetype }
-                .onEach(Command::execute)
                 .onEach { nåværendeOppgavetype = it.oppgavetype }
+                .onEach(Command::execute)
                 .takeWhile { !it.trengerExecute() }
                 .forEach {
                     log.info(

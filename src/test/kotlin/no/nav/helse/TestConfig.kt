@@ -10,6 +10,7 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import no.nav.helse.modell.dto.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.dto.PersonFraSpleisDto
@@ -82,6 +83,17 @@ internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUI
                         )
                     )
                 )
+            }
+        }
+    }
+}
+
+
+internal fun failingHttpClient(): HttpClient {
+    return HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                respond("Failed to execute request", status = HttpStatusCode.InternalServerError)
             }
         }
     }

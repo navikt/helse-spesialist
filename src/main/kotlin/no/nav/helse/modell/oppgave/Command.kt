@@ -82,6 +82,7 @@ abstract class Command(
             log.warn("Prøvde å persistere en oppgave som allerede ligger i databasen")
             return
         }
+        require(status != Oppgavestatus.Ferdigstilt) { "Kan ikke persistere en oppgave som er ferdigstilt" }
         oppgaveDao.insertOppgave(behovId, oppgavetype, status, vedtakRef)
     }
 }
