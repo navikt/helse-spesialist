@@ -10,6 +10,7 @@ import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.dto.OppgaveDto
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
@@ -113,10 +114,11 @@ internal class SpleisbehovMediator(
         restoreAndInvoke(spleisbehovId) {}
     }
 
-    fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
+    fun håndter(vedtaksperiodeId: UUID, løsning: TilInfotrygdMessage) {
         spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
+            val nåværendeOppgave = oppgaveDao.findNåværendeOppgave(spleisbehovDBDto.id) ?: return
             log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
-            spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data)
+            spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data, nåværendeOppgave)
                 .invalider()
         }
     }
@@ -169,7 +171,12 @@ internal class SpleisbehovMediator(
         )
     }
 
-    private fun spleisbehov(id: UUID, spleisReferanse: UUID, spleisbehovJson: String) = Spleisbehov.restore(
+    private fun spleisbehov(
+        id: UUID,
+        spleisReferanse: UUID,
+        spleisbehovJson: String,
+        nåværendeOppgave: OppgaveDto = requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
+    ) = Spleisbehov.restore(
         id = id,
         vedtaksperiodeId = spleisReferanse,
         data = spleisbehovJson,
@@ -179,6 +186,6 @@ internal class SpleisbehovMediator(
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
         oppgaveDao = oppgaveDao,
-        nåværendeOppgave = requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
+        nåværendeOppgave = nåværendeOppgave
     )
 }

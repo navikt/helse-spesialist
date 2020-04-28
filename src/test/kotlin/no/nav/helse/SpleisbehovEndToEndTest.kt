@@ -167,6 +167,53 @@ internal class SpleisbehovEndToEndTest {
         }
         assertEquals(Oppgavestatus.Invalidert, oppgavestatus)
     }
+
+    @ExperimentalContracts
+    @Test
+    fun `ignorerer TIL_INFOTRYGD når et spleisbehov er fullført`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val rapid = TestRapid()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
+        ).apply { init(rapid) }
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "456546",
+            aktørId = "7345626534",
+            organisasjonsnummer = "756876",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen")
+        )
+
+        spleisbehovMediator.håndter(
+            spleisbehovId, SaksbehandlerLøsning(
+                godkjent = false,
+                saksbehandlerIdent = "abcd",
+                godkjenttidspunkt = LocalDateTime.now(),
+                oid = UUID.randomUUID(),
+                epostadresse = "epost"
+            )
+        )
+
+        assertDoesNotThrow {
+            spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
+        }
+    }
 }
 
 @ExperimentalContracts
