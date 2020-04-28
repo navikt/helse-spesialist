@@ -9,13 +9,7 @@ import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.Spleisbehov
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.SpleisbehovDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
@@ -24,7 +18,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class SpleisbehovMediator(
     private val spleisbehovDao: SpleisbehovDao,
@@ -120,13 +114,10 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
-        log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
-        val spleisbehovDBDto = spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)
-        if (spleisbehovDBDto != null) {
-            val spleisbehov = spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data)
-            spleisbehov.invalider()
-        } else {
-            log.info("Ukjent vedtaksperiode {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
+        spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
+            log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
+            spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data)
+                .invalider()
         }
     }
 
