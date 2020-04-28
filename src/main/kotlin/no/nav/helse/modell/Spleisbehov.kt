@@ -134,6 +134,11 @@ internal class Spleisbehov(
     }
 
     override fun invalider() {
+        log.info(
+            "Invaliderer spleisbehov: {}, {}",
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("behovId", behovId)
+        )
         current().invalider()
         current().persisterEndring(oppgaveDao)
     }

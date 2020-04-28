@@ -1,8 +1,12 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.dao.PersonDao
@@ -13,8 +17,7 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
-import no.nav.helse.rapids_rivers.InMemoryRapid
-import no.nav.helse.rapids_rivers.inMemoryRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -60,9 +63,10 @@ internal class SpleisbehovEndToEndTest {
     @Test
     fun `Spleisbehov persisteres`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val rapid = inMemoryRapid {}
+        val rapid = TestRapid()
         val spleisbehovMediator = SpleisbehovMediator(
-            spleisbehovDao = spleisbehovDao, personDao = personDao,
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
@@ -81,7 +85,7 @@ internal class SpleisbehovEndToEndTest {
             periodeTom = LocalDate.of(2018, 1, 31)
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
-        assertEquals(2, rapid.outgoingMessages.size)
+        assertEquals(2, rapid.inspektør.size)
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
         spleisbehovMediator.håndter(
             spleisbehovId,
@@ -94,24 +98,74 @@ internal class SpleisbehovEndToEndTest {
         customAssertNotNull(saksbehandlerOppgaver)
         assertTrue(saksbehandlerOppgaver.any { it.vedtaksref == vedtakRef.toLong() })
 
-        spleisbehovMediator.håndter(spleisbehovId, SaksbehandlerLøsning(
-            godkjent = true,
-            saksbehandlerIdent = "abcd",
-            godkjenttidspunkt = LocalDateTime.now(),
-            oid = UUID.randomUUID(),
-            epostadresse = "epost"
-        ))
-        assertEquals(5, rapid.outgoingMessages.size)
-        val løsninger = rapid.outgoingMessages
-            .map(InMemoryRapid.RapidMessage::value)
-            .map(objectMapper::readTree)
-            .filter { it.hasNonNull("@løsning") }
-        val løsning = løsninger.first()["@løsning"]
+        spleisbehovMediator.håndter(
+            spleisbehovId, SaksbehandlerLøsning(
+                godkjent = true,
+                saksbehandlerIdent = "abcd",
+                godkjenttidspunkt = LocalDateTime.now(),
+                oid = UUID.randomUUID(),
+                epostadresse = "epost"
+            )
+        )
+        assertEquals(5, rapid.inspektør.size)
+        val løsning = 0.until(rapid.inspektør.size)
+            .map(rapid.inspektør::message)
+            .first { it.hasNonNull("@løsning") }
+            .path("@løsning")
 
         customAssertNotNull(løsning)
 
         løsning as ObjectNode
         assertEquals(listOf("Godkjenning"), løsning.fieldNames().asSequence().toList())
+    }
+
+    @ExperimentalContracts
+    @Test
+    fun `Vedtaksperioder som går til infotrygd invaliderer oppgaver`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val rapid = TestRapid()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
+        ).apply { init(rapid) }
+        TilInfotrygdMessage.Factory(rapid, spleisbehovMediator)
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+
+        rapid.sendTestMessage(
+            """
+            {
+            "@event_name": "vedtaksperiode_endret",
+            "vedtaksperiodeId": "$vedtaksperiodeId",
+            "gjeldendeTilstand": "TIL_INFOTRYGD"
+            }
+        """
+        )
+        val oppgavestatus = using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT * FROM oppgave where behov_id=?",
+                    spleisbehovId
+                ).map { Oppgavestatus.valueOf(it.string("status")) }
+                    .asSingle
+            )
+        }
+        assertEquals(Oppgavestatus.Invalidert, oppgavestatus)
     }
 }
 

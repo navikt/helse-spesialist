@@ -22,17 +22,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
-import no.nav.helse.mediator.kafka.meldinger.ArbeidsgiverMessage
-import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.PersoninfoLøsningMessage
-import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.SpleisbehovDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.mediator.kafka.meldinger.*
+import no.nav.helse.modell.dao.*
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
@@ -41,7 +32,7 @@ import org.slf4j.event.Level
 import java.net.ProxySelector
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.UUID
+import java.util.*
 
 const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
@@ -143,6 +134,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         GodkjenningMessage.Factory(rapidsConnection, spleisbehovMediator)
         PersoninfoLøsningMessage.Factory(rapidsConnection, spleisbehovMediator)
         PåminnelseMessage.Factory(rapidsConnection, spleisbehovMediator)
+        TilInfotrygdMessage.Factory(rapidsConnection, spleisbehovMediator)
     }
 
     fun start() = rapidsConnection.start()

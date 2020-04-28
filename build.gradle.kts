@@ -13,17 +13,11 @@ val githubPassword: String by project
 repositories {
     jcenter()
 
-    maven {
-        url = uri("https://maven.pkg.github.com/navikt/rapids-and-rivers")
-        credentials {
-            username = githubUser
-            password = githubPassword
-        }
-    }
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.8b0b763")
+    implementation("com.github.navikt:rapids-and-rivers:1.47c31b4")
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("com.papertrailapp:logback-syslog4j:1.0.0")
     implementation("com.zaxxer:HikariCP:3.4.2")

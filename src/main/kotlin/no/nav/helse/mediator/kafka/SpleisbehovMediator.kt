@@ -115,17 +115,19 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(spleisbehovId: UUID, påminnelseMessage: PåminnelseMessage) {
-        log.info("Mottok påminnelse for spleisbehov", keyValue("spleisbehovId", spleisbehovId))
+        log.info("Mottok påminnelse for spleisbehov {}", keyValue("spleisbehovId", spleisbehovId))
         restoreAndInvoke(spleisbehovId) {}
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
         log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
-        val spleisbehovDBDto = requireNotNull(spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)) {
-            "Fant ikke behov med spleis referanse $vedtaksperiodeId"
+        val spleisbehovDBDto = spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)
+        if (spleisbehovDBDto != null) {
+            val spleisbehov = spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data)
+            spleisbehov.invalider()
+        } else {
+            log.info("Ukjent vedtaksperiode {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         }
-        val spleisbehov = spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data)
-        spleisbehov.invalider()
     }
 
     fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {
