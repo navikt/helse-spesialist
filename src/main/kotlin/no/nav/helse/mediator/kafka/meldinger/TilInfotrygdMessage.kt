@@ -20,8 +20,8 @@ internal class TilInfotrygdMessage {
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "vedtaksperiode_endret")
+                    it.demandValue("gjeldendeTilstand", "TIL_INFOTRYGD")
                     it.requireKey("vedtaksperiodeId")
-                    it.requireValue("gjeldendeTilstand", "TIL_INFOTRYGD")
                 }
             }.register(this)
         }
