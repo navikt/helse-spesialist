@@ -33,6 +33,7 @@ internal class SpleisbehovMediator(
 ) {
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
+    private var shutdown = false
 
     init {
         oid = spesialistOID
@@ -123,7 +124,11 @@ internal class SpleisbehovMediator(
         }
     }
 
-    fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {
+    private fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {
+        if (shutdown) {
+            throw IllegalStateException("Stopper håndtering av behov når appen er i shutdown")
+        }
+
         val spleisbehovDBDto = requireNotNull(spleisbehovDao.findBehov(spleisbehovId)) {
             "Fant ikke behov med id $spleisbehovId"
         }
@@ -169,6 +174,10 @@ internal class SpleisbehovMediator(
                 )
             )
         )
+    }
+
+    fun shutdown() {
+        shutdown = true
     }
 
     private fun spleisbehov(
