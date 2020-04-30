@@ -38,7 +38,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
     internal fun findVedtakByPersonRef(personRef: Int): VedtakDto? =
         using(sessionOf(dataSource)) { session ->
             session.run(
-                queryOf("SELECT * FROM vedtak WHERE person_ref=?;", personRef)
+                queryOf("SELECT * FROM vedtak WHERE id = (SELECT MAX(id) FROM vedtak WHERE person_ref=?);", personRef)
                     .map (::vedtakDto)
                     .asSingle
             )
