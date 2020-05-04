@@ -85,7 +85,7 @@ class OppgaveDao(private val dataSource: DataSource) {
             periodeFom = it.localDate("fom"),
             periodeTom = it.localDate("tom"),
             navn = NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")),
-            fødselsnummer = it.string("fodselsnummer")
+            fødselsnummer = it.long("fodselsnummer").toFødselsnummer()
         )
     }
 
@@ -100,4 +100,6 @@ class OppgaveDao(private val dataSource: DataSource) {
             vedtaksref = it.longOrNull("vedtak_ref")
         )
     }
+
+    private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }
