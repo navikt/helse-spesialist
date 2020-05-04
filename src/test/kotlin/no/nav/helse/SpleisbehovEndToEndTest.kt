@@ -93,10 +93,8 @@ internal class SpleisbehovEndToEndTest {
             HentPersoninfoLøsning("Test", null, "Testsen")
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
-        val vedtakRef = vedtakDao.findVedtaksperiode(vedtaksperiodeId)
-        customAssertNotNull(vedtakRef)
         customAssertNotNull(saksbehandlerOppgaver)
-        assertTrue(saksbehandlerOppgaver.any { it.vedtaksref == vedtakRef.toLong() })
+        assertTrue(saksbehandlerOppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
 
         spleisbehovMediator.håndter(
             spleisbehovId, SaksbehandlerLøsning(

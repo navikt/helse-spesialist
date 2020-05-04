@@ -123,7 +123,7 @@ internal class RestApiTest {
             oppgaveDao = oppgaveDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
-        val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, personDao)
+        val oppgaveMediator = OppgaveMediator(oppgaveDao)
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
         val azureConfig = AzureAdAppConfig(clientId = clientId, requiredGroup = requiredGroup)

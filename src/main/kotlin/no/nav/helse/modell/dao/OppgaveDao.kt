@@ -5,8 +5,10 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.modell.dto.NavnDto
 import no.nav.helse.modell.dto.OppgaveDto
-import java.util.UUID
+import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
+import java.util.*
 import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) {
@@ -58,17 +60,32 @@ class OppgaveDao(private val dataSource: DataSource) {
 
     fun findNåværendeOppgave(behovId: UUID): OppgaveDto? = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("SELECT * FROM oppgave WHERE behov_id=? AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)", behovId)
+            queryOf(
+                "SELECT * FROM oppgave WHERE behov_id=? AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)",
+                behovId
+            )
                 .map(::oppgaveDto)
                 .asSingle
         )
     }
 
-    fun findSaksbehandlerOppgaver(): List<OppgaveDto>? = using(sessionOf(dataSource)) { session ->
+    fun findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("SELECT * FROM oppgave WHERE status='AvventerSaksbehandler'::oppgavestatus")
-                .map(::oppgaveDto)
+            queryOf("""SELECT * FROM oppgave o INNER JOIN vedtak v on o.vedtak_ref = v.id INNER JOIN person p on v.person_ref = p.id INNER JOIN person_navn pn on p.navn_ref = pn.id WHERE status='AvventerSaksbehandler'::oppgavestatus""")
+                .map(::saksbehandleroppgaveDto)
                 .asList
+        )
+    }
+
+    private fun saksbehandleroppgaveDto(it: Row): SaksbehandleroppgaveDto {
+        return SaksbehandleroppgaveDto(
+            spleisbehovId = UUID.fromString(it.string("behov_id")),
+            opprettet = it.localDateTime("opprettet"),
+            vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
+            periodeFom = it.localDate("fom"),
+            periodeTom = it.localDate("tom"),
+            navn = NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")),
+            fødselsnummer = it.string("fodselsnummer")
         )
     }
 

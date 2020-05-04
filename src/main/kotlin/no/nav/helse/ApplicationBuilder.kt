@@ -93,7 +93,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         oppgaveDao = oppgaveDao,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, personDao)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
