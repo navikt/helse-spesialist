@@ -19,6 +19,7 @@ import io.ktor.jackson.JacksonConverter
 import io.ktor.request.path
 import io.ktor.request.uri
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
@@ -92,6 +93,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         oppgaveDao = oppgaveDao,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, personDao)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -116,7 +118,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(oidcDiscovery, azureConfig)
-            oppgaveApi(oppgaveDao = oppgaveDao, personDao = personDao, vedtakDao = vedtakDao)
+            oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
                 personDao = personDao,
                 vedtakDao = vedtakDao,

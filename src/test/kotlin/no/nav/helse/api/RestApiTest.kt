@@ -123,6 +123,7 @@ internal class RestApiTest {
             oppgaveDao = oppgaveDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
+        val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, personDao)
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
         val azureConfig = AzureAdAppConfig(clientId = clientId, requiredGroup = requiredGroup)
@@ -131,7 +132,7 @@ internal class RestApiTest {
         app = embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
-            oppgaveApi(oppgaveDao, personDao, vedtakDao)
+            oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(personDao, vedtakDao, snapshotDao, arbeidsgiverDao, spleisbehovMediator)
         }
 

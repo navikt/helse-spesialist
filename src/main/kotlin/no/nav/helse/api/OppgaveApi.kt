@@ -12,32 +12,16 @@ import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
 
 internal fun Application.oppgaveApi(
-    oppgaveDao: OppgaveDao,
-    personDao: PersonDao,
-    vedtakDao: VedtakDao
+    oppgaveMediator: OppgaveMediator
 ) {
     routing {
         authenticate {
             get("/api/oppgaver") {
-                val oppgaver = oppgaveDao.findSaksbehandlerOppgaver()
-                if (oppgaver == null || oppgaver.isEmpty()) {
+                val saksbehandlerOppgaver = oppgaveMediator.hentOppgaver()
+                if (saksbehandlerOppgaver.isEmpty()) {
                     call.respond(HttpStatusCode.NotFound, "Fant ingen oppgaver")
                     return@get
                 }
-                val saksbehandlerOppgaver = oppgaver
-                    .map { it to vedtakDao.findVedtak(it.vedtaksref!!) }
-                    .map { (oppgave, vedtak) ->
-                        val personDto = personDao.findPerson(vedtak.personRef) ?: return@map null
-                        SaksbehandleroppgaveDto(
-                            spleisbehovId = oppgave.behovId,
-                            opprettet = oppgave.opprettet,
-                            vedtaksperiodeId = vedtak.vedtaksperiodeId,
-                            periodeFom = vedtak.fom,
-                            periodeTom = vedtak.tom,
-                            navn = personDto.navn,
-                            fødselsnummer = personDto.fødselsnummer
-                        )
-                    }.filterNotNull()
                 call.respond(saksbehandlerOppgaver)
             }
         }
