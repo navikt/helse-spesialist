@@ -8,6 +8,7 @@ import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.dto.NavnDto
 import no.nav.helse.modell.dto.OppgaveDto
 import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
+import no.nav.helse.objectMapper
 import java.util.*
 import javax.sql.DataSource
 
@@ -71,7 +72,17 @@ class OppgaveDao(private val dataSource: DataSource) {
 
     fun findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("""SELECT * FROM oppgave o INNER JOIN vedtak v on o.vedtak_ref = v.id INNER JOIN person p on v.person_ref = p.id INNER JOIN person_navn pn on p.navn_ref = pn.id WHERE status='AvventerSaksbehandler'::oppgavestatus AND o.opprettet > now()::date""")
+            queryOf(
+                """
+                SELECT *, (SELECT json_agg(melding) meldinger FROM warning where spleisbehov_ref=o.behov_id)
+                FROM oppgave o
+                       INNER JOIN vedtak v on o.vedtak_ref = v.id
+                       INNER JOIN person p on v.person_ref = p.id
+                       INNER JOIN person_navn pn on p.navn_ref = pn.id
+                WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+                  AND o.opprettet > now()::date
+            """
+            )
                 .map(::saksbehandleroppgaveDto)
                 .asList
         )
@@ -85,7 +96,8 @@ class OppgaveDao(private val dataSource: DataSource) {
             periodeFom = it.localDate("fom"),
             periodeTom = it.localDate("tom"),
             navn = NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")),
-            fødselsnummer = it.long("fodselsnummer").toFødselsnummer()
+            fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
+            antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count()
         )
     }
 

@@ -204,8 +204,15 @@ internal class SpleisbehovEndToEndTest {
                 ).map { it.string("melding") }.asList
             )
         }
-
         assertEquals(listOf(warningTekst), warnings)
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen")
+        )
+        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        assertEquals(1, saksbehandlerOppgaver.first().antallVarsler)
     }
 
     @ExperimentalContracts
