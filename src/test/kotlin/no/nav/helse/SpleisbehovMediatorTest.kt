@@ -10,6 +10,7 @@ import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.SpleisbehovDao
 import no.nav.helse.modell.dao.VedtakDao
 import no.nav.helse.rapids_rivers.inMemoryRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -58,7 +59,7 @@ internal class SpleisbehovMediatorTest {
             speilSnapshotRestDao = speilSnapshotRestDao,
             oppgaveDao = oppgaveDao,
             spesialistOID = spesialistOID
-        ).apply { init(inMemoryRapid {  }) }
+        ).apply { init(TestRapid()) }
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,
@@ -67,7 +68,8 @@ internal class SpleisbehovMediatorTest {
             organisasjonsnummer = "89123",
             vedtaksperiodeId = UUID.randomUUID(),
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))

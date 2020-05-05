@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -17,7 +18,8 @@ internal class GodkjenningMessage(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,
-    val periodeTom: LocalDate
+    val periodeTom: LocalDate,
+    val warnings: List<String>
 ) {
 
     internal class Factory(
@@ -33,7 +35,7 @@ internal class GodkjenningMessage(
                     it.rejectKey("@løsning")
                     it.requireKey(
                         "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
-                        "periodeTom"
+                        "periodeTom", "warnings"
                     )
                 }
             }.register(this)
@@ -47,10 +49,13 @@ internal class GodkjenningMessage(
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 periodeFom = LocalDate.parse(packet["periodeFom"].asText()),
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
-                vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
+                vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+                warnings = packet["warnings"].toWarnings()
             )
             spleisbehovMediator.håndter(behov, packet.toJson())
         }
+
+        private fun JsonNode.toWarnings() = this["aktiviteter"].map { it["melding"].asText() }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
             sikkerLogg.error("Forstod ikke Godkjenning-behov:\n${problems.toExtendedReport()}")

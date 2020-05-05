@@ -31,6 +31,7 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.inMemoryRapid
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -53,7 +54,7 @@ internal class RestApiTest {
     private lateinit var app: ApplicationEngine
     private lateinit var spleisbehovMediator: SpleisbehovMediator
     private lateinit var flyway: Flyway
-    private val rapid = inMemoryRapid {}
+    private val rapid = TestRapid()
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
@@ -164,7 +165,8 @@ internal class RestApiTest {
             organisasjonsnummer = "89123",
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         spleisbehovMediator.håndter(
@@ -188,7 +190,8 @@ internal class RestApiTest {
             organisasjonsnummer = "89123",
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         spleisbehovMediator.håndter(
@@ -216,7 +219,8 @@ internal class RestApiTest {
             organisasjonsnummer = "89123",
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         spleisbehovMediator.håndter(
@@ -244,7 +248,8 @@ internal class RestApiTest {
             organisasjonsnummer = "89123",
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         spleisbehovMediator.håndter(
@@ -271,7 +276,8 @@ internal class RestApiTest {
             organisasjonsnummer = "89123",
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
         spleisbehovMediator.håndter(
@@ -294,11 +300,10 @@ internal class RestApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.Created, response.status)
-        val løsning = rapid.outgoingMessages
-            .map { objectMapper.readTree(it.value) }
-            .filter { it.hasNonNull("@løsning") }
-            .firstOrNull { it["@id"]?.asText() == spleisbehovId.toString() }
-            ?.get("@løsning")
+        val løsning = 0.until(rapid.inspektør.size)
+            .map(rapid.inspektør::message)
+            .first { it.hasNonNull("@løsning") }
+            .path("@løsning")
         requireNotNull(løsning)
         assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
         assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)

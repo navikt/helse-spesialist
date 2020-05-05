@@ -7,13 +7,7 @@ import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.SpleisbehovDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
@@ -24,7 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -74,17 +68,24 @@ internal class SpleisbehovEndToEndTest {
             oppgaveDao = oppgaveDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
         val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "12345",
-            aktørId = "12345",
-            organisasjonsnummer = "89123",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+        rapid.sendTestMessage(
+            """
+            {
+              "@behov": ["Godkjenning"],
+              "@id": "$spleisbehovId",
+              "fødselsnummer": "12345",
+              "aktørId": "12345",
+              "organisasjonsnummer": "89123",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "periodeFom": "${LocalDate.of(2018, 1, 1)}",
+              "periodeTom": "${LocalDate.of(2018, 1, 31)}",
+              "warnings": {"aktiviteter": []}
+            }
+        """
         )
-        spleisbehovMediator.håndter(godkjenningMessage, "{}")
         assertEquals(2, rapid.inspektør.size)
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
         spleisbehovMediator.håndter(
@@ -119,6 +120,87 @@ internal class SpleisbehovEndToEndTest {
 
     @ExperimentalContracts
     @Test
+    fun `Mottar godkjennings message med warning fra topic`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val rapid = TestRapid()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
+        ).apply { init(rapid) }
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        val spleisbehovId = UUID.randomUUID()
+        val warningsJson = """
+            {
+              "aktiviteter": [
+                {
+                  "kontekster": [
+                    {
+                      "kontekstType": "Ytelser",
+                      "kontekstMap": {}
+                    },
+                    {
+                      "kontekstType": "Person",
+                      "kontekstMap": {
+                        "fødselsnummer": "12345",
+                        "aktørId": "12345"
+                      }
+                    },
+                    {
+                      "kontekstType": "Arbeidsgiver",
+                      "kontekstMap": {
+                        "organisasjonsnummer": "89123"
+                      }
+                    },
+                    {
+                      "kontekstType": "Vedtaksperiode",
+                      "kontekstMap": {
+                        "vedtaksperiodeId": "$vedtaksperiodeId"
+                      }
+                    },
+                    {
+                      "kontekstType": "Tilstand",
+                      "kontekstMap": {
+                        "tilstand": "AVVENTER_GAP"
+                      }
+                    }
+                  ],
+                  "alvorlighetsgrad": "WARN",
+                  "melding": "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode",
+                  "detaljer": {},
+                  "tidsstempel": "2020-05-05 09:09:01.797"
+                }
+              ]
+            }
+        """
+        rapid.sendTestMessage(
+            """
+            {
+              "@behov": ["Godkjenning"],
+              "@id": "$spleisbehovId",
+              "fødselsnummer": "12345",
+              "aktørId": "12345",
+              "organisasjonsnummer": "89123",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "periodeFom": "${LocalDate.of(2018, 1, 1)}",
+              "periodeTom": "${LocalDate.of(2018, 1, 31)}",
+              "warnings": $warningsJson
+            }
+        """
+        )
+
+        assertEquals(1, rapid.inspektør.size)
+        assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
+    }
+
+    @ExperimentalContracts
+    @Test
     fun `Vedtaksperioder som går til infotrygd invaliderer oppgaver`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val rapid = TestRapid()
@@ -132,18 +214,26 @@ internal class SpleisbehovEndToEndTest {
             oppgaveDao = oppgaveDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
+
         TilInfotrygdMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
         val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "12345",
-            aktørId = "12345",
-            organisasjonsnummer = "89123",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+        rapid.sendTestMessage(
+            """
+            {
+              "@behov": ["Godkjenning"],
+              "@id": "$spleisbehovId",
+              "fødselsnummer": "12345",
+              "aktørId": "12345",
+              "organisasjonsnummer": "89123",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "periodeFom": "${LocalDate.of(2018, 1, 1)}",
+              "periodeTom": "${LocalDate.of(2018, 1, 31)}",
+              "warnings": {"aktiviteter": []}
+            }
+        """
         )
-        spleisbehovMediator.håndter(godkjenningMessage, "{}")
 
         rapid.sendTestMessage(
             """
@@ -154,6 +244,7 @@ internal class SpleisbehovEndToEndTest {
             }
         """
         )
+
         val oppgavestatus = using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
@@ -189,7 +280,8 @@ internal class SpleisbehovEndToEndTest {
             organisasjonsnummer = "756876",
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         spleisbehovMediator.håndter(
