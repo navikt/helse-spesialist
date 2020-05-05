@@ -136,6 +136,7 @@ internal class SpleisbehovEndToEndTest {
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
 
         val spleisbehovId = UUID.randomUUID()
+        val warningTekst = "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
         val warningsJson = """
             {
               "aktiviteter": [
@@ -172,7 +173,7 @@ internal class SpleisbehovEndToEndTest {
                     }
                   ],
                   "alvorlighetsgrad": "WARN",
-                  "melding": "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode",
+                  "melding": "$warningTekst",
                   "detaljer": {},
                   "tidsstempel": "2020-05-05 09:09:01.797"
                 }
@@ -195,8 +196,16 @@ internal class SpleisbehovEndToEndTest {
         """
         )
 
-        assertEquals(1, rapid.inspektør.size)
-        assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
+        val warnings = using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT * FROM warning where spleisbehov_ref=?",
+                    spleisbehovId
+                ).map { it.string("melding") }.asList
+            )
+        }
+
+        assertEquals(listOf(warningTekst), warnings)
     }
 
     @ExperimentalContracts

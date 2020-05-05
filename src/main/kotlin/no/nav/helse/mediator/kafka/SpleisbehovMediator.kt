@@ -86,6 +86,12 @@ internal class SpleisbehovMediator(
             spleisbehov.toJson(),
             originalJson
         )
+        godkjenningMessage.warnings.forEach {
+            spleisbehovDao.insertWarning(
+                melding = it,
+                spleisbehovRef = godkjenningMessage.id
+            )
+        }
         publiserBehov(godkjenningMessage.id, spleisbehov)
     }
 

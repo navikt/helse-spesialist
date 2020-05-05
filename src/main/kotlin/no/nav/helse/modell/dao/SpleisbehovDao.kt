@@ -4,7 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.dto.SpleisbehovDBDto
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 internal class SpleisbehovDao(private val dataSource: DataSource) {
@@ -20,8 +20,17 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
                     original
                 ).asUpdate
             )
-
         }
+    }
+
+    fun insertWarning(melding: String, spleisbehovRef: UUID) = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "INSERT INTO warning (melding, spleisbehov_ref) VALUES (?, ?)",
+                melding,
+                spleisbehovRef
+            ).asUpdate
+        )
     }
 
     internal fun updateBehov(id: UUID, behov: String) {
@@ -47,18 +56,19 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? = using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT  id, data FROM spleisbehov WHERE spleis_referanse=?", spleisReferanse)
-            .map {
-                SpleisbehovDBDto(
-                    id = UUID.fromString(it.string("id")),
-                    spleisReferanse = spleisReferanse,
-                    data = it.string("data")
-                )
-            }
-            .asSingle
-        )
-    }
+    internal fun findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? =
+        using(sessionOf(dataSource)) { session ->
+            session.run(queryOf("SELECT  id, data FROM spleisbehov WHERE spleis_referanse=?", spleisReferanse)
+                .map {
+                    SpleisbehovDBDto(
+                        id = UUID.fromString(it.string("id")),
+                        spleisReferanse = spleisReferanse,
+                        data = it.string("data")
+                    )
+                }
+                .asSingle
+            )
+        }
 
     internal fun findOriginalBehov(id: UUID): String? = using(sessionOf(dataSource)) { session ->
         session.run(queryOf("SELECT original FROM spleisbehov WHERE id=?", id)
