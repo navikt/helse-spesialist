@@ -67,7 +67,7 @@ internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUI
             this.serializer = JacksonSerializer()
         }
         engine {
-            addHandler { request ->
+            addHandler { _ ->
                 respond(
                     objectMapper.writeValueAsString(
                         PersonFraSpleisDto(
@@ -92,7 +92,7 @@ internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUI
 internal fun failingHttpClient(): HttpClient {
     return HttpClient(MockEngine) {
         engine {
-            addHandler { request ->
+            addHandler { _ ->
                 respond("Failed to execute request", status = HttpStatusCode.InternalServerError)
             }
         }

@@ -34,8 +34,6 @@ internal fun Application.vedtaksperiodeApi(
     arbeidsgiverDao: ArbeidsgiverDao,
     spleisbehovMediator: SpleisbehovMediator
 ) {
-    val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
     routing {
         authenticate {
             get("/api/person/{vedtaksperiodeId}") {

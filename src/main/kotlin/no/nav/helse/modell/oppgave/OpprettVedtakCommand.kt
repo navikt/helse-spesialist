@@ -23,8 +23,7 @@ internal class OpprettVedtakCommand(
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
     behovId: UUID,
-    parent: Command,
-    ferdigstilt: LocalDateTime? = null
+    parent: Command
 ) : Command(
     behovId = behovId,
     initiellStatus = Oppgavestatus.AvventerSystem,
