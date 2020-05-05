@@ -27,7 +27,7 @@ class PersonDao(private val dataSource: DataSource) {
 
     internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("SELECT p.fodselsnummer, n.fornavn, n.mellomnavn, n.etternavn FROM person AS p JOIN person_navn AS n ON p.navn_ref = n.id WHERE p.id=?;", id)
+            queryOf("SELECT p.fodselsnummer, pi.fornavn, pi.mellomnavn, pi.etternavn FROM person AS p JOIN person_info AS pi ON p.info_ref = pi.id WHERE p.id=?;", id)
                 .map { PersonDto(
                     fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
                     navn = NavnDto(
@@ -44,7 +44,7 @@ class PersonDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT * from person_navn WHERE id=(SELECT navn_ref FROM person where id =?);",
+                    "SELECT * from person_info WHERE id=(SELECT info_ref FROM person where id =?);",
                     personId
                 ).map { NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")) }.asSingle
             )
@@ -55,7 +55,7 @@ class PersonDao(private val dataSource: DataSource) {
         requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO person_navn(fornavn, mellomnavn, etternavn) VALUES(?, ?, ?);",
+                    "INSERT INTO person_info(fornavn, mellomnavn, etternavn) VALUES(?, ?, ?);",
                     fornavn,
                     mellomnavn,
                     etternavn
@@ -67,7 +67,7 @@ class PersonDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO person(fodselsnummer, aktor_id, navn_ref, enhet_ref) VALUES(?, ?, ?, ?);",
+                    "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref) VALUES(?, ?, ?, ?);",
                     fødselsnummer,
                     aktørId,
                     navnId,
@@ -81,7 +81,7 @@ class PersonDao(private val dataSource: DataSource) {
             session.transaction { tx ->
                 tx.run(
                     queryOf(
-                        "UPDATE person_navn SET fornavn=?, mellomnavn=?, etternavn=? WHERE id=(SELECT navn_ref FROM person WHERE fodselsnummer=?);",
+                        "UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=? WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);",
                         fornavn, mellomnavn, etternavn, fødselsnummer
                     ).asUpdate
                 )
@@ -120,32 +120,6 @@ class PersonDao(private val dataSource: DataSource) {
             }.asSingle
         )
     })
-
-    internal fun updateEgenskap(fødselsnummer: Long, egenskap: PersonEgenskap?) =
-        using(sessionOf(dataSource)) { session ->
-            val id = requireNotNull(session.run(
-                queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)
-                    .map { it.int("id") }
-                    .asSingle
-            ))
-
-            session.run(
-                queryOf("DELETE FROM person_egenskap WHERE person_ref=?;", id)
-                    .asUpdate
-            )
-            egenskap?.also {
-                val typeRef = requireNotNull(session.run(
-                    queryOf("SELECT id FROM person_egenskap_type WHERE type=?;", egenskap)
-                        .map { it.int("id") }
-                        .asSingle
-                ))
-                session.run(
-                    queryOf("INSERT INTO person_egenskap(type_ref, person_ref) VALUES(?, ?);", typeRef, id)
-                        .asUpdate
-                )
-            }
-
-        }
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 

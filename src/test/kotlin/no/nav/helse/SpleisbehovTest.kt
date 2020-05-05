@@ -9,10 +9,7 @@ import no.nav.helse.modell.dao.SnapshotDao
 import no.nav.helse.modell.dao.SpeilSnapshotRestDao
 import no.nav.helse.modell.dao.SpleisbehovDao
 import no.nav.helse.modell.dao.VedtakDao
-import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.modell.løsning.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -85,7 +82,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
 
@@ -113,7 +110,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         testDao.setEnhetOppdatert(13245, LocalDate.of(2020, 1, 1))
         spleisBehov.execute()
@@ -144,7 +141,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
 
@@ -173,7 +170,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
@@ -205,7 +202,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         spleisBehov.execute()
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
@@ -248,7 +245,7 @@ internal class SpleisbehovTest {
             nåværendeOppgave = null
         )
         spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen"))
+        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
         spleisBehov.fortsett(HentEnhetLøsning("3417"))
         assertThrows<Exception> {
             spleisBehov.execute()

@@ -10,6 +10,7 @@ import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.løsning.Kjønn
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
@@ -91,7 +92,7 @@ internal class SpleisbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen")
+            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         customAssertNotNull(saksbehandlerOppgaver)
@@ -303,7 +304,7 @@ internal class SpleisbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen")
+            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
         )
 
         spleisbehovMediator.håndter(

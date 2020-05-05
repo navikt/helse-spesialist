@@ -78,7 +78,7 @@ class OppgaveDao(private val dataSource: DataSource) {
                 FROM oppgave o
                        INNER JOIN vedtak v on o.vedtak_ref = v.id
                        INNER JOIN person p on v.person_ref = p.id
-                       INNER JOIN person_navn pn on p.navn_ref = pn.id
+                       INNER JOIN person_info pi on p.info_ref = pi.id
                 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                   AND o.opprettet > now()::date
             """
