@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
@@ -86,6 +87,11 @@ internal class SpleisbehovMediator(
             originalJson
         )
         publiserBehov(godkjenningMessage.id, spleisbehov)
+    }
+
+    internal fun håndter(vedtaksperiodeId: UUID, annullering: AnnulleringMessage) {
+        log.info("Publiserer annullering på fagsystemId ${annullering.fagsystemId} for vedtaksperiode $vedtaksperiodeId")
+        rapidsConnection.publish(annullering.fødselsnummer, annullering.toJson())
     }
 
     internal fun håndter(

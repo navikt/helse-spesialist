@@ -1,6 +1,5 @@
 package no.nav.helse.api
 
-import com.auth0.jwt.interfaces.DecodedJWT
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.application.Application
@@ -15,6 +14,7 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.dao.PersonDao
 import no.nav.helse.modell.dao.SnapshotDao
@@ -188,10 +188,34 @@ internal fun Application.vedtaksperiodeApi(
                 spleisbehovMediator.håndter(godkjenning.behovId, løsning)
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
+            post("/api/annullering") {
+                val saksbehandlerIdent = requireNotNull(call.principal<JWTPrincipal>()).payload.getClaim("NAVident").asString()
+                val annullering = call.receive<Annullering>()
+                val vedtaksperiodeId = UUID.fromString(annullering.vedtaksperiodeId)
+
+                val message = AnnulleringMessage(
+                    aktørId = annullering.aktørId,
+                    fødselsnummer = annullering.fødselsnummer,
+                    organisasjonsnummer = annullering.organisasjonsnummer,
+                    fagsystemId = annullering.fagsystemId,
+                    saksbehandlerIdent = saksbehandlerIdent
+                )
+
+                spleisbehovMediator.håndter(vedtaksperiodeId, message)
+            }
         }
     }
 }
 
-
 @JsonIgnoreProperties
 data class Godkjenning(val behovId: UUID, val godkjent: Boolean, val saksbehandlerIdent: String)
+
+@JsonIgnoreProperties
+data class Annullering(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val fagsystemId: String,
+    val saksbehandlerIdent: String,
+    val vedtaksperiodeId: String
+)
