@@ -210,7 +210,7 @@ internal class SpleisbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen")
+            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Kvinne)
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertEquals(1, saksbehandlerOppgaver.first().antallVarsler)
