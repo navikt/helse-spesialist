@@ -9,17 +9,20 @@ import io.ktor.auth.principal
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
+import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
+import no.nav.helse.modell.dao.OppgaveDao
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDateTime
 import java.util.*
 
 internal fun Application.vedtaksperiodeApi(
+    oppgaveDao: OppgaveDao,
     vedtaksperiodeMediator: VedtaksperiodeMediator,
     spleisbehovMediator: SpleisbehovMediator
 ) {
@@ -58,6 +61,14 @@ internal fun Application.vedtaksperiodeApi(
                 val saksbehandlerIdent = godkjenning.saksbehandlerIdent
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+
+                val oppgave = oppgaveDao.findNåværendeOppgave(godkjenning.behovId)
+                if (oppgave == null) {
+                    call.respondText(
+                        "Dette vedtaket har ingen aktiv saksbehandler oppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
+                        status = HttpStatusCode.Conflict
+                    )
+                }
 
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,

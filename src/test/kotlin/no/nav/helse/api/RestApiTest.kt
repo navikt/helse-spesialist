@@ -142,7 +142,7 @@ internal class RestApiTest {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
             oppgaveApi(oppgaveMediator)
-            vedtaksperiodeApi(vedtaksperiodeMediator, spleisbehovMediator)
+            vedtaksperiodeApi(oppgaveDao, vedtaksperiodeMediator, spleisbehovMediator)
         }
 
         app.start(wait = false)
@@ -316,5 +316,55 @@ internal class RestApiTest {
         assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
         assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
         assertNotNull(løsning["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
+    }
+
+    @Test
+    fun `en vedtaksperiode kan kun godkjennes en gang`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "6745",
+            aktørId = "45637",
+            organisasjonsnummer = "56783456",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+        )
+        runBlocking {
+            val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
+                body = TextContent(
+                    objectMapper.writeValueAsString(
+                        Godkjenning(
+                            spleisbehovId,
+                            true,
+                            saksbehandlerIdent = saksbehandlerIdent
+                        )
+                    ),
+                    contentType = ContentType.Application.Json
+                )
+            }.execute()
+            assertEquals(HttpStatusCode.Created, godkjenning1.status)
+
+            val godkjenning2 = client.post<HttpStatement>("/api/vedtak") {
+                body = TextContent(
+                    objectMapper.writeValueAsString(
+                        Godkjenning(
+                            spleisbehovId,
+                            true,
+                            saksbehandlerIdent = saksbehandlerIdent
+                        )
+                    ),
+                    contentType = ContentType.Application.Json
+                )
+            }.execute()
+            assertEquals(HttpStatusCode.Conflict, godkjenning2.status)
+        }
     }
 }

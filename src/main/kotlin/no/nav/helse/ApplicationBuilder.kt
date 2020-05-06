@@ -125,6 +125,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             azureAdAppAuthentication(oidcDiscovery, azureConfig)
             oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
+                oppgaveDao = oppgaveDao,
                 spleisbehovMediator = spleisbehovMediator,
                 vedtaksperiodeMediator = vedtaksperiodeMediator
             )
