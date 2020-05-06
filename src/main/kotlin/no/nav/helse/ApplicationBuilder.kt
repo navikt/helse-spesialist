@@ -27,6 +27,8 @@ import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.dao.*
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
+import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -48,6 +50,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val spleisbehovDao = SpleisbehovDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
+    private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
 
     private val azureAdClient = HttpClient(Apache) {
         engine {
@@ -94,6 +97,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
     private val oppgaveMediator = OppgaveMediator(oppgaveDao)
+    private val vedtaksperiodeMediator =
+        VedtaksperiodeMediator(vedtaksperiodeDao, arbeidsgiverDao, snapshotDao)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -120,11 +125,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             azureAdAppAuthentication(oidcDiscovery, azureConfig)
             oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
-                personDao = personDao,
-                vedtakDao = vedtakDao,
-                snapshotDao = snapshotDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                spleisbehovMediator = spleisbehovMediator
+                spleisbehovMediator = spleisbehovMediator,
+                vedtaksperiodeMediator = vedtaksperiodeMediator
             )
         }.build()
 

@@ -31,8 +31,9 @@ import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
 import no.nav.helse.modell.løsning.Kjønn
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.inMemoryRapid
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
+import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -114,6 +115,7 @@ internal class RestApiTest {
             accessTokenClient(),
             "spleisClientId"
         )
+        val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
 
         spleisbehovMediator = SpleisbehovMediator(
             spleisbehovDao = spleisbehovDao,
@@ -126,6 +128,11 @@ internal class RestApiTest {
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
         val oppgaveMediator = OppgaveMediator(oppgaveDao)
+        val vedtaksperiodeMediator = VedtaksperiodeMediator(
+            vedtaksperiodeDao,
+            arbeidsgiverDao,
+            snapshotDao
+        )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
         val azureConfig = AzureAdAppConfig(clientId = clientId, requiredGroup = requiredGroup)
@@ -135,7 +142,7 @@ internal class RestApiTest {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
             oppgaveApi(oppgaveMediator)
-            vedtaksperiodeApi(personDao, vedtakDao, snapshotDao, arbeidsgiverDao, spleisbehovMediator)
+            vedtaksperiodeApi(vedtaksperiodeMediator, spleisbehovMediator)
         }
 
         app.start(wait = false)

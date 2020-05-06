@@ -1,7 +1,6 @@
 package no.nav.helse.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.auth.authenticate
@@ -15,160 +14,43 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.VedtakDao
-import no.nav.helse.modell.dto.*
 import no.nav.helse.modell.løsning.SaksbehandlerLøsning
-import no.nav.helse.objectMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal fun Application.vedtaksperiodeApi(
-    personDao: PersonDao,
-    vedtakDao: VedtakDao,
-    snapshotDao: SnapshotDao,
-    arbeidsgiverDao: ArbeidsgiverDao,
+    vedtaksperiodeMediator: VedtaksperiodeMediator,
     spleisbehovMediator: SpleisbehovMediator
 ) {
     routing {
         authenticate {
             get("/api/person/{vedtaksperiodeId}") {
-                val vedtaksperiodeId = UUID.fromString(call.parameters["vedtaksperiodeId"]!!)
-                val vedtak = vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)
-                if (vedtak == null) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke vedtaksperiode"
-                    )
+                val speilSnapshot = vedtaksperiodeMediator
+                    .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!))
+                if (speilSnapshot == null) {
+                    call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
                     return@get
                 }
-                val personDto = personDao.findPerson(vedtak.personRef)
-                if (personDto == null) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke person"
-                    )
-                    return@get
-                }
-                val arbeidsgiverDto =
-                    requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
-                val speilSnapshot =
-                    requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
-                        .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
-                val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
-                    if (it.organisasjonsnummer == arbeidsgiverDto.organisasjonsnummer) ArbeidsgiverForSpeilDto(
-                        it.organisasjonsnummer,
-                        arbeidsgiverDto.navn,
-                        it.id,
-                        it.vedtaksperioder
-                    ) else ArbeidsgiverForSpeilDto(
-                        it.organisasjonsnummer,
-                        "Ikke tilgjengelig",
-                        it.id,
-                        it.vedtaksperioder
-                    )
-                }
-                val personForSpeil = PersonForSpeilDto(
-                    speilSnapshot.aktørId,
-                    speilSnapshot.fødselsnummer,
-                    personDto.navn,
-                    arbeidsgivere
-                )
-                call.respond(personForSpeil)
+                call.respond(speilSnapshot)
             }
             get("/api/person/aktorId/{aktørId}") {
-                val aktørId = call.parameters["aktørId"]!!.toLong()
-                val personId = personDao.findPersonByAktørId(aktørId)
-                if (personId == null) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke person"
-                    )
+                val speilSnapshot = vedtaksperiodeMediator
+                    .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!)
+                if (speilSnapshot == null) {
+                    call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
                     return@get
                 }
-                val vedtak = vedtakDao.findVedtakByPersonRef(personId)
-                if (vedtak == null) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke vedtaksperiode"
-                    )
-                    return@get
-                }
-                val arbeidsgiverDto =
-                    requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
-                val speilSnapshot =
-                    requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
-                        .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
-                val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
-                    if (it.organisasjonsnummer == arbeidsgiverDto.organisasjonsnummer) ArbeidsgiverForSpeilDto(
-                        it.organisasjonsnummer,
-                        arbeidsgiverDto.navn,
-                        it.id,
-                        it.vedtaksperioder
-                    ) else ArbeidsgiverForSpeilDto(
-                        it.organisasjonsnummer,
-                        "Ikke tilgjengelig",
-                        it.id,
-                        it.vedtaksperioder
-                    )
-                }
-                val navnDto = requireNotNull(personDao.findNavn(personId)){ "Fant ikke navn for person" }
-                val personForSpeil = PersonForSpeilDto(
-                    speilSnapshot.aktørId,
-                    speilSnapshot.fødselsnummer,
-                    navnDto,
-                    arbeidsgivere
-                )
-                call.respond(personForSpeil)
+                call.respond(speilSnapshot)
             }
             get("/api/person/fnr/{fødselsnummer}") {
-                val fødselsnummer = call.parameters["fødselsnummer"]!!.toLong()
-                val personId = personDao.findPersonByFødselsnummer(fødselsnummer)
-                if (personId == null) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke person"
-                    )
+                val speilSnapshot = vedtaksperiodeMediator
+                    .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!)
+                if (speilSnapshot == null) {
+                    call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
                     return@get
                 }
-                val vedtak = vedtakDao.findVedtakByPersonRef(personId)
-                if (vedtak == null) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke vedtaksperiode"
-                    )
-                    return@get
-                }
-                val arbeidsgiverDto =
-                    requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
-                val speilSnapshot =
-                    requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
-                        .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
-                val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
-                    if (it.organisasjonsnummer == arbeidsgiverDto.organisasjonsnummer) ArbeidsgiverForSpeilDto(
-                        it.organisasjonsnummer,
-                        arbeidsgiverDto.navn,
-                        it.id,
-                        it.vedtaksperioder
-                    ) else ArbeidsgiverForSpeilDto(
-                        it.organisasjonsnummer,
-                        "Ikke tilgjengelig",
-                        it.id,
-                        it.vedtaksperioder
-                    )
-                }
-                val navnDto = requireNotNull(personDao.findNavn(personId)){ "Fant ikke navn for person" }
-                val personForSpeil = PersonForSpeilDto(
-                    speilSnapshot.aktørId,
-                    speilSnapshot.fødselsnummer,
-                    navnDto,
-                    arbeidsgivere
-                )
-                call.respond(personForSpeil)
+                call.respond(speilSnapshot)
             }
             post("/api/vedtak") {
                 val godkjenning = call.receive<Godkjenning>()
@@ -189,7 +71,8 @@ internal fun Application.vedtaksperiodeApi(
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
             post("/api/annullering") {
-                val saksbehandlerIdent = requireNotNull(call.principal<JWTPrincipal>()).payload.getClaim("NAVident").asString()
+                val saksbehandlerIdent =
+                    requireNotNull(call.principal<JWTPrincipal>()).payload.getClaim("NAVident").asString()
                 val annullering = call.receive<Annullering>()
                 val vedtaksperiodeId = UUID.fromString(annullering.vedtaksperiodeId)
 

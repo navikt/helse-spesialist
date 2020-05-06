@@ -1,14 +1,11 @@
 package no.nav.helse
 
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.Spleisbehov
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.SpleisbehovDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
@@ -17,7 +14,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -176,7 +173,7 @@ internal class SpleisbehovTest {
         spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         spleisBehov.execute()
 
-        assertNotNull(vedtakDao.findVedtaksperiode(vedtaksperiodeId))
+        assertNotNull(findVedtaksperiode(vedtaksperiodeId))
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertFalse(saksbehandlerOppgaver.isNullOrEmpty())
     }
@@ -252,5 +249,13 @@ internal class SpleisbehovTest {
         }
 
         assertEquals("OpprettVedtakCommand", oppgaveDao.findNåværendeOppgave(spleisbehovId)?.oppgaveType)
+    }
+
+    internal fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf("SELECT id FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
+                .map { it.int("id") }
+                .asSingle
+        )
     }
 }
