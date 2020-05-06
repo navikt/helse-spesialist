@@ -29,7 +29,7 @@ internal class SpleisbehovTest {
     private lateinit var testDao: TestPersonDao
     private lateinit var spleisbehovDao: SpleisbehovDao
 
-    private val httpClientForSpleis = httpClientForSpleis()
+    private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
     private val spesialistOID: UUID = UUID.randomUUID()
@@ -42,7 +42,7 @@ internal class SpleisbehovTest {
         vedtakDao = VedtakDao(dataSource)
         snapshotDao = SnapshotDao(dataSource)
         oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
+        speilSnapshotRestDao = SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient, "spleisClientId")
         testDao = TestPersonDao(dataSource)
         spleisbehovDao = SpleisbehovDao(dataSource)
 

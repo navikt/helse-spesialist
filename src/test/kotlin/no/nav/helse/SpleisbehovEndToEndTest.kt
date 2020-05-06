@@ -7,6 +7,7 @@ import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
+import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.HentEnhetLøsning
 import no.nav.helse.modell.løsning.HentPersoninfoLøsning
@@ -15,6 +16,7 @@ import no.nav.helse.modell.løsning.SaksbehandlerLøsning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -36,7 +38,7 @@ internal class SpleisbehovEndToEndTest {
     private lateinit var spleisbehovDao: SpleisbehovDao
     private lateinit var testDao: TestPersonDao
 
-    private val httpClientForSpleis = httpClientForSpleis()
+    private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
     private val spesialistOID: UUID = UUID.randomUUID()
@@ -49,7 +51,7 @@ internal class SpleisbehovEndToEndTest {
         vedtakDao = VedtakDao(dataSource)
         snapshotDao = SnapshotDao(dataSource)
         oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
+        speilSnapshotRestDao = SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient, "spleisClientId")
         spleisbehovDao = SpleisbehovDao(dataSource)
         testDao = TestPersonDao(dataSource)
     }
@@ -213,7 +215,7 @@ internal class SpleisbehovEndToEndTest {
             HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Kvinne)
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
-        assertEquals(1, saksbehandlerOppgaver.first().antallVarsler)
+        assertEquals(1, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
     }
 
     @ExperimentalContracts
@@ -320,6 +322,54 @@ internal class SpleisbehovEndToEndTest {
         assertDoesNotThrow {
             spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
         }
+    }
+
+    @Disabled
+    @ExperimentalContracts
+    @Test
+    fun `vedtaksperiode_endret fører til oppdatert speil snapshot`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val rapid = TestRapid()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
+        ).apply { init(rapid) }
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        val spleisbehovId = UUID.randomUUID()
+        rapid.sendTestMessage(
+            """
+            {
+              "@behov": ["Godkjenning"],
+              "@id": "$spleisbehovId",
+              "fødselsnummer": "3546756",
+              "aktørId": "7653345",
+              "organisasjonsnummer": "6546346",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "periodeFom": "${LocalDate.of(2018, 1, 1)}",
+              "periodeTom": "${LocalDate.of(2018, 1, 31)}",
+              "warnings": {"aktiviteter": []}
+            }
+        """
+        )
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+        )
+
+        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+
+        spleisbehovMediator.håndter(vedtaksperiodeId, VedtaksperiodeEndretMessage())
+
+        val saksbehandlerOppgaverEtter = oppgaveDao.findSaksbehandlerOppgaver()
+        assertNotEquals(saksbehandlerOppgaver, saksbehandlerOppgaverEtter)
     }
 }
 

@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
-import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.PåminnelseMessage
-import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
+import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dto.OppgaveDto
@@ -134,6 +131,9 @@ internal class SpleisbehovMediator(
             spleisbehov(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data, nåværendeOppgave)
                 .invalider()
         }
+    }
+
+    fun håndter(vedtaksperiodeId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
     }
 
     private fun restoreAndInvoke(spleisbehovId: UUID, invoke: Spleisbehov.() -> Unit) {

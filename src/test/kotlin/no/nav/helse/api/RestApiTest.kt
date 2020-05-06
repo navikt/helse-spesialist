@@ -88,6 +88,7 @@ internal class RestApiTest {
         }
     }
     var vedtaksperiodeId = UUID.randomUUID()
+    private val spleisMockClient = SpleisMockClient()
 
     @BeforeAll
     internal fun `start embedded environment`(@TempDir postgresPath: Path) {
@@ -111,7 +112,7 @@ internal class RestApiTest {
         val snapshotDao = SnapshotDao(dataSource)
         val oppgaveDao = OppgaveDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(
-            httpClientForSpleis(vedtaksperiodeId = { vedtaksperiodeId }),
+            spleisMockClient.client,
             accessTokenClient(),
             "spleisClientId"
         )
@@ -152,7 +153,7 @@ internal class RestApiTest {
     internal fun updateVedtaksperiodeId() {
         flyway.clean()
         flyway.migrate()
-        vedtaksperiodeId = UUID.randomUUID()
+        spleisMockClient.setVedtaksperiodeId(vedtaksperiodeId)
     }
 
     @AfterAll

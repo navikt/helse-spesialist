@@ -2,21 +2,14 @@ package no.nav.helse
 
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.SpleisbehovDao
-import no.nav.helse.modell.dao.VedtakDao
-import no.nav.helse.rapids_rivers.inMemoryRapid
+import no.nav.helse.modell.dao.*
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,7 +24,7 @@ internal class SpleisbehovMediatorTest {
     private lateinit var spleisbehovDao: SpleisbehovDao
     private lateinit var testDao: TestPersonDao
 
-    private val httpClientForSpleis = httpClientForSpleis()
+    private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
     private val spesialistOID: UUID = UUID.randomUUID()
@@ -44,7 +37,7 @@ internal class SpleisbehovMediatorTest {
         vedtakDao = VedtakDao(dataSource)
         snapshotDao = SnapshotDao(dataSource)
         oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(httpClientForSpleis, accessTokenClient, "spleisClientId")
+        speilSnapshotRestDao = SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient, "spleisClientId")
         spleisbehovDao = SpleisbehovDao(dataSource)
         testDao = TestPersonDao(dataSource)
     }

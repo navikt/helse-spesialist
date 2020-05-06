@@ -3,7 +3,7 @@
     "gruppeId": "47f6663e-ee55-4097-a3fb-a7db015e0912",
     "fom": "2018-01-01",
     "tom": "2018-01-31",
-    "tilstand": "TilUtbetaling",
+    "tilstand": "Utbetalt",
     "fullstendig": true,
     "utbetalingsreferanse": null,
     "utbetalingstidslinje": [

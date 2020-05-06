@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -15,8 +16,9 @@ import io.ktor.http.headersOf
 import no.nav.helse.modell.dto.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.dto.PersonFraSpleisDto
 import org.flywaydb.core.Flyway
-import java.io.File
-import java.util.UUID
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.*
 import javax.sql.DataSource
 
 internal fun setupDataSourceMedFlyway(): DataSource {
@@ -57,17 +59,26 @@ internal fun setupDataSource(): DataSource {
     return HikariDataSource(hikariConfig)
 }
 
+class SpleisMockClient {
+    private val queuedResponses: Queue<Path> = LinkedList()
+    private var vedtaksperiodeId: UUID = UUID.randomUUID()
+    private fun nextResponse(): Path = queuedResponses.poll() ?: VEDTAKSPERIODE_TIL_GODKJENNING
 
-internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUID() }): HttpClient {
-    val vedtaksperiode = objectMapper.readTree(
-        File("src/test/resources/vedtaksperiode.json").readText()
-    ) as ObjectNode
-    return HttpClient(MockEngine) {
+    internal fun setVedtaksperiodeId(vedtaksperiodeId: UUID) {
+        this.vedtaksperiodeId = vedtaksperiodeId
+    }
+
+    internal fun enqueueResponses(vararg responses: Path) {
+        queuedResponses.addAll(responses)
+    }
+
+    internal val client = HttpClient(MockEngine) {
         install(JsonFeature) {
             this.serializer = JacksonSerializer()
         }
         engine {
             addHandler { _ ->
+                val vedtaksperiode = objectMapper.readValue<ObjectNode>(nextResponse().toFile())
                 respond(
                     objectMapper.writeValueAsString(
                         PersonFraSpleisDto(
@@ -76,7 +87,7 @@ internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUI
                                     organisasjonsnummer = "888",
                                     id = UUID.randomUUID(),
                                     vedtaksperioder = listOf(
-                                        vedtaksperiode.deepCopy().put("id", vedtaksperiodeId().toString())
+                                        vedtaksperiode.deepCopy().put("id", vedtaksperiodeId.toString())
                                     )
                                 )
                             )
@@ -85,6 +96,12 @@ internal fun httpClientForSpleis(vedtaksperiodeId: () -> UUID = { UUID.randomUUI
                 )
             }
         }
+    }
+
+
+    companion object {
+        val VEDTAKSPERIODE_TIL_GODKJENNING = Paths.get("src/test/resources/vedtaksperiode.json")
+        val VEDTAKSPERIODE_UTBETALT = Paths.get("src/test/resources/vedtaksperiode_utbetalt.json")
     }
 }
 
