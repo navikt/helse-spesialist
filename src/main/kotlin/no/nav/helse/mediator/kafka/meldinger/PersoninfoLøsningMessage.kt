@@ -50,7 +50,7 @@ internal class PersoninfoLøsningMessage {
                 val fornavn = hentPersoninfo["fornavn"].asText()
                 val mellomnavn = hentPersoninfo.takeIf { it.hasNonNull("mellomavn") }?.get("mellomnavn")?.asText()
                 val etternavn = hentPersoninfo["etternavn"].asText()
-                val fødselsdato = LocalDate.parse(hentPersoninfo["fødelsdato"].asText())
+                val fødselsdato = LocalDate.parse(hentPersoninfo["fødselsdato"].asText())
                 val kjønn = Kjønn.valueOf(hentPersoninfo["kjønn"].textValue())
                 HentPersoninfoLøsning(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
             }
