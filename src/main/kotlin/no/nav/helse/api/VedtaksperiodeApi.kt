@@ -82,8 +82,6 @@ internal fun Application.vedtaksperiodeApi(
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
             post("/api/annullering") {
-                val saksbehandlerIdent =
-                    requireNotNull(call.principal<JWTPrincipal>()).payload.getClaim("NAVident").asString()
                 val annullering = call.receive<Annullering>()
                 val vedtaksperiodeId = UUID.fromString(annullering.vedtaksperiodeId)
 
@@ -92,7 +90,7 @@ internal fun Application.vedtaksperiodeApi(
                     fødselsnummer = annullering.fødselsnummer,
                     organisasjonsnummer = annullering.organisasjonsnummer,
                     fagsystemId = annullering.fagsystemId,
-                    saksbehandlerIdent = saksbehandlerIdent
+                    saksbehandlerIdent = annullering.saksbehandlerIdent
                 )
 
                 spleisbehovMediator.håndter(vedtaksperiodeId, message)
