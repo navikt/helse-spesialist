@@ -94,6 +94,7 @@ internal fun Application.vedtaksperiodeApi(
                 )
 
                 spleisbehovMediator.håndter(vedtaksperiodeId, message)
+                call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
             }
         }
     }
