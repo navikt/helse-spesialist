@@ -9,7 +9,7 @@ class AnnulleringMessage(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val fagsystemId: String,
-    val saksbehandlerIdent: String
+    val saksbehandler: String
 ) {
     fun toJson() = objectMapper.writeValueAsString(mapOf(
         "@event_name" to "kanseller_utbetaling",
@@ -19,6 +19,6 @@ class AnnulleringMessage(
         "organisasjonsnummer" to organisasjonsnummer,
         "aktørId" to aktørId,
         "fagsystemId" to fagsystemId,
-        "saksbehandlerIdent" to saksbehandlerIdent
+        "saksbehandler" to saksbehandler
     ))
 }

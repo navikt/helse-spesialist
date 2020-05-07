@@ -90,7 +90,7 @@ internal fun Application.vedtaksperiodeApi(
                     fødselsnummer = annullering.fødselsnummer,
                     organisasjonsnummer = annullering.organisasjonsnummer,
                     fagsystemId = annullering.fagsystemId,
-                    saksbehandlerIdent = annullering.saksbehandlerIdent
+                    saksbehandler = annullering.saksbehandlerIdent
                 )
 
                 spleisbehovMediator.håndter(vedtaksperiodeId, message)
