@@ -1,15 +1,9 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dao.SpeilSnapshotRestDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.dao.*
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class OpprettVedtakCommand(
     private val personDao: PersonDao,
@@ -26,18 +20,16 @@ internal class OpprettVedtakCommand(
     parent: Command
 ) : Command(
     behovId = behovId,
-    initiellStatus = Oppgavestatus.AvventerSystem,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
-
-    override fun execute() {
+    override fun execute(): Resultat {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
-        val id = vedtakDao.insertVedtak(
+        vedtakDao.insertVedtak(
             vedtaksperiodeId = vedtaksperiodeId,
             fom = periodeFom,
             tom = periodeTom,
@@ -46,9 +38,7 @@ internal class OpprettVedtakCommand(
             speilSnapshotRef = snapshotId
         )
 
-        oppdaterVedtakRef(id)
-
-        ferdigstillSystem()
+        return Resultat.Ok.System
     }
 
 }

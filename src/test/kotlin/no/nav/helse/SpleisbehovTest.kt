@@ -3,12 +3,12 @@ package no.nav.helse
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.*
+import no.nav.helse.modell.oppgave.Command
+import no.nav.helse.modell.oppgave.CommandExecutor
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -19,69 +19,48 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SpleisbehovTest {
-    private lateinit var dataSource: DataSource
-    private lateinit var personDao: PersonDao
-    private lateinit var arbeidsgiverDao: ArbeidsgiverDao
-    private lateinit var vedtakDao: VedtakDao
-    private lateinit var snapshotDao: SnapshotDao
-    private lateinit var oppgaveDao: OppgaveDao
-    private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
-    private lateinit var testDao: TestPersonDao
-    private lateinit var spleisbehovDao: SpleisbehovDao
-
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
-    private val spesialistOID: UUID = UUID.randomUUID()
-
-    @BeforeAll
-    fun setup() {
-        dataSource = setupDataSourceMedFlyway()
-        personDao = PersonDao(dataSource)
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        vedtakDao = VedtakDao(dataSource)
-        snapshotDao = SnapshotDao(dataSource)
-        oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient, "spleisClientId")
-        testDao = TestPersonDao(dataSource)
-        spleisbehovDao = SpleisbehovDao(dataSource)
-
-        SpleisbehovMediator(
-            spleisbehovDao,
-            personDao,
-            arbeidsgiverDao,
-            vedtakDao,
-            snapshotDao,
-            speilSnapshotRestDao,
-            oppgaveDao,
-            spesialistOID
-        )
-    }
+    private val dataSource: DataSource = setupDataSourceMedFlyway()
+    private val personDao: PersonDao = PersonDao(dataSource)
+    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource)
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
+    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource)
+    private val speilSnapshotRestDao: SpeilSnapshotRestDao= SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient,  "spleisClientId")
+    private val testDao: TestPersonDao = TestPersonDao(dataSource)
 
     @Test
     fun `godkjenningsbehov for ny person legger inn ny person i DB`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehov = Spleisbehov(
-            id = UUID.randomUUID(),
-            fødselsnummer = "12345",
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 20),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "123455",
-            orgnummer = "98765432",
-            vedtaksperiodeReferanse = null,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+        val eventId = UUID.randomUUID()
+        val spleisExecutor = CommandExecutor(
+            command = Spleisbehov(
+                id = eventId,
+                fødselsnummer = "12345",
+                periodeFom = LocalDate.of(2018, 1, 1),
+                periodeTom = LocalDate.of(2018, 1, 20),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "123455",
+                orgnummer = "98765432",
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = speilSnapshotRestDao
+            ),
+            spesialistOid = UUID.randomUUID(),
+            eventId = eventId,
+            nåværendeOppgave = null,
             oppgaveDao = oppgaveDao,
-            nåværendeOppgave = null
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf()
         )
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
-        spleisBehov.fortsett(HentEnhetLøsning("3417"))
-        spleisBehov.execute()
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
+        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
 
         assertNotNull(personDao.findPersonByFødselsnummer(12345))
     }
@@ -89,29 +68,36 @@ internal class SpleisbehovTest {
     @Test
     fun `godkjenningsbehov for person oppdaterer person i DB`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehov = Spleisbehov(
-            id = UUID.randomUUID(),
-            fødselsnummer = "13245",
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 20),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "13245",
-            orgnummer = "98765432",
-            vedtaksperiodeReferanse = null,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+        val eventId = UUID.randomUUID()
+        val spleisExecutor = CommandExecutor(
+            command = Spleisbehov(
+                id = eventId,
+                fødselsnummer = "13245",
+                periodeFom = LocalDate.of(2018, 1, 1),
+                periodeTom = LocalDate.of(2018, 1, 20),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "13245",
+                orgnummer = "98765432",
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = speilSnapshotRestDao
+            ),
+            spesialistOid = UUID.randomUUID(),
+            eventId = eventId,
+            nåværendeOppgave = null,
             oppgaveDao = oppgaveDao,
-            nåværendeOppgave = null
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf()
         )
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
-        spleisBehov.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
+        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
         testDao.setEnhetOppdatert(13245, LocalDate.of(2020, 1, 1))
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentEnhetLøsning("3117"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentEnhetLøsning("3117"))
+        spleisExecutor.execute()
 
         assertNotNull(personDao.findPersonByFødselsnummer(13245))
         assertEquals(LocalDate.now(), personDao.findEnhetSistOppdatert(13245))
@@ -120,58 +106,70 @@ internal class SpleisbehovTest {
     @Test
     fun `godkjenningsbehov for person med ny arbeidsgiver legger inn ny arbeidsgiver i DB`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehov = Spleisbehov(
-            id = UUID.randomUUID(),
-            fødselsnummer = "23456",
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 20),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "123455",
-            orgnummer = "98765432",
-            vedtaksperiodeReferanse = null,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+        val eventId = UUID.randomUUID()
+        val spleisExecutor = CommandExecutor(
+            command = Spleisbehov(
+                id = eventId,
+                fødselsnummer = "23456",
+                periodeFom = LocalDate.of(2018, 1, 1),
+                periodeTom = LocalDate.of(2018, 1, 20),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "123455",
+                orgnummer = "98765432",
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = speilSnapshotRestDao
+            ),
+            spesialistOid = UUID.randomUUID(),
+            eventId = eventId,
+            nåværendeOppgave = null,
             oppgaveDao = oppgaveDao,
-            nåværendeOppgave = null
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf()
         )
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
-        spleisBehov.fortsett(HentEnhetLøsning("3417"))
-        spleisBehov.execute()
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
+        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
 
-        spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
+        spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(98765432))
     }
 
     @Test
     fun `Ved nytt godkjenningsbehov opprettes et nytt vedtak i DB`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehov = Spleisbehov(
-            id = UUID.randomUUID(),
-            fødselsnummer = "34567",
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 20),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "123455",
-            orgnummer = "98765433",
-            vedtaksperiodeReferanse = null,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+        val eventId = UUID.randomUUID()
+        val spleisExecutor = CommandExecutor(
+            command = Spleisbehov(
+                id = eventId,
+                fødselsnummer = "34567",
+                periodeFom = LocalDate.of(2018, 1, 1),
+                periodeTom = LocalDate.of(2018, 1, 20),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "123455",
+                orgnummer = "98765433",
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = speilSnapshotRestDao
+            ),
+            spesialistOid = UUID.randomUUID(),
+            eventId = eventId,
+            nåværendeOppgave = null,
             oppgaveDao = oppgaveDao,
-            nåværendeOppgave = null
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf()
         )
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
-        spleisBehov.fortsett(HentEnhetLøsning("3417"))
-        spleisBehov.execute()
-        spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
-        spleisBehov.execute()
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
+        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
+        spleisExecutor.execute()
 
         assertNotNull(findVedtaksperiode(vedtaksperiodeId))
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
@@ -181,30 +179,36 @@ internal class SpleisbehovTest {
     @Test
     fun `ved godkjenning har spleisbehovet en løsning`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val spleisBehov = Spleisbehov(
-            id = UUID.randomUUID(),
-            fødselsnummer = "3457812",
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 20),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "123455",
-            orgnummer = "98765433",
-            vedtaksperiodeReferanse = null,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+        val eventId = UUID.randomUUID()
+        val spleisExecutor = CommandExecutor(
+            command = Spleisbehov(
+                id = eventId,
+                fødselsnummer = "3457812",
+                periodeFom = LocalDate.of(2018, 1, 1),
+                periodeTom = LocalDate.of(2018, 1, 20),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "123455",
+                orgnummer = "98765433",
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = speilSnapshotRestDao
+            ),
+            spesialistOid = UUID.randomUUID(),
+            eventId = eventId,
+            nåværendeOppgave = null,
             oppgaveDao = oppgaveDao,
-            nåværendeOppgave = null
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf()
         )
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
-        spleisBehov.fortsett(HentEnhetLøsning("3417"))
-        spleisBehov.execute()
-        spleisBehov.fortsett(ArbeidsgiverLøsning("NAV IKT"))
-        spleisBehov.execute()
-        spleisBehov.fortsett(
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
+        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(
             SaksbehandlerLøsning(
                 godkjent = true,
                 saksbehandlerIdent = "abcd",
@@ -214,44 +218,52 @@ internal class SpleisbehovTest {
             )
         )
 
-        assertNotNull(spleisBehov.løsning())
+        val resultat = spleisExecutor.execute()
+
+        assertTrue(resultat.any { it is Command.Resultat.Ok.Løst })
     }
 
     @Test
     fun `ved feilende command lagres den siste commanden som ikke ble ferdigstilt`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val spleisbehovId = UUID.randomUUID()
+        val eventId = UUID.randomUUID()
 
         val failingSpeilSnapshotDao = SpeilSnapshotRestDao(failingHttpClient(), accessTokenClient, "spleisClientId")
 
-        val spleisBehov = Spleisbehov(
-            id = spleisbehovId,
-            fødselsnummer = "134896",
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 20),
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = "47839",
-            orgnummer = "98765433",
-            vedtaksperiodeReferanse = null,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = failingSpeilSnapshotDao,
+        val spleisExecutor = CommandExecutor(
+            command = Spleisbehov(
+                id = eventId,
+                fødselsnummer = "134896",
+                periodeFom = LocalDate.of(2018, 1, 1),
+                periodeTom = LocalDate.of(2018, 1, 20),
+                vedtaksperiodeId = vedtaksperiodeId,
+                aktørId = "47839",
+                orgnummer = "98765433",
+                personDao = personDao,
+                arbeidsgiverDao = arbeidsgiverDao,
+                vedtakDao = vedtakDao,
+                snapshotDao = snapshotDao,
+                speilSnapshotRestDao = failingSpeilSnapshotDao
+            ),
+            spesialistOid = UUID.randomUUID(),
+            eventId = eventId,
+            nåværendeOppgave = null,
             oppgaveDao = oppgaveDao,
-            nåværendeOppgave = null
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf()
         )
-        spleisBehov.execute()
-        spleisBehov.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
-        spleisBehov.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentPersoninfoLøsning("Test", "Mellomnavn", "Etternavnsen", LocalDate.now(), Kjønn.Mann))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
         assertThrows<Exception> {
-            spleisBehov.execute()
+            spleisExecutor.execute()
         }
 
-        assertEquals("OpprettVedtakCommand", oppgaveDao.findNåværendeOppgave(spleisbehovId)?.oppgaveType)
+        assertEquals("OpprettVedtakCommand", oppgaveDao.findNåværendeOppgave(eventId)?.oppgaveType)
     }
 
-    internal fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
+    private fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT id FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
                 .map { it.int("id") }

@@ -97,7 +97,7 @@ internal class SpleisbehovEndToEndTest {
             HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
-        customAssertNotNull(saksbehandlerOppgaver)
+        assertFalse(saksbehandlerOppgaver.isEmpty())
         assertTrue(saksbehandlerOppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
 
         spleisbehovMediator.håndter(
@@ -324,8 +324,8 @@ internal class SpleisbehovEndToEndTest {
         }
     }
 
-    @Disabled
     @ExperimentalContracts
+    @Disabled
     @Test
     fun `vedtaksperiode_endret fører til oppdatert speil snapshot`() {
         val vedtaksperiodeId = UUID.randomUUID()

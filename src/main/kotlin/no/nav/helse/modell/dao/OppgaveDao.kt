@@ -14,7 +14,7 @@ import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) {
 
-    fun insertOppgave(behovId: UUID, oppgavetype: String, status: Oppgavestatus, vedtakRef: Int?) =
+    fun insertOppgave(behovId: UUID, oppgavetype: String, status: Oppgavestatus, vedtakRef: Long?) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(

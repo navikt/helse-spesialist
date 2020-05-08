@@ -1,31 +1,27 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.Spleisbehov
 import no.nav.helse.modell.dao.ArbeidsgiverDao
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
 import java.time.Duration
-import java.util.UUID
+import java.util.*
 
 internal class OpprettArbeidsgiverCommand(
-    private val spleisbehov: Spleisbehov,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val orgnummer: String,
     behovId: UUID,
     parent: Command
 ) : Command(
     behovId = behovId,
-    initiellStatus = Oppgavestatus.AvventerSystem,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
 
-    override fun execute() {
-        if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
-            ferdigstillSystem()
+    override fun execute(): Resultat {
+        return if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
+            Resultat.Ok.System
         } else {
             arbeidsgiverDao.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")
-            ferdigstillSystem()
+            Resultat.Ok.System
             //spleisbehov.håndter(Behovtype.HentArbeidsgiverNavn)
         }
     }

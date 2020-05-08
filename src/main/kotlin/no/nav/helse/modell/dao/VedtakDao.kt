@@ -30,4 +30,10 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 ).asUpdateAndReturnGeneratedKey
             )
         }?.toInt())
+
+    internal fun findVedtakRef(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT id FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
+            .map { it.long("id") }
+            .asSingle)
+    }
 }
