@@ -27,7 +27,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SpleisbehovEndToEndTest {
+internal class GodkjenningsbehovEndToEndTest {
     private lateinit var dataSource: DataSource
     private lateinit var personDao: PersonDao
     private lateinit var arbeidsgiverDao: ArbeidsgiverDao

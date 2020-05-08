@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Behov
-import no.nav.helse.modell.Spleisbehov
+import no.nav.helse.modell.Godkjenningsbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.dto.OppgaveDto
 import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
@@ -50,7 +50,7 @@ internal class SpleisbehovMediator(
             return
         }
         val spleisbehovExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = godkjenningMessage.id,
                 fødselsnummer = godkjenningMessage.fødselsnummer,
                 periodeFom = godkjenningMessage.periodeFom,
@@ -231,7 +231,7 @@ internal class SpleisbehovMediator(
         spleisbehovJson: String,
         nåværendeOppgave: OppgaveDto = requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
     ) = CommandExecutor(
-        command = Spleisbehov.restore(
+        command = Godkjenningsbehov.restore(
             id = id,
             vedtaksperiodeId = spleisReferanse,
             data = spleisbehovJson,

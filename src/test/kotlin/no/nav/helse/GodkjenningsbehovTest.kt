@@ -3,7 +3,7 @@ package no.nav.helse
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.Spleisbehov
+import no.nav.helse.modell.Godkjenningsbehov
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.løsning.*
 import no.nav.helse.modell.oppgave.Command
@@ -18,7 +18,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SpleisbehovTest {
+internal class GodkjenningsbehovTest {
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
@@ -36,7 +36,7 @@ internal class SpleisbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "12345",
                 periodeFom = LocalDate.of(2018, 1, 1),
@@ -70,7 +70,7 @@ internal class SpleisbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "13245",
                 periodeFom = LocalDate.of(2018, 1, 1),
@@ -108,7 +108,7 @@ internal class SpleisbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "23456",
                 periodeFom = LocalDate.of(2018, 1, 1),
@@ -143,7 +143,7 @@ internal class SpleisbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "34567",
                 periodeFom = LocalDate.of(2018, 1, 1),
@@ -181,7 +181,7 @@ internal class SpleisbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "3457812",
                 periodeFom = LocalDate.of(2018, 1, 1),
@@ -231,7 +231,7 @@ internal class SpleisbehovTest {
         val failingSpeilSnapshotDao = SpeilSnapshotRestDao(failingHttpClient(), accessTokenClient, "spleisClientId")
 
         val spleisExecutor = CommandExecutor(
-            command = Spleisbehov(
+            command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "134896",
                 periodeFom = LocalDate.of(2018, 1, 1),

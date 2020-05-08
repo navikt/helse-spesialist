@@ -8,7 +8,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
-internal class Spleisbehov(
+internal class Godkjenningsbehov(
     private val id: UUID,
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
@@ -71,9 +71,9 @@ internal class Spleisbehov(
             vedtakDao: VedtakDao,
             snapshotDao: SnapshotDao,
             speilSnapshotRestDao: SpeilSnapshotRestDao
-        ): Spleisbehov {
+        ): Godkjenningsbehov {
             val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
-            return Spleisbehov(
+            return Godkjenningsbehov(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = spleisbehovDTO.fødselsnummer,
