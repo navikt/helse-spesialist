@@ -14,14 +14,26 @@ import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) {
 
-    fun insertOppgave(behovId: UUID, oppgavetype: String, status: Oppgavestatus, vedtakRef: Long?) =
+    fun insertOppgave(
+        behovId: UUID,
+        oppgavetype: String,
+        oppgavestatus: Oppgavestatus,
+        ferdigstiltAv: String?,
+        oid: UUID?,
+        vedtakRef: Long?
+    ) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO oppgave(behov_id, oppdatert, type, status, vedtak_ref) VALUES(?, now(), ?, CAST(? as oppgavestatus), ?);",
+                    """
+                        INSERT INTO oppgave(behov_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref)
+                        VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?);
+                    """,
                     behovId,
                     oppgavetype,
-                    status.name,
+                    oppgavestatus.name,
+                    ferdigstiltAv,
+                    oid,
                     vedtakRef
                 ).asUpdate
             )
@@ -44,18 +56,6 @@ class OppgaveDao(private val dataSource: DataSource) {
                     behovId,
                     oppgavetype
                 ).asUpdate
-            )
-        }
-
-    fun findOppgave(behovId: UUID, type: String): Long? =
-        using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    "SELECT * FROM oppgave where behov_id=? AND type=?;",
-                    behovId,
-                    type
-                ).map { it.long("id") }
-                    .asSingle
             )
         }
 

@@ -25,7 +25,7 @@ internal class CommandExecutor(
     private val log: Logger = LoggerFactory.getLogger("command")
     private fun Command.flat() = oppgaver + this
 
-    private var nåværendeOppgavetype = nåværendeOppgave?.oppgaveType ?: command.oppgaver.first().oppgavetype
+    private var nåværendeOppgavetype = nåværendeOppgave?.oppgaveType ?: command.flat().first().oppgavetype
     private val gjennståendeOppgaver = command
         .flat()
         .asSequence()
@@ -89,13 +89,18 @@ internal class CommandExecutor(
 
         if (nåværendeOppgave == null || executedCommands.size > 1) {
             oppgaveDao.insertOppgave(
-                eventId,
-                sisteCommand.command.oppgavetype,
-                sisteCommand.oppgavestatus(),
-                vedtakRef
+                behovId = eventId,
+                oppgavetype = sisteCommand.command.oppgavetype,
+                oppgavestatus = sisteCommand.oppgavestatus(),
+                ferdigstiltAv = førsteCommand.ferdigstiltAv(),
+                oid = førsteCommand.oid(),
+                vedtakRef = vedtakRef
             )
         } else {
-            log.warn("Execute av command førte ikke til endring i nåværende oppgavetype, ${loggingData.format()}", *loggingData)
+            log.warn(
+                "Execute av command førte ikke til endring i nåværende oppgavetype, ${loggingData.format()}",
+                *loggingData
+            )
         }
 
         if (sisteCommand is CommandExecution.Error) {
@@ -110,7 +115,7 @@ internal class CommandExecutor(
         return executedCommands.filterIsInstance<CommandExecution.Ok>().map { it.resultat }
     }
 
-    internal fun tryExecute(command: Command) = try {
+    private fun tryExecute(command: Command) = try {
         CommandExecution.Ok(command, spesialistOid, command.execute())
     } catch (e: Exception) {
         CommandExecution.Error(command, e)
@@ -122,7 +127,11 @@ internal class CommandExecutor(
         abstract fun ferdigstiltAv(): String?
         abstract fun oppgavestatus(): Oppgavestatus
 
-        class Ok internal constructor(command: Command, val spesialistOid: UUID, val resultat: Command.Resultat) : CommandExecution(command) {
+        class Ok internal constructor(
+            command: Command,
+            private val spesialistOid: UUID,
+            val resultat: Command.Resultat
+        ) : CommandExecution(command) {
             override fun skalFortsette() = resultat is Command.Resultat.Ok
             override fun oid(): UUID? = when (resultat) {
                 Command.Resultat.Ok.System -> spesialistOid
