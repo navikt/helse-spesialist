@@ -7,9 +7,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.routing
-import no.nav.helse.modell.dao.*
-import no.nav.helse.modell.dao.VedtakDao
-import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
 
 internal fun Application.oppgaveApi(
     oppgaveMediator: OppgaveMediator

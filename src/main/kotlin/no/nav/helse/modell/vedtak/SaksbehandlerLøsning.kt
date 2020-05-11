@@ -1,4 +1,4 @@
-package no.nav.helse.modell.løsning
+package no.nav.helse.modell.vedtak
 
 import java.time.LocalDateTime
 import java.util.*

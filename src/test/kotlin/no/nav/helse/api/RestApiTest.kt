@@ -24,12 +24,18 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.dao.*
-import no.nav.helse.modell.dto.PersonForSpeilDto
-import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.Kjønn
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.vedtaksperiode.PersonForSpeilDto
+import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
@@ -181,7 +187,13 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         val response = runBlocking { client.get<HttpStatement>("/api/oppgaver").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -206,7 +218,13 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -235,7 +253,13 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/aktorId/$aktørId").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -264,7 +288,13 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/fnr/$fødselsnummer").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -292,7 +322,13 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         val response = runBlocking {
             client.post<HttpStatement>("/api/vedtak") {
@@ -336,7 +372,13 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         runBlocking {
             val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {

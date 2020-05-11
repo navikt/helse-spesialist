@@ -24,7 +24,13 @@ import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.*
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.vedtaksperiode.VedtaksperiodeDao

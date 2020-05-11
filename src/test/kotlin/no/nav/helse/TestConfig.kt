@@ -13,8 +13,8 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import no.nav.helse.modell.dto.ArbeidsgiverFraSpleisDto
-import no.nav.helse.modell.dto.PersonFraSpleisDto
+import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
+import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import org.flywaydb.core.Flyway
 import java.nio.file.Path
 import java.nio.file.Paths

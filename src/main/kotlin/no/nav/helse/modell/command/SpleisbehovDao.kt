@@ -1,9 +1,8 @@
-package no.nav.helse.modell.dao
+package no.nav.helse.modell.command
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.dto.SpleisbehovDBDto
 import java.util.*
 import javax.sql.DataSource
 

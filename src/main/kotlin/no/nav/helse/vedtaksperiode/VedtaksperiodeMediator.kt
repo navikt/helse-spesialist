@@ -1,12 +1,10 @@
 package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.dao.SnapshotDao
-import no.nav.helse.modell.dto.ArbeidsgiverForSpeilDto
-import no.nav.helse.modell.dto.NavnDto
-import no.nav.helse.modell.dto.PersonForSpeilDto
-import no.nav.helse.modell.dto.PersonFraSpleisDto
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.NavnDto
+import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.objectMapper
 import java.util.*
 

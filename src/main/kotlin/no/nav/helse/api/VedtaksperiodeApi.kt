@@ -15,8 +15,8 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDateTime
 import java.util.*

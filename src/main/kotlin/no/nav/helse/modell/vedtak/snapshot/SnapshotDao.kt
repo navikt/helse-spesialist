@@ -1,4 +1,4 @@
-package no.nav.helse.modell.dao
+package no.nav.helse.modell.vedtak.snapshot
 
 import kotliquery.queryOf
 import kotliquery.sessionOf

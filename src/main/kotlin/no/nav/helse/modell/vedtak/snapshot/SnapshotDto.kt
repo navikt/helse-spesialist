@@ -1,4 +1,4 @@
-package no.nav.helse.modell.dto
+package no.nav.helse.modell.vedtak.snapshot
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.*

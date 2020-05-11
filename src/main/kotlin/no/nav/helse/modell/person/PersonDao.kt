@@ -1,11 +1,9 @@
-package no.nav.helse.modell.dao
+package no.nav.helse.modell.person
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.dto.NavnDto
-import no.nav.helse.modell.dto.PersonDto
-import no.nav.helse.modell.løsning.PersonEgenskap
+import no.nav.helse.modell.vedtak.NavnDto
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
@@ -28,14 +26,16 @@ class PersonDao(private val dataSource: DataSource) {
     internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT p.fodselsnummer, pi.fornavn, pi.mellomnavn, pi.etternavn FROM person AS p JOIN person_info AS pi ON p.info_ref = pi.id WHERE p.id=?;", id)
-                .map { PersonDto(
-                    fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
-                    navn = NavnDto(
-                        fornavn = it.string("fornavn"),
-                        mellomnavn = it.stringOrNull("mellomnavn"),
-                        etternavn = it.string("etternavn")
+                .map {
+                    PersonDto(
+                        fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
+                        navn = NavnDto(
+                            fornavn = it.string("fornavn"),
+                            mellomnavn = it.stringOrNull("mellomnavn"),
+                            etternavn = it.string("etternavn")
+                        )
                     )
-                ) }
+                }
                 .asSingle
         )
     }
@@ -46,7 +46,13 @@ class PersonDao(private val dataSource: DataSource) {
                 queryOf(
                     "SELECT * from person_info WHERE id=(SELECT info_ref FROM person where id =?);",
                     personId
-                ).map { NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")) }.asSingle
+                ).map {
+                    NavnDto(
+                        it.string("fornavn"),
+                        it.stringOrNull("mellomnavn"),
+                        it.string("etternavn")
+                    )
+                }.asSingle
             )
         }
 

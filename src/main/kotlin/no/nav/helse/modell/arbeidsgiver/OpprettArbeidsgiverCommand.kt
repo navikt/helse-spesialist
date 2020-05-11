@@ -1,7 +1,6 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell.arbeidsgiver
 
-import no.nav.helse.modell.dao.ArbeidsgiverDao
-import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
+import no.nav.helse.modell.command.Command
 import java.time.Duration
 import java.util.*
 

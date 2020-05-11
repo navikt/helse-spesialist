@@ -1,4 +1,4 @@
-package no.nav.helse.modell.dao
+package no.nav.helse.modell.vedtak.snapshot
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept

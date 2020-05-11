@@ -1,9 +1,8 @@
-package no.nav.helse.modell.dao
+package no.nav.helse.modell.arbeidsgiver
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.dto.ArbeidsgiverDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource

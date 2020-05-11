@@ -2,7 +2,13 @@ package no.nav.helse
 
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -37,7 +43,11 @@ internal class GodkjenningsbehovMediatorTest {
         vedtakDao = VedtakDao(dataSource)
         snapshotDao = SnapshotDao(dataSource)
         oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient, "spleisClientId")
+        speilSnapshotRestDao = SpeilSnapshotRestDao(
+            spleisMockClient.client,
+            accessTokenClient,
+            "spleisClientId"
+        )
         spleisbehovDao = SpleisbehovDao(dataSource)
         testDao = TestPersonDao(dataSource)
     }

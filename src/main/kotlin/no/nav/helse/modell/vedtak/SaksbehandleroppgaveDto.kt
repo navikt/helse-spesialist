@@ -1,4 +1,4 @@
-package no.nav.helse.modell.dto
+package no.nav.helse.modell.vedtak
 
 import java.time.LocalDate
 import java.time.LocalDateTime

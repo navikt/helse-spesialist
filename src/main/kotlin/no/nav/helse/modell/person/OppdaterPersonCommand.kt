@@ -1,9 +1,7 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell.person
 
 import no.nav.helse.modell.Behovtype
-import no.nav.helse.modell.dao.PersonDao
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
+import no.nav.helse.modell.command.Command
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*

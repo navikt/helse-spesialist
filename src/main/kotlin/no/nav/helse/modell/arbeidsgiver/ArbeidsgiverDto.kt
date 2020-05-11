@@ -1,3 +1,3 @@
-package no.nav.helse.modell.dto
+package no.nav.helse.modell.arbeidsgiver
 
 data class ArbeidsgiverDto(val organisasjonsnummer: String, val navn: String)

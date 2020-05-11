@@ -1,14 +1,12 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell.command
 
 import net.logstash.logback.argument.StructuredArgument
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.VedtakDao
-import no.nav.helse.modell.dto.OppgaveDto
-import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.modell.vedtak.VedtakDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -116,7 +114,11 @@ internal class CommandExecutor(
     }
 
     private fun tryExecute(command: Command) = try {
-        CommandExecution.Ok(command, spesialistOid, command.execute())
+        CommandExecution.Ok(
+            command,
+            spesialistOid,
+            command.execute()
+        )
     } catch (e: Exception) {
         CommandExecution.Error(command, e)
     }

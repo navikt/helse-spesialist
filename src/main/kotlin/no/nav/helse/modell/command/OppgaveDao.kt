@@ -1,13 +1,12 @@
-package no.nav.helse.modell.dao
+package no.nav.helse.modell.command
 
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.dto.NavnDto
-import no.nav.helse.modell.dto.OppgaveDto
-import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
+import no.nav.helse.modell.vedtak.NavnDto
+import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.objectMapper
 import java.util.*
 import javax.sql.DataSource
@@ -95,7 +94,11 @@ class OppgaveDao(private val dataSource: DataSource) {
             vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
             periodeFom = it.localDate("fom"),
             periodeTom = it.localDate("tom"),
-            navn = NavnDto(it.string("fornavn"), it.stringOrNull("mellomnavn"), it.string("etternavn")),
+            navn = NavnDto(
+                it.string("fornavn"),
+                it.stringOrNull("mellomnavn"),
+                it.string("etternavn")
+            ),
             fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
             antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count()
         )

@@ -1,6 +1,10 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.dao.*
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*

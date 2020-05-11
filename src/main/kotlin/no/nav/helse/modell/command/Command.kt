@@ -1,11 +1,11 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell.command
 
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Behovtype
-import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration

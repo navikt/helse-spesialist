@@ -1,7 +1,7 @@
 package no.nav.helse.api
 
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dto.SaksbehandleroppgaveDto
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 
 internal class OppgaveMediator(
     private val oppgaveDao: OppgaveDao

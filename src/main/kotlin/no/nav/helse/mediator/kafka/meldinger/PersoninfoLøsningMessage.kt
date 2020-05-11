@@ -2,9 +2,9 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.Kjønn
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -52,7 +52,13 @@ internal class PersoninfoLøsningMessage {
                 val etternavn = hentPersoninfo["etternavn"].asText()
                 val fødselsdato = LocalDate.parse(hentPersoninfo["fødselsdato"].asText())
                 val kjønn = Kjønn.valueOf(hentPersoninfo["kjønn"].textValue())
-                HentPersoninfoLøsning(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+                HentPersoninfoLøsning(
+                    fornavn,
+                    mellomnavn,
+                    etternavn,
+                    fødselsdato,
+                    kjønn
+                )
             }
 
         private fun JsonNode.tilHentEnhetLøsning() =

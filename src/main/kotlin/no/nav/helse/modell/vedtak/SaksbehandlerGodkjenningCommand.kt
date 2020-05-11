@@ -1,6 +1,6 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.modell.command.Command
 import java.time.Duration
 import java.util.*
 

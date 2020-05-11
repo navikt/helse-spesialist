@@ -1,4 +1,4 @@
-package no.nav.helse.modell.dto
+package no.nav.helse.modell.command
 
 import java.util.UUID
 

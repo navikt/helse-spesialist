@@ -3,8 +3,11 @@ package no.nav.helse.modell.oppgave
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.dao.OppgaveDao
-import no.nav.helse.modell.dao.VedtakDao
+import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.command.CommandExecutor
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.command.RootCommand
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -22,7 +25,14 @@ class CommandExecutorTest {
     internal fun `persisterer hvem som ferdigstilte den siste oppgaven`() {
         val behovId = UUID.randomUUID()
         val testCommand = TestRootCommand(behovId)
-        val executor = CommandExecutor(testCommand, spesialistOID, behovId, null, oppgaveDao, vedtakDao)
+        val executor = CommandExecutor(
+            testCommand,
+            spesialistOID,
+            behovId,
+            null,
+            oppgaveDao,
+            vedtakDao
+        )
         executor.execute()
         val oppgaverForBehov = using(sessionOf(dataSource)) { session ->
             session.run(

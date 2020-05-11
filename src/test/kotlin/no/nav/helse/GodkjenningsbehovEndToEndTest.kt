@@ -8,11 +8,17 @@ import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
-import no.nav.helse.modell.dao.*
-import no.nav.helse.modell.løsning.HentEnhetLøsning
-import no.nav.helse.modell.løsning.HentPersoninfoLøsning
-import no.nav.helse.modell.løsning.Kjønn
-import no.nav.helse.modell.løsning.SaksbehandlerLøsning
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
@@ -51,7 +57,11 @@ internal class GodkjenningsbehovEndToEndTest {
         vedtakDao = VedtakDao(dataSource)
         snapshotDao = SnapshotDao(dataSource)
         oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(spleisMockClient.client, accessTokenClient, "spleisClientId")
+        speilSnapshotRestDao = SpeilSnapshotRestDao(
+            spleisMockClient.client,
+            accessTokenClient,
+            "spleisClientId"
+        )
         spleisbehovDao = SpleisbehovDao(dataSource)
         testDao = TestPersonDao(dataSource)
     }
@@ -94,7 +104,13 @@ internal class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertFalse(saksbehandlerOppgaver.isEmpty())
@@ -212,7 +228,13 @@ internal class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Kvinne)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Kvinne
+            )
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertEquals(1, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
@@ -306,7 +328,13 @@ internal class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
 
         spleisbehovMediator.håndter(
@@ -361,7 +389,13 @@ internal class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             eventId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
 
         assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
@@ -404,7 +438,13 @@ internal class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            )
         )
 
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()

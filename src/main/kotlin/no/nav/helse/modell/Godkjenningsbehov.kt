@@ -2,8 +2,18 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.modell.dao.*
-import no.nav.helse.modell.oppgave.*
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.OppdatertArbeidsgiverCommand
+import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
+import no.nav.helse.modell.command.RootCommand
+import no.nav.helse.modell.person.OppdaterPersonCommand
+import no.nav.helse.modell.person.OpprettPersonCommand
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.vedtak.OpprettVedtakCommand
+import no.nav.helse.modell.vedtak.SaksbehandlerGodkjenningCommand
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.objectMapper
 import java.time.Duration
 import java.time.LocalDate
@@ -29,8 +39,18 @@ internal class Godkjenningsbehov(
     override val oppgaver = setOf(
         OpprettPersonCommand(personDao, fødselsnummer, aktørId, id, this),
         OppdaterPersonCommand(personDao, fødselsnummer, id, this),
-        OpprettArbeidsgiverCommand(arbeidsgiverDao, orgnummer, id, this),
-        OppdatertArbeidsgiverCommand(arbeidsgiverDao, orgnummer, id, this),
+        OpprettArbeidsgiverCommand(
+            arbeidsgiverDao,
+            orgnummer,
+            id,
+            this
+        ),
+        OppdatertArbeidsgiverCommand(
+            arbeidsgiverDao,
+            orgnummer,
+            id,
+            this
+        ),
         OpprettVedtakCommand(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,

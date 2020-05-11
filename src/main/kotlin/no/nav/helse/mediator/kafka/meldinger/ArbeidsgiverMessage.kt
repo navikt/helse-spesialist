@@ -2,7 +2,7 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.Behovtype
-import no.nav.helse.modell.løsning.ArbeidsgiverLøsning
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -18,7 +18,8 @@ class ArbeidsgiverMessage(
     val spleisbehovId: UUID,
     val arbeidsgiverNavn: String
 ) {
-    fun asArbeidsgiverLøsning() = ArbeidsgiverLøsning(arbeidsgiverNavn)
+    fun asArbeidsgiverLøsning() =
+        ArbeidsgiverLøsning(arbeidsgiverNavn)
 
     internal class Factory(
         rapidsConnection: RapidsConnection,

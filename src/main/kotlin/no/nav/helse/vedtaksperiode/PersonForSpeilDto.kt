@@ -1,6 +1,7 @@
-package no.nav.helse.modell.dto
+package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.modell.vedtak.NavnDto
 import java.util.*
 
 
