@@ -151,12 +151,18 @@ internal class SpleisbehovMediator(
             "Fant ikke behov med id $eventId"
         }
 
+        val nåværendeOppgave = requireNotNull(oppgaveDao.findNåværendeOppgave(eventId)) {
+            "Svar på behov krever at det er en nåværende oppgave"
+        }
+
         val spleisbehovExecutor = spleisbehovExecutor(
             id = eventId,
             spleisReferanse = spleisbehovDBDto.spleisReferanse,
-            spleisbehovJson = spleisbehovDBDto.data
+            spleisbehovJson = spleisbehovDBDto.data,
+            nåværendeOppgave = nåværendeOppgave
         )
         spleisbehovExecutor.invoke()
+
 
         val resultater = spleisbehovExecutor.execute()
         spleisbehovDao.updateBehov(eventId, spleisbehovExecutor.command.toJson())
@@ -229,7 +235,7 @@ internal class SpleisbehovMediator(
         id: UUID,
         spleisReferanse: UUID,
         spleisbehovJson: String,
-        nåværendeOppgave: OppgaveDto = requireNotNull(oppgaveDao.findNåværendeOppgave(id)) { "Svar på behov krever at det er en nåværende oppgave" }
+        nåværendeOppgave: OppgaveDto
     ) = CommandExecutor(
         command = Godkjenningsbehov.restore(
             id = id,

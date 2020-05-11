@@ -324,6 +324,49 @@ internal class GodkjenningsbehovEndToEndTest {
         }
     }
 
+    @Test
+    fun `gjør ingen ting om man får en løsning på en invalidert oppgave`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val eventId = UUID.randomUUID()
+
+        val rapid = TestRapid()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
+        ).apply { init(rapid) }
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        rapid.sendTestMessage(
+            """
+            {
+              "@behov": ["Godkjenning"],
+              "@id": "$eventId",
+              "fødselsnummer": "3546756",
+              "aktørId": "7653345",
+              "organisasjonsnummer": "6546346",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "periodeFom": "${LocalDate.of(2018, 1, 1)}",
+              "periodeTom": "${LocalDate.of(2018, 1, 31)}",
+              "warnings": {"aktiviteter": []}
+            }
+        """
+        )
+        spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
+        spleisbehovMediator.håndter(
+            eventId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
+        )
+
+        assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
+    }
+
     @ExperimentalContracts
     @Disabled
     @Test

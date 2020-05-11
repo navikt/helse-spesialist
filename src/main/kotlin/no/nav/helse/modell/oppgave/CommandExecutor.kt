@@ -57,7 +57,7 @@ internal class CommandExecutor(
 
     internal fun execute(): List<Command.Resultat> {
         if (nåværendeOppgave?.status == Oppgavestatus.Invalidert) {
-            log.info("Utfører ikke oppgaver siden noen er invalidert, ${loggingData.format()}", *loggingData)
+            log.info("Kan ikke gjenoppta oppgave da den er invalidert ${loggingData.format()}", *loggingData)
             return listOf(Command.Resultat.Invalidert)
         }
 

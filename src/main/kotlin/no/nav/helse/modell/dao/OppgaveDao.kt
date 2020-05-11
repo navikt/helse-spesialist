@@ -62,7 +62,7 @@ class OppgaveDao(private val dataSource: DataSource) {
     fun findNåværendeOppgave(behovId: UUID): OppgaveDto? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
-                "SELECT * FROM oppgave WHERE behov_id=? AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)",
+                "SELECT * FROM oppgave WHERE behov_id=? AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)",
                 behovId
             )
                 .map(::oppgaveDto)
