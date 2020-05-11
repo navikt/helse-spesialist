@@ -1,5 +1,6 @@
 package no.nav.helse.modell
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.dao.*
 import no.nav.helse.modell.oppgave.*
@@ -91,6 +92,7 @@ internal class Godkjenningsbehov(
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class SpleisbehovDTO(
     val id: UUID,
     val fødselsnummer: String,
