@@ -16,11 +16,12 @@ class CommandExecutorTest {
     private val vedtakDao = VedtakDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val spesialistOID: UUID = UUID.randomUUID()
+    private val saksbehandlerOID = UUID.randomUUID()
 
     @Test
     internal fun `persisterer hvem som ferdigstilte den siste oppgaven`() {
         val behovId = UUID.randomUUID()
-        val testCommand = TestCommand(behovId)
+        val testCommand = TestRootCommand(behovId)
         val executor = CommandExecutor(testCommand, spesialistOID, behovId, null, oppgaveDao, vedtakDao)
         executor.execute()
         val oppgaverForBehov = using(sessionOf(dataSource)) { session ->
@@ -39,13 +40,18 @@ class CommandExecutorTest {
         }
         assertEquals(listOf(FerdigstiltAv("tbd@nav.no", spesialistOID)), oppgaverForBehov)
     }
-}
 
-class TestCommand(behovId: UUID, override val fødselsnummer: String = "12345") : RootCommand(behovId, Duration.ZERO) {
-    override fun execute() = Resultat.Ok.System
-    override val orgnummer: String? = null
-    override val vedtaksperiodeId: UUID? = null
-    override fun toJson(): String = "{}"
-}
+    inner class TestRootCommand(behovId: UUID, override val fødselsnummer: String = "12345") : RootCommand(behovId, Duration.ZERO) {
+        override fun execute() = Resultat.Ok.System
+        override val orgnummer: String? = null
+        override val vedtaksperiodeId: UUID? = null
+        override fun toJson(): String = "{}"
+        override val oppgaver: Set<Command> = setOf(TestCommand(behovId, this))
+    }
 
-data class FerdigstiltAv(val epost: String?, val oid: UUID?)
+    inner class TestCommand(behovId: UUID, parent: Command) : Command(behovId, parent, Duration.ZERO) {
+        override fun execute() = Resultat.Ok.Løst("saksbehandler@nav.no", saksbehandlerOID, mapOf())
+    }
+
+    data class FerdigstiltAv(val epost: String?, val oid: UUID?)
+}

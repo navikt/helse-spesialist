@@ -92,8 +92,8 @@ internal class CommandExecutor(
                 behovId = eventId,
                 oppgavetype = sisteCommand.command.oppgavetype,
                 oppgavestatus = sisteCommand.oppgavestatus(),
-                ferdigstiltAv = førsteCommand.ferdigstiltAv(),
-                oid = førsteCommand.oid(),
+                ferdigstiltAv = sisteCommand.ferdigstiltAv(),
+                oid = sisteCommand.oid(),
                 vedtakRef = vedtakRef
             )
         } else {
