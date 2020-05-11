@@ -9,62 +9,45 @@ import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
-import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import javax.sql.DataSource
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GodkjenningsbehovEndToEndTest {
-    private lateinit var dataSource: DataSource
-    private lateinit var personDao: PersonDao
-    private lateinit var arbeidsgiverDao: ArbeidsgiverDao
-    private lateinit var vedtakDao: VedtakDao
-    private lateinit var snapshotDao: SnapshotDao
-    private lateinit var oppgaveDao: OppgaveDao
-    private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
-    private lateinit var spleisbehovDao: SpleisbehovDao
-    private lateinit var testDao: TestPersonDao
-
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
-    private val spesialistOID: UUID = UUID.randomUUID()
+    private val dataSource = setupDataSourceMedFlyway()
+    private val personDao = PersonDao(dataSource)
+    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
+    private val oppgaveDao = OppgaveDao(dataSource)
+    private val speilSnapshotRestDao = SpeilSnapshotRestDao(
+        spleisMockClient.client,
+        accessTokenClient,
+        "spleisClientId"
+    )
+    private val spleisbehovDao = SpleisbehovDao(dataSource)
+    private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
 
-    @BeforeAll
-    fun setup() {
-        dataSource = setupDataSourceMedFlyway()
-        personDao = PersonDao(dataSource)
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        vedtakDao = VedtakDao(dataSource)
-        snapshotDao = SnapshotDao(dataSource)
-        oppgaveDao = OppgaveDao(dataSource)
-        speilSnapshotRestDao = SpeilSnapshotRestDao(
-            spleisMockClient.client,
-            accessTokenClient,
-            "spleisClientId"
-        )
-        spleisbehovDao = SpleisbehovDao(dataSource)
-        testDao = TestPersonDao(dataSource)
-    }
+    private val spesialistOID: UUID = UUID.randomUUID()
 
     @ExperimentalContracts
     @Test
@@ -402,7 +385,6 @@ internal class GodkjenningsbehovEndToEndTest {
     }
 
     @ExperimentalContracts
-    @Disabled
     @Test
     fun `vedtaksperiode_endret fører til oppdatert speil snapshot`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -420,12 +402,13 @@ internal class GodkjenningsbehovEndToEndTest {
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
 
         val spleisbehovId = UUID.randomUUID()
+        val fødselsnummer = "3546756"
         rapid.sendTestMessage(
             """
             {
               "@behov": ["Godkjenning"],
               "@id": "$spleisbehovId",
-              "fødselsnummer": "3546756",
+              "fødselsnummer": "$fødselsnummer",
               "aktørId": "7653345",
               "organisasjonsnummer": "6546346",
               "vedtaksperiodeId": "$vedtaksperiodeId",
@@ -447,12 +430,17 @@ internal class GodkjenningsbehovEndToEndTest {
             )
         )
 
-        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        val speilSnapshotRef = vedtaksperiodeDao.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
+        val snapshotFør = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
 
-        spleisbehovMediator.håndter(vedtaksperiodeId, VedtaksperiodeEndretMessage())
+        spleisMockClient.enqueueResponses(SpleisMockClient.VEDTAKSPERIODE_UTBETALT)
+        spleisbehovMediator.håndter(
+            vedtaksperiodeId,
+            VedtaksperiodeEndretMessage(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
+        )
 
-        val saksbehandlerOppgaverEtter = oppgaveDao.findSaksbehandlerOppgaver()
-        assertNotEquals(saksbehandlerOppgaver, saksbehandlerOppgaverEtter)
+        val snapshotEtter = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+        assertNotEquals(snapshotFør, snapshotEtter)
     }
 }
 

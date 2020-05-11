@@ -8,20 +8,17 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Behov
 import no.nav.helse.modell.Godkjenningsbehov
+import no.nav.helse.modell.OppdaterVedtaksperiode
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDto
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
+import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.command.Command
-import no.nav.helse.modell.command.CommandExecutor
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
+import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
-import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
@@ -50,7 +47,7 @@ internal class SpleisbehovMediator(
         if (spleisbehovDao.findBehov(godkjenningMessage.id) != null) {
             log.warn(
                 "Mottok duplikat godkjenning behov, {}, {}",
-                keyValue("spleisbehovId", godkjenningMessage.id),
+                keyValue("eventId", godkjenningMessage.id),
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
             )
             return
@@ -77,13 +74,13 @@ internal class SpleisbehovMediator(
             vedtakDao = vedtakDao,
             loggingData = *arrayOf(
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
-                keyValue("spleisbehovId", godkjenningMessage.id)
+                keyValue("eventId", godkjenningMessage.id)
             )
         )
         log.info(
             "Mottok Godkjenning behov med {}, {}",
             keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
-            keyValue("spleisbehovId", godkjenningMessage.id)
+            keyValue("eventId", godkjenningMessage.id)
         )
         val resultater = spleisbehovExecutor.execute()
         spleisbehovDao.insertBehov(
@@ -101,7 +98,7 @@ internal class SpleisbehovMediator(
         publiserBehov(
             spleisreferanse = godkjenningMessage.id,
             resultater = resultater,
-            spleisbehovExecutor = spleisbehovExecutor
+            commandExecutor = spleisbehovExecutor
         )
     }
 
@@ -111,30 +108,30 @@ internal class SpleisbehovMediator(
     }
 
     internal fun håndter(
-        spleisbehovId: UUID,
+        eventId: UUID,
         behandlendeEnhet: HentEnhetLøsning?,
         hentPersoninfoLøsning: HentPersoninfoLøsning?
     ) {
-        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) {
+        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("eventId", eventId))
+        restoreAndInvoke(eventId) {
             behandlendeEnhet?.also(::fortsett)
             hentPersoninfoLøsning?.also(::fortsett)
         }
     }
 
-    fun håndter(spleisbehovId: UUID, løsning: ArbeidsgiverLøsning) {
-        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) { fortsett(løsning) }
+    fun håndter(eventId: UUID, løsning: ArbeidsgiverLøsning) {
+        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("eventId", eventId))
+        restoreAndInvoke(eventId) { fortsett(løsning) }
     }
 
-    fun håndter(spleisbehovId: UUID, løsning: SaksbehandlerLøsning) {
-        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) { fortsett(løsning) }
+    fun håndter(eventId: UUID, løsning: SaksbehandlerLøsning) {
+        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("eventId", eventId))
+        restoreAndInvoke(eventId) { fortsett(løsning) }
     }
 
-    fun håndter(spleisbehovId: UUID, påminnelseMessage: PåminnelseMessage) {
-        log.info("Mottok påminnelse for spleisbehov {}", keyValue("spleisbehovId", spleisbehovId))
-        restoreAndInvoke(spleisbehovId) {}
+    fun håndter(eventId: UUID, påminnelseMessage: PåminnelseMessage) {
+        log.info("Mottok påminnelse for spleisbehov {}", keyValue("eventId", eventId))
+        restoreAndInvoke(eventId) {}
     }
 
     fun håndter(vedtaksperiodeId: UUID, løsning: TilInfotrygdMessage) {
@@ -146,7 +143,38 @@ internal class SpleisbehovMediator(
         }
     }
 
-    fun håndter(vedtaksperiodeId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {}
+    fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
+        log.info(
+            "Mottok vedtaksperiode endret {}, {}",
+            keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
+            keyValue("eventId", eventId)
+        )
+        val commandExecutor = CommandExecutor(
+            command = OppdaterVedtaksperiode(
+                fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
+                eventId = eventId,
+                speilSnapshotRestDao = speilSnapshotRestDao,
+                snapshotDao = snapshotDao
+            ),
+            spesialistOid = spesialistOID,
+            eventId = eventId,
+            nåværendeOppgave = null,
+            oppgaveDao = oppgaveDao,
+            vedtakDao = vedtakDao,
+            loggingData = *arrayOf(
+                keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
+                keyValue("eventId", eventId)
+            )
+        )
+
+        val resultater = commandExecutor.execute()
+        publiserBehov(
+            spleisreferanse = eventId,
+            resultater = resultater,
+            commandExecutor = commandExecutor
+        )
+    }
 
     private fun restoreAndInvoke(eventId: UUID, invoke: CommandExecutor.() -> Unit) {
         if (shutdown) {
@@ -161,45 +189,45 @@ internal class SpleisbehovMediator(
             "Svar på behov krever at det er en nåværende oppgave"
         }
 
-        val spleisbehovExecutor = spleisbehovExecutor(
+        val commandExecutor = spleisbehovExecutor(
             id = eventId,
             spleisReferanse = spleisbehovDBDto.spleisReferanse,
             spleisbehovJson = spleisbehovDBDto.data,
             nåværendeOppgave = nåværendeOppgave
         )
-        spleisbehovExecutor.invoke()
+        commandExecutor.invoke()
 
 
-        val resultater = spleisbehovExecutor.execute()
-        spleisbehovDao.updateBehov(eventId, spleisbehovExecutor.command.toJson())
+        val resultater = commandExecutor.execute()
+        spleisbehovDao.updateBehov(eventId, commandExecutor.command.toJson())
         publiserBehov(
             spleisreferanse = eventId,
             resultater = resultater,
-            spleisbehovExecutor = spleisbehovExecutor
+            commandExecutor = commandExecutor
         )
     }
 
     private fun publiserBehov(
         spleisreferanse: UUID,
         resultater: List<Command.Resultat>,
-        spleisbehovExecutor: CommandExecutor
+        commandExecutor: CommandExecutor
     ) {
         val behovstyper = resultater.filterIsInstance<Command.Resultat.HarBehov>().flatMap { it.behovstyper.toList() }
         if (behovstyper.isNotEmpty()) {
             val behov = Behov(
                 typer = behovstyper,
-                fødselsnummer = spleisbehovExecutor.command.fødselsnummer,
-                orgnummer = spleisbehovExecutor.command.orgnummer,
+                fødselsnummer = commandExecutor.command.fødselsnummer,
+                orgnummer = commandExecutor.command.orgnummer,
                 spleisBehovId = spleisreferanse,
-                vedtaksperiodeId = spleisbehovExecutor.command.vedtaksperiodeId
+                vedtaksperiodeId = commandExecutor.command.vedtaksperiodeId
             )
             log.info(
                 "Sender ut behov for {}, {}, {}",
                 keyValue("vedtaksperiodeId", behov.vedtaksperiodeId),
-                keyValue("spleisbehovId", behov.spleisBehovId),
+                keyValue("eventId", behov.spleisBehovId),
                 keyValue("behov", behov.typer.toString())
             )
-            rapidsConnection.publish(spleisbehovExecutor.command.fødselsnummer, behov.toJson())
+            rapidsConnection.publish(commandExecutor.command.fødselsnummer, behov.toJson())
         }
 
         resultater
@@ -208,13 +236,13 @@ internal class SpleisbehovMediator(
                 val originalJson = requireNotNull(spleisbehovDao.findOriginalBehov(spleisreferanse))
                 val løsningJson = objectMapper.readValue<ObjectNode>(originalJson)
                 løsningJson.set<ObjectNode>("@løsning", objectMapper.convertValue<JsonNode>(løst.løsning))
-                rapidsConnection.publish(spleisbehovExecutor.command.fødselsnummer, løsningJson.toString())
+                rapidsConnection.publish(commandExecutor.command.fødselsnummer, løsningJson.toString())
             }
 
         log.info(
             "Produserer oppgave endret event for {}, {}",
-            keyValue("spleisbehovId", spleisreferanse),
-            keyValue("vedtaksperiodeId", spleisbehovExecutor.command.vedtaksperiodeId)
+            keyValue("eventId", spleisreferanse),
+            keyValue("vedtaksperiodeId", commandExecutor.command.vedtaksperiodeId)
         )
 
         rapidsConnection.publish(
@@ -223,9 +251,9 @@ internal class SpleisbehovMediator(
                     "@event_name" to "oppgave_oppdatert",
                     "@id" to UUID.randomUUID(),
                     "@opprettet" to LocalDateTime.now(),
-                    "timeout" to spleisbehovExecutor.currentTimeout().toSeconds(),
-                    "spleisbehovId" to spleisreferanse,
-                    "fødselsnummer" to spleisbehovExecutor.command.fødselsnummer,
+                    "timeout" to commandExecutor.currentTimeout().toSeconds(),
+                    "eventId" to spleisreferanse,
+                    "fødselsnummer" to commandExecutor.command.fødselsnummer,
                     "endringstidspunkt" to LocalDateTime.now(),
                     "ferdigstilt" to (resultater.last() is Command.Resultat.Ok)
                 )
@@ -258,6 +286,6 @@ internal class SpleisbehovMediator(
         nåværendeOppgave = nåværendeOppgave,
         oppgaveDao = oppgaveDao,
         vedtakDao = vedtakDao,
-        loggingData = *arrayOf(keyValue("vedtaksperiodeId", spleisReferanse), keyValue("spleisbehovId", id))
+        loggingData = *arrayOf(keyValue("vedtaksperiodeId", spleisReferanse), keyValue("eventId", id))
     )
 }

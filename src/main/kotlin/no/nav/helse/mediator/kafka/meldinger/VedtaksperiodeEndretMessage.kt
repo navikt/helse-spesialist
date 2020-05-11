@@ -6,7 +6,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import java.util.*
 
-class VedtaksperiodeEndretMessage {
+class VedtaksperiodeEndretMessage(
+    internal val vedtaksperiodeId: UUID,
+    internal val fødselsnummer: String
+) {
     internal class Factory(
         rapidsConnection: RapidsConnection,
         private val spleisbehovMediator: SpleisbehovMediator
@@ -24,7 +27,9 @@ class VedtaksperiodeEndretMessage {
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-            spleisbehovMediator.håndter(vedtaksperiodeId, VedtaksperiodeEndretMessage())
+            val fødselsnummer = packet["fødselsnummer"].asText()
+            val eventId = UUID.fromString(packet["@id"].asText())
+            spleisbehovMediator.håndter(eventId, VedtaksperiodeEndretMessage(vedtaksperiodeId, fødselsnummer))
         }
     }
 }

@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtak.snapshot
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import java.util.*
 import javax.sql.DataSource
 
 class SnapshotDao(private val dataSource: DataSource) {
@@ -29,4 +30,19 @@ class SnapshotDao(private val dataSource: DataSource) {
                 ).map { it.string("data") }.asSingle
             )
         }
+
+    fun oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId: UUID, snapshot: String): Int =
+        requireNotNull(using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    """
+                            UPDATE speil_snapshot
+                            SET data=CAST(? as json)
+                            WHERE id = (SELECT speil_snapshot_ref FROM vedtak WHERE vedtaksperiode_id=?);
+                        """,
+                    snapshot,
+                    vedtaksperiodeId
+                ).asUpdate
+            )
+        }.toInt())
 }
