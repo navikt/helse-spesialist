@@ -18,14 +18,10 @@ class VedtaksperiodeEndretMessage(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.require("gjeldendeTilstand") { node ->
-                        require(node.isTextual)
-                        require(node.asText() != "TIL_INFOTRYGD")
-                    }
+                    it.demandValue("@event_name", "vedtaksperiode_endret")
                     it.requireKey("vedtaksperiodeId")
                     it.requireKey("fødselsnummer")
                     it.requireKey("@id")
-                    it.demandValue("@event_name", "vedtaksperiode_endret")
                 }
             }.register(this)
         }
