@@ -400,17 +400,20 @@ internal class GodkjenningsbehovEndToEndTest {
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        VedtaksperiodeEndretMessage.Factory(rapid, spleisbehovMediator)
 
         val spleisbehovId = UUID.randomUUID()
         val fødselsnummer = "3546756"
+        val aktørId = "7653345"
+        val orgnummer = "6546346"
         rapid.sendTestMessage(
             """
             {
               "@behov": ["Godkjenning"],
               "@id": "$spleisbehovId",
               "fødselsnummer": "$fødselsnummer",
-              "aktørId": "7653345",
-              "organisasjonsnummer": "6546346",
+              "aktørId": "$aktørId",
+              "organisasjonsnummer": "$orgnummer",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "periodeFom": "${LocalDate.of(2018, 1, 1)}",
               "periodeTom": "${LocalDate.of(2018, 1, 31)}",
@@ -434,9 +437,20 @@ internal class GodkjenningsbehovEndToEndTest {
         val snapshotFør = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
 
         spleisMockClient.enqueueResponses(SpleisMockClient.VEDTAKSPERIODE_UTBETALT)
-        spleisbehovMediator.håndter(
-            vedtaksperiodeId,
-            VedtaksperiodeEndretMessage(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
+        rapid.sendTestMessage(
+            """
+            {
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "gjeldendeTilstand": "AVSLUTTET",
+              "forrigeTilstand": "TIL_UTBETALING",
+              "@event_name": "vedtaksperiode_endret",
+              "@id": "${UUID.randomUUID()}",
+              "@opprettet": "${LocalDateTime.now()}",
+              "aktørId": "$aktørId",
+              "fødselsnummer": "$fødselsnummer",
+              "organisasjonsnummer": "$orgnummer"
+            }
+        """
         )
 
         val snapshotEtter = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
