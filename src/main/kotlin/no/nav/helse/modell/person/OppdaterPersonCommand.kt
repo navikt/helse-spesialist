@@ -18,7 +18,8 @@ internal class OppdaterPersonCommand(
 ) {
     override val oppgaver: Set<Command> = setOf(
         HentPersoninfoCommand(),
-        HentEnhetCommand()
+        HentEnhetCommand(),
+        HentInfotrygdutbetalingerCommand()
     )
 
     private inner class HentPersoninfoCommand : Command(
@@ -61,6 +62,25 @@ internal class OppdaterPersonCommand(
 
         override fun fortsett(løsning: HentEnhetLøsning) {
             personDao.updateEnhet(fødselsnummer.toLong(), løsning.enhetNr.toInt())
+        }
+    }
+
+    private inner class HentInfotrygdutbetalingerCommand : Command(
+        behovId = behovId,
+        parent = this@OppdaterPersonCommand,
+        timeout = Duration.ofHours(1)
+    ) {
+        override fun execute(): Resultat {
+            val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer.toLong())
+            return if (sistOppdatert.plusDays(1) < LocalDate.now()) {
+                Resultat.HarBehov(Behovtype.HentInfotrygdutbetalinger)
+            } else {
+                Resultat.Ok.System
+            }
+        }
+
+        override fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
+            personDao.updateInfotrygdutbetalinger(fødselsnummer.toLong(), løsning.utbetalinger)
         }
     }
 

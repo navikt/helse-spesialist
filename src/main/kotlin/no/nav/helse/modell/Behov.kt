@@ -28,5 +28,6 @@ class Behov(
 enum class Behovtype {
     HentEnhet,
     HentPersoninfo,
-    HentArbeidsgiverNavn
+    HentArbeidsgiverNavn,
+    HentInfotrygdutbetalinger
 }

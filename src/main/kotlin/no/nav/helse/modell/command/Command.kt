@@ -4,6 +4,7 @@ import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import org.slf4j.Logger
@@ -25,6 +26,7 @@ abstract class Command(
     internal open fun fortsett(løsning: HentPersoninfoLøsning) {}
     internal open fun fortsett(løsning: ArbeidsgiverLøsning) {}
     internal open fun fortsett(løsning: SaksbehandlerLøsning) {}
+    internal open fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {}
 
     sealed class Resultat(private val oppgavestatus: Oppgavestatus) {
         internal fun tilOppgavestatus() = oppgavestatus

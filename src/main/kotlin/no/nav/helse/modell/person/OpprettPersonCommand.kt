@@ -18,14 +18,15 @@ internal class OpprettPersonCommand(
 ) {
     private var navnId: Int? = null
     private var enhetId: Int? = null
+    private var infotrygdutbetalingerId: Int? = null
 
     override fun execute(): Resultat = if (personDao.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
         Resultat.Ok.System
-    } else if (navnId != null && enhetId != null) {
-        personDao.insertPerson(fødselsnummer.toLong(), aktørId.toLong(), navnId!!, enhetId!!)
+    } else if (navnId != null && enhetId != null && infotrygdutbetalingerId != null) {
+        personDao.insertPerson(fødselsnummer.toLong(), aktørId.toLong(), navnId!!, enhetId!!, infotrygdutbetalingerId!!)
         Resultat.Ok.System
     } else {
-        Resultat.HarBehov(Behovtype.HentPersoninfo, Behovtype.HentEnhet)
+        Resultat.HarBehov(Behovtype.HentPersoninfo, Behovtype.HentEnhet, Behovtype.HentInfotrygdutbetalinger)
     }
 
     override fun fortsett(løsning: HentEnhetLøsning) {
@@ -34,5 +35,9 @@ internal class OpprettPersonCommand(
 
     override fun fortsett(løsning: HentPersoninfoLøsning) {
         navnId = personDao.insertNavn(løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
+    }
+
+    override fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
+        infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(løsning.utbetalinger)
     }
 }

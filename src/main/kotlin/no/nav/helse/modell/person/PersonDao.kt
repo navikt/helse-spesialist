@@ -25,7 +25,10 @@ class PersonDao(private val dataSource: DataSource) {
 
     internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("SELECT p.fodselsnummer, pi.fornavn, pi.mellomnavn, pi.etternavn FROM person AS p JOIN person_info AS pi ON p.info_ref = pi.id WHERE p.id=?;", id)
+            queryOf(
+                "SELECT p.fodselsnummer, pi.fornavn, pi.mellomnavn, pi.etternavn FROM person AS p JOIN person_info AS pi ON p.info_ref = pi.id WHERE p.id=?;",
+                id
+            )
                 .map {
                     PersonDto(
                         fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
@@ -69,18 +72,29 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }?.toInt())
 
-    internal fun insertPerson(fødselsnummer: Long, aktørId: Long, navnId: Int, enhetId: Int) =
+    internal fun insertPerson(fødselsnummer: Long, aktørId: Long, navnId: Int, enhetId: Int, infotrygdutbetalingerId: Int) =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref) VALUES(?, ?, ?, ?);",
+                    "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?);",
                     fødselsnummer,
                     aktørId,
                     navnId,
-                    enhetId
+                    enhetId,
+                    infotrygdutbetalingerId
                 ).asExecute
             )
         }
+
+    internal fun insertInfotrygdutbetalinger(data: String): Int =
+        requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            session.run(
+                queryOf(
+                    "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));",
+                    data
+                ).asUpdateAndReturnGeneratedKey
+            )
+        }?.toInt())
 
     internal fun updateNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String) =
         using(sessionOf(dataSource)) { session ->
@@ -91,7 +105,13 @@ class PersonDao(private val dataSource: DataSource) {
                         fornavn, mellomnavn, etternavn, fødselsnummer
                     ).asUpdate
                 )
-                tx.run(queryOf("UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;", fødselsnummer).asUpdate) }
+                tx.run(
+                    queryOf(
+                        "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
+                        fødselsnummer
+                    ).asUpdate
+                )
+            }
         }
 
     internal fun updateEnhet(fødselsnummer: Long, enhetNr: Int) = using(sessionOf(dataSource)) { session ->
@@ -103,6 +123,24 @@ class PersonDao(private val dataSource: DataSource) {
             ).asUpdate
         )
     }
+
+    internal fun updateInfotrygdutbetalinger(fødselsnummer: Long, data: String) =
+        using(sessionOf(dataSource)) { session ->
+            session.transaction { tx ->
+                tx.run(
+                    queryOf(
+                        "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
+                        data, fødselsnummer
+                    ).asUpdate
+                )
+                tx.run(
+                    queryOf(
+                        "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
+                        fødselsnummer
+                    ).asUpdate
+                )
+            }
+        }
 
     internal fun findPersoninfoSistOppdatert(fødselsnummer: Long) =
         requireNotNull(using(sessionOf(dataSource)) { session ->
@@ -126,6 +164,18 @@ class PersonDao(private val dataSource: DataSource) {
             }.asSingle
         )
     })
+
+    internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: Long) =
+        requireNotNull(using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;",
+                    fødselsnummer
+                ).map {
+                    it.sqlDate("infotrygdutbetalinger_oppdatert").toLocalDate()
+                }.asSingle
+            )
+        })
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 

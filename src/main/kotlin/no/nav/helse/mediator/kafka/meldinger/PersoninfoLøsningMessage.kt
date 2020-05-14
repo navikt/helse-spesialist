@@ -3,6 +3,7 @@ package no.nav.helse.mediator.kafka.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -25,23 +26,24 @@ internal class PersoninfoLøsningMessage {
                 validate {
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
-                    it.demandAllOrAny("@behov", listOf("HentEnhet", "HentPersoninfo"))
+                    it.demandAllOrAny("@behov", listOf("HentEnhet", "HentPersoninfo", "HentInfotrygdutbetalinger"))
                     it.requireKey("@løsning", "spleisBehovId")
                 }
             }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-            sikkerLog.error("forstod ikke HentEnhet eller HentPersoninfo:\n${problems.toExtendedReport()}")
+            sikkerLog.error("forstod ikke HentEnhet, HentPersoninfo eller HentInfotrygdutbetalinger:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hentEnhet = packet["@løsning"].tilHentEnhetLøsning()
             val hentPersoninfo = packet["@løsning"].tilPersonInfoLøsning()
+            val hentInfotrygdutbetalinger = packet["@løsning"].tilInfotrygdutbetalinger()
 
             val spleisbehovId = UUID.fromString(packet["spleisBehovId"].asText())
 
-            spleisbehovMediator.håndter(spleisbehovId, hentEnhet, hentPersoninfo)
+            spleisbehovMediator.håndter(spleisbehovId, hentEnhet, hentPersoninfo, hentInfotrygdutbetalinger)
         }
 
         private fun JsonNode.tilPersonInfoLøsning() =
@@ -63,5 +65,8 @@ internal class PersoninfoLøsningMessage {
 
         private fun JsonNode.tilHentEnhetLøsning() =
             takeIf { hasNonNull("HentEnhet") }?.let { HentEnhetLøsning(it["HentEnhet"].asText()) }
+
+        private fun JsonNode.tilInfotrygdutbetalinger() =
+            takeIf { hasNonNull("HentInfotrygdutbetalinger") }?.let { HentInfotrygdutbetalingerLøsning(it["HentInfotrygdutbetalinger"].asText()) }
     }
 }

@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArgument
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.VedtakDao
@@ -38,6 +39,10 @@ internal class CommandExecutor(
     }
 
     internal fun fortsett(løsning: HentPersoninfoLøsning) {
+        current().fortsett(løsning)
+    }
+
+    internal fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
         current().fortsett(løsning)
     }
 

@@ -13,6 +13,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
@@ -110,12 +111,14 @@ internal class SpleisbehovMediator(
     internal fun håndter(
         eventId: UUID,
         behandlendeEnhet: HentEnhetLøsning?,
-        hentPersoninfoLøsning: HentPersoninfoLøsning?
+        hentPersoninfoLøsning: HentPersoninfoLøsning?,
+        hentInfotrygdutbetalingerLøsning: HentInfotrygdutbetalingerLøsning?
     ) {
         log.info("Mottok personinfo løsning for spleis behov {}", keyValue("eventId", eventId))
         restoreAndInvoke(eventId) {
             behandlendeEnhet?.also(::fortsett)
             hentPersoninfoLøsning?.also(::fortsett)
+            hentInfotrygdutbetalingerLøsning?.also(::fortsett)
         }
     }
 
