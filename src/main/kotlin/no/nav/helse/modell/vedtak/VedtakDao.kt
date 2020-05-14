@@ -31,9 +31,12 @@ internal class VedtakDao(private val dataSource: DataSource) {
             )
         }?.toInt())
 
-    internal fun findVedtakRef(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT id FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
-            .map { it.long("id") }
+    internal fun findVedtak(vedtaksperiodeId: UUID): VedtakDto? = using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT * FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
+            .map { VedtakDto(
+                id = it.long("id"),
+                speilSnapshotRef = it.long("speil_snapshot_ref")
+            ) }
             .asSingle)
     }
 }

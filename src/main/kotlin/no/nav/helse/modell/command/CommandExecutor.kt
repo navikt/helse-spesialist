@@ -2,11 +2,11 @@ package no.nav.helse.modell.command
 
 import net.logstash.logback.argument.StructuredArgument
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
+import no.nav.helse.modell.vedtak.VedtakDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -73,7 +73,7 @@ internal class CommandExecutor(
                 )
             }
 
-        val vedtakRef = command.vedtaksperiodeId?.let(vedtakDao::findVedtakRef)
+        val vedtakRef = command.vedtaksperiodeId?.let(vedtakDao::findVedtak)?.id
         val førsteCommand = executedCommands.first()
         val sisteCommand = executedCommands.last()
         oppgaveDao.updateOppgave(

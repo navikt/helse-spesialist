@@ -155,7 +155,8 @@ internal class SpleisbehovMediator(
                 vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
                 eventId = eventId,
                 speilSnapshotRestDao = speilSnapshotRestDao,
-                snapshotDao = snapshotDao
+                snapshotDao = snapshotDao,
+                vedtakDao = vedtakDao
             ),
             spesialistOid = spesialistOID,
             eventId = eventId,
