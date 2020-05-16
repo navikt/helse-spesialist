@@ -1,9 +1,5 @@
 package no.nav.helse.mediator.kafka
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.readValue
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Behov
@@ -20,7 +16,8 @@ import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
-import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -36,6 +33,7 @@ internal class SpleisbehovMediator(
     private val oppgaveDao: OppgaveDao,
     private val spesialistOID: UUID
 ) {
+    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
     private var shutdown = false
@@ -105,7 +103,9 @@ internal class SpleisbehovMediator(
 
     internal fun håndter(vedtaksperiodeId: UUID, annullering: AnnulleringMessage) {
         log.info("Publiserer annullering på fagsystemId ${annullering.fagsystemId} for vedtaksperiode $vedtaksperiodeId")
-        rapidsConnection.publish(annullering.fødselsnummer, annullering.toJson())
+        rapidsConnection.publish(annullering.fødselsnummer, annullering.toJson().also {
+            sikkerLogg.info("sender annullering for fagsystemId=${annullering.fagsystemId} for vedtaksperiodeId=$vedtaksperiodeId:\n\t$it")
+        })
     }
 
     internal fun håndter(
@@ -237,16 +237,20 @@ internal class SpleisbehovMediator(
                 keyValue("eventId", behov.spleisBehovId),
                 keyValue("behov", behov.typer.toString())
             )
-            rapidsConnection.publish(commandExecutor.command.fødselsnummer, behov.toJson())
+            rapidsConnection.publish(commandExecutor.command.fødselsnummer, behov.toJson().also {
+                sikkerLogg.info("sender behov for vedtaksperiodeId=${behov.vedtaksperiodeId} (spleis behovId=${behov.spleisBehovId}:\n\t$it")
+            })
         }
 
         resultater
             .filterIsInstance<Command.Resultat.Ok.Løst>()
             .forEach { løst ->
                 val originalJson = requireNotNull(spleisbehovDao.findOriginalBehov(spleisreferanse))
-                val løsningJson = objectMapper.readValue<ObjectNode>(originalJson)
-                løsningJson.set<ObjectNode>("@løsning", objectMapper.convertValue<JsonNode>(løst.løsning))
-                rapidsConnection.publish(commandExecutor.command.fødselsnummer, løsningJson.toString())
+                val løsningJson = JsonMessage(originalJson, MessageProblems(originalJson))
+                løsningJson["@løsning"] = løst.løsning
+                rapidsConnection.publish(commandExecutor.command.fødselsnummer, løsningJson.toJson().also {
+                    sikkerLogg.info("sender løsning for fødselsnummer=${commandExecutor.command.fødselsnummer} vedtaksperiodeId=${commandExecutor.command.vedtaksperiodeId} spleisBehovId=$spleisreferanse:\n\t$it")
+                })
             }
 
         log.info(
@@ -255,20 +259,18 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", commandExecutor.command.vedtaksperiodeId)
         )
 
-        rapidsConnection.publish(
-            objectMapper.writeValueAsString(
-                mapOf(
-                    "@event_name" to "oppgave_oppdatert",
-                    "@id" to UUID.randomUUID(),
-                    "@opprettet" to LocalDateTime.now(),
-                    "timeout" to commandExecutor.currentTimeout().toSeconds(),
-                    "eventId" to spleisreferanse,
-                    "fødselsnummer" to commandExecutor.command.fødselsnummer,
-                    "endringstidspunkt" to LocalDateTime.now(),
-                    "ferdigstilt" to (resultater.last() is Command.Resultat.Ok)
-                )
-            )
-        )
+        rapidsConnection.publish(JsonMessage.newMessage(mapOf(
+                "@event_name" to "oppgave_oppdatert",
+                "@id" to UUID.randomUUID(),
+                "@opprettet" to LocalDateTime.now(),
+                "timeout" to commandExecutor.currentTimeout().toSeconds(),
+                "eventId" to spleisreferanse,
+                "fødselsnummer" to commandExecutor.command.fødselsnummer,
+                "endringstidspunkt" to LocalDateTime.now(),
+                "ferdigstilt" to (resultater.last() is Command.Resultat.Ok)
+            )).toJson().also {
+            sikkerLogg.info("sender oppgave_oppdatert for fødselsnummer=${commandExecutor.command.fødselsnummer} vedtaksperiodeId=${commandExecutor.command.vedtaksperiodeId} spleisBehovId=$spleisreferanse:\n\t$it")
+        })
     }
 
     fun shutdown() {

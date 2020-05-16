@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -12,20 +12,19 @@ internal class Behov(
     internal val spleisBehovId: UUID,
     internal val vedtaksperiodeId: UUID?
 ) {
-    fun toJson() = objectMapper.writeValueAsString(
-        mapOf(
-            "@event_name" to "behov",
-            "@behov" to typer.map { it.name },
-            "@id" to UUID.randomUUID(),
-            "@opprettet" to LocalDateTime.now(),
-            "spleisBehovId" to spleisBehovId,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "fødselsnummer" to fødselsnummer,
-            "orgnummer" to orgnummer
-        ) + typer.flatMap { it.ekstrafelter.map { entry ->
-            "${it.name}.${entry.key}" to entry.value
-        }.toList() }
-    )
+    fun toJson() = JsonMessage.newMessage(mutableMapOf(
+        "@event_name" to "behov",
+        "@behov" to typer.map { it.name },
+        "@id" to UUID.randomUUID(),
+        "@opprettet" to LocalDateTime.now(),
+        "spleisBehovId" to spleisBehovId,
+        "fødselsnummer" to fødselsnummer
+    ).apply {
+        vedtaksperiodeId?.also { this["vedtaksperiodeId"] = it }
+        orgnummer?.also { this["orgnummer"] = it }
+    } + typer.flatMap { it.ekstrafelter.map { entry ->
+        "${it.name}.${entry.key}" to entry.value
+    }.toList()}).toJson()
 }
 
 internal sealed class Behovtype {
