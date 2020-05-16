@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.OppdatertArbeidsgiverCommand
@@ -9,12 +10,13 @@ import no.nav.helse.modell.command.RootCommand
 import no.nav.helse.modell.person.OppdaterPersonCommand
 import no.nav.helse.modell.person.OpprettPersonCommand
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.modell.vedtak.OpprettVedtakCommand
 import no.nav.helse.modell.vedtak.SaksbehandlerGodkjenningCommand
 import no.nav.helse.modell.vedtak.VedtakDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -71,7 +73,7 @@ internal class Godkjenningsbehov(
     override fun execute(): Resultat = Resultat.Ok.System
 
     override fun toJson() =
-        objectMapper.writeValueAsString(
+        JsonMessage.newMessage(objectMapper.convertValue(
             SpleisbehovDTO(
                 id = id,
                 fødselsnummer = fødselsnummer,
@@ -80,7 +82,7 @@ internal class Godkjenningsbehov(
                 aktørId = aktørId,
                 orgnummer = orgnummer
             )
-        )
+        )).toJson()
 
     companion object {
         fun restore(

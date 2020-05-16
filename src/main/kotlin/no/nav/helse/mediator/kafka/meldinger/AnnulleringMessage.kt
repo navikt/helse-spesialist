@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.*
 
@@ -11,7 +11,7 @@ class AnnulleringMessage(
     val fagsystemId: String,
     val saksbehandler: String
 ) {
-    fun toJson() = objectMapper.writeValueAsString(mapOf(
+    fun toJson() = JsonMessage.newMessage(mapOf(
         "@event_name" to "kanseller_utbetaling",
         "@id" to UUID.randomUUID(),
         "@opprettet" to LocalDateTime.now(),
@@ -20,5 +20,5 @@ class AnnulleringMessage(
         "aktørId" to aktørId,
         "fagsystemId" to fagsystemId,
         "saksbehandler" to saksbehandler
-    ))
+    )).toJson()
 }
