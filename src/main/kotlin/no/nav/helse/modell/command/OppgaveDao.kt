@@ -79,7 +79,8 @@ class OppgaveDao(private val dataSource: DataSource) {
                        INNER JOIN person p on v.person_ref = p.id
                        INNER JOIN person_info pi on p.info_ref = pi.id
                 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-                  AND o.opprettet > now()::date
+                ORDER BY opprettet DESC
+                LIMIT 100
             """
             )
                 .map(::saksbehandleroppgaveDto)
