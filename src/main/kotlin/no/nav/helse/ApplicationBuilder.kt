@@ -104,7 +104,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val oppgaveMediator = OppgaveMediator(oppgaveDao)
     private val vedtaksperiodeMediator =
-        VedtaksperiodeMediator(vedtaksperiodeDao, arbeidsgiverDao, snapshotDao)
+        VedtaksperiodeMediator(vedtaksperiodeDao, arbeidsgiverDao, snapshotDao, personDao)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {

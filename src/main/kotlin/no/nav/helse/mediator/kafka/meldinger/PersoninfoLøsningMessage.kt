@@ -39,7 +39,7 @@ internal class PersoninfoLøsningMessage {
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hentEnhet = packet["@løsning"].tilHentEnhetLøsning()
             val hentPersoninfo = packet["@løsning"].tilPersonInfoLøsning()
-            val hentInfotrygdutbetalinger = packet["@løsning"].tilInfotrygdutbetalinger()
+            val hentInfotrygdutbetalinger = packet["@løsning"].tilInfotrygdutbetalingerLøsning()
 
             val spleisbehovId = UUID.fromString(packet["spleisBehovId"].asText())
 
@@ -66,7 +66,7 @@ internal class PersoninfoLøsningMessage {
         private fun JsonNode.tilHentEnhetLøsning() =
             takeIf { hasNonNull("HentEnhet") }?.let { HentEnhetLøsning(it["HentEnhet"].asText()) }
 
-        private fun JsonNode.tilInfotrygdutbetalinger() =
-            takeIf { hasNonNull("HentInfotrygdutbetalinger") }?.let { HentInfotrygdutbetalingerLøsning(it["HentInfotrygdutbetalinger"].asText()) }
+        private fun JsonNode.tilInfotrygdutbetalingerLøsning() =
+            takeIf { hasNonNull("HentInfotrygdutbetalinger") }?.let { HentInfotrygdutbetalingerLøsning(it["HentInfotrygdutbetalinger"]) }
     }
 }

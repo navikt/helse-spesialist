@@ -73,7 +73,7 @@ internal class OppdaterPersonCommand(
         override fun execute(): Resultat {
             val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(1) < LocalDate.now()) {
-                Resultat.HarBehov(Behovtype.HentInfotrygdutbetalinger)
+                Resultat.HarBehov(Behovtype.HentInfotrygdutbetalinger())
             } else {
                 Resultat.Ok.System
             }

@@ -1,9 +1,11 @@
 package no.nav.helse.modell.person
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.vedtak.NavnDto
+import no.nav.helse.objectMapper
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
@@ -59,6 +61,16 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
+    internal fun findInfotrygdutbetalinger(personId: Long): String? =
+        using(sessionOf(dataSource)) {session ->
+            session.run(
+                queryOf(
+                    "SELECT data FROM infotrygdutbetalinger WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE id = ?);",
+                    personId
+                ).map { it.string("data") }.asSingle
+            )
+        }
+
 
     internal fun insertNavn(fornavn: String, mellomnavn: String?, etternavn: String): Int =
         requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
@@ -86,12 +98,12 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun insertInfotrygdutbetalinger(data: String): Int =
+    internal fun insertInfotrygdutbetalinger(data: JsonNode): Int =
         requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.run(
                 queryOf(
                     "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));",
-                    data
+                    objectMapper.writeValueAsString(data)
                 ).asUpdateAndReturnGeneratedKey
             )
         }?.toInt())
@@ -124,13 +136,13 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun updateInfotrygdutbetalinger(fødselsnummer: Long, data: String) =
+    internal fun updateInfotrygdutbetalinger(fødselsnummer: Long, data: JsonNode) =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
                 tx.run(
                     queryOf(
                         "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
-                        data, fødselsnummer
+                        objectMapper.writeValueAsString(data), fødselsnummer
                     ).asUpdate
                 )
                 tx.run(

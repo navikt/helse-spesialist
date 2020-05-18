@@ -9,10 +9,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.CommandExecutor
 import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
@@ -89,6 +86,9 @@ internal class GodkjenningsbehovTest {
         spleisExecutor.fortsett(HentEnhetLøsning("3417"))
         spleisExecutor.execute()
 
+        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
+        spleisExecutor.execute()
+
         assertNotNull(personDao.findPersonByFødselsnummer(12345))
     }
 
@@ -129,6 +129,7 @@ internal class GodkjenningsbehovTest {
             )
         )
         spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         testDao.setEnhetOppdatert(13245, LocalDate.of(2020, 1, 1))
         spleisExecutor.execute()
         spleisExecutor.fortsett(HentEnhetLøsning("3117"))
@@ -175,6 +176,7 @@ internal class GodkjenningsbehovTest {
             )
         )
         spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         spleisExecutor.execute()
 
         spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
@@ -218,6 +220,7 @@ internal class GodkjenningsbehovTest {
             )
         )
         spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         spleisExecutor.execute()
         spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         spleisExecutor.execute()
@@ -264,6 +267,7 @@ internal class GodkjenningsbehovTest {
             )
         )
         spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         spleisExecutor.execute()
         spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         spleisExecutor.execute()
@@ -327,6 +331,8 @@ internal class GodkjenningsbehovTest {
         )
         spleisExecutor.execute()
         spleisExecutor.fortsett(HentEnhetLøsning("3417"))
+        spleisExecutor.execute()
+        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         assertThrows<Exception> {
             spleisExecutor.execute()
         }
@@ -342,3 +348,24 @@ internal class GodkjenningsbehovTest {
         )
     }
 }
+
+private fun infotrygdutbetalingerLøsning(
+    fom: LocalDate = LocalDate.of(2020, 1, 1),
+    tom: LocalDate = LocalDate.of(2020, 1, 1),
+    grad: Int = 100,
+    dagsats: Double = 1200.0,
+    typetekst: String = "ArbRef",
+    orgnr: String = "89123"
+) = objectMapper.readTree(
+    """
+            [
+                {
+                    "fom": "$fom",
+                    "tom": "$tom",
+                    "grad": "$grad",
+                    "dagsats": $dagsats,
+                    "typetekst": "$typetekst",
+                    "organisasjonsnummer": "$orgnr"
+                }
+            ]
+        """.trimIndent())

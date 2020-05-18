@@ -76,6 +76,5 @@ internal class GodkjenningsbehovMediatorTest {
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
-
     }
 }

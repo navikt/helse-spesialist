@@ -9,7 +9,8 @@ data class PersonForSpeilDto(
     val aktørId: String,
     val fødselsnummer: String,
     val navn: NavnDto,
-    val arbeidsgivere: List<ArbeidsgiverForSpeilDto>
+    val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
+    val infotrygdutbetalinger: JsonNode?
 )
 
 data class ArbeidsgiverForSpeilDto(

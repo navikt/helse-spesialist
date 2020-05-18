@@ -26,7 +26,11 @@ internal class OpprettPersonCommand(
         personDao.insertPerson(fødselsnummer.toLong(), aktørId.toLong(), navnId!!, enhetId!!, infotrygdutbetalingerId!!)
         Resultat.Ok.System
     } else {
-        Resultat.HarBehov(Behovtype.HentPersoninfo, Behovtype.HentEnhet, Behovtype.HentInfotrygdutbetalinger)
+        Resultat.HarBehov(
+            Behovtype.HentPersoninfo,
+            Behovtype.HentEnhet,
+            Behovtype.HentInfotrygdutbetalinger()
+        )
     }
 
     override fun fortsett(løsning: HentEnhetLøsning) {

@@ -1,6 +1,6 @@
 CREATE TABLE infotrygdutbetalinger
 (
-    id   INT UNIQUE NOT NULL,
+    id   SERIAL PRIMARY KEY,
     data JSON NOT NULL
 );
 

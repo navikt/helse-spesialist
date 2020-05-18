@@ -47,7 +47,7 @@ internal class SpleisbehovMediator(
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
         if (spleisbehovDao.findBehov(godkjenningMessage.id) != null) {
             log.warn(
-                "Mottok duplikat godkjenning behov, {}, {}",
+                "Mottok duplikat godkjenningsbehov, {}, {}",
                 keyValue("eventId", godkjenningMessage.id),
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
             )
@@ -79,7 +79,7 @@ internal class SpleisbehovMediator(
             )
         )
         log.info(
-            "Mottok Godkjenning behov med {}, {}",
+            "Mottok godkjenningsbehov med {}, {}",
             keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
             keyValue("eventId", godkjenningMessage.id)
         )
@@ -114,7 +114,13 @@ internal class SpleisbehovMediator(
         hentPersoninfoLøsning: HentPersoninfoLøsning?,
         hentInfotrygdutbetalingerLøsning: HentInfotrygdutbetalingerLøsning?
     ) {
-        log.info("Mottok personinfo løsning for spleis behov {}", keyValue("eventId", eventId))
+        val behovSomHarLøsninger = mapOf(
+            "HentEnhet" to behandlendeEnhet,
+            "HentPersoninfo" to hentPersoninfoLøsning,
+            "HentInfotrygdutbetalinger" to hentInfotrygdutbetalingerLøsning
+        ).filter { it.value != null }.keys.toList()
+
+        log.info("Mottok løsninger for $behovSomHarLøsninger for Spleis-behov {}", keyValue("eventId", eventId))
         restoreAndInvoke(eventId) {
             behandlendeEnhet?.also(::fortsett)
             hentPersoninfoLøsning?.also(::fortsett)
@@ -123,24 +129,24 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(eventId: UUID, løsning: ArbeidsgiverLøsning) {
-        log.info("Mottok arbeidsgiver løsning for spleis behov {}", keyValue("eventId", eventId))
+        log.info("Mottok arbeidsgiverløsning for Spleis-behov {}", keyValue("eventId", eventId))
         restoreAndInvoke(eventId) { fortsett(løsning) }
     }
 
     fun håndter(eventId: UUID, løsning: SaksbehandlerLøsning) {
-        log.info("Mottok godkjenningsløsning for spleis behov {}", keyValue("eventId", eventId))
+        log.info("Mottok godkjenningsløsning for Spleis-behov {}", keyValue("eventId", eventId))
         restoreAndInvoke(eventId) { fortsett(løsning) }
     }
 
     fun håndter(eventId: UUID, påminnelseMessage: PåminnelseMessage) {
-        log.info("Mottok påminnelse for spleisbehov {}", keyValue("eventId", eventId))
+        log.info("Mottok påminnelse for Spleis-behov {}", keyValue("eventId", eventId))
         restoreAndInvoke(eventId) {}
     }
 
     fun håndter(vedtaksperiodeId: UUID, løsning: TilInfotrygdMessage) {
         spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
             val nåværendeOppgave = oppgaveDao.findNåværendeOppgave(spleisbehovDBDto.id) ?: return
-            log.info("Vedtaksperiode i spleis gikk TIL_INFOTRYGD")
+            log.info("Vedtaksperiode i Spleis gikk TIL_INFOTRYGD")
             spleisbehovExecutor(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data, nåværendeOppgave)
                 .invalider()
         }

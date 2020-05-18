@@ -30,7 +30,7 @@ class ArbeidsgiverMessage(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.demandAll("@behov", Behovtype.HentArbeidsgiverNavn)
+                    it.demandAll("@behov", listOf(Behovtype.HentArbeidsgiverNavn.name))
                     it.demandValue("final", true)
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")

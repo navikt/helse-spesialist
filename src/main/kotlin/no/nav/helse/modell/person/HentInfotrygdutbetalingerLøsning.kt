@@ -1,3 +1,5 @@
 package no.nav.helse.modell.person
 
-internal class HentInfotrygdutbetalingerLøsning(internal val utbetalinger: String)
+import com.fasterxml.jackson.databind.JsonNode
+
+internal class HentInfotrygdutbetalingerLøsning(internal val utbetalinger: JsonNode)

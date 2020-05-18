@@ -39,7 +39,7 @@ abstract class Command(
             ) : Ok()
         }
 
-        class HarBehov(internal vararg val behovstyper: Behovtype) : Resultat(Oppgavestatus.AvventerSystem)
+        internal class HarBehov(internal vararg val behovstyper: Behovtype) : Resultat(Oppgavestatus.AvventerSystem)
         object TrengerSaksbehandlerInput : Resultat(Oppgavestatus.AvventerSaksbehandler)
         object Invalidert : Resultat(Oppgavestatus.Invalidert)
     }

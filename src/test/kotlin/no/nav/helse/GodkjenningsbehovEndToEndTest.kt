@@ -6,15 +6,13 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.PersoninfoLøsningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -93,7 +91,8 @@ internal class GodkjenningsbehovEndToEndTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertFalse(saksbehandlerOppgaver.isEmpty())
@@ -217,10 +216,43 @@ internal class GodkjenningsbehovEndToEndTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Kvinne
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
         assertEquals(1, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
+    }
+
+    @Test
+    fun `Persisterer løsning for HentInfotrygdutbetalinger`() {
+        val rapid = TestRapid()
+        val spleisbehovId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val spleisbehovMediator = SpleisbehovMediator(
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestDao = speilSnapshotRestDao,
+            oppgaveDao = oppgaveDao,
+            spesialistOID = spesialistOID
+        ).apply { init(rapid) }
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        rapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
+
+        PersoninfoLøsningMessage.Factory(rapid, spleisbehovMediator)
+        rapid.sendTestMessage(infotrygdutbetalingerLøsningJson(spleisbehovId, vedtaksperiodeId))
+
+        val utbetaling = using(sessionOf(dataSource)) {session ->
+            session.run(
+                queryOf(
+                    "SELECT * FROM infotrygdutbetalinger WHERE id=?",
+                    1
+                ).map { it.string("data") }.asSingle
+            )
+        }
+        assertNotNull(utbetaling)
     }
 
     @ExperimentalContracts
@@ -317,7 +349,8 @@ internal class GodkjenningsbehovEndToEndTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
         spleisbehovMediator.håndter(
@@ -378,7 +411,8 @@ internal class GodkjenningsbehovEndToEndTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
         assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
@@ -430,7 +464,8 @@ internal class GodkjenningsbehovEndToEndTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
         val speilSnapshotRef = vedtaksperiodeDao.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
@@ -463,3 +498,77 @@ fun customAssertNotNull(value: Any?) {
     contract { returns() implies (value is Any) }
     assertNotNull(value)
 }
+
+private fun infotrygdutbetalingerLøsning(
+    fom: LocalDate = LocalDate.of(2020, 1, 1),
+    tom: LocalDate = LocalDate.of(2020, 1, 1),
+    grad: Int = 100,
+    dagsats: Double = 1200.0,
+    typetekst: String = "ArbRef",
+    orgnr: String = "89123"
+) = objectMapper.readTree(
+    """
+            [
+                {
+                    "fom": "$fom",
+                    "tom": "$tom",
+                    "grad": "$grad",
+                    "dagsats": $dagsats,
+                    "typetekst": "$typetekst",
+                    "organisasjonsnummer": "$orgnr"
+                }
+            ]
+        """.trimIndent()
+)
+
+private fun godkjenningbehov(
+    spleisbehovId: UUID,
+    vedtaksperiodeId: UUID,
+    fnr: String = "12345",
+    orgnr: String = "89123"
+) = """
+{
+  "@behov": ["Godkjenning"],
+  "@id": "$spleisbehovId",
+  "fødselsnummer": "$fnr",
+  "aktørId": "12345",
+  "organisasjonsnummer": "$orgnr",
+  "vedtaksperiodeId": "$vedtaksperiodeId",
+  "periodeFom": "${LocalDate.of(2018, 1, 1)}",
+  "periodeTom": "${LocalDate.of(2018, 1, 31)}",
+  "warnings": {"aktiviteter": []}
+}
+"""
+
+private fun infotrygdutbetalingerLøsningJson(
+    spleisbehovId: UUID,
+    vedtaksperiodeId: UUID,
+    fnr: String = "12345",
+    orgnr: String = "89123"
+) = """
+{
+    "@event_name" : "behov",
+    "@final": true,
+    "@behov" : [ "HentEnhet", "HentPersoninfo", "HentInfotrygdutbetalinger" ],
+    "@id" : "id",
+    "@opprettet" : "2020-05-18",
+    "spleisBehovId" : "$spleisbehovId",
+    "vedtaksperiodeId" : "$vedtaksperiodeId",
+    "fødselsnummer" : "$fnr",
+    "orgnummer" : "$orgnr",
+    "HentInfotrygdutbetalinger" : {
+        "historikkFom" : "2017-05-18",
+        "historikkTom" : "2020-05-18"
+    },
+    "system_read_count" : 0,
+    "@løsning" : {
+        "HentInfotrygdutbetalinger" : [ {
+            "fom" : "2018-01-19",
+            "tom" : "2018-01-23",
+            "dagsats" : 870.0,
+            "grad" : "100",
+            "typetekst" : "ArbRef",
+            "organisasjonsnummer" : "80000000"
+        } ]
+    }
+}""".trimIndent()

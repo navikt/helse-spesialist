@@ -65,7 +65,8 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
         mellomnavn = row.stringOrNull("mellomnavn"),
         etternavn = row.string("etternavn"),
         arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-        speilSnapshotRef = row.long("speil_snapshot_ref")
+        speilSnapshotRef = row.long("speil_snapshot_ref"),
+        infotrygdutbetalingerRef = row.longOrNull("infotrygdutbetalinger_ref")
     )
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

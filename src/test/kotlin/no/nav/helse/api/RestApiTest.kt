@@ -28,14 +28,12 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.vedtaksperiode.PersonForSpeilDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.VedtakDao
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
@@ -84,7 +82,7 @@ internal class RestApiTest {
                     epostadresse,
                     clientId,
                     issuer
-                )}".also { println(it) })
+                )}")
         }
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -138,7 +136,8 @@ internal class RestApiTest {
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
             vedtaksperiodeDao,
             arbeidsgiverDao,
-            snapshotDao
+            snapshotDao,
+            personDao
         )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
@@ -193,12 +192,57 @@ internal class RestApiTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/oppgaver").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
         val oppgaver = runBlocking { response.receive<List<SaksbehandleroppgaveDto>>() }
         assertTrue(oppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
+    }
+
+    @Test
+    fun `PersonDTO inneholder infotrygdutbetalinger`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning(
+                LocalDate.of(2018, 1, 1),
+                LocalDate.of(2018, 1, 31),
+                grad = 100,
+                dagsats = 1200.0,
+                typetekst = "ArbRef",
+                orgnr = "89123"
+            ))
+        )
+        val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
+        val infotrygdutbetalinger = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().infotrygdutbetalinger) }
+        assertNotNull(infotrygdutbetalinger)
+        assertEquals(LocalDate.of(2018, 1, 1), infotrygdutbetalinger[0]["fom"].asLocalDate())
+        assertEquals(LocalDate.of(2018, 1, 31), infotrygdutbetalinger[0]["tom"].asLocalDate())
+        assertEquals(100, infotrygdutbetalinger[0]["grad"].asInt())
+        assertEquals(1200.0, infotrygdutbetalinger[0]["dagsats"].asDouble())
+        assertEquals("ArbRef", infotrygdutbetalinger[0]["typetekst"].asText())
+        assertEquals("89123", infotrygdutbetalinger[0]["organisasjonsnummer"].asText())
     }
 
     @Test
@@ -224,7 +268,8 @@ internal class RestApiTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -259,7 +304,8 @@ internal class RestApiTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/aktorId/$aktørId").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -294,7 +340,8 @@ internal class RestApiTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/fnr/$fødselsnummer").execute() }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -328,7 +375,8 @@ internal class RestApiTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking {
             client.post<HttpStatement>("/api/vedtak") {
@@ -378,7 +426,8 @@ internal class RestApiTest {
                 "Testsen",
                 LocalDate.now(),
                 Kjønn.Mann
-            )
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         runBlocking {
             val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
@@ -411,3 +460,25 @@ internal class RestApiTest {
         }
     }
 }
+
+private fun infotrygdutbetalingerLøsning(
+    fom: LocalDate = LocalDate.of(2020, 1, 1),
+    tom: LocalDate = LocalDate.of(2020, 1, 1),
+    grad: Int = 100,
+    dagsats: Double = 1200.0,
+    typetekst: String = "ArbRef",
+    orgnr: String = "89123"
+) = objectMapper.readTree(
+    """
+            [
+                {
+                    "fom": "$fom",
+                    "tom": "$tom",
+                    "grad": "$grad",
+                    "dagsats": $dagsats,
+                    "typetekst": "$typetekst",
+                    "organisasjonsnummer": "$orgnr"
+                }
+            ]
+        """.trimIndent())
+
