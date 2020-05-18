@@ -79,7 +79,7 @@ class OppgaveDao(private val dataSource: DataSource) {
                        INNER JOIN person p on v.person_ref = p.id
                        INNER JOIN person_info pi on p.info_ref = pi.id
                 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-                ORDER BY opprettet DESC
+                ORDER BY opprettet ASC
                 LIMIT 100
             """
             )
