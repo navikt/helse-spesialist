@@ -80,7 +80,7 @@ class OppgaveDao(private val dataSource: DataSource) {
                        INNER JOIN person_info pi on p.info_ref = pi.id
                 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                 ORDER BY opprettet DESC
-                LIMIT 100
+                LIMIT 500
             """
             )
                 .map(::saksbehandleroppgaveDto)
