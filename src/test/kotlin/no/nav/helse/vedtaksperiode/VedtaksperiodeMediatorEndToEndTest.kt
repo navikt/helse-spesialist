@@ -84,7 +84,7 @@ class VedtaksperiodeMediatorEndToEndTest {
             oppgaveDao = oppgaveDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
-        vedtaksperiodeMediator = VedtaksperiodeMediator(vedtaksperiodeDao, arbeidsgiverDao, snapshotDao, personDao)
+        vedtaksperiodeMediator = VedtaksperiodeMediator(vedtaksperiodeDao, arbeidsgiverDao, snapshotDao, personDao, oppgaveDao)
     }
 
     @Test

@@ -137,7 +137,8 @@ internal class RestApiTest {
             vedtaksperiodeDao,
             arbeidsgiverDao,
             snapshotDao,
-            personDao
+            personDao,
+            oppgaveDao
         )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)

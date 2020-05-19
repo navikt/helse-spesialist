@@ -88,6 +88,22 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
+    fun behovForVedtaksperide(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                """
+                SELECT behov_id
+                FROM oppgave o
+                    INNER JOIN vedtak v on o.vedtak_ref = v.id
+                WHERE v.vedtaksperiode_id = ? AND status = 'AvventerSaksbehandler'::oppgavestatus
+            """,
+                vedtaksperiodeId
+            )
+                .map { UUID.fromString(it.stringOrNull("behov_id")) }
+                .asSingle
+        )
+    }
+
     private fun saksbehandleroppgaveDto(it: Row): SaksbehandleroppgaveDto {
         return SaksbehandleroppgaveDto(
             spleisbehovId = UUID.fromString(it.string("behov_id")),
