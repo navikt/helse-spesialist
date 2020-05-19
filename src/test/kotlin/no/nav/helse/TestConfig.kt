@@ -59,7 +59,7 @@ internal fun setupDataSource(): DataSource {
     return HikariDataSource(hikariConfig)
 }
 
-class SpleisMockClient {
+class SpleisMockClient(fødselsnummer: String = "01129342684", aktørId: String = "123", organisasjonsnummer: String = "888") {
     private val queuedResponses: Queue<Path> = LinkedList()
     private var vedtaksperiodeId: UUID = UUID.randomUUID()
     private fun nextResponse(): Path = queuedResponses.poll() ?: VEDTAKSPERIODE_TIL_GODKJENNING
@@ -82,9 +82,9 @@ class SpleisMockClient {
                 respond(
                     objectMapper.writeValueAsString(
                         PersonFraSpleisDto(
-                            aktørId = "123", fødselsnummer = "01129342684", arbeidsgivere = listOf(
+                            aktørId = aktørId, fødselsnummer = fødselsnummer, arbeidsgivere = listOf(
                                 ArbeidsgiverFraSpleisDto(
-                                    organisasjonsnummer = "888",
+                                    organisasjonsnummer = organisasjonsnummer,
                                     id = UUID.randomUUID(),
                                     vedtaksperioder = listOf(
                                         vedtaksperiode.deepCopy().put("id", vedtaksperiodeId.toString())

@@ -61,12 +61,12 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun findInfotrygdutbetalinger(personId: Long): String? =
+    internal fun findInfotrygdutbetalinger(id: Int): String? =
         using(sessionOf(dataSource)) {session ->
             session.run(
                 queryOf(
-                    "SELECT data FROM infotrygdutbetalinger WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE id = ?);",
-                    personId
+                    "SELECT data FROM infotrygdutbetalinger WHERE id=?;",
+                    id
                 ).map { it.string("data") }.asSingle
             )
         }

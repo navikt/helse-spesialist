@@ -8,5 +8,5 @@ data class VedtaksperiodeDto(
     val etternavn: String,
     val arbeidsgiverRef: Long,
     val speilSnapshotRef: Long,
-    val infotrygdutbetalingerRef: Long?
+    val infotrygdutbetalingerRef: Int?
 )

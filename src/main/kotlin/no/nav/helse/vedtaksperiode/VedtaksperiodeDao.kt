@@ -58,7 +58,7 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
         )
     }
 
-    fun tilVedtaksperiode(row: Row) = VedtaksperiodeDto(
+    private fun tilVedtaksperiode(row: Row) = VedtaksperiodeDto(
         fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
         aktørId = row.long("aktor_id").toString(),
         fornavn = row.string("fornavn"),
@@ -66,7 +66,7 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
         etternavn = row.string("etternavn"),
         arbeidsgiverRef = row.long("arbeidsgiver_ref"),
         speilSnapshotRef = row.long("speil_snapshot_ref"),
-        infotrygdutbetalingerRef = row.longOrNull("infotrygdutbetalinger_ref")
+        infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
     )
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

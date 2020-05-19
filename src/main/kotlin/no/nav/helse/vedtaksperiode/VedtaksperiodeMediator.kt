@@ -19,7 +19,7 @@ internal class VedtaksperiodeMediator(
     fun byggSpeilSnapshotForAktørId(aktørId: String) = vedtaksperiodeDao.findVedtakByAktørId(aktørId)?.let(::byggSpeilSnapshot)
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) = vedtaksperiodeDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
 
-    fun byggSpeilSnapshot(vedtak: VedtaksperiodeDto): PersonForSpeilDto {
+    private fun byggSpeilSnapshot(vedtak: VedtaksperiodeDto): PersonForSpeilDto {
         val arbeidsgiverDto = requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
         val infotrygdutbetalinger = vedtak.infotrygdutbetalingerRef
             ?.let { personDao.findInfotrygdutbetalinger(it) }
