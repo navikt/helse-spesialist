@@ -10,6 +10,7 @@ import no.nav.helse.modell.command.RootCommand
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.util.*
@@ -51,6 +52,17 @@ class CommandExecutorTest {
         assertEquals(listOf(FerdigstiltAv("tbd@nav.no", spesialistOID)), oppgaverForBehov)
     }
 
+    @Test
+    fun `command executor vil kjøre alle nestede subcommands`() {
+        val behovId = UUID.randomUUID()
+        val command = NestedCommand(behovId, "12356543")
+        val executor = CommandExecutor(command, spesialistOID, behovId, null, oppgaveDao, vedtakDao)
+
+        executor.execute()
+        assertTrue(command.innerExecuted)
+        assertTrue(command.innerInnerExecuted)
+    }
+
     inner class TestRootCommand(behovId: UUID, override val fødselsnummer: String = "12345") : RootCommand(behovId, Duration.ZERO) {
         override fun execute() = Resultat.Ok.System
         override val orgnummer: String? = null
@@ -64,4 +76,37 @@ class CommandExecutorTest {
     }
 
     data class FerdigstiltAv(val epost: String?, val oid: UUID?)
+
+
+    private class NestedCommand(
+        behovId: UUID,
+        override val fødselsnummer: String
+    ) : RootCommand(behovId = behovId, timeout = Duration.ZERO) {
+        override val orgnummer: String? = null
+        override val vedtaksperiodeId: UUID? = null
+
+        override fun toJson() = "{}"
+
+        override fun execute(): Resultat {
+            return Resultat.Ok.System
+        }
+
+        override val oppgaver: Set<Command> = setOf(InnerCommand())
+        internal var innerExecuted = false
+        internal var innerInnerExecuted = false
+        inner class InnerCommand : Command(behovId = behovId, parent = this, timeout = Duration.ZERO) {
+            override val oppgaver: Set<Command> = setOf(InnerInnerCommand())
+            inner class InnerInnerCommand : Command(behovId = behovId, parent = this, timeout = Duration.ZERO) {
+                override fun execute(): Resultat {
+                    innerInnerExecuted = true
+                    return Resultat.Ok.System
+                }
+            }
+
+            override fun execute(): Resultat {
+                innerExecuted = true
+                return Resultat.Ok.System
+            }
+        }
+    }
 }

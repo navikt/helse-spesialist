@@ -22,7 +22,7 @@ internal class CommandExecutor(
     private vararg val loggingData: StructuredArgument
 ) {
     private val log: Logger = LoggerFactory.getLogger("command")
-    private fun Command.flat() = oppgaver + this
+    private fun Command.flat(): List<Command> = oppgaver.flatMap { it.flat() } + this
 
     private var nåværendeOppgavetype = nåværendeOppgave?.oppgaveType ?: command.flat().first().oppgavetype
     private val gjennståendeOppgaver = command
