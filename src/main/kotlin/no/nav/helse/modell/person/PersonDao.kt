@@ -61,12 +61,12 @@ class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun findInfotrygdutbetalinger(id: Int): String? =
+    internal fun findInfotrygdutbetalinger(fødselsnummer: Long): String? =
         using(sessionOf(dataSource)) {session ->
             session.run(
                 queryOf(
-                    "SELECT data FROM infotrygdutbetalinger WHERE id=?;",
-                    id
+                    "SELECT data FROM infotrygdutbetalinger WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
+                    fødselsnummer
                 ).map { it.string("data") }.asSingle
             )
         }
@@ -153,6 +153,16 @@ class PersonDao(private val dataSource: DataSource) {
                 )
             }
         }
+
+    internal fun updateInfotrygdutbetalingerRef(fødselsnummer: Long, ref: Int) = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "UPDATE person SET infotrygdutbetalinger_ref=?, infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
+                ref,
+                fødselsnummer
+            ).asUpdate
+        )
+    }
 
     internal fun findPersoninfoSistOppdatert(fødselsnummer: Long) =
         requireNotNull(using(sessionOf(dataSource)) { session ->

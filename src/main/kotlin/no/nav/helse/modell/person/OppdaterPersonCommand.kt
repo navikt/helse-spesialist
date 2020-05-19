@@ -80,7 +80,12 @@ internal class OppdaterPersonCommand(
         }
 
         override fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
-            personDao.updateInfotrygdutbetalinger(fødselsnummer.toLong(), løsning.utbetalinger)
+            if (personDao.findInfotrygdutbetalinger(fødselsnummer.toLong()) != null) {
+                personDao.updateInfotrygdutbetalinger(fødselsnummer.toLong(), løsning.utbetalinger)
+            } else {
+                val utbetalingRef = personDao.insertInfotrygdutbetalinger(løsning.utbetalinger)
+                personDao.updateInfotrygdutbetalingerRef(fødselsnummer.toLong(), utbetalingRef)
+            }
         }
     }
 

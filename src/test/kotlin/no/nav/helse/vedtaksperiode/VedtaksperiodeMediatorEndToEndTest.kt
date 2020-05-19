@@ -1,6 +1,9 @@
 package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.databind.node.ArrayNode
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.SpleisMockClient
 import no.nav.helse.accessTokenClient
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
@@ -17,12 +20,13 @@ import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.setupDataSourceMedFlyway
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.util.*
+import javax.sql.DataSource
 
 class VedtaksperiodeMediatorEndToEndTest {
 
@@ -39,14 +43,14 @@ class VedtaksperiodeMediatorEndToEndTest {
         "spleisClientId"
     )
 
-    private val dataSource = setupDataSourceMedFlyway()
-    private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val spleisbehovDao = SpleisbehovDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
-    private val personDao = PersonDao(dataSource)
+    private lateinit var dataSource: DataSource
+    private lateinit var vedtaksperiodeDao: VedtaksperiodeDao
+    private lateinit var arbeidsgiverDao: ArbeidsgiverDao
+    private lateinit var spleisbehovDao: SpleisbehovDao
+    private lateinit var snapshotDao: SnapshotDao
+    private lateinit var oppgaveDao: OppgaveDao
+    private lateinit var vedtakDao: VedtakDao
+    private lateinit var personDao: PersonDao
 
     private val spesialistOID: UUID = UUID.randomUUID()
 
@@ -59,6 +63,14 @@ class VedtaksperiodeMediatorEndToEndTest {
 
     @BeforeEach
     fun setup() {
+        dataSource = setupDataSourceMedFlyway()
+        vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
+        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+        spleisbehovDao = SpleisbehovDao(dataSource)
+        snapshotDao = SnapshotDao(dataSource)
+        oppgaveDao = OppgaveDao(dataSource)
+        vedtakDao = VedtakDao(dataSource)
+        personDao = PersonDao(dataSource)
         spleisbehovId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
         rapid = TestRapid()
@@ -113,7 +125,82 @@ class VedtaksperiodeMediatorEndToEndTest {
             assertEquals("ArbRef", infotrygdutbetaling["typetekst"].asText())
             assertEquals(organisasjonsnummer, infotrygdutbetaling["organisasjonsnummer"].asText())
         }
+    }
 
+    @Test
+    fun `inserter infotrygdutbetaling for person uten infotrygdutbetaling ved update`() {
+        val navnId = personDao.insertNavn("Test", "Testy", "McTesterson")
+        val fødselsnummer = 12345L
+        insertPerson(
+            fødselsnummer = fødselsnummer,
+            navnId = navnId,
+            infotrygdutbetalingerSistOppdatert = LocalDate.now().minusDays(3)
+        )
+
+        assertNull(personDao.findInfotrygdutbetalinger(fødselsnummer))
+
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        sendGodkjenningsbehov(fødselsnummer = fødselsnummer.toString())
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            null,
+            null,
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val utbetalinger = personDao.findInfotrygdutbetalinger(fødselsnummer)
+        assertNotNull(utbetalinger)
+    }
+
+    @Test
+    fun `oppdaterer infotrygdutbetaling for person med eksisterende infotrygdutbetaling ved update`() {
+        val data = objectMapper.readTree("""{"test":"meh"}""")
+        val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(data)
+        val navnId = personDao.insertNavn("Test", "Testy", "McTesterson")
+        val fødselsnummer = 12345L
+        insertPerson(
+            fødselsnummer = fødselsnummer,
+            navnId = navnId,
+            infotrygdutbetalingerId = infotrygdutbetalingerId,
+            infotrygdutbetalingerSistOppdatert = LocalDate.now().minusDays(3)
+        )
+
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        sendGodkjenningsbehov(fødselsnummer = fødselsnummer.toString())
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            null,
+            null,
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val utbetalinger = personDao.findInfotrygdutbetalinger(fødselsnummer)
+        assertDoesNotThrow {
+            requireNotNull(utbetalinger)
+            val utbetaling = objectMapper.readTree(utbetalinger).first()
+            assertEquals(utbetaling["grad"].asInt(), 50)
+        }
+    }
+
+    private fun insertPerson(
+        fødselsnummer: Long = 12345,
+        aktørId: Long = 12345,
+        navnId: Int = 1,
+        enhetId: Int = 1169,
+        infotrygdutbetalingerId: Int? = null,
+        infotrygdutbetalingerSistOppdatert: LocalDate? = LocalDate.now()
+    ) = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert) VALUES(?, ?, ?, ?, ?, ?);",
+                fødselsnummer,
+                aktørId,
+                navnId,
+                enhetId,
+                infotrygdutbetalingerId,
+                infotrygdutbetalingerSistOppdatert
+            ).asExecute
+        )
     }
 
     private fun sendGodkjenningsbehov(

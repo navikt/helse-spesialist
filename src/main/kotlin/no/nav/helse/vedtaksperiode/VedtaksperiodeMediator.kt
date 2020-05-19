@@ -21,9 +21,7 @@ internal class VedtaksperiodeMediator(
 
     private fun byggSpeilSnapshot(vedtak: VedtaksperiodeDto): PersonForSpeilDto {
         val arbeidsgiverDto = requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
-        val infotrygdutbetalinger = vedtak.infotrygdutbetalingerRef
-            ?.let { personDao.findInfotrygdutbetalinger(it) }
-            ?.let { objectMapper.readTree(it) }
+        val infotrygdutbetalinger = personDao.findInfotrygdutbetalinger(vedtak.fødselsnummer.toLong())?.let { objectMapper.readTree(it) }
         val speilSnapshot =
             requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
                 .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
