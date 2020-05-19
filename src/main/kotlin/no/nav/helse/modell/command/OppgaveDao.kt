@@ -100,6 +100,7 @@ class OppgaveDao(private val dataSource: DataSource) {
                 it.stringOrNull("mellomnavn"),
                 it.string("etternavn")
             ),
+            aktørId = it.long("aktor_id").toString(),
             fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
             antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count()
         )

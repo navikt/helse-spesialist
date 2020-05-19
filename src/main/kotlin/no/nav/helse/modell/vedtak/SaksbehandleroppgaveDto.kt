@@ -13,5 +13,6 @@ data class SaksbehandleroppgaveDto(
     val periodeTom: LocalDate,
     val navn: NavnDto,
     val fødselsnummer: String,
+    val aktørId: String,
     val antallVarsler: Int
 )
