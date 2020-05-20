@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.SpleisMockClient
-import no.nav.helse.accessTokenClient
+import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
@@ -16,12 +16,11 @@ import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
-import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
@@ -180,6 +179,31 @@ class VedtaksperiodeMediatorEndToEndTest {
             val utbetaling = objectMapper.readTree(utbetalinger).first()
             assertEquals(utbetaling["grad"].asInt(), 50)
         }
+    }
+
+    @Disabled
+    @Test
+    fun `invaliderer oppgaver for vedtaksperioder som er rullet tilbake`() {
+        val data = objectMapper.readTree("""{"test":"meh"}""")
+        val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(data)
+        val navnId = personDao.insertNavn("Test", "Testy", "McTesterson")
+        insertPerson(navnId = navnId, infotrygdutbetalingerId = infotrygdutbetalingerId)
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "23456",
+            aktørId = "23456",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        assertNotEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(spleisbehovId)?.status)
+        assertNotNull(vedtakDao.findVedtak(vedtaksperiodeId))
+        spleisbehovMediator.håndter(TilbakerullingMessage("23456", listOf(UUID.randomUUID(), vedtaksperiodeId)))
+        assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(spleisbehovId)?.status)
+        assertNull(vedtakDao.findVedtak(vedtaksperiodeId))
     }
 
     private fun insertPerson(

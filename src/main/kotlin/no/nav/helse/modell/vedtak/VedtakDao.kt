@@ -39,4 +39,15 @@ internal class VedtakDao(private val dataSource: DataSource) {
             ) }
             .asSingle)
     }
+
+    internal fun deleteVedtak(vedtaksperiodeId: UUID) {
+        val vedtak = findVedtak(vedtaksperiodeId)
+        using(sessionOf(dataSource)) {session ->
+            session.transaction { transaction ->
+//                transaction.
+
+            }
+
+        }
+    }
 }

@@ -146,9 +146,24 @@ internal class SpleisbehovMediator(
     fun håndter(vedtaksperiodeId: UUID, løsning: TilInfotrygdMessage) {
         spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
             val nåværendeOppgave = oppgaveDao.findNåværendeOppgave(spleisbehovDBDto.id) ?: return
-            log.info("Vedtaksperiode i Spleis gikk TIL_INFOTRYGD")
+            log.info("Vedtaksperiode {} i Spleis gikk TIL_INFOTRYGD", keyValue("vedtaksperiodeId", vedtaksperiodeId))
             spleisbehovExecutor(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data, nåværendeOppgave)
                 .invalider()
+        }
+    }
+
+    fun håndter(tilbakerullingMessage: TilbakerullingMessage) {
+        tilbakerullingMessage.vedtakperioderSlettet.forEach {
+            spleisbehovDao.findBehovMedSpleisReferanse(it)?.also { spleisbehovDBDto ->
+                val nåværendeOppgave = oppgaveDao.findNåværendeOppgave(spleisbehovDBDto.id) ?: return
+                log.info(
+                    "Invaliderer oppgave {} fordi vedtaksperiode {} ble slettet",
+                    keyValue("oppgaveId", nåværendeOppgave.id),
+                    keyValue("vedtaksperiodeId", it)
+                )
+                spleisbehovExecutor(spleisbehovDBDto.id, it, spleisbehovDBDto.data, nåværendeOppgave)
+                    .invalider()
+            }
         }
     }
 
