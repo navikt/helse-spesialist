@@ -2,7 +2,6 @@ package no.nav.helse
 
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
@@ -77,5 +76,35 @@ internal class GodkjenningsbehovMediatorTest {
         )
         spleisbehovMediator.håndter(godkjenningMessage, "{}")
         assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
+    }
+
+    @Test
+    fun `invaliderer oppgaver for vedtaksperioder som er rullet tilbake`() {
+        val eventId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val person = TestPerson(dataSource)
+        person.tilSaksbehandlerGodkjenning(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
+
+        assertNotEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
+        assertNotNull(vedtakDao.findVedtak(vedtaksperiodeId))
+        person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId)
+        assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
+        assertNull(vedtakDao.findVedtak(vedtaksperiodeId))
+    }
+
+    @Test
+    fun `behandler vedtaksperiode etter rollback`() {
+        val eventId1 = UUID.randomUUID()
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val eventId2 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val person = TestPerson(dataSource)
+        person.tilSaksbehandlerGodkjenning(eventId = eventId1, vedtaksperiodeId = vedtaksperiodeId1)
+        person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId1)
+
+        person.tilSaksbehandlerGodkjenning(eventId = eventId2, vedtaksperiodeId = vedtaksperiodeId2)
+
+        assertNull(vedtakDao.findVedtak(vedtaksperiodeId1))
+        assertNotNull(vedtakDao.findVedtak(vedtaksperiodeId2))
     }
 }

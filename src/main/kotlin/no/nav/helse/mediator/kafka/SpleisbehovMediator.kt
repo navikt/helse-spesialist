@@ -163,6 +163,7 @@ internal class SpleisbehovMediator(
                 )
                 spleisbehovExecutor(spleisbehovDBDto.id, it, spleisbehovDBDto.data, nåværendeOppgave)
                     .invalider()
+                vedtakDao.deleteVedtak(it)
             }
         }
     }
