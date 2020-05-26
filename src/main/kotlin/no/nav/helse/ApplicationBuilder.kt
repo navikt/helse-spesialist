@@ -20,6 +20,7 @@ import io.ktor.request.path
 import io.ktor.request.uri
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.api.adminApi
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
@@ -128,13 +129,18 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
-            azureAdAppAuthentication(oidcDiscovery, azureConfig)
+            azureAdAppAuthentication(
+                oidcDiscovery = oidcDiscovery,
+                config = azureConfig
+            )
+            basicauthAuthenticaiton(env.getValue("ADMIN_SECRET"))
             oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
                 oppgaveDao = oppgaveDao,
                 spleisbehovMediator = spleisbehovMediator,
                 vedtaksperiodeMediator = vedtaksperiodeMediator
             )
+            adminApi(spleisbehovMediator)
         }.build()
 
     init {

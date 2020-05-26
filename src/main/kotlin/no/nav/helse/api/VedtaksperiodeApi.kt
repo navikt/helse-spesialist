@@ -27,7 +27,7 @@ internal fun Application.vedtaksperiodeApi(
     spleisbehovMediator: SpleisbehovMediator
 ) {
     routing {
-        authenticate {
+        authenticate("saksbehandler") {
             get("/api/person/{vedtaksperiodeId}") {
                 val speilSnapshot = vedtaksperiodeMediator
                     .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!))

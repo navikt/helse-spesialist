@@ -12,7 +12,7 @@ internal fun Application.oppgaveApi(
     oppgaveMediator: OppgaveMediator
 ) {
     routing {
-        authenticate {
+        authenticate("saksbehandler") {
             get("/api/oppgaver") {
                 val saksbehandlerOppgaver = oppgaveMediator.hentOppgaver()
                 if (saksbehandlerOppgaver.isEmpty()) {

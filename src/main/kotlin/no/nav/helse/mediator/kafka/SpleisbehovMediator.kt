@@ -1,6 +1,8 @@
 package no.nav.helse.mediator.kafka
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.api.Rollback
+import no.nav.helse.api.RollbackDelete
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Behov
 import no.nav.helse.modell.Godkjenningsbehov
@@ -200,6 +202,33 @@ internal class SpleisbehovMediator(
             resultater = resultater,
             commandExecutor = commandExecutor
         )
+    }
+
+    internal fun rollbackPerson(rollback: Rollback) {
+        log.info("Publiserer rollback på aktør: ${rollback.aktørId}")
+        rapidsConnection.publish(rollback.fødselsnummer, JsonMessage.newMessage(
+            mutableMapOf(
+                "@id" to UUID.randomUUID(),
+                "@event_name" to "rollback_person",
+                "@opprettet" to LocalDateTime.now(),
+                "aktørId" to rollback.aktørId,
+                "fødselsnummer" to rollback.fødselsnummer,
+                "personVersjon" to rollback.personVersjon
+            )
+        ).toJson())
+    }
+
+    internal fun rollbackDeletePerson(rollback: RollbackDelete) {
+        log.info("Publiserer rollback_delete på aktør: ${rollback.aktørId}")
+        rapidsConnection.publish(JsonMessage.newMessage(
+            mutableMapOf(
+                "@id" to UUID.randomUUID(),
+                "@event_name" to "rollback_person_delete",
+                "@opprettet" to LocalDateTime.now(),
+                "aktørId" to rollback.aktørId,
+                "fødselsnummer" to rollback.fødselsnummer
+            )
+        ).toJson())
     }
 
     private fun restoreAndInvoke(eventId: UUID, invoke: CommandExecutor.() -> Unit) {

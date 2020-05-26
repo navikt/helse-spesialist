@@ -10,9 +10,13 @@ import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import java.net.URL
 
-internal fun Application.azureAdAppAuthentication(oidcDiscovery: OidcDiscovery, config: AzureAdAppConfig, jwkProvider: JwkProvider = JwkProviderBuilder(URL(oidcDiscovery.jwks_uri)).build()) {
+internal fun Application.azureAdAppAuthentication(
+    oidcDiscovery: OidcDiscovery,
+    config: AzureAdAppConfig,
+    jwkProvider: JwkProvider = JwkProviderBuilder(URL(oidcDiscovery.jwks_uri)).build()
+) {
     install(Authentication) {
-        jwt {
+        jwt(name = "saksbehandler") {
             verifier(jwkProvider, oidcDiscovery.issuer)
             validate { credentials ->
                 val groupsClaim = credentials.payload.getClaim("groups").asList(String::class.java)
@@ -20,7 +24,6 @@ internal fun Application.azureAdAppAuthentication(oidcDiscovery: OidcDiscovery, 
                     log.info("${credentials.payload.subject} with audience ${credentials.payload.audience} is not authorized to use this app, denying access")
                     return@validate null
                 }
-
                 JWTPrincipal(credentials.payload)
             }
         }
