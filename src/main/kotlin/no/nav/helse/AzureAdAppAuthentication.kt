@@ -3,9 +3,8 @@ package no.nav.helse
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.application.Application
-import io.ktor.application.install
 import io.ktor.application.log
-import io.ktor.auth.Authentication
+import io.ktor.auth.authentication
 import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.auth.jwt.jwt
 import java.net.URL
@@ -15,7 +14,7 @@ internal fun Application.azureAdAppAuthentication(
     config: AzureAdAppConfig,
     jwkProvider: JwkProvider = JwkProviderBuilder(URL(oidcDiscovery.jwks_uri)).build()
 ) {
-    install(Authentication) {
+    authentication {
         jwt(name = "saksbehandler") {
             verifier(jwkProvider, oidcDiscovery.issuer)
             validate { credentials ->

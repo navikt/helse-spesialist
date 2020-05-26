@@ -133,7 +133,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 oidcDiscovery = oidcDiscovery,
                 config = azureConfig
             )
-            basicauthAuthenticaiton(env.getValue("ADMIN_SECRET"))
+            basicAuthentication(env.getValue("ADMIN_SECRET"))
             oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
                 oppgaveDao = oppgaveDao,

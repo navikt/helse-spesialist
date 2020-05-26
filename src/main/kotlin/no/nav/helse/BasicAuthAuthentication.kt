@@ -1,15 +1,14 @@
 package no.nav.helse
 
 import io.ktor.application.Application
-import io.ktor.application.install
-import io.ktor.auth.Authentication
 import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.authentication
 import io.ktor.auth.basic
 
-internal fun Application.basicauthAuthenticaiton(
+internal fun Application.basicAuthentication(
     adminSecret: String
 ) {
-    install(Authentication) {
+    authentication {
         basic(name = "admin") {
             this.validate {
                 if (it.password == adminSecret) {

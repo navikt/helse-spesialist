@@ -26,12 +26,12 @@ import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.VedtakDao
+import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -147,6 +147,7 @@ internal class RestApiTest {
 
         app = embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            basicAuthentication("🅱️")
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
             oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(oppgaveDao, vedtaksperiodeMediator, spleisbehovMediator)

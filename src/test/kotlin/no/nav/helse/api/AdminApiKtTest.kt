@@ -12,7 +12,7 @@ import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.basicauthAuthenticaiton
+import no.nav.helse.basicAuthentication
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Test
@@ -27,7 +27,7 @@ internal class AdminApiKtTest {
     fun `oppslag på rollback`() {
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            basicauthAuthenticaiton("hunter2")
+            basicAuthentication("hunter2")
             adminApi(mediator)
         }) {
             with(handleRequest(HttpMethod.Post, "/admin/rollback") {
@@ -46,7 +46,7 @@ internal class AdminApiKtTest {
     fun `oppslag på rollback_delete`() {
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            basicauthAuthenticaiton("hunter2")
+            basicAuthentication("hunter2")
             adminApi(mediator)
         }) {
             with(handleRequest(HttpMethod.Post, "/admin/rollback_delete") {
@@ -65,7 +65,7 @@ internal class AdminApiKtTest {
     fun `unau🅱️horized uten autentisering`() {
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            basicauthAuthenticaiton("hunter2")
+            basicAuthentication("hunter2")
             adminApi(mediator)
         }) {
             with(handleRequest(HttpMethod.Post, "/admin/rollback_delete") {
