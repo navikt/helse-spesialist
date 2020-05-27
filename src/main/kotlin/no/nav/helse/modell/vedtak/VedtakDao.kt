@@ -43,7 +43,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun deleteVedtak(vedtaksperiodeId: UUID) {
-        val vedtak = requireNotNull(findVedtak(vedtaksperiodeId))
+        val vedtak = findVedtak(vedtaksperiodeId) ?: return
         using(sessionOf(dataSource)) { session ->
             session.transaction { transaction ->
                 transaction.run(queryOf("UPDATE oppgave SET vedtak_ref = null WHERE vedtak_ref = ?", vedtak.id).asUpdate)
