@@ -204,6 +204,14 @@ internal class SpleisbehovMediator(
         )
     }
 
+    fun håndter(eventId: UUID, risikovurderingMessage: RisikovurderingMessage) {
+        log.info(
+            "Mottok risikovurdering {}, {}",
+            keyValue("vedtaksperiodeId", risikovurderingMessage.vedtaksperiodeId),
+            keyValue("eventId", eventId)
+        )
+    }
+
     internal fun rollbackPerson(rollback: Rollback) {
         log.info("Publiserer rollback på aktør: ${rollback.aktørId}")
         rapidsConnection.publish(rollback.fødselsnummer, JsonMessage.newMessage(
