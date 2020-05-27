@@ -154,6 +154,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         TilInfotrygdMessage.Factory(rapidsConnection, spleisbehovMediator)
         VedtaksperiodeEndretMessage.Factory(rapidsConnection, spleisbehovMediator)
         TilbakerullingMessage.Factory(rapidsConnection, spleisbehovMediator)
+        RisikovurderingMessage.Factory(rapidsConnection, spleisbehovMediator)
     }
 
     fun start() = rapidsConnection.start()
