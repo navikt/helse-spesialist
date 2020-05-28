@@ -12,6 +12,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
+import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
@@ -43,6 +44,7 @@ class TestPerson(private val dataSource: DataSource) {
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val personDao = PersonDao(dataSource)
+    private val risikoDao = RisikoDao(dataSource)
 
     val rapid = TestRapid()
 
@@ -54,6 +56,7 @@ class TestPerson(private val dataSource: DataSource) {
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
         oppgaveDao = oppgaveDao,
+        risikoDao = risikoDao,
         spesialistOID = spesialistOID
     ).apply { init(rapid) }
 

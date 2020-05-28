@@ -14,6 +14,7 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -33,6 +34,7 @@ internal class SpleisbehovMediator(
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
     private val oppgaveDao: OppgaveDao,
+    private val risikoDao: RisikoDao,
     private val spesialistOID: UUID
 ) {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -210,33 +212,44 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", risikovurderingMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
+
+        risikoDao.persisterRisikovurdering(
+            vedtaksperiodeId = risikovurderingMessage.vedtaksperiodeId,
+            samletScore = risikovurderingMessage.samletScore,
+            begrunnelser = risikovurderingMessage.begrunnelser,
+            ufullstendig = risikovurderingMessage.ufullstendig
+        )
     }
 
     internal fun rollbackPerson(rollback: Rollback) {
         log.info("Publiserer rollback på aktør: ${rollback.aktørId}")
-        rapidsConnection.publish(rollback.fødselsnummer, JsonMessage.newMessage(
-            mutableMapOf(
-                "@id" to UUID.randomUUID(),
-                "@event_name" to "rollback_person",
-                "@opprettet" to LocalDateTime.now(),
-                "aktørId" to rollback.aktørId,
-                "fødselsnummer" to rollback.fødselsnummer,
-                "personVersjon" to rollback.personVersjon
-            )
-        ).toJson())
+        rapidsConnection.publish(
+            rollback.fødselsnummer, JsonMessage.newMessage(
+                mutableMapOf(
+                    "@id" to UUID.randomUUID(),
+                    "@event_name" to "rollback_person",
+                    "@opprettet" to LocalDateTime.now(),
+                    "aktørId" to rollback.aktørId,
+                    "fødselsnummer" to rollback.fødselsnummer,
+                    "personVersjon" to rollback.personVersjon
+                )
+            ).toJson()
+        )
     }
 
     internal fun rollbackDeletePerson(rollback: RollbackDelete) {
         log.info("Publiserer rollback_delete på aktør: ${rollback.aktørId}")
-        rapidsConnection.publish(JsonMessage.newMessage(
-            mutableMapOf(
-                "@id" to UUID.randomUUID(),
-                "@event_name" to "rollback_person_delete",
-                "@opprettet" to LocalDateTime.now(),
-                "aktørId" to rollback.aktørId,
-                "fødselsnummer" to rollback.fødselsnummer
-            )
-        ).toJson())
+        rapidsConnection.publish(
+            JsonMessage.newMessage(
+                mutableMapOf(
+                    "@id" to UUID.randomUUID(),
+                    "@event_name" to "rollback_person_delete",
+                    "@opprettet" to LocalDateTime.now(),
+                    "aktørId" to rollback.aktørId,
+                    "fødselsnummer" to rollback.fødselsnummer
+                )
+            ).toJson()
+        )
     }
 
     private fun restoreAndInvoke(eventId: UUID, invoke: CommandExecutor.() -> Unit) {
@@ -312,7 +325,8 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", commandExecutor.command.vedtaksperiodeId)
         )
 
-        rapidsConnection.publish(JsonMessage.newMessage(mapOf(
+        rapidsConnection.publish(JsonMessage.newMessage(
+            mapOf(
                 "@event_name" to "oppgave_oppdatert",
                 "@id" to UUID.randomUUID(),
                 "@opprettet" to LocalDateTime.now(),
@@ -321,7 +335,8 @@ internal class SpleisbehovMediator(
                 "fødselsnummer" to commandExecutor.command.fødselsnummer,
                 "endringstidspunkt" to LocalDateTime.now(),
                 "ferdigstilt" to (resultater.last() is Command.Resultat.Ok)
-            )).toJson().also {
+            )
+        ).toJson().also {
             sikkerLogg.info("sender oppgave_oppdatert for fødselsnummer=${commandExecutor.command.fødselsnummer} vedtaksperiodeId=${commandExecutor.command.vedtaksperiodeId} spleisBehovId=$spleisreferanse:\n\t$it")
         })
     }

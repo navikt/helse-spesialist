@@ -29,6 +29,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
@@ -58,6 +59,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val snapshotDao = SnapshotDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
+    private val risikoDao = RisikoDao(dataSource)
 
     private val azureAdClient = HttpClient(Apache) {
         engine {
@@ -101,6 +103,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
         oppgaveDao = oppgaveDao,
+        risikoDao = risikoDao,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
     private val oppgaveMediator = OppgaveMediator(oppgaveDao)

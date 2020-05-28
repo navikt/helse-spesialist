@@ -28,6 +28,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
+import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -115,6 +116,7 @@ internal class RestApiTest {
         val spleisbehovDao = SpleisbehovDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
         val oppgaveDao = OppgaveDao(dataSource)
+        val risikoDao = RisikoDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(
             spleisMockClient.client,
             accessTokenClient(),
@@ -130,6 +132,7 @@ internal class RestApiTest {
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
             oppgaveDao = oppgaveDao,
+            risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
         val oppgaveMediator = OppgaveMediator(oppgaveDao)

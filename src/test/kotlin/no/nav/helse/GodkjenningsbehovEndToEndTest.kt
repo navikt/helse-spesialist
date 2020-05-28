@@ -5,14 +5,12 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
-import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.PersoninfoLøsningMessage
-import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
-import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
+import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
+import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -45,6 +43,7 @@ internal class GodkjenningsbehovEndToEndTest {
     )
     private val spleisbehovDao = SpleisbehovDao(dataSource)
     private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
+    private val risikoDao = RisikoDao(dataSource)
 
     private val spesialistOID: UUID = UUID.randomUUID()
 
@@ -66,6 +65,7 @@ internal class GodkjenningsbehovEndToEndTest {
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
             oppgaveDao = oppgaveDao,
+            risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
     }
@@ -339,6 +339,34 @@ internal class GodkjenningsbehovEndToEndTest {
 
         val snapshotEtter = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
         assertNotEquals(snapshotFør, snapshotEtter)
+    }
+
+    @ExperimentalContracts
+    @Test
+    fun `risikovurderinger persisteres`() {
+        RisikovurderingMessage.Factory(rapid, spleisbehovMediator)
+
+        rapid.sendTestMessage(
+            """
+            {
+              "@event_name": "risikovurdering",
+              "@id": "${UUID.randomUUID()}",
+              "@opprettet": "${LocalDateTime.now()}",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "samletScore": 10,
+              "begrunnelser": ["Detta ser ikke bra ut"],
+              "ufullstendig": true
+            }
+        """
+        )
+
+        assertNotNull(using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf("SELECT id FROM risikovurdering WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
+                    .map { it.int("id") }
+                    .asSingle
+            )
+        })
     }
 
     private fun sendVedtaksperiodeEndretEvent(aktørId: String, fødselsnummer: String, organisasjonsnummer: String) {

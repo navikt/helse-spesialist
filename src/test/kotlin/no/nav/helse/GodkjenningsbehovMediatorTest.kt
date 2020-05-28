@@ -8,6 +8,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
@@ -28,6 +29,7 @@ internal class GodkjenningsbehovMediatorTest {
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
     private lateinit var spleisbehovDao: SpleisbehovDao
+    private lateinit var risikoDao: RisikoDao
     private lateinit var testDao: TestPersonDao
 
     private val spleisMockClient = SpleisMockClient()
@@ -49,6 +51,7 @@ internal class GodkjenningsbehovMediatorTest {
             "spleisClientId"
         )
         spleisbehovDao = SpleisbehovDao(dataSource)
+        risikoDao = RisikoDao(dataSource)
         testDao = TestPersonDao(dataSource)
     }
 
@@ -61,6 +64,7 @@ internal class GodkjenningsbehovMediatorTest {
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
             oppgaveDao = oppgaveDao,
+            risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(TestRapid()) }
         val spleisbehovId = UUID.randomUUID()
