@@ -9,11 +9,9 @@ import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.risiko.RisikoDao
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -41,21 +39,18 @@ class TestPerson(private val dataSource: DataSource) {
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val spleisbehovDao = SpleisbehovDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
     private val personDao = PersonDao(dataSource)
     private val risikoDao = RisikoDao(dataSource)
 
     val rapid = TestRapid()
 
     private val mediator = SpleisbehovMediator(
+        dataSource = dataSource,
         spleisbehovDao = spleisbehovDao,
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
-        oppgaveDao = oppgaveDao,
         risikoDao = risikoDao,
         spesialistOID = spesialistOID
     ).apply { init(rapid) }

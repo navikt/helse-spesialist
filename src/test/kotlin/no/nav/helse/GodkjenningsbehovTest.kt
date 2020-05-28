@@ -8,12 +8,12 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.CommandExecutor
-import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.command.findNåværendeOppgave
+import no.nav.helse.modell.command.findSaksbehandlerOppgaver
 import no.nav.helse.modell.person.*
+import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.vedtak.VedtakDao
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,16 +29,9 @@ class GodkjenningsbehovTest {
     private val accessTokenClient = accessTokenClient()
 
     private val dataSource: DataSource = setupDataSourceMedFlyway()
-    private val personDao: PersonDao =
-        PersonDao(dataSource)
-    private val arbeidsgiverDao: ArbeidsgiverDao =
-        ArbeidsgiverDao(dataSource)
-    private val vedtakDao: VedtakDao =
-        VedtakDao(dataSource)
-    private val snapshotDao: SnapshotDao =
-        SnapshotDao(dataSource)
-    private val oppgaveDao: OppgaveDao =
-        OppgaveDao(dataSource)
+    private val personDao: PersonDao = PersonDao(dataSource)
+    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
     private val speilSnapshotRestDao: SpeilSnapshotRestDao =
         SpeilSnapshotRestDao(
             spleisMockClient.client,
@@ -52,6 +45,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "12345",
@@ -62,15 +56,12 @@ class GodkjenningsbehovTest {
                 orgnummer = "98765432",
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
@@ -97,6 +88,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "13245",
@@ -107,15 +99,12 @@ class GodkjenningsbehovTest {
                 orgnummer = "98765432",
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
@@ -144,6 +133,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "23456",
@@ -154,15 +144,12 @@ class GodkjenningsbehovTest {
                 orgnummer = "98765432",
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
@@ -188,6 +175,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "34567",
@@ -198,15 +186,12 @@ class GodkjenningsbehovTest {
                 orgnummer = "98765433",
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
@@ -226,7 +211,7 @@ class GodkjenningsbehovTest {
         spleisExecutor.execute()
 
         assertNotNull(findVedtaksperiode(vedtaksperiodeId))
-        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
         assertFalse(saksbehandlerOppgaver.isNullOrEmpty())
     }
 
@@ -235,6 +220,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "3457812",
@@ -245,15 +231,12 @@ class GodkjenningsbehovTest {
                 orgnummer = "98765433",
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
@@ -298,6 +281,7 @@ class GodkjenningsbehovTest {
         )
 
         val spleisExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "134896",
@@ -308,15 +292,12 @@ class GodkjenningsbehovTest {
                 orgnummer = "98765433",
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = failingSpeilSnapshotDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
@@ -337,7 +318,9 @@ class GodkjenningsbehovTest {
             spleisExecutor.execute()
         }
 
-        assertEquals("OpprettVedtakCommand", oppgaveDao.findNåværendeOppgave(eventId)?.oppgaveType)
+        using(sessionOf(dataSource)) { session ->
+            assertEquals("OpprettVedtakCommand", session.findNåværendeOppgave(eventId)?.oppgaveType)
+        }
     }
 
     private fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
@@ -368,4 +351,5 @@ private fun infotrygdutbetalingerLøsning(
                     "organisasjonsnummer": "$orgnr"
                 }
             ]
-        """.trimIndent())
+        """.trimIndent()
+)

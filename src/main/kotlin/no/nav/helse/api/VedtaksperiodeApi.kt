@@ -13,18 +13,21 @@ import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
-import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDateTime
 import java.util.*
+import javax.sql.DataSource
 
 internal fun Application.vedtaksperiodeApi(
-    oppgaveDao: OppgaveDao,
     vedtaksperiodeMediator: VedtaksperiodeMediator,
-    spleisbehovMediator: SpleisbehovMediator
+    spleisbehovMediator: SpleisbehovMediator,
+    dataSource: DataSource
 ) {
     routing {
         authenticate("saksbehandler") {
@@ -62,7 +65,8 @@ internal fun Application.vedtaksperiodeApi(
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
-                val oppgave = oppgaveDao.findNåværendeOppgave(godkjenning.behovId)
+                val oppgave =
+                    using(sessionOf(dataSource)) { session -> session.findNåværendeOppgave(godkjenning.behovId) }
                 if (oppgave == null) {
                     call.respondText(
                         "Dette vedtaket har ingen aktiv saksbehandler oppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",

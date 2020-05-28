@@ -1,5 +1,7 @@
 package no.nav.helse.modell.command
 
+import kotliquery.sessionOf
+import kotliquery.using
 import net.logstash.logback.argument.StructuredArgument
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
@@ -7,18 +9,18 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.vedtak.VedtakDao
+import no.nav.helse.modell.vedtak.findVedtak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
+import javax.sql.DataSource
 
 internal class CommandExecutor(
     internal val command: RootCommand,
     private val spesialistOid: UUID,
     private val eventId: UUID,
     private val nåværendeOppgave: OppgaveDto?,
-    private val oppgaveDao: OppgaveDao,
-    private val vedtakDao: VedtakDao,
+    private val dataSource: DataSource,
     private vararg val loggingData: StructuredArgument
 ) {
     private val log: Logger = LoggerFactory.getLogger("command")
@@ -55,7 +57,15 @@ internal class CommandExecutor(
     }
 
     internal fun invalider() {
-        oppgaveDao.updateOppgave(eventId, current().oppgavetype, Oppgavestatus.Invalidert, null, null)
+        using(sessionOf(dataSource)) { session ->
+            session.updateOppgave(
+                eventId,
+                current().oppgavetype,
+                Oppgavestatus.Invalidert,
+                null,
+                null
+            )
+        }
     }
 
     internal fun execute(): List<Command.Resultat> {
@@ -63,67 +73,70 @@ internal class CommandExecutor(
             log.info("Kan ikke gjenoppta oppgave da den er invalidert ${loggingData.format()}", *loggingData)
             return listOf(Command.Resultat.Invalidert)
         }
+        return using(sessionOf(dataSource)) { session ->
+            val executedCommands = mutableListOf<CommandExecution>()
 
-        val executedCommands = mutableListOf<CommandExecution>()
+            gjennståendeOppgaver
+                .onEach { nåværendeOppgavetype = it.oppgavetype }
+                .map(::tryExecute)
+                .onEach { executedCommands.add(it) }
+                .takeWhile(CommandExecution::skalFortsette)
+                .forEach {
+                    log.info(
+                        "Oppgave ${it.command::class.simpleName} ble executed. Nåværende oppgave er $nåværendeOppgavetype, ${loggingData.format()}",
+                        *loggingData
+                    )
+                }
 
-        gjennståendeOppgaver
-            .onEach { nåværendeOppgavetype = it.oppgavetype }
-            .map(::tryExecute)
-            .onEach { executedCommands.add(it) }
-            .takeWhile(CommandExecution::skalFortsette)
-            .forEach {
-                log.info(
-                    "Oppgave ${it.command::class.simpleName} ble executed. Nåværende oppgave er $nåværendeOppgavetype, ${loggingData.format()}",
+            val vedtakRef = command.vedtaksperiodeId?.let(session::findVedtak)?.id
+            val førsteCommand = executedCommands.first()
+            val sisteCommand = executedCommands.last()
+            session.updateOppgave(
+                behovId = eventId,
+                oppgavetype = førsteCommand.command.oppgavetype,
+                oppgavestatus = førsteCommand.oppgavestatus(),
+                ferdigstiltAv = førsteCommand.ferdigstiltAv(),
+                oid = førsteCommand.oid()
+            )
+
+
+            if (nåværendeOppgave == null || executedCommands.size > 1) {
+                session.insertOppgave(
+                    behovId = eventId,
+                    oppgavetype = sisteCommand.command.oppgavetype,
+                    oppgavestatus = sisteCommand.oppgavestatus(),
+                    ferdigstiltAv = sisteCommand.ferdigstiltAv(),
+                    oid = sisteCommand.oid(),
+                    vedtakRef = vedtakRef
+                )
+            } else {
+                log.warn(
+                    "Execute av command førte ikke til endring i nåværende oppgavetype, ${loggingData.format()}",
                     *loggingData
                 )
             }
 
-        val vedtakRef = command.vedtaksperiodeId?.let(vedtakDao::findVedtak)?.id
-        val førsteCommand = executedCommands.first()
-        val sisteCommand = executedCommands.last()
-        oppgaveDao.updateOppgave(
-            behovId = eventId,
-            oppgavetype = førsteCommand.command.oppgavetype,
-            oppgavestatus = førsteCommand.oppgavestatus(),
-            ferdigstiltAv = førsteCommand.ferdigstiltAv(),
-            oid = førsteCommand.oid()
-        )
+            if (sisteCommand is CommandExecution.Error) {
+                throw sisteCommand.exception
+            }
 
-
-        if (nåværendeOppgave == null || executedCommands.size > 1) {
-            oppgaveDao.insertOppgave(
-                behovId = eventId,
-                oppgavetype = sisteCommand.command.oppgavetype,
-                oppgavestatus = sisteCommand.oppgavestatus(),
-                ferdigstiltAv = sisteCommand.ferdigstiltAv(),
-                oid = sisteCommand.oid(),
-                vedtakRef = vedtakRef
-            )
-        } else {
-            log.warn(
-                "Execute av command førte ikke til endring i nåværende oppgavetype, ${loggingData.format()}",
+            log.info(
+                "Oppgaver utført, gikk fra ${førsteCommand.command.oppgavetype} til ${sisteCommand.command.oppgavetype}, ${loggingData.format()}",
                 *loggingData
             )
+
+            executedCommands.filterIsInstance<CommandExecution.Ok>().map { it.resultat }
         }
-
-        if (sisteCommand is CommandExecution.Error) {
-            throw sisteCommand.exception
-        }
-
-        log.info(
-            "Oppgaver utført, gikk fra ${førsteCommand.command.oppgavetype} til ${sisteCommand.command.oppgavetype}, ${loggingData.format()}",
-            *loggingData
-        )
-
-        return executedCommands.filterIsInstance<CommandExecution.Ok>().map { it.resultat }
     }
 
     private fun tryExecute(command: Command) = try {
-        CommandExecution.Ok(
-            command,
-            spesialistOid,
-            command.execute()
-        )
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            CommandExecution.Ok(
+                command,
+                spesialistOid,
+                session.transaction(command::execute)
+            )
+        }
     } catch (e: Exception) {
         CommandExecution.Error(command, e)
     }

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
+import kotliquery.Session
 import no.nav.helse.modell.command.Command
 import java.time.Duration
 import java.util.*
@@ -15,7 +16,7 @@ internal class OpprettArbeidsgiverCommand(
     timeout = Duration.ofHours(1)
 ) {
 
-    override fun execute(): Resultat {
+    override fun execute(session: Session): Resultat {
         return if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
             Resultat.Ok.System
         } else {

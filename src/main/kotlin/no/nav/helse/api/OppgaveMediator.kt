@@ -1,12 +1,12 @@
 package no.nav.helse.api
 
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
+import kotliquery.sessionOf
+import kotliquery.using
+import no.nav.helse.modell.command.findSaksbehandlerOppgaver
+import javax.sql.DataSource
 
-internal class OppgaveMediator(
-    private val oppgaveDao: OppgaveDao
-) {
-    fun hentOppgaver(): List<SaksbehandleroppgaveDto> {
-        return oppgaveDao.findSaksbehandlerOppgaver()
+internal class OppgaveMediator(private val dataSource: DataSource) {
+    fun hentOppgaver() = using(sessionOf(dataSource)) { session ->
+        session.findSaksbehandlerOppgaver()
     }
 }

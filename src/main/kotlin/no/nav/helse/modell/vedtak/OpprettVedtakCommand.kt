@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtak
 
+import kotliquery.Session
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.person.PersonDao
@@ -12,7 +13,6 @@ import java.util.*
 internal class OpprettVedtakCommand(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
     private val fødselsnummer: String,
@@ -27,13 +27,13 @@ internal class OpprettVedtakCommand(
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
-    override fun execute(): Resultat {
+    override fun execute(session: Session): Resultat {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
-        vedtakDao.insertVedtak(
+        session.insertVedtak(
             vedtaksperiodeId = vedtaksperiodeId,
             fom = periodeFom,
             tom = periodeTom,

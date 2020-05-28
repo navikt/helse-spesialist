@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.Session
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.OppdatertArbeidsgiverCommand
 import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
@@ -12,7 +13,6 @@ import no.nav.helse.modell.person.OpprettPersonCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.OpprettVedtakCommand
 import no.nav.helse.modell.vedtak.SaksbehandlerGodkjenningCommand
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.objectMapper
@@ -31,7 +31,6 @@ internal class Godkjenningsbehov(
     override val vedtaksperiodeId: UUID,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
-    vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao
 ) : RootCommand(
@@ -56,7 +55,6 @@ internal class Godkjenningsbehov(
         OpprettVedtakCommand(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
             fødselsnummer = fødselsnummer,
@@ -70,7 +68,7 @@ internal class Godkjenningsbehov(
         SaksbehandlerGodkjenningCommand(id, this)
     )
 
-    override fun execute(): Resultat = Resultat.Ok.System
+    override fun execute(session: Session): Resultat = Resultat.Ok.System
 
     override fun toJson() =
         JsonMessage.newMessage(objectMapper.convertValue(
@@ -91,7 +89,6 @@ internal class Godkjenningsbehov(
             data: String,
             personDao: PersonDao,
             arbeidsgiverDao: ArbeidsgiverDao,
-            vedtakDao: VedtakDao,
             snapshotDao: SnapshotDao,
             speilSnapshotRestDao: SpeilSnapshotRestDao
         ): Godkjenningsbehov {
@@ -106,7 +103,6 @@ internal class Godkjenningsbehov(
                 orgnummer = spleisbehovDTO.orgnummer,
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             )

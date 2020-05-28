@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vedtak
 
+import kotliquery.Session
 import no.nav.helse.modell.command.Command
 import java.time.Duration
 import java.util.*
@@ -13,7 +14,7 @@ internal class SaksbehandlerGodkjenningCommand(
     timeout = Duration.ofDays(14)
 ) {
     private var resultat: Resultat = Resultat.TrengerSaksbehandlerInput
-    override fun execute() = resultat
+    override fun execute(session: Session) = resultat
 
     override fun fortsett(løsning: SaksbehandlerLøsning) {
         resultat = Resultat.Ok.Løst(

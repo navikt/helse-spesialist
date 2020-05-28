@@ -1,5 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
+import kotliquery.Session
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.Command
@@ -16,7 +17,7 @@ internal class OppdatertArbeidsgiverCommand(
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
-    override fun execute(): Resultat {
+    override fun execute(session: Session): Resultat {
         return Resultat.Ok.System
     }
 

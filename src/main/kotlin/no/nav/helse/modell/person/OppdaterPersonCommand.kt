@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person
 
+import kotliquery.Session
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.command.Command
 import java.time.Duration
@@ -27,7 +28,7 @@ internal class OppdaterPersonCommand(
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
-        override fun execute(): Resultat {
+        override fun execute(session: Session): Resultat {
             val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(14) < LocalDate.now()) {
                 Resultat.HarBehov(Behovtype.HentPersoninfo)
@@ -51,7 +52,7 @@ internal class OppdaterPersonCommand(
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
-        override fun execute(): Resultat {
+        override fun execute(session: Session): Resultat {
             val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(5) < LocalDate.now()) {
                 Resultat.HarBehov(Behovtype.HentEnhet)
@@ -70,7 +71,7 @@ internal class OppdaterPersonCommand(
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
-        override fun execute(): Resultat {
+        override fun execute(session: Session): Resultat {
             val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(1) < LocalDate.now()) {
                 Resultat.HarBehov(Behovtype.HentInfotrygdutbetalinger())
@@ -89,5 +90,5 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    override fun execute() = Resultat.Ok.System
+    override fun execute(session: Session) = Resultat.Ok.System
 }

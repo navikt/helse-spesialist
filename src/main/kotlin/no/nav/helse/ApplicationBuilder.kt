@@ -26,11 +26,9 @@ import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoDao
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -54,10 +52,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val personDao = PersonDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
     private val spleisbehovDao = SpleisbehovDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
     private val risikoDao = RisikoDao(dataSource)
 
@@ -96,19 +92,23 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private val spleisbehovMediator = SpleisbehovMediator(
+        dataSource = dataSource,
         spleisbehovDao = spleisbehovDao,
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
-        oppgaveDao = oppgaveDao,
         risikoDao = risikoDao,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao)
-    private val vedtaksperiodeMediator =
-        VedtaksperiodeMediator(vedtaksperiodeDao, arbeidsgiverDao, snapshotDao, personDao, oppgaveDao)
+    private val oppgaveMediator = OppgaveMediator(dataSource)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(
+        vedtaksperiodeDao = vedtaksperiodeDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        snapshotDao = snapshotDao,
+        personDao = personDao,
+        dataSource = dataSource
+    )
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -139,9 +139,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             basicAuthentication(env.getValue("ADMIN_SECRET"))
             oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
-                oppgaveDao = oppgaveDao,
                 spleisbehovMediator = spleisbehovMediator,
-                vedtaksperiodeMediator = vedtaksperiodeMediator
+                vedtaksperiodeMediator = vedtaksperiodeMediator,
+                dataSource = dataSource
             )
             adminApi(spleisbehovMediator)
         }.build()

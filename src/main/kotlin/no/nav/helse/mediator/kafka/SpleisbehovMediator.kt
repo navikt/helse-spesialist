@@ -1,5 +1,7 @@
 package no.nav.helse.mediator.kafka
 
+import kotliquery.sessionOf
+import kotliquery.using
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
@@ -16,7 +18,7 @@ import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.vedtak.VedtakDao
+import no.nav.helse.modell.vedtak.deleteVedtak
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -25,16 +27,16 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
+import javax.sql.DataSource
 
 internal class SpleisbehovMediator(
     private val spleisbehovDao: SpleisbehovDao,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
-    private val oppgaveDao: OppgaveDao,
     private val risikoDao: RisikoDao,
+    private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -56,6 +58,7 @@ internal class SpleisbehovMediator(
             return
         }
         val spleisbehovExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = Godkjenningsbehov(
                 id = godkjenningMessage.id,
                 fødselsnummer = godkjenningMessage.fødselsnummer,
@@ -66,15 +69,12 @@ internal class SpleisbehovMediator(
                 orgnummer = godkjenningMessage.organisasjonsnummer,
                 personDao = personDao,
                 arbeidsgiverDao = arbeidsgiverDao,
-                vedtakDao = vedtakDao,
                 snapshotDao = snapshotDao,
                 speilSnapshotRestDao = speilSnapshotRestDao
             ),
             spesialistOid = spesialistOID,
             eventId = godkjenningMessage.id,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf(
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
                 keyValue("eventId", godkjenningMessage.id)
@@ -149,7 +149,7 @@ internal class SpleisbehovMediator(
 
     fun håndter(vedtaksperiodeId: UUID, løsning: TilInfotrygdMessage) {
         spleisbehovDao.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
-            val nåværendeOppgave = oppgaveDao.findNåværendeOppgave(spleisbehovDBDto.id) ?: return
+            val nåværendeOppgave = findNåværendeOppgave(spleisbehovDBDto.id) ?: return
             log.info("Vedtaksperiode {} i Spleis gikk TIL_INFOTRYGD", keyValue("vedtaksperiodeId", vedtaksperiodeId))
             spleisbehovExecutor(spleisbehovDBDto.id, vedtaksperiodeId, spleisbehovDBDto.data, nåværendeOppgave)
                 .invalider()
@@ -159,7 +159,7 @@ internal class SpleisbehovMediator(
     fun håndter(tilbakerullingMessage: TilbakerullingMessage) {
         tilbakerullingMessage.vedtakperioderSlettet.forEach {
             spleisbehovDao.findBehovMedSpleisReferanse(it)?.also { spleisbehovDBDto ->
-                val nåværendeOppgave = oppgaveDao.findNåværendeOppgave(spleisbehovDBDto.id) ?: return
+                val nåværendeOppgave = findNåværendeOppgave(spleisbehovDBDto.id) ?: return
                 log.info(
                     "Invaliderer oppgave {} fordi vedtaksperiode {} ble slettet",
                     keyValue("oppgaveId", nåværendeOppgave.id),
@@ -167,7 +167,7 @@ internal class SpleisbehovMediator(
                 )
                 spleisbehovExecutor(spleisbehovDBDto.id, it, spleisbehovDBDto.data, nåværendeOppgave)
                     .invalider()
-                vedtakDao.deleteVedtak(it)
+                deleteVedtak(it)
             }
         }
     }
@@ -179,19 +179,17 @@ internal class SpleisbehovMediator(
             keyValue("eventId", eventId)
         )
         val commandExecutor = CommandExecutor(
+            dataSource = dataSource,
             command = OppdaterVedtaksperiode(
                 fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
                 eventId = eventId,
                 speilSnapshotRestDao = speilSnapshotRestDao,
-                snapshotDao = snapshotDao,
-                vedtakDao = vedtakDao
+                snapshotDao = snapshotDao
             ),
             spesialistOid = spesialistOID,
             eventId = eventId,
             nåværendeOppgave = null,
-            oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao,
             loggingData = *arrayOf(
                 keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
                 keyValue("eventId", eventId)
@@ -261,7 +259,7 @@ internal class SpleisbehovMediator(
             "Fant ikke behov med id $eventId"
         }
 
-        val nåværendeOppgave = requireNotNull(oppgaveDao.findNåværendeOppgave(eventId)) {
+        val nåværendeOppgave = requireNotNull(findNåværendeOppgave(eventId)) {
             "Svar på behov krever at det er en nåværende oppgave"
         }
 
@@ -351,21 +349,27 @@ internal class SpleisbehovMediator(
         spleisbehovJson: String,
         nåværendeOppgave: OppgaveDto
     ) = CommandExecutor(
+        dataSource = dataSource,
         command = Godkjenningsbehov.restore(
             id = id,
             vedtaksperiodeId = spleisReferanse,
             data = spleisbehovJson,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao
         ),
         spesialistOid = spesialistOID,
         eventId = id,
         nåværendeOppgave = nåværendeOppgave,
-        oppgaveDao = oppgaveDao,
-        vedtakDao = vedtakDao,
         loggingData = *arrayOf(keyValue("vedtaksperiodeId", spleisReferanse), keyValue("eventId", id))
     )
+
+    fun findNåværendeOppgave(eventId: UUID) = using(sessionOf(dataSource)) { session ->
+        session.findNåværendeOppgave(eventId)
+    }
+
+    fun deleteVedtak(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+        session.deleteVedtak(vedtaksperiodeId)
+    }
 }

@@ -1,15 +1,17 @@
 package no.nav.helse
 
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikoDao
+import no.nav.helse.modell.vedtak.findVedtak
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
-import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.risiko.RisikoDao
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
@@ -24,9 +26,7 @@ internal class GodkjenningsbehovMediatorTest {
     private lateinit var dataSource: DataSource
     private lateinit var personDao: PersonDao
     private lateinit var arbeidsgiverDao: ArbeidsgiverDao
-    private lateinit var vedtakDao: VedtakDao
     private lateinit var snapshotDao: SnapshotDao
-    private lateinit var oppgaveDao: OppgaveDao
     private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
     private lateinit var spleisbehovDao: SpleisbehovDao
     private lateinit var risikoDao: RisikoDao
@@ -42,9 +42,7 @@ internal class GodkjenningsbehovMediatorTest {
         dataSource = setupDataSourceMedFlyway()
         personDao = PersonDao(dataSource)
         arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        vedtakDao = VedtakDao(dataSource)
         snapshotDao = SnapshotDao(dataSource)
-        oppgaveDao = OppgaveDao(dataSource)
         speilSnapshotRestDao = SpeilSnapshotRestDao(
             spleisMockClient.client,
             accessTokenClient,
@@ -58,12 +56,12 @@ internal class GodkjenningsbehovMediatorTest {
     @Test
     fun `Spleisbehov persisteres`() {
         val spleisbehovMediator = SpleisbehovMediator(
-            spleisbehovDao = spleisbehovDao, personDao = personDao,
+            dataSource = dataSource,
+            spleisbehovDao = spleisbehovDao,
+            personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
             risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(TestRapid()) }
@@ -89,11 +87,13 @@ internal class GodkjenningsbehovMediatorTest {
         val person = TestPerson(dataSource)
         person.tilSaksbehandlerGodkjenning(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
 
-        assertNotEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
-        assertNotNull(vedtakDao.findVedtak(vedtaksperiodeId))
-        person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId)
-        assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(eventId)?.status)
-        assertNull(vedtakDao.findVedtak(vedtaksperiodeId))
+        using(sessionOf(dataSource)) { session ->
+            assertNotEquals(Oppgavestatus.Invalidert, session.findNåværendeOppgave(eventId)?.status)
+            assertNotNull(session.findVedtak(vedtaksperiodeId))
+            person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId)
+            assertEquals(Oppgavestatus.Invalidert, session.findNåværendeOppgave(eventId)?.status)
+            assertNull(session.findVedtak(vedtaksperiodeId))
+        }
     }
 
     @Test
@@ -108,7 +108,9 @@ internal class GodkjenningsbehovMediatorTest {
 
         person.tilSaksbehandlerGodkjenning(eventId = eventId2, vedtaksperiodeId = vedtaksperiodeId2)
 
-        assertNull(vedtakDao.findVedtak(vedtaksperiodeId1))
-        assertNotNull(vedtakDao.findVedtak(vedtaksperiodeId2))
+        using(sessionOf(dataSource)) { session ->
+            assertNull(session.findVedtak(vedtaksperiodeId1))
+            assertNotNull(session.findVedtak(vedtaksperiodeId2))
+        }
     }
 }

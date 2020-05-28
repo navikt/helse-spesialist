@@ -7,12 +7,12 @@ import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.command.findNåværendeOppgave
+import no.nav.helse.modell.command.findSaksbehandlerOppgaver
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -33,9 +33,7 @@ internal class GodkjenningsbehovEndToEndTest {
     private val dataSource = setupDataSourceMedFlyway()
     private val personDao = PersonDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
     private val speilSnapshotRestDao = SpeilSnapshotRestDao(
         spleisMockClient.client,
         accessTokenClient,
@@ -58,13 +56,12 @@ internal class GodkjenningsbehovEndToEndTest {
         vedtaksperiodeId = UUID.randomUUID()
         rapid = TestRapid()
         spleisbehovMediator = SpleisbehovMediator(
+            dataSource = dataSource,
             spleisbehovDao = spleisbehovDao,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
             risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
@@ -91,7 +88,7 @@ internal class GodkjenningsbehovEndToEndTest {
             ),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
         assertFalse(saksbehandlerOppgaver.isEmpty())
         assertTrue(saksbehandlerOppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
 
@@ -189,7 +186,7 @@ internal class GodkjenningsbehovEndToEndTest {
             ),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = oppgaveDao.findSaksbehandlerOppgaver()
+        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
         assertEquals(1, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
     }
 
@@ -303,7 +300,9 @@ internal class GodkjenningsbehovEndToEndTest {
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
-        assertEquals(Oppgavestatus.Invalidert, oppgaveDao.findNåværendeOppgave(spleisbehovId)?.status)
+        assertEquals(
+            Oppgavestatus.Invalidert,
+            using(sessionOf(dataSource)) { it.findNåværendeOppgave(spleisbehovId)?.status })
     }
 
     @ExperimentalContracts

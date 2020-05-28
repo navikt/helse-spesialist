@@ -25,12 +25,10 @@ import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
-import no.nav.helse.modell.vedtak.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -112,10 +110,8 @@ internal class RestApiTest {
 
         val personDao = PersonDao(dataSource)
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        val vedtakDao = VedtakDao(dataSource)
         val spleisbehovDao = SpleisbehovDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
-        val oppgaveDao = OppgaveDao(dataSource)
         val risikoDao = RisikoDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(
             spleisMockClient.client,
@@ -125,23 +121,22 @@ internal class RestApiTest {
         val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
 
         spleisbehovMediator = SpleisbehovMediator(
+            dataSource = dataSource,
             spleisbehovDao = spleisbehovDao,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            oppgaveDao = oppgaveDao,
             risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
-        val oppgaveMediator = OppgaveMediator(oppgaveDao)
+        val oppgaveMediator = OppgaveMediator(dataSource)
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
-            vedtaksperiodeDao,
-            arbeidsgiverDao,
-            snapshotDao,
-            personDao,
-            oppgaveDao
+            vedtaksperiodeDao = vedtaksperiodeDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            snapshotDao = snapshotDao,
+            personDao = personDao,
+            dataSource = dataSource
         )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
@@ -153,7 +148,7 @@ internal class RestApiTest {
             basicAuthentication("🅱️")
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
             oppgaveApi(oppgaveMediator)
-            vedtaksperiodeApi(oppgaveDao, vedtaksperiodeMediator, spleisbehovMediator)
+            vedtaksperiodeApi(vedtaksperiodeMediator, spleisbehovMediator, dataSource)
         }
 
         app.start(wait = false)

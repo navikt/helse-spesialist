@@ -1,5 +1,6 @@
 package no.nav.helse.modell.command
 
+import kotliquery.Session
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
@@ -21,7 +22,7 @@ abstract class Command(
     internal open val oppgaver: Set<Command> = setOf()
     internal val oppgavetype: String = requireNotNull(this::class.simpleName)
 
-    internal abstract fun execute(): Resultat
+    internal abstract fun execute(session: Session): Resultat
     internal open fun fortsett(løsning: HentEnhetLøsning) {}
     internal open fun fortsett(løsning: HentPersoninfoLøsning) {}
     internal open fun fortsett(løsning: ArbeidsgiverLøsning) {}
