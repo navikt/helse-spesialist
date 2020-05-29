@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class NavnDto(val fornavn: String, val mellomnavn: String?, val etternavn: String)
+data class EnhetDto(val id: String, val navn: String)
 data class SaksbehandleroppgaveDto(
     val spleisbehovId: UUID,
     val opprettet: LocalDateTime,

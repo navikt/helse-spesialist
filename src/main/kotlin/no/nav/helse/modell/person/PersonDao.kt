@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.objectMapper
 import javax.sql.DataSource
@@ -183,6 +184,20 @@ class PersonDao(private val dataSource: DataSource) {
                 fødselsnummer
             ).map {
                 it.sqlDate("enhet_ref_oppdatert").toLocalDate()
+            }.asSingle
+        )
+    })
+
+    internal fun findEnhet(fødselsnummer: Long): EnhetDto = requireNotNull(using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "SELECT id, navn from enhet WHERE id=(SELECT enhet_ref FROM person where fodselsnummer =?);",
+                fødselsnummer
+            ).map {
+                EnhetDto(
+                    it.string("id"),
+                    it.string("navn")
+                )
             }.asSingle
         )
     })

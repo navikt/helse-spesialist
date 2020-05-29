@@ -58,12 +58,14 @@ internal class VedtaksperiodeMediator(
             }
         }
 
+        val enhet = personDao.findEnhet(vedtak.fødselsnummer.toLong())
         PersonForSpeilDto(
             aktørId = speilSnapshot.aktørId,
             fødselsnummer = speilSnapshot.fødselsnummer,
             navn = NavnDto(vedtak.fornavn, vedtak.mellomnavn, vedtak.etternavn),
             arbeidsgivere = arbeidsgivere,
-            infotrygdutbetalinger = infotrygdutbetalinger
+            infotrygdutbetalinger = infotrygdutbetalinger,
+            enhet = enhet
         )
     }
 }

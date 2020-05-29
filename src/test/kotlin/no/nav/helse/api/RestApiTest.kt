@@ -186,13 +186,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/oppgaver").execute() }
@@ -218,13 +212,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning(
                 LocalDate.of(2018, 1, 1),
                 LocalDate.of(2018, 1, 31),
@@ -246,6 +234,32 @@ internal class RestApiTest {
     }
 
     @Test
+    fun `PersonDTO inneholder enhetsinfo`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("301"),
+            hentPersoninfoLøsning(),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
+        val enhet = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().enhet) }
+        assertNotNull(enhet)
+        assertEquals("Oslo", enhet.navn)
+    }
+
+    @Test
     fun `hent vedtaksperiode med vedtaksperiodeId`() {
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
@@ -262,13 +276,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
@@ -298,13 +306,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/aktorId/$aktørId").execute() }
@@ -334,13 +336,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/fnr/$fødselsnummer").execute() }
@@ -369,13 +365,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val response = runBlocking {
@@ -420,13 +410,7 @@ internal class RestApiTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         runBlocking {
@@ -459,7 +443,16 @@ internal class RestApiTest {
             assertEquals(HttpStatusCode.Conflict, godkjenning2.status)
         }
     }
+
 }
+
+private fun hentPersoninfoLøsning(
+    fornavn: String = "Test",
+    mellomnavn: String? = null,
+    etternavn: String = "Testsen",
+    fødselsdato: LocalDate = LocalDate.now(),
+    kjønn: Kjønn = Kjønn.Mann
+) = HentPersoninfoLøsning(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
 
 private fun infotrygdutbetalingerLøsning(
     fom: LocalDate = LocalDate.of(2020, 1, 1),
