@@ -104,7 +104,7 @@ internal fun Application.vedtaksperiodeApi(
     }
 }
 
-@JsonIgnoreProperties
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Godkjenning(val behovId: UUID, val godkjent: Boolean, val saksbehandlerIdent: String)
 
 @JsonIgnoreProperties
