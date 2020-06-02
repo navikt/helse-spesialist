@@ -21,7 +21,7 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
             databaseName
         )
 
-        maximumPoolSize = 3
+        maximumPoolSize = 6
         minimumIdle = 1
         idleTimeout = 10001
         connectionTimeout = 1000
