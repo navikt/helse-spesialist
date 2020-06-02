@@ -98,7 +98,10 @@ internal class GodkjenningsbehovEndToEndTest {
                 saksbehandlerIdent = "abcd",
                 godkjenttidspunkt = LocalDateTime.now(),
                 oid = UUID.randomUUID(),
-                epostadresse = "epost"
+                epostadresse = "epost",
+                årsak = null,
+                begrunnelser = null,
+                kommentar = null
             )
         )
         assertEquals(5, rapid.inspektør.size)
@@ -273,7 +276,10 @@ internal class GodkjenningsbehovEndToEndTest {
                 saksbehandlerIdent = "abcd",
                 godkjenttidspunkt = LocalDateTime.now(),
                 oid = UUID.randomUUID(),
-                epostadresse = "epost"
+                epostadresse = "epost",
+                årsak = null,
+                begrunnelser = null,
+                kommentar = null
             )
         )
 

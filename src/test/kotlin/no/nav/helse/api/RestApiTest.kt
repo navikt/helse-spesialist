@@ -375,7 +375,10 @@ internal class RestApiTest {
                         Godkjenning(
                             spleisbehovId,
                             true,
-                            saksbehandlerIdent = saksbehandlerIdent
+                            saksbehandlerIdent = saksbehandlerIdent,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null
                         )
                     ),
                     contentType = ContentType.Application.Json
@@ -420,7 +423,10 @@ internal class RestApiTest {
                         Godkjenning(
                             spleisbehovId,
                             true,
-                            saksbehandlerIdent = saksbehandlerIdent
+                            saksbehandlerIdent = saksbehandlerIdent,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null
                         )
                     ),
                     contentType = ContentType.Application.Json
@@ -434,7 +440,10 @@ internal class RestApiTest {
                         Godkjenning(
                             spleisbehovId,
                             true,
-                            saksbehandlerIdent = saksbehandlerIdent
+                            saksbehandlerIdent = saksbehandlerIdent,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null
                         )
                     ),
                     contentType = ContentType.Application.Json

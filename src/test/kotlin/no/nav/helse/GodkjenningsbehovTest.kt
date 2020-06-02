@@ -260,7 +260,10 @@ class GodkjenningsbehovTest {
                 saksbehandlerIdent = "abcd",
                 godkjenttidspunkt = LocalDateTime.now(),
                 oid = UUID.randomUUID(),
-                epostadresse = "epost"
+                epostadresse = "epost",
+                årsak = null,
+                begrunnelser = null,
+                kommentar = null
             )
         )
 

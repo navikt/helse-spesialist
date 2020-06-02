@@ -74,12 +74,17 @@ internal fun Application.vedtaksperiodeApi(
                     )
                 }
 
+                validerSaksbehandlerInput(godkjenning)
+
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
                     godkjenttidspunkt = LocalDateTime.now(),
                     saksbehandlerIdent = saksbehandlerIdent,
                     oid = oid,
-                    epostadresse = epostadresse
+                    epostadresse = epostadresse,
+                    årsak = godkjenning.årsak,
+                    begrunnelser = godkjenning.begrunnelser,
+                    kommentar = godkjenning.kommentar
                 )
 
                 spleisbehovMediator.håndter(godkjenning.behovId, løsning)
@@ -104,8 +109,21 @@ internal fun Application.vedtaksperiodeApi(
     }
 }
 
+fun validerSaksbehandlerInput(godkjenning: Godkjenning) {
+    if (!godkjenning.godkjent) {
+        requireNotNull(godkjenning.årsak)
+    }
+}
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Godkjenning(val behovId: UUID, val godkjent: Boolean, val saksbehandlerIdent: String)
+data class Godkjenning(
+    val behovId: UUID,
+    val godkjent: Boolean,
+    val saksbehandlerIdent: String,
+    val årsak: String?,
+    val begrunnelser: List<String>?,
+    val kommentar: String?
+)
 
 @JsonIgnoreProperties
 data class Annullering(

@@ -24,7 +24,10 @@ internal class SaksbehandlerGodkjenningCommand(
                 "Godkjenning" to mapOf(
                     "godkjent" to løsning.godkjent,
                     "saksbehandlerIdent" to løsning.saksbehandlerIdent,
-                    "godkjenttidspunkt" to løsning.godkjenttidspunkt
+                    "godkjenttidspunkt" to løsning.godkjenttidspunkt,
+                    "årsak" to løsning.årsak,
+                    "begrunnelser" to løsning.begrunnelser,
+                    "kommentar" to løsning.kommentar
                 )
             )
         )

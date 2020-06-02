@@ -8,5 +8,8 @@ internal class SaksbehandlerLøsning(
     val saksbehandlerIdent: String,
     val oid: UUID,
     val epostadresse: String,
-    val godkjenttidspunkt: LocalDateTime
+    val godkjenttidspunkt: LocalDateTime,
+    val årsak: String?,
+    val begrunnelser: List<String>?,
+    val kommentar: String?
 )
