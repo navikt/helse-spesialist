@@ -4,7 +4,7 @@ import io.prometheus.client.Collector.NANOSECONDS_PER_SECOND
 import io.prometheus.client.Histogram
 
 private val histogram =
-    Histogram.build("timer", "Dette er en generell timer")
+    Histogram.build("latency", "Måler hvor lang tid en kodeblokk tar")
         .labelNames("measurement", "duration")
         .register()
 

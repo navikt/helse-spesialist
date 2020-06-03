@@ -28,29 +28,25 @@ internal class OpprettVedtakCommand(
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
-    override fun execute(session: Session): Resultat = measureAsHistogram("OpprettVedtakCommand.opprettVedtak") {
+    override fun execute(session: Session): Resultat = measureAsHistogram("OpprettVedtakCommand") {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val speilSnapshot =
-            measureAsHistogram("OpprettVedtakCommand.hentSpeilSnapshot") {
-                speilSnapshotRestDao.hentSpeilSpapshot(
-                    fødselsnummer
-                )
-            }
-        val snapshotId =
-            measureAsHistogram("OpprettVedtakCommand.insertSpeilSnapshot") {
-                snapshotDao.insertSpeilSnapshot(
-                    speilSnapshot
-                )
-            }
-        val personRef =
-            measureAsHistogram("OpprettVedtakCommand.findPersonByFødselsnummer") {
-                requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
-            }
-        val arbeidsgiverRef =
-            measureAsHistogram("OpprettVedtakCommand.findArbeidsgiverByOrgnummer") {
-                requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
-            }
-        measureAsHistogram("OpprettVedtakCommand.insertVedtak") {
+        val speilSnapshot = measureAsHistogram("OpprettVedtakCommand_hentSpeilSnapshot") {
+            speilSnapshotRestDao.hentSpeilSpapshot(
+                fødselsnummer
+            )
+        }
+        val snapshotId = measureAsHistogram("OpprettVedtakCommand_insertSpeilSnapshot") {
+            snapshotDao.insertSpeilSnapshot(
+                speilSnapshot
+            )
+        }
+        val personRef = measureAsHistogram("OpprettVedtakCommand_findPersonByFødselsnummer") {
+            requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
+        }
+        val arbeidsgiverRef = measureAsHistogram("OpprettVedtakCommand_findArbeidsgiverByOrgnummer") {
+            requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
+        }
+        measureAsHistogram("OpprettVedtakCommand_insertVedtak") {
             session.insertVedtak(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = periodeFom,
