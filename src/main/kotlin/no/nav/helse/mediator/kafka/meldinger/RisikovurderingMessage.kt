@@ -21,7 +21,8 @@ class RisikovurderingMessage(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "risikovurdering")
-                    it.requireKey("@id", "vedtaksperiodeId", "samletScore", "ufullstendig")
+                    it.requireKey("@id", "samletScore", "ufullstendig")
+                    it.require("vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
                     it.requireArray("begrunnelser")
                 }
             }.register(this)

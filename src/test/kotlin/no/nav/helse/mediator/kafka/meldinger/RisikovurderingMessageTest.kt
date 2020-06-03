@@ -32,4 +32,20 @@ internal class RisikovurderingMessageTest {
         verify { mediatorMock.håndter(any(), any<RisikovurderingMessage>()) }
     }
 
+    @Test
+    fun `ignorerer ugyldig message`() {
+        rapid.sendTestMessage("""
+            {
+              "@event_name": "risikovurdering",
+              "@id": "${UUID.randomUUID()}",
+              "@opprettet": "${LocalDateTime.now()}",
+              "vedtaksperiodeId": "dette er ikke en UUID",
+              "samletScore": 10,
+              "begrunnelser": ["Detta ser ikke bra ut"],
+              "ufullstendig": true
+            }
+        """)
+        verify(exactly = 0) { mediatorMock.håndter(any(), any<RisikovurderingMessage>()) }
+    }
+
 }
