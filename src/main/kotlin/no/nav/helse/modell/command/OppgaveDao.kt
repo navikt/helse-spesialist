@@ -85,7 +85,7 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.ru
         .asList
 )
 
-fun Session.behovForVedtaksperide(vedtaksperiodeId: UUID) = this.run(
+fun Session.behovForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
     queryOf(
         """
             SELECT behov_id
