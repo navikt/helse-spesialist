@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtak
 
 import kotliquery.Session
+import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.person.PersonDao
@@ -27,22 +28,40 @@ internal class OpprettVedtakCommand(
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
-    override fun execute(session: Session): Resultat {
+    override fun execute(session: Session): Resultat = measureAsHistogram("OpprettVedtakCommand.opprettVedtak") {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val speilSnapshot = speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
-        val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
-        val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
-        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
-        session.insertVedtak(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = periodeFom,
-            tom = periodeTom,
-            personRef = personRef,
-            arbeidsgiverRef = arbeidsgiverRef,
-            speilSnapshotRef = snapshotId
-        )
+        val speilSnapshot =
+            measureAsHistogram("OpprettVedtakCommand.hentSpeilSnapshot") {
+                speilSnapshotRestDao.hentSpeilSpapshot(
+                    fødselsnummer
+                )
+            }
+        val snapshotId =
+            measureAsHistogram("OpprettVedtakCommand.insertSpeilSnapshot") {
+                snapshotDao.insertSpeilSnapshot(
+                    speilSnapshot
+                )
+            }
+        val personRef =
+            measureAsHistogram("OpprettVedtakCommand.findPersonByFødselsnummer") {
+                requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
+            }
+        val arbeidsgiverRef =
+            measureAsHistogram("OpprettVedtakCommand.findArbeidsgiverByOrgnummer") {
+                requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
+            }
+        measureAsHistogram("OpprettVedtakCommand.insertVedtak") {
+            session.insertVedtak(
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = periodeFom,
+                tom = periodeTom,
+                personRef = personRef,
+                arbeidsgiverRef = arbeidsgiverRef,
+                speilSnapshotRef = snapshotId
+            )
+        }
 
-        return Resultat.Ok.System
+        Resultat.Ok.System
     }
 
 }
