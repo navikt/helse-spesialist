@@ -21,8 +21,9 @@ internal class OppdaterVedtaksperiode(
     override fun execute(session: Session) =
         measureAsHistogram("OppdaterVedtaksperiode_execute") {
             measureAsHistogram("OppdaterVedtaksperiode_execute_findVedtak") {
-                session.findVedtak(vedtaksperiodeId) ?: Resultat.Ok.System
-            }
+                session.findVedtak(vedtaksperiodeId)
+            } ?: return@measureAsHistogram Resultat.Ok.System
+
             val snapshot = measureAsHistogram("OppdaterVedtaksperiode_execute_hentSpeilSnapshot") {
                 speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
             }
