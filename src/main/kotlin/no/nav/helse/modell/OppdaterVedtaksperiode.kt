@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import kotliquery.Session
+import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.command.RootCommand
 import no.nav.helse.modell.vedtak.findVedtak
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -17,12 +18,22 @@ internal class OppdaterVedtaksperiode(
 ) : RootCommand(eventId, Duration.ofHours(1)) {
     override val orgnummer: String? = null
 
-    override fun execute(session: Session): Resultat.Ok.System {
-        session.findVedtak(vedtaksperiodeId) ?: return Resultat.Ok.System
-        val snapshot = speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
-        snapshotDao.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, snapshot = snapshot)
-        return Resultat.Ok.System
-    }
+    override fun execute(session: Session) =
+        measureAsHistogram("OppdaterVedtaksperiode_execute") {
+            measureAsHistogram("OppdaterVedtaksperiode_execute_findVedtak") {
+                session.findVedtak(vedtaksperiodeId) ?: Resultat.Ok.System
+            }
+            val snapshot = measureAsHistogram("OppdaterVedtaksperiode_execute_hentSpeilSnapshot") {
+                speilSnapshotRestDao.hentSpeilSpapshot(fødselsnummer)
+            }
+            measureAsHistogram("OppdaterVedtaksperiode_execute_oppdaterSnapshot") {
+                snapshotDao.oppdaterSnapshotForVedtaksperiode(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    snapshot = snapshot
+                )
+            }
+            Resultat.Ok.System
+        }
 
     override fun toJson() = "{}"
 }

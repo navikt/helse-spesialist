@@ -5,6 +5,7 @@ import kotliquery.using
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
+import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Behov
 import no.nav.helse.modell.Godkjenningsbehov
@@ -196,7 +197,7 @@ internal class SpleisbehovMediator(
             )
         )
 
-        val resultater = commandExecutor.execute()
+        val resultater = measureAsHistogram("vedtaksperidoe_endret") {commandExecutor.execute() }
         publiserBehov(
             spleisreferanse = eventId,
             resultater = resultater,
