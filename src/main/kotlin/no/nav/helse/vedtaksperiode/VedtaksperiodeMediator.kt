@@ -64,7 +64,7 @@ internal class VedtaksperiodeMediator(
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val behovId = session.behovForVedtaksperiode(vedtaksperiodeId)
                         vedtaksperiode as ObjectNode
-                        vedtaksperiode.put("oppgavereferanse", behovId.toString())
+                        vedtaksperiode.put("oppgavereferanse", behovId?.toString())
                     }
                 }
             }
