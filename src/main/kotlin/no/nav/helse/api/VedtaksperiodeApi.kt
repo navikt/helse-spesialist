@@ -41,6 +41,10 @@ internal fun Application.vedtaksperiodeApi(
                 call.respond(speilSnapshot)
             }
             get("/api/person/aktorId/{aktørId}") {
+                call.parameters["aktørId"]?.toLongOrNull() ?: run {
+                    call.respond(status = HttpStatusCode.BadRequest, message = "AktørId må være numerisk")
+                    return@get
+                }
                 val speilSnapshot = vedtaksperiodeMediator
                     .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!)
                 if (speilSnapshot == null) {
@@ -50,6 +54,10 @@ internal fun Application.vedtaksperiodeApi(
                 call.respond(speilSnapshot)
             }
             get("/api/person/fnr/{fødselsnummer}") {
+                call.parameters["fødselsnummer"]?.toLongOrNull() ?: run {
+                    call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")
+                    return@get
+                }
                 val speilSnapshot = vedtaksperiodeMediator
                     .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!)
                 if (speilSnapshot == null) {

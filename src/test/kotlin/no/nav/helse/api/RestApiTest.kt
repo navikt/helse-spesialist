@@ -453,6 +453,23 @@ internal class RestApiTest {
         }
     }
 
+    @Test
+    fun `404 ved gyldig søketekst-input som ikke eksisterer`() {
+        val søketekst = 123456789101
+        val responseByAktørId = runBlocking { client.get<HttpStatement>("/api/person/aktorId/$søketekst").execute() }
+        val responseByFnr = runBlocking { client.get<HttpStatement>("/api/person/fnr/$søketekst").execute() }
+        assertEquals(HttpStatusCode.NotFound, responseByAktørId.status)
+        assertEquals(HttpStatusCode.NotFound, responseByFnr.status)
+    }
+
+    @Test
+    fun `400 ved ikke-numerisk søketekst-input`() {
+        val søketekst = "12345678a9101"
+        val responseByAktørId = runBlocking { client.get<HttpStatement>("/api/person/aktorId/$søketekst").execute() }
+        val responseByFnr = runBlocking { client.get<HttpStatement>("/api/person/fnr/$søketekst").execute() }
+        assertEquals(HttpStatusCode.BadRequest, responseByAktørId.status)
+        assertEquals(HttpStatusCode.BadRequest, responseByFnr.status)
+    }
 }
 
 private fun hentPersoninfoLøsning(
