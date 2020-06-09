@@ -179,29 +179,23 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
-        val commandExecutor = CommandExecutor(
-            dataSource = dataSource,
-            command = OppdaterVedtaksperiode(
-                fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
-                eventId = eventId,
-                speilSnapshotRestDao = speilSnapshotRestDao,
-                snapshotDao = snapshotDao
-            ),
-            spesialistOid = spesialistOID,
+        oppdaterVedtaksperiode(
             eventId = eventId,
-            nåværendeOppgave = null,
-            loggingData = *arrayOf(
-                keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
-                keyValue("eventId", eventId)
-            )
+            fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId
         )
+    }
 
-        val resultater = measureAsHistogram("vedtaksperidoe_endret") {commandExecutor.execute() }
-        publiserBehov(
-            spleisreferanse = eventId,
-            resultater = resultater,
-            commandExecutor = commandExecutor
+    fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
+        log.info(
+            "Mottok vedtaksperiode forkastet {}, {}",
+            keyValue("vedtaksperiodeId", vedtaksperiodeForkastetMessage.vedtaksperiodeId),
+            keyValue("eventId", eventId)
+        )
+        oppdaterVedtaksperiode(
+            eventId = eventId,
+            fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId
         )
     }
 
@@ -211,12 +205,38 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", risikovurderingMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
-
         risikoDao.persisterRisikovurdering(
             vedtaksperiodeId = risikovurderingMessage.vedtaksperiodeId,
             samletScore = risikovurderingMessage.samletScore,
             begrunnelser = risikovurderingMessage.begrunnelser,
             ufullstendig = risikovurderingMessage.ufullstendig
+        )
+    }
+
+    private fun oppdaterVedtaksperiode(eventId: UUID, fødselsnummer: String, vedtaksperiodeId: UUID) {
+        val commandExecutor = CommandExecutor(
+            dataSource = dataSource,
+            command = OppdaterVedtaksperiode(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                eventId = eventId,
+                speilSnapshotRestDao = speilSnapshotRestDao,
+                snapshotDao = snapshotDao
+            ),
+            spesialistOid = spesialistOID,
+            eventId = eventId,
+            nåværendeOppgave = null,
+            loggingData = *arrayOf(
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("eventId", eventId)
+            )
+        )
+
+        val resultater = measureAsHistogram("vedtaksperidoe_endret") { commandExecutor.execute() }
+        publiserBehov(
+            spleisreferanse = eventId,
+            resultater = resultater,
+            commandExecutor = commandExecutor
         )
     }
 
@@ -303,7 +323,12 @@ internal class SpleisbehovMediator(
                 keyValue("behov", behov.typer.toString())
             )
             rapidsConnection.publish(commandExecutor.command.fødselsnummer, behov.toJson().also {
-                sikkerLogg.info("sender behov for vedtaksperiodeId=${behov.vedtaksperiodeId} (spleis behovId=${behov.spleisBehovId}:\n\t$it")
+                sikkerLogg.info(
+                    "sender behov for {}, {}, {}:\n\t$it",
+                    keyValue("fødselsnummer", commandExecutor.command.fødselsnummer),
+                    keyValue("vedtaksperiodeId", commandExecutor.command.vedtaksperiodeId),
+                    keyValue("spleisBehovId", spleisreferanse)
+                )
             })
         }
 
@@ -314,7 +339,12 @@ internal class SpleisbehovMediator(
                 val løsningJson = JsonMessage(originalJson, MessageProblems(originalJson))
                 løsningJson["@løsning"] = løst.løsning
                 rapidsConnection.publish(commandExecutor.command.fødselsnummer, løsningJson.toJson().also {
-                    sikkerLogg.info("sender løsning for fødselsnummer=${commandExecutor.command.fødselsnummer} vedtaksperiodeId=${commandExecutor.command.vedtaksperiodeId} spleisBehovId=$spleisreferanse:\n\t$it")
+                    sikkerLogg.info(
+                        "sender løsning for {}, {}, {}:\n\t$it",
+                        keyValue("fødselsnummer", commandExecutor.command.fødselsnummer),
+                        keyValue("vedtaksperiodeId", commandExecutor.command.vedtaksperiodeId),
+                        keyValue("spleisBehovId", spleisreferanse)
+                    )
                 })
             }
 
@@ -336,7 +366,12 @@ internal class SpleisbehovMediator(
                 "ferdigstilt" to (resultater.last() is Command.Resultat.Ok)
             )
         ).toJson().also {
-            sikkerLogg.info("sender oppgave_oppdatert for fødselsnummer=${commandExecutor.command.fødselsnummer} vedtaksperiodeId=${commandExecutor.command.vedtaksperiodeId} spleisBehovId=$spleisreferanse:\n\t$it")
+            sikkerLogg.info(
+                "sender oppgave_oppdatert for {}, {}, {}:\n\t$it",
+                keyValue("fødselsnummer", commandExecutor.command.fødselsnummer),
+                keyValue("vedtaksperiodeId", commandExecutor.command.vedtaksperiodeId),
+                keyValue("spleisBehovId", spleisreferanse)
+            )
         })
     }
 

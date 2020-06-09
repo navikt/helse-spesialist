@@ -348,6 +348,41 @@ internal class GodkjenningsbehovEndToEndTest {
 
     @ExperimentalContracts
     @Test
+    fun `vedtaksperiode_forkastet fører til oppdatert speil snapshot`() {
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        VedtaksperiodeForkastetMessage.Factory(rapid, spleisbehovMediator)
+
+        val fødselsnummer = "3546756"
+        val aktørId = "7653345"
+        val orgnummer = "6546346"
+
+        sendGodkjenningsbehov(aktørId = aktørId, fødselsnummer = fødselsnummer, organisasjonsnummer = orgnummer)
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Mann
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+
+        val speilSnapshotRef = vedtaksperiodeDao.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
+        val snapshotFør = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+
+        spleisMockClient.enqueueResponses(SpleisMockClient.VEDTAKSPERIODE_UTBETALT)
+        sendVedtaksperiodeForkastetEvent(aktørId, fødselsnummer, orgnummer)
+
+        val snapshotEtter = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+        assertNotEquals(snapshotFør, snapshotEtter)
+    }
+
+    @ExperimentalContracts
+    @Test
     fun `risikovurderinger persisteres`() {
         RisikovurderingMessage.Factory(rapid, spleisbehovMediator)
 
@@ -382,6 +417,23 @@ internal class GodkjenningsbehovEndToEndTest {
               "gjeldendeTilstand": "AVSLUTTET",
               "forrigeTilstand": "TIL_UTBETALING",
               "@event_name": "vedtaksperiode_endret",
+              "@id": "${UUID.randomUUID()}",
+              "@opprettet": "${LocalDateTime.now()}",
+              "aktørId": "$aktørId",
+              "fødselsnummer": "$fødselsnummer",
+              "organisasjonsnummer": "$organisasjonsnummer"
+            }
+        """
+        )
+    }
+
+    private fun sendVedtaksperiodeForkastetEvent(aktørId: String, fødselsnummer: String, organisasjonsnummer: String) {
+        rapid.sendTestMessage(
+            """
+            {
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "tilstand": "TIL_INFOTRYGD",
+              "@event_name": "vedtaksperiode_forkastet",
               "@id": "${UUID.randomUUID()}",
               "@opprettet": "${LocalDateTime.now()}",
               "aktørId": "$aktørId",
