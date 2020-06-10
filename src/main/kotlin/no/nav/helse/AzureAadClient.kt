@@ -6,10 +6,7 @@ import io.ktor.client.request.get
 
 
 class AzureAadClient(private val httpClient: HttpClient) {
-
-    internal suspend fun oidcDiscovery(url: String): OidcDiscovery {
-        return httpClient.get(url)
-    }
+    internal suspend fun oidcDiscovery(url: String): OidcDiscovery = httpClient.get(url)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
