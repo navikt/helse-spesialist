@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
 import org.slf4j.LoggerFactory
+import java.lang.RuntimeException
 import java.time.Duration
 import java.time.Instant
 
@@ -34,15 +35,19 @@ class AccessTokenClient(
                 ?.takeUnless { it.expiry.isBefore(omToMinutter) }
                 ?: run {
                     log.info("Henter nytt token fra Azure AD")
-                    val response: AadAccessToken = httpClient.post(aadAccessTokenUrl) {
-                        accept(ContentType.Application.Json)
-                        method = HttpMethod.Post
-                        body = FormDataContent(Parameters.build {
-                            append("client_id", clientId)
-                            append("scope", "api://$resource/.default")
-                            append("grant_type", "client_credentials")
-                            append("client_secret", clientSecret)
-                        })
+                    val response: AadAccessToken = try {
+                        httpClient.post(aadAccessTokenUrl) {
+                            accept(ContentType.Application.Json)
+                            method = HttpMethod.Post
+                            body = FormDataContent(Parameters.build {
+                                append("client_id", clientId)
+                                append("scope", "api://$resource/.default")
+                                append("grant_type", "client_credentials")
+                                append("client_secret", clientSecret)
+                            })
+                        }
+                    } catch (e: Exception) {
+                        throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
                     }
                     tokenMap[resource] = response
                     log.debug("Har hentet accesstoken")
