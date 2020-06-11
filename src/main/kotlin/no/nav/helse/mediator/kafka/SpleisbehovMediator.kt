@@ -214,30 +214,35 @@ internal class SpleisbehovMediator(
     }
 
     private fun oppdaterVedtaksperiode(eventId: UUID, fødselsnummer: String, vedtaksperiodeId: UUID) {
-        val commandExecutor = CommandExecutor(
-            dataSource = dataSource,
-            command = OppdaterVedtaksperiode(
-                fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
+        try {
+            val commandExecutor = CommandExecutor(
+                dataSource = dataSource,
+                command = OppdaterVedtaksperiode(
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    eventId = eventId,
+                    speilSnapshotRestDao = speilSnapshotRestDao,
+                    snapshotDao = snapshotDao
+                ),
+                spesialistOid = spesialistOID,
                 eventId = eventId,
-                speilSnapshotRestDao = speilSnapshotRestDao,
-                snapshotDao = snapshotDao
-            ),
-            spesialistOid = spesialistOID,
-            eventId = eventId,
-            nåværendeOppgave = null,
-            loggingData = *arrayOf(
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("eventId", eventId)
+                nåværendeOppgave = null,
+                loggingData = *arrayOf(
+                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                    keyValue("eventId", eventId)
+                )
             )
-        )
 
-        val resultater = measureAsHistogram("vedtaksperidoe_endret") { commandExecutor.execute() }
-        publiserBehov(
-            spleisreferanse = eventId,
-            resultater = resultater,
-            commandExecutor = commandExecutor
-        )
+            val resultater = measureAsHistogram("vedtaksperidoe_endret") { commandExecutor.execute() }
+            publiserBehov(
+                spleisreferanse = eventId,
+                resultater = resultater,
+                commandExecutor = commandExecutor
+            )
+        } catch (e: Exception) {
+            log.error("Klarte ikke å oppdaterer vedtaksperiode", e)
+            throw RuntimeException("Klarte ikke å oppdaterer vedtaksperiode", e)
+        }
     }
 
     internal fun rollbackPerson(rollback: Rollback) {
