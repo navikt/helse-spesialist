@@ -18,7 +18,7 @@ internal class SpeilSnapshotRestDao(
     internal fun hentSpeilSpapshot(fnr: String): String {
         return runBlocking {
             val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
-            httpClient.get<HttpStatement>("http://spleis-api.tbd.svc.cluster.local/api/person-snapshot") {
+            httpClient.get<HttpStatement>("http://spleis-api.tbd.svc.nais.local/api/person-snapshot") {
                 header("Authorization", "Bearer $accessToken")
                 header("fnr", fnr)
                 accept(ContentType.Application.Json)
