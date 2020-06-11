@@ -233,7 +233,7 @@ internal class SpleisbehovMediator(
                 )
             )
 
-            val resultater = measureAsHistogram("vedtaksperidoe_endret") { commandExecutor.execute() }
+            val resultater = measureAsHistogram("vedtaksperiode_endret") { commandExecutor.execute() }
             publiserBehov(
                 spleisreferanse = eventId,
                 resultater = resultater,
