@@ -3,7 +3,7 @@ plugins {
 }
 
 val junitJupiterVersion = "5.6.0"
-val ktorVersion = "1.3.1"
+val ktorVersion = "1.3.2"
 
 group = "no.nav.helse"
 
@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.47c31b4")
+    implementation("com.github.navikt:rapids-and-rivers:1.74ae9cb")
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("com.papertrailapp:logback-syslog4j:1.0.0")
     implementation("com.zaxxer:HikariCP:3.4.2")
