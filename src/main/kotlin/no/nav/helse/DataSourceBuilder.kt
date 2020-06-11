@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
 import org.flywaydb.core.Flyway
-import java.time.Duration
 import javax.sql.DataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration as createDataSource
 
@@ -26,7 +25,7 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
         idleTimeout = 10001
         connectionTimeout = 1000
         maxLifetime = 30001
-        leakDetectionThreshold = Duration.ofMinutes(1).toMillis()
+        leakDetectionThreshold = 30000
     }
 
     fun getDataSource(role: Role = Role.User) =
