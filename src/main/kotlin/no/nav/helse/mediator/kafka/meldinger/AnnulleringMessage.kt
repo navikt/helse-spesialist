@@ -11,14 +11,16 @@ class AnnulleringMessage(
     val fagsystemId: String,
     val saksbehandler: String
 ) {
-    fun toJson() = JsonMessage.newMessage(mapOf(
-        "@event_name" to "kanseller_utbetaling",
-        "@id" to UUID.randomUUID(),
-        "@opprettet" to LocalDateTime.now(),
-        "fødselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "aktørId" to aktørId,
-        "fagsystemId" to fagsystemId,
-        "saksbehandler" to saksbehandler
-    )).toJson()
+    fun toJson() = JsonMessage.newMessage(
+        mapOf(
+            "@event_name" to "kanseller_utbetaling",
+            "@id" to UUID.randomUUID(),
+            "@opprettet" to LocalDateTime.now(),
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "aktørId" to aktørId,
+            "fagsystemId" to fagsystemId,
+            "saksbehandler" to saksbehandler
+        )
+    ).toJson()
 }

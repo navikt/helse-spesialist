@@ -1,8 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import kotliquery.Session
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.Command
 import java.time.Duration
 import java.util.*

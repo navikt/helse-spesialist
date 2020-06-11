@@ -71,16 +71,18 @@ internal class Godkjenningsbehov(
     override fun execute(session: Session): Resultat = Resultat.Ok.System
 
     override fun toJson() =
-        JsonMessage.newMessage(objectMapper.convertValue(
-            SpleisbehovDTO(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom,
-                aktørId = aktørId,
-                orgnummer = orgnummer
+        JsonMessage.newMessage(
+            objectMapper.convertValue(
+                SpleisbehovDTO(
+                    id = id,
+                    fødselsnummer = fødselsnummer,
+                    periodeFom = periodeFom,
+                    periodeTom = periodeTom,
+                    aktørId = aktørId,
+                    orgnummer = orgnummer
+                )
             )
-        )).toJson()
+        ).toJson()
 
     companion object {
         fun restore(

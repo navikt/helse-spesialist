@@ -5,13 +5,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.post
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.Parameters
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 import java.time.Duration
 import java.time.Instant
 

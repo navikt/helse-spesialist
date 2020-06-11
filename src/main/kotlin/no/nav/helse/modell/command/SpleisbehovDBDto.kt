@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command
 
-import java.util.UUID
+import java.util.*
 
 data class SpleisbehovDBDto(
     val id: UUID,

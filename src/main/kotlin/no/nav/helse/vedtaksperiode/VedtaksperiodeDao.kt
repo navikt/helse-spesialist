@@ -12,7 +12,8 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
     internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) =
         using(sessionOf(dataSource)) { session ->
             session.run(
-                queryOf("""
+                queryOf(
+                    """
                 SELECT *
                 FROM vedtak AS v
                          INNER JOIN person AS p ON v.person_ref = p.id
@@ -20,15 +21,17 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
                 WHERE v.vedtaksperiode_id = ?
                 ORDER BY v.id DESC
                 LIMIT 1;
-            """, vedtaksperiodeId)
-                    .map (::tilVedtaksperiode)
+            """, vedtaksperiodeId
+                )
+                    .map(::tilVedtaksperiode)
                     .asSingle
             )
         }
 
     fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("""
+            queryOf(
+                """
                 SELECT *
                 FROM vedtak AS v
                          INNER JOIN person AS p ON v.person_ref = p.id
@@ -36,7 +39,8 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
                 WHERE p.fodselsnummer = ?
                 ORDER BY v.id DESC
                 LIMIT 1;
-            """, fnr.toLong())
+            """, fnr.toLong()
+            )
                 .map(::tilVedtaksperiode)
                 .asSingle
         )
@@ -44,7 +48,8 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
 
     fun findVedtakByAktørId(aktørId: String) = using(sessionOf(dataSource)) { session ->
         session.run(
-            queryOf("""
+            queryOf(
+                """
                 SELECT *
                 FROM vedtak AS v
                          INNER JOIN person AS p ON v.person_ref = p.id
@@ -52,7 +57,8 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
                 WHERE p.aktor_id = ?
                 ORDER BY v.id DESC
                 LIMIT 1;
-            """, aktørId.toLong())
+            """, aktørId.toLong()
+            )
                 .map(::tilVedtaksperiode)
                 .asSingle
         )

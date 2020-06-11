@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 
 
 class AzureAadClient(private val httpClient: HttpClient) {
-    internal suspend fun oidcDiscovery(url: String): OidcDiscovery = try{
+    internal suspend fun oidcDiscovery(url: String): OidcDiscovery = try {
         httpClient.get(url)
     } catch (e: Exception) {
         throw RuntimeException("Feilet kall mot oidcDiscovery", e)

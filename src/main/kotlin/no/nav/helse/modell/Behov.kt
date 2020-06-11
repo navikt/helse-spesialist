@@ -22,9 +22,11 @@ internal class Behov(
     ).apply {
         vedtaksperiodeId?.also { this["vedtaksperiodeId"] = it }
         orgnummer?.also { this["orgnummer"] = it }
-    } + typer.flatMap { it.ekstrafelter.map { entry ->
-        "${it.name}.${entry.key}" to entry.value
-    }.toList()}).toJson()
+    } + typer.flatMap {
+        it.ekstrafelter.map { entry ->
+            "${it.name}.${entry.key}" to entry.value
+        }.toList()
+    }).toJson()
 }
 
 internal sealed class Behovtype {
