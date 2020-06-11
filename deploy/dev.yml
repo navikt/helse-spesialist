@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: spesialist
-  namespace: default
+  namespace: tbd
   labels:
     team: tbd
 spec:
@@ -37,7 +37,7 @@ spec:
     enabled: true
     paths:
       - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/preprod/fss/spesialist/default
+        kvPath: /kv/preprod/fss/spesialist/tbd
       - mountPath: /var/run/secrets/nais.io/service_user
         kvPath: /serviceuser/data/dev/srvspesialist
       - mountPath: /var/run/secrets/nais.io/azure
