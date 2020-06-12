@@ -4,12 +4,14 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
 class RisikoDao(private val dataSource: DataSource) {
     fun persisterRisikovurdering(
         vedtaksperiodeId: UUID,
+        opprettet: LocalDateTime,
         samletScore: Int,
         begrunnelser: List<String>,
         ufullstendig: Boolean
@@ -18,8 +20,9 @@ class RisikoDao(private val dataSource: DataSource) {
             val risikovurderingRef = requireNotNull(
                 transaction.run(
                     queryOf(
-                        "INSERT INTO risikovurdering (vedtaksperiode_id, samlet_score, ufullstendig) VALUES (?, ?, ?);",
+                        "INSERT INTO risikovurdering (vedtaksperiode_id, opprettet, samlet_score, ufullstendig) VALUES (?, ?, ?, ?);",
                         vedtaksperiodeId,
+                        opprettet,
                         samletScore,
                         ufullstendig
                     ).asUpdateAndReturnGeneratedKey
@@ -43,7 +46,7 @@ class RisikoDao(private val dataSource: DataSource) {
             session.run(
                 queryOf(
                     """
-                    SELECT r.id, r.vedtaksperiode_id, r.samlet_score, rb.begrunnelse, r.ufullstendig
+                    SELECT r.id, r.opprettet, r.vedtaksperiode_id, r.samlet_score, rb.begrunnelse, r.ufullstendig
                     FROM risikovurdering r
                              INNER JOIN vedtak v on r.vedtaksperiode_id = v.vedtaksperiode_id
                              INNER JOIN risikovurdering_begrunnelse rb on r.id = rb.risikovurdering_ref
@@ -70,6 +73,7 @@ class RisikoDao(private val dataSource: DataSource) {
 
     private fun tilRisikovurderingDto(row: Row) = RisikovurderingDto(
         vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+        opprettet = row.localDateTime("opprettet"),
         samletScore = row.int("samlet_score"),
         begrunnelser = listOf(row.string("begrunnelse")),
         ufullstendig = row.boolean("ufullstendig")

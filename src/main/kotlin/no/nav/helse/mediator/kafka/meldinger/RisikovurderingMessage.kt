@@ -4,10 +4,13 @@ import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import java.time.LocalDateTime
 import java.util.*
 
 class RisikovurderingMessage(
     val vedtaksperiodeId: UUID,
+    val opprettet: LocalDateTime,
     val samletScore: Int,
     val begrunnelser: List<String>,
     val ufullstendig: Boolean
@@ -22,6 +25,7 @@ class RisikovurderingMessage(
                 validate {
                     it.demandValue("@event_name", "risikovurdering")
                     it.requireKey("@id", "samletScore", "ufullstendig")
+                    it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.require("vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
                     it.requireArray("begrunnelser")
                 }
@@ -30,6 +34,7 @@ class RisikovurderingMessage(
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val eventId = UUID.fromString(packet["@id"].asText())
+            val opprettet = packet["@opprettet"].asLocalDateTime()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val samletScore = packet["samletScore"].asInt()
             val begrunnelser = packet["begrunnelser"].map { it.asText() }
@@ -38,6 +43,7 @@ class RisikovurderingMessage(
                 eventId,
                 RisikovurderingMessage(
                     vedtaksperiodeId = vedtaksperiodeId,
+                    opprettet = opprettet,
                     samletScore = samletScore,
                     begrunnelser = begrunnelser,
                     ufullstendig = ufullstendig

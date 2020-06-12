@@ -207,6 +207,7 @@ internal class SpleisbehovMediator(
         )
         risikoDao.persisterRisikovurdering(
             vedtaksperiodeId = risikovurderingMessage.vedtaksperiodeId,
+            opprettet = risikovurderingMessage.opprettet,
             samletScore = risikovurderingMessage.samletScore,
             begrunnelser = risikovurderingMessage.begrunnelser,
             ufullstendig = risikovurderingMessage.ufullstendig

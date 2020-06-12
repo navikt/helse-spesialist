@@ -47,6 +47,7 @@ import java.net.ServerSocket
 import java.nio.file.Path
 import java.sql.Connection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import javax.sql.DataSource
@@ -285,6 +286,7 @@ internal class RestApiTest {
             spleisbehovId,
             RisikovurderingMessage(
                 vedtaksperiodeId = vedtaksperiodeId,
+                opprettet = LocalDateTime.now(),
                 samletScore = 1,
                 begrunnelser = listOf("begrunnelse", "begrunnelser"),
                 ufullstendig = false
