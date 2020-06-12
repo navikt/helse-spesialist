@@ -46,7 +46,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
     })
 
 
-    fun findArbeidsgiver(arbeidsgiverId: Long): ArbeidsgiverDto? = using(sessionOf(dataSource)) { session ->
+    fun findArbeidsgiver(arbeidsgiverId: Int): ArbeidsgiverDto? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT an.navn, a.orgnummer FROM arbeidsgiver AS a JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id WHERE a.id=?;",

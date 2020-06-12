@@ -7,9 +7,7 @@ import java.util.*
 import javax.sql.DataSource
 
 class SnapshotDao(private val dataSource: DataSource) {
-    internal fun insertSpeilSnapshot(
-        personBlob: String
-    ): Int =
+    internal fun insertSpeilSnapshot(personBlob: String): Int =
         requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.run(
                 queryOf(
@@ -19,9 +17,7 @@ class SnapshotDao(private val dataSource: DataSource) {
             )
         }?.toInt())
 
-    internal fun findSpeilSnapshot(
-        id: Long
-    ): String? =
+    internal fun findSpeilSnapshot(id: Int): String? =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(

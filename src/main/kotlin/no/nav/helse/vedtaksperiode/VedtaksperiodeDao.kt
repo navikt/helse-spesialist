@@ -70,8 +70,8 @@ class VedtaksperiodeDao(private val dataSource: DataSource) {
         fornavn = row.string("fornavn"),
         mellomnavn = row.stringOrNull("mellomnavn"),
         etternavn = row.string("etternavn"),
-        arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-        speilSnapshotRef = row.long("speil_snapshot_ref"),
+        arbeidsgiverRef = row.int("arbeidsgiver_ref"),
+        speilSnapshotRef = row.int("speil_snapshot_ref"),
         infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
     )
 

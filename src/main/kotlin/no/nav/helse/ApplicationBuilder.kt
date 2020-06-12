@@ -107,7 +107,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         arbeidsgiverDao = arbeidsgiverDao,
         snapshotDao = snapshotDao,
         personDao = personDao,
-        dataSource = dataSource
+        dataSource = dataSource,
+        risikoDao = risikoDao
     )
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {

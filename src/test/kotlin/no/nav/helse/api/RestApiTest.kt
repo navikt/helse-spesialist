@@ -24,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.RisikovurderingMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
@@ -136,6 +137,7 @@ internal class RestApiTest {
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             personDao = personDao,
+            risikoDao = risikoDao,
             dataSource = dataSource
         )
 
@@ -257,6 +259,40 @@ internal class RestApiTest {
         val enhet = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().enhet) }
         assertNotNull(enhet)
         assertEquals("Oslo", enhet.navn)
+    }
+
+    @Test
+    fun `PersonDTO inneholder risikovurdering`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("301"),
+            hentPersoninfoLøsning(),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            RisikovurderingMessage(
+                vedtaksperiodeId = vedtaksperiodeId,
+                samletScore = 1,
+                begrunnelser = listOf("begrunnelse", "begrunnelser"),
+                ufullstendig = false
+            )
+        )
+        val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
+        val risikovurderinger = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().arbeidsgivere.first().risikovurderinger) }
+        assertEquals(1, risikovurderinger.size)
     }
 
     @Test
