@@ -381,34 +381,6 @@ internal class GodkjenningsbehovEndToEndTest {
         assertNotEquals(snapshotFør, snapshotEtter)
     }
 
-    @ExperimentalContracts
-    @Test
-    fun `risikovurderinger persisteres`() {
-        RisikovurderingMessage.Factory(rapid, spleisbehovMediator)
-
-        rapid.sendTestMessage(
-            """
-            {
-              "@event_name": "risikovurdering",
-              "@id": "${UUID.randomUUID()}",
-              "@opprettet": "${LocalDateTime.now()}",
-              "vedtaksperiodeId": "$vedtaksperiodeId",
-              "samletScore": 10,
-              "begrunnelser": ["Detta ser ikke bra ut"],
-              "ufullstendig": true
-            }
-        """
-        )
-
-        assertNotNull(using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf("SELECT id FROM risikovurdering WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
-                    .map { it.int("id") }
-                    .asSingle
-            )
-        })
-    }
-
     private fun sendVedtaksperiodeEndretEvent(aktørId: String, fødselsnummer: String, organisasjonsnummer: String) {
         rapid.sendTestMessage(
             """

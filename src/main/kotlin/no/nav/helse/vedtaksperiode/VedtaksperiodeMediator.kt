@@ -8,7 +8,6 @@ import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.behovForVedtaksperiode
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -21,7 +20,6 @@ internal class VedtaksperiodeMediator(
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val snapshotDao: SnapshotDao,
     private val personDao: PersonDao,
-    private val risikoDao: RisikoDao,
     private val dataSource: DataSource
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
@@ -57,8 +55,7 @@ internal class VedtaksperiodeMediator(
                     organisasjonsnummer = it.organisasjonsnummer,
                     navn = arbeidsgivernavn,
                     id = it.id,
-                    vedtaksperioder = it.vedtaksperioder,
-                    risikovurderinger = risikoDao.hentRisikovurderingerForArbeidsgiver(vedtak.arbeidsgiverRef)
+                    vedtaksperioder = it.vedtaksperioder
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {

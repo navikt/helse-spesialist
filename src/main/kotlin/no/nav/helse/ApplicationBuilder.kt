@@ -107,8 +107,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         arbeidsgiverDao = arbeidsgiverDao,
         snapshotDao = snapshotDao,
         personDao = personDao,
-        dataSource = dataSource,
-        risikoDao = risikoDao
+        dataSource = dataSource
     )
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
@@ -159,7 +158,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         VedtaksperiodeEndretMessage.Factory(rapidsConnection, spleisbehovMediator)
         VedtaksperiodeForkastetMessage.Factory(rapidsConnection, spleisbehovMediator)
         TilbakerullingMessage.Factory(rapidsConnection, spleisbehovMediator)
-        RisikovurderingMessage.Factory(rapidsConnection, spleisbehovMediator)
     }
 
     fun start() = rapidsConnection.start()

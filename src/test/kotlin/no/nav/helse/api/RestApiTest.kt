@@ -24,7 +24,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.RisikovurderingMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
@@ -47,7 +46,6 @@ import java.net.ServerSocket
 import java.nio.file.Path
 import java.sql.Connection
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import javax.sql.DataSource
@@ -83,7 +81,8 @@ internal class RestApiTest {
                     epostadresse,
                     clientId,
                     issuer
-                )}")
+                )}"
+            )
         }
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -138,7 +137,6 @@ internal class RestApiTest {
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             personDao = personDao,
-            risikoDao = risikoDao,
             dataSource = dataSource
         )
 
@@ -216,17 +214,20 @@ internal class RestApiTest {
             spleisbehovId,
             HentEnhetLøsning("1234"),
             hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning(
-                LocalDate.of(2018, 1, 1),
-                LocalDate.of(2018, 1, 31),
-                grad = 100,
-                dagsats = 1200.0,
-                typetekst = "ArbRef",
-                orgnr = "89123"
-            ))
+            HentInfotrygdutbetalingerLøsning(
+                infotrygdutbetalingerLøsning(
+                    LocalDate.of(2018, 1, 1),
+                    LocalDate.of(2018, 1, 31),
+                    grad = 100,
+                    dagsats = 1200.0,
+                    typetekst = "ArbRef",
+                    orgnr = "89123"
+                )
+            )
         )
         val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
-        val infotrygdutbetalinger = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().infotrygdutbetalinger) }
+        val infotrygdutbetalinger =
+            runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().infotrygdutbetalinger) }
         assertNotNull(infotrygdutbetalinger)
         assertEquals(LocalDate.of(2018, 1, 1), infotrygdutbetalinger[0]["fom"].asLocalDate())
         assertEquals(LocalDate.of(2018, 1, 31), infotrygdutbetalinger[0]["tom"].asLocalDate())
@@ -260,41 +261,6 @@ internal class RestApiTest {
         val enhet = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().enhet) }
         assertNotNull(enhet)
         assertEquals("Oslo", enhet.navn)
-    }
-
-    @Test
-    fun `PersonDTO inneholder risikovurdering`() {
-        val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "12345",
-            aktørId = "12345",
-            organisasjonsnummer = "89123",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31),
-            warnings = emptyList()
-        )
-        spleisbehovMediator.håndter(godkjenningMessage, "{}")
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("301"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            RisikovurderingMessage(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = LocalDateTime.now(),
-                samletScore = 1,
-                begrunnelser = listOf("begrunnelse", "begrunnelser"),
-                ufullstendig = false
-            )
-        )
-        val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
-        val risikovurderinger = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().arbeidsgivere.first().risikovurderinger) }
-        assertEquals(1, risikovurderinger.size)
     }
 
     @Test
@@ -537,5 +503,6 @@ private fun infotrygdutbetalingerLøsning(
                     "organisasjonsnummer": "$orgnr"
                 }
             ]
-        """.trimIndent())
+        """.trimIndent()
+)
 

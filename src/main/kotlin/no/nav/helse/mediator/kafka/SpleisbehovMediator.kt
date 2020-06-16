@@ -199,21 +199,6 @@ internal class SpleisbehovMediator(
         )
     }
 
-    fun håndter(eventId: UUID, risikovurderingMessage: RisikovurderingMessage) {
-        log.info(
-            "Mottok risikovurdering {}, {}",
-            keyValue("vedtaksperiodeId", risikovurderingMessage.vedtaksperiodeId),
-            keyValue("eventId", eventId)
-        )
-        risikoDao.persisterRisikovurdering(
-            vedtaksperiodeId = risikovurderingMessage.vedtaksperiodeId,
-            opprettet = risikovurderingMessage.opprettet,
-            samletScore = risikovurderingMessage.samletScore,
-            begrunnelser = risikovurderingMessage.begrunnelser,
-            ufullstendig = risikovurderingMessage.ufullstendig
-        )
-    }
-
     private fun oppdaterVedtaksperiode(eventId: UUID, fødselsnummer: String, vedtaksperiodeId: UUID) {
         try {
             val commandExecutor = CommandExecutor(

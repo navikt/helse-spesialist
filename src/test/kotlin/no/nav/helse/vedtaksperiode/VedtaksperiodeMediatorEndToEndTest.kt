@@ -27,7 +27,6 @@ class VedtaksperiodeMediatorEndToEndTest {
         arbeidsgiverDao = arbeidsgiverDao,
         snapshotDao = snapshotDao,
         personDao = personDao,
-        risikoDao = risikoDao,
         dataSource = dataSource
     )
 
