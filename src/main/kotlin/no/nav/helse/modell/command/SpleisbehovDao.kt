@@ -3,6 +3,7 @@ package no.nav.helse.modell.command
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 import javax.sql.DataSource
 
@@ -27,6 +28,16 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
             queryOf(
                 "INSERT INTO warning (melding, spleisbehov_ref) VALUES (?, ?)",
                 melding,
+                spleisbehovRef
+            ).asUpdate
+        )
+    }
+
+    fun insertSaksbehandleroppgavetype(type: Saksbehandleroppgavetype, spleisbehovRef: UUID) = using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "INSERT INTO saksbehandleroppgavetype (type, spleisbehov_ref) VALUES (?, ?)",
+                type.name,
                 spleisbehovRef
             ).asUpdate
         )

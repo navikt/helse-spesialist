@@ -99,6 +99,9 @@ internal class SpleisbehovMediator(
                 spleisbehovRef = godkjenningMessage.id
             )
         }
+        godkjenningMessage.periodetype?.let {
+            spleisbehovDao.insertSaksbehandleroppgavetype(type = it, spleisbehovRef = godkjenningMessage.id)
+        }
         publiserBehov(
             spleisreferanse = godkjenningMessage.id,
             resultater = resultater,

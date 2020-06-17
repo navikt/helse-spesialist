@@ -15,5 +15,12 @@ data class SaksbehandleroppgaveDto(
     val navn: NavnDto,
     val fødselsnummer: String,
     val aktørId: String,
-    val antallVarsler: Int
+    val antallVarsler: Int,
+    val type: Saksbehandleroppgavetype?
 )
+
+enum class Saksbehandleroppgavetype {
+    FØRSTEGANGSBEHANDLING,
+    FORLENGELSE,
+    INFOTRYGDFORLENGELSE
+}

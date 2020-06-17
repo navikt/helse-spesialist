@@ -2,10 +2,8 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -19,7 +17,8 @@ internal class GodkjenningMessage(
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
-    val warnings: List<String>
+    val warnings: List<String>,
+    val periodetype: Saksbehandleroppgavetype? = null
 ) {
 
     internal class Factory(
@@ -37,6 +36,7 @@ internal class GodkjenningMessage(
                         "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
                         "periodeTom", "warnings"
                     )
+                    it.interestedIn("periodetype")
                 }
             }.register(this)
         }
@@ -50,7 +50,9 @@ internal class GodkjenningMessage(
                 periodeFom = LocalDate.parse(packet["periodeFom"].asText()),
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-                warnings = packet["warnings"].toWarnings()
+                warnings = packet["warnings"].toWarnings(),
+                periodetype = packet["periodetype"].takeUnless { it.isMissingOrNull() }
+                    ?.asText()?.let { Saksbehandleroppgavetype.valueOf(it) }
             )
             spleisbehovMediator.håndter(behov, packet.toJson())
         }

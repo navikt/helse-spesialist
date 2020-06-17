@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
 import java.util.*
 
@@ -71,11 +72,12 @@ fun Session.findNåværendeOppgave(behovId: UUID): OppgaveDto? = this.run(
 fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.run(
     queryOf(
         """
-            SELECT *, (SELECT json_agg(melding) meldinger FROM warning where spleisbehov_ref=o.behov_id)
+            SELECT *, (SELECT json_agg(melding) meldinger FROM warning where spleisbehov_ref=o.behov_id), sot.type as saksbehandleroppgavetype
             FROM oppgave o
                    INNER JOIN vedtak v on o.vedtak_ref = v.id
                    INNER JOIN person p on v.person_ref = p.id
                    INNER JOIN person_info pi on p.info_ref = pi.id
+                   LEFT JOIN saksbehandleroppgavetype sot on o.behov_id = sot.spleisbehov_ref
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             ORDER BY opprettet DESC
             LIMIT 500
@@ -99,7 +101,7 @@ fun Session.behovForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
         .asSingle
 )
 
-private fun saksbehandleroppgaveDto(it: Row): SaksbehandleroppgaveDto = SaksbehandleroppgaveDto(
+private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
     spleisbehovId = UUID.fromString(it.string("behov_id")),
     opprettet = it.localDateTime("opprettet"),
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
@@ -112,10 +114,11 @@ private fun saksbehandleroppgaveDto(it: Row): SaksbehandleroppgaveDto = Saksbeha
     ),
     aktørId = it.long("aktor_id").toString(),
     fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
-    antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count()
+    antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count(),
+    type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) }
 )
 
-private fun oppgaveDto(it: Row): OppgaveDto = OppgaveDto(
+private fun oppgaveDto(it: Row) = OppgaveDto(
     id = it.long("id"),
     opprettet = it.localDateTime("opprettet"),
     oppdatert = it.localDateTimeOrNull("oppdatert"),

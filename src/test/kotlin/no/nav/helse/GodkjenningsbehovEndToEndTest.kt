@@ -13,6 +13,7 @@ import no.nav.helse.modell.command.findSaksbehandlerOppgaver
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -26,7 +27,7 @@ import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-internal class GodkjenningsbehovEndToEndTest {
+class GodkjenningsbehovEndToEndTest {
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
@@ -191,6 +192,50 @@ internal class GodkjenningsbehovEndToEndTest {
         )
         val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
         assertEquals(1, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
+    }
+
+    @Test
+    fun `Persisterer og henter saksbehandleroppgavetype`() {
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        sendGodkjenningsbehov(periodetype = Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE)
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Kvinne
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        assertEquals(Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.type)
+    }
+
+    @Test
+    fun `Saksbehandleroppgavetype kan være null`() {
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        sendGodkjenningsbehov(periodetype = null)
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Kvinne
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        assertNull(saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.type)
     }
 
     @Test
@@ -420,7 +465,8 @@ internal class GodkjenningsbehovEndToEndTest {
         aktørId: String = "12345",
         fødselsnummer: String = "12345",
         organisasjonsnummer: String = "89123",
-        warnings: String = "{\"aktiviteter\": []}"
+        warnings: String = "{\"aktiviteter\": []}",
+        periodetype: Saksbehandleroppgavetype? = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
     ) {
         rapid.sendTestMessage(
             """
@@ -433,7 +479,8 @@ internal class GodkjenningsbehovEndToEndTest {
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "periodeFom": "${LocalDate.of(2018, 1, 1)}",
               "periodeTom": "${LocalDate.of(2018, 1, 31)}",
-              "warnings": $warnings
+              "warnings": $warnings,
+              "periodetype": ${periodetype?.let { "\"${it.name}\"" }}
             }
         """
         )
