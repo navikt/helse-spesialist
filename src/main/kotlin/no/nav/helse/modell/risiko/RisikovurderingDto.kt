@@ -7,6 +7,7 @@ data class RisikovurderingDto(
     val vedtaksperiodeId: UUID,
     val opprettet: LocalDateTime,
     val samletScore: Int,
-    val begrunnelser: List<String>,
+    val faresignaler: List<String>,
+    val arbeidsuførhetvurdering: List<String>,
     val ufullstendig: Boolean
 )

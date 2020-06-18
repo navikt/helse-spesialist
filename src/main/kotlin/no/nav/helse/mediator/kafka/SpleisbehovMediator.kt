@@ -17,7 +17,6 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.deleteVedtak
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -36,7 +35,6 @@ internal class SpleisbehovMediator(
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
-    private val risikoDao: RisikoDao,
     private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) {
@@ -174,6 +172,16 @@ internal class SpleisbehovMediator(
                 deleteVedtak(it)
             }
         }
+    }
+
+    fun håndter(eventId: UUID, risikovurderingMessage: RisikovurderingMessage) {
+        log.info(
+            "Mottok risikovurdering {}, {}",
+            keyValue("vedtaksperiodeId", risikovurderingMessage.vedtaksperiodeId),
+            keyValue("eventId", eventId)
+        )
+
+        TODO("Håndter risikovurdering")
     }
 
     fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {

@@ -28,7 +28,6 @@ import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -55,7 +54,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val spleisbehovDao = SpleisbehovDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
-    private val risikoDao = RisikoDao(dataSource)
 
     private val azureAdClient = HttpClient(Apache) {
         engine {
@@ -98,7 +96,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         arbeidsgiverDao = arbeidsgiverDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestDao = speilSnapshotRestDao,
-        risikoDao = risikoDao,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
     private val oppgaveMediator = OppgaveMediator(dataSource)

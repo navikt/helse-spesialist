@@ -8,7 +8,6 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.findVedtak
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
@@ -29,7 +28,6 @@ internal class GodkjenningsbehovMediatorTest {
     private lateinit var snapshotDao: SnapshotDao
     private lateinit var speilSnapshotRestDao: SpeilSnapshotRestDao
     private lateinit var spleisbehovDao: SpleisbehovDao
-    private lateinit var risikoDao: RisikoDao
     private lateinit var testDao: TestPersonDao
 
     private val spleisMockClient = SpleisMockClient()
@@ -49,7 +47,6 @@ internal class GodkjenningsbehovMediatorTest {
             "spleisClientId"
         )
         spleisbehovDao = SpleisbehovDao(dataSource)
-        risikoDao = RisikoDao(dataSource)
         testDao = TestPersonDao(dataSource)
     }
 
@@ -62,7 +59,6 @@ internal class GodkjenningsbehovMediatorTest {
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(TestRapid()) }
         val spleisbehovId = UUID.randomUUID()

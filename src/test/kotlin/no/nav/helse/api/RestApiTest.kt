@@ -27,7 +27,6 @@ import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.person.*
-import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
@@ -113,7 +112,6 @@ internal class RestApiTest {
         val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
         val spleisbehovDao = SpleisbehovDao(dataSource)
         val snapshotDao = SnapshotDao(dataSource)
-        val risikoDao = RisikoDao(dataSource)
         val speilSnapshotRestDao = SpeilSnapshotRestDao(
             spleisMockClient.client,
             accessTokenClient(),
@@ -128,7 +126,6 @@ internal class RestApiTest {
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
         val oppgaveMediator = OppgaveMediator(dataSource)

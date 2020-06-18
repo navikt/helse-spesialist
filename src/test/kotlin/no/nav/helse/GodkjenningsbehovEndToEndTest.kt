@@ -11,7 +11,6 @@ import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.command.findSaksbehandlerOppgaver
 import no.nav.helse.modell.person.*
-import no.nav.helse.modell.risiko.RisikoDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
@@ -42,7 +41,6 @@ class GodkjenningsbehovEndToEndTest {
     )
     private val spleisbehovDao = SpleisbehovDao(dataSource)
     private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
-    private val risikoDao = RisikoDao(dataSource)
 
     private val spesialistOID: UUID = UUID.randomUUID()
 
@@ -63,7 +61,6 @@ class GodkjenningsbehovEndToEndTest {
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestDao = speilSnapshotRestDao,
-            risikoDao = risikoDao,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
     }
