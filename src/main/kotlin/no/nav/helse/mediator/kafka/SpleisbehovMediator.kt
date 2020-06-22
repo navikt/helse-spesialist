@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import kotlin.NoSuchElementException
 
 internal class SpleisbehovMediator(
     private val spleisbehovDao: SpleisbehovDao,
@@ -240,6 +241,30 @@ internal class SpleisbehovMediator(
             log.error("Klarte ikke å oppdaterer vedtaksperiode", e)
             throw RuntimeException("Klarte ikke å oppdaterer vedtaksperiode", e)
         }
+    }
+
+    internal fun oppdaterVedtaksperioder(aktørId: Long) {
+        personDao.findVedtaksperioderByAktørId(aktørId)?.let {
+            log.info(
+                "Publiserer vedtaksperiode_endret på {} for {}",
+                keyValue("vedtaksperioder", it.second),
+                keyValue("aktørId", aktørId)
+            )
+            it.second.forEach { vedtaksperiodeId ->
+                rapidsConnection.publish(
+                    it.first, JsonMessage.newMessage(
+                        mutableMapOf(
+                            "@id" to UUID.randomUUID(),
+                            "@event_name" to "vedtaksperiode_endret",
+                            "@opprettet" to LocalDateTime.now(),
+                            "aktørId" to aktørId,
+                            "fødselsnummer" to it.first,
+                            "vedtaksperiodeId" to vedtaksperiodeId
+                        )
+                    ).toJson()
+                )
+            }
+        } ?: throw NoSuchElementException()
     }
 
     internal fun rollbackPerson(rollback: Rollback) {

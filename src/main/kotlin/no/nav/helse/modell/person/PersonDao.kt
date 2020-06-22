@@ -1,12 +1,13 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.vedtak.EnhetDto
-import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.objectMapper
+import java.util.*
 import javax.sql.DataSource
 
 class PersonDao(private val dataSource: DataSource) {
@@ -18,47 +19,22 @@ class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findPersonByAktørId(aktørId: Long): Int? = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf("SELECT id FROM person WHERE aktor_id=?;", aktørId)
-                .map { it.int("id") }
-                .asSingle
-        )
-    }
-
-    internal fun findPerson(id: Long): PersonDto? = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf(
-                "SELECT p.fodselsnummer, pi.fornavn, pi.mellomnavn, pi.etternavn FROM person AS p JOIN person_info AS pi ON p.info_ref = pi.id WHERE p.id=?;",
-                id
-            )
-                .map {
-                    PersonDto(
-                        fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
-                        navn = NavnDto(
-                            fornavn = it.string("fornavn"),
-                            mellomnavn = it.stringOrNull("mellomnavn"),
-                            etternavn = it.string("etternavn")
-                        )
-                    )
-                }
-                .asSingle
-        )
-    }
-
-    internal fun findNavn(personId: Int): NavnDto? =
+    fun findVedtaksperioderByAktørId(aktørId: Long): Pair<String, List<UUID>>? =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT * from person_info WHERE id=(SELECT info_ref FROM person where id =?);",
-                    personId
-                ).map {
-                    NavnDto(
-                        it.string("fornavn"),
-                        it.stringOrNull("mellomnavn"),
-                        it.string("etternavn")
-                    )
-                }.asSingle
+                    """
+                    SELECT p.fodselsnummer, json_agg(DISTINCT v.vedtaksperiode_id) AS json
+                    FROM vedtak AS v
+                        INNER JOIN person AS p ON v.person_ref = p.id
+                    WHERE p.aktor_id = ?
+                    GROUP BY p.fodselsnummer;""",
+                    aktørId
+                )
+                    .map { row ->
+                        row.long("fodselsnummer").toFødselsnummer() to
+                            objectMapper.readValue<List<String>>(row.string("json")).map { UUID.fromString(it) }
+                    }.asSingle
             )
         }
 

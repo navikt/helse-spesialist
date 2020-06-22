@@ -1,9 +1,11 @@
 package no.nav.helse.vedtaksperiode
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.objectMapper
 import java.util.*
 import javax.sql.DataSource
 

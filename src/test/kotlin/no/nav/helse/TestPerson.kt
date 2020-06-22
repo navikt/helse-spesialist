@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
+import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -23,7 +24,7 @@ class TestPerson(private val dataSource: DataSource) {
     val aktørId = nyAktørId(fødselsnummer)
     val orgnummer = nyttOrgnummer()
 
-    private val spleisMockClient = SpleisMockClient(
+    internal val spleisMockClient = SpleisMockClient(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
         organisasjonsnummer = orgnummer
@@ -68,6 +69,10 @@ class TestPerson(private val dataSource: DataSource) {
                 warnings = emptyList()
             ), "{}"
         )
+    }
+
+    fun oppdaterVedtaksperioder(aktørId: String) {
+        mediator.oppdaterVedtaksperioder(aktørId.toLong())
     }
 
     fun sendPersoninfo(
@@ -123,7 +128,6 @@ class TestPerson(private val dataSource: DataSource) {
             .filter { it["@event_name"].asText() == "behov" }
             .filter { UUID.fromString(it["vedtaksperiodeId"].asText()) in forIder }
     }
-
 
     companion object {
         private val spesialistOID = UUID.randomUUID()
