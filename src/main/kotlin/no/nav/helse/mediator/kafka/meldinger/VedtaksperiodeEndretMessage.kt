@@ -33,4 +33,27 @@ class VedtaksperiodeEndretMessage(
             spleisbehovMediator.håndter(eventId, VedtaksperiodeEndretMessage(vedtaksperiodeId, fødselsnummer))
         }
     }
+
+    internal class ManuellFactory(
+        rapidsConnection: RapidsConnection,
+        private val spleisbehovMediator: SpleisbehovMediator
+    ) : River.PacketListener {
+        init {
+            River(rapidsConnection).apply {
+                validate {
+                    it.demandValue("@event_name", "vedtaksperiode_endret_manuelt")
+                    it.requireKey("vedtaksperiodeId")
+                    it.requireKey("fødselsnummer")
+                    it.requireKey("@id")
+                }
+            }.register(this)
+        }
+
+        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+            val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
+            val fødselsnummer = packet["fødselsnummer"].asText()
+            val eventId = UUID.fromString(packet["@id"].asText())
+            spleisbehovMediator.håndter(eventId, VedtaksperiodeEndretMessage(vedtaksperiodeId, fødselsnummer))
+        }
+    }
 }

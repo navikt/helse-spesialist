@@ -153,6 +153,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         PåminnelseMessage.Factory(rapidsConnection, spleisbehovMediator)
         TilInfotrygdMessage.Factory(rapidsConnection, spleisbehovMediator)
         VedtaksperiodeEndretMessage.Factory(rapidsConnection, spleisbehovMediator)
+        VedtaksperiodeEndretMessage.ManuellFactory(rapidsConnection, spleisbehovMediator)
         VedtaksperiodeForkastetMessage.Factory(rapidsConnection, spleisbehovMediator)
         TilbakerullingMessage.Factory(rapidsConnection, spleisbehovMediator)
     }

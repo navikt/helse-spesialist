@@ -17,7 +17,7 @@ internal class OppdaterVedtaksperioderTest {
         person.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId)
         person.oppdaterVedtaksperioder(person.aktørId)
         val message = person.rapid.inspektør.message(person.rapid.inspektør.size - 1)
-        assertEquals("vedtaksperiode_endret", message["@event_name"].asText())
+        assertEquals("vedtaksperiode_endret_manuelt", message["@event_name"].asText())
         assertEquals(person.fødselsnummer, message["fødselsnummer"].asText())
         assertEquals(person.aktørId, message["aktørId"].asText())
         assertEquals(vedtaksperiodeId, UUID.fromString(message["vedtaksperiodeId"].asText()))

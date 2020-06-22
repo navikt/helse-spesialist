@@ -246,7 +246,7 @@ internal class SpleisbehovMediator(
     internal fun oppdaterVedtaksperioder(aktørId: Long) {
         personDao.findVedtaksperioderByAktørId(aktørId)?.let {
             log.info(
-                "Publiserer vedtaksperiode_endret på {} for {}",
+                "Publiserer vedtaksperiode_endret_manuelt på {} for {}",
                 keyValue("vedtaksperioder", it.second),
                 keyValue("aktørId", aktørId)
             )
@@ -255,7 +255,7 @@ internal class SpleisbehovMediator(
                     it.first, JsonMessage.newMessage(
                         mutableMapOf(
                             "@id" to UUID.randomUUID(),
-                            "@event_name" to "vedtaksperiode_endret",
+                            "@event_name" to "vedtaksperiode_endret_manuelt",
                             "@opprettet" to LocalDateTime.now(),
                             "aktørId" to aktørId,
                             "fødselsnummer" to it.first,
