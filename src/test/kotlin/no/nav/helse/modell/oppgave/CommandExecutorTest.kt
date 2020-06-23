@@ -6,23 +6,32 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.CommandExecutor
-import no.nav.helse.modell.command.RootCommand
+import no.nav.helse.modell.command.MacroCommand
 import no.nav.helse.setupDataSourceMedFlyway
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.Duration
 import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CommandExecutorTest {
     private val dataSource = setupDataSourceMedFlyway()
+    private val session = sessionOf(dataSource)
     private val spesialistOID: UUID = UUID.randomUUID()
     private val saksbehandlerOID = UUID.randomUUID()
+
+    @AfterAll
+    fun cleanup() {
+        session.close()
+    }
 
     @Test
     internal fun `persisterer hvem som ferdigstilte den siste oppgaven`() {
         val eventId = UUID.randomUUID()
-        val testCommand = TestRootCommand(eventId)
+        val testCommand = TestMacroCommand(eventId)
         val executor = CommandExecutor(
             command = testCommand,
             spesialistOid = spesialistOID,
@@ -65,8 +74,8 @@ class CommandExecutorTest {
         assertTrue(command.innerInnerExecuted)
     }
 
-    inner class TestRootCommand(behovId: UUID, override val fødselsnummer: String = "12345") :
-        RootCommand(behovId, Duration.ZERO) {
+    inner class TestMacroCommand(behovId: UUID, override val fødselsnummer: String = "12345") :
+        MacroCommand(behovId, Duration.ZERO) {
         override fun execute(session: Session) = Resultat.Ok.System
         override val orgnummer: String? = null
         override val vedtaksperiodeId: UUID? = null
@@ -84,7 +93,7 @@ class CommandExecutorTest {
     private class NestedCommand(
         eventId: UUID,
         override val fødselsnummer: String
-    ) : RootCommand(eventId = eventId, timeout = Duration.ZERO) {
+    ) : MacroCommand(eventId = eventId, timeout = Duration.ZERO) {
         override val orgnummer: String? = null
         override val vedtaksperiodeId: UUID? = null
 

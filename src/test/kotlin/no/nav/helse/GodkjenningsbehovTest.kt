@@ -5,15 +5,12 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.Godkjenningsbehov
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
-import no.nav.helse.modell.command.Command
-import no.nav.helse.modell.command.CommandExecutor
-import no.nav.helse.modell.command.findNåværendeOppgave
-import no.nav.helse.modell.command.findSaksbehandlerOppgaver
+import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,6 +26,7 @@ class GodkjenningsbehovTest {
     private val accessTokenClient = accessTokenClient()
 
     private val dataSource: DataSource = setupDataSourceMedFlyway()
+    private val session = sessionOf(dataSource)
     private val personDao: PersonDao = PersonDao(dataSource)
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
@@ -39,6 +37,11 @@ class GodkjenningsbehovTest {
             "spleisClientId"
         )
     private val testDao: TestPersonDao = TestPersonDao(dataSource)
+
+    @AfterAll
+    fun cleanup() {
+        session.close()
+    }
 
     @Test
     fun `godkjenningsbehov for ny person legger inn ny person i DB`() {
@@ -65,23 +68,24 @@ class GodkjenningsbehovTest {
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            HentPersoninfoLøsning(
-                "Test",
-                "Mellomnavn",
-                "Etternavnsen",
-                LocalDate.now(),
-                Kjønn.Mann
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                HentPersoninfoLøsning(
+                    "Test",
+                    "Mellomnavn",
+                    "Etternavnsen",
+                    LocalDate.now(),
+                    Kjønn.Mann
+                ),
+                HentEnhetLøsning("3417"),
+                HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
-        spleisExecutor.execute()
-
-        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
-        spleisExecutor.execute()
-
         assertNotNull(personDao.findPersonByFødselsnummer(12345))
     }
+
+    fun løsningify(vararg løsninger: Any) = Løsninger().also { løsninger.forEach { løsning -> it.add(løsning) } }
 
     @Test
     fun `godkjenningsbehov for person oppdaterer person i DB`() {
@@ -108,20 +112,23 @@ class GodkjenningsbehovTest {
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            HentPersoninfoLøsning(
-                "Test",
-                "Mellomnavn",
-                "Etternavnsen",
-                LocalDate.now(),
-                Kjønn.Mann
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                HentPersoninfoLøsning(
+                    "Test",
+                    "Mellomnavn",
+                    "Etternavnsen",
+                    LocalDate.now(),
+                    Kjønn.Mann
+                ),
+                HentEnhetLøsning("3417"),
+                HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
-        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         testDao.setEnhetOppdatert(13245, LocalDate.of(2020, 1, 1))
         spleisExecutor.execute()
-        spleisExecutor.fortsett(HentEnhetLøsning("3117"))
+        spleisExecutor.resume(session, løsningify(HentEnhetLøsning("1119")))
         spleisExecutor.execute()
 
         assertNotNull(personDao.findPersonByFødselsnummer(13245))
@@ -153,20 +160,22 @@ class GodkjenningsbehovTest {
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            HentPersoninfoLøsning(
-                "Test",
-                "Mellomnavn",
-                "Etternavnsen",
-                LocalDate.now(),
-                Kjønn.Mann
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                HentPersoninfoLøsning(
+                    "Test",
+                    "Mellomnavn",
+                    "Etternavnsen",
+                    LocalDate.now(),
+                    Kjønn.Mann
+                ),
+                HentEnhetLøsning("3417"),
+                HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
-        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         spleisExecutor.execute()
 
-        spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(98765432))
     }
 
@@ -195,19 +204,20 @@ class GodkjenningsbehovTest {
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            HentPersoninfoLøsning(
-                "Test",
-                "Mellomnavn",
-                "Etternavnsen",
-                LocalDate.now(),
-                Kjønn.Mann
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                HentPersoninfoLøsning(
+                    "Test",
+                    "Mellomnavn",
+                    "Etternavnsen",
+                    LocalDate.now(),
+                    Kjønn.Mann
+                ),
+                HentEnhetLøsning("3417"),
+                HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
-        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
-        spleisExecutor.execute()
-        spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
         spleisExecutor.execute()
 
         assertNotNull(findVedtaksperiode(vedtaksperiodeId))
@@ -240,30 +250,34 @@ class GodkjenningsbehovTest {
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            HentPersoninfoLøsning(
-                "Test",
-                "Mellomnavn",
-                "Etternavnsen",
-                LocalDate.now(),
-                Kjønn.Mann
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                HentPersoninfoLøsning(
+                    "Test",
+                    "Mellomnavn",
+                    "Etternavnsen",
+                    LocalDate.now(),
+                    Kjønn.Mann
+                ),
+                HentEnhetLøsning("3417"),
+                HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
-        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         spleisExecutor.execute()
-        spleisExecutor.fortsett(ArbeidsgiverLøsning("NAV IKT"))
-        spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            SaksbehandlerLøsning(
-                godkjent = true,
-                saksbehandlerIdent = "abcd",
-                godkjenttidspunkt = LocalDateTime.now(),
-                oid = UUID.randomUUID(),
-                epostadresse = "epost",
-                årsak = null,
-                begrunnelser = null,
-                kommentar = null
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                SaksbehandlerLøsning(
+                    godkjent = true,
+                    saksbehandlerIdent = "abcd",
+                    godkjenttidspunkt = LocalDateTime.now(),
+                    oid = UUID.randomUUID(),
+                    epostadresse = "epost",
+                    årsak = null,
+                    begrunnelser = null,
+                    kommentar = null
+                )
             )
         )
 
@@ -304,19 +318,20 @@ class GodkjenningsbehovTest {
             loggingData = *arrayOf()
         )
         spleisExecutor.execute()
-        spleisExecutor.fortsett(
-            HentPersoninfoLøsning(
-                "Test",
-                "Mellomnavn",
-                "Etternavnsen",
-                LocalDate.now(),
-                Kjønn.Mann
+        spleisExecutor.resume(
+            session,
+            løsningify(
+                HentPersoninfoLøsning(
+                    "Test",
+                    "Mellomnavn",
+                    "Etternavnsen",
+                    LocalDate.now(),
+                    Kjønn.Mann
+                ),
+                HentEnhetLøsning("3417"),
+                HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        spleisExecutor.execute()
-        spleisExecutor.fortsett(HentEnhetLøsning("3417"))
-        spleisExecutor.execute()
-        spleisExecutor.fortsett(HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning()))
         assertThrows<Exception> {
             spleisExecutor.execute()
         }

@@ -2,7 +2,7 @@ package no.nav.helse.modell.risiko
 
 import kotliquery.Session
 import no.nav.helse.mediator.kafka.meldinger.RisikovurderingMessage
-import no.nav.helse.modell.command.RootCommand
+import no.nav.helse.modell.command.MacroCommand
 import java.time.Duration
 import java.util.*
 
@@ -10,7 +10,7 @@ class PersisterRisikovurderingCommand(
     eventId: UUID,
     val risikovurderingMessage: RisikovurderingMessage,
     override val vedtaksperiodeId: UUID
-) : RootCommand(eventId = eventId, timeout = Duration.ZERO) {
+) : MacroCommand(eventId = eventId, timeout = Duration.ZERO) {
     override val orgnummer: String? = null
     override val fødselsnummer: String get() = throw RuntimeException("Not implemented")
 
@@ -21,13 +21,13 @@ class PersisterRisikovurderingCommand(
         val risikovurdering = session.hentRisikovurderingForVedtaksperiode(vedtaksperiodeId)
             ?: return Resultat.HarBehov()
         val paragrafPrefix = "8-4: "
-        val (arbeidsuførhetvurdering, faresignaler) = risikovurdering?.faresignaler
+        val (arbeidsuførhetvurdering, faresignaler) = risikovurdering.faresignaler
             .partition { it.startsWith(paragrafPrefix) }
             .let { it.first.map { begrunnelse -> begrunnelse.removePrefix(paragrafPrefix) } to it.second }
         if (arbeidsuførhetvurdering.isNotEmpty()) {
             warnings.add("Arbeidsuførhet må vurderes")
         }
-        if (faresignaler.isNotEmpty() && risikovurdering?.samletScore ?: 0 > 0) {
+        if (faresignaler.isNotEmpty() && risikovurdering.samletScore > 0) {
             warnings.add("Faresignaler oppdaget")
         }
 

@@ -3,7 +3,7 @@ package no.nav.helse.modell.command
 import java.time.Duration
 import java.util.*
 
-abstract class RootCommand(
+abstract class MacroCommand(
     eventId: UUID,
     timeout: Duration
 ) : Command(

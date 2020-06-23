@@ -81,7 +81,8 @@ internal class GodkjenningsbehovMediatorTest {
         val eventId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val person = TestPerson(dataSource)
-        person.tilSaksbehandlerGodkjenning(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
+        person.sendGodkjenningMessage(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
+        person.sendPersoninfo(eventId = eventId)
 
         using(sessionOf(dataSource)) { session ->
             assertNotEquals(Oppgavestatus.Invalidert, session.findNåværendeOppgave(eventId)?.status)
@@ -99,10 +100,11 @@ internal class GodkjenningsbehovMediatorTest {
         val eventId2 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
         val person = TestPerson(dataSource)
-        person.tilSaksbehandlerGodkjenning(eventId = eventId1, vedtaksperiodeId = vedtaksperiodeId1)
-        person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId1)
 
-        person.tilSaksbehandlerGodkjenning(eventId = eventId2, vedtaksperiodeId = vedtaksperiodeId2)
+        person.sendGodkjenningMessage(eventId = eventId1, vedtaksperiodeId = vedtaksperiodeId1)
+        person.sendPersoninfo(eventId = eventId1)
+        person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId1)
+        person.sendGodkjenningMessage(eventId = eventId2, vedtaksperiodeId = vedtaksperiodeId2)
 
         using(sessionOf(dataSource)) { session ->
             assertNull(session.findVedtak(vedtaksperiodeId1))

@@ -3,6 +3,7 @@ package no.nav.helse.modell.person
 import kotliquery.Session
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.command.Løsninger
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -37,7 +38,8 @@ internal class OppdaterPersonCommand(
             }
         }
 
-        override fun fortsett(løsning: HentPersoninfoLøsning) {
+        override fun resume(session: Session, løsninger: Løsninger) {
+            val løsning = løsninger.løsning<HentPersoninfoLøsning>()
             personDao.updateNavn(
                 fødselsnummer = fødselsnummer.toLong(),
                 fornavn = løsning.fornavn,
@@ -61,7 +63,8 @@ internal class OppdaterPersonCommand(
             }
         }
 
-        override fun fortsett(løsning: HentEnhetLøsning) {
+        override fun resume(session: Session, løsninger: Løsninger) {
+            val løsning = løsninger.løsning<HentEnhetLøsning>()
             personDao.updateEnhet(fødselsnummer.toLong(), løsning.enhetNr.toInt())
         }
     }
@@ -80,7 +83,8 @@ internal class OppdaterPersonCommand(
             }
         }
 
-        override fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
+        override fun resume(session: Session, løsninger: Løsninger) {
+            val løsning = løsninger.løsning<HentInfotrygdutbetalingerLøsning>()
             if (personDao.findInfotrygdutbetalinger(fødselsnummer.toLong()) != null) {
                 personDao.updateInfotrygdutbetalinger(fødselsnummer.toLong(), løsning.utbetalinger)
             } else {

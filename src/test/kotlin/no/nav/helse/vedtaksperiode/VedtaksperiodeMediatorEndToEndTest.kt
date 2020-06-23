@@ -45,10 +45,12 @@ class VedtaksperiodeMediatorEndToEndTest {
     fun `ber om infotrygdutbetaling oppdatering for person med utdatert infotrygdutbetaling`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
+        val eventId = UUID.randomUUID()
         val person = TestPerson(dataSource)
-        person.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId1)
+        person.sendGodkjenningMessage(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId1)
+        person.sendPersoninfo(eventId = eventId)
         person.settInfotrygdSistOppdatert(LocalDate.now().minusYears(1))
-        person.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId2)
+        person.sendGodkjenningMessage(eventId = UUID.randomUUID(), vedtaksperiodeId = vedtaksperiodeId2)
 
         val infotrygdutbetalingerBehov = person.finnBehov(vedtaksperiodeId2)
             .filter { "HentInfotrygdutbetalinger" in it["@behov"].map(JsonNode::asText) }

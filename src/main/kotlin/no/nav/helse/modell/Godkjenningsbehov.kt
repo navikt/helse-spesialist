@@ -7,7 +7,7 @@ import kotliquery.Session
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.OppdatertArbeidsgiverCommand
 import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
-import no.nav.helse.modell.command.RootCommand
+import no.nav.helse.modell.command.MacroCommand
 import no.nav.helse.modell.person.OppdaterPersonCommand
 import no.nav.helse.modell.person.OpprettPersonCommand
 import no.nav.helse.modell.person.PersonDao
@@ -33,7 +33,7 @@ internal class Godkjenningsbehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao
-) : RootCommand(
+) : MacroCommand(
     eventId = id,
     timeout = Duration.ofDays(14)
 ) {

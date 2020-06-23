@@ -3,6 +3,7 @@ package no.nav.helse.modell.person
 import kotliquery.Session
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.command.Løsninger
 import java.time.Duration
 import java.util.*
 
@@ -17,21 +18,8 @@ internal class OpprettPersonCommand(
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
-    private var navnId: Int? = null
-    private var enhetId: Int? = null
-    private var infotrygdutbetalingerId: Int? = null
-
     override fun execute(session: Session): Resultat =
         if (personDao.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
-            Resultat.Ok.System
-        } else if (navnId != null && enhetId != null && infotrygdutbetalingerId != null) {
-            personDao.insertPerson(
-                fødselsnummer.toLong(),
-                aktørId.toLong(),
-                navnId!!,
-                enhetId!!,
-                infotrygdutbetalingerId!!
-            )
             Resultat.Ok.System
         } else {
             Resultat.HarBehov(
@@ -41,15 +29,26 @@ internal class OpprettPersonCommand(
             )
         }
 
-    override fun fortsett(løsning: HentEnhetLøsning) {
-        enhetId = løsning.enhetNr.toInt()
-    }
+    override fun resume(session: Session, løsninger: Løsninger) {
+        val hentEnhetLøsning = løsninger.løsning<HentEnhetLøsning>()
+        val hentPersoninfoLøsning = løsninger.løsning<HentPersoninfoLøsning>()
+        val hentInfotrygdutbetalingerLøsning = løsninger.løsning<HentInfotrygdutbetalingerLøsning>()
 
-    override fun fortsett(løsning: HentPersoninfoLøsning) {
-        navnId = personDao.insertNavn(løsning.fornavn, løsning.mellomnavn, løsning.etternavn)
-    }
+        val enhetId = hentEnhetLøsning.enhetNr.toInt()
+        val navnId = personDao.insertNavn(
+            hentPersoninfoLøsning.fornavn,
+            hentPersoninfoLøsning.mellomnavn,
+            hentPersoninfoLøsning.etternavn
+        )
+        val infotrygdutbetalingerId =
+            personDao.insertInfotrygdutbetalinger(hentInfotrygdutbetalingerLøsning.utbetalinger)
 
-    override fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
-        infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(løsning.utbetalinger)
+        personDao.insertPerson(
+            fødselsnummer = fødselsnummer.toLong(),
+            aktørId = aktørId.toLong(),
+            navnId = navnId,
+            enhetId = enhetId,
+            infotrygdutbetalingerId = infotrygdutbetalingerId
+        )
     }
 }

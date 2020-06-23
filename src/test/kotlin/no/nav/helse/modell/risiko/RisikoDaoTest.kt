@@ -28,8 +28,10 @@ internal class RisikoDaoTest {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
 
-        testperson.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId1)
-        testperson.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId2)
+        val eventId1 = UUID.randomUUID()
+        testperson.sendGodkjenningMessage(eventId = eventId1, vedtaksperiodeId = vedtaksperiodeId1)
+        testperson.sendPersoninfo(eventId = eventId1)
+        testperson.sendGodkjenningMessage(eventId = UUID.randomUUID(), vedtaksperiodeId = vedtaksperiodeId2)
 
         val expectedRisikovurdering1 = RisikovurderingDto(
             vedtaksperiodeId = vedtaksperiodeId1,
@@ -102,7 +104,9 @@ internal class RisikoDaoTest {
         val testperson = TestPerson(dataSource)
 
         val vedtaksperiodeId = UUID.randomUUID()
-        testperson.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId)
+        val eventId = UUID.randomUUID()
+        testperson.sendGodkjenningMessage(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
+        testperson.sendPersoninfo(eventId = eventId)
 
         val risikovurdering = session.hentRisikovurderingForVedtaksperiode(vedtaksperiodeId)
         assertNull(risikovurdering)

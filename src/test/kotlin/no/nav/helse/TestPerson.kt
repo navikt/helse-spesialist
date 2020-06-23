@@ -2,7 +2,6 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
-import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -81,7 +80,7 @@ class TestPerson(private val dataSource: DataSource) {
     ) {
         mediator.håndter(
             eventId,
-            HentEnhetLøsning("1234"),
+            HentEnhetLøsning("1119"),
             HentPersoninfoLøsning(
                 fornavn = "Test",
                 mellomnavn = null,
@@ -91,21 +90,6 @@ class TestPerson(private val dataSource: DataSource) {
             ),
             HentInfotrygdutbetalingerLøsning(objectMapper.convertValue(infotrygdUtbetalingerJson))
         )
-    }
-
-    private fun opprettPerson(
-        eventId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID()
-    ) {
-        sendGodkjenningMessage(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
-        sendPersoninfo(eventId = eventId)
-    }
-
-    fun tilSaksbehandlerGodkjenning(
-        eventId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID()
-    ) {
-        opprettPerson(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
     }
 
     fun rullTilbake(vararg vedtaksperiodeIder: UUID) {

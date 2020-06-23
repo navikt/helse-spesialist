@@ -2,6 +2,7 @@ package no.nav.helse.modell.arbeidsgiver
 
 import kotliquery.Session
 import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.command.Løsninger
 import java.time.Duration
 import java.util.*
 
@@ -26,7 +27,8 @@ internal class OpprettArbeidsgiverCommand(
         }
     }
 
-    override fun fortsett(løsning: ArbeidsgiverLøsning) {
+    override fun resume(session: Session, løsninger: Løsninger) {
+        val løsning = løsninger.løsning<ArbeidsgiverLøsning>()
         // TODO: Faktisk hente arbeidsgiver info
     }
 }

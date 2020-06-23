@@ -14,7 +14,9 @@ internal class OppdaterVedtaksperioderTest {
     @Test
     fun `Oppdater vedtaksperioder`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        person.tilSaksbehandlerGodkjenning(vedtaksperiodeId = vedtaksperiodeId)
+        val eventId = UUID.randomUUID()
+        person.sendGodkjenningMessage(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
+        person.sendPersoninfo(eventId = eventId)
         person.oppdaterVedtaksperioder(person.aktørId)
         val message = person.rapid.inspektør.message(person.rapid.inspektør.size - 1)
         assertEquals("vedtaksperiode_endret_manuelt", message["@event_name"].asText())

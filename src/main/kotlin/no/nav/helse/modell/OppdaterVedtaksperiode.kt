@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import kotliquery.Session
 import no.nav.helse.measureAsHistogram
-import no.nav.helse.modell.command.RootCommand
+import no.nav.helse.modell.command.MacroCommand
 import no.nav.helse.modell.vedtak.findVedtak
 import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
@@ -15,7 +15,7 @@ internal class OppdaterVedtaksperiode(
     override val vedtaksperiodeId: UUID,
     private val speilSnapshotRestDao: SpeilSnapshotRestDao,
     private val snapshotDao: SnapshotDao
-) : RootCommand(eventId, Duration.ofHours(1)) {
+) : MacroCommand(eventId, Duration.ofHours(1)) {
     override val orgnummer: String? = null
 
     override fun execute(session: Session) =

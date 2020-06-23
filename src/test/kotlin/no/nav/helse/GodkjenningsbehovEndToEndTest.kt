@@ -238,10 +238,10 @@ class GodkjenningsbehovEndToEndTest {
     @Test
     fun `Persisterer løsning for HentInfotrygdutbetalinger`() {
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
-        rapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
-
         PersoninfoLøsningMessage.Factory(rapid, spleisbehovMediator)
-        rapid.sendTestMessage(infotrygdutbetalingerLøsningJson(spleisbehovId, vedtaksperiodeId))
+
+        rapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
+        rapid.sendTestMessage(personinfoLøsningJson(spleisbehovId, vedtaksperiodeId))
 
         val utbetaling = using(sessionOf(dataSource)) { session ->
             session.run(
@@ -531,7 +531,7 @@ private fun godkjenningbehov(
 }
 """
 
-private fun infotrygdutbetalingerLøsningJson(
+private fun personinfoLøsningJson(
     spleisbehovId: UUID,
     vedtaksperiodeId: UUID,
     fnr: String = "12345",
@@ -560,6 +560,14 @@ private fun infotrygdutbetalingerLøsningJson(
             "grad" : "100",
             "typetekst" : "ArbRef",
             "organisasjonsnummer" : "80000000"
-        } ]
+        } ],
+        "HentEnhet" :"1119",
+        "HentPersoninfo" : {
+            "fornavn": "Person",
+            "mellomnavn": "Ressurs",
+            "etternavn": "Personsen",
+            "fødselsdato": "2020-01-01",
+            "kjønn": "Ukjent"
+        }
     }
 }""".trimIndent()

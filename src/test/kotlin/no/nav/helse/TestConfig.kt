@@ -49,7 +49,7 @@ internal fun setupDataSource(): DataSource {
 
     val hikariConfig = HikariConfig().apply {
         this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
-        maximumPoolSize = 3
+        maximumPoolSize = 5
         minimumIdle = 1
         idleTimeout = 10001
         connectionTimeout = 1000

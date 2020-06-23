@@ -1,14 +1,10 @@
 package no.nav.helse.modell.command
 
+import kotliquery.Session
 import kotliquery.sessionOf
 import kotliquery.using
 import net.logstash.logback.argument.StructuredArgument
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.findVedtak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,7 +12,7 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class CommandExecutor(
-    internal val command: RootCommand,
+    internal val command: MacroCommand,
     private val spesialistOid: UUID,
     private val eventId: UUID,
     private val nåværendeOppgave: OppgaveDto?,
@@ -35,26 +31,6 @@ internal class CommandExecutor(
     private fun current(): Command = gjennståendeOppgaver.first { it.oppgavetype == nåværendeOppgavetype }
 
     internal fun currentTimeout() = current().timeout
-
-    internal fun fortsett(løsning: HentEnhetLøsning) {
-        current().fortsett(løsning)
-    }
-
-    internal fun fortsett(løsning: HentPersoninfoLøsning) {
-        current().fortsett(løsning)
-    }
-
-    internal fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {
-        current().fortsett(løsning)
-    }
-
-    internal fun fortsett(løsning: ArbeidsgiverLøsning) {
-        current().fortsett(løsning)
-    }
-
-    internal fun fortsett(løsning: SaksbehandlerLøsning) {
-        current().fortsett(løsning)
-    }
 
     internal fun invalider() {
         using(sessionOf(dataSource)) { session ->
@@ -177,4 +153,8 @@ internal class CommandExecutor(
     }
 
     private fun Array<out StructuredArgument>.format() = joinToString(", ") { "{}" }
+
+    fun resume(session: Session, løsninger: Løsninger) {
+        current().resume(session, løsninger)
+    }
 }

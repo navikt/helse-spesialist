@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtak
 
 import kotliquery.Session
 import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.command.Løsninger
 import java.time.Duration
 import java.util.*
 
@@ -15,8 +16,8 @@ internal class SaksbehandlerGodkjenningCommand(
 ) {
     private var resultat: Resultat = Resultat.TrengerSaksbehandlerInput
     override fun execute(session: Session) = resultat
-
-    override fun fortsett(løsning: SaksbehandlerLøsning) {
+    override fun resume(session: Session, løsninger: Løsninger) {
+        val løsning = løsninger.løsning<SaksbehandlerLøsning>()
         resultat = Resultat.Ok.Løst(
             ferdigstiltAv = løsning.epostadresse,
             oid = løsning.oid,

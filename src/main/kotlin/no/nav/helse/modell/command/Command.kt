@@ -3,11 +3,6 @@ package no.nav.helse.modell.command
 import kotliquery.Session
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.Behovtype
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -23,11 +18,7 @@ abstract class Command(
     internal val oppgavetype: String = requireNotNull(this::class.simpleName)
 
     internal abstract fun execute(session: Session): Resultat
-    internal open fun fortsett(løsning: HentEnhetLøsning) {}
-    internal open fun fortsett(løsning: HentPersoninfoLøsning) {}
-    internal open fun fortsett(løsning: ArbeidsgiverLøsning) {}
-    internal open fun fortsett(løsning: SaksbehandlerLøsning) {}
-    internal open fun fortsett(løsning: HentInfotrygdutbetalingerLøsning) {}
+    internal open fun resume(session: Session, løsninger: Løsninger) {}
 
     sealed class Resultat(private val oppgavestatus: Oppgavestatus) {
         internal fun tilOppgavestatus() = oppgavestatus
