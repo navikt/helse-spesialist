@@ -9,7 +9,7 @@ data class OppgaveDto(
     val opprettet: LocalDateTime,
     val oppdatert: LocalDateTime?,
     val oppgaveType: String,
-    val behovId: UUID,
+    val eventId: UUID,
     val status: Oppgavestatus,
     val vedtaksref: Long?
 )

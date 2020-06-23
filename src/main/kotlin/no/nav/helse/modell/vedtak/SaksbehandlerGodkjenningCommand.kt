@@ -6,10 +6,10 @@ import java.time.Duration
 import java.util.*
 
 internal class SaksbehandlerGodkjenningCommand(
-    behovId: UUID,
+    eventId: UUID,
     parent: Command
 ) : Command(
-    behovId = behovId,
+    eventId = eventId,
     parent = parent,
     timeout = Duration.ofDays(14)
 ) {

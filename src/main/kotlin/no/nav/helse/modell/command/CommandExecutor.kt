@@ -92,7 +92,7 @@ internal class CommandExecutor(
             val førsteCommand = executedCommands.first()
             val sisteCommand = executedCommands.last()
             session.updateOppgave(
-                behovId = eventId,
+                eventId = eventId,
                 oppgavetype = førsteCommand.command.oppgavetype,
                 oppgavestatus = førsteCommand.oppgavestatus(),
                 ferdigstiltAv = førsteCommand.ferdigstiltAv(),
@@ -102,7 +102,7 @@ internal class CommandExecutor(
 
             if (nåværendeOppgave == null || executedCommands.size > 1) {
                 session.insertOppgave(
-                    behovId = eventId,
+                    eventId = eventId,
                     oppgavetype = sisteCommand.command.oppgavetype,
                     oppgavestatus = sisteCommand.oppgavestatus(),
                     ferdigstiltAv = sisteCommand.ferdigstiltAv(),

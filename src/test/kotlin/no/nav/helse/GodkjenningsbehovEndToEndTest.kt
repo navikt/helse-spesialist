@@ -275,7 +275,7 @@ class GodkjenningsbehovEndToEndTest {
         val oppgavestatus = using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM oppgave where behov_id=?",
+                    "SELECT * FROM oppgave where event_id=?",
                     spleisbehovId
                 ).map { Oppgavestatus.valueOf(it.string("status")) }
                     .asSingle

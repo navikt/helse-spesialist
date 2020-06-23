@@ -8,10 +8,10 @@ import java.util.*
 internal class OpprettArbeidsgiverCommand(
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val orgnummer: String,
-    behovId: UUID,
+    eventId: UUID,
     parent: Command
 ) : Command(
-    behovId = behovId,
+    eventId = eventId,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {

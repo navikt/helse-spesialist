@@ -14,7 +14,7 @@ import java.time.Duration
 import java.util.*
 
 abstract class Command(
-    protected val behovId: UUID,
+    protected val eventId: UUID,
     private val parent: Command?,
     internal val timeout: Duration
 ) {

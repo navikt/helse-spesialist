@@ -6,7 +6,7 @@ import java.time.Duration
 import java.util.*
 
 class VurderRisikoCommand(eventId: UUID, parent: Command, val vedtaksperiodeId: UUID) :
-    Command(behovId = eventId, parent = parent, timeout = Duration.ofHours(1)) {
+    Command(eventId = eventId, parent = parent, timeout = Duration.ofHours(1)) {
     override fun execute(session: Session): Resultat {
         val risikovurdering = session.hentRisikovurderingForVedtaksperiode(vedtaksperiodeId)
 

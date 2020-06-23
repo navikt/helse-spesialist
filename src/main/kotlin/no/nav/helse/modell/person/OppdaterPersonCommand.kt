@@ -10,10 +10,10 @@ import java.util.*
 internal class OppdaterPersonCommand(
     private val personDao: PersonDao,
     private val fødselsnummer: String,
-    behovId: UUID,
+    eventId: UUID,
     parent: Command
 ) : Command(
-    behovId = behovId,
+    eventId = eventId,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
@@ -24,7 +24,7 @@ internal class OppdaterPersonCommand(
     )
 
     private inner class HentPersoninfoCommand : Command(
-        behovId = behovId,
+        eventId = eventId,
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
@@ -48,7 +48,7 @@ internal class OppdaterPersonCommand(
     }
 
     private inner class HentEnhetCommand : Command(
-        behovId = behovId,
+        eventId = eventId,
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {
@@ -67,7 +67,7 @@ internal class OppdaterPersonCommand(
     }
 
     private inner class HentInfotrygdutbetalingerCommand : Command(
-        behovId = behovId,
+        eventId = eventId,
         parent = this@OppdaterPersonCommand,
         timeout = Duration.ofHours(1)
     ) {

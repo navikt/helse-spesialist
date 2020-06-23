@@ -4,10 +4,10 @@ import java.time.Duration
 import java.util.*
 
 abstract class RootCommand(
-    behovId: UUID,
+    eventId: UUID,
     timeout: Duration
 ) : Command(
-    behovId = behovId,
+    eventId = eventId,
     parent = null,
     timeout = timeout
 ) {

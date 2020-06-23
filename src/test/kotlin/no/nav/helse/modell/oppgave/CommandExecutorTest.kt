@@ -21,12 +21,12 @@ class CommandExecutorTest {
 
     @Test
     internal fun `persisterer hvem som ferdigstilte den siste oppgaven`() {
-        val behovId = UUID.randomUUID()
-        val testCommand = TestRootCommand(behovId)
+        val eventId = UUID.randomUUID()
+        val testCommand = TestRootCommand(eventId)
         val executor = CommandExecutor(
             command = testCommand,
             spesialistOid = spesialistOID,
-            eventId = behovId,
+            eventId = eventId,
             nåværendeOppgave = null,
             dataSource = dataSource
         )
@@ -34,8 +34,8 @@ class CommandExecutorTest {
         val oppgaverForBehov = using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM oppgave where behov_id=?;",
-                    behovId
+                    "SELECT * FROM oppgave where event_id=?;",
+                    eventId
                 ).map {
                     FerdigstiltAv(
                         it.stringOrNull("ferdigstilt_av"),
@@ -50,12 +50,12 @@ class CommandExecutorTest {
 
     @Test
     fun `command executor vil kjøre alle nestede subcommands`() {
-        val behovId = UUID.randomUUID()
-        val command = NestedCommand(behovId, "12356543")
+        val eventId = UUID.randomUUID()
+        val command = NestedCommand(eventId, "12356543")
         val executor = CommandExecutor(
             command = command,
             spesialistOid = spesialistOID,
-            eventId = behovId,
+            eventId = eventId,
             nåværendeOppgave = null,
             dataSource = dataSource
         )
@@ -82,9 +82,9 @@ class CommandExecutorTest {
 
 
     private class NestedCommand(
-        behovId: UUID,
+        eventId: UUID,
         override val fødselsnummer: String
-    ) : RootCommand(behovId = behovId, timeout = Duration.ZERO) {
+    ) : RootCommand(eventId = eventId, timeout = Duration.ZERO) {
         override val orgnummer: String? = null
         override val vedtaksperiodeId: UUID? = null
 
@@ -98,10 +98,10 @@ class CommandExecutorTest {
         internal var innerExecuted = false
         internal var innerInnerExecuted = false
 
-        inner class InnerCommand : Command(behovId = behovId, parent = this, timeout = Duration.ZERO) {
+        inner class InnerCommand : Command(eventId = eventId, parent = this, timeout = Duration.ZERO) {
             override val oppgaver: Set<Command> = setOf(InnerInnerCommand())
 
-            inner class InnerInnerCommand : Command(behovId = behovId, parent = this, timeout = Duration.ZERO) {
+            inner class InnerInnerCommand : Command(eventId = eventId, parent = this, timeout = Duration.ZERO) {
                 override fun execute(session: Session): Resultat {
                     innerInnerExecuted = true
                     return Resultat.Ok.System

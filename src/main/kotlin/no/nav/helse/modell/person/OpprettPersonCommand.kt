@@ -10,10 +10,10 @@ internal class OpprettPersonCommand(
     private val personDao: PersonDao,
     private val fødselsnummer: String,
     private val aktørId: String,
-    behovId: UUID,
+    eventId: UUID,
     parent: Command
 ) : Command(
-    behovId = behovId,
+    eventId = eventId,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {

@@ -34,7 +34,7 @@ internal class Godkjenningsbehov(
     snapshotDao: SnapshotDao,
     speilSnapshotRestDao: SpeilSnapshotRestDao
 ) : RootCommand(
-    behovId = id,
+    eventId = id,
     timeout = Duration.ofDays(14)
 ) {
     override val oppgaver = setOf(
@@ -62,7 +62,7 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            behovId = id,
+            eventId = id,
             parent = this
         ),
         SaksbehandlerGodkjenningCommand(id, this)

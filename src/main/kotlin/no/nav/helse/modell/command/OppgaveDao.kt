@@ -11,7 +11,7 @@ import no.nav.helse.objectMapper
 import java.util.*
 
 fun Session.insertOppgave(
-    behovId: UUID,
+    eventId: UUID,
     oppgavetype: String,
     oppgavestatus: Oppgavestatus,
     ferdigstiltAv: String?,
@@ -21,10 +21,10 @@ fun Session.insertOppgave(
     this.run(
         queryOf(
             """
-                INSERT INTO oppgave(behov_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref)
+                INSERT INTO oppgave(event_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref)
                 VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?);
             """,
-            behovId,
+            eventId,
             oppgavetype,
             oppgavestatus.name,
             ferdigstiltAv,
@@ -34,7 +34,7 @@ fun Session.insertOppgave(
     )
 
 fun Session.updateOppgave(
-    behovId: UUID,
+    eventId: UUID,
     oppgavetype: String,
     oppgavestatus: Oppgavestatus,
     ferdigstiltAv: String?,
@@ -44,26 +44,26 @@ fun Session.updateOppgave(
         queryOf(
             """
                 UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus
-                WHERE behov_id=? AND type=?;
+                WHERE event_id=? AND type=?;
             """,
             ferdigstiltAv,
             oid,
             oppgavestatus.name,
-            behovId,
+            eventId,
             oppgavetype
         ).asUpdate
     )
 
 
-fun Session.findNåværendeOppgave(behovId: UUID): OppgaveDto? = this.run(
+fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
     queryOf(
         """
             SELECT *
             FROM oppgave
-            WHERE behov_id=?
+            WHERE event_id=?
               AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
         """,
-        behovId
+        eventId
     )
         .map(::oppgaveDto)
         .asSingle
@@ -72,12 +72,12 @@ fun Session.findNåværendeOppgave(behovId: UUID): OppgaveDto? = this.run(
 fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.run(
     queryOf(
         """
-            SELECT *, (SELECT json_agg(melding) meldinger FROM warning where spleisbehov_ref=o.behov_id), sot.type as saksbehandleroppgavetype
+            SELECT *, (SELECT json_agg(melding) meldinger FROM warning where spleisbehov_ref=o.event_id), sot.type as saksbehandleroppgavetype
             FROM oppgave o
                    INNER JOIN vedtak v on o.vedtak_ref = v.id
                    INNER JOIN person p on v.person_ref = p.id
                    INNER JOIN person_info pi on p.info_ref = pi.id
-                   LEFT JOIN saksbehandleroppgavetype sot on o.behov_id = sot.spleisbehov_ref
+                   LEFT JOIN saksbehandleroppgavetype sot on o.event_id = sot.spleisbehov_ref
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             ORDER BY opprettet DESC
             LIMIT 500
@@ -87,22 +87,22 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.ru
         .asList
 )
 
-fun Session.behovForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
+fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
     queryOf(
         """
-            SELECT behov_id
+            SELECT event_id
             FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = ? AND status = 'AvventerSaksbehandler'::oppgavestatus
         """,
         vedtaksperiodeId
     )
-        .map { UUID.fromString(it.stringOrNull("behov_id")) }
+        .map { UUID.fromString(it.stringOrNull("event_id")) }
         .asSingle
 )
 
 private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
-    spleisbehovId = UUID.fromString(it.string("behov_id")),
+    spleisbehovId = UUID.fromString(it.string("event_id")),
     opprettet = it.localDateTime("opprettet"),
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
     periodeFom = it.localDate("fom"),
@@ -123,7 +123,7 @@ private fun oppgaveDto(it: Row) = OppgaveDto(
     opprettet = it.localDateTime("opprettet"),
     oppdatert = it.localDateTimeOrNull("oppdatert"),
     oppgaveType = it.string("type"),
-    behovId = UUID.fromString(it.string("behov_id")),
+    eventId = UUID.fromString(it.string("event_id")),
     status = Oppgavestatus.valueOf(it.string("status")),
     vedtaksref = it.longOrNull("vedtak_ref")
 )

@@ -10,7 +10,7 @@ class PersisterRisikovurderingCommand(
     eventId: UUID,
     val risikovurderingMessage: RisikovurderingMessage,
     override val vedtaksperiodeId: UUID
-) : RootCommand(behovId = eventId, timeout = Duration.ZERO) {
+) : RootCommand(eventId = eventId, timeout = Duration.ZERO) {
     override val orgnummer: String? = null
     override val fødselsnummer: String get() = throw RuntimeException("Not implemented")
 

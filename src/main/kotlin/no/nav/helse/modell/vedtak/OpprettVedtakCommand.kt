@@ -21,10 +21,10 @@ internal class OpprettVedtakCommand(
     private val vedtaksperiodeId: UUID,
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
-    behovId: UUID,
+    eventId: UUID,
     parent: Command
 ) : Command(
-    behovId = behovId,
+    eventId = eventId,
     parent = parent,
     timeout = Duration.ofHours(1)
 ) {
