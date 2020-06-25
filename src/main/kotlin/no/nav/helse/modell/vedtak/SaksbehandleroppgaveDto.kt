@@ -22,5 +22,6 @@ data class SaksbehandleroppgaveDto(
 enum class Saksbehandleroppgavetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
-    INFOTRYGDFORLENGELSE
+    INFOTRYGDFORLENGELSE,
+    OVERGANG_FRA_IT
 }
