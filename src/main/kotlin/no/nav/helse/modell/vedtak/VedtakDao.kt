@@ -40,10 +40,8 @@ internal fun Session.findVedtak(vedtaksperiodeId: UUID): VedtakDto? =
 
 internal fun Session.deleteVedtak(vedtaksperiodeId: UUID) {
     val vedtak = findVedtak(vedtaksperiodeId) ?: return
-    this.transaction { transaction ->
-        transaction.run(queryOf("UPDATE oppgave SET vedtak_ref = null WHERE vedtak_ref = ?", vedtak.id).asUpdate)
-        transaction.run(queryOf("DELETE FROM vedtak WHERE id = ?", vedtak.id).asUpdate)
-        transaction.run(queryOf("DELETE FROM speil_snapshot WHERE id = ?", vedtak.speilSnapshotRef).asUpdate)
-    }
+    run(queryOf("UPDATE oppgave SET vedtak_ref = null WHERE vedtak_ref = ?", vedtak.id).asUpdate)
+    run(queryOf("DELETE FROM vedtak WHERE id = ?", vedtak.id).asUpdate)
+    run(queryOf("DELETE FROM speil_snapshot WHERE id = ?", vedtak.speilSnapshotRef).asUpdate)
 }
 

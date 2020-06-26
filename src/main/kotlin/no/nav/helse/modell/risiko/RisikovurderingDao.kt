@@ -7,9 +7,9 @@ import kotliquery.queryOf
 import no.nav.helse.objectMapper
 import java.util.*
 
-internal fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDto) = this.transaction { transaction ->
+internal fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDto) {
     val risikovurderingRef = requireNotNull(
-        transaction.run(
+        run(
             queryOf(
                 "INSERT INTO risikovurdering (vedtaksperiode_id, opprettet, samlet_score, ufullstendig) VALUES (?, ?, ?, ?);",
                 risikovurdering.vedtaksperiodeId,
@@ -21,7 +21,7 @@ internal fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDt
     )
 
     risikovurdering.faresignaler.forEach { tekst ->
-        transaction.run(
+        run(
             queryOf(
                 "INSERT INTO risikovurdering_faresignal (risikovurdering_ref, tekst) VALUES (?, ?);",
                 risikovurderingRef,
@@ -30,8 +30,9 @@ internal fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDt
         )
     }
 
+
     risikovurdering.arbeidsuførhetvurdering.forEach { tekst ->
-        transaction.run(
+        run(
             queryOf(
                 "INSERT INTO risikovurdering_arbeidsuforhetvurdering (risikovurdering_ref, tekst) VALUES (?, ?);",
                 risikovurderingRef,
@@ -42,7 +43,7 @@ internal fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDt
 }
 
 internal fun Session.hentRisikovurderingForVedtaksperiode(vedtaksperiodeId: UUID): RisikovurderingDto? =
-    this.run(
+    run(
         queryOf(
             """
                 SELECT r.id,

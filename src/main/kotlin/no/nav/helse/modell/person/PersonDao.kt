@@ -81,21 +81,20 @@ internal fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =
             ?.toInt()
     )
 
-internal fun Session.updateNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String) =
-    this.transaction { tx ->
-        tx.run(
-            queryOf(
-                "UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=? WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);",
-                fornavn, mellomnavn, etternavn, fødselsnummer
-            ).asUpdate
-        )
-        tx.run(
-            queryOf(
-                "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
-                fødselsnummer
-            ).asUpdate
-        )
-    }
+internal fun Session.updateNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String): Int {
+    run(
+        queryOf(
+            "UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=? WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);",
+            fornavn, mellomnavn, etternavn, fødselsnummer
+        ).asUpdate
+    )
+    return run(
+        queryOf(
+            "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
+            fødselsnummer
+        ).asUpdate
+    )
+}
 
 internal fun Session.updateEnhet(fødselsnummer: Long, enhetNr: Int) = this.run(
     queryOf(
@@ -105,21 +104,20 @@ internal fun Session.updateEnhet(fødselsnummer: Long, enhetNr: Int) = this.run(
     ).asUpdate
 )
 
-internal fun Session.updateInfotrygdutbetalinger(fødselsnummer: Long, data: JsonNode) =
-    this.transaction { tx ->
-        tx.run(
-            queryOf(
-                "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
-                objectMapper.writeValueAsString(data), fødselsnummer
-            ).asUpdate
-        )
-        tx.run(
-            queryOf(
-                "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
-                fødselsnummer
-            ).asUpdate
-        )
-    }
+internal fun Session.updateInfotrygdutbetalinger(fødselsnummer: Long, data: JsonNode): Int {
+    run(
+        queryOf(
+            "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
+            objectMapper.writeValueAsString(data), fødselsnummer
+        ).asUpdate
+    )
+    return run(
+        queryOf(
+            "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
+            fødselsnummer
+        ).asUpdate
+    )
+}
 
 internal fun Session.updateInfotrygdutbetalingerRef(fødselsnummer: Long, ref: Int) =
     this.run(
