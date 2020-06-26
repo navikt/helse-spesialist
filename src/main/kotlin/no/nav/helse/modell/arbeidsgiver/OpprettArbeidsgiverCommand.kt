@@ -7,7 +7,6 @@ import java.time.Duration
 import java.util.*
 
 internal class OpprettArbeidsgiverCommand(
-    private val arbeidsgiverDao: ArbeidsgiverDao,
     private val orgnummer: String,
     eventId: UUID,
     parent: Command
@@ -18,10 +17,10 @@ internal class OpprettArbeidsgiverCommand(
 ) {
 
     override fun execute(session: Session): Resultat {
-        return if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
+        return if (session.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
             Resultat.Ok.System
         } else {
-            arbeidsgiverDao.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")
+            session.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")
             Resultat.Ok.System
             //spleisbehov.håndter(Behovtype.HentArbeidsgiverNavn)
         }

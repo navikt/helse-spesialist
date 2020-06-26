@@ -8,7 +8,6 @@ import java.time.Duration
 import java.util.*
 
 internal class OpprettPersonCommand(
-    private val personDao: PersonDao,
     private val fødselsnummer: String,
     private val aktørId: String,
     eventId: UUID,
@@ -19,7 +18,7 @@ internal class OpprettPersonCommand(
     timeout = Duration.ofHours(1)
 ) {
     override fun execute(session: Session): Resultat =
-        if (personDao.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
+        if (session.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
             Resultat.Ok.System
         } else {
             Resultat.HarBehov(
@@ -35,15 +34,15 @@ internal class OpprettPersonCommand(
         val hentInfotrygdutbetalingerLøsning = løsninger.løsning<HentInfotrygdutbetalingerLøsning>()
 
         val enhetId = hentEnhetLøsning.enhetNr.toInt()
-        val navnId = personDao.insertNavn(
+        val navnId = session.insertNavn(
             hentPersoninfoLøsning.fornavn,
             hentPersoninfoLøsning.mellomnavn,
             hentPersoninfoLøsning.etternavn
         )
         val infotrygdutbetalingerId =
-            personDao.insertInfotrygdutbetalinger(hentInfotrygdutbetalingerLøsning.utbetalinger)
+            session.insertInfotrygdutbetalinger(hentInfotrygdutbetalingerLøsning.utbetalinger)
 
-        personDao.insertPerson(
+        session.insertPerson(
             fødselsnummer = fødselsnummer.toLong(),
             aktørId = aktørId.toLong(),
             navnId = navnId,

@@ -25,14 +25,9 @@ import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.*
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -48,12 +43,6 @@ private val auditLog = LoggerFactory.getLogger("auditLogger")
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val dataSourceBuilder = DataSourceBuilder(System.getenv())
     private val dataSource = dataSourceBuilder.getDataSource(DataSourceBuilder.Role.User)
-
-    private val personDao = PersonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val spleisbehovDao = SpleisbehovDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
 
     private val azureAdClient = HttpClient(Apache) {
         engine {
@@ -78,7 +67,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         clientSecret = readClientSecret(),
         httpClient = azureAdClient
     )
-    private val speilSnapshotRestDao = SpeilSnapshotRestDao(
+    private val speilSnapshotRestClient = SpeilSnapshotRestClient(
         httpClient = spleisClient,
         accessTokenClient = accessTokenClient,
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
@@ -91,19 +80,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private val spleisbehovMediator = SpleisbehovMediator(
         dataSource = dataSource,
-        spleisbehovDao = spleisbehovDao,
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        snapshotDao = snapshotDao,
-        speilSnapshotRestDao = speilSnapshotRestDao,
+        speilSnapshotRestClient = speilSnapshotRestClient,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
     )
     private val oppgaveMediator = OppgaveMediator(dataSource)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(
-        vedtaksperiodeDao = vedtaksperiodeDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        snapshotDao = snapshotDao,
-        personDao = personDao,
         dataSource = dataSource
     )
     private val rapidsConnection =

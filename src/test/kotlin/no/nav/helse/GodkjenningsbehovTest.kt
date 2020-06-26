@@ -4,12 +4,11 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.Godkjenningsbehov
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.findArbeidsgiverByOrgnummer
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -26,12 +25,9 @@ class GodkjenningsbehovTest {
     private val accessTokenClient = accessTokenClient()
 
     private val dataSource: DataSource = setupDataSourceMedFlyway()
-    private val session = sessionOf(dataSource)
-    private val personDao: PersonDao = PersonDao(dataSource)
-    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
-    private val speilSnapshotRestDao: SpeilSnapshotRestDao =
-        SpeilSnapshotRestDao(
+    private val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private val speilSnapshotRestClient: SpeilSnapshotRestClient =
+        SpeilSnapshotRestClient(
             spleisMockClient.client,
             accessTokenClient,
             "spleisClientId"
@@ -48,7 +44,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            dataSource = dataSource,
+            session = session,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "12345",
@@ -57,10 +53,7 @@ class GodkjenningsbehovTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765432",
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao
+                speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -82,7 +75,7 @@ class GodkjenningsbehovTest {
                 HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        assertNotNull(personDao.findPersonByFødselsnummer(12345))
+        assertNotNull(session.findPersonByFødselsnummer(12345))
     }
 
     fun løsningify(vararg løsninger: Any) = Løsninger().also { løsninger.forEach { løsning -> it.add(løsning) } }
@@ -92,7 +85,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            dataSource = dataSource,
+            session = session,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "13245",
@@ -101,10 +94,7 @@ class GodkjenningsbehovTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "13245",
                 orgnummer = "98765432",
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao
+                speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -131,8 +121,8 @@ class GodkjenningsbehovTest {
         spleisExecutor.resume(session, løsningify(HentEnhetLøsning("1119")))
         spleisExecutor.execute()
 
-        assertNotNull(personDao.findPersonByFødselsnummer(13245))
-        assertEquals(LocalDate.now(), personDao.findEnhetSistOppdatert(13245))
+        assertNotNull(session.findPersonByFødselsnummer(13245))
+        assertEquals(LocalDate.now(), session.findEnhetSistOppdatert(13245))
     }
 
     @Test
@@ -140,7 +130,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            dataSource = dataSource,
+            session = session,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "23456",
@@ -149,10 +139,7 @@ class GodkjenningsbehovTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765432",
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao
+                speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -176,7 +163,7 @@ class GodkjenningsbehovTest {
         )
         spleisExecutor.execute()
 
-        assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(98765432))
+        assertNotNull(session.findArbeidsgiverByOrgnummer(98765432))
     }
 
     @Test
@@ -184,7 +171,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            dataSource = dataSource,
+            session = session,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "34567",
@@ -193,10 +180,7 @@ class GodkjenningsbehovTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765433",
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao
+                speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -230,7 +214,7 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
         val spleisExecutor = CommandExecutor(
-            dataSource = dataSource,
+            session = session,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "3457812",
@@ -239,10 +223,7 @@ class GodkjenningsbehovTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765433",
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao
+                speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -291,14 +272,14 @@ class GodkjenningsbehovTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
 
-        val failingSpeilSnapshotDao = SpeilSnapshotRestDao(
+        val failingSpeilSnapshotDao = SpeilSnapshotRestClient(
             failingHttpClient(),
             accessTokenClient,
             "spleisClientId"
         )
 
         val spleisExecutor = CommandExecutor(
-            dataSource = dataSource,
+            session = session,
             command = Godkjenningsbehov(
                 id = eventId,
                 fødselsnummer = "134896",
@@ -307,10 +288,7 @@ class GodkjenningsbehovTest {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "47839",
                 orgnummer = "98765433",
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = failingSpeilSnapshotDao
+                speilSnapshotRestClient = failingSpeilSnapshotDao
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,

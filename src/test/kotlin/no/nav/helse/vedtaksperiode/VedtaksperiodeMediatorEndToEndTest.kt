@@ -3,9 +3,6 @@ package no.nav.helse.vedtaksperiode
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestPerson
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
 import no.nav.helse.objectMapper
 import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,15 +13,7 @@ import java.util.*
 
 class VedtaksperiodeMediatorEndToEndTest {
     private val dataSource = setupDataSourceMedFlyway()
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val personDao = PersonDao(dataSource)
-    private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(
-        vedtaksperiodeDao = vedtaksperiodeDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        snapshotDao = snapshotDao,
-        personDao = personDao,
         dataSource = dataSource
     )
 

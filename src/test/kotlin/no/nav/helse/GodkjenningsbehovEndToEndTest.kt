@@ -6,17 +6,19 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.*
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.command.findBehov
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.command.findSaksbehandlerOppgaver
-import no.nav.helse.modell.person.*
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
+import no.nav.helse.vedtaksperiode.findVedtakByFnr
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,17 +33,12 @@ class GodkjenningsbehovEndToEndTest {
     private val accessTokenClient = accessTokenClient()
 
     private val dataSource = setupDataSourceMedFlyway()
-    private val personDao = PersonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val speilSnapshotRestDao = SpeilSnapshotRestDao(
+    private val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private val speilSnapshotRestClient = SpeilSnapshotRestClient(
         spleisMockClient.client,
         accessTokenClient,
         "spleisClientId"
     )
-    private val spleisbehovDao = SpleisbehovDao(dataSource)
-    private val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
-
     private val spesialistOID: UUID = UUID.randomUUID()
 
     private lateinit var spleisbehovMediator: SpleisbehovMediator
@@ -56,11 +53,7 @@ class GodkjenningsbehovEndToEndTest {
         rapid = TestRapid()
         spleisbehovMediator = SpleisbehovMediator(
             dataSource = dataSource,
-            spleisbehovDao = spleisbehovDao,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+            speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
     }
@@ -73,7 +66,7 @@ class GodkjenningsbehovEndToEndTest {
         sendGodkjenningsbehov()
 
         assertEquals(2, rapid.inspektør.size)
-        assertNotNull(spleisbehovDao.findBehov(spleisbehovId))
+        assertNotNull(session.findBehov(spleisbehovId))
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
@@ -210,7 +203,10 @@ class GodkjenningsbehovEndToEndTest {
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
-        assertEquals(Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.type)
+        assertEquals(
+            Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE,
+            saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.type
+        )
     }
 
     @Test
@@ -272,15 +268,14 @@ class GodkjenningsbehovEndToEndTest {
         """
         )
 
-        val oppgavestatus = using(sessionOf(dataSource)) { session ->
-            session.run(
-                queryOf(
-                    "SELECT * FROM oppgave where event_id=?",
-                    spleisbehovId
-                ).map { Oppgavestatus.valueOf(it.string("status")) }
-                    .asSingle
-            )
-        }
+        val oppgavestatus = session.run(
+            queryOf(
+                "SELECT * FROM oppgave where event_id=?",
+                spleisbehovId
+            ).map { Oppgavestatus.valueOf(it.string("status")) }
+                .asSingle
+        )
+
         assertEquals(Oppgavestatus.Invalidert, oppgavestatus)
     }
 
@@ -378,13 +373,13 @@ class GodkjenningsbehovEndToEndTest {
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
-        val speilSnapshotRef = vedtaksperiodeDao.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
-        val snapshotFør = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+        val speilSnapshotRef = session.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
+        val snapshotFør = session.findSpeilSnapshot(speilSnapshotRef)
 
         spleisMockClient.enqueueResponses(SpleisMockClient.VEDTAKSPERIODE_UTBETALT)
         sendVedtaksperiodeEndretEvent(aktørId, fødselsnummer, orgnummer)
 
-        val snapshotEtter = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+        val snapshotEtter = session.findSpeilSnapshot(speilSnapshotRef)
         assertNotEquals(snapshotFør, snapshotEtter)
     }
 
@@ -413,13 +408,13 @@ class GodkjenningsbehovEndToEndTest {
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
-        val speilSnapshotRef = vedtaksperiodeDao.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
-        val snapshotFør = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+        val speilSnapshotRef = session.findVedtakByFnr(fødselsnummer)!!.arbeidsgiverRef
+        val snapshotFør = session.findSpeilSnapshot(speilSnapshotRef)
 
         spleisMockClient.enqueueResponses(SpleisMockClient.VEDTAKSPERIODE_UTBETALT)
         sendVedtaksperiodeForkastetEvent(aktørId, fødselsnummer, orgnummer)
 
-        val snapshotEtter = snapshotDao.findSpeilSnapshot(speilSnapshotRef)
+        val snapshotEtter = session.findSpeilSnapshot(speilSnapshotRef)
         assertNotEquals(snapshotFør, snapshotEtter)
     }
 

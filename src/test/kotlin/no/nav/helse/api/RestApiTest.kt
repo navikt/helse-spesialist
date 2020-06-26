@@ -24,17 +24,16 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.person.*
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.vedtaksperiode.PersonForSpeilDto
-import no.nav.helse.vedtaksperiode.VedtaksperiodeDao
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
@@ -108,32 +107,19 @@ internal class RestApiTest {
             .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
             .load()
 
-        val personDao = PersonDao(dataSource)
-        val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        val spleisbehovDao = SpleisbehovDao(dataSource)
-        val snapshotDao = SnapshotDao(dataSource)
-        val speilSnapshotRestDao = SpeilSnapshotRestDao(
+        val speilSnapshotRestClient = SpeilSnapshotRestClient(
             spleisMockClient.client,
             accessTokenClient(),
             "spleisClientId"
         )
-        val vedtaksperiodeDao = VedtaksperiodeDao(dataSource)
 
         spleisbehovMediator = SpleisbehovMediator(
             dataSource = dataSource,
-            spleisbehovDao = spleisbehovDao,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+            speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
         ).apply { init(rapid) }
         val oppgaveMediator = OppgaveMediator(dataSource)
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
-            vedtaksperiodeDao = vedtaksperiodeDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
-            personDao = personDao,
             dataSource = dataSource
         )
 

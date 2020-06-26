@@ -9,12 +9,11 @@ import io.ktor.http.ContentType
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AccessTokenClient
 
-internal class SpeilSnapshotRestDao(
+internal class SpeilSnapshotRestClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
     private val spleisClientId: String
 ) {
-
     internal fun hentSpeilSpapshot(fnr: String): String {
         return runBlocking {
             val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
@@ -22,7 +21,7 @@ internal class SpeilSnapshotRestDao(
                 header("Authorization", "Bearer $accessToken")
                 header("fnr", fnr)
                 accept(ContentType.Application.Json)
-            }.let { it.receive<String>() }
+            }.receive<String>()
         }
     }
 }

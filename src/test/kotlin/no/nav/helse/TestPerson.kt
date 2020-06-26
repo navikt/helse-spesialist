@@ -8,11 +8,11 @@ import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.SpleisbehovDao
-import no.nav.helse.modell.person.*
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.person.HentEnhetLøsning
+import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
+import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import java.time.LocalDate
 import java.util.*
@@ -29,26 +29,17 @@ class TestPerson(private val dataSource: DataSource) {
         organisasjonsnummer = orgnummer
     )
 
-    private val speilSnapshotRestDao = SpeilSnapshotRestDao(
+    private val speilSnapshotRestClient = SpeilSnapshotRestClient(
         spleisMockClient.client,
         accessTokenClient(),
         "spleisClientId"
     )
 
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val spleisbehovDao = SpleisbehovDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val personDao = PersonDao(dataSource)
-
     val rapid = TestRapid()
 
     private val mediator = SpleisbehovMediator(
         dataSource = dataSource,
-        spleisbehovDao = spleisbehovDao,
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        snapshotDao = snapshotDao,
-        speilSnapshotRestDao = speilSnapshotRestDao,
+        speilSnapshotRestClient = speilSnapshotRestClient,
         spesialistOID = spesialistOID
     ).apply { init(rapid) }
 

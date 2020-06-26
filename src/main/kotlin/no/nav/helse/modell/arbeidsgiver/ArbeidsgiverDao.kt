@@ -1,73 +1,62 @@
 package no.nav.helse.modell.arbeidsgiver
 
+import kotliquery.Session
 import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.sql.DataSource
 
-class ArbeidsgiverDao(private val dataSource: DataSource) {
-    fun findArbeidsgiverByOrgnummer(orgnummer: Long): Int? = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer)
-                .map { it.int("id") }
-                .asSingle
-        )
-    }
+internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: Long): Int? = this.run(
+    queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer)
+        .map { it.int("id") }
+        .asSingle
+)
 
-    fun insertArbeidsgiver(orgnummer: Long, navn: String) =
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val navnRef = requireNotNull(
-                session.run(
-                    queryOf(
-                        "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
-                        navn,
-                        LocalDateTime.now().minusYears(1)
-                    )
-                        .asUpdateAndReturnGeneratedKey
-                )
-            )
-            session.run(
-                queryOf("INSERT INTO arbeidsgiver(orgnummer, navn_ref) VALUES(?, ?);", orgnummer, navnRef)
-                    .asUpdate
-            )
-        }
-
-    fun findNavnSistOppdatert(orgnummer: Long): LocalDate = requireNotNull(using(sessionOf(dataSource)) { session ->
-        session.run(
+internal fun Session.insertArbeidsgiver(orgnummer: Long, navn: String) {
+    val navnRef = requireNotNull(
+        this.run(
             queryOf(
-                "SELECT navn_oppdatert FROM arbeidsgiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
-                orgnummer
-            ).map {
-                it.localDate("navn_oppdatert")
-            }.asSingle
-        )
-    })
-
-
-    fun findArbeidsgiver(arbeidsgiverId: Int): ArbeidsgiverDto? = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf(
-                "SELECT an.navn, a.orgnummer FROM arbeidsgiver AS a JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id WHERE a.id=?;",
-                arbeidsgiverId
-            ).map {
-                ArbeidsgiverDto(
-                    organisasjonsnummer = it.string("orgnummer"),
-                    navn = it.string("navn")
-                )
-            }.asSingle
-        )
-    }
-
-    fun updateNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf(
-                "UPDATE arbeidsgiver_navn SET navn=?, navn_oppdatert=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
+                "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
                 navn,
-                LocalDateTime.now().minusYears(1),
-                orgnummer
-            ).asUpdate
+                LocalDateTime.now().minusYears(1)
+            )
+                .asUpdateAndReturnGeneratedKey
         )
-    }
+    )
+    this.run(
+        queryOf("INSERT INTO arbeidsgiver(orgnummer, navn_ref) VALUES(?, ?);", orgnummer, navnRef)
+            .asUpdate
+    )
 }
+
+internal fun Session.findNavnSistOppdatert(orgnummer: Long): LocalDate = requireNotNull(
+    this.run(
+        queryOf(
+            "SELECT navn_oppdatert FROM arbeidsgiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
+            orgnummer
+        ).map {
+            it.localDate("navn_oppdatert")
+        }.asSingle
+    )
+)
+
+
+internal fun Session.findArbeidsgiver(arbeidsgiverId: Int): ArbeidsgiverDto? = this.run(
+    queryOf(
+        "SELECT an.navn, a.orgnummer FROM arbeidsgiver AS a JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id WHERE a.id=?;",
+        arbeidsgiverId
+    ).map {
+        ArbeidsgiverDto(
+            organisasjonsnummer = it.string("orgnummer"),
+            navn = it.string("navn")
+        )
+    }.asSingle
+)
+
+internal fun Session.updateNavn(orgnummer: String, navn: String) = this.run(
+    queryOf(
+        "UPDATE arbeidsgiver_navn SET navn=?, navn_oppdatert=? WHERE id(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
+        navn,
+        LocalDateTime.now().minusYears(1),
+        orgnummer
+    ).asUpdate
+)

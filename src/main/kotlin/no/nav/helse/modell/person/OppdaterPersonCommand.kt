@@ -9,7 +9,6 @@ import java.time.LocalDate
 import java.util.*
 
 internal class OppdaterPersonCommand(
-    private val personDao: PersonDao,
     private val fødselsnummer: String,
     eventId: UUID,
     parent: Command
@@ -30,7 +29,7 @@ internal class OppdaterPersonCommand(
         timeout = Duration.ofHours(1)
     ) {
         override fun execute(session: Session): Resultat {
-            val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer.toLong())
+            val sistOppdatert = session.findPersoninfoSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(14) < LocalDate.now()) {
                 Resultat.HarBehov(Behovtype.HentPersoninfo)
             } else {
@@ -40,7 +39,7 @@ internal class OppdaterPersonCommand(
 
         override fun resume(session: Session, løsninger: Løsninger) {
             val løsning = løsninger.løsning<HentPersoninfoLøsning>()
-            personDao.updateNavn(
+            session.updateNavn(
                 fødselsnummer = fødselsnummer.toLong(),
                 fornavn = løsning.fornavn,
                 mellomnavn = løsning.mellomnavn,
@@ -55,7 +54,7 @@ internal class OppdaterPersonCommand(
         timeout = Duration.ofHours(1)
     ) {
         override fun execute(session: Session): Resultat {
-            val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer.toLong())
+            val sistOppdatert = session.findEnhetSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(5) < LocalDate.now()) {
                 Resultat.HarBehov(Behovtype.HentEnhet)
             } else {
@@ -65,7 +64,7 @@ internal class OppdaterPersonCommand(
 
         override fun resume(session: Session, løsninger: Løsninger) {
             val løsning = løsninger.løsning<HentEnhetLøsning>()
-            personDao.updateEnhet(fødselsnummer.toLong(), løsning.enhetNr.toInt())
+            session.updateEnhet(fødselsnummer.toLong(), løsning.enhetNr.toInt())
         }
     }
 
@@ -75,7 +74,7 @@ internal class OppdaterPersonCommand(
         timeout = Duration.ofHours(1)
     ) {
         override fun execute(session: Session): Resultat {
-            val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer.toLong())
+            val sistOppdatert = session.findITUtbetalingsperioderSistOppdatert(fødselsnummer.toLong())
             return if (sistOppdatert.plusDays(1) < LocalDate.now()) {
                 Resultat.HarBehov(Behovtype.HentInfotrygdutbetalinger())
             } else {
@@ -85,11 +84,11 @@ internal class OppdaterPersonCommand(
 
         override fun resume(session: Session, løsninger: Løsninger) {
             val løsning = løsninger.løsning<HentInfotrygdutbetalingerLøsning>()
-            if (personDao.findInfotrygdutbetalinger(fødselsnummer.toLong()) != null) {
-                personDao.updateInfotrygdutbetalinger(fødselsnummer.toLong(), løsning.utbetalinger)
+            if (session.findInfotrygdutbetalinger(fødselsnummer.toLong()) != null) {
+                session.updateInfotrygdutbetalinger(fødselsnummer.toLong(), løsning.utbetalinger)
             } else {
-                val utbetalingRef = personDao.insertInfotrygdutbetalinger(løsning.utbetalinger)
-                personDao.updateInfotrygdutbetalingerRef(fødselsnummer.toLong(), utbetalingRef)
+                val utbetalingRef = session.insertInfotrygdutbetalinger(løsning.utbetalinger)
+                session.updateInfotrygdutbetalingerRef(fødselsnummer.toLong(), utbetalingRef)
             }
         }
     }

@@ -2,20 +2,17 @@ package no.nav.helse.modell.vedtak
 
 import kotliquery.Session
 import no.nav.helse.measureAsHistogram
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.findArbeidsgiverByOrgnummer
 import no.nav.helse.modell.command.Command
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.person.findPersonByFødselsnummer
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.vedtak.snapshot.insertSpeilSnapshot
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
 internal class OpprettVedtakCommand(
-    private val personDao: PersonDao,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val snapshotDao: SnapshotDao,
-    private val speilSnapshotRestDao: SpeilSnapshotRestDao,
+    private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID,
@@ -31,20 +28,20 @@ internal class OpprettVedtakCommand(
     override fun execute(session: Session): Resultat = measureAsHistogram("OpprettVedtakCommand") {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val speilSnapshot = measureAsHistogram("OpprettVedtakCommand_hentSpeilSnapshot") {
-            speilSnapshotRestDao.hentSpeilSpapshot(
+            speilSnapshotRestClient.hentSpeilSpapshot(
                 fødselsnummer
             )
         }
         val snapshotId = measureAsHistogram("OpprettVedtakCommand_insertSpeilSnapshot") {
-            snapshotDao.insertSpeilSnapshot(
+            session.insertSpeilSnapshot(
                 speilSnapshot
             )
         }
         val personRef = measureAsHistogram("OpprettVedtakCommand_findPersonByFødselsnummer") {
-            requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
+            requireNotNull(session.findPersonByFødselsnummer(fødselsnummer.toLong()))
         }
         val arbeidsgiverRef = measureAsHistogram("OpprettVedtakCommand_findArbeidsgiverByOrgnummer") {
-            requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
+            requireNotNull(session.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
         }
         measureAsHistogram("OpprettVedtakCommand_insertVedtak") {
             session.insertVedtak(

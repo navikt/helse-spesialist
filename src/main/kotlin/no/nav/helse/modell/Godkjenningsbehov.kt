@@ -4,17 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.OppdatertArbeidsgiverCommand
 import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
 import no.nav.helse.modell.command.MacroCommand
 import no.nav.helse.modell.person.OppdaterPersonCommand
 import no.nav.helse.modell.person.OpprettPersonCommand
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.OpprettVedtakCommand
 import no.nav.helse.modell.vedtak.SaksbehandlerGodkjenningCommand
-import no.nav.helse.modell.vedtak.snapshot.SnapshotDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.Duration
@@ -29,34 +26,26 @@ internal class Godkjenningsbehov(
     override val fødselsnummer: String,
     override val orgnummer: String,
     override val vedtaksperiodeId: UUID,
-    personDao: PersonDao,
-    arbeidsgiverDao: ArbeidsgiverDao,
-    snapshotDao: SnapshotDao,
-    speilSnapshotRestDao: SpeilSnapshotRestDao
+    speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : MacroCommand(
     eventId = id,
     timeout = Duration.ofDays(14)
 ) {
     override val oppgaver = setOf(
-        OpprettPersonCommand(personDao, fødselsnummer, aktørId, id, this),
-        OppdaterPersonCommand(personDao, fødselsnummer, id, this),
+        OpprettPersonCommand(fødselsnummer, aktørId, id, this),
+        OppdaterPersonCommand(fødselsnummer, id, this),
         OpprettArbeidsgiverCommand(
-            arbeidsgiverDao,
             orgnummer,
             id,
             this
         ),
         OppdatertArbeidsgiverCommand(
-            arbeidsgiverDao,
             orgnummer,
             id,
             this
         ),
         OpprettVedtakCommand(
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
-            speilSnapshotRestDao = speilSnapshotRestDao,
+            speilSnapshotRestClient = speilSnapshotRestClient,
             fødselsnummer = fødselsnummer,
             orgnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -89,10 +78,7 @@ internal class Godkjenningsbehov(
             id: UUID,
             vedtaksperiodeId: UUID,
             data: String,
-            personDao: PersonDao,
-            arbeidsgiverDao: ArbeidsgiverDao,
-            snapshotDao: SnapshotDao,
-            speilSnapshotRestDao: SpeilSnapshotRestDao
+            speilSnapshotRestClient: SpeilSnapshotRestClient
         ): Godkjenningsbehov {
             val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
             return Godkjenningsbehov(
@@ -103,10 +89,7 @@ internal class Godkjenningsbehov(
                 periodeTom = spleisbehovDTO.periodeTom,
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
-                personDao = personDao,
-                arbeidsgiverDao = arbeidsgiverDao,
-                snapshotDao = snapshotDao,
-                speilSnapshotRestDao = speilSnapshotRestDao
+                speilSnapshotRestClient = speilSnapshotRestClient
             )
         }
     }

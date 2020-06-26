@@ -34,10 +34,10 @@ class CommandExecutorTest {
         val testCommand = TestMacroCommand(eventId)
         val executor = CommandExecutor(
             command = testCommand,
+            session = session,
             spesialistOid = spesialistOID,
             eventId = eventId,
-            nåværendeOppgave = null,
-            dataSource = dataSource
+            nåværendeOppgave = null
         )
         executor.execute()
         val oppgaverForBehov = using(sessionOf(dataSource)) { session ->
@@ -62,11 +62,11 @@ class CommandExecutorTest {
         val eventId = UUID.randomUUID()
         val command = NestedCommand(eventId, "12356543")
         val executor = CommandExecutor(
+            session = session,
             command = command,
             spesialistOid = spesialistOID,
             eventId = eventId,
-            nåværendeOppgave = null,
-            dataSource = dataSource
+            nåværendeOppgave = null
         )
 
         executor.execute()

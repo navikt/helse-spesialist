@@ -7,7 +7,6 @@ import java.time.Duration
 import java.util.*
 
 internal class OppdatertArbeidsgiverCommand(
-    private val arbeidsgiverDao: ArbeidsgiverDao,
     private val orgnummer: String,
     eventId: UUID,
     parent: Command
@@ -22,7 +21,7 @@ internal class OppdatertArbeidsgiverCommand(
 
     override fun resume(session: Session, løsninger: Løsninger) {
         val løsning = løsninger.løsning<ArbeidsgiverLøsning>()
-        arbeidsgiverDao.updateNavn(orgnummer, løsning.navn)
+        session.updateNavn(orgnummer, løsning.navn)
 
     }
 }

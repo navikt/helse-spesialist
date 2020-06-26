@@ -7,7 +7,7 @@ import kotliquery.queryOf
 import no.nav.helse.objectMapper
 import java.util.*
 
-fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDto) = this.transaction { transaction ->
+internal fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDto) = this.transaction { transaction ->
     val risikovurderingRef = requireNotNull(
         transaction.run(
             queryOf(
@@ -41,7 +41,7 @@ fun Session.persisterRisikovurdering(risikovurdering: RisikovurderingDto) = this
     }
 }
 
-fun Session.hentRisikovurderingForVedtaksperiode(vedtaksperiodeId: UUID): RisikovurderingDto? =
+internal fun Session.hentRisikovurderingForVedtaksperiode(vedtaksperiodeId: UUID): RisikovurderingDto? =
     this.run(
         queryOf(
             """
