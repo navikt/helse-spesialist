@@ -40,7 +40,7 @@ class CommandExecutorTest {
             nåværendeOppgave = null
         )
         executor.execute()
-        val oppgaverForBehov = using(sessionOf(dataSource)) { session ->
+        val oppgaverForBehov = using(sessionOf(dataSource, returnGeneratedKey=true)) { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM oppgave where event_id=?;",

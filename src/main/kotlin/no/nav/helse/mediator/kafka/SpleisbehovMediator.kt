@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka
 
 import kotliquery.Session
 import kotliquery.sessionOf
+import kotliquery.using
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
@@ -30,76 +31,78 @@ import kotlin.NoSuchElementException
 
 internal class SpleisbehovMediator(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
-    dataSource: DataSource,
+    private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
     private var shutdown = false
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
 
     internal fun init(rapidsConnection: RapidsConnection) {
         this.rapidsConnection = rapidsConnection
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
-        if (session.findBehov(godkjenningMessage.id) != null) {
-            log.warn(
-                "Mottok duplikat godkjenningsbehov, {}, {}",
-                keyValue("eventId", godkjenningMessage.id),
-                keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
-            )
-            return
-        }
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            if (session.findBehov(godkjenningMessage.id) != null) {
+                log.warn(
+                    "Mottok duplikat godkjenningsbehov, {}, {}",
+                    keyValue("eventId", godkjenningMessage.id),
+                    keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
+                )
+                return@using
+            }
 
-        val spleisbehovExecutor = CommandExecutor(
-            session = session,
-            command = Godkjenningsbehov(
-                id = godkjenningMessage.id,
-                fødselsnummer = godkjenningMessage.fødselsnummer,
-                periodeFom = godkjenningMessage.periodeFom,
-                periodeTom = godkjenningMessage.periodeTom,
-                vedtaksperiodeId = godkjenningMessage.vedtaksperiodeId,
-                aktørId = godkjenningMessage.aktørId,
-                orgnummer = godkjenningMessage.organisasjonsnummer,
-                speilSnapshotRestClient = speilSnapshotRestClient
-            ),
-            spesialistOid = spesialistOID,
-            eventId = godkjenningMessage.id,
-            nåværendeOppgave = null,
-            loggingData = *arrayOf(
+            val spleisbehovExecutor = CommandExecutor(
+                session = session,
+                command = Godkjenningsbehov(
+                    id = godkjenningMessage.id,
+                    fødselsnummer = godkjenningMessage.fødselsnummer,
+                    periodeFom = godkjenningMessage.periodeFom,
+                    periodeTom = godkjenningMessage.periodeTom,
+                    vedtaksperiodeId = godkjenningMessage.vedtaksperiodeId,
+                    aktørId = godkjenningMessage.aktørId,
+                    orgnummer = godkjenningMessage.organisasjonsnummer,
+                    speilSnapshotRestClient = speilSnapshotRestClient
+                ),
+                spesialistOid = spesialistOID,
+                eventId = godkjenningMessage.id,
+                nåværendeOppgave = null,
+                loggingData = *arrayOf(
+                    keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
+                    keyValue("eventId", godkjenningMessage.id)
+                )
+            )
+            log.info(
+                "Mottok godkjenningsbehov med {}, {}",
                 keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
                 keyValue("eventId", godkjenningMessage.id)
             )
-        )
-        log.info(
-            "Mottok godkjenningsbehov med {}, {}",
-            keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId),
-            keyValue("eventId", godkjenningMessage.id)
-        )
-        val resultater = spleisbehovExecutor.execute()
+            val resultater = spleisbehovExecutor.execute()
 
-        session.insertBehov(
-            godkjenningMessage.id,
-            godkjenningMessage.vedtaksperiodeId,
-            spleisbehovExecutor.command.toJson(),
-            originalJson
-        )
-        godkjenningMessage.warnings.forEach {
-            session.insertWarning(
-                melding = it,
-                spleisbehovRef = godkjenningMessage.id
+            session.insertBehov(
+                godkjenningMessage.id,
+                godkjenningMessage.vedtaksperiodeId,
+                spleisbehovExecutor.command.toJson(),
+                originalJson
+            )
+            godkjenningMessage.warnings.forEach {
+                session.insertWarning(
+                    melding = it,
+                    spleisbehovRef = godkjenningMessage.id
+                )
+            }
+            godkjenningMessage.periodetype?.let {
+                session.insertSaksbehandleroppgavetype(type = it, spleisbehovRef = godkjenningMessage.id)
+            }
+            publiserBehov(
+                spleisreferanse = godkjenningMessage.id,
+                resultater = resultater,
+                commandExecutor = spleisbehovExecutor,
+                session = session
             )
         }
-        godkjenningMessage.periodetype?.let {
-            session.insertSaksbehandleroppgavetype(type = it, spleisbehovRef = godkjenningMessage.id)
-        }
-        publiserBehov(
-            spleisreferanse = godkjenningMessage.id,
-            resultater = resultater,
-            commandExecutor = spleisbehovExecutor
-        )
     }
 
     internal fun håndter(vedtaksperiodeId: UUID, annullering: AnnulleringMessage) {
@@ -148,36 +151,43 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
-        session.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
-            val nåværendeOppgave = findNåværendeOppgave(spleisbehovDBDto.id) ?: return
-            log.info("Vedtaksperiode {} i Spleis gikk TIL_INFOTRYGD", keyValue("vedtaksperiodeId", vedtaksperiodeId))
-            spleisbehovExecutor(
-                id = spleisbehovDBDto.id,
-                spleisReferanse = vedtaksperiodeId,
-                spleisbehovJson = spleisbehovDBDto.data,
-                session = session,
-                nåværendeOppgave = nåværendeOppgave
-            ).invalider()
-        }
-    }
-
-    fun håndter(tilbakerullingMessage: TilbakerullingMessage) {
-        tilbakerullingMessage.vedtakperioderSlettet.forEach {
-            session.findBehovMedSpleisReferanse(it)?.also { spleisbehovDBDto ->
-                val nåværendeOppgave = findNåværendeOppgave(spleisbehovDBDto.id) ?: return
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            session.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
+                val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@using
                 log.info(
-                    "Invaliderer oppgave {} fordi vedtaksperiode {} ble slettet",
-                    keyValue("oppgaveId", nåværendeOppgave.id),
-                    keyValue("vedtaksperiodeId", it)
+                    "Vedtaksperiode {} i Spleis gikk TIL_INFOTRYGD",
+                    keyValue("vedtaksperiodeId", vedtaksperiodeId)
                 )
                 spleisbehovExecutor(
                     id = spleisbehovDBDto.id,
-                    spleisReferanse = it,
+                    spleisReferanse = vedtaksperiodeId,
                     spleisbehovJson = spleisbehovDBDto.data,
                     session = session,
                     nåværendeOppgave = nåværendeOppgave
                 ).invalider()
-                deleteVedtak(it)
+            }
+        }
+    }
+
+    fun håndter(tilbakerullingMessage: TilbakerullingMessage) {
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            tilbakerullingMessage.vedtakperioderSlettet.forEach {
+                session.findBehovMedSpleisReferanse(it)?.also { spleisbehovDBDto ->
+                    val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@using
+                    log.info(
+                        "Invaliderer oppgave {} fordi vedtaksperiode {} ble slettet",
+                        keyValue("oppgaveId", nåværendeOppgave.id),
+                        keyValue("vedtaksperiodeId", it)
+                    )
+                    spleisbehovExecutor(
+                        id = spleisbehovDBDto.id,
+                        spleisReferanse = it,
+                        spleisbehovJson = spleisbehovDBDto.data,
+                        session = session,
+                        nåværendeOppgave = nåværendeOppgave
+                    ).invalider()
+                    session.deleteVedtak(it)
+                }
             }
         }
     }
@@ -219,58 +229,63 @@ internal class SpleisbehovMediator(
     }
 
     private fun oppdaterVedtaksperiode(eventId: UUID, fødselsnummer: String, vedtaksperiodeId: UUID) {
-        try {
-            val commandExecutor = CommandExecutor(
-                session = session,
-                command = OppdaterVedtaksperiode(
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            try {
+                val commandExecutor = CommandExecutor(
+                    session = session,
+                    command = OppdaterVedtaksperiode(
+                        fødselsnummer = fødselsnummer,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        eventId = eventId,
+                        speilSnapshotRestClient = speilSnapshotRestClient
+                    ),
+                    spesialistOid = spesialistOID,
                     eventId = eventId,
-                    speilSnapshotRestClient = speilSnapshotRestClient
-                ),
-                spesialistOid = spesialistOID,
-                eventId = eventId,
-                nåværendeOppgave = null,
-                loggingData = *arrayOf(
-                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                    keyValue("eventId", eventId)
+                    nåværendeOppgave = null,
+                    loggingData = *arrayOf(
+                        keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                        keyValue("eventId", eventId)
+                    )
                 )
-            )
 
-            val resultater = measureAsHistogram("vedtaksperiode_endret") { commandExecutor.execute() }
-            publiserBehov(
-                spleisreferanse = eventId,
-                resultater = resultater,
-                commandExecutor = commandExecutor
-            )
-        } catch (e: Exception) {
-            log.error("Klarte ikke å oppdaterer vedtaksperiode", e)
-            throw RuntimeException("Klarte ikke å oppdaterer vedtaksperiode", e)
+                val resultater = measureAsHistogram("vedtaksperiode_endret") { commandExecutor.execute() }
+                publiserBehov(
+                    spleisreferanse = eventId,
+                    resultater = resultater,
+                    commandExecutor = commandExecutor,
+                    session = session
+                )
+            } catch (e: Exception) {
+                log.error("Klarte ikke å oppdaterer vedtaksperiode", e)
+                throw RuntimeException("Klarte ikke å oppdaterer vedtaksperiode", e)
+            }
         }
     }
 
     internal fun oppdaterVedtaksperioder(aktørId: Long) {
-        session.findVedtaksperioderByAktørId(aktørId)?.let {
-            log.info(
-                "Publiserer vedtaksperiode_endret_manuelt på {} for {}",
-                keyValue("vedtaksperioder", it.second),
-                keyValue("aktørId", aktørId)
-            )
-            it.second.forEach { vedtaksperiodeId ->
-                rapidsConnection.publish(
-                    it.first, JsonMessage.newMessage(
-                        mutableMapOf(
-                            "@id" to UUID.randomUUID(),
-                            "@event_name" to "vedtaksperiode_endret_manuelt",
-                            "@opprettet" to LocalDateTime.now(),
-                            "aktørId" to aktørId,
-                            "fødselsnummer" to it.first,
-                            "vedtaksperiodeId" to vedtaksperiodeId
-                        )
-                    ).toJson()
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            session.findVedtaksperioderByAktørId(aktørId)?.let {
+                log.info(
+                    "Publiserer vedtaksperiode_endret_manuelt på {} for {}",
+                    keyValue("vedtaksperioder", it.second),
+                    keyValue("aktørId", aktørId)
                 )
-            }
-        } ?: throw NoSuchElementException()
+                it.second.forEach { vedtaksperiodeId ->
+                    rapidsConnection.publish(
+                        it.first, JsonMessage.newMessage(
+                            mutableMapOf(
+                                "@id" to UUID.randomUUID(),
+                                "@event_name" to "vedtaksperiode_endret_manuelt",
+                                "@opprettet" to LocalDateTime.now(),
+                                "aktørId" to aktørId,
+                                "fødselsnummer" to it.first,
+                                "vedtaksperiodeId" to vedtaksperiodeId
+                            )
+                        ).toJson()
+                    )
+                }
+            } ?: throw NoSuchElementException()
+        }
     }
 
     internal fun rollbackPerson(rollback: Rollback) {
@@ -309,37 +324,41 @@ internal class SpleisbehovMediator(
             throw IllegalStateException("Stopper håndtering av behov når appen er i shutdown")
         }
 
-        val spleisbehovDBDto = requireNotNull(session.findBehov(eventId)) {
-            "Fant ikke behov med id $eventId"
-        }
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            val spleisbehovDBDto = requireNotNull(session.findBehov(eventId)) {
+                "Fant ikke behov med id $eventId"
+            }
 
-        val nåværendeOppgave = requireNotNull(findNåværendeOppgave(eventId)) {
-            "Svar på behov krever at det er en nåværende oppgave"
-        }
+            val nåværendeOppgave = requireNotNull(session.findNåværendeOppgave(eventId)) {
+                "Svar på behov krever at det er en nåværende oppgave"
+            }
 
-        val commandExecutor =
-            spleisbehovExecutor(
-                id = eventId,
-                spleisReferanse = spleisbehovDBDto.spleisReferanse,
-                spleisbehovJson = spleisbehovDBDto.data,
-                session = session,
-                nåværendeOppgave = nåværendeOppgave
+            val commandExecutor =
+                spleisbehovExecutor(
+                    id = eventId,
+                    spleisReferanse = spleisbehovDBDto.spleisReferanse,
+                    spleisbehovJson = spleisbehovDBDto.data,
+                    session = session,
+                    nåværendeOppgave = nåværendeOppgave
+                )
+            commandExecutor.resume(session, løsninger)
+
+            val resultater = commandExecutor.execute()
+            session.updateBehov(eventId, commandExecutor.command.toJson())
+            publiserBehov(
+                spleisreferanse = eventId,
+                resultater = resultater,
+                commandExecutor = commandExecutor,
+                session = session
             )
-        commandExecutor.resume(session, løsninger)
-
-        val resultater = commandExecutor.execute()
-        session.updateBehov(eventId, commandExecutor.command.toJson())
-        publiserBehov(
-            spleisreferanse = eventId,
-            resultater = resultater,
-            commandExecutor = commandExecutor
-        )
+        }
     }
 
     private fun publiserBehov(
         spleisreferanse: UUID,
         resultater: List<Command.Resultat>,
-        commandExecutor: CommandExecutor
+        commandExecutor: CommandExecutor,
+        session: Session
     ) {
         val behovstyper = resultater.filterIsInstance<Command.Resultat.HarBehov>().flatMap { it.behovstyper.toList() }
         if (behovstyper.isNotEmpty()) {
@@ -432,7 +451,4 @@ internal class SpleisbehovMediator(
         nåværendeOppgave = nåværendeOppgave,
         loggingData = *arrayOf(keyValue("vedtaksperiodeId", spleisReferanse), keyValue("eventId", id))
     )
-
-    fun findNåværendeOppgave(eventId: UUID) = session.findNåværendeOppgave(eventId)
-    fun deleteVedtak(vedtaksperiodeId: UUID) = session.deleteVedtak(vedtaksperiodeId)
 }
