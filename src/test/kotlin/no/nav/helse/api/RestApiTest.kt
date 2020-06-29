@@ -490,4 +490,3 @@ private fun infotrygdutbetalingerLøsning(
             ]
         """.trimIndent()
 )
-
