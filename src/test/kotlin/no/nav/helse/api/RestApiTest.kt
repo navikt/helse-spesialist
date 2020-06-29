@@ -156,7 +156,7 @@ internal class RestApiTest {
     @Test
     fun `hent oppgaver`() {
         val spleisbehovId = UUID.randomUUID()
-        val boenhetId = "1234"
+        val boenhetId = "235"
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,
             fødselsnummer = "12345",
@@ -178,7 +178,7 @@ internal class RestApiTest {
         assertEquals(HttpStatusCode.OK, response.status)
         val oppgaver = runBlocking { response.receive<List<SaksbehandleroppgaveDto>>() }
         assertTrue(oppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
-        assertTrue(oppgaver.any { it.boenhet.id == boenhetId })
+        assertTrue(oppgaver.any { it.boenhet.id == "0$boenhetId" })
     }
 
     @Test

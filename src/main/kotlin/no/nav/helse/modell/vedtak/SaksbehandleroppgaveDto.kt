@@ -1,11 +1,16 @@
 package no.nav.helse.modell.vedtak
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 data class NavnDto(val fornavn: String, val mellomnavn: String?, val etternavn: String)
-data class EnhetDto(val id: String, val navn: String)
+
+data class EnhetDto(@JsonProperty("id") private val _id: String, val navn: String) {
+    val id get() = if (_id.length == 3) "0$_id" else _id
+}
+
 data class SaksbehandleroppgaveDto(
     val spleisbehovId: UUID,
     val opprettet: LocalDateTime,
