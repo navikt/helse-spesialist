@@ -70,13 +70,7 @@ class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
@@ -236,7 +230,8 @@ class GodkjenningsbehovEndToEndTest {
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
 
         val warningTekst = "Personen tjener alt for mye"
-        val duplicatedWarningTekst = "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
+        val duplicatedWarningTekst =
+            "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
         val warningsJson = """
             {
               "aktiviteter": [
@@ -355,13 +350,7 @@ class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
@@ -391,13 +380,7 @@ class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
@@ -421,13 +404,7 @@ class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
@@ -456,13 +433,7 @@ class GodkjenningsbehovEndToEndTest {
         spleisbehovMediator.håndter(
             spleisbehovId,
             HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Mann
-            ),
+            hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
 
@@ -542,6 +513,8 @@ fun customAssertNotNull(value: Any?) {
     contract { returns() implies (value is Any) }
     assertNotNull(value)
 }
+
+private fun hentPersoninfoLøsning() = HentPersoninfoLøsning("Test", null, "Testsen", LocalDate.now(), Kjønn.Mann)
 
 private fun infotrygdutbetalingerLøsning(
     fom: LocalDate = LocalDate.of(2020, 1, 1),
