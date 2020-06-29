@@ -72,7 +72,7 @@ fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
 fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.run(
     queryOf(
         """
-            SELECT *, (SELECT json_agg(melding) meldinger FROM warning where spleisbehov_ref=o.event_id), sot.type as saksbehandleroppgavetype
+            SELECT *, (SELECT json_agg(distinct melding) meldinger FROM warning where spleisbehov_ref=o.event_id), sot.type as saksbehandleroppgavetype
             FROM oppgave o
                    INNER JOIN vedtak v on o.vedtak_ref = v.id
                    INNER JOIN person p on v.person_ref = p.id

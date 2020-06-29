@@ -232,6 +232,64 @@ class GodkjenningsbehovEndToEndTest {
     }
 
     @Test
+    fun `Advarsler dedupliseres i oppgaver til saksbehandler`() {
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+
+        val warningTekst = "Personen tjener alt for mye"
+        val duplicatedWarningTekst = "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
+        val warningsJson = """
+            {
+              "aktiviteter": [
+                {
+                  "alvorlighetsgrad": "WARN",
+                  "melding": "$warningTekst",
+                  "detaljer": {},
+                  "tidsstempel": "2020-05-05 09:09:01.797"
+                },
+                {
+                  "alvorlighetsgrad": "WARN",
+                  "melding": "$duplicatedWarningTekst",
+                  "detaljer": {},
+                  "tidsstempel": "2020-05-05 19:09:01.797"
+                },
+                {
+                  "alvorlighetsgrad": "WARN",
+                  "melding": "$duplicatedWarningTekst",
+                  "detaljer": {},
+                  "tidsstempel": "2020-05-05 19:19:01.797"
+                }
+              ]
+            }
+        """
+        sendGodkjenningsbehov(warnings = warningsJson)
+
+        val warnings = using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT * FROM warning where spleisbehov_ref=?",
+                    spleisbehovId
+                ).map { it.string("melding") }.asList
+            )
+        }
+        assertEquals(listOf(warningTekst, duplicatedWarningTekst, duplicatedWarningTekst), warnings)
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testsen",
+                LocalDate.now(),
+                Kjønn.Kvinne
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        assertEquals(2, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
+    }
+
+    @Test
     fun `Persisterer løsning for HentInfotrygdutbetalinger`() {
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
         PersoninfoLøsningMessage.Factory(rapid, spleisbehovMediator)
