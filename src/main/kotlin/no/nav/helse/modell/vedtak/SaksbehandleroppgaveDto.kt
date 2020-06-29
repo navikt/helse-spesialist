@@ -16,7 +16,8 @@ data class SaksbehandleroppgaveDto(
     val fødselsnummer: String,
     val aktørId: String,
     val antallVarsler: Int,
-    val type: Saksbehandleroppgavetype?
+    val type: Saksbehandleroppgavetype?,
+    var boenhet: EnhetDto
 )
 
 enum class Saksbehandleroppgavetype {

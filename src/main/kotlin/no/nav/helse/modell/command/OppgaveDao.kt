@@ -4,6 +4,7 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -77,6 +78,7 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.ru
                    INNER JOIN vedtak v on o.vedtak_ref = v.id
                    INNER JOIN person p on v.person_ref = p.id
                    INNER JOIN person_info pi on p.info_ref = pi.id
+                   LEFT JOIN (select navn as enhet_navn, id as enhet_id from enhet) e on p.enhet_ref = enhet_id
                    LEFT JOIN saksbehandleroppgavetype sot on o.event_id = sot.spleisbehov_ref
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             ORDER BY opprettet DESC
@@ -115,7 +117,8 @@ private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
     aktørId = it.long("aktor_id").toString(),
     fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
     antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count(),
-    type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) }
+    type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) },
+    boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn"))
 )
 
 private fun oppgaveDto(it: Row) = OppgaveDto(
