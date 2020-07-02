@@ -191,16 +191,6 @@ internal class SpleisbehovMediator(
         }
     }
 
-    fun håndter(eventId: UUID, risikovurderingMessage: RisikovurderingMessage) {
-        log.info(
-            "Mottok risikovurdering {}, {}",
-            keyValue("vedtaksperiodeId", risikovurderingMessage.vedtaksperiodeId),
-            keyValue("eventId", eventId)
-        )
-
-        TODO("Håndter risikovurdering")
-    }
-
     fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
         log.info(
             "Mottok vedtaksperiode endret {}, {}",
