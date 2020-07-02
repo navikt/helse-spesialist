@@ -16,7 +16,6 @@ import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
-import no.nav.helse.modell.person.findVedtaksperioderByAktørId
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.deleteVedtak
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import kotlin.NoSuchElementException
 
 internal class SpleisbehovMediator(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
@@ -105,12 +103,6 @@ internal class SpleisbehovMediator(
         }
     }
 
-    internal fun håndter(annullering: AnnulleringMessage) {
-        log.info("Publiserer annullering på fagsystemId {}", keyValue("fagsystemId", annullering.fagsystemId))
-        val annulleringCommand = AnnulleringCommand(rapidsConnection, annullering)
-        annulleringCommand.execute(sessionOf(dataSource))
-    }
-
     internal fun håndter(
         eventId: UUID,
         behandlendeEnhet: HentEnhetLøsning?,
@@ -147,6 +139,44 @@ internal class SpleisbehovMediator(
         log.info("Mottok påminnelse for Spleis-behov {}", keyValue("eventId", eventId))
         val løsninger = Løsninger().also { it.add(påminnelseMessage) }
         resume(eventId, løsninger)
+    }
+
+    internal fun håndter(annullering: AnnulleringMessage) {
+        log.info("Publiserer annullering på fagsystemId {}", keyValue("fagsystemId", annullering.fagsystemId))
+        val annulleringCommand = AnnulleringCommand(rapidsConnection, annullering)
+        annulleringCommand.execute(sessionOf(dataSource))
+    }
+
+    fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
+        log.info(
+            "Mottok vedtaksperiode endret {}, {}",
+            keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
+            keyValue("eventId", eventId)
+        )
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
+                fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
+            )
+            oppdaterVedtaksperiodeCommand.execute(session)
+        }
+    }
+
+    fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
+        log.info(
+            "Mottok vedtaksperiode forkastet {}, {}",
+            keyValue("vedtaksperiodeId", vedtaksperiodeForkastetMessage.vedtaksperiodeId),
+            keyValue("eventId", eventId)
+        )
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId,
+                fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer
+            )
+            oppdaterVedtaksperiodeCommand.execute(session)
+        }
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
@@ -188,64 +218,6 @@ internal class SpleisbehovMediator(
                     session.deleteVedtak(it)
                 }
             }
-        }
-    }
-
-    fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
-        log.info(
-            "Mottok vedtaksperiode endret {}, {}",
-            keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
-            keyValue("eventId", eventId)
-        )
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
-                speilSnapshotRestClient = speilSnapshotRestClient,
-                vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
-                fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
-            )
-            oppdaterVedtaksperiodeCommand.execute(session)
-        }
-    }
-
-    fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
-        log.info(
-            "Mottok vedtaksperiode forkastet {}, {}",
-            keyValue("vedtaksperiodeId", vedtaksperiodeForkastetMessage.vedtaksperiodeId),
-            keyValue("eventId", eventId)
-        )
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
-                speilSnapshotRestClient = speilSnapshotRestClient,
-                vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId,
-                fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer
-            )
-            oppdaterVedtaksperiodeCommand.execute(session)
-        }
-    }
-
-    internal fun oppdaterVedtaksperioder(aktørId: Long) {
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            session.findVedtaksperioderByAktørId(aktørId)?.let {
-                log.info(
-                    "Publiserer vedtaksperiode_endret_manuelt på {} for {}",
-                    keyValue("vedtaksperioder", it.second),
-                    keyValue("aktørId", aktørId)
-                )
-                it.second.forEach { vedtaksperiodeId ->
-                    rapidsConnection.publish(
-                        it.first, JsonMessage.newMessage(
-                            mutableMapOf(
-                                "@id" to UUID.randomUUID(),
-                                "@event_name" to "vedtaksperiode_endret_manuelt",
-                                "@opprettet" to LocalDateTime.now(),
-                                "aktørId" to aktørId,
-                                "fødselsnummer" to it.first,
-                                "vedtaksperiodeId" to vedtaksperiodeId
-                            )
-                        ).toJson()
-                    )
-                }
-            } ?: throw NoSuchElementException()
         }
     }
 

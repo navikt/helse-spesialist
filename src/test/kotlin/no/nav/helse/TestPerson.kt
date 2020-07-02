@@ -61,10 +61,6 @@ class TestPerson(private val dataSource: DataSource) {
         )
     }
 
-    fun oppdaterVedtaksperioder(aktørId: String) {
-        mediator.oppdaterVedtaksperioder(aktørId.toLong())
-    }
-
     fun sendPersoninfo(
         eventId: UUID,
         infotrygdUtbetalingerJson: Any = "{}"
