@@ -6,13 +6,12 @@ import kotliquery.using
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
-import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.Behov
 import no.nav.helse.modell.Godkjenningsbehov
-import no.nav.helse.modell.OppdaterVedtaksperiode
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
+import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -209,7 +208,6 @@ internal class SpleisbehovMediator(
             keyValue("eventId", eventId)
         )
         oppdaterVedtaksperiode(
-            eventId = eventId,
             fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId
         )
@@ -222,43 +220,19 @@ internal class SpleisbehovMediator(
             keyValue("eventId", eventId)
         )
         oppdaterVedtaksperiode(
-            eventId = eventId,
             fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId
         )
     }
 
-    private fun oppdaterVedtaksperiode(eventId: UUID, fødselsnummer: String, vedtaksperiodeId: UUID) {
+    private fun oppdaterVedtaksperiode(fødselsnummer: String, vedtaksperiodeId: UUID) {
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            try {
-                val commandExecutor = CommandExecutor(
-                    session = session,
-                    command = OppdaterVedtaksperiode(
-                        fødselsnummer = fødselsnummer,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        eventId = eventId,
-                        speilSnapshotRestClient = speilSnapshotRestClient
-                    ),
-                    spesialistOid = spesialistOID,
-                    eventId = eventId,
-                    nåværendeOppgave = null,
-                    loggingData = *arrayOf(
-                        keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                        keyValue("eventId", eventId)
-                    )
-                )
-
-                val resultater = measureAsHistogram("vedtaksperiode_endret") { commandExecutor.execute() }
-                publiserBehov(
-                    spleisreferanse = eventId,
-                    resultater = resultater,
-                    commandExecutor = commandExecutor,
-                    session = session
-                )
-            } catch (e: Exception) {
-                log.error("Klarte ikke å oppdaterer vedtaksperiode", e)
-                throw RuntimeException("Klarte ikke å oppdaterer vedtaksperiode", e)
-            }
+            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer
+            )
+            oppdaterVedtaksperiodeCommand.execute(session)
         }
     }
 
