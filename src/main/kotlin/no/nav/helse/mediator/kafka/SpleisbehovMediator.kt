@@ -11,6 +11,7 @@ import no.nav.helse.modell.Behov
 import no.nav.helse.modell.Godkjenningsbehov
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
+import no.nav.helse.modell.command.ny.AnnulleringCommand
 import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -104,11 +105,10 @@ internal class SpleisbehovMediator(
         }
     }
 
-    internal fun håndter(vedtaksperiodeId: UUID, annullering: AnnulleringMessage) {
-        log.info("Publiserer annullering på fagsystemId ${annullering.fagsystemId} for vedtaksperiode $vedtaksperiodeId")
-        rapidsConnection.publish(annullering.fødselsnummer, annullering.toJson().also {
-            sikkerLogg.info("sender annullering for fagsystemId=${annullering.fagsystemId} for vedtaksperiodeId=$vedtaksperiodeId:\n\t$it")
-        })
+    internal fun håndter(annullering: AnnulleringMessage) {
+        log.info("Publiserer annullering på fagsystemId {}", keyValue("fagsystemId", annullering.fagsystemId))
+        val annulleringCommand = AnnulleringCommand(rapidsConnection, annullering)
+        annulleringCommand.execute(sessionOf(dataSource))
     }
 
     internal fun håndter(
@@ -197,10 +197,14 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
-        oppdaterVedtaksperiode(
-            fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId
-        )
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
+                fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
+            )
+            oppdaterVedtaksperiodeCommand.execute(session)
+        }
     }
 
     fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
@@ -209,18 +213,11 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", vedtaksperiodeForkastetMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
-        oppdaterVedtaksperiode(
-            fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId
-        )
-    }
-
-    private fun oppdaterVedtaksperiode(fødselsnummer: String, vedtaksperiodeId: UUID) {
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
                 speilSnapshotRestClient = speilSnapshotRestClient,
-                vedtaksperiodeId = vedtaksperiodeId,
-                fødselsnummer = fødselsnummer
+                vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId,
+                fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer
             )
             oppdaterVedtaksperiodeCommand.execute(session)
         }

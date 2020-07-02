@@ -100,7 +100,6 @@ internal fun Application.vedtaksperiodeApi(
             }
             post("/api/annullering") {
                 val annullering = call.receive<Annullering>()
-                val vedtaksperiodeId = UUID.fromString(annullering.vedtaksperiodeId)
 
                 val message = AnnulleringMessage(
                     aktørId = annullering.aktørId,
@@ -110,7 +109,7 @@ internal fun Application.vedtaksperiodeApi(
                     saksbehandler = annullering.saksbehandlerIdent
                 )
 
-                spleisbehovMediator.håndter(vedtaksperiodeId, message)
+                spleisbehovMediator.håndter(message)
                 call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
             }
         }
