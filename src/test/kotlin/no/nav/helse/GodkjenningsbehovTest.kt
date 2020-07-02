@@ -2,7 +2,6 @@ package no.nav.helse
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.Godkjenningsbehov
 import no.nav.helse.modell.arbeidsgiver.findArbeidsgiverByOrgnummer
 import no.nav.helse.modell.command.*
@@ -205,7 +204,7 @@ class GodkjenningsbehovTest {
         spleisExecutor.execute()
 
         assertNotNull(findVedtaksperiode(vedtaksperiodeId))
-        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        val saksbehandlerOppgaver = sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }
         assertFalse(saksbehandlerOppgaver.isNullOrEmpty())
     }
 
@@ -314,12 +313,12 @@ class GodkjenningsbehovTest {
             spleisExecutor.execute()
         }
 
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             assertEquals("OpprettVedtakCommand", session.findNåværendeOppgave(eventId)?.oppgaveType)
         }
     }
 
-    private fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = using(sessionOf(dataSource)) { session ->
+    private fun findVedtaksperiode(vedtaksperiodeId: UUID): Int? = sessionOf(dataSource).use { session ->
         session.run(
             queryOf("SELECT id FROM vedtak WHERE vedtaksperiode_id=?;", vedtaksperiodeId)
                 .map { it.int("id") }

@@ -2,7 +2,6 @@ package no.nav.helse.mediator.kafka
 
 import kotliquery.Session
 import kotliquery.sessionOf
-import kotliquery.using
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
@@ -44,14 +43,14 @@ internal class SpleisbehovMediator(
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             if (session.findBehov(godkjenningMessage.id) != null) {
                 log.warn(
                     "Mottok duplikat godkjenningsbehov, {}, {}",
                     keyValue("eventId", godkjenningMessage.id),
                     keyValue("vedtaksperiodeId", godkjenningMessage.vedtaksperiodeId)
                 )
-                return@using
+                return@use
             }
 
             val spleisbehovExecutor = CommandExecutor(
@@ -155,14 +154,12 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
-                speilSnapshotRestClient = speilSnapshotRestClient,
-                vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
-                fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
-            )
-            oppdaterVedtaksperiodeCommand.execute(session)
-        }
+        val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
+            fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
+        )
+        sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
     fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
@@ -171,20 +168,18 @@ internal class SpleisbehovMediator(
             keyValue("vedtaksperiodeId", vedtaksperiodeForkastetMessage.vedtaksperiodeId),
             keyValue("eventId", eventId)
         )
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
-                speilSnapshotRestClient = speilSnapshotRestClient,
-                vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId,
-                fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer
-            )
-            oppdaterVedtaksperiodeCommand.execute(session)
-        }
+        val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId,
+            fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer
+        )
+        sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
-                val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@using
+                val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@use
                 log.info(
                     "Vedtaksperiode {} i Spleis gikk TIL_INFOTRYGD",
                     keyValue("vedtaksperiodeId", vedtaksperiodeId)
@@ -201,10 +196,10 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(tilbakerullingMessage: TilbakerullingMessage) {
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             tilbakerullingMessage.vedtakperioderSlettet.forEach {
                 session.findBehovMedSpleisReferanse(it)?.also { spleisbehovDBDto ->
-                    val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@using
+                    val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@use
                     log.info(
                         "Invaliderer oppgave {} fordi vedtaksperiode {} ble slettet",
                         keyValue("oppgaveId", nåværendeOppgave.id),
@@ -240,7 +235,7 @@ internal class SpleisbehovMediator(
             throw IllegalStateException("Stopper håndtering av behov når appen er i shutdown")
         }
 
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val spleisbehovDBDto = requireNotNull(session.findBehov(eventId)) {
                 "Fant ikke behov med id $eventId"
             }

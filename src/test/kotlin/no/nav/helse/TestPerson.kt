@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
@@ -83,7 +82,7 @@ class TestPerson(private val dataSource: DataSource) {
         mediator.håndter(TilbakerullingMessage(fødselsnummer, vedtaksperiodeIder.toList()))
     }
 
-    fun settInfotrygdSistOppdatert(sistOppdatert: LocalDate) = using(sessionOf(dataSource)) { session ->
+    fun settInfotrygdSistOppdatert(sistOppdatert: LocalDate) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf(
                 "UPDATE person SET infotrygdutbetalinger_oppdatert=? WHERE fodselsnummer=?;",

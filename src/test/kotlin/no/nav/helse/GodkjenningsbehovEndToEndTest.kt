@@ -3,7 +3,6 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.node.ObjectNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.command.findBehov
@@ -73,7 +72,7 @@ class GodkjenningsbehovEndToEndTest {
             hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        val saksbehandlerOppgaver = sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }
         assertFalse(saksbehandlerOppgaver.isEmpty())
         assertTrue(saksbehandlerOppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
 
@@ -152,7 +151,7 @@ class GodkjenningsbehovEndToEndTest {
         """
         sendGodkjenningsbehov(warnings = warningsJson)
 
-        val warnings = using(sessionOf(dataSource)) { session ->
+        val warnings = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM warning where spleisbehov_ref=?",
@@ -174,7 +173,7 @@ class GodkjenningsbehovEndToEndTest {
             ),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        val saksbehandlerOppgaver = sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }
         assertEquals(1, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
     }
 
@@ -196,7 +195,7 @@ class GodkjenningsbehovEndToEndTest {
             ),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        val saksbehandlerOppgaver = sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }
         assertEquals(
             Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE,
             saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.type
@@ -221,7 +220,7 @@ class GodkjenningsbehovEndToEndTest {
             ),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        val saksbehandlerOppgaver = sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }
         assertNull(saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.type)
     }
 
@@ -258,7 +257,7 @@ class GodkjenningsbehovEndToEndTest {
         """
         sendGodkjenningsbehov(warnings = warningsJson)
 
-        val warnings = using(sessionOf(dataSource)) { session ->
+        val warnings = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM warning where spleisbehov_ref=?",
@@ -280,7 +279,7 @@ class GodkjenningsbehovEndToEndTest {
             ),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        val saksbehandlerOppgaver = using(sessionOf(dataSource)) { it.findSaksbehandlerOppgaver() }
+        val saksbehandlerOppgaver = sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }
         assertEquals(2, saksbehandlerOppgaver.first { it.vedtaksperiodeId == vedtaksperiodeId }.antallVarsler)
     }
 
@@ -292,7 +291,7 @@ class GodkjenningsbehovEndToEndTest {
         rapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
         rapid.sendTestMessage(personinfoLøsningJson(spleisbehovId, vedtaksperiodeId))
 
-        val utbetaling = using(sessionOf(dataSource)) { session ->
+        val utbetaling = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM infotrygdutbetalinger WHERE id=?",
@@ -386,7 +385,7 @@ class GodkjenningsbehovEndToEndTest {
 
         assertEquals(
             Oppgavestatus.Invalidert,
-            using(sessionOf(dataSource)) { it.findNåværendeOppgave(spleisbehovId)?.status })
+            sessionOf(dataSource).use { it.findNåværendeOppgave(spleisbehovId)?.status })
     }
 
     @ExperimentalContracts

@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.command.findBehov
@@ -66,7 +65,7 @@ internal class GodkjenningsbehovMediatorTest {
         person.sendGodkjenningMessage(eventId = eventId, vedtaksperiodeId = vedtaksperiodeId)
         person.sendPersoninfo(eventId = eventId)
 
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             assertNotEquals(Oppgavestatus.Invalidert, session.findNåværendeOppgave(eventId)?.status)
             assertNotNull(session.findVedtak(vedtaksperiodeId))
             person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId)
@@ -88,7 +87,7 @@ internal class GodkjenningsbehovMediatorTest {
         person.rullTilbake(UUID.randomUUID(), vedtaksperiodeId1)
         person.sendGodkjenningMessage(eventId = eventId2, vedtaksperiodeId = vedtaksperiodeId2)
 
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             assertNull(session.findVedtak(vedtaksperiodeId1))
             assertNotNull(session.findVedtak(vedtaksperiodeId2))
         }

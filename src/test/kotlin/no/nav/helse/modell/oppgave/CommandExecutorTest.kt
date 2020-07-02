@@ -3,7 +3,6 @@ package no.nav.helse.modell.oppgave
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.CommandExecutor
 import no.nav.helse.modell.command.MacroCommand
@@ -40,7 +39,7 @@ class CommandExecutorTest {
             nåværendeOppgave = null
         )
         executor.execute()
-        val oppgaverForBehov = using(sessionOf(dataSource, returnGeneratedKey=true)) { session ->
+        val oppgaverForBehov = sessionOf(dataSource, returnGeneratedKey=true).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM oppgave where event_id=?;",
