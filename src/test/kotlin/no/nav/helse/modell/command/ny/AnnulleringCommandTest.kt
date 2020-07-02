@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 
 internal class AnnulleringCommandTest {
     @Test
-    fun sd() {
+    fun `annullering-command legger annulleringsmelding på rapid`() {
         val dataSource = setupDataSourceMedFlyway()
         val testRapid = TestRapid()
         val annulleringMessage = AnnulleringMessage(
@@ -20,7 +20,7 @@ internal class AnnulleringCommandTest {
             saksbehandler = "saksbehandler"
         )
         val annulleringCommand = AnnulleringCommand(testRapid, annulleringMessage)
-        annulleringCommand.execute(sessionOf(dataSource, returnGeneratedKey = true))
+        sessionOf(dataSource, returnGeneratedKey = true).use(annulleringCommand::execute)
 
         val kanselleringsmelding = testRapid.inspektør.message(0)
 

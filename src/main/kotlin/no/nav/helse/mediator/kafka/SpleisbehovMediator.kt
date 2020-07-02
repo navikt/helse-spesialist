@@ -13,6 +13,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
 import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
+import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -144,7 +145,7 @@ internal class SpleisbehovMediator(
     internal fun håndter(annullering: AnnulleringMessage) {
         log.info("Publiserer annullering på fagsystemId {}", keyValue("fagsystemId", annullering.fagsystemId))
         val annulleringCommand = AnnulleringCommand(rapidsConnection, annullering)
-        annulleringCommand.execute(sessionOf(dataSource))
+        sessionOf(dataSource).use(annulleringCommand::execute)
     }
 
     fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
@@ -223,18 +224,8 @@ internal class SpleisbehovMediator(
 
     internal fun rollbackPerson(rollback: Rollback) {
         log.info("Publiserer rollback på aktør: ${rollback.aktørId}")
-        rapidsConnection.publish(
-            rollback.fødselsnummer, JsonMessage.newMessage(
-                mutableMapOf(
-                    "@id" to UUID.randomUUID(),
-                    "@event_name" to "rollback_person",
-                    "@opprettet" to LocalDateTime.now(),
-                    "aktørId" to rollback.aktørId,
-                    "fødselsnummer" to rollback.fødselsnummer,
-                    "personVersjon" to rollback.personVersjon
-                )
-            ).toJson()
-        )
+        val rollbackPersonCommand = RollbackPersonCommand(rapidsConnection, rollback)
+        sessionOf(dataSource).use(rollbackPersonCommand::execute)
     }
 
     internal fun rollbackDeletePerson(rollback: RollbackDelete) {

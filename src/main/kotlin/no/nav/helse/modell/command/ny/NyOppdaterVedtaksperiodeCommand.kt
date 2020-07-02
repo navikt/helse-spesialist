@@ -35,9 +35,4 @@ internal class NyOppdaterVedtaksperiodeCommand(
             }
             NyCommand.Resultat.Ok
         }
-
-
-    override fun resume(session: Session): NyCommand.Resultat {
-        throw NotImplementedError()
-    }
 }

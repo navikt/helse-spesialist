@@ -39,8 +39,4 @@ class AnnulleringCommand(
             "saksbehandler" to saksbehandler
         )
     ).toJson()
-
-    override fun resume(session: Session): NyCommand.Resultat {
-        TODO("Not yet implemented")
-    }
 }
