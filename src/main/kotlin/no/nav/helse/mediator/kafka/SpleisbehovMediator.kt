@@ -13,6 +13,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
 import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
+import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -230,17 +231,8 @@ internal class SpleisbehovMediator(
 
     internal fun rollbackDeletePerson(rollback: RollbackDelete) {
         log.info("Publiserer rollback_delete på aktør: ${rollback.aktørId}")
-        rapidsConnection.publish(
-            JsonMessage.newMessage(
-                mutableMapOf(
-                    "@id" to UUID.randomUUID(),
-                    "@event_name" to "rollback_person_delete",
-                    "@opprettet" to LocalDateTime.now(),
-                    "aktørId" to rollback.aktørId,
-                    "fødselsnummer" to rollback.fødselsnummer
-                )
-            ).toJson()
-        )
+        val rollbackDeletePersonCommand = RollbackDeletePersonCommand(rapidsConnection, rollback)
+        sessionOf(dataSource).use(rollbackDeletePersonCommand::execute)
     }
 
     private fun resume(eventId: UUID, løsninger: Løsninger) {
