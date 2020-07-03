@@ -14,15 +14,19 @@ abstract class NyMacroCommand() : NyCommand {
     override fun resume(session: Session): NyCommand.Resultat {
         val currentCommandType = session.finnCurrentCommandType(this.type)
         val (first, tail) = commands.dropWhile { it.type != currentCommandType }.split()
-        first.resume(session)
-        return tail.execute(session)
+        val resultat = first.resume(session)
+        session.oppdaterCommandResultat(resultat, first, this.type)
+        return if (resultat.suspends) {
+            resultat
+        } else {
+            tail.execute(session)
+        }
     }
 
     private fun List<NyCommand>.execute(session: Session) =
         asSequence()
             .map { subCommand -> subCommand.execute(session) to subCommand }
-            .firstOrNull { (resultat, _) -> resultat.suspends }
-            ?.also { (resultat, command) ->
+            .onEach { (resultat, command) ->
                 persister(
                     session = session,
                     subCommand = command,
@@ -30,6 +34,7 @@ abstract class NyMacroCommand() : NyCommand {
                     resultat = resultat
                 )
             }
+            .firstOrNull { (resultat, _) -> resultat.suspends }
             ?.let { (resultat, _) -> resultat }
             ?: NyCommand.Resultat.Ok
 
@@ -56,10 +61,27 @@ fun Session.persisterCommand(subCommand: NyCommand, type: String, resultat: NyCo
     )
 }
 
+fun Session.oppdaterCommandResultat(resultat: NyCommand.Resultat, subCommand: NyCommand, macroType: String): Long? {
+    @Language("PostgreSQL")
+    val query =
+        """UPDATE command SET resultat=:resultat WHERE macro_type=:macro_type AND command_type=:command_type"""
+    return run(
+        queryOf(
+            query,
+            mapOf(
+                "resultat" to resultat.name,
+                "macro_type" to macroType,
+                "command_type" to subCommand.type
+            )
+        )
+            .asUpdateAndReturnGeneratedKey
+    )
+}
+
 fun Session.finnCurrentCommandType(macroType: String): String? {
     @Language("PostgreSQL")
     val query =
-        """SELECT command_type FROM command WHERE macro_type=:macro_type ORDER BY id DESC LIMIT 1"""
+        """SELECT command_type FROM command WHERE macro_type=:macro_type AND resultat != 'Ok' ORDER BY id DESC LIMIT 1"""
     return run(queryOf(query, mapOf("macro_type" to macroType))
         .map { it.string("command_type") }
         .asSingle

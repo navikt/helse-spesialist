@@ -11,18 +11,18 @@ internal class NyMacroCommandTest {
     val dataSource = setupDataSourceMedFlyway()
 
     @Test
-    fun `macrocommand utfører undercommands`() {
+    fun `utfører undercommands`() {
         val command1 = command()
         val command2 = command()
         val macro = macroOf(command1, command2)
-        sessionOf(dataSource).use(macro::execute)
+        sessionOf(dataSource, returnGeneratedKey = true).use(macro::execute)
 
         assertEquals(1, command1.executions)
         assertEquals(1, command2.executions)
     }
 
     @Test
-    fun `macrocommand kan resume undercommands`() {
+    fun `kan resume undercommands`() {
         val firstCommand = command()
         val suspendingCommand = command() { NyCommand.Resultat.AvventerSystem }
         val lastCommand = command()
@@ -41,7 +41,7 @@ internal class NyMacroCommandTest {
     }
 
     @Test
-    fun `macrocommand kan resume flere undercommands`() {
+    fun `kan resume flere undercommands`() {
         val firstCommand = command()
         val firstSuspendingCommand = command() { NyCommand.Resultat.AvventerSystem }
         val secondSuspendingCommand = command() { NyCommand.Resultat.AvventerSystem }
