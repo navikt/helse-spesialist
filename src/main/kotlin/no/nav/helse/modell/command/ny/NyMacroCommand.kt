@@ -4,18 +4,20 @@ import kotliquery.Session
 import kotliquery.queryOf
 import org.intellij.lang.annotations.Language
 
-abstract class NyMacroCommand() : NyCommand {
-    internal abstract val commands: List<NyCommand>
+class NyMacroCommand(
+    private val commands: List<NyCommand>,
+    override val type: String,
+    private val id: Long
+) : NyCommand {
 
-    override fun execute(session: Session): NyCommand.Resultat {
-        return commands.execute(session)
-    }
+    override fun execute(session: Session) = commands.execute(session)
 
     override fun resume(session: Session): NyCommand.Resultat {
-        val currentCommandType = session.finnCurrentCommandType(this.type)
+        val currentCommandType = session.finnCurrentCommandType(this.id)
         val (first, tail) = commands.dropWhile { it.type != currentCommandType }.split()
-        val resultat = first.resume(session)
-        session.oppdaterCommandResultat(resultat, first, this.type)
+        val resultat = first.resume(session).also {
+            session.persisterCommand(type = first.type, parent = id)
+        }
         return if (resultat.suspends) {
             resultat
         } else {
@@ -27,62 +29,41 @@ abstract class NyMacroCommand() : NyCommand {
         asSequence()
             .map { subCommand -> subCommand.execute(session) to subCommand }
             .onEach { (resultat, command) ->
-                persister(
-                    session = session,
-                    subCommand = command,
-                    type = this@NyMacroCommand.type,
-                    resultat = resultat
+                session.persisterCommand(
+                    type = command.type,
+                    parent = id
                 )
             }
             .firstOrNull { (resultat, _) -> resultat.suspends }
             ?.let { (resultat, _) -> resultat }
             ?: NyCommand.Resultat.Ok
-
-    private fun persister(session: Session, subCommand: NyCommand, type: String, resultat: NyCommand.Resultat) {
-        session.persisterCommand(subCommand, type, resultat)
-    }
 }
 
 fun <T> List<T>.split() = Pair(first(), drop(1))
 
-fun Session.persisterCommand(subCommand: NyCommand, type: String, resultat: NyCommand.Resultat): Long? {
+fun Session.persisterCommand(type: String, parent: Long?): Long? {
     @Language("PostgreSQL")
     val query =
-        """INSERT INTO command (macro_type, command_type, resultat) VALUES (:macro_type, :command_type, :resultat)"""
+        """
+            INSERT INTO command (command_type, parent_ref)
+            VALUES (:command_type, :parent)
+        """
     return run(
         queryOf(
             query,
             mapOf(
-                "macro_type" to type,
-                "command_type" to subCommand.type,
-                "resultat" to resultat.name
+                "command_type" to type,
+                "parent" to parent
             )
         ).asUpdateAndReturnGeneratedKey
     )
 }
 
-fun Session.oppdaterCommandResultat(resultat: NyCommand.Resultat, subCommand: NyCommand, macroType: String): Long? {
+fun Session.finnCurrentCommandType(id: Long): String? {
     @Language("PostgreSQL")
     val query =
-        """UPDATE command SET resultat=:resultat WHERE macro_type=:macro_type AND command_type=:command_type"""
-    return run(
-        queryOf(
-            query,
-            mapOf(
-                "resultat" to resultat.name,
-                "macro_type" to macroType,
-                "command_type" to subCommand.type
-            )
-        )
-            .asUpdateAndReturnGeneratedKey
-    )
-}
-
-fun Session.finnCurrentCommandType(macroType: String): String? {
-    @Language("PostgreSQL")
-    val query =
-        """SELECT command_type FROM command WHERE macro_type=:macro_type AND resultat != 'Ok' ORDER BY id DESC LIMIT 1"""
-    return run(queryOf(query, mapOf("macro_type" to macroType))
+        """SELECT command_type FROM command WHERE parent_ref=:id ORDER BY id DESC LIMIT 1"""
+    return run(queryOf(query, mapOf("id" to id))
         .map { it.string("command_type") }
         .asSingle
     )
