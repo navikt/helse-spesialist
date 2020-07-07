@@ -12,7 +12,7 @@ data class EnhetDto(@JsonProperty("id") private val _id: String, val navn: Strin
 }
 
 data class SaksbehandleroppgaveDto(
-    val spleisbehovId: UUID,
+    val oppgavereferanse: UUID,
     val opprettet: LocalDateTime,
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,

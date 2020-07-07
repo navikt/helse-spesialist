@@ -74,10 +74,10 @@ internal fun Application.vedtaksperiodeApi(
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
                 val oppgave =
-                    using(sessionOf(dataSource)) { session -> session.findNåværendeOppgave(godkjenning.behovId) }
+                    using(sessionOf(dataSource)) { session -> session.findNåværendeOppgave(godkjenning.oppgavereferanse) }
                 if (oppgave == null) {
                     call.respondText(
-                        "Dette vedtaket har ingen aktiv saksbehandler oppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
+                        "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
                         status = HttpStatusCode.Conflict
                     )
                 }
@@ -95,7 +95,7 @@ internal fun Application.vedtaksperiodeApi(
                     kommentar = godkjenning.kommentar
                 )
 
-                spleisbehovMediator.håndter(godkjenning.behovId, løsning)
+                spleisbehovMediator.håndter(godkjenning.oppgavereferanse, løsning)
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
             post("/api/annullering") {
@@ -124,7 +124,7 @@ fun validerSaksbehandlerInput(godkjenning: Godkjenning) {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Godkjenning(
-    val behovId: UUID,
+    val oppgavereferanse: UUID,
     val godkjent: Boolean,
     val saksbehandlerIdent: String,
     val årsak: String?,

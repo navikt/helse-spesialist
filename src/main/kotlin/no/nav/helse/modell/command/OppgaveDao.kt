@@ -104,7 +104,7 @@ fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
 )
 
 private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
-    spleisbehovId = UUID.fromString(it.string("event_id")),
+    oppgavereferanse = UUID.fromString(it.string("event_id")),
     opprettet = it.localDateTime("opprettet"),
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
     periodeFom = it.localDate("fom"),
