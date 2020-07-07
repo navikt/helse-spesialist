@@ -39,11 +39,13 @@ internal class OppdaterPersonCommand(
 
         override fun resume(session: Session, løsninger: Løsninger) {
             val løsning = løsninger.løsning<HentPersoninfoLøsning>()
-            session.updateNavn(
+            session.updatePersoninfo(
                 fødselsnummer = fødselsnummer.toLong(),
                 fornavn = løsning.fornavn,
                 mellomnavn = løsning.mellomnavn,
-                etternavn = løsning.etternavn
+                etternavn = løsning.etternavn,
+                fødselsdato = løsning.fødselsdato,
+                kjønn = løsning.kjønn
             )
         }
     }

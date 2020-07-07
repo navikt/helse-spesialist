@@ -6,6 +6,8 @@ import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.objectMapper
+import org.intellij.lang.annotations.Language
+import java.time.LocalDate
 import java.util.*
 
 internal fun Session.findPersonByFødselsnummer(fødselsnummer: Long): Int? = this.run(
@@ -40,14 +42,25 @@ internal fun Session.findInfotrygdutbetalinger(fødselsnummer: Long): String? =
     )
 
 
-internal fun Session.insertNavn(fornavn: String, mellomnavn: String?, etternavn: String): Int =
+internal fun Session.insertPersoninfo(
+    fornavn: String,
+    mellomnavn: String?,
+    etternavn: String,
+    fødselsdato: LocalDate,
+    kjønn: Kjønn
+): Int =
     requireNotNull(
         this.run(
             queryOf(
-                "INSERT INTO person_info(fornavn, mellomnavn, etternavn) VALUES(?, ?, ?);",
+                """
+                    INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn)
+                    VALUES(?, ?, ?, ?, CAST(? as person_kjonn));
+                """,
                 fornavn,
                 mellomnavn,
-                etternavn
+                etternavn,
+                fødselsdato,
+                kjønn.name
             ).asUpdateAndReturnGeneratedKey
         )?.toInt()
     )
@@ -81,11 +94,24 @@ internal fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =
             ?.toInt()
     )
 
-internal fun Session.updateNavn(fødselsnummer: Long, fornavn: String, mellomnavn: String?, etternavn: String): Int {
+internal fun Session.updatePersoninfo(
+    fødselsnummer: Long,
+    fornavn: String,
+    mellomnavn: String?,
+    etternavn: String,
+    fødselsdato: LocalDate,
+    kjønn: Kjønn
+): Int {
+    @Language("PostgreSQL")
+    val query =
+        """
+            UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=?, fodselsdato=?, kjonn=CAST(? as person_kjonn)
+            WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);
+        """.trimIndent()
     run(
         queryOf(
-            "UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=? WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);",
-            fornavn, mellomnavn, etternavn, fødselsnummer
+            query,
+            fornavn, mellomnavn, etternavn, fødselsdato, kjønn.name, fødselsnummer
         ).asUpdate
     )
     return run(

@@ -34,10 +34,12 @@ internal class OpprettPersonCommand(
         val hentInfotrygdutbetalingerLøsning = løsninger.løsning<HentInfotrygdutbetalingerLøsning>()
 
         val enhetId = hentEnhetLøsning.enhetNr.toInt()
-        val navnId = session.insertNavn(
+        val navnId = session.insertPersoninfo(
             hentPersoninfoLøsning.fornavn,
             hentPersoninfoLøsning.mellomnavn,
-            hentPersoninfoLøsning.etternavn
+            hentPersoninfoLøsning.etternavn,
+            hentPersoninfoLøsning.fødselsdato,
+            hentPersoninfoLøsning.kjønn
         )
         val infotrygdutbetalingerId =
             session.insertInfotrygdutbetalinger(hentInfotrygdutbetalingerLøsning.utbetalinger)
