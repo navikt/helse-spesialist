@@ -21,6 +21,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.stop
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.*
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
@@ -246,6 +248,59 @@ internal class RestApiTest {
         val enhet = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().enhet) }
         assertNotNull(enhet)
         assertEquals("Oslo", enhet.navn)
+    }
+
+    @Test
+    fun `PersonDTO inneholder fødselsdato og kjønn`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, "{}")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("301"),
+            hentPersoninfoLøsning(fornavn = "Sigrun", kjønn = Kjønn.Kvinne, fødselsdato = LocalDate.of(1950, 10, 29)),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+
+        val response = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
+        val personinfo = runBlocking { requireNotNull(response.receive<PersonForSpeilDto>().personinfo) }
+        assertNotNull(personinfo)
+        assertEquals("Sigrun", personinfo.fornavn)
+        assertEquals(Kjønn.Kvinne, personinfo.kjønn)
+        assertEquals(LocalDate.of(1950, 10, 29), personinfo.fødselsdato)
+
+        // For å simulere de innslagene i person_info som stammer fra før vi begynte å lagre fødselsdato og kjønn
+        sessionOf(dataSource).run {
+            run(
+                queryOf(
+                    "UPDATE person_info SET fodselsdato=?, kjonn=? WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);",
+                    null,
+                    null,
+                    12345
+                ).asUpdate
+            )
+            run(
+                queryOf(
+                    "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
+                    12345
+                ).asUpdate
+            )
+        }
+        val response2 = runBlocking { client.get<HttpStatement>("/api/person/$vedtaksperiodeId").execute() }
+        val personinfo2 = runBlocking { requireNotNull(response2.receive<PersonForSpeilDto>().personinfo) }
+        assertNotNull(personinfo2)
+        assertEquals("Sigrun", personinfo2.fornavn)
+        assertEquals(null, personinfo2.kjønn)
+        assertEquals(null, personinfo2.fødselsdato)
     }
 
     @Test

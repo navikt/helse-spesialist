@@ -3,6 +3,8 @@ package no.nav.helse.vedtaksperiode
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
+import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.modell.vedtak.PersoninfoDto
 import java.util.*
 
 internal fun Session.findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = this.run(
@@ -56,9 +58,13 @@ internal fun Session.findVedtakByAktørId(aktørId: String) = this.run(
 private fun tilVedtaksperiode(row: Row) = VedtaksperiodeDto(
     fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
     aktørId = row.long("aktor_id").toString(),
-    fornavn = row.string("fornavn"),
-    mellomnavn = row.stringOrNull("mellomnavn"),
-    etternavn = row.string("etternavn"),
+    personinfo = PersoninfoDto(
+        fornavn = row.string("fornavn"),
+        mellomnavn = row.stringOrNull("mellomnavn"),
+        etternavn = row.string("etternavn"),
+        fødselsdato = row.localDateOrNull("fodselsdato"),
+        kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf)
+    ),
     arbeidsgiverRef = row.int("arbeidsgiver_ref"),
     speilSnapshotRef = row.int("speil_snapshot_ref"),
     infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")

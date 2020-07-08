@@ -9,7 +9,6 @@ import no.nav.helse.modell.arbeidsgiver.findArbeidsgiver
 import no.nav.helse.modell.command.eventIdForVedtaksperiode
 import no.nav.helse.modell.person.findEnhet
 import no.nav.helse.modell.person.findInfotrygdutbetalinger
-import no.nav.helse.modell.vedtak.NavnDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
 import no.nav.helse.objectMapper
@@ -80,7 +79,7 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,
                 fødselsnummer = speilSnapshot.fødselsnummer,
-                navn = NavnDto(vedtak.fornavn, vedtak.mellomnavn, vedtak.etternavn),
+                personinfo = vedtak.personinfo,
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet

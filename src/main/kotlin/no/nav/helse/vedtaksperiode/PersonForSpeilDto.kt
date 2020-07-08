@@ -2,14 +2,14 @@ package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.vedtak.EnhetDto
-import no.nav.helse.modell.vedtak.NavnDto
+import no.nav.helse.modell.vedtak.PersoninfoDto
 import java.util.*
 
 
 data class PersonForSpeilDto(
     val aktørId: String,
     val fødselsnummer: String,
-    val navn: NavnDto,
+    val personinfo: PersoninfoDto,
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto

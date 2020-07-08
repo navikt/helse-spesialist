@@ -4,8 +4,9 @@ import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
-import no.nav.helse.modell.vedtak.NavnDto
+import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
@@ -109,10 +110,12 @@ private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
     periodeFom = it.localDate("fom"),
     periodeTom = it.localDate("tom"),
-    navn = NavnDto(
+    personinfo = PersoninfoDto(
         it.string("fornavn"),
         it.stringOrNull("mellomnavn"),
-        it.string("etternavn")
+        it.string("etternavn"),
+        it.localDateOrNull("fodselsdato"),
+        it.stringOrNull("kjonn")?.let(Kjønn::valueOf)
     ),
     aktørId = it.long("aktor_id").toString(),
     fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
