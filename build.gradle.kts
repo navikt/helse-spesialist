@@ -1,28 +1,24 @@
+val junitJupiterVersion = "5.6.2"
+val ktorVersion = "1.3.2"
+
 plugins {
     kotlin("jvm") version "1.3.72"
 }
 
-val junitJupiterVersion = "5.6.0"
-val ktorVersion = "1.3.2"
-
 group = "no.nav.helse"
-
-val githubUser: String by project
-val githubPassword: String by project
 
 repositories {
     jcenter()
-
-    maven { url = uri("https://jitpack.io") }
+    maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.74ae9cb")
+    implementation("com.github.navikt:rapids-and-rivers:1.2954646")
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("com.papertrailapp:logback-syslog4j:1.0.0")
-    implementation("com.zaxxer:HikariCP:3.4.2")
+    implementation("com.zaxxer:HikariCP:3.4.5")
     implementation("no.nav:vault-jdbc:1.3.7")
-    implementation("org.flywaydb:flyway-core:6.2.4")
+    implementation("org.flywaydb:flyway-core:6.5.0")
     implementation("com.github.seratch:kotliquery:1.3.1")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
@@ -40,15 +36,15 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
     testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
-    testImplementation("io.mockk:mockk:1.9.3")
+    testImplementation("io.mockk:mockk:1.10.0")
 }
 
 tasks {
     compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "12"
     }
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "12"
     }
 
     named<Jar>("jar") {
@@ -75,5 +71,9 @@ tasks {
         testLogging {
             events("passed", "skipped", "failed")
         }
+    }
+
+    withType<Wrapper> {
+        gradleVersion = "6.5.1"
     }
 }
