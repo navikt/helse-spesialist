@@ -28,7 +28,7 @@ class NyMacroCommand(
     private fun List<NyCommand>.execute(session: Session) =
         asSequence()
             .map { subCommand -> subCommand.execute(session) to subCommand }
-            .onEach { (resultat, command) ->
+            .onEach { (_, command) ->
                 session.persisterCommand(
                     type = command.type,
                     parent = id
