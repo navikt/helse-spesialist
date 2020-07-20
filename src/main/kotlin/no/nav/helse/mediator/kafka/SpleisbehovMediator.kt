@@ -240,14 +240,18 @@ internal class SpleisbehovMediator(
                 "Fant ikke behov med id $eventId"
             }
 
-            val nåværendeOppgave = requireNotNull(session.findNåværendeOppgave(eventId)) {
-                sikkerLogg.error(
-                    "Finner ikke en nåværende oppgave knyttet til behov med {}, {}: \n\t: ${spleisbehovDBDto.data}",
+            val nåværendeOppgave = session.findNåværendeOppgave(eventId) ?: {
+                sikkerLogg.warn(
+                    "Finner ikke en nåværende oppgave knyttet til behov med {}, {}:\n{}",
                     keyValue("id", eventId),
-                    keyValue("spleisBehovId", spleisbehovDBDto.spleisReferanse)
+                    keyValue("spleisBehovId", spleisbehovDBDto.spleisReferanse),
+                    keyValue("json", spleisbehovDBDto.data)
                 )
-                "Finner ikke en nåværende oppgave knyttet til behov med id $eventId. Svar på behov krever at det er en nåværende oppgave"
-            }
+                log.warn(
+                    "Finner ikke en nåværende oppgave knyttet til behov med id {}, ignorerer løsning",
+                    keyValue("id", eventId)
+                )
+            }.let { return }
 
             val commandExecutor =
                 spleisbehovExecutor(
