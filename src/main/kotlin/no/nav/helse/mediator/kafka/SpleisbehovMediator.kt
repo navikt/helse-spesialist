@@ -241,7 +241,12 @@ internal class SpleisbehovMediator(
             }
 
             val nåværendeOppgave = requireNotNull(session.findNåværendeOppgave(eventId)) {
-                "Svar på behov krever at det er en nåværende oppgave"
+                sikkerLogg.error(
+                    "Finner ikke en nåværende oppgave knyttet til behov med {}, {}: \n\t: ${spleisbehovDBDto.data}",
+                    keyValue("id", eventId),
+                    keyValue("spleisBehovId", spleisbehovDBDto.spleisReferanse)
+                )
+                "Finner ikke en nåværende oppgave knyttet til behov med id $eventId. Svar på behov krever at det er en nåværende oppgave"
             }
 
             val commandExecutor =
