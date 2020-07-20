@@ -240,7 +240,7 @@ internal class SpleisbehovMediator(
                 "Fant ikke behov med id $eventId"
             }
 
-            val nåværendeOppgave = session.findNåværendeOppgave(eventId) ?: {
+            val nåværendeOppgave = session.findNåværendeOppgave(eventId) ?: run {
                 sikkerLogg.warn(
                     "Finner ikke en nåværende oppgave knyttet til behov med {}, {}:\n{}",
                     keyValue("id", eventId),
@@ -251,7 +251,8 @@ internal class SpleisbehovMediator(
                     "Finner ikke en nåværende oppgave knyttet til behov med id {}, ignorerer løsning",
                     keyValue("id", eventId)
                 )
-            }.let { return }
+                return
+            }
 
             val commandExecutor =
                 spleisbehovExecutor(

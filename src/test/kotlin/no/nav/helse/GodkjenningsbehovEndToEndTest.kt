@@ -323,6 +323,45 @@ class GodkjenningsbehovEndToEndTest {
         assertNotNull(utbetaling)
     }
 
+    @Test
+    fun `Ignorerer løsning på behov dersom det ikke finnes noen nåværende oppgave`() {
+        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        sendGodkjenningsbehov()
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            HentPersoninfoLøsning(
+                "Test",
+                null,
+                "Testesen",
+                LocalDate.now(),
+                Kjønn.Kvinne
+            ),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+
+        spleisbehovMediator.håndter(
+            spleisbehovId, SaksbehandlerLøsning(
+                godkjent = true,
+                saksbehandlerIdent = "Tester",
+                godkjenttidspunkt = LocalDateTime.now(),
+                oid = UUID.randomUUID(),
+                epostadresse = "test@testesen.test",
+                årsak = null,
+                begrunnelser = null,
+                kommentar = null
+            )
+        )
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            null,
+            null,
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+    }
+
     @ExperimentalContracts
     @Test
     fun `Vedtaksperioder som går til infotrygd invaliderer oppgaver`() {
