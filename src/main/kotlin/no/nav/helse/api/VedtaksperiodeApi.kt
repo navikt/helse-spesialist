@@ -80,6 +80,7 @@ internal fun Application.vedtaksperiodeApi(
                         "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
                         status = HttpStatusCode.Conflict
                     )
+                    return@post
                 }
 
                 validerSaksbehandlerInput(godkjenning)
