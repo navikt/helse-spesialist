@@ -203,27 +203,6 @@ class GodkjenningsbehovEndToEndTest {
     }
 
     @Test
-    fun `Holder igjen førstegangsbehandlinger`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
-
-        sendGodkjenningsbehov(periodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING)
-
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            HentPersoninfoLøsning(
-                "Test",
-                null,
-                "Testsen",
-                LocalDate.now(),
-                Kjønn.Kvinne
-            ),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-        assertTrue(sessionOf(dataSource).use { it.findSaksbehandlerOppgaver() }.isEmpty())
-    }
-
-    @Test
     fun `Saksbehandleroppgavetype kan være null`() {
         GodkjenningMessage.Factory(rapid, spleisbehovMediator)
 
@@ -546,7 +525,7 @@ class GodkjenningsbehovEndToEndTest {
         fødselsnummer: String = "12345",
         organisasjonsnummer: String = "89123",
         warnings: String = "{\"aktiviteter\": []}",
-        periodetype: Saksbehandleroppgavetype? = Saksbehandleroppgavetype.FORLENGELSE
+        periodetype: Saksbehandleroppgavetype? = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
     ) {
         rapid.sendTestMessage(
             """

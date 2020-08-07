@@ -81,7 +81,7 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.ru
                    INNER JOIN person_info pi on p.info_ref = pi.id
                    LEFT JOIN (select navn as enhet_navn, id as enhet_id from enhet) e on p.enhet_ref = enhet_id
                    LEFT JOIN saksbehandleroppgavetype sot on o.event_id = sot.spleisbehov_ref
-            WHERE status = 'AvventerSaksbehandler'::oppgavestatus and (sot.type IS NULL OR sot.type != 'FØRSTEGANGSBEHANDLING')
+            WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             ORDER BY opprettet DESC
             LIMIT 500
         """
