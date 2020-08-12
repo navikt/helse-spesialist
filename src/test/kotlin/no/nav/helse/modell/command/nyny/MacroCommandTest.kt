@@ -8,10 +8,16 @@ import kotlin.test.assertEquals
 
 class MacroCommandTest {
     private val constants: MutableList<String> = mutableListOf()
+    private var executeCount: Int = 0
+    private var resumeCount: Int = 0
+    private var undoCount: Int = 0
 
     @BeforeEach
     fun beforeEach() {
         constants.clear()
+        executeCount = 0
+        resumeCount = 0
+        undoCount = 0
     }
 
     @Test
@@ -106,8 +112,100 @@ class MacroCommandTest {
         assertRekkefølge("A", "B før")
     }
 
+    @Test
+    fun `Undo gjør ingenting dersom ingen kommandoer er kjørt`() {
+        val macroCommand =
+            command(
+                execute = { constants.add("B før"); true },
+                undo = { constants.add("B etter") }
+            ) +
+            command(
+                execute = { constants.add("C før"); true },
+                undo = { constants.add("C etter") }
+            )
+        macroCommand.undo()
+        assertRekkefølge()
+        assertTellere(0, 0, 0)
+    }
+
+    @Test
+    fun `Undo reverserer alle kommandoer`() {
+        val macroCommand =
+            command(
+                execute = { constants.add("B før"); true },
+                undo = { constants.add("B etter") }
+            ) +
+            command(
+                execute = { constants.add("C før"); true },
+                undo = { constants.add("C etter") }
+            )
+        macroCommand.execute()
+        macroCommand.undo()
+        assertRekkefølge("B før", "C før", "C etter", "B etter")
+        assertTellere(2, 0, 2)
+    }
+
+    @Test
+    fun `Undo reverserer alle kjørte kommandoer når en kommando suspender`() {
+        val macroCommand =
+            command(
+                execute = { constants.add("B før"); false },
+                undo = { constants.add("B etter") }
+            ) +
+            command(
+                execute = { constants.add("C før"); true },
+                undo = { constants.add("C etter") }
+            )
+        macroCommand.execute()
+        macroCommand.undo()
+        assertRekkefølge("B før", "B etter")
+        assertTellere(1, 0, 1)
+    }
+
+    @Test
+    fun `Undo reverserer riktig etter restore`() {
+        val macroCommand =
+            command(
+                execute = { constants.add("B før"); false },
+                undo = { constants.add("B etter") }
+            ) +
+            command(
+                execute = { constants.add("C før"); true },
+                undo = { constants.add("C etter") }
+            )
+        macroCommand.restore(listOf(1))
+        macroCommand.undo()
+        assertRekkefølge("C etter", "B etter")
+        assertTellere(0, 0, 2)
+    }
+
+    @Test
+    fun `Undo reverserer riktig etter resume`() {
+        val macroCommand =
+            command(
+                execute = { constants.add("B før"); true },
+                undo = { constants.add("B undo") }
+            ) +
+            command(
+                execute = { constants.add("C før"); false },
+                resume = { constants.add("C etter"); true },
+                undo = { constants.add("C undo") }
+            )
+        macroCommand.restore(listOf(1))
+        macroCommand.resume()
+        macroCommand.undo()
+        assertRekkefølge("C etter", "C undo", "B undo")
+        assertTellere(0, 1, 2)
+    }
+
     private fun assertRekkefølge(vararg konstanter: String) {
         assertEquals(konstanter.toList(), constants)
+    }
+
+    private fun assertTellere(expectedExecuteCount: Int, expectedResumeCount: Int, expectedUndoCount: Int) {
+        assertEquals(expectedExecuteCount, executeCount)
+        assertEquals(expectedResumeCount, resumeCount)
+        assertEquals(expectedUndoCount, undoCount)
     }
 
     private operator fun Command.plus(other: Command): MacroCommand {
@@ -116,14 +214,21 @@ class MacroCommandTest {
         }
     }
 
-    private fun command(execute: () -> Boolean, resume: () -> Boolean = { true }): Command {
+    private fun command(execute: () -> Boolean, resume: () -> Boolean = { true }, undo: () -> Unit = {}): Command {
         return object : Command() {
             override fun execute(): Boolean {
+                executeCount += 1
                 return execute()
             }
 
             override fun resume(): Boolean {
+                resumeCount += 1
                 return resume()
+            }
+
+            override fun undo() {
+                undoCount += 1
+                return undo()
             }
         }
     }
