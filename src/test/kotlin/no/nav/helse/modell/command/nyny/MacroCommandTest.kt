@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-internal class MacroCommandTest {
+class MacroCommandTest {
     private val constants: MutableList<String> = mutableListOf()
 
     @BeforeEach
@@ -68,6 +68,42 @@ internal class MacroCommandTest {
         macroCommand2.resume()
         assertTrue(macroCommand2.state().isEmpty())
         assertRekkefølge("A", "B før", "B etter", "C før", "C etter")
+    }
+
+    @Test
+    fun `Restore av kommandohierkarki`() {
+        val command1 = command(execute = { constants.add("A"); true })
+        val macroCommand1 =
+            command(
+                execute = { constants.add("B før"); false },
+                resume = { constants.add("B etter"); true }
+            ) +
+            command(
+                execute = { constants.add("C før"); false },
+                resume = { constants.add("C etter"); true }
+            )
+        val macroCommand2 = command1 + macroCommand1
+        macroCommand2.restore(listOf(1, 0))
+        macroCommand2.resume()
+        assertRekkefølge("B etter", "C før")
+    }
+
+    @Test
+    fun `Execute etter restore medfører at execution starter fra begynnelsen`() {
+        val command1 = command(execute = { constants.add("A"); true })
+        val macroCommand1 =
+            command(
+                execute = { constants.add("B før"); false },
+                resume = { constants.add("B etter"); true }
+            ) +
+            command(
+                execute = { constants.add("C før"); false },
+                resume = { constants.add("C etter"); true }
+            )
+        val macroCommand2 = command1 + macroCommand1
+        macroCommand2.restore(listOf(1, 0))
+        macroCommand2.execute()
+        assertRekkefølge("A", "B før")
     }
 
     private fun assertRekkefølge(vararg konstanter: String) {

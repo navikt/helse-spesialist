@@ -1,44 +1,40 @@
 package no.nav.helse.modell.command.nyny
 
 internal abstract class MacroCommand : Command() {
-    private val indices: MutableList<Int> = mutableListOf()
+    private var indices: MutableList<Int> = mutableListOf()
+
     private var currentIndex: Int = 0
     protected abstract val commands: List<Command>
 
     internal fun state() = indices.reversed().toList()
 
+    private fun restore(state: MutableList<Int>) {
+        currentIndex = state.removeAt(0)
+        commands.listIterator(currentIndex).forEach { if (it is MacroCommand) it.restore(state) } }
+
+    internal fun restore(state: List<Int>) {
+        restore(state.toMutableList())
+    }
+
     final override fun resume(): Boolean {
         indices.clear()
-        return resume(indices)
+        if (!runCommand(commands[currentIndex], Command::resume)) return false
+        return run(commands.subList(currentIndex, commands.size))
     }
 
-    final override fun execute() : Boolean {
+    final override fun execute(): Boolean {
         require(commands.isNotEmpty())
         indices.clear()
-        return execute(indices)
+        return run(commands)
     }
 
-    private fun execute(indices: MutableList<Int>): Boolean {
-        commands.listIterator(currentIndex).forEach {
-            if(!it.run(indices, MacroCommand::execute, Command::execute)) return false
-        }
-        return true
+    private fun run(commands: List<Command>): Boolean {
+        return commands.none { !runCommand(it, Command::execute) }
     }
 
-    private fun resume(indices: MutableList<Int>): Boolean {
-        commands[currentIndex].also {
-            if(!it.run(indices, MacroCommand::resume, Command::resume)) return false
-        }
-        return execute(indices)
-    }
-
-    private fun Command.run(
-        indices: MutableList<Int>,
-        macroCommandAction: MacroCommand.(indices: MutableList<Int>) -> Boolean,
-        commandAction: Command.() -> Boolean
-    ): Boolean {
-        val executeOk = if (this is MacroCommand) this.macroCommandAction(indices) else this.commandAction()
-        if(!executeOk) return false.also { indices.add(currentIndex) }
+    private fun runCommand(command: Command, commandAction: Command.() -> Boolean): Boolean {
+        if(command is MacroCommand) command.indices = indices
+        if (!commandAction(command)) return false.also { indices.add(currentIndex) }
         currentIndex += 1
         return true
     }
