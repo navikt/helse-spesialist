@@ -16,8 +16,8 @@ internal class MacroCommandTest {
 
     @Test
     fun `Kommandoer utføres i rekkefølge`() {
-        val command1 = command { constants.add("Kommando A"); true }
-        val command2 = command { constants.add("Kommando B"); true }
+        val command1 = command(execute = { constants.add("Kommando A"); true })
+        val command2 = command(execute = { constants.add("Kommando B"); true })
         val macroCommand = command1 + command2
         assertTrue(macroCommand.execute())
         assertRekkefølge("Kommando A", "Kommando B")
@@ -26,8 +26,8 @@ internal class MacroCommandTest {
 
     @Test
     fun `Kommandoer kan suspenderes`() {
-        val command1 = command { constants.add("Kommando A"); false }
-        val command2 = command { constants.add("Kommando B"); true }
+        val command1 = command(execute = { constants.add("Kommando A"); false })
+        val command2 = command(execute = { constants.add("Kommando B"); true })
         val macroCommand = command1 + command2
         assertFalse(macroCommand.execute())
         assertRekkefølge("Kommando A")
@@ -36,32 +36,38 @@ internal class MacroCommandTest {
 
     @Test
     fun `Kommandoer kan fortsette`() {
-        var Ok = false
-        val command1 = command { constants.add("Kommando A ${if(!Ok) "Før" else "Etter"}"); Ok }
-        val command2 = command { constants.add("Kommando B"); true }
+        val command1 = command(
+            execute = { constants.add("Kommando A Før"); false },
+            resume = { constants.add("Kommando A Etter"); true }
+        )
+        val command2 = command(execute = { constants.add("Kommando B"); true })
         val macroCommand = command1 + command2
         macroCommand.execute()
-        Ok = true
-        assertTrue(macroCommand.execute())
+        assertTrue(macroCommand.resume())
         assertRekkefølge("Kommando A Før", "Kommando A Etter", "Kommando B")
         assertTrue(macroCommand.state().isEmpty())
     }
 
     @Test
     fun `Nestede makrokommandoer`() {
-        var ok = false
-        val command1 = command { constants.add("A"); true }
-        val macroCommand1 = command { constants.add("B"); ok } + command { constants.add("C"); !ok }
+        val command1 = command(execute = { constants.add("A"); true })
+        val macroCommand1 =
+            command(
+                execute = { constants.add("B før"); false },
+                resume = { constants.add("B etter"); true }
+            ) +
+            command(
+                execute = { constants.add("C før"); false },
+                resume = { constants.add("C etter"); true }
+            )
         val macroCommand2 = command1 + macroCommand1
         macroCommand2.execute()
         assertEquals(listOf(1, 0), macroCommand2.state())
-        ok = true
-        macroCommand2.execute()
+        macroCommand2.resume()
         assertEquals(listOf(1, 1), macroCommand2.state())
-        ok = false
-        macroCommand2.execute()
+        macroCommand2.resume()
         assertTrue(macroCommand2.state().isEmpty())
-        assertRekkefølge("A", "B", "B", "C", "C")
+        assertRekkefølge("A", "B før", "B etter", "C før", "C etter")
     }
 
     private fun assertRekkefølge(vararg konstanter: String) {
@@ -74,10 +80,14 @@ internal class MacroCommandTest {
         }
     }
 
-    private fun command(f: () -> Boolean): Command {
+    private fun command(execute: () -> Boolean, resume: () -> Boolean = { true }): Command {
         return object : Command() {
             override fun execute(): Boolean {
-                return f()
+                return execute()
+            }
+
+            override fun resume(): Boolean {
+                return resume()
             }
         }
     }
