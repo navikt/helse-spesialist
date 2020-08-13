@@ -12,22 +12,23 @@ internal abstract class MacroCommand : Command() {
     private fun restore(state: MutableList<Int>) {
         currentIndex = state.removeAt(0)
         for (i in 0..currentIndex) history.add(0, commands[i])
-        commands.listIterator(currentIndex).forEach { if (it is MacroCommand) it.restore(state) } }
+        commands.listIterator(currentIndex).forEach { if (it is MacroCommand) it.restore(state) }
+    }
 
     internal fun restore(state: List<Int>) {
         restore(state.toMutableList())
     }
 
-    final override fun execute(): Boolean {
+    final override fun execute(context: CommandContext): Boolean {
         require(commands.isNotEmpty())
         indices.clear()
-        return run(commands)
+        return run(context, commands)
     }
 
-    final override fun resume(): Boolean {
+    final override fun resume(context: CommandContext): Boolean {
         indices.clear()
-        if (!runCommand(commands[currentIndex], Command::resume)) return false
-        return run(commands.subList(currentIndex, commands.size))
+        if (!runCommand(context, commands[currentIndex], Command::resume)) return false
+        return run(context, commands.subList(currentIndex, commands.size))
     }
 
     final override fun undo() {
@@ -37,13 +38,13 @@ internal abstract class MacroCommand : Command() {
         indices.clear()
     }
 
-    private fun run(commands: List<Command>): Boolean {
-        return commands.none { history.add(0, it); !runCommand(it, Command::execute) }
+    private fun run(context: CommandContext, commands: List<Command>): Boolean {
+        return commands.none { history.add(0, it); !runCommand(context, it, Command::execute) }
     }
 
-    private fun runCommand(command: Command, commandAction: Command.() -> Boolean): Boolean {
+    private fun runCommand(context: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
         if(command is MacroCommand) command.indices = indices
-        if (!commandAction(command)) return false.also { indices.add(currentIndex) }
+        if (!commandAction(command, context)) return false.also { indices.add(currentIndex) }
         currentIndex += 1
         return true
     }

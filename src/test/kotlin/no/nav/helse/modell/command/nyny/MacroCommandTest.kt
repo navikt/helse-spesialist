@@ -12,12 +12,15 @@ class MacroCommandTest {
     private var resumeCount: Int = 0
     private var undoCount: Int = 0
 
+    private lateinit var context: CommandContext
+
     @BeforeEach
     fun beforeEach() {
         constants.clear()
         executeCount = 0
         resumeCount = 0
         undoCount = 0
+        context = CommandContext()
     }
 
     @Test
@@ -25,7 +28,7 @@ class MacroCommandTest {
         val command1 = command(execute = { constants.add("Kommando A"); true })
         val command2 = command(execute = { constants.add("Kommando B"); true })
         val macroCommand = command1 + command2
-        assertTrue(macroCommand.execute())
+        assertTrue(macroCommand.execute(context))
         assertRekkefølge("Kommando A", "Kommando B")
         assertTrue(macroCommand.state().isEmpty())
     }
@@ -35,7 +38,7 @@ class MacroCommandTest {
         val command1 = command(execute = { constants.add("Kommando A"); false })
         val command2 = command(execute = { constants.add("Kommando B"); true })
         val macroCommand = command1 + command2
-        assertFalse(macroCommand.execute())
+        assertFalse(macroCommand.execute(context))
         assertRekkefølge("Kommando A")
         assertEquals(listOf(0), macroCommand.state())
     }
@@ -48,8 +51,8 @@ class MacroCommandTest {
         )
         val command2 = command(execute = { constants.add("Kommando B"); true })
         val macroCommand = command1 + command2
-        macroCommand.execute()
-        assertTrue(macroCommand.resume())
+        macroCommand.execute(context)
+        assertTrue(macroCommand.resume(context))
         assertRekkefølge("Kommando A Før", "Kommando A Etter", "Kommando B")
         assertTrue(macroCommand.state().isEmpty())
     }
@@ -67,11 +70,11 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true }
             )
         val macroCommand2 = command1 + macroCommand1
-        macroCommand2.execute()
+        macroCommand2.execute(context)
         assertEquals(listOf(1, 0), macroCommand2.state())
-        macroCommand2.resume()
+        macroCommand2.resume(context)
         assertEquals(listOf(1, 1), macroCommand2.state())
-        macroCommand2.resume()
+        macroCommand2.resume(context)
         assertTrue(macroCommand2.state().isEmpty())
         assertRekkefølge("A", "B før", "B etter", "C før", "C etter")
     }
@@ -90,7 +93,7 @@ class MacroCommandTest {
             )
         val macroCommand2 = command1 + macroCommand1
         macroCommand2.restore(listOf(1, 0))
-        macroCommand2.resume()
+        macroCommand2.resume(context)
         assertRekkefølge("B etter", "C før")
     }
 
@@ -108,7 +111,7 @@ class MacroCommandTest {
             )
         val macroCommand2 = command1 + macroCommand1
         macroCommand2.restore(listOf(1, 0))
-        macroCommand2.execute()
+        macroCommand2.execute(context)
         assertRekkefølge("A", "B før")
     }
 
@@ -139,7 +142,7 @@ class MacroCommandTest {
                 execute = { constants.add("C før"); true },
                 undo = { constants.add("C etter") }
             )
-        macroCommand.execute()
+        macroCommand.execute(context)
         macroCommand.undo()
         assertRekkefølge("B før", "C før", "C etter", "B etter")
         assertTellere(2, 0, 2)
@@ -156,7 +159,7 @@ class MacroCommandTest {
                 execute = { constants.add("C før"); true },
                 undo = { constants.add("C etter") }
             )
-        macroCommand.execute()
+        macroCommand.execute(context)
         macroCommand.undo()
         assertRekkefølge("B før", "B etter")
         assertTellere(1, 0, 1)
@@ -192,7 +195,7 @@ class MacroCommandTest {
                 undo = { constants.add("C undo") }
             )
         macroCommand.restore(listOf(1))
-        macroCommand.resume()
+        macroCommand.resume(context)
         macroCommand.undo()
         assertRekkefølge("C etter", "C undo", "B undo")
         assertTellere(0, 1, 2)
@@ -214,16 +217,16 @@ class MacroCommandTest {
         }
     }
 
-    private fun command(execute: () -> Boolean, resume: () -> Boolean = { true }, undo: () -> Unit = {}): Command {
+    private fun command(execute: (context: CommandContext) -> Boolean, resume: (context: CommandContext) -> Boolean = { true }, undo: () -> Unit = {}): Command {
         return object : Command() {
-            override fun execute(): Boolean {
+            override fun execute(context: CommandContext): Boolean {
                 executeCount += 1
-                return execute()
+                return execute(context)
             }
 
-            override fun resume(): Boolean {
+            override fun resume(context: CommandContext): Boolean {
                 resumeCount += 1
-                return resume()
+                return resume(context)
             }
 
             override fun undo() {
