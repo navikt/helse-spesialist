@@ -17,6 +17,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
+import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
@@ -113,6 +114,22 @@ internal fun Application.vedtaksperiodeApi(
                 spleisbehovMediator.håndter(message)
                 call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
             }
+
+            post("/api/overstyr/dager") {
+                val overstyring = call.receive<Overstyring>()
+
+                val message = OverstyringMessage(
+                    organisasjonsnummer = overstyring.organisasjonsnummer,
+                    fødselsnummer = overstyring.fødselsnummer,
+                    aktørId = overstyring.aktørId,
+                    begrunnelse = overstyring.begrunnelse,
+                    dager = overstyring.dager,
+                    unntaFraInnsyn = overstyring.unntaFraInnsyn
+                )
+
+                spleisbehovMediator.håndter(message)
+                call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
+            }
         }
     }
 }
@@ -141,4 +158,14 @@ data class Annullering(
     val fagsystemId: String,
     val saksbehandlerIdent: String,
     val vedtaksperiodeId: String
+)
+
+@JsonIgnoreProperties
+data class Overstyring(
+    val organisasjonsnummer: String,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val begrunnelse: String,
+    val dager: String,
+    val unntaFraInnsyn: Boolean
 )
