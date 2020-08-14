@@ -1,14 +1,21 @@
 package no.nav.helse.mediator.kafka.meldinger
 
+import java.time.LocalDate
 import java.util.*
 
-data class OverstyringMessage(
+class OverstyringMessage(
     val saksbehandlerOid: UUID,
     val saksbehandlerEpost: String,
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: String,
+    val dager: List<OverstyringMessageDag>,
     val unntaFraInnsyn: Boolean
-)
+) {
+    class OverstyringMessageDag(
+        val dato: LocalDate,
+        val dagtype: String,
+        val grad: Int
+    )
+}

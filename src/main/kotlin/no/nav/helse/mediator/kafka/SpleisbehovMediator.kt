@@ -223,11 +223,11 @@ internal class SpleisbehovMediator(
         log.info("Publiserer overstyring")
         val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null)
 
-        sessionOf(dataSource, returnGeneratedKey = true).use {
-            overstyringCommand.resume(it, Løsninger().apply {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            overstyringCommand.resume(session, Løsninger().apply {
                 add(overstyringMessage)
             })
-            overstyringCommand.execute(it)
+            overstyringCommand.execute(session)
         }
     }
 

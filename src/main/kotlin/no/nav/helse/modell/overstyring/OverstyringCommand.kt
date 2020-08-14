@@ -4,8 +4,6 @@ import kotliquery.Session
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.Løsninger
-import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.asLocalDate
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
@@ -21,15 +19,16 @@ internal class OverstyringCommand(
 
     override fun resume(session: Session, løsninger: Løsninger) {
         val overstyringMessage = løsninger.løsning<OverstyringMessage>()
-            session.persisterOverstyring(
-                fødselsnummer = overstyringMessage.fødselsnummer,
-                organisasjonsnummer = overstyringMessage.organisasjonsnummer,
-                begrunnelse = overstyringMessage.begrunnelse,
-                unntaFraInnsyn = overstyringMessage.unntaFraInnsyn,
-                overstyrteDager = objectMapper.readTree(overstyringMessage.dager).map { it["dato"].asLocalDate() }
-            )
+        session.persisterOverstyring(
+            fødselsnummer = overstyringMessage.fødselsnummer,
+            organisasjonsnummer = overstyringMessage.organisasjonsnummer,
+            begrunnelse = overstyringMessage.begrunnelse,
+            unntaFraInnsyn = overstyringMessage.unntaFraInnsyn,
+            overstyrteDager = overstyringMessage.dager.map { it.dato }
+        )
 
-            resultat = Resultat.Ok.Løst(overstyringMessage.saksbehandlerEpost, overstyringMessage.saksbehandlerOid,  mapOf<String, Any?>(
+        resultat = Resultat.Ok.Løst(
+            overstyringMessage.saksbehandlerEpost, overstyringMessage.saksbehandlerOid, mapOf<String, Any?>(
                 "@id" to UUID.randomUUID(),
                 "@event_name" to "overstyr_dager",
                 "@opprettet" to LocalDateTime.now(),
@@ -37,7 +36,8 @@ internal class OverstyringCommand(
                 "fødselsnummer" to overstyringMessage.fødselsnummer,
                 "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
                 "dager" to overstyringMessage.dager
-            ))
+            )
+        )
 
     }
 }

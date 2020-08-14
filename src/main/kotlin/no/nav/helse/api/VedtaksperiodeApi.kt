@@ -21,6 +21,7 @@ import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -129,7 +130,13 @@ internal fun Application.vedtaksperiodeApi(
                     fødselsnummer = overstyring.fødselsnummer,
                     aktørId = overstyring.aktørId,
                     begrunnelse = overstyring.begrunnelse,
-                    dager = overstyring.dager,
+                    dager = overstyring.dager.map {
+                        OverstyringMessage.OverstyringMessageDag(
+                            dato = it.dato,
+                            dagtype = it.dagtype,
+                            grad = it.grad
+                        )
+                    },
                     unntaFraInnsyn = overstyring.unntaFraInnsyn
                 )
 
@@ -167,11 +174,17 @@ data class Annullering(
 )
 
 @JsonIgnoreProperties
-data class Overstyring(
+class Overstyring(
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: String,
+    val dager: List<Overstyringdag>,
     val unntaFraInnsyn: Boolean
-)
+) {
+    class Overstyringdag(
+        val dato: LocalDate,
+        val dagtype: String,
+        val grad: Int
+    )
+}

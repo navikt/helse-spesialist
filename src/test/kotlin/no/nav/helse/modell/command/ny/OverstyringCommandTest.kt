@@ -6,9 +6,9 @@ import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.Løsninger
 import no.nav.helse.modell.overstyring.OverstyringCommand
-import no.nav.helse.objectMapper
 import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -25,18 +25,16 @@ class OverstyringCommandTest {
             organisasjonsnummer = "987654321",
             begrunnelse = "En god grunn",
             unntaFraInnsyn = false,
-            dager = objectMapper.writeValueAsString(
-                listOf(
-                    mapOf(
-                        "dato" to "2020-01-01",
-                        "dagtype" to "SYKEDAG",
-                        "grad" to 100
-                    ),
-                    mapOf(
-                        "dato" to "2020-01-02",
-                        "dagtype" to "SYKEDAG",
-                        "grad" to 100
-                    )
+            dager = listOf(
+                OverstyringMessage.OverstyringMessageDag(
+                    dato = LocalDate.of(2020, 1, 1),
+                    dagtype = "Syk",
+                    grad = 100
+                ),
+                OverstyringMessage.OverstyringMessageDag(
+                    dato = LocalDate.of(2020, 1, 2),
+                    dagtype = "Syk",
+                    grad = 100
                 )
             )
         )
