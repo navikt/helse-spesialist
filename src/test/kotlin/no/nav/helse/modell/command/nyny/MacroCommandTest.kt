@@ -30,7 +30,7 @@ class MacroCommandTest {
         val macroCommand = command1 + command2
         assertTrue(macroCommand.execute(context))
         assertRekkefølge("Kommando A", "Kommando B")
-        assertTrue(macroCommand.state().isEmpty())
+        assertTrue(context.tilstand().isEmpty())
     }
 
     @Test
@@ -40,7 +40,7 @@ class MacroCommandTest {
         val macroCommand = command1 + command2
         assertFalse(macroCommand.execute(context))
         assertRekkefølge("Kommando A")
-        assertEquals(listOf(0), macroCommand.state())
+        assertEquals(listOf(0), context.tilstand())
     }
 
     @Test
@@ -54,7 +54,7 @@ class MacroCommandTest {
         macroCommand.execute(context)
         assertTrue(macroCommand.resume(context))
         assertRekkefølge("Kommando A Før", "Kommando A Etter", "Kommando B")
-        assertTrue(macroCommand.state().isEmpty())
+        assertTrue(context.tilstand().isEmpty())
     }
 
     @Test
@@ -71,11 +71,11 @@ class MacroCommandTest {
             )
         val macroCommand2 = command1 + macroCommand1
         macroCommand2.execute(context)
-        assertEquals(listOf(1, 0), macroCommand2.state())
+        assertEquals(listOf(1, 0), context.tilstand())
         macroCommand2.resume(context)
-        assertEquals(listOf(1, 1), macroCommand2.state())
+        assertEquals(listOf(1, 1), context.tilstand())
         macroCommand2.resume(context)
-        assertTrue(macroCommand2.state().isEmpty())
+        assertTrue(context.tilstand().isEmpty())
         assertRekkefølge("A", "B før", "B etter", "C før", "C etter")
     }
 
@@ -92,7 +92,7 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true }
             )
         val macroCommand2 = command1 + macroCommand1
-        macroCommand2.restore(listOf(1, 0))
+        context.tilstand(listOf(1, 0))
         macroCommand2.resume(context)
         assertRekkefølge("B etter", "C før")
     }
@@ -110,7 +110,7 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true }
             )
         val macroCommand2 = command1 + macroCommand1
-        macroCommand2.restore(listOf(1, 0))
+        context.tilstand(listOf(1, 0))
         macroCommand2.execute(context)
         assertRekkefølge("A", "B før")
     }
@@ -126,7 +126,7 @@ class MacroCommandTest {
                 execute = { constants.add("C før"); true },
                 undo = { constants.add("C etter") }
             )
-        macroCommand.undo()
+        macroCommand.undo(context)
         assertRekkefølge()
         assertTellere(0, 0, 0)
     }
@@ -143,7 +143,7 @@ class MacroCommandTest {
                 undo = { constants.add("C etter") }
             )
         macroCommand.execute(context)
-        macroCommand.undo()
+        macroCommand.undo(context)
         assertRekkefølge("B før", "C før", "C etter", "B etter")
         assertTellere(2, 0, 2)
     }
@@ -160,7 +160,7 @@ class MacroCommandTest {
                 undo = { constants.add("C etter") }
             )
         macroCommand.execute(context)
-        macroCommand.undo()
+        macroCommand.undo(context)
         assertRekkefølge("B før", "B etter")
         assertTellere(1, 0, 1)
     }
@@ -176,8 +176,8 @@ class MacroCommandTest {
                 execute = { constants.add("C før"); true },
                 undo = { constants.add("C etter") }
             )
-        macroCommand.restore(listOf(1))
-        macroCommand.undo()
+        context.tilstand(listOf(1))
+        macroCommand.undo(context)
         assertRekkefølge("C etter", "B etter")
         assertTellere(0, 0, 2)
     }
@@ -194,9 +194,9 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true },
                 undo = { constants.add("C undo") }
             )
-        macroCommand.restore(listOf(1))
+        context.tilstand(listOf(1))
         macroCommand.resume(context)
-        macroCommand.undo()
+        macroCommand.undo(context)
         assertRekkefølge("C etter", "C undo", "B undo")
         assertTellere(0, 1, 2)
     }
@@ -229,7 +229,7 @@ class MacroCommandTest {
                 return resume(context)
             }
 
-            override fun undo() {
+            override fun undo(context: CommandContext) {
                 undoCount += 1
                 return undo()
             }
