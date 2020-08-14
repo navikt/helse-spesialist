@@ -24,7 +24,7 @@ internal class OverstyringCommand(
             organisasjonsnummer = overstyringMessage.organisasjonsnummer,
             begrunnelse = overstyringMessage.begrunnelse,
             unntaFraInnsyn = overstyringMessage.unntaFraInnsyn,
-            overstyrteDager = overstyringMessage.dager.map { it.dato }
+            overstyrteDager = overstyringMessage.dager
         )
 
         resultat = Resultat.Ok.Løst(
