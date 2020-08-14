@@ -10,7 +10,11 @@ import no.nav.helse.modell.Behov
 import no.nav.helse.modell.Godkjenningsbehov
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
-import no.nav.helse.modell.command.ny.*
+import no.nav.helse.modell.command.ny.AnnulleringCommand
+import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
+import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
+import no.nav.helse.modell.command.ny.RollbackPersonCommand
+import no.nav.helse.modell.overstyring.OverstyringCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -217,8 +221,14 @@ internal class SpleisbehovMediator(
 
     fun håndter(overstyringMessage: OverstyringMessage) {
         log.info("Publiserer overstyring")
-        val overstyringCommand = OverstyringCommand(rapidsConnection, overstyringMessage)
-        sessionOf(dataSource).use(overstyringCommand::execute)
+        val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null)
+
+        sessionOf(dataSource, returnGeneratedKey = true).use {
+            overstyringCommand.resume(it, Løsninger().apply {
+                add(overstyringMessage)
+            })
+            overstyringCommand.execute(it)
+        }
     }
 
     internal fun rollbackPerson(rollback: Rollback) {

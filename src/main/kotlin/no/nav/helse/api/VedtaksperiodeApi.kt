@@ -118,7 +118,13 @@ internal fun Application.vedtaksperiodeApi(
             post("/api/overstyr/dager") {
                 val overstyring = call.receive<Overstyring>()
 
+                val accessToken = requireNotNull(call.principal<JWTPrincipal>())
+                val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+                val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+
                 val message = OverstyringMessage(
+                    saksbehandlerEpost = epostadresse,
+                    saksbehandlerOid = oid,
                     organisasjonsnummer = overstyring.organisasjonsnummer,
                     fødselsnummer = overstyring.fødselsnummer,
                     aktørId = overstyring.aktørId,
