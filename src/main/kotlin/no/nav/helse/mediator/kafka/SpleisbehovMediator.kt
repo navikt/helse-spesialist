@@ -14,6 +14,7 @@ import no.nav.helse.modell.command.ny.AnnulleringCommand
 import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
 import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
+import no.nav.helse.modell.overstyring.BistandSaksbehandlerCommand
 import no.nav.helse.modell.overstyring.OverstyringCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -85,7 +86,8 @@ internal class SpleisbehovMediator(
                 godkjenningMessage.id,
                 godkjenningMessage.vedtaksperiodeId,
                 spleisbehovExecutor.command.toJson(),
-                originalJson
+                originalJson,
+                MacroCommandType.Godkjenningsbehov
             )
             godkjenningMessage.warnings.forEach {
                 session.insertWarning(
@@ -98,6 +100,51 @@ internal class SpleisbehovMediator(
             }
             publiserBehov(
                 spleisreferanse = godkjenningMessage.id,
+                resultater = resultater,
+                commandExecutor = spleisbehovExecutor,
+                session = session
+            )
+        }
+    }
+
+    internal fun håndter(bistandSaksbehandler: BistandSaksbehandlerMessage, originalJson: String) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val spleisbehovExecutor = CommandExecutor(
+                session = session,
+                command = BistandSaksbehandlerCommand(
+                    id = bistandSaksbehandler.id,
+                    fødselsnummer = bistandSaksbehandler.fødselsnummer,
+                    periodeFom = bistandSaksbehandler.periodeFom,
+                    periodeTom = bistandSaksbehandler.periodeTom,
+                    vedtaksperiodeId = bistandSaksbehandler.vedtaksperiodeId,
+                    aktørId = bistandSaksbehandler.aktørId,
+                    orgnummer = bistandSaksbehandler.orgnummer,
+                    speilSnapshotRestClient = speilSnapshotRestClient
+                ),
+                spesialistOid = spesialistOID,
+                eventId = bistandSaksbehandler.id,
+                nåværendeOppgave = null,
+                loggingData = *arrayOf(
+                    keyValue("vedtaksperiodeId", bistandSaksbehandler.vedtaksperiodeId),
+                    keyValue("eventId", bistandSaksbehandler.id)
+                )
+            )
+            log.info(
+                "Mottok godkjenningsbehov med {}, {}",
+                keyValue("vedtaksperiodeId", bistandSaksbehandler.vedtaksperiodeId),
+                keyValue("eventId", bistandSaksbehandler.id)
+            )
+            val resultater = spleisbehovExecutor.execute()
+
+            session.insertBehov(
+                bistandSaksbehandler.id,
+                bistandSaksbehandler.vedtaksperiodeId,
+                spleisbehovExecutor.command.toJson(),
+                originalJson,
+                MacroCommandType.BistandSaksbehandler
+            )
+            publiserBehov(
+                spleisreferanse = bistandSaksbehandler.id,
                 resultater = resultater,
                 commandExecutor = spleisbehovExecutor,
                 session = session
@@ -186,9 +233,7 @@ internal class SpleisbehovMediator(
                     keyValue("vedtaksperiodeId", vedtaksperiodeId)
                 )
                 spleisbehovExecutor(
-                    id = spleisbehovDBDto.id,
-                    spleisReferanse = vedtaksperiodeId,
-                    spleisbehovJson = spleisbehovDBDto.data,
+                    spleisbehovDBDto = spleisbehovDBDto ,
                     session = session,
                     nåværendeOppgave = nåværendeOppgave
                 ).invalider()
@@ -207,9 +252,7 @@ internal class SpleisbehovMediator(
                         keyValue("vedtaksperiodeId", it)
                     )
                     spleisbehovExecutor(
-                        id = spleisbehovDBDto.id,
-                        spleisReferanse = it,
-                        spleisbehovJson = spleisbehovDBDto.data,
+                        spleisbehovDBDto = spleisbehovDBDto ,
                         session = session,
                         nåværendeOppgave = nåværendeOppgave
                     ).invalider()
@@ -269,9 +312,7 @@ internal class SpleisbehovMediator(
 
             val commandExecutor =
                 spleisbehovExecutor(
-                    id = eventId,
-                    spleisReferanse = spleisbehovDBDto.spleisReferanse,
-                    spleisbehovJson = spleisbehovDBDto.data,
+                    spleisbehovDBDto = spleisbehovDBDto,
                     session = session,
                     nåværendeOppgave = nåværendeOppgave
                 )
@@ -367,22 +408,33 @@ internal class SpleisbehovMediator(
     }
 
     private fun spleisbehovExecutor(
-        id: UUID,
-        spleisReferanse: UUID,
-        spleisbehovJson: String,
+        spleisbehovDBDto : SpleisbehovDBDto,
         session: Session,
         nåværendeOppgave: OppgaveDto
     ) = CommandExecutor(
         session = session,
-        command = Godkjenningsbehov.restore(
-            id = id,
-            vedtaksperiodeId = spleisReferanse,
-            data = spleisbehovJson,
-            speilSnapshotRestClient = speilSnapshotRestClient
-        ),
+        command = restore(spleisbehovDBDto ),
         spesialistOid = spesialistOID,
-        eventId = id,
+        eventId = spleisbehovDBDto .id,
         nåværendeOppgave = nåværendeOppgave,
-        loggingData = *arrayOf(keyValue("vedtaksperiodeId", spleisReferanse), keyValue("eventId", id))
+        loggingData = *arrayOf(
+            keyValue("vedtaksperiodeId", spleisbehovDBDto .spleisReferanse),
+            keyValue("eventId", spleisbehovDBDto.id)
+        )
     )
+
+    private fun restore(spleisbehovDbDTO: SpleisbehovDBDto): MacroCommand = when (spleisbehovDbDTO.type) {
+        MacroCommandType.Godkjenningsbehov -> Godkjenningsbehov.restore(
+            id = spleisbehovDbDTO.id,
+            vedtaksperiodeId = spleisbehovDbDTO.spleisReferanse,
+            data = spleisbehovDbDTO.data,
+            speilSnapshotRestClient = speilSnapshotRestClient
+        )
+        MacroCommandType.BistandSaksbehandler -> BistandSaksbehandlerCommand.restore(
+            id = spleisbehovDbDTO.id,
+            vedtaksperiodeId = spleisbehovDbDTO.spleisReferanse,
+            data = spleisbehovDbDTO.data,
+            speilSnapshotRestClient = speilSnapshotRestClient
+        )
+    }
 }

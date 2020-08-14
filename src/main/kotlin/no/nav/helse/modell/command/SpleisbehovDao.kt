@@ -5,14 +5,15 @@ import kotliquery.queryOf
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 
-internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String, original: String) {
+internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String, original: String, type: MacroCommandType) {
     this.run(
         queryOf(
-            "INSERT INTO spleisbehov(id, spleis_referanse, data, original) VALUES(?, ?, CAST(? as json), CAST(? as json))",
+            "INSERT INTO spleisbehov(id, spleis_referanse, data, original, type) VALUES(?, ?, CAST(? as json), CAST(? as json), ?)",
             id,
             spleisReferanse,
             behov,
-            original
+            original,
+            type.name
         ).asUpdate
     )
 }
@@ -43,24 +44,26 @@ internal fun Session.updateBehov(id: UUID, behov: String) {
 }
 
 internal fun Session.findBehov(id: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT spleis_referanse, data FROM spleisbehov WHERE id=?", id)
+    this.run(queryOf("SELECT spleis_referanse, data, type FROM spleisbehov WHERE id=?", id)
         .map {
             SpleisbehovDBDto(
                 id = id,
                 spleisReferanse = UUID.fromString(it.string("spleis_referanse")),
-                data = it.string("data")
+                data = it.string("data"),
+                type = enumValueOf(it.string("type"))
             )
         }
         .asSingle
     )
 
 internal fun Session.findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT  id, data FROM spleisbehov WHERE spleis_referanse=?", spleisReferanse)
+    this.run(queryOf("SELECT id, data, type FROM spleisbehov WHERE spleis_referanse=?", spleisReferanse)
         .map {
             SpleisbehovDBDto(
                 id = UUID.fromString(it.string("id")),
                 spleisReferanse = spleisReferanse,
-                data = it.string("data")
+                data = it.string("data"),
+                type = enumValueOf(it.string("type"))
             )
         }
         .asSingle

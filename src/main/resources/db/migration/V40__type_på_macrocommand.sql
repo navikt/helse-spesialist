@@ -1,0 +1,2 @@
+ALTER TABLE spleisbehov ADD COLUMN type VARCHAR(32) NOT NULL DEFAULT 'Godkjenningsbehov';
+ALTER TABLE spleisbehov ALTER COLUMN type DROP DEFAULT;
