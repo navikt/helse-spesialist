@@ -7,6 +7,3 @@ CREATE TABLE command_context
     tilstand       VARCHAR(64) NOT NULL,
     data           JSON        NOT NULL
 );
-
-
-create table
