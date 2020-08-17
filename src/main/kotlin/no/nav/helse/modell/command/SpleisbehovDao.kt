@@ -1,11 +1,51 @@
 package no.nav.helse.modell.command
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Session
 import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
+import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
+import javax.sql.DataSource
 
-internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String, original: String, type: MacroCommandType) {
+internal class SpleisbehovDao(private val dataSource: DataSource) {
+    private companion object {
+        private val mapper = jacksonObjectMapper()
+    }
+
+    fun opprett(hendelse: Hendelse) {
+        using(sessionOf(dataSource)) {
+            it.insertBehov(hendelse.id, UUID.fromString("00000000-0000-0000-0000-000000000000"), hendelse.toJson(), "{}", tilHendelsetype(hendelse).name )
+        }
+    }
+
+    fun finn(id: UUID) =
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("SELECT type,behov FROM spleisbehov WHERE id = ?", id).map {
+                fraHendelsetype(enumValueOf(it.string("type")), mapper.readTree(it.string("behov")))
+            }.asSingle)
+        }
+
+    private fun fraHendelsetype(hendelsetype: Hendelsetype, json: JsonNode) =
+        when(hendelsetype) {
+            Hendelsetype.VEDTAKSPERIODE_ENDRET -> NyVedtaksperiodeEndretMessage(json)
+        }
+
+    private fun tilHendelsetype(hendelse: Hendelse) = when(hendelse) {
+        is NyVedtaksperiodeEndretMessage -> Hendelsetype.VEDTAKSPERIODE_ENDRET
+        else -> throw IllegalArgumentException("ukjent hendelsetype")
+    }
+
+    private enum class Hendelsetype {
+        VEDTAKSPERIODE_ENDRET
+    }
+}
+
+internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String, original: String, type: String) {
     this.run(
         queryOf(
             "INSERT INTO spleisbehov(id, spleis_referanse, data, original, type) VALUES(?, ?, CAST(? as json), CAST(? as json), ?)",
@@ -13,7 +53,7 @@ internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String,
             spleisReferanse,
             behov,
             original,
-            type.name
+            type
         ).asUpdate
     )
 }

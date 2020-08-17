@@ -6,14 +6,14 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
 import no.nav.helse.mediator.kafka.meldinger.*
-import no.nav.helse.modell.Behov
-import no.nav.helse.modell.Godkjenningsbehov
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
 import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
 import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
+import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.overstyring.BistandSaksbehandlerCommand
 import no.nav.helse.modell.overstyring.OverstyringCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
@@ -29,11 +29,16 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import no.nav.helse.modell.command.nyny.Command as NynyCommand
 
 internal class SpleisbehovMediator(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val dataSource: DataSource,
-    private val spesialistOID: UUID
+    private val spesialistOID: UUID,
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
+    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
+    private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource)
 ) {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
@@ -87,7 +92,7 @@ internal class SpleisbehovMediator(
                 godkjenningMessage.vedtaksperiodeId,
                 spleisbehovExecutor.command.toJson(),
                 originalJson,
-                MacroCommandType.Godkjenningsbehov
+                MacroCommandType.Godkjenningsbehov.name
             )
             godkjenningMessage.warnings.forEach {
                 session.insertWarning(
@@ -141,7 +146,7 @@ internal class SpleisbehovMediator(
                 bistandSaksbehandler.vedtaksperiodeId,
                 spleisbehovExecutor.command.toJson(),
                 originalJson,
-                MacroCommandType.BistandSaksbehandler
+                MacroCommandType.BistandSaksbehandler.name
             )
             publiserBehov(
                 spleisreferanse = bistandSaksbehandler.id,
@@ -150,10 +155,6 @@ internal class SpleisbehovMediator(
                 session = session
             )
         }
-    }
-
-    internal fun håndter(hendelse: Hendelse) {
-        TODO()
     }
 
     internal fun håndter(
@@ -212,6 +213,23 @@ internal class SpleisbehovMediator(
             fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
         )
         sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
+    }
+
+    internal fun håndter(hendelse: Hendelse) {
+        val context = CommandContext()
+        commandContextDao.lagre(hendelse, context, CommandContextTilstand.NY)
+        spleisbehovDao.opprett(hendelse)
+        håndter(context, hendelse, NynyCommand::execute)
+    }
+
+    private fun håndter(context: CommandContext, hendelse: Hendelse, runStrategy: NynyCommand.(CommandContext) -> Boolean) {
+        val handler = CommandMediator(context, hendelse, runStrategy)
+        if (handler.håndter()) {
+            commandContextDao.lagre(hendelse, context, CommandContextTilstand.FERDIG)
+        } else {
+            commandContextDao.lagre(hendelse, context, CommandContextTilstand.SUSPENDERT)
+            // TODO: dytt ting ut på kafka
+        }
     }
 
     fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
@@ -439,5 +457,32 @@ internal class SpleisbehovMediator(
             data = spleisbehovDbDTO.data,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
+    }
+
+    private inner class CommandMediator(
+        private val context: CommandContext,
+        hendelse: Hendelse,
+        private val runStrategy: NynyCommand.(CommandContext) -> Boolean
+    ) : ICommandMediator {
+        private var command: NynyCommand? = null
+
+        init {
+            hendelse.håndter(this)
+        }
+
+        override fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage) {
+            command = vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient)
+        }
+
+        internal fun håndter(): Boolean {
+            val cmd = command ?: return true
+            return try {
+                runStrategy(cmd, context)
+            } catch (err: Exception) {
+                log.warn("Feil ved kjøring av kommando: {}", err.message, err)
+                cmd.undo(context)
+                throw err
+            }
+        }
     }
 }

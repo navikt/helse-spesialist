@@ -1,6 +1,8 @@
 package no.nav.helse.modell.command.nyny
 
-internal class CommandContext {
+import java.util.*
+
+internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
     private val data = mutableListOf<Any>()
     private val tilstand: MutableList<Int> = mutableListOf()
 

@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import kotliquery.Session
+import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.SnapshotDao
@@ -15,16 +15,31 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class NyVedtaksperiodeEndretMessage(
+    override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String
 ) : Hendelse {
+
+    constructor(json: JsonNode) : this(
+        id = UUID.fromString(json.path("id").asText()),
+        vedtaksperiodeId = UUID.fromString(json.path("vedtaksperiodeId").asText()),
+        fødselsnummer = json.path("fødselsnummer").asText()
+    )
 
     override fun håndter(mediator: ICommandMediator) {
         mediator.håndter(this) // double dispatch
     }
 
-    fun asCommand(session: Session, speilSnapshotRestClient: SpeilSnapshotRestClient): Command {
-        return OppdaterSnapshotCommand(speilSnapshotRestClient, VedtakDao(session), SnapshotDao(session), vedtaksperiodeId, fødselsnummer)
+    fun asCommand(vedtakDao: VedtakDao, snapshotDao: SnapshotDao, speilSnapshotRestClient: SpeilSnapshotRestClient): Command {
+        return OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
+    }
+
+    override fun toJson(): String {
+        return """{
+    "id": "$id",
+    "vedtaksperiodeId": "$vedtaksperiodeId",
+    "fødselsnummer": "$fødselsnummer"
+}""".trimIndent()
     }
 
     internal class VedtaksperiodeEndretRiver(
@@ -54,7 +69,7 @@ internal class NyVedtaksperiodeEndretMessage(
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("eventId", id)
             )
-            mediator.håndter(NyVedtaksperiodeEndretMessage(vedtaksperiodeId, fødselsnummer))
+            mediator.håndter(NyVedtaksperiodeEndretMessage(id, vedtaksperiodeId, fødselsnummer))
         }
     }
 }
