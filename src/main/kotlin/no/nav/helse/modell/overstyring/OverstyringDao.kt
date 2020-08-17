@@ -51,7 +51,7 @@ fun Session.persisterOverstyring(
                     mapOf(
                         "overstyring_ref" to overstyringRef,
                         "dato" to dag.dato,
-                        "dagtype" to dag.dagtype,
+                        "dagtype" to dag.type,
                         "grad" to dag.grad
                     )
                 ).asUpdate

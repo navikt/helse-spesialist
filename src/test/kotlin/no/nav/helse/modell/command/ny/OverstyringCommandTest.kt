@@ -30,12 +30,12 @@ class OverstyringCommandTest {
             dager = listOf(
                 OverstyringMessage.OverstyringMessageDag(
                     dato = LocalDate.of(2020, 1, 1),
-                    dagtype = "Syk",
+                    type = "Syk",
                     grad = 100
                 ),
                 OverstyringMessage.OverstyringMessageDag(
                     dato = LocalDate.of(2020, 1, 2),
-                    dagtype = "Syk",
+                    type = "Syk",
                     grad = 100
                 )
             )

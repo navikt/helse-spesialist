@@ -15,7 +15,7 @@ class OverstyringMessage(
 ) {
     class OverstyringMessageDag(
         val dato: LocalDate,
-        val dagtype: String,
+        val type: String,
         val grad: Int
     )
 }
