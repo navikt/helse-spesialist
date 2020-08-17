@@ -185,6 +185,6 @@ class Overstyring(
     class Overstyringdag(
         val dato: LocalDate,
         val type: String,
-        val grad: Int
+        val grad: Int?
     )
 }

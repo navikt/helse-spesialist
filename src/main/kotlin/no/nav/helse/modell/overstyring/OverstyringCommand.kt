@@ -32,7 +32,7 @@ internal class OverstyringCommand(
 
         val overstyring = mapOf<String, Any>(
             "@id" to UUID.randomUUID(),
-            "@event_name" to "overstyr_dager",
+            "@event_name" to "overstyr_tidslinje",
             "@opprettet" to LocalDateTime.now(),
             "aktørId" to overstyringMessage.aktørId,
             "fødselsnummer" to overstyringMessage.fødselsnummer,
