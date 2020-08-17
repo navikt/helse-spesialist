@@ -17,11 +17,11 @@ import kotlin.test.assertEquals
 
 class OverstyringCommandTest {
 
-    val rapidsConnection = TestRapid()
+    private val rapidsConnection = TestRapid()
     val dataSource = setupDataSourceMedFlyway()
 
     @Test
-    fun `overstyring-command legger ovserstyringsmelding på rapid`() {
+    fun `overstyring-command legger overstyringsmelding på rapid`() {
         val overstyringMessage = OverstyringMessage(
             saksbehandlerEpost = "tbd@nav.no",
             saksbehandlerOid = UUID.randomUUID(),
@@ -55,7 +55,7 @@ class OverstyringCommandTest {
 
         val løsning = (resultat as Command.Resultat.Ok.Løst).løsning
 
-        assertEquals("overstyr_dager", løsning["@event_name"])
+        assertEquals("overstyr_tidslinje", løsning["@event_name"])
         assertEquals(overstyringMessage.aktørId, løsning["aktørId"])
         assertEquals(overstyringMessage.fødselsnummer, løsning["fødselsnummer"])
         assertEquals(overstyringMessage.organisasjonsnummer, løsning["organisasjonsnummer"])
