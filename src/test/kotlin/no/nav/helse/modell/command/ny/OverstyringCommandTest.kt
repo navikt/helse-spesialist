@@ -7,6 +7,7 @@ import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.Løsninger
 import no.nav.helse.modell.overstyring.OverstyringCommand
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.setupDataSourceMedFlyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -15,10 +16,12 @@ import java.util.*
 import kotlin.test.assertEquals
 
 class OverstyringCommandTest {
+
+    val rapidsConnection = TestRapid()
+    val dataSource = setupDataSourceMedFlyway()
+
     @Test
     fun `overstyring-command legger ovserstyringsmelding på rapid`() {
-        val dataSource = setupDataSourceMedFlyway()
-
         val overstyringMessage = OverstyringMessage(
             saksbehandlerEpost = "tbd@nav.no",
             saksbehandlerOid = UUID.randomUUID(),
@@ -41,7 +44,7 @@ class OverstyringCommandTest {
             )
         )
 
-        val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null)
+        val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null, rapidsConnection = rapidsConnection)
         val resultat = sessionOf(dataSource, returnGeneratedKey = true).use {
             overstyringCommand.resume(it, Løsninger().apply {
                 add(overstyringMessage)

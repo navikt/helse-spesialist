@@ -267,8 +267,7 @@ internal class SpleisbehovMediator(
     }
 
     fun håndter(overstyringMessage: OverstyringMessage) {
-        log.info("Publiserer overstyring")
-        val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null)
+        val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null, rapidsConnection)
 
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             overstyringCommand.resume(session, Løsninger().apply {
