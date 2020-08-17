@@ -152,6 +152,10 @@ internal class SpleisbehovMediator(
         }
     }
 
+    internal fun håndter(hendelse: Hendelse) {
+        TODO()
+    }
+
     internal fun håndter(
         eventId: UUID,
         behandlendeEnhet: HentEnhetLøsning?,
