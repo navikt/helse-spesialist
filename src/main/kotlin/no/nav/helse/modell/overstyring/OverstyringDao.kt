@@ -9,6 +9,7 @@ import no.nav.helse.modell.person.findPersonByFødselsnummer
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 fun Session.persisterOverstyring(
@@ -75,7 +76,7 @@ fun Session.persisterOverstyring(
 fun Session.finnOverstyring(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringDto> {
     @Language("PostgreSQL")
     val finnOverstyringQuery = """
-SELECT o.id as overstyring_id, *
+SELECT o.*, p.fodselsnummer, a.orgnummer
 FROM overstyring o
          INNER JOIN person p ON p.id = o.person_ref
          INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
@@ -83,7 +84,7 @@ WHERE p.fodselsnummer = ?
   AND a.orgnummer = ?
     """
     return this.run(queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong()).map { overstyringRow ->
-        val id = overstyringRow.long("overstyring_id")
+        val id = overstyringRow.long("id")
 
         OverstyringDto(
             hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
@@ -91,6 +92,7 @@ WHERE p.fodselsnummer = ?
             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
             begrunnelse = overstyringRow.string("begrunnelse"),
             unntaFraInnsyn = overstyringRow.boolean("unntaFraInnsyn"),
+            timestamp = overstyringRow.localDateTime("tidspunkt"),
             overstyrteDager = this.run(queryOf(
                 "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
             ).map { overstyringDagRow ->
@@ -112,6 +114,7 @@ data class OverstyringDto(
     val organisasjonsnummer: String,
     val begrunnelse: String,
     val unntaFraInnsyn: Boolean,
+    val timestamp: LocalDateTime,
     val overstyrteDager: List<OverstyringDagDto>
 )
 

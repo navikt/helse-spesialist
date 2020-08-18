@@ -23,7 +23,7 @@ data class ArbeidsgiverForSpeilDto(
     val navn: String,
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
-    val overstyringer: List<OverstyringForSpeilDto> = emptyList()
+    val overstyringer: List<OverstyringForSpeilDto>
 )
 
 data class OverstyringForSpeilDto(

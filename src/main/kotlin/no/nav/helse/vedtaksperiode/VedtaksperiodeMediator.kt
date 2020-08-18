@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.arbeidsgiver.findArbeidsgiver
 import no.nav.helse.modell.command.eventIdForVedtaksperiode
+import no.nav.helse.modell.overstyring.finnOverstyring
 import no.nav.helse.modell.person.findEnhet
 import no.nav.helse.modell.person.findInfotrygdutbetalinger
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
@@ -55,10 +56,27 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
                         arbeidsgiverDto.navn
                     else
                         "Ikke tilgjengelig"
+                val overstyringer = session.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
+                    .map { overstyring ->
+                        OverstyringForSpeilDto(
+                            hendelseId = overstyring.hendelseId,
+                            begrunnelse = overstyring.begrunnelse,
+                            unntaFraInnsyn = overstyring.unntaFraInnsyn,
+                            timestamp = overstyring.timestamp,
+                            overstyrteDager = overstyring.overstyrteDager.map { dag ->
+                                OverstyringDagForSpeilDto(
+                                    dato = dag.dato,
+                                    dagtype = dag.dagtype,
+                                    grad = dag.grad
+                                )
+                            }
+                        )
+                    }
                 ArbeidsgiverForSpeilDto(
                     organisasjonsnummer = it.organisasjonsnummer,
                     navn = arbeidsgivernavn,
                     id = it.id,
+                    overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder
                 )
             }
