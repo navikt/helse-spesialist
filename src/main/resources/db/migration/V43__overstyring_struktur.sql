@@ -1,4 +1,6 @@
 DELETE
+FROM overstyrtdag;
+DELETE
 FROM overstyring;
 
 ALTER TABLE overstyring
