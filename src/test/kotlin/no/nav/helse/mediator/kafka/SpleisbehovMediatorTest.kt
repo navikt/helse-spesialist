@@ -11,6 +11,7 @@ import no.nav.helse.modell.CommandContextTilstand
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.SpleisbehovDao
+import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Test
@@ -39,7 +40,7 @@ internal class SpleisbehovMediatorTest {
     fun `hendelser blir lagret`() {
         val hendelse = object : Hendelse {
             override val id = ID
-            override fun håndter(mediator: ICommandMediator) { }
+            override fun håndter(mediator: ICommandMediator, context: CommandContext) { }
             override fun toJson(): String { return SNAPSHOT }
         }
 

@@ -29,5 +29,10 @@ internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
         this.tilstand.apply { clear(); addAll(tilstand) }
     }
 
+    internal fun run(command: Command) = when {
+        tilstand.isEmpty() -> command.execute(this)
+        else -> command.resume(this)
+    }
+
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 }

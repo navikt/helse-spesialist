@@ -39,7 +39,7 @@ internal class SpleisbehovMediator(
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource)
-) {
+) : IHendelseMediator, ICommandMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
@@ -215,20 +215,33 @@ internal class SpleisbehovMediator(
         sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
-    internal fun håndter(hendelse: Hendelse) {
+    override fun håndter(hendelse: Hendelse) {
+        return hendelse.håndter(this, nyContext(hendelse))
+    }
+
+    override fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage, context: CommandContext) {
+        håndter(vedtaksperiodeEndretMessage, context, vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient))
+    }
+
+    private fun nyContext(hendelse: Hendelse): CommandContext {
         val context = CommandContext()
         commandContextDao.lagre(hendelse, context, CommandContextTilstand.NY)
         spleisbehovDao.opprett(hendelse)
-        håndter(context, hendelse, NynyCommand::execute)
+        return context
     }
 
-    private fun håndter(context: CommandContext, hendelse: Hendelse, runStrategy: NynyCommand.(CommandContext) -> Boolean) {
-        val handler = CommandMediator(context, hendelse, runStrategy)
-        if (handler.håndter()) {
-            commandContextDao.lagre(hendelse, context, CommandContextTilstand.FERDIG)
-        } else {
-            commandContextDao.lagre(hendelse, context, CommandContextTilstand.SUSPENDERT)
-            // TODO: dytt ting ut på kafka
+    private fun håndter(hendelse: Hendelse, context: CommandContext, command: NynyCommand) {
+        try {
+            if (context.run(command)) {
+                commandContextDao.lagre(hendelse, context, CommandContextTilstand.FERDIG)
+            } else {
+                commandContextDao.lagre(hendelse, context, CommandContextTilstand.SUSPENDERT)
+                // TODO: dytt ting ut på kafka
+            }
+        } catch (err: Exception) {
+            log.warn("Feil ved kjøring av kommando: {}", err.message, err)
+            command.undo(context)
+            throw err
         }
     }
 
@@ -457,32 +470,5 @@ internal class SpleisbehovMediator(
             data = spleisbehovDbDTO.data,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
-    }
-
-    private inner class CommandMediator(
-        private val context: CommandContext,
-        hendelse: Hendelse,
-        private val runStrategy: NynyCommand.(CommandContext) -> Boolean
-    ) : ICommandMediator {
-        private var command: NynyCommand? = null
-
-        init {
-            hendelse.håndter(this)
-        }
-
-        override fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage) {
-            command = vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient)
-        }
-
-        internal fun håndter(): Boolean {
-            val cmd = command ?: return true
-            return try {
-                runStrategy(cmd, context)
-            } catch (err: Exception) {
-                log.warn("Feil ved kjøring av kommando: {}", err.message, err)
-                cmd.undo(context)
-                throw err
-            }
-        }
     }
 }

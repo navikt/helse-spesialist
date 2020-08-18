@@ -23,7 +23,7 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
         }
     }
 
-    fun finn(id: UUID) =
+    fun finn(id: UUID): Hendelse? =
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT type,behov FROM spleisbehov WHERE id = ?", id).map {
                 fraHendelsetype(enumValueOf(it.string("type")), mapper.readTree(it.string("behov")))

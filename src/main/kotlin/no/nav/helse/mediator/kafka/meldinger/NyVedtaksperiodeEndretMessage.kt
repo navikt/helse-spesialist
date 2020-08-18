@@ -2,10 +2,10 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.nyny.Command
+import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.command.nyny.OppdaterSnapshotCommand
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -26,8 +26,8 @@ internal class NyVedtaksperiodeEndretMessage(
         fødselsnummer = json.path("fødselsnummer").asText()
     )
 
-    override fun håndter(mediator: ICommandMediator) {
-        mediator.håndter(this) // double dispatch
+    override fun håndter(mediator: ICommandMediator, context: CommandContext) {
+        mediator.håndter(this, context) // double dispatch
     }
 
     fun asCommand(vedtakDao: VedtakDao, snapshotDao: SnapshotDao, speilSnapshotRestClient: SpeilSnapshotRestClient): Command {
@@ -44,7 +44,7 @@ internal class NyVedtaksperiodeEndretMessage(
 
     internal class VedtaksperiodeEndretRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: SpleisbehovMediator
+        private val mediator: IHendelseMediator
     ) : River.PacketListener {
 
         private val log = LoggerFactory.getLogger(this::class.java)
