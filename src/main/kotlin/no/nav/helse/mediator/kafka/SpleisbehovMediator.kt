@@ -223,6 +223,15 @@ internal class SpleisbehovMediator(
         håndter(vedtaksperiodeEndretMessage, context, vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient))
     }
 
+    // resume en command
+    internal fun håndter(løsning: Delløsning) {
+        val hendelse = requireNotNull(spleisbehovDao.finn(løsning.behovId))
+        val context = requireNotNull(commandContextDao.finn(løsning.contextId)).apply {
+            add(løsning)
+        }
+        hendelse.håndter(this, context) // double dispatch
+    }
+
     private fun nyContext(hendelse: Hendelse): CommandContext {
         val context = CommandContext()
         commandContextDao.lagre(hendelse, context, CommandContextTilstand.NY)

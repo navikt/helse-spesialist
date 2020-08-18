@@ -11,6 +11,12 @@ internal interface Hendelse {
     fun toJson(): String
 }
 
+internal interface Delløsning {
+    val behovId: UUID
+    val contextId: UUID
+
+}
+
 internal interface IHendelseMediator {
     fun håndter(hendelse: Hendelse)
 }

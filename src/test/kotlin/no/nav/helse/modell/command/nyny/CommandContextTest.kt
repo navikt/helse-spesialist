@@ -1,7 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -17,6 +16,25 @@ internal class CommandContextTest {
     @Test
     fun `Tom command context`() {
         assertNull(context.get<TestObject1>())
+    }
+
+    @Test
+    fun `executer kommando uten tilstand`() {
+        TestCommand().apply {
+            context.run(this)
+            assertTrue(executed)
+            assertFalse(resumed)
+        }
+    }
+
+    @Test
+    fun `resumer kommando med tilstand`() {
+        context.tilstand(listOf(1))
+        TestCommand().apply {
+            context.run(this)
+            assertFalse(executed)
+            assertTrue(resumed)
+        }
     }
 
     @Test
@@ -40,4 +58,23 @@ internal class CommandContextTest {
 
     private class TestObject1(val data: String)
     private class TestObject2(val data: String)
+    private class TestCommand() : Command() {
+        var executed = false
+        var resumed = false
+        var undo = false
+
+        override fun execute(context: CommandContext): Boolean {
+            executed = true
+            return true
+        }
+
+        override fun resume(context: CommandContext): Boolean {
+            resumed = true
+            return true
+        }
+
+        override fun undo(context: CommandContext) {
+            undo = true
+        }
+    }
 }
