@@ -22,7 +22,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                     "INSERT INTO command_context(context_id,spleisbehov_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
                     context.id,
                     hendelse.id,
-                    CommandContextTilstand.NY.name,
+                    tilstand.name,
                     mapper.writeValueAsString(CommandContextDto(context.tilstand()))
                 ).asExecute
             )
@@ -40,4 +40,4 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     private class CommandContextDto(val tilstand: List<Int>)
 }
 
-internal enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT }
+internal enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT, FEIL }

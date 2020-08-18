@@ -7,6 +7,7 @@ import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.*
+import no.nav.helse.modell.CommandContextTilstand.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
@@ -232,24 +233,19 @@ internal class SpleisbehovMediator(
         hendelse.håndter(this, context) // double dispatch
     }
 
-    private fun nyContext(hendelse: Hendelse): CommandContext {
-        val context = CommandContext()
-        commandContextDao.lagre(hendelse, context, CommandContextTilstand.NY)
+    private fun nyContext(hendelse: Hendelse) = CommandContext().apply {
         spleisbehovDao.opprett(hendelse)
-        return context
+        commandContextDao.lagre(hendelse, this, NY)
     }
 
     private fun håndter(hendelse: Hendelse, context: CommandContext, command: NynyCommand) {
         try {
-            if (context.run(command)) {
-                commandContextDao.lagre(hendelse, context, CommandContextTilstand.FERDIG)
-            } else {
-                commandContextDao.lagre(hendelse, context, CommandContextTilstand.SUSPENDERT)
-                // TODO: dytt ting ut på kafka
-            }
+            commandContextDao.lagre(hendelse, context, if (context.run(command)) FERDIG else SUSPENDERT)
+            // TODO: dytt ting ut på kafka
         } catch (err: Exception) {
             log.warn("Feil ved kjøring av kommando: {}", err.message, err)
             command.undo(context)
+            commandContextDao.lagre(hendelse, context, FEIL)
             throw err
         }
     }
