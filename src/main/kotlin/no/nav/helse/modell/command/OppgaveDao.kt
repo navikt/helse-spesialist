@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
+import org.intellij.lang.annotations.Language
 import java.util.*
 
 fun Session.insertOppgave(
@@ -103,6 +104,31 @@ fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
         .map { UUID.fromString(it.stringOrNull("event_id")) }
         .asSingle
 )
+
+
+fun Session.invaliderSaksbehandlerOppgaver(fødselsnummer: String, orgnummer: String) {
+    @Language("PostgreSQL")
+    val finnOppgaveIder = """
+SELECT o.*
+FROM vedtak v
+         JOIN oppgave o ON o.vedtak_ref = v.id
+         JOIN person p ON v.person_ref = p.id
+         JOIN arbeidsgiver a ON v.arbeidsgiver_ref = a.id
+WHERE a.orgnummer = :orgnummer
+  AND p.fodselsnummer = :fodselsnummer
+  AND o.status = 'AvventerSaksbehandler'::oppgavestatus;
+"""
+
+    @Language("PostgreSQL")
+    val invaliderOppgave = "UPDATE oppgave SET status = 'Invalidert'::oppgavestatus WHERE id=:id;"
+
+    run(
+        queryOf(
+            finnOppgaveIder,
+            mapOf("orgnummer" to orgnummer.toLong(), "fodselsnummer" to fødselsnummer.toLong())
+        ).map { it.long("id") }.asList
+    ).forEach { id -> run(queryOf(invaliderOppgave, mapOf("id" to id)).asUpdate) }
+}
 
 private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
     oppgavereferanse = UUID.fromString(it.string("event_id")),

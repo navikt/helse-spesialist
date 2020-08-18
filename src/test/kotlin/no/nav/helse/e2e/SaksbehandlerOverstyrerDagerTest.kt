@@ -52,6 +52,7 @@ class SaksbehandlerOverstyrerDagerTest {
             periodeTom = LocalDate.of(2018, 1, 31)
         )
         assertEquals(1, session.findSaksbehandlerOppgaver().filter { it.oppgavereferanse == eventId }.size)
+        assertTrue(session.findSaksbehandlerOppgaver().any { it.oppgavereferanse == eventId })
         saksbehandlerOverstyrer(
             OverstyringMessage.OverstyringMessageDag(
                 dato = LocalDate.of(2018, 1, 20),
@@ -61,10 +62,21 @@ class SaksbehandlerOverstyrerDagerTest {
         )
         assertTrue(session.finnOverstyring(person.fødselsnummer, person.orgnummer).isNotEmpty())
         assertTrue(meldinger().any { it.hasNonNull("@event_name") && it["@event_name"].textValue() == "overstyr_tidslinje" })
+        assertTrue(session.findSaksbehandlerOppgaver().none { it.oppgavereferanse == eventId })
     }
 
     fun `TODO e2e med response fra spleis`() {
-        // testen over +
+        sakTilGodkjenning(
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        saksbehandlerOverstyrer(
+            OverstyringMessage.OverstyringMessageDag(
+                dato = LocalDate.of(2018, 1, 20),
+                type = Dagtype.Feriedag,
+                grad = null
+            )
+        )
         // Mock svar fra spleis
 
         // populer kall til speil
