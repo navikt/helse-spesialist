@@ -9,8 +9,10 @@ import no.nav.helse.modell.person.findPersonByFødselsnummer
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
+import java.util.*
 
 fun Session.persisterOverstyring(
+    hendelseId: UUID,
     fødselsnummer: String,
     organisasjonsnummer: String,
     begrunnelse: String,
@@ -19,8 +21,9 @@ fun Session.persisterOverstyring(
 ): Long? {
     @Language("PostgreSQL")
     val opprettOverstyringQuery = """
-        INSERT INTO overstyring(person_ref, arbeidsgiver_ref, begrunnelse, unntafrainnsyn)
-        VALUES (:person_ref,
+        INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, unntafrainnsyn)
+        VALUES (:hendelse_id,
+                :person_ref,
                 :arbeidsgiver_ref,
                 :begrunnelse,
                 :unntafrainnsyn)
@@ -42,6 +45,7 @@ fun Session.persisterOverstyring(
         queryOf(
             opprettOverstyringQuery,
             mapOf(
+                "hendelse_id" to hendelseId,
                 "person_ref" to person_ref,
                 "arbeidsgiver_ref" to arbeidsgiver_ref,
                 "begrunnelse" to begrunnelse,
@@ -82,6 +86,7 @@ WHERE p.fodselsnummer = ?
         val id = overstyringRow.long("overstyring_id")
 
         OverstyringDto(
+            hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
             begrunnelse = overstyringRow.string("begrunnelse"),
@@ -102,6 +107,7 @@ WHERE p.fodselsnummer = ?
 
 
 data class OverstyringDto(
+    val hendelseId: UUID,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val begrunnelse: String,

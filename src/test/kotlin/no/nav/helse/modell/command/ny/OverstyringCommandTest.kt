@@ -21,9 +21,9 @@ class OverstyringCommandTest {
     @Test
     fun `overstyring-command legger overstyringsmelding på rapid`() {
         val testPerson = TestPerson(dataSource)
-        val eventId = UUID.randomUUID()
-        testPerson.sendGodkjenningMessage(eventId)
-        testPerson.sendPersoninfo(eventId)
+        val eventIdFraSpleis = UUID.randomUUID()
+        testPerson.sendGodkjenningMessage(eventIdFraSpleis)
+        testPerson.sendPersoninfo(eventIdFraSpleis)
         val overstyringMessage = OverstyringMessage(
             saksbehandlerEpost = "tbd@nav.no",
             saksbehandlerOid = UUID.randomUUID(),
@@ -46,7 +46,8 @@ class OverstyringCommandTest {
             )
         )
 
-        val overstyringCommand = OverstyringCommand(UUID.randomUUID(), null, rapidsConnection = testPerson.rapid)
+        val eventIdFraSaksbehandler = UUID.randomUUID()
+        val overstyringCommand = OverstyringCommand(eventIdFraSaksbehandler, null, rapidsConnection = testPerson.rapid)
         val resultat = sessionOf(dataSource, returnGeneratedKey = true).use {
             overstyringCommand.resume(it, Løsninger().apply {
                 add(overstyringMessage)
@@ -67,6 +68,7 @@ class OverstyringCommandTest {
             it.finnOverstyring(testPerson.fødselsnummer, testPerson.orgnummer)
         }
 
+        assertEquals(eventIdFraSaksbehandler, overstyringer.first().hendelseId)
         assertEquals(overstyringer.first().overstyrteDager.size, 2)
     }
 }

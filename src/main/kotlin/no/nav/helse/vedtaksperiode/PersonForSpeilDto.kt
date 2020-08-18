@@ -1,8 +1,11 @@
 package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.mediator.kafka.meldinger.Dagtype
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -19,5 +22,20 @@ data class ArbeidsgiverForSpeilDto(
     val organisasjonsnummer: String,
     val navn: String,
     val id: UUID,
-    val vedtaksperioder: List<JsonNode>
+    val vedtaksperioder: List<JsonNode>,
+    val overstyringer: List<OverstyringForSpeilDto> = emptyList()
+)
+
+data class OverstyringForSpeilDto(
+    val hendelseId: UUID,
+    val begrunnelse: String,
+    val unntaFraInnsyn: Boolean,
+    val timestamp: LocalDateTime,
+    val overstyrteDager: List<OverstyringDagForSpeilDto>
+)
+
+data class OverstyringDagForSpeilDto(
+    val dato: LocalDate,
+    val dagtype: Dagtype,
+    val grad: Int?
 )

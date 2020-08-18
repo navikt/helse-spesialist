@@ -23,6 +23,7 @@ internal class OverstyringCommand(
     override fun resume(session: Session, løsninger: Løsninger) {
         val overstyringMessage = løsninger.løsning<OverstyringMessage>()
         session.persisterOverstyring(
+            hendelseId = eventId,
             fødselsnummer = overstyringMessage.fødselsnummer,
             organisasjonsnummer = overstyringMessage.organisasjonsnummer,
             begrunnelse = overstyringMessage.begrunnelse,
@@ -31,7 +32,7 @@ internal class OverstyringCommand(
         )
 
         val overstyring = mapOf<String, Any>(
-            "@id" to UUID.randomUUID(),
+            "@id" to eventId,
             "@event_name" to "overstyr_tidslinje",
             "@opprettet" to LocalDateTime.now(),
             "aktørId" to overstyringMessage.aktørId,
