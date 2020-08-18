@@ -56,9 +56,36 @@ internal class CommandContextTest {
         assertEquals(testObject2, context.get<TestObject2>())
     }
 
+    @Test
+    fun `samler opp behov`() {
+        val packet = mapOf(
+            "fødselsnummer" to "123"
+        )
+        context.behov("type 1", mapOf("param 1" to 1))
+        context.behov("type 2")
+        val result = context.behov(packet)
+        assertTrue(context.harBehov())
+        assertTrue(result.containsKey("type 1"))
+        assertFalse(result.containsKey("type 2"))
+        assertTrue(result.containsKey("contextId"))
+        assertEquals(listOf("type 1", "type 2"), result.getValue("behov") as List<*>)
+        assertEquals(mapOf("param 1" to 1), result.getValue("type 1") as Map<*, *>)
+        assertEquals("123", result.getValue("fødselsnummer"))
+    }
+
+    @Test
+    fun `har ingen behov`() {
+        val packet = mapOf(
+            "fødselsnummer" to "123"
+        )
+        val result = context.behov(packet)
+        assertFalse(context.harBehov())
+        assertEquals(packet, result)
+    }
+
     private class TestObject1(val data: String)
     private class TestObject2(val data: String)
-    private class TestCommand() : Command() {
+    private class TestCommand : Command() {
         var executed = false
         var resumed = false
         var undo = false
