@@ -15,7 +15,9 @@ class OverstyringMessage(
 ) {
     class OverstyringMessageDag(
         val dato: LocalDate,
-        val type: String,
+        val type: Dagtype,
         val grad: Int?
     )
 }
+
+enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag }

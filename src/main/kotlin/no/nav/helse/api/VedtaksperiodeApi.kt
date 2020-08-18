@@ -133,7 +133,7 @@ internal fun Application.vedtaksperiodeApi(
                     dager = overstyring.dager.map {
                         OverstyringMessage.OverstyringMessageDag(
                             dato = it.dato,
-                            type = it.type,
+                            type = enumValueOf(it.type),
                             grad = it.grad
                         )
                     },

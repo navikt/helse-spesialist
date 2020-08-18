@@ -203,4 +203,4 @@ internal fun Session.findITUtbetalingsperioderSistOppdatert(fødselsnummer: Long
         )
     )
 
-private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
+internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

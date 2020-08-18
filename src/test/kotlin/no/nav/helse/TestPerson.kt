@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -44,7 +45,9 @@ class TestPerson(private val dataSource: DataSource) {
 
     fun sendGodkjenningMessage(
         eventId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID()
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        periodeFom: LocalDate = LocalDate.of(2018, 1, 1),
+        periodeTom: LocalDate = LocalDate.of(2018, 1, 31)
     ) {
         mediator.håndter(
             GodkjenningMessage(
@@ -53,8 +56,8 @@ class TestPerson(private val dataSource: DataSource) {
                 aktørId = aktørId,
                 organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                periodeFom = LocalDate.of(2018, 1, 1),
-                periodeTom = LocalDate.of(2018, 1, 31),
+                periodeFom = periodeFom,
+                periodeTom = periodeTom,
                 warnings = emptyList()
             ), "{}"
         )
@@ -97,6 +100,24 @@ class TestPerson(private val dataSource: DataSource) {
             .map { rapid.inspektør.message(it) }
             .filter { it["@event_name"].asText() == "behov" }
             .filter { UUID.fromString(it["vedtaksperiodeId"].asText()) in forIder }
+    }
+
+    fun sendOverstyrteDager(dager: List<OverstyringMessage.OverstyringMessageDag>) {
+        mediator.håndter(
+            OverstyringMessage(
+                saksbehandlerOid = UUID.randomUUID(),
+                saksbehandlerEpost = "saksbehandler@epost.com",
+                organisasjonsnummer = orgnummer,
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                begrunnelse = "en begrunnelse",
+                dager = dager,
+                unntaFraInnsyn = false
+            ))
+    }
+
+    fun finnOppgaver() {
+        //mediator.
     }
 
     companion object {
