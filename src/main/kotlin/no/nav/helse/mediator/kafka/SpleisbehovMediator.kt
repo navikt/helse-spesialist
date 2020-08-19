@@ -45,9 +45,11 @@ internal class SpleisbehovMediator(
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
     private var shutdown = false
+    private lateinit var behovMediator: BehovMediator
 
     internal fun init(rapidsConnection: RapidsConnection) {
         this.rapidsConnection = rapidsConnection
+        behovMediator = BehovMediator(rapidsConnection)
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
@@ -241,7 +243,7 @@ internal class SpleisbehovMediator(
     private fun håndter(hendelse: Hendelse, context: CommandContext, command: NynyCommand) {
         try {
             commandContextDao.lagre(hendelse, context, if (context.run(command)) FERDIG else SUSPENDERT)
-            // TODO: dytt ting ut på kafka
+            behovMediator.håndter(hendelse, context)
         } catch (err: Exception) {
             log.warn("Feil ved kjøring av kommando: {}", err.message, err)
             command.undo(context)

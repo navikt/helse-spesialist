@@ -11,17 +11,7 @@ internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
         this.behov[behovtype] = params
     }
 
-    internal fun behov(packet: Map<String, Any>) =
-        if (!harBehov()) packet
-        else packet.toMutableMap().apply {
-            this["contextId"] = id
-            this["behov"] = behov.keys.toList()
-            behov.forEach { (behovtype, params) ->
-                if (params.isNotEmpty()) {
-                    this[behovtype] = params
-                }
-            }
-        }
+    internal fun behov() = behov.toMap()
 
     internal fun add(data: Any) {
         this.data.add(data)

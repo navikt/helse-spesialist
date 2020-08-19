@@ -15,6 +15,7 @@ import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -38,7 +39,9 @@ internal class SpleisbehovMediatorTest {
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val spleisbehovDao = mockk<SpleisbehovDao>(relaxed = true)
 
-    private val mediator = SpleisbehovMediator(restClient, dataSource, UUID.randomUUID(), vedtakDao, snapshotDao, commandContextDao, spleisbehovDao)
+    private val mediator = SpleisbehovMediator(restClient, dataSource, UUID.randomUUID(), vedtakDao, snapshotDao, commandContextDao, spleisbehovDao).apply {
+        init(TestRapid())
+    }
 
     @Test
     fun `hendelser blir lagret`() {
@@ -82,10 +85,13 @@ internal class SpleisbehovMediatorTest {
             isCalled = true
             actualContext = context
         }
+
+        override fun fødselsnummer(): String {
+            return FNR
+        }
+
         override fun toJson(): String { return SNAPSHOT }
     }
 
-    private class Testløsning(override val behovId: UUID,
-                              override val contextId: UUID) : Delløsning {
-    }
+    private class Testløsning(override val behovId: UUID, override val contextId: UUID) : Delløsning
 }

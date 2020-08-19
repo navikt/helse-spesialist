@@ -30,6 +30,10 @@ internal class NyVedtaksperiodeEndretMessage(
         mediator.håndter(this, context) // double dispatch
     }
 
+    override fun fødselsnummer(): String {
+        return fødselsnummer
+    }
+
     fun asCommand(vedtakDao: VedtakDao, snapshotDao: SnapshotDao, speilSnapshotRestClient: SpeilSnapshotRestClient): Command {
         return OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     }

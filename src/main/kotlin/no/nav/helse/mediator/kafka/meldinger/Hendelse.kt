@@ -7,6 +7,7 @@ internal interface Hendelse {
     val id: UUID
 
     fun håndter(mediator: ICommandMediator, context: CommandContext)
+    fun fødselsnummer(): String
 
     fun toJson(): String
 }
