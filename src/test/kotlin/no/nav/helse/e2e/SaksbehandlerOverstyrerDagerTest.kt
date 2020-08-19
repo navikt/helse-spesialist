@@ -59,10 +59,12 @@ class SaksbehandlerOverstyrerDagerTest {
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
+        val vedtaksperiodeId = UUID.randomUUID()
         person.sendGodkjenningMessage(
             eventId = eventId,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            vedtaksperiodeId = vedtaksperiodeId
         )
         person.sendPersoninfo(eventId)
         saksbehandlerOverstyrer(
@@ -77,8 +79,10 @@ class SaksbehandlerOverstyrerDagerTest {
         person.sendGodkjenningMessage(
             eventId = eventId2,
             periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            periodeTom = LocalDate.of(2018, 1, 31),
+            vedtaksperiodeId = vedtaksperiodeId
         )
+        person.sendVedtaksperiodeEndret(vedtaksperiodeId)
 
         assertTrue(session.findSaksbehandlerOppgaver().any { it.fødselsnummer == person.fødselsnummer })
 
@@ -98,5 +102,7 @@ class SaksbehandlerOverstyrerDagerTest {
             person.rapid.inspektør.message(it)
         }
     }
+
+
 
 }

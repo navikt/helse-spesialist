@@ -8,6 +8,7 @@ import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
+import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -15,6 +16,7 @@ import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -116,6 +118,12 @@ class TestPerson(private val dataSource: DataSource) {
             ))
     }
 
+    fun sendVedtaksperiodeEndret(vedtaksperiodeId: UUID) {
+        mediator.håndter(
+            UUID.randomUUID(), VedtaksperiodeEndretMessage(vedtaksperiodeId, fødselsnummer)
+        )
+    }
+
     fun finnOppgaver() {
         //mediator.
     }
@@ -137,4 +145,5 @@ class TestPerson(private val dataSource: DataSource) {
 
         private fun nyAktørId(fødselsnummer: String) = "90$fødselsnummer"
     }
+
 }
