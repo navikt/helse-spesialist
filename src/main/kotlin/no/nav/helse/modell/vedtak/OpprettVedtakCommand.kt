@@ -44,7 +44,7 @@ internal class OpprettVedtakCommand(
             requireNotNull(session.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
         }
         measureAsHistogram("OpprettVedtakCommand_insertVedtak") {
-            session.insertVedtak(
+            session.upsertVedtak(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = periodeFom,
                 tom = periodeTom,

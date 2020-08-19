@@ -2,10 +2,18 @@ package no.nav.helse.modell.vedtak
 
 import kotliquery.Session
 import kotliquery.queryOf
+import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
 
-internal fun Session.insertVedtak(
+@Language("PostgreSQL")
+val upsertVedtakQuery = """INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref)
+VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :speil_snapshot_ref)
+ON CONFLICT (vedtaksperiode_id)
+DO UPDATE SET speil_snapshot_ref = :speil_snapshot_ref, fom = :fom, tom = :tom
+"""
+
+internal fun Session.upsertVedtak(
     vedtaksperiodeId: UUID,
     fom: LocalDate,
     tom: LocalDate,
@@ -16,14 +24,16 @@ internal fun Session.insertVedtak(
     requireNotNull(
         this.run(
             queryOf(
-                "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref) VALUES(?, ?, ?, ?, ?, ?);",
-                vedtaksperiodeId,
-                fom,
-                tom,
-                personRef,
-                arbeidsgiverRef,
-                speilSnapshotRef
-            ).asUpdateAndReturnGeneratedKey
+                upsertVedtakQuery,
+                mapOf(
+                    "vedtaksperiode_id" to vedtaksperiodeId,
+                    "fom" to fom,
+                    "tom" to tom,
+                    "person_ref" to personRef,
+                    "arbeidsgiver_ref" to arbeidsgiverRef,
+                    "speil_snapshot_ref" to speilSnapshotRef
+                )
+            ).asUpdate
         )
     ).toInt()
 
