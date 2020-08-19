@@ -34,6 +34,7 @@ internal class BehovE2ETest {
     private companion object {
         private val SPESIALIST_IOD = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
+        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val UNG_PERSON_FNR_2018 = "12020052345"
     }
 
@@ -47,9 +48,9 @@ internal class BehovE2ETest {
 
     @Test
     fun `vedtaksperiode endret`() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(HENDELSE_ID))
+        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, VEDTAKSPERIODE_ID))
         assertSpleisbehov(HENDELSE_ID)
-        assertTilstand(HENDELSE_ID, NY, FERDIG)
+        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, NY, FERDIG)
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -58,12 +59,13 @@ internal class BehovE2ETest {
         })
     }
 
-    private fun assertTilstand(hendelseId: UUID, vararg tilstand: CommandContextTilstand) {
+    private fun assertTilstand(hendelseId: UUID, vedtaksperiodeId: UUID, vararg tilstand: CommandContextTilstand) {
         assertEquals(tilstand.toList(), using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "SELECT tilstand FROM command_context WHERE spleisbehov_id = ? ORDER BY id ASC",
-                    hendelseId
+                    "SELECT tilstand FROM command_context WHERE spleisbehov_id = ? AND vedtaksperiode_id = ? ORDER BY id ASC",
+                    hendelseId,
+                    vedtaksperiodeId
                 ).map { enumValueOf<CommandContextTilstand>(it.string("tilstand")) }.asList
             )
         })

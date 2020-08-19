@@ -90,6 +90,10 @@ internal class SpleisbehovMediatorTest {
             return FNR
         }
 
+        override fun vedtaksperiodeId(): UUID {
+            return VEDTAKSPERIODE_ID
+        }
+
         override fun toJson(): String { return SNAPSHOT }
     }
 

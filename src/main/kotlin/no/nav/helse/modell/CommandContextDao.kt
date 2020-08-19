@@ -19,10 +19,11 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "INSERT INTO command_context(context_id,spleisbehov_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
+                    "INSERT INTO command_context(context_id,spleisbehov_id,tilstand,vedtaksperiode_id,data) VALUES (?, ?, ?, ?, ?::json)",
                     context.id,
                     hendelse.id,
                     tilstand.name,
+                    hendelse.vedtaksperiodeId(),
                     mapper.writeValueAsString(CommandContextDto(context.tilstand()))
                 ).asExecute
             )

@@ -19,6 +19,7 @@ internal class BehovMediatorTest {
     private lateinit var testContext: CommandContext
     private val hendelseId = UUID.randomUUID()
     private val contextId = UUID.randomUUID()
+    private val vedtaksperiodeId = UUID.randomUUID()
     private val FNR = "fødselsnummer"
 
     @BeforeEach
@@ -62,6 +63,10 @@ internal class BehovMediatorTest {
 
         override fun fødselsnummer(): String {
             return FNR
+        }
+
+        override fun vedtaksperiodeId(): UUID {
+            return vedtaksperiodeId
         }
 
         override fun toJson(): String {

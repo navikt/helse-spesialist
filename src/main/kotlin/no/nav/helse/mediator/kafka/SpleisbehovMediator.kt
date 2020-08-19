@@ -218,21 +218,22 @@ internal class SpleisbehovMediator(
         sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
+    // ny command (execute)
     override fun håndter(hendelse: Hendelse) {
         return hendelse.håndter(this, nyContext(hendelse))
     }
 
-    override fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage, context: CommandContext) {
-        håndter(vedtaksperiodeEndretMessage, context, vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient))
-    }
-
-    // resume en command
+    // fortsett en command (resume)
     internal fun håndter(løsning: Delløsning) {
         val hendelse = requireNotNull(spleisbehovDao.finn(løsning.behovId))
         val context = requireNotNull(commandContextDao.finn(løsning.contextId)).apply {
-            add(løsning)
+            løsning.context(this)
         }
         hendelse.håndter(this, context) // double dispatch
+    }
+
+    override fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage, context: CommandContext) {
+        håndter(vedtaksperiodeEndretMessage, context, vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient))
     }
 
     private fun nyContext(hendelse: Hendelse) = CommandContext().apply {

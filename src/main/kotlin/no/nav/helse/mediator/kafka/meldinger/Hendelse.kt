@@ -7,7 +7,9 @@ internal interface Hendelse {
     val id: UUID
 
     fun håndter(mediator: ICommandMediator, context: CommandContext)
+
     fun fødselsnummer(): String
+    fun vedtaksperiodeId(): UUID
 
     fun toJson(): String
 }
@@ -16,6 +18,9 @@ internal interface Delløsning {
     val behovId: UUID
     val contextId: UUID
 
+    fun context(context: CommandContext) {
+        context.add(this)
+    }
 }
 
 internal interface IHendelseMediator {

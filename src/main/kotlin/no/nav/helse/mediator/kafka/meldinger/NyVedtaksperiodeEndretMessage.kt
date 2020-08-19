@@ -34,6 +34,10 @@ internal class NyVedtaksperiodeEndretMessage(
         return fødselsnummer
     }
 
+    override fun vedtaksperiodeId(): UUID {
+        return vedtaksperiodeId
+    }
+
     fun asCommand(vedtakDao: VedtakDao, snapshotDao: SnapshotDao, speilSnapshotRestClient: SpeilSnapshotRestClient): Command {
         return OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     }
