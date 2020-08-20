@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.modell.CommandContextTilstand.*
 import no.nav.helse.modell.command.nyny.CommandContext
 import java.util.*
 import javax.sql.DataSource
@@ -24,8 +25,22 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                     hendelse.id,
                     tilstand.name,
                     hendelse.vedtaksperiodeId(),
-                    mapper.writeValueAsString(CommandContextDto(context.tilstand()))
+                    mapper.writeValueAsString(CommandContextDto(context.sti()))
                 ).asExecute
+            )
+        }
+    }
+
+    fun avbryt(vedtaksperiodeId: UUID) {
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    "UPDATE command_context SET tilstand = ? WHERE vedtaksperiode_id = ? AND tilstand in (?,?)",
+                    AVBRUTT.name,
+                    vedtaksperiodeId,
+                    SUSPENDERT.name,
+                    NY.name
+                ).asUpdate
             )
         }
     }
@@ -33,12 +48,12 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     fun finn(id: UUID) =
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT data FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1", id).map {
-                val dto = mapper.readValue<CommandContextDto>(it.string("tilstand"))
-                CommandContext(id).apply { tilstand(dto.tilstand) }
+                val dto = mapper.readValue<CommandContextDto>(it.string("data"))
+                CommandContext(id).apply { sti(dto.sti) }
             }.asSingle)
         }
 
-    private class CommandContextDto(val tilstand: List<Int>)
+    private class CommandContextDto(val sti: List<Int>)
 }
 
-internal enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT, FEIL }
+internal enum class CommandContextTilstand { NY, FERDIG, SUSPENDERT, FEIL, AVBRUTT }

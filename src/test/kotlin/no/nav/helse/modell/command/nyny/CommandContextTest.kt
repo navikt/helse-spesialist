@@ -29,7 +29,7 @@ internal class CommandContextTest {
 
     @Test
     fun `resumer kommando med tilstand`() {
-        context.tilstand(listOf(1))
+        context.sti(listOf(1))
         TestCommand().apply {
             context.run(this)
             assertFalse(executed)

@@ -5,7 +5,7 @@ import java.util.*
 internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
     private val data = mutableListOf<Any>()
     private val behov = mutableMapOf<String, Map<String, Any>>()
-    private val tilstand: MutableList<Int> = mutableListOf()
+    private val sti: MutableList<Int> = mutableListOf()
 
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
         this.behov[behovtype] = params
@@ -18,28 +18,28 @@ internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
     }
 
     internal fun add(index: Int, command: Command) {
-        tilstand.add(0, index)
+        sti.add(0, index)
     }
 
     internal fun clear() {
-        tilstand.clear()
+        sti.clear()
     }
 
     internal fun register(command: MacroCommand) {
-        if (tilstand.isEmpty()) return
-        command.restore(tilstand.removeAt(0))
+        if (sti.isEmpty()) return
+        command.restore(sti.removeAt(0))
     }
 
     internal fun harBehov() = behov.isNotEmpty()
 
-    internal fun tilstand() = tilstand.toList()
+    internal fun sti() = sti.toList()
 
-    internal fun tilstand(tilstand: List<Int>) {
-        this.tilstand.apply { clear(); addAll(tilstand) }
+    internal fun sti(sti: List<Int>) {
+        this.sti.apply { clear(); addAll(sti) }
     }
 
     internal fun run(command: Command) = when {
-        tilstand.isEmpty() -> command.execute(this)
+        sti.isEmpty() -> command.execute(this)
         else -> command.resume(this)
     }
 
