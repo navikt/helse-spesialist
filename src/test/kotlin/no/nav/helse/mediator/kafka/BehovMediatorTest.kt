@@ -8,13 +8,15 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 
 internal class BehovMediatorTest {
     private val testRapid: TestRapid = TestRapid()
-    private val behovMediator: BehovMediator = BehovMediator(testRapid)
+    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    private val behovMediator: BehovMediator = BehovMediator(testRapid, sikkerLogg)
     private lateinit var testHendelse: TestHendelse
     private lateinit var testContext: CommandContext
     private val hendelseId = UUID.randomUUID()

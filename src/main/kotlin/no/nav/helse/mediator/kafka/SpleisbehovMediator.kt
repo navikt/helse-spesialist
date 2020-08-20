@@ -49,7 +49,7 @@ internal class SpleisbehovMediator(
 
     internal fun init(rapidsConnection: RapidsConnection) {
         this.rapidsConnection = rapidsConnection
-        behovMediator = BehovMediator(rapidsConnection)
+        behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
@@ -219,7 +219,8 @@ internal class SpleisbehovMediator(
     }
 
     // ny command (execute)
-    override fun håndter(hendelse: Hendelse) {
+    override fun håndter(message: JsonMessage, hendelse: Hendelse) {
+        sikkerLogg.info("gjenkjente ${hendelse::class.simpleName} fra:\n\t${message.toJson()}")
         return hendelse.håndter(this, nyContext(hendelse))
     }
 

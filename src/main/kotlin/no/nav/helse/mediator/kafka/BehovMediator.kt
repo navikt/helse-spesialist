@@ -4,15 +4,17 @@ import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.Logger
 import java.time.LocalDateTime
 import java.util.*
 
 internal class BehovMediator(
-    private val rapidsConnection: RapidsConnection
+    private val rapidsConnection: RapidsConnection,
+    private val sikkerLogg: Logger
 ) {
     internal fun håndter(hendelse: Hendelse, context: CommandContext) {
         if (!context.harBehov()) return
-        rapidsConnection.publish(packet(hendelse, context))
+        rapidsConnection.publish(hendelse.fødselsnummer(), packet(hendelse, context).also { sikkerLogg.info("sender {}", it) })
     }
 
     private fun packet(hendelse: Hendelse, context: CommandContext) = standardfelter(hendelse).apply {

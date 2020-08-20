@@ -15,6 +15,7 @@ import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,7 +47,7 @@ internal class SpleisbehovMediatorTest {
     @Test
     fun `hendelser blir lagret`() {
         val hendelse = Testhendelse(ID)
-        mediator.håndter(hendelse)
+        mediator.håndter(JsonMessage.newMessage(), hendelse)
         verify(exactly = 1) { commandContextDao.lagre(hendelse, any(), CommandContextTilstand.NY) }
         verify(exactly = 1) { spleisbehovDao.opprett(hendelse) }
     }
@@ -72,7 +73,7 @@ internal class SpleisbehovMediatorTest {
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE_ID, SNAPSHOT) } returns 1
         val message = NyVedtaksperiodeEndretMessage(ID, VEDTAKSPERIODE_ID, FNR)
-        mediator.håndter(message)
+        mediator.håndter(JsonMessage.newMessage(), message)
         verify(exactly = 1) { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE_ID, SNAPSHOT) }
         verify(exactly = 1) { commandContextDao.lagre(any(), any(), CommandContextTilstand.FERDIG) }
     }

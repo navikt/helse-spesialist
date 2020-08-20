@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.*
 
 internal interface Hendelse {
@@ -24,7 +25,7 @@ internal interface Delløsning {
 }
 
 internal interface IHendelseMediator {
-    fun håndter(hendelse: Hendelse)
+    fun håndter(message: JsonMessage, hendelse: Hendelse)
 }
 
 internal interface ICommandMediator {

@@ -31,7 +31,7 @@ internal class VedtaksperiodeEndretRiverTest {
             "fødselsnummer": "fnr",
             "@id": "a71468f7-6095-48bf-a9bb-acf6497befac"
         }""")
-        verify { mediator.håndter(any<NyVedtaksperiodeEndretMessage>()) }
+        verify { mediator.håndter(any(), any<NyVedtaksperiodeEndretMessage>()) }
 
     }
 }

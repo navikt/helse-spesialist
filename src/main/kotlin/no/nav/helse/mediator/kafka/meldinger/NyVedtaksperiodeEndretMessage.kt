@@ -77,7 +77,7 @@ internal class NyVedtaksperiodeEndretMessage(
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("eventId", id)
             )
-            mediator.håndter(NyVedtaksperiodeEndretMessage(id, vedtaksperiodeId, fødselsnummer))
+            mediator.håndter(packet, NyVedtaksperiodeEndretMessage(id, vedtaksperiodeId, fødselsnummer))
         }
     }
 }
