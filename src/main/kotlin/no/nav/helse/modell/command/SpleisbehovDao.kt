@@ -1,6 +1,5 @@
 package no.nav.helse.modell.command
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Session
 import kotliquery.queryOf
@@ -8,11 +7,17 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
+import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
+import no.nav.helse.modell.IHendelsefabrikk
+import no.nav.helse.modell.command.SpleisbehovDao.Hendelsetype.VEDTAKSPERIODE_ENDRET
+import no.nav.helse.modell.command.SpleisbehovDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 import javax.sql.DataSource
 
-internal class SpleisbehovDao(private val dataSource: DataSource) {
+internal class SpleisbehovDao(private val dataSource: DataSource,
+                              private val hendelsefabrikk: IHendelsefabrikk
+) {
     private companion object {
         private val mapper = jacksonObjectMapper()
     }
@@ -26,22 +31,24 @@ internal class SpleisbehovDao(private val dataSource: DataSource) {
     fun finn(id: UUID): Hendelse? =
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT type,behov FROM spleisbehov WHERE id = ?", id).map {
-                fraHendelsetype(enumValueOf(it.string("type")), mapper.readTree(it.string("behov")))
+                fraHendelsetype(enumValueOf(it.string("type")), it.string("behov"))
             }.asSingle)
         }
 
-    private fun fraHendelsetype(hendelsetype: Hendelsetype, json: JsonNode) =
+    private fun fraHendelsetype(hendelsetype: Hendelsetype, json: String): Hendelse? =
         when(hendelsetype) {
-            Hendelsetype.VEDTAKSPERIODE_ENDRET -> NyVedtaksperiodeEndretMessage(json)
+            VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.nyNyVedtaksperiodeEndret(json)
+            VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.nyNyVedtaksperiodeForkastet(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when(hendelse) {
-        is NyVedtaksperiodeEndretMessage -> Hendelsetype.VEDTAKSPERIODE_ENDRET
-        else -> throw IllegalArgumentException("ukjent hendelsetype")
+        is NyVedtaksperiodeEndretMessage -> VEDTAKSPERIODE_ENDRET
+        is NyVedtaksperiodeForkastetMessage -> VEDTAKSPERIODE_FORKASTET
+        else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET
+        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET
     }
 }
 

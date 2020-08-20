@@ -22,7 +22,7 @@ internal class VedtaksperiodeForkastetRiverTest {
     @Test
     fun `tar imot forkastet-message`() {
         rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet())
-        verify { mediator.håndter(any(), any<NyVedtaksperiodeForkastetMessage>()) }
+        verify { mediator.vedtaksperiodeForkastet(any(), any()) }
     }
 
     @Test
@@ -31,7 +31,7 @@ internal class VedtaksperiodeForkastetRiverTest {
             meldingsfabrikk.lagVedtaksperiodeForkastet().let { mapper.readTree(it) as ObjectNode }
                 .put("vedtaksperiodeId", "dette er ikke en UUID").toString()
         )
-        verify(exactly = 0) { mediator.håndter(any(), any<NyVedtaksperiodeForkastetMessage>()) }
+        verify(exactly = 0) { mediator.vedtaksperiodeForkastet(any(), any()) }
     }
 
 }

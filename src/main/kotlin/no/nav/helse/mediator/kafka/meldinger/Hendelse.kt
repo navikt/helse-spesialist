@@ -1,13 +1,13 @@
 package no.nav.helse.mediator.kafka.meldinger
 
+import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.RapidsConnection
 import java.util.*
 
-internal interface Hendelse {
+internal interface Hendelse : Command {
     val id: UUID
-
-    fun håndter(mediator: ICommandMediator, context: CommandContext)
 
     fun fødselsnummer(): String
     fun vedtaksperiodeId(): UUID
@@ -25,10 +25,6 @@ internal interface Delløsning {
 }
 
 internal interface IHendelseMediator {
-    fun håndter(message: JsonMessage, hendelse: Hendelse)
-}
-
-internal interface ICommandMediator {
-    fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage, context: CommandContext)
-    fun håndter(vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage, context: CommandContext)
+    fun vedtaksperiodeEndret(message: JsonMessage, context: RapidsConnection.MessageContext)
+    fun vedtaksperiodeForkastet(message: JsonMessage, context: RapidsConnection.MessageContext)
 }

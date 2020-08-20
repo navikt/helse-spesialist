@@ -2,7 +2,6 @@ package no.nav.helse.mediator.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
-import no.nav.helse.mediator.kafka.meldinger.ICommandMediator
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
@@ -59,8 +58,8 @@ internal class BehovMediatorTest {
     }
 
     inner class TestHendelse(override val id: UUID) : Hendelse {
-        override fun håndter(mediator: ICommandMediator, context: CommandContext) {
-            throw UnsupportedOperationException()
+        override fun execute(context: CommandContext): Boolean {
+            TODO("Not yet implemented")
         }
 
         override fun fødselsnummer(): String {

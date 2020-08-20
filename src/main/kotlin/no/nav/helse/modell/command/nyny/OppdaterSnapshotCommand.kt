@@ -10,7 +10,7 @@ internal class OppdaterSnapshotCommand(
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val vedtaksperiodeId: UUID,
-    private val fødselsnummer: String) : Command() {
+    private val fødselsnummer: String) : Command {
 
     override fun execute(context: CommandContext): Boolean {
         if (null == vedtakDao.findVedtak(vedtaksperiodeId)) return true

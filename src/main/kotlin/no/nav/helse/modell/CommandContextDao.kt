@@ -31,15 +31,16 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         }
     }
 
-    fun avbryt(vedtaksperiodeId: UUID) {
+    fun avbryt(context: CommandContext, vedtaksperiodeId: UUID) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "UPDATE command_context SET tilstand = ? WHERE vedtaksperiode_id = ? AND tilstand in (?,?)",
+                    "UPDATE command_context SET tilstand = ? WHERE vedtaksperiode_id = ? AND tilstand in (?,?) AND context_id != ?",
                     AVBRUTT.name,
                     vedtaksperiodeId,
                     SUSPENDERT.name,
-                    NY.name
+                    NY.name,
+                    context.id
                 ).asUpdate
             )
         }

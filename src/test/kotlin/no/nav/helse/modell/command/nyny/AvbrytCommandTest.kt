@@ -28,6 +28,6 @@ internal class AvbrytCommandTest {
     @Test
     fun `avbryter command context`() {
         assertTrue(command.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE) }
+        verify(exactly = 1) { commandContextDao.avbryt(context, VEDTAKSPERIODE) }
     }
 }

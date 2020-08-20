@@ -76,7 +76,7 @@ internal class CommandContextTest {
 
     private class TestObject1(val data: String)
     private class TestObject2(val data: String)
-    private class TestCommand : Command() {
+    private class TestCommand : Command {
         var executed = false
         var resumed = false
         var undo = false

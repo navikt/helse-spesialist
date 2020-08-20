@@ -30,17 +30,19 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import no.nav.helse.modell.command.nyny.Command as NynyCommand
 
 internal class SpleisbehovMediator(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val dataSource: DataSource,
-    private val spesialistOID: UUID,
-    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
-    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
-    private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource)
-) : IHendelseMediator, ICommandMediator {
+    private val spesialistOID: UUID
+) : IHendelseMediator {
+    private val hendelsefabrikk = Hendelsefabrikk()
+
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource)
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
+    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource)
+    private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
+
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
@@ -218,10 +220,12 @@ internal class SpleisbehovMediator(
         sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
-    // ny command (execute)
-    override fun håndter(message: JsonMessage, hendelse: Hendelse) {
-        sikkerLogg.info("gjenkjente ${hendelse::class.simpleName} fra:\n\t${message.toJson()}")
-        return hendelse.håndter(this, nyContext(hendelse))
+    override fun vedtaksperiodeEndret(message: JsonMessage, context: RapidsConnection.MessageContext) {
+        håndter(hendelsefabrikk.nyNyVedtaksperiodeEndret(message.toJson()))
+    }
+
+    override fun vedtaksperiodeForkastet(message: JsonMessage, context: RapidsConnection.MessageContext) {
+        håndter(hendelsefabrikk.nyNyVedtaksperiodeForkastet(message.toJson()))
     }
 
     // fortsett en command (resume)
@@ -230,15 +234,7 @@ internal class SpleisbehovMediator(
         val context = requireNotNull(commandContextDao.finn(løsning.contextId)).apply {
             løsning.context(this)
         }
-        hendelse.håndter(this, context) // double dispatch
-    }
-
-    override fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage, context: CommandContext) {
-        håndter(vedtaksperiodeEndretMessage, context, vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient))
-    }
-
-    override fun håndter(vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage, context: CommandContext) {
-        // TODO
+        håndter(hendelse, context)
     }
 
     private fun nyContext(hendelse: Hendelse) = CommandContext().apply {
@@ -246,13 +242,13 @@ internal class SpleisbehovMediator(
         commandContextDao.lagre(hendelse, this, NY)
     }
 
-    private fun håndter(hendelse: Hendelse, context: CommandContext, command: NynyCommand) {
+    private fun håndter(hendelse: Hendelse, context: CommandContext = nyContext(hendelse)) {
         try {
-            commandContextDao.lagre(hendelse, context, if (context.run(command)) FERDIG else SUSPENDERT)
+            commandContextDao.lagre(hendelse, context, if (context.run(hendelse)) FERDIG else SUSPENDERT)
             behovMediator.håndter(hendelse, context)
         } catch (err: Exception) {
             log.warn("Feil ved kjøring av kommando: {}", err.message, err)
-            command.undo(context)
+            hendelse.undo(context)
             commandContextDao.lagre(hendelse, context, FEIL)
             throw err
         }
@@ -490,5 +486,15 @@ internal class SpleisbehovMediator(
             data = spleisbehovDbDTO.data,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
+    }
+
+    private inner class Hendelsefabrikk : IHendelsefabrikk {
+        override fun nyNyVedtaksperiodeEndret(json: String): NyVedtaksperiodeEndretMessage {
+            return NyVedtaksperiodeEndretMessage(json, vedtakDao, snapshotDao, speilSnapshotRestClient)
+        }
+
+        override fun nyNyVedtaksperiodeForkastet(json: String): NyVedtaksperiodeForkastetMessage {
+            return NyVedtaksperiodeForkastetMessage(json, commandContextDao, vedtakDao, snapshotDao, speilSnapshotRestClient)
+        }
     }
 }

@@ -7,7 +7,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
-import no.nav.helse.mediator.kafka.meldinger.ICommandMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.CommandContextTilstand
 import no.nav.helse.modell.CommandContextTilstand.*
@@ -46,25 +45,35 @@ internal class CommandContextDaoTest {
     }
 
     @Test
+    fun `avbryter ikke seg selv`() {
+        val context = context(UUID.randomUUID())
+        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context, NY)
+        commandContextDao.avbryt(context, VEDTAKSPERIODE)
+        assertEquals(NY, status(VEDTAKSPERIODE)[context.id])
+    }
+
+    @Test
     fun `avbryter command som er NY eller SUSPENDERT`() {
-        val context1 = UUID.randomUUID()
-        val context2 = UUID.randomUUID()
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context(context1), NY)
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context(context2), SUSPENDERT)
-        commandContextDao.avbryt(VEDTAKSPERIODE)
-        assertEquals(AVBRUTT, status(VEDTAKSPERIODE)[context1])
-        assertEquals(AVBRUTT, status(VEDTAKSPERIODE)[context2])
+        val context1 = context(UUID.randomUUID())
+        val context2 = context(UUID.randomUUID())
+        val context3 = context(UUID.randomUUID())
+        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context2, NY)
+        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context3, SUSPENDERT)
+        commandContextDao.avbryt(context1, VEDTAKSPERIODE)
+        assertEquals(AVBRUTT, status(VEDTAKSPERIODE)[context2.id])
+        assertEquals(AVBRUTT, status(VEDTAKSPERIODE)[context3.id])
     }
 
     @Test
     fun `avbryter ikke commands som er FEIL eller FERDIG`() {
-        val context1 = UUID.randomUUID()
-        val context2 = UUID.randomUUID()
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context(context1), FERDIG)
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context(context2), FEIL)
-        commandContextDao.avbryt(VEDTAKSPERIODE)
-        assertEquals(FERDIG, status(VEDTAKSPERIODE)[context1])
-        assertEquals(FEIL, status(VEDTAKSPERIODE)[context2])
+        val context1 = context(UUID.randomUUID())
+        val context2 = context(UUID.randomUUID())
+        val context3 = context(UUID.randomUUID())
+        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context2, FERDIG)
+        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context3, FEIL)
+        commandContextDao.avbryt(context1, VEDTAKSPERIODE)
+        assertEquals(FERDIG, status(VEDTAKSPERIODE)[context2.id])
+        assertEquals(FEIL, status(VEDTAKSPERIODE)[context3.id])
     }
 
     private fun status(vedtaksperiodeId: UUID): Map<UUID, CommandContextTilstand> {
@@ -93,7 +102,7 @@ internal class CommandContextDaoTest {
     }
 
     private class TestHendelse(override val id: UUID, private val vedtaksperiodeId: UUID) : Hendelse {
-        override fun håndter(mediator: ICommandMediator, context: CommandContext) {
+        override fun execute(context: CommandContext): Boolean {
             TODO("Not yet implemented")
         }
 

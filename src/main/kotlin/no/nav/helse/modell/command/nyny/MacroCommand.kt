@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
-internal abstract class MacroCommand : Command() {
+internal abstract class MacroCommand : Command {
     private var currentIndex: Int = 0
     private val historikk: MutableList<Command> = mutableListOf()
     protected abstract val commands: List<Command>

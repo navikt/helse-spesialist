@@ -27,7 +27,7 @@ internal class VedtaksperiodeEndretRiverTest {
     @Test
     fun `tolker vedtaksperiode_endret`() {
         rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret())
-        verify { mediator.håndter(any(), any<NyVedtaksperiodeEndretMessage>()) }
+        verify { mediator.vedtaksperiodeEndret(any(), any()) }
 
     }
 }

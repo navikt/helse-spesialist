@@ -10,14 +10,11 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
+import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.CommandContextTilstand
 import no.nav.helse.modell.CommandContextTilstand.FERDIG
 import no.nav.helse.modell.CommandContextTilstand.NY
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.SpleisbehovDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
@@ -53,6 +50,13 @@ internal class BehovE2ETest {
         assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, NY, FERDIG)
     }
 
+    @Test
+    fun `vedtaksperiode forkastet`() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(HENDELSE_ID, VEDTAKSPERIODE_ID))
+        assertSpleisbehov(HENDELSE_ID)
+        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, NY, FERDIG)
+    }
+
     private fun assertSpleisbehov(hendelseId: UUID) {
         assertEquals(1, using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT COUNT(1) FROM spleisbehov WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
@@ -84,15 +88,12 @@ internal class BehovE2ETest {
         behovMediator = SpleisbehovMediator(
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
-            spesialistOID = SPESIALIST_IOD,
-            vedtakDao = VedtakDao(dataSource),
-            snapshotDao = SnapshotDao(dataSource),
-            commandContextDao = CommandContextDao(dataSource),
-            spleisbehovDao = SpleisbehovDao(dataSource)
+            spesialistOID = SPESIALIST_IOD
         )
 
         behovMediator.init(testRapid)
         NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(testRapid, behovMediator)
+        NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(testRapid, behovMediator)
     }
 
     private fun createHikariConfig(jdbcUrl: String) =

@@ -218,7 +218,7 @@ class MacroCommandTest {
     }
 
     private fun command(execute: (context: CommandContext) -> Boolean, resume: (context: CommandContext) -> Boolean = { true }, undo: () -> Unit = {}): Command {
-        return object : Command() {
+        return object : Command {
             override fun execute(context: CommandContext): Boolean {
                 executeCount += 1
                 return execute(context)

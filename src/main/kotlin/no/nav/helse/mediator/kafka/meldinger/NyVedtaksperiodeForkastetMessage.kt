@@ -1,37 +1,53 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.modell.command.nyny.CommandContext
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.command.nyny.AvbrytCommand
+import no.nav.helse.modell.command.nyny.Command
+import no.nav.helse.modell.command.nyny.MacroCommand
+import no.nav.helse.modell.command.nyny.OppdaterSnapshotCommand
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class NyVedtaksperiodeForkastetMessage(
-    override val id: UUID,
-    private val vedtaksperiodeId: UUID,
-    private val fødselsnummer: String
-) : Hendelse {
-    override fun håndter(mediator: ICommandMediator, context: CommandContext) {
-        TODO("Not yet implemented")
-    }
+    private val json: String,
+    commandContextDao: CommandContextDao,
+    vedtakDao: VedtakDao,
+    snapshotDao: SnapshotDao,
+    speilSnapshotRestClient: SpeilSnapshotRestClient
+) : Hendelse, MacroCommand() {
+    private val mapper = jacksonObjectMapper()
+    private val jsonNode = mapper.readTree(json)
+
+    override val id = UUID.fromString(jsonNode.path("@id").asText())
+    private val vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())
+    private val fødselsnummer = jsonNode.path("fødselsnummer").asText()
+
+    override val commands: List<Command> = listOf(
+        AvbrytCommand(vedtaksperiodeId, commandContextDao),
+        OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
+    )
 
     override fun fødselsnummer() = fødselsnummer
-
     override fun vedtaksperiodeId() = vedtaksperiodeId
-
-    override fun toJson(): String {
-        return """{
-    "id": "$id",
-    "vedtaksperiodeId": "$vedtaksperiodeId",
-    "fødselsnummer": "$fødselsnummer"
-}"""
-    }
+    override fun toJson() = json
 
     internal class VedtaksperiodeForkastetRiver(
         rapidsConnection: RapidsConnection,
         private val mediator: IHendelseMediator
     ) : River.PacketListener {
+        private val log = LoggerFactory.getLogger(this::class.java)
+        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
         init {
             River(rapidsConnection).apply {
@@ -44,10 +60,19 @@ internal class NyVedtaksperiodeForkastetMessage(
             }.register(this)
         }
 
+        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+            sikkerLogg.error("Forstod ikke vedtaksperiode_forkastet:\n${problems.toExtendedReport()}")
+        }
+
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val vedtaksperiodeId = uuid(packet["vedtaksperiodeId"])
-            val fødselsnummer = packet["fødselsnummer"].asText()
-            mediator.håndter(packet, NyVedtaksperiodeForkastetMessage(uuid(packet["@id"]), vedtaksperiodeId, fødselsnummer))
+            val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
+            val id = UUID.fromString(packet["@id"].asText())
+            log.info(
+                "Mottok vedtaksperiode endret {}, {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("eventId", id)
+            )
+            mediator.vedtaksperiodeForkastet(packet, context)
         }
     }
 }

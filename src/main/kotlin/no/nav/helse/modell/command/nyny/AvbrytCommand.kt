@@ -6,9 +6,9 @@ import java.util.*
 internal class AvbrytCommand(
     private val vedtaksperiodeId: UUID,
     private val commandContextDao: CommandContextDao
-) : Command() {
+) : Command {
     override fun execute(context: CommandContext): Boolean {
-        commandContextDao.avbryt(vedtaksperiodeId)
+        commandContextDao.avbryt(context, vedtaksperiodeId)
         return true
     }
 }
