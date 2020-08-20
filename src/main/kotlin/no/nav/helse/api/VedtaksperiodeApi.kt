@@ -68,6 +68,19 @@ internal fun Application.vedtaksperiodeApi(
                 }
                 call.respond(speilSnapshot)
             }
+            get("/api/person/aktorId/{aktørId}/sist_oppdatert") {
+                call.parameters["aktørId"]?.toLongOrNull() ?: run {
+                    call.respond(status = HttpStatusCode.BadRequest, message = "AktørId må være numerisk")
+                    return@get
+                }
+            }
+
+            get("/api/person/fnr/{fødselsnummer}/sist_oppdatert") {
+                call.parameters["fødselsnummer"]?.toLongOrNull() ?: run {
+                    call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")
+                    return@get
+                }
+            }
             post("/api/vedtak") {
                 val godkjenning = call.receive<Godkjenning>()
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
