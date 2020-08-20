@@ -30,4 +30,5 @@ internal interface IHendelseMediator {
 
 internal interface ICommandMediator {
     fun håndter(vedtaksperiodeEndretMessage: NyVedtaksperiodeEndretMessage, context: CommandContext)
+    fun håndter(vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage, context: CommandContext)
 }

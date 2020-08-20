@@ -237,6 +237,10 @@ internal class SpleisbehovMediator(
         håndter(vedtaksperiodeEndretMessage, context, vedtaksperiodeEndretMessage.asCommand(vedtakDao, snapshotDao, speilSnapshotRestClient))
     }
 
+    override fun håndter(vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage, context: CommandContext) {
+        // TODO
+    }
+
     private fun nyContext(hendelse: Hendelse) = CommandContext().apply {
         spleisbehovDao.opprett(hendelse)
         commandContextDao.lagre(hendelse, this, NY)

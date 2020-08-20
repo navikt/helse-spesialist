@@ -12,6 +12,7 @@ internal class VedtaksperiodeEndretRiverTest {
 
     private val rapid = TestRapid()
     private val mediator = mockk<SpleisbehovMediator>(relaxed = true)
+    private val meldingsfabrikk = Testmeldingfabrikk("fnr")
 
     init {
         NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(rapid, mediator)
@@ -25,12 +26,7 @@ internal class VedtaksperiodeEndretRiverTest {
 
     @Test
     fun `tolker vedtaksperiode_endret`() {
-        rapid.sendTestMessage("""{
-            "@event_name": "vedtaksperiode_endret",
-            "vedtaksperiodeId": "030001bd-8fba-4324-9725-d618ce5b83e9",
-            "fødselsnummer": "fnr",
-            "@id": "a71468f7-6095-48bf-a9bb-acf6497befac"
-        }""")
+        rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret())
         verify { mediator.håndter(any(), any<NyVedtaksperiodeEndretMessage>()) }
 
     }
