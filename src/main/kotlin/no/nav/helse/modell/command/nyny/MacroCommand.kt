@@ -11,30 +11,30 @@ internal abstract class MacroCommand : Command() {
         for (i in 0..currentIndex) historikk.add(0, commands[i])
     }
 
-    final override fun execute(kontekst: CommandContext): Boolean {
+    final override fun execute(context: CommandContext): Boolean {
         require(commands.isNotEmpty())
-        kontekst.register(this)
-        return run(kontekst, commands)
+        context.register(this)
+        return run(context, commands)
     }
 
-    final override fun resume(kontekst: CommandContext): Boolean {
-        kontekst.register(this)
-        if (!runCommand(kontekst, commands[currentIndex], Command::resume)) return false
-        return run(kontekst, commands.subList(currentIndex, commands.size))
+    final override fun resume(context: CommandContext): Boolean {
+        context.register(this)
+        if (!runCommand(context, commands[currentIndex], Command::resume)) return false
+        return run(context, commands.subList(currentIndex, commands.size))
     }
 
-    final override fun undo(kontekst: CommandContext) {
-        kontekst.register(this)
-        historikk.forEach { it.undo(kontekst) }
-        kontekst.clear()
+    final override fun undo(context: CommandContext) {
+        context.register(this)
+        historikk.forEach { it.undo(context) }
+        context.clear()
     }
 
-    private fun run(kontekst: CommandContext, commands: List<Command>): Boolean {
-        return commands.none { historikk.add(0, it); !runCommand(kontekst, it, Command::execute) }
+    private fun run(context: CommandContext, commands: List<Command>): Boolean {
+        return commands.none { historikk.add(0, it); !runCommand(context, it, Command::execute) }
     }
 
-    private fun runCommand(kontekst: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
-        if (!commandAction(command, kontekst)) return false.also { kontekst.add(currentIndex, command) }
+    private fun runCommand(context: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
+        if (!commandAction(command, context)) return false.also { context.add(currentIndex, command) }
         currentIndex += 1
         return true
     }
