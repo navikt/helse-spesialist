@@ -27,6 +27,7 @@ spec:
     cpuThresholdPercentage: 90
   ingresses:
     - https://spesialist.dev-fss.nais.io
+    - https://speil.nais.preprod.local/api/v1
   prometheus:
     enabled: true
     path: /metrics
