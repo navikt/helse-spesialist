@@ -24,7 +24,7 @@ internal fun Application.oppgaveApi(
                 call.respond(saksbehandlerOppgaver)
             }
 
-            get("/api/oppgave") {
+            get("/api/v1/oppgave") {
                 val fødselsnummer = call.request.header("fodselsnummer")
                 if (fødselsnummer == null) {
                     call.respond(HttpStatusCode.BadRequest, "Mangler fødselsnummer i header")

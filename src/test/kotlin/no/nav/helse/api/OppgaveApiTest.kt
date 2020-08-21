@@ -77,7 +77,7 @@ class OppgaveApiTest {
         person.sendPersoninfo(eventId)
 
         val referanse = runBlocking {
-            client.get<SaksbehandleroppgavereferanseDto>("/api/oppgave") {
+            client.get<SaksbehandleroppgavereferanseDto>("/api/v1/oppgave") {
                 header("fodselsnummer", person.fødselsnummer)
             }
         }
@@ -88,7 +88,7 @@ class OppgaveApiTest {
     @Test
     fun `får 404 når oppgaven ikke finnes`() {
         val response = runBlocking {
-            client.get<HttpStatement>("/api/oppgave") {
+            client.get<HttpStatement>("/api/v1/oppgave") {
                 header("fodselsnummer", "42069")
             }.execute()
         }
