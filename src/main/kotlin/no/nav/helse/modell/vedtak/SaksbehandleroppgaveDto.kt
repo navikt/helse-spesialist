@@ -32,6 +32,10 @@ data class SaksbehandleroppgaveDto(
     var boenhet: EnhetDto
 )
 
+data class SaksbehandleroppgavereferanseDto(
+    val oppgavereferanse: UUID
+)
+
 enum class Saksbehandleroppgavetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
