@@ -91,6 +91,29 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.ru
         .asList
 )
 
+fun Session.findOppgave(fødselsnummer: String): OppgaveDto? {
+    @Language("PostgreSQL")
+    val query = """
+SELECT o.*
+FROM oppgave o
+         JOIN vedtak v ON v.id = o.vedtak_ref
+         JOIN person p ON v.person_ref = p.id
+WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
+  AND p.fodselsnummer = ?;
+""".trimIndent()
+    return run(queryOf(query, fødselsnummer.toLong()).map {
+        OppgaveDto(
+            id = it.long("id"),
+            opprettet = it.localDateTime("opprettet"),
+            oppdatert = it.localDateTime("oppdatert"),
+            eventId = UUID.fromString(it.string("event_id")),
+            oppgaveType = it.string("type"),
+            status = Oppgavestatus.valueOf(it.string("status")),
+            vedtaksref = it.longOrNull("vedtak_ref")
+        )
+    }.asSingle)
+}
+
 fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
     queryOf(
         """

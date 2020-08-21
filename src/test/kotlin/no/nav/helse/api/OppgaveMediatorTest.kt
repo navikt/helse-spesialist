@@ -12,7 +12,6 @@ internal class OppgaveMediatorTest {
     val dataSource = setupDataSourceMedFlyway()
     val mediator = OppgaveMediator(dataSource)
 
-    @Disabled
     @Test
     fun `henter oppgave med fødselsnummer`() {
         val eventId = UUID.randomUUID()
@@ -22,6 +21,6 @@ internal class OppgaveMediatorTest {
 
         val oppgave = mediator.hentOppgave(person.fødselsnummer)
 
-        assertEquals(eventId, oppgave.eventId)
+        assertEquals(eventId, oppgave?.eventId)
     }
 }
