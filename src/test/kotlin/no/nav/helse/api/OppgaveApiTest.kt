@@ -29,11 +29,12 @@ class OppgaveApiTest {
 
     private val jwtStub = JwtStub()
     private val clientId = "client_id"
+    private val speilClientId = "speil_id"
     private val issuer = "https://jwt-provider-domain"
     private val requiredGroup = "required_group"
 
     private val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
-    private val azureConfig = AzureAdAppConfig(clientId = clientId, requiredGroup = requiredGroup)
+    private val azureConfig = AzureAdAppConfig(clientId = clientId, speilClientId = speilClientId, requiredGroup = requiredGroup)
     private val jwkProvider = jwtStub.getJwkProviderMock()
     private val oppgaveMediator = OppgaveMediator(dataSource)
 
@@ -47,7 +48,7 @@ class OppgaveApiTest {
                     arrayOf(requiredGroup),
                     UUID.randomUUID().toString(),
                     "tbd@nav.no",
-                    clientId,
+                    speilClientId,
                     issuer
                 )}"
             )

@@ -24,6 +24,9 @@ internal fun Application.oppgaveApi(
                 call.respond(saksbehandlerOppgaver)
             }
 
+        }
+
+        authenticate("saksbehandler-direkte") {
             get("/api/v1/oppgave") {
                 val fødselsnummer = call.request.header("fodselsnummer")
                 if (fødselsnummer == null) {

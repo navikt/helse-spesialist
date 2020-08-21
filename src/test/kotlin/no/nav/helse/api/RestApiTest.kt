@@ -66,6 +66,7 @@ internal class RestApiTest {
     private val saksbehandlerIdent = "1234"
     private val epostadresse = "epostadresse"
     private val clientId = "client_id"
+    private val speilClientId = "speil_id"
     private val oid: UUID = UUID.randomUUID()
     private val spesialistOID: UUID = UUID.randomUUID()
     private val issuer = "https://jwt-provider-domain"
@@ -126,7 +127,7 @@ internal class RestApiTest {
         )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
-        val azureConfig = AzureAdAppConfig(clientId = clientId, requiredGroup = requiredGroup)
+        val azureConfig = AzureAdAppConfig(clientId = clientId, speilClientId = speilClientId, requiredGroup = requiredGroup)
         val jwkProvider = jwtStub.getJwkProviderMock()
 
         app = embeddedServer(Netty, port = httpPort) {

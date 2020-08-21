@@ -26,10 +26,23 @@ internal fun Application.azureAdAppAuthentication(
                 JWTPrincipal(credentials.payload)
             }
         }
+
+        jwt(name = "saksbehandler-direkte") {
+            verifier(jwkProvider, oidcDiscovery.issuer)
+            validate { credentials ->
+                val groupsClaim = credentials.payload.getClaim("groups").asList(String::class.java)
+                if (config.requiredGroup !in groupsClaim || config.speilClientId !in credentials.payload.audience) {
+                    log.info("${credentials.payload.subject} with audience ${credentials.payload.audience} is not authorized to use this app, denying access")
+                    return@validate null
+                }
+                JWTPrincipal(credentials.payload)
+            }
+        }
     }
 }
 
 internal data class AzureAdAppConfig(
     internal val clientId: String,
+    internal val speilClientId: String,
     internal val requiredGroup: String
 )
