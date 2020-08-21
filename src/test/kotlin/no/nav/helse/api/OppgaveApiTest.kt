@@ -2,21 +2,22 @@ package no.nav.helse.api
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.host
-import io.ktor.client.request.port
+import io.ktor.client.request.*
+import io.ktor.client.statement.HttpStatement
+import io.ktor.features.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.JacksonConverter
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
 import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
-import no.nav.helse.setupDataSourceMedFlyway
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.net.ServerSocket
 import java.util.*
@@ -60,13 +61,13 @@ class OppgaveApiTest {
     }
 
     private val app = embeddedServer(Netty, port = httpPort) {
+        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
         oppgaveApi(oppgaveMediator)
     }.also {
         it.start(wait = false)
     }
 
-    @Disabled
     @Test
     fun `finner oppgave for person via fødselsnummer`() {
         val eventId = UUID.randomUUID()
@@ -77,10 +78,21 @@ class OppgaveApiTest {
 
         val referanse = runBlocking {
             client.get<SaksbehandleroppgavereferanseDto>("/api/oppgave") {
-                header("fødselsnummer", person.fødselsnummer)
+                header("fodselsnummer", person.fødselsnummer)
             }
         }
 
         assertEquals(eventId, referanse.oppgavereferanse)
+    }
+
+    @Test
+    fun `får 404 når oppgaven ikke finnes`() {
+        val response = runBlocking {
+            client.get<HttpStatement>("/api/oppgave") {
+                header("fodselsnummer", "42069")
+            }.execute()
+        }
+
+        assertEquals(HttpStatusCode.NotFound, response.status)
     }
 }
