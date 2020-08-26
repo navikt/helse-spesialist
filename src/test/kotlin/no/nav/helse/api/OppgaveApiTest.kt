@@ -1,5 +1,6 @@
 package no.nav.helse.api
 
+import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.install
@@ -18,14 +19,14 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.*
 import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.net.ServerSocket
 import java.util.*
 import kotlin.test.assertEquals
 
-class OppgaveApiTest {
+class OppgaveApiTest: AbstractEndToEndTest() {
     private val httpPort = ServerSocket(0).use { it.localPort }
-    private val dataSource = setupDataSourceMedFlyway()
 
     private val jwtStub = JwtStub()
     private val clientId = "client_id"
@@ -36,7 +37,20 @@ class OppgaveApiTest {
     private val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
     private val azureConfig = AzureAdAppConfig(clientId = clientId, speilClientId = speilClientId, requiredGroup = requiredGroup)
     private val jwkProvider = jwtStub.getJwkProviderMock()
-    private val oppgaveMediator = OppgaveMediator(dataSource)
+    private lateinit var oppgaveMediator: OppgaveMediator
+
+    @BeforeAll
+    fun setup() {
+        oppgaveMediator = OppgaveMediator(dataSource)
+        embeddedServer(Netty, port = httpPort) {
+            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
+            oppgaveApi(oppgaveMediator)
+        }.also {
+            it.start(wait = false)
+        }
+    }
+
 
     private val client = HttpClient {
         defaultRequest {
@@ -61,13 +75,7 @@ class OppgaveApiTest {
         }
     }
 
-    private val app = embeddedServer(Netty, port = httpPort) {
-        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-        azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
-        oppgaveApi(oppgaveMediator)
-    }.also {
-        it.start(wait = false)
-    }
+
 
     @Test
     fun `finner oppgave for person via fødselsnummer`() {

@@ -1,14 +1,16 @@
 package no.nav.helse.e2e
 
+import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.Session
 import kotliquery.sessionOf
 import no.nav.helse.TestPerson
 import no.nav.helse.mediator.kafka.meldinger.Dagtype
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findSaksbehandlerOppgaver
 import no.nav.helse.modell.overstyring.finnOverstyring
-import no.nav.helse.setupDataSourceMedFlyway
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -17,15 +19,20 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class SaksbehandlerOverstyrerDagerTest {
-    private val dataSource = setupDataSourceMedFlyway()
+class SaksbehandlerOverstyrerDagerTest: AbstractEndToEndTest() {
 
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+    private lateinit var session: Session
+    private lateinit var vedtaksperiodeMediator: VedtaksperiodeMediator
 
     private lateinit var eventId: UUID
     private lateinit var vedtaksperiodeId: UUID
     private lateinit var person:TestPerson
+
+    @BeforeAll
+    fun setupAll() {
+        session = sessionOf(dataSource, returnGeneratedKey = true)
+        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+    }
 
     @BeforeEach
     fun setup() {

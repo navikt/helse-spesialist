@@ -1,16 +1,21 @@
 package no.nav.helse.api
 
+import AbstractEndToEndTest
 import no.nav.helse.TestPerson
-import no.nav.helse.setupDataSourceMedFlyway
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-internal class OppgaveMediatorTest {
+internal class OppgaveMediatorTest : AbstractEndToEndTest() {
 
-    val dataSource = setupDataSourceMedFlyway()
-    val mediator = OppgaveMediator(dataSource)
+    private lateinit var mediator:OppgaveMediator
+
+    @BeforeAll
+    fun setup() {
+        mediator = OppgaveMediator(dataSource)
+    }
 
     @Test
     fun `henter oppgave med fødselsnummer`() {

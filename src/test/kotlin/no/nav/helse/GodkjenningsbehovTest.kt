@@ -1,5 +1,7 @@
 package no.nav.helse
 
+import AbstractEndToEndTest
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.Godkjenningsbehov
@@ -8,30 +10,30 @@ import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import javax.sql.DataSource
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GodkjenningsbehovTest {
+class GodkjenningsbehovTest: AbstractEndToEndTest() {
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
-    private val dataSource: DataSource = setupDataSourceMedFlyway()
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private lateinit var session: Session
     private val speilSnapshotRestClient: SpeilSnapshotRestClient =
         SpeilSnapshotRestClient(
             spleisMockClient.client,
             accessTokenClient,
             "spleisClientId"
         )
-    private val testDao: TestPersonDao = TestPersonDao(dataSource)
+    private lateinit var testDao: TestPersonDao
+
+    @BeforeAll
+    fun setup() {
+        session = sessionOf(dataSource, returnGeneratedKey = true)
+        testDao = TestPersonDao(dataSource)
+    }
 
     @AfterAll
     fun cleanup() {

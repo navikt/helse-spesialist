@@ -1,5 +1,7 @@
 package no.nav.helse
 
+import AbstractEndToEndTest
+import kotliquery.Session
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.BistandSaksbehandlerMessage
@@ -10,16 +12,13 @@ import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BistandSaksbehandlerMediatorTest {
-    private val dataSource = setupDataSourceMedFlyway()
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
-
+class BistandSaksbehandlerMediatorTest: AbstractEndToEndTest() {
+    private lateinit var session: Session
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
     private val speilSnapshotRestClient = SpeilSnapshotRestClient(
@@ -29,6 +28,11 @@ class BistandSaksbehandlerMediatorTest {
     )
 
     private val spesialistOID: UUID = UUID.randomUUID()
+
+    @BeforeAll
+    fun setup() {
+        session = sessionOf(dataSource, returnGeneratedKey = true)
+    }
 
     @AfterAll
     fun tearDown() {

@@ -3,9 +3,6 @@ package no.nav.helse
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -15,49 +12,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
-import org.flywaydb.core.Flyway
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
-import javax.sql.DataSource
 
-internal fun setupDataSourceMedFlyway(): DataSource {
-    val embeddedPostgres = EmbeddedPostgres.builder().start()
-
-    val hikariConfig = HikariConfig().apply {
-        this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
-        maximumPoolSize = 5
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
-    }
-
-    val dataSource = HikariDataSource(hikariConfig)
-
-    Flyway.configure()
-        .dataSource(dataSource)
-        .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
-        .load()
-        .migrate()
-
-    return dataSource
-}
-
-internal fun setupDataSource(): DataSource {
-    val embeddedPostgres = EmbeddedPostgres.builder().start()
-
-    val hikariConfig = HikariConfig().apply {
-        this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
-        maximumPoolSize = 5
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
-    }
-
-    return HikariDataSource(hikariConfig)
-}
 
 class SpleisMockClient(fødselsnummer: String = "01129342684", aktørId: String = "123", organisasjonsnummer: String = "888") {
     private val queuedResponses: Queue<Path> = LinkedList()

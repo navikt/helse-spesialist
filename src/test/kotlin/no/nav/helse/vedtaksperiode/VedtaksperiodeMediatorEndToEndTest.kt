@@ -1,21 +1,24 @@
 package no.nav.helse.vedtaksperiode
 
+import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestPerson
 import no.nav.helse.objectMapper
-import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-class VedtaksperiodeMediatorEndToEndTest {
-    private val dataSource = setupDataSourceMedFlyway()
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(
-        dataSource = dataSource
-    )
+class VedtaksperiodeMediatorEndToEndTest: AbstractEndToEndTest() {
+    private lateinit var vedtaksperiodeMediator: VedtaksperiodeMediator
+
+    @BeforeAll
+    fun setup() {
+        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+    }
 
     @Test
     fun `bygger forventet spapspot`() {

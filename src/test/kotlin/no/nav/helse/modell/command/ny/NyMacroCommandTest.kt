@@ -3,7 +3,6 @@ package no.nav.helse.modell.command.ny
 import AbstractEndToEndTest
 import kotliquery.Session
 import kotliquery.sessionOf
-import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*

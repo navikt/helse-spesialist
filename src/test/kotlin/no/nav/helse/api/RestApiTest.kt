@@ -1,8 +1,8 @@
 package no.nav.helse.api
 
+import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -34,32 +34,22 @@ import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.vedtaksperiode.PersonForSpeilDto
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
-import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.net.ServerSocket
-import java.nio.file.Path
-import java.sql.Connection
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
-import javax.sql.DataSource
 
-@TestInstance(Lifecycle.PER_CLASS)
-internal class RestApiTest {
-    private lateinit var embeddedPostgres: EmbeddedPostgres
-    private lateinit var postgresConnection: Connection
-    private lateinit var dataSource: DataSource
+internal class RestApiTest : AbstractEndToEndTest() {
 
     private lateinit var app: ApplicationEngine
     private lateinit var spleisbehovMediator: SpleisbehovMediator
-    private lateinit var flyway: Flyway
-    private val rapid = TestRapid()
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
@@ -96,20 +86,7 @@ internal class RestApiTest {
     private val spleisMockClient = SpleisMockClient()
 
     @BeforeAll
-    internal fun `start embedded environment`(@TempDir postgresPath: Path) {
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        postgresConnection = embeddedPostgres.postgresDatabase.connection
-
-        dataSource = setupDataSource()
-
-        flyway = Flyway.configure()
-            .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
-            .load()
-
+    internal fun `start embedded environment`() {
         val speilSnapshotRestClient = SpeilSnapshotRestClient(
             spleisMockClient.client,
             accessTokenClient(),
@@ -120,14 +97,15 @@ internal class RestApiTest {
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
-        ).apply { init(rapid) }
+        ).apply { init(testRapid) }
         val oppgaveMediator = OppgaveMediator(dataSource)
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
             dataSource = dataSource
         )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
-        val azureConfig = AzureAdAppConfig(clientId = clientId, speilClientId = speilClientId, requiredGroup = requiredGroup)
+        val azureConfig =
+            AzureAdAppConfig(clientId = clientId, speilClientId = speilClientId, requiredGroup = requiredGroup)
         val jwkProvider = jwtStub.getJwkProviderMock()
 
         app = embeddedServer(Netty, port = httpPort) {
@@ -143,16 +121,12 @@ internal class RestApiTest {
 
     @BeforeEach
     internal fun updateVedtaksperiodeId() {
-        flyway.clean()
-        flyway.migrate()
         spleisMockClient.setVedtaksperiodeId(vedtaksperiodeId)
     }
 
     @AfterAll
     internal fun `stop embedded environment`() {
         app.stop(1L, 1L, SECONDS)
-        postgresConnection.close()
-        embeddedPostgres.close()
     }
 
 
@@ -431,8 +405,8 @@ internal class RestApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.Created, response.status)
-        val løsning = 0.until(rapid.inspektør.size)
-            .map(rapid.inspektør::message)
+        val løsning = 0.until(testRapid.inspektør.size)
+            .map(testRapid.inspektør::message)
             .first { it.hasNonNull("@løsning") }
             .path("@løsning")
         requireNotNull(løsning)

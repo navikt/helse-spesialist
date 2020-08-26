@@ -1,26 +1,29 @@
 package no.nav.helse.modell.oppgave
 
+import AbstractEndToEndTest
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.CommandExecutor
 import no.nav.helse.modell.command.MacroCommand
-import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.Duration
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CommandExecutorTest {
-    private val dataSource = setupDataSourceMedFlyway()
-    private val session = sessionOf(dataSource)
+class CommandExecutorTest : AbstractEndToEndTest() {
+    private lateinit var session:Session
     private val spesialistOID: UUID = UUID.randomUUID()
     private val saksbehandlerOID = UUID.randomUUID()
+
+    @BeforeAll
+    fun setup() {
+        session = sessionOf(dataSource)
+    }
 
     @AfterAll
     fun cleanup() {
@@ -39,7 +42,7 @@ class CommandExecutorTest {
             nåværendeOppgave = null
         )
         executor.execute()
-        val oppgaverForBehov = sessionOf(dataSource, returnGeneratedKey=true).use { session ->
+        val oppgaverForBehov = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM oppgave where event_id=?;",

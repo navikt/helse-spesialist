@@ -1,6 +1,8 @@
 package no.nav.helse
 
+import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
@@ -16,9 +18,9 @@ import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.vedtaksperiode.findVedtakByFnr
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -27,12 +29,11 @@ import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-class GodkjenningsbehovEndToEndTest {
+class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
-    private val dataSource = setupDataSourceMedFlyway()
-    private val session = sessionOf(dataSource, returnGeneratedKey = true)
+    private lateinit var session: Session
     private val speilSnapshotRestClient = SpeilSnapshotRestClient(
         spleisMockClient.client,
         accessTokenClient,
@@ -43,28 +44,31 @@ class GodkjenningsbehovEndToEndTest {
     private lateinit var spleisbehovMediator: SpleisbehovMediator
     private lateinit var vedtaksperiodeId: UUID
     private lateinit var spleisbehovId: UUID
-    private lateinit var rapid: TestRapid
+
+    @BeforeAll
+    fun setupAll() {
+        session = sessionOf(dataSource, returnGeneratedKey = true)
+    }
 
     @BeforeEach
     fun setup() {
         spleisbehovId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
-        rapid = TestRapid()
         spleisbehovMediator = SpleisbehovMediator(
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
-        ).apply { init(rapid) }
+        ).apply { init(testRapid) }
     }
 
     @ExperimentalContracts
     @Test
     fun `Spleisbehov persisteres`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
 
         sendGodkjenningsbehov()
 
-        assertEquals(2, rapid.inspektør.size)
+        assertEquals(2, testRapid.inspektør.size)
         assertNotNull(session.findBehov(spleisbehovId))
         spleisbehovMediator.håndter(
             spleisbehovId,
@@ -88,9 +92,9 @@ class GodkjenningsbehovEndToEndTest {
                 kommentar = null
             )
         )
-        assertEquals(5, rapid.inspektør.size)
-        val løsning = 0.until(rapid.inspektør.size)
-            .map(rapid.inspektør::message)
+        assertEquals(5, testRapid.inspektør.size)
+        val løsning = 0.until(testRapid.inspektør.size)
+            .map(testRapid.inspektør::message)
             .first { it.hasNonNull("@løsning") }
             .path("@løsning")
 
@@ -103,7 +107,7 @@ class GodkjenningsbehovEndToEndTest {
     @ExperimentalContracts
     @Test
     fun `Mottar godkjennings message med warning fra topic`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
 
         val warningTekst = "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
         val warningsJson = """
@@ -179,7 +183,7 @@ class GodkjenningsbehovEndToEndTest {
 
     @Test
     fun `Persisterer og henter saksbehandleroppgavetype`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
 
         sendGodkjenningsbehov(periodetype = Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE)
 
@@ -204,7 +208,7 @@ class GodkjenningsbehovEndToEndTest {
 
     @Test
     fun `Saksbehandleroppgavetype kan være null`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
 
         sendGodkjenningsbehov(periodetype = null)
 
@@ -226,7 +230,7 @@ class GodkjenningsbehovEndToEndTest {
 
     @Test
     fun `Advarsler dedupliseres i oppgaver til saksbehandler`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
 
         val warningTekst = "Personen tjener alt for mye"
         val duplicatedWarningTekst =
@@ -285,11 +289,11 @@ class GodkjenningsbehovEndToEndTest {
 
     @Test
     fun `Persisterer løsning for HentInfotrygdutbetalinger`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
-        PersoninfoLøsningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
+        PersoninfoLøsningMessage.Factory(testRapid, spleisbehovMediator)
 
-        rapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
-        rapid.sendTestMessage(personinfoLøsningJson(spleisbehovId, vedtaksperiodeId))
+        testRapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
+        testRapid.sendTestMessage(personinfoLøsningJson(spleisbehovId, vedtaksperiodeId))
 
         val utbetaling = sessionOf(dataSource).use { session ->
             session.run(
@@ -304,7 +308,7 @@ class GodkjenningsbehovEndToEndTest {
 
     @Test
     fun `Ignorerer løsning på behov dersom det ikke finnes noen nåværende oppgave`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
         sendGodkjenningsbehov()
 
         spleisbehovMediator.håndter(
@@ -344,12 +348,12 @@ class GodkjenningsbehovEndToEndTest {
     @ExperimentalContracts
     @Test
     fun `Vedtaksperioder som går til infotrygd invaliderer oppgaver`() {
-        TilInfotrygdMessage.Factory(rapid, spleisbehovMediator)
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        TilInfotrygdMessage.Factory(testRapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
 
         sendGodkjenningsbehov()
 
-        rapid.sendTestMessage(
+        testRapid.sendTestMessage(
             """
             {
             "@event_name": "vedtaksperiode_endret",
@@ -412,7 +416,7 @@ class GodkjenningsbehovEndToEndTest {
 
     @Test
     fun `gjør ingen ting om man får en løsning på en invalidert oppgave`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
         sendGodkjenningsbehov(aktørId = "7653345", fødselsnummer = "3546756", organisasjonsnummer = "6546346")
         spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
         spleisbehovMediator.håndter(
@@ -430,8 +434,8 @@ class GodkjenningsbehovEndToEndTest {
     @ExperimentalContracts
     @Test
     fun `vedtaksperiode_endret fører til oppdatert speil snapshot`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
-        VedtaksperiodeEndretMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
+        VedtaksperiodeEndretMessage.Factory(testRapid, spleisbehovMediator)
 
         val fødselsnummer = "3546756"
         val aktørId = "7653345"
@@ -459,8 +463,8 @@ class GodkjenningsbehovEndToEndTest {
     @ExperimentalContracts
     @Test
     fun `vedtaksperiode_forkastet fører til oppdatert speil snapshot`() {
-        GodkjenningMessage.Factory(rapid, spleisbehovMediator)
-        VedtaksperiodeForkastetMessage.Factory(rapid, spleisbehovMediator)
+        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
+        VedtaksperiodeForkastetMessage.Factory(testRapid, spleisbehovMediator)
 
         val fødselsnummer = "3546756"
         val aktørId = "7653345"
@@ -486,7 +490,7 @@ class GodkjenningsbehovEndToEndTest {
     }
 
     private fun sendVedtaksperiodeEndretEvent(aktørId: String, fødselsnummer: String, organisasjonsnummer: String) {
-        rapid.sendTestMessage(
+        testRapid.sendTestMessage(
             """
             {
               "vedtaksperiodeId": "$vedtaksperiodeId",
@@ -504,7 +508,7 @@ class GodkjenningsbehovEndToEndTest {
     }
 
     private fun sendVedtaksperiodeForkastetEvent(aktørId: String, fødselsnummer: String, organisasjonsnummer: String) {
-        rapid.sendTestMessage(
+        testRapid.sendTestMessage(
             """
             {
               "vedtaksperiodeId": "$vedtaksperiodeId",
@@ -527,7 +531,7 @@ class GodkjenningsbehovEndToEndTest {
         warnings: String = "{\"aktiviteter\": []}",
         periodetype: Saksbehandleroppgavetype? = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
     ) {
-        rapid.sendTestMessage(
+        testRapid.sendTestMessage(
             """
             {
               "@behov": ["Godkjenning"],
