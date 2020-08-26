@@ -1,5 +1,6 @@
 package no.nav.helse.modell.command.ny
 
+import AbstractEndToEndTest
 import kotliquery.sessionOf
 import no.nav.helse.api.RollbackDelete
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -7,11 +8,9 @@ import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class RollbackDeletePersonCommandTest {
+class RollbackDeletePersonCommandTest: AbstractEndToEndTest() {
     @Test
     fun `rollback delete person command legger rollback delete melding på rapid`() {
-        val dataSource = setupDataSourceMedFlyway()
-        val testRapid = TestRapid()
         val rollbackDelete = RollbackDelete(
             fødselsnummer = "fødselsnummer",
             aktørId = "aktørid"

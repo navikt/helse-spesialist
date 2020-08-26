@@ -1,17 +1,14 @@
 package no.nav.helse.modell.command.ny
 
+import AbstractEndToEndTest
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-internal class AnnulleringCommandTest {
+internal class AnnulleringCommandTest : AbstractEndToEndTest() {
     @Test
     fun `annullering-command legger annulleringsmelding på rapid`() {
-        val dataSource = setupDataSourceMedFlyway()
-        val testRapid = TestRapid()
         val annulleringMessage = AnnulleringMessage(
             aktørId = "aktørid",
             fødselsnummer = "fødselsnummer",

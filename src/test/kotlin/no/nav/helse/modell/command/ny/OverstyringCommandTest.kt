@@ -1,5 +1,6 @@
 package no.nav.helse.modell.command.ny
 
+import AbstractEndToEndTest
 import junit.framework.Assert.assertTrue
 import kotliquery.sessionOf
 import no.nav.helse.TestPerson
@@ -9,14 +10,12 @@ import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.Løsninger
 import no.nav.helse.modell.overstyring.OverstyringCommand
 import no.nav.helse.modell.overstyring.finnOverstyring
-import no.nav.helse.setupDataSourceMedFlyway
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
-class OverstyringCommandTest {
-    val dataSource = setupDataSourceMedFlyway()
+class OverstyringCommandTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyring-command legger overstyringsmelding på rapid`() {
