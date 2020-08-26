@@ -72,24 +72,29 @@ fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
         .asSingle
 )
 
-fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> = this.run(
-    queryOf(
-        """
-            SELECT *, (SELECT json_agg(distinct melding) meldinger FROM warning where spleisbehov_ref=o.event_id), sot.type as saksbehandleroppgavetype
-            FROM oppgave o
-                   INNER JOIN vedtak v on o.vedtak_ref = v.id
-                   INNER JOIN person p on v.person_ref = p.id
-                   INNER JOIN person_info pi on p.info_ref = pi.id
-                   LEFT JOIN (select navn as enhet_navn, id as enhet_id from enhet) e on p.enhet_ref = enhet_id
-                   LEFT JOIN saksbehandleroppgavetype sot on o.event_id = sot.spleisbehov_ref
-            WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-            ORDER BY opprettet DESC
-            LIMIT 500
-        """
+fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
+    @Language("PostgreSQL")
+    val query = """
+SELECT *,
+       (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE spleisbehov_ref = o.event_id),
+       sot.type AS saksbehandleroppgavetype
+FROM oppgave o
+         INNER JOIN vedtak v ON o.vedtak_ref = v.id
+         INNER JOIN person p ON v.person_ref = p.id
+         INNER JOIN person_info pi ON p.info_ref = pi.id
+         LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
+         LEFT JOIN saksbehandleroppgavetype sot ON o.event_id = sot.spleisbehov_ref
+WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+ORDER BY CASE WHEN sot.type = 'FORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC
+LIMIT 500
+"""
+    return this.run(
+        queryOf(query)
+            .map(::saksbehandleroppgaveDto)
+            .asList
     )
-        .map(::saksbehandleroppgaveDto)
-        .asList
-)
+}
+
 
 fun Session.findOppgave(fødselsnummer: String): OppgaveDto? {
     @Language("PostgreSQL")
@@ -100,7 +105,7 @@ FROM oppgave o
          JOIN person p ON v.person_ref = p.id
 WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
   AND p.fodselsnummer = ?;
-""".trimIndent()
+"""
     return run(queryOf(query, fødselsnummer.toLong()).map {
         OppgaveDto(
             id = it.long("id"),
