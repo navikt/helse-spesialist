@@ -26,7 +26,7 @@ internal class OppdaterSnapshotCommandTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val context = CommandContext()
+    private val context = CommandContext(UUID.randomUUID())
 
     private val command = OppdaterSnapshotCommand(restClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
 

@@ -1,11 +1,13 @@
 package no.nav.helse.modell.command.nyny
 
+import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.modell.CommandContextDao
 import java.util.*
 
-internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
+internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()) {
     private val data = mutableListOf<Any>()
     private val behov = mutableMapOf<String, Map<String, Any>>()
-    private val sti: MutableList<Int> = mutableListOf()
+    private val sti: MutableList<Int> = sti.toMutableList()
 
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
         this.behov[behovtype] = params
@@ -17,7 +19,7 @@ internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
         this.data.add(data)
     }
 
-    internal fun add(index: Int, command: Command) {
+    internal fun add(index: Int) {
         sti.add(0, index)
     }
 
@@ -34,14 +36,28 @@ internal class CommandContext(internal val id: UUID = UUID.randomUUID()) {
 
     internal fun sti() = sti.toList()
 
-    internal fun sti(sti: List<Int>) {
-        this.sti.apply { clear(); addAll(sti) }
+    internal fun opprett(commandContextDao: CommandContextDao, hendelse: Hendelse) {
+        commandContextDao.opprett(hendelse, id)
     }
 
-    internal fun run(command: Command) = when {
-        sti.isEmpty() -> command.execute(this)
-        else -> command.resume(this)
+    internal fun avbryt(commandContextDao: CommandContextDao, vedtaksperiodeId: UUID) {
+        commandContextDao.avbryt(vedtaksperiodeId, id)
     }
 
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
+
+    internal fun run(commandContextDao: CommandContextDao, hendelse: Hendelse) = try {
+        run(hendelse).also {
+            if (it) commandContextDao.ferdig(hendelse, id)
+            else commandContextDao.suspendert(hendelse, id, sti)
+        }
+    } catch (e: Exception) {
+        commandContextDao.feil(hendelse, id)
+        throw e
+    }
+
+    private fun run(hendelse: Hendelse) = when {
+        sti.isEmpty() -> hendelse.execute(this)
+        else -> hendelse.resume(this)
+    }
 }

@@ -7,7 +7,6 @@ import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.*
-import no.nav.helse.modell.CommandContextTilstand.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
@@ -234,22 +233,26 @@ internal class SpleisbehovMediator(
         val context = requireNotNull(commandContextDao.finn(løsning.contextId)).apply {
             løsning.context(this)
         }
-        håndter(hendelse, context)
+        håndter(hendelse, context, løsning.contextId)
     }
 
-    private fun nyContext(hendelse: Hendelse) = CommandContext().apply {
+    private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
         spleisbehovDao.opprett(hendelse)
-        commandContextDao.lagre(hendelse, this, NY)
+        opprett(commandContextDao, hendelse)
     }
 
-    private fun håndter(hendelse: Hendelse, context: CommandContext = nyContext(hendelse)) {
+    private fun håndter(hendelse: Hendelse) {
+        val contextId = UUID.randomUUID()
+        håndter(hendelse, nyContext(hendelse, contextId), contextId)
+    }
+
+    private fun håndter(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         try {
-            commandContextDao.lagre(hendelse, context, if (context.run(hendelse)) FERDIG else SUSPENDERT)
-            behovMediator.håndter(hendelse, context)
+            context.run(commandContextDao, hendelse)
+            behovMediator.håndter(hendelse, context, contextId)
         } catch (err: Exception) {
-            log.warn("Feil ved kjøring av kommando: {}", err.message, err)
+            log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
             hendelse.undo(context)
-            commandContextDao.lagre(hendelse, context, FEIL)
             throw err
         }
     }

@@ -6,8 +6,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.CommandContextTilstand
-import no.nav.helse.modell.CommandContextTilstand.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,7 +20,7 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
     private companion object {
         private val FNR = "FNR"
         private val VEDTAKSPERIODE = UUID.randomUUID()
-        private val HENDELSE = UUID.randomUUID()
+        private val HENDELSE = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE)
     }
 
     private lateinit var commandContextDao: CommandContextDao
@@ -32,56 +30,64 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
     @Test
     fun `lagrer og finner context i db`() {
         val contextId = UUID.randomUUID()
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context(contextId), NY)
+        context(contextId).opprett(commandContextDao, HENDELSE)
         assertNotNull(commandContextDao.finn(contextId))
+        assertTilstand("NY", contextId)
     }
 
     @Test
     fun `avbryter ikke seg selv`() {
-        val context = context(UUID.randomUUID())
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context, NY)
-        commandContextDao.avbryt(context, VEDTAKSPERIODE)
-        assertEquals(NY, status(VEDTAKSPERIODE)[context.id])
+        val contextId = UUID.randomUUID()
+        context(contextId).apply {
+            opprett(commandContextDao, HENDELSE)
+            avbryt(commandContextDao, VEDTAKSPERIODE)
+        }
+        assertTilstand("NY", contextId)
     }
 
     @Test
     fun `avbryter command som er NY eller SUSPENDERT`() {
-        val context1 = context(UUID.randomUUID())
-        val context2 = context(UUID.randomUUID())
-        val context3 = context(UUID.randomUUID())
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context2, NY)
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context3, SUSPENDERT)
-        commandContextDao.avbryt(context1, VEDTAKSPERIODE)
-        assertEquals(AVBRUTT, status(VEDTAKSPERIODE)[context2.id])
-        assertEquals(AVBRUTT, status(VEDTAKSPERIODE)[context3.id])
+        val contextId1 = UUID.randomUUID()
+        val contextId2 = UUID.randomUUID()
+        val contextId3 = UUID.randomUUID()
+        context(contextId2).opprett(commandContextDao, HENDELSE)
+        context(contextId3).opprett(commandContextDao, HENDELSE)
+        commandContextDao.suspendert(HENDELSE, contextId3, listOf())
+        context(contextId1).avbryt(commandContextDao, VEDTAKSPERIODE)
+
+        assertTilstand("AVBRUTT", contextId2)
+        assertTilstand("AVBRUTT", contextId3)
     }
 
     @Test
     fun `avbryter ikke commands som er FEIL eller FERDIG`() {
-        val context1 = context(UUID.randomUUID())
-        val context2 = context(UUID.randomUUID())
-        val context3 = context(UUID.randomUUID())
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context2, FERDIG)
-        commandContextDao.lagre(TestHendelse(HENDELSE, VEDTAKSPERIODE), context3, FEIL)
-        commandContextDao.avbryt(context1, VEDTAKSPERIODE)
-        assertEquals(FERDIG, status(VEDTAKSPERIODE)[context2.id])
-        assertEquals(FEIL, status(VEDTAKSPERIODE)[context3.id])
+        val contextId1 = UUID.randomUUID()
+        val contextId2 = UUID.randomUUID()
+        val contextId3 = UUID.randomUUID()
+        context(contextId2).opprett(commandContextDao, HENDELSE)
+        context(contextId3).opprett(commandContextDao, HENDELSE)
+        commandContextDao.ferdig(HENDELSE, contextId2)
+        commandContextDao.feil(HENDELSE, contextId3)
+        context(contextId1).avbryt(commandContextDao, VEDTAKSPERIODE)
+
+        assertTilstand("FERDIG", contextId2)
+        assertTilstand("FEIL", contextId3)
     }
 
-    private fun status(vedtaksperiodeId: UUID): Map<UUID, CommandContextTilstand> {
-        return using(sessionOf(dataSource)) {
-            it.run(
+    private fun assertTilstand(expectedTilstand: String, contextId: UUID) {
+        using(sessionOf(dataSource)) { session ->
+            session.run(
                 queryOf(
-                    "SELECT context_id, tilstand FROM command_context WHERE vedtaksperiode_id = ?",
-                    vedtaksperiodeId
-                ).map { row ->
-                    UUID.fromString(row.string("context_id")) to enumValueOf<CommandContextTilstand>(row.string("tilstand"))
-                }.asList
-            ).toMap()
+                    "SELECT tilstand FROM command_context WHERE context_id = ?",
+                    contextId
+                ).map { it.string("tilstand") }.asSingle
+            )
+        }.also {
+            assertEquals(expectedTilstand, it)
         }
     }
 
-    private fun testSpleisbehov(hendelseId: UUID = HENDELSE) {
+    private fun testSpleisbehov(hendelseId: UUID = HENDELSE.id) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(

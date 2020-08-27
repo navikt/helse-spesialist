@@ -34,7 +34,7 @@ internal abstract class MacroCommand : Command {
     }
 
     private fun runCommand(context: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
-        if (!commandAction(command, context)) return false.also { context.add(currentIndex, command) }
+        if (!commandAction(command, context)) return false.also { context.add(currentIndex) }
         currentIndex += 1
         return true
     }

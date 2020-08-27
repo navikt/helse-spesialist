@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 import kotlin.test.assertEquals
 
 class MacroCommandTest {
@@ -20,7 +21,7 @@ class MacroCommandTest {
         executeCount = 0
         resumeCount = 0
         undoCount = 0
-        context = CommandContext()
+        context = CommandContext(UUID.randomUUID())
     }
 
     @Test
@@ -92,8 +93,7 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true }
             )
         val macroCommand2 = command1 + macroCommand1
-        context.sti(listOf(1, 0))
-        macroCommand2.resume(context)
+        macroCommand2.resume(CommandContext(UUID.randomUUID(), listOf(1, 0)))
         assertRekkefølge("B etter", "C før")
     }
 
@@ -110,8 +110,7 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true }
             )
         val macroCommand2 = command1 + macroCommand1
-        context.sti(listOf(1, 0))
-        macroCommand2.execute(context)
+        macroCommand2.execute(CommandContext(UUID.randomUUID(), listOf(1, 0)))
         assertRekkefølge("A", "B før")
     }
 
@@ -176,8 +175,7 @@ class MacroCommandTest {
                 execute = { constants.add("C før"); true },
                 undo = { constants.add("C etter") }
             )
-        context.sti(listOf(1))
-        macroCommand.undo(context)
+        macroCommand.undo(CommandContext(UUID.randomUUID(), listOf(1)))
         assertRekkefølge("C etter", "B etter")
         assertTellere(0, 0, 2)
     }
@@ -194,7 +192,7 @@ class MacroCommandTest {
                 resume = { constants.add("C etter"); true },
                 undo = { constants.add("C undo") }
             )
-        context.sti(listOf(1))
+        context = CommandContext(UUID.randomUUID(), listOf(1))
         macroCommand.resume(context)
         macroCommand.undo(context)
         assertRekkefølge("C etter", "C undo", "B undo")

@@ -12,14 +12,14 @@ internal class BehovMediator(
     private val rapidsConnection: RapidsConnection,
     private val sikkerLogg: Logger
 ) {
-    internal fun håndter(hendelse: Hendelse, context: CommandContext) {
+    internal fun håndter(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         if (!context.harBehov()) return
-        rapidsConnection.publish(hendelse.fødselsnummer(), packet(hendelse, context).also { sikkerLogg.info("sender {}", it) })
+        rapidsConnection.publish(hendelse.fødselsnummer(), packet(hendelse, context, contextId).also { sikkerLogg.info("sender {}", it) })
     }
 
-    private fun packet(hendelse: Hendelse, context: CommandContext) = standardfelter(hendelse).apply {
+    private fun packet(hendelse: Hendelse, context: CommandContext, contextId: UUID) = standardfelter(hendelse).apply {
         this["@behov"] = context.behov().keys.toList()
-        this["contextId"] = context.id
+        this["contextId"] = contextId
         this["hendelseId"] = hendelse.id
         putAll(context.behov())
     }.let { JsonMessage.newMessage(it).toJson() }

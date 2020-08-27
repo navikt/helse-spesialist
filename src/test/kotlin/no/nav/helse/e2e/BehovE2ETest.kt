@@ -12,9 +12,6 @@ import no.nav.helse.mediator.kafka.SpleisbehovMediator
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.CommandContextTilstand
-import no.nav.helse.modell.CommandContextTilstand.FERDIG
-import no.nav.helse.modell.CommandContextTilstand.NY
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
@@ -47,14 +44,14 @@ internal class BehovE2ETest {
     fun `vedtaksperiode endret`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, VEDTAKSPERIODE_ID))
         assertSpleisbehov(HENDELSE_ID)
-        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, NY, FERDIG)
+        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, "NY", "FERDIG")
     }
 
     @Test
     fun `vedtaksperiode forkastet`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(HENDELSE_ID, VEDTAKSPERIODE_ID))
         assertSpleisbehov(HENDELSE_ID)
-        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, NY, FERDIG)
+        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID, "NY", "FERDIG")
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -63,14 +60,14 @@ internal class BehovE2ETest {
         })
     }
 
-    private fun assertTilstand(hendelseId: UUID, vedtaksperiodeId: UUID, vararg tilstand: CommandContextTilstand) {
+    private fun assertTilstand(hendelseId: UUID, vedtaksperiodeId: UUID, vararg tilstand: String) {
         assertEquals(tilstand.toList(), using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
                     "SELECT tilstand FROM command_context WHERE spleisbehov_id = ? AND vedtaksperiode_id = ? ORDER BY id ASC",
                     hendelseId,
                     vedtaksperiodeId
-                ).map { enumValueOf<CommandContextTilstand>(it.string("tilstand")) }.asList
+                ).map { it.string("tilstand") }.asList
             )
         })
     }

@@ -13,10 +13,10 @@ internal class AvbrytCommandTest {
 
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
+        private val CONTEXT = UUID.randomUUID()
     }
-
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val context = CommandContext()
+    private val context = CommandContext(CONTEXT)
 
     private val command = AvbrytCommand(VEDTAKSPERIODE, commandContextDao)
 
@@ -28,6 +28,6 @@ internal class AvbrytCommandTest {
     @Test
     fun `avbryter command context`() {
         assertTrue(command.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(context, VEDTAKSPERIODE) }
+        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
     }
 }

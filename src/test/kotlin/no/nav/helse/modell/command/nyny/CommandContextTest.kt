@@ -1,16 +1,32 @@
 package no.nav.helse.modell.command.nyny
 
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.modell.CommandContextDao
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.util.*
 
 internal class CommandContextTest {
 
     private lateinit var context: CommandContext
 
+    private companion object {
+        private val HENDELSE = UUID.randomUUID()
+        private val VEDTAKSPERIODE = UUID.randomUUID()
+        private val CONTEXT = UUID.randomUUID()
+        private const val FNR = "fnr"
+        private const val SNAPSHOT = "json"
+    }
+
+    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
+
     @BeforeEach
     private fun setupEach() {
-        context = CommandContext()
+        context = CommandContext(CONTEXT)
     }
 
     @Test
@@ -21,19 +37,65 @@ internal class CommandContextTest {
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            context.run(this)
+            context.run(commandContextDao, this)
             assertTrue(executed)
             assertFalse(resumed)
+            verify(exactly = 1) { commandContextDao.ferdig(this@apply, CONTEXT) }
+            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), any()) }
         }
     }
 
     @Test
     fun `resumer kommando med tilstand`() {
-        context.sti(listOf(1))
+        context = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            context.run(this)
+            context.run(commandContextDao, this)
             assertFalse(executed)
             assertTrue(resumed)
+            verify(exactly = 1) { commandContextDao.ferdig(this@apply, CONTEXT) }
+            verify(exactly = 0) { commandContextDao.suspendert(any(), any(), any()) }
+        }
+    }
+
+    @Test
+    fun `suspenderer ved execute`() {
+        context = CommandContext(CONTEXT)
+        TestCommand(executeAction = { false }).apply {
+            context.run(commandContextDao, this)
+            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply, CONTEXT, any()) }
+        }
+    }
+
+    @Test
+    fun `suspenderer ved resume`() {
+        val sti = listOf(1)
+        context = CommandContext(CONTEXT, sti)
+        TestCommand(resumeAction = { false }).apply {
+            context.run(commandContextDao, this)
+            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextDao.suspendert(this@apply, CONTEXT, sti) }
+        }
+    }
+
+    @Test
+    fun `feil ved execute`() {
+        context = CommandContext(CONTEXT)
+        TestCommand(executeAction = { throw Exception() }).apply {
+            assertThrows<Exception> { context.run(commandContextDao, this) }
+            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextDao.feil(this@apply, CONTEXT) }
+        }
+    }
+
+    @Test
+    fun `feil ved resume`() {
+        val sti = listOf(1)
+        context = CommandContext(CONTEXT, sti)
+        TestCommand(resumeAction = { throw Exception() }).apply {
+            assertThrows<Exception> { context.run(commandContextDao, this) }
+            verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
+            verify(exactly = 1) { commandContextDao.feil(this@apply, CONTEXT) }
         }
     }
 
@@ -76,19 +138,27 @@ internal class CommandContextTest {
 
     private class TestObject1(val data: String)
     private class TestObject2(val data: String)
-    private class TestCommand : Command {
+    private class TestCommand(
+        private val executeAction: () -> Boolean = { true },
+        private val resumeAction: () -> Boolean = { true }
+    ) : Hendelse {
         var executed = false
         var resumed = false
         var undo = false
 
+        override val id = HENDELSE
+        override fun fødselsnummer() = FNR
+        override fun vedtaksperiodeId() = VEDTAKSPERIODE
+        override fun toJson() = SNAPSHOT
+
         override fun execute(context: CommandContext): Boolean {
             executed = true
-            return true
+            return executeAction()
         }
 
         override fun resume(context: CommandContext): Boolean {
             resumed = true
-            return true
+            return resumeAction()
         }
 
         override fun undo(context: CommandContext) {

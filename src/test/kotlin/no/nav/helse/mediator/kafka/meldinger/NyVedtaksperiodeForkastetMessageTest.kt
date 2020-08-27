@@ -19,8 +19,9 @@ import java.util.*
 internal class NyVedtaksperiodeForkastetMessageTest {
 
     private companion object {
-        private val ID = UUID.randomUUID()
+        private val HENDELSE = UUID.randomUUID()
         private val VEDTAKSPERIODE = UUID.randomUUID()
+        private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
         private const val SNAPSHOT = "json"
         private val vedtak = VedtakDto(1, 2)
@@ -31,8 +32,8 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val context = CommandContext()
-    private val vedtaksperiodeForkastetMessage = NyVedtaksperiodeForkastetMessage(testmeldingfabrikk.lagVedtaksperiodeForkastet(ID, VEDTAKSPERIODE), commandContextDao, vedtakDao, snapshotDao, restClient)
+    private val context = CommandContext(CONTEXT)
+    private val vedtaksperiodeForkastetMessage = NyVedtaksperiodeForkastetMessage(testmeldingfabrikk.lagVedtaksperiodeForkastet(HENDELSE, VEDTAKSPERIODE), commandContextDao, vedtakDao, snapshotDao, restClient)
 
     @BeforeEach
     fun setup() {
@@ -45,7 +46,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(context, VEDTAKSPERIODE) }
+        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) }
     }
 
@@ -55,7 +56,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns 0
         assertFalse(vedtaksperiodeForkastetMessage.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(context, VEDTAKSPERIODE) }
+        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) }
     }
 }

@@ -8,7 +8,7 @@ internal class AvbrytCommand(
     private val commandContextDao: CommandContextDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        commandContextDao.avbryt(context, vedtaksperiodeId)
+        context.avbryt(commandContextDao, vedtaksperiodeId)
         return true
     }
 }

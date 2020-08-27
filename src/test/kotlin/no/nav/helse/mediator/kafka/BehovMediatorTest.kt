@@ -37,7 +37,7 @@ internal class BehovMediatorTest {
             "param 2" to 2
         )
         testContext.behov("type 1", params)
-        behovMediator.håndter(testHendelse, testContext)
+        behovMediator.håndter(testHendelse, testContext, contextId)
         assertEquals(listOf("type 1"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
         assertEquals("$contextId", testRapid.inspektør.field(0, "contextId").asText())
         assertEquals("$hendelseId", testRapid.inspektør.field(0, "hendelseId").asText())
@@ -50,7 +50,7 @@ internal class BehovMediatorTest {
     @Test
     fun `standardfelter`() {
         testContext.behov("testbehov")
-        behovMediator.håndter(testHendelse, testContext)
+        behovMediator.håndter(testHendelse, testContext, contextId)
         assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals(FNR, testRapid.inspektør.field(0, "fødselsnummer").asText())
         assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
