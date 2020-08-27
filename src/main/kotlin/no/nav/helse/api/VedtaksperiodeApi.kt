@@ -1,18 +1,13 @@
 package no.nav.helse.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.auth.authenticate
-import io.ktor.auth.jwt.JWTPrincipal
-import io.ktor.auth.principal
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.response.respondText
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.routing
+import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.auth.jwt.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.SpleisbehovMediator
@@ -116,13 +111,16 @@ internal fun Application.vedtaksperiodeApi(
             }
             post("/api/annullering") {
                 val annullering = call.receive<Annullering>()
+                val accessToken = requireNotNull(call.principal<JWTPrincipal>())
+                val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
                 val message = AnnulleringMessage(
                     aktørId = annullering.aktørId,
                     fødselsnummer = annullering.fødselsnummer,
                     organisasjonsnummer = annullering.organisasjonsnummer,
                     fagsystemId = annullering.fagsystemId,
-                    saksbehandler = annullering.saksbehandlerIdent
+                    saksbehandler = annullering.saksbehandlerIdent,
+                    saksbehandlerEpost = epostadresse
                 )
 
                 spleisbehovMediator.håndter(message)

@@ -14,7 +14,8 @@ internal class AnnulleringCommandTest : AbstractEndToEndTest() {
             fødselsnummer = "fødselsnummer",
             organisasjonsnummer = "organisasjonsnummer",
             fagsystemId = "fagsystemid",
-            saksbehandler = "saksbehandler"
+            saksbehandler = "saksbehandler",
+            saksbehandlerEpost = "saksbehander@nav.no"
         )
         val annulleringCommand = AnnulleringCommand(testRapid, annulleringMessage)
         sessionOf(dataSource, returnGeneratedKey = true).use(annulleringCommand::execute)

@@ -36,7 +36,8 @@ class AnnulleringCommand(
             "organisasjonsnummer" to organisasjonsnummer,
             "aktørId" to aktørId,
             "fagsystemId" to fagsystemId,
-            "saksbehandler" to saksbehandler
+            "saksbehandler" to saksbehandler,
+            "saksbehandlerEpost" to saksbehandlerEpost
         )
     ).toJson()
 }

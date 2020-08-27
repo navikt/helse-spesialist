@@ -5,5 +5,6 @@ class AnnulleringMessage(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val fagsystemId: String,
-    val saksbehandler: String
+    val saksbehandler: String,
+    val saksbehandlerEpost: String
 )
