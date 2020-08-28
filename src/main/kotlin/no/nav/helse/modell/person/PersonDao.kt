@@ -107,7 +107,7 @@ internal fun Session.updatePersoninfo(
         """
             UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=?, fodselsdato=?, kjonn=CAST(? as person_kjonn)
             WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);
-        """.trimIndent()
+        """
     run(
         queryOf(
             query,

@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.*
 import no.nav.helse.modell.command.nyny.CommandContext
+import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
@@ -34,15 +35,28 @@ internal class CommandContextDao(private val dataSource: DataSource) {
 
     fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) {
         using(sessionOf(dataSource)) {
+            @Language("PostgreSQL")
+            val query = """
+                INSERT INTO command_context(context_id,spleisbehov_id,tilstand,vedtaksperiode_id,data)
+                    SELECT context_id, spleisbehov_id,?, vedtaksperiode_id, data
+                    FROM command_context
+                    WHERE vedtaksperiode_id = ? AND context_id != ? AND context_id NOT IN (
+                        SELECT context_id
+                        FROM command_context
+                        WHERE vedtaksperiode_id = ? AND tilstand IN (?,?,?)
+                    )
+            """
             it.run(
                 queryOf(
-                    "UPDATE command_context SET tilstand = ? WHERE vedtaksperiode_id = ? AND tilstand in (?,?) AND context_id != ?",
+                    query,
                     AVBRUTT.name,
                     vedtaksperiodeId,
-                    SUSPENDERT.name,
-                    NY.name,
-                    contextId
-                ).asUpdate
+                    contextId,
+                    vedtaksperiodeId,
+                    FEIL.name,
+                    FERDIG.name,
+                    AVBRUTT.name
+                ).asExecute
             )
         }
     }
