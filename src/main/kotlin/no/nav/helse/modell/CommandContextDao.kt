@@ -37,31 +37,38 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             @Language("PostgreSQL")
             val query = """
-                INSERT INTO command_context(context_id,spleisbehov_id,tilstand,vedtaksperiode_id,data)
-                    SELECT context_id, spleisbehov_id,?, vedtaksperiode_id, data
-                    FROM command_context
-                    WHERE vedtaksperiode_id = ? AND context_id != ? AND context_id NOT IN (
-                        SELECT context_id
-                        FROM command_context
-                        WHERE vedtaksperiode_id = ? AND tilstand IN (?,?,?)
-                    )
+                INSERT INTO command_context(context_id, spleisbehov_id, tilstand, vedtaksperiode_id, data)
+                    SELECT context_id, spleisbehov_id, :avbrutt, vedtaksperiode_id, data
+                    FROM (
+                             SELECT DISTINCT ON (context_id) *
+                             FROM command_context
+                             WHERE vedtaksperiode_id = :vedtaksperiodeId
+                               AND context_id != :contextId
+                             ORDER BY context_id, id DESC
+                         ) AS command_contexts
+                    WHERE tilstand IN (:ny, :suspendert)
             """
             it.run(
                 queryOf(
                     query,
-                    AVBRUTT.name,
-                    vedtaksperiodeId,
-                    contextId,
-                    vedtaksperiodeId,
-                    FEIL.name,
-                    FERDIG.name,
-                    AVBRUTT.name
+                    mapOf(
+                        "avbrutt" to AVBRUTT.name,
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "contextId" to contextId,
+                        "ny" to NY.name,
+                        "suspendert" to SUSPENDERT.name
+                    )
                 ).asExecute
             )
         }
     }
 
-    private fun lagre(hendelse: Hendelse, contextId: UUID, tilstand: CommandContextTilstand, sti: List<Int> = emptyList()) {
+    private fun lagre(
+        hendelse: Hendelse,
+        contextId: UUID,
+        tilstand: CommandContextTilstand,
+        sti: List<Int> = emptyList()
+    ) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(

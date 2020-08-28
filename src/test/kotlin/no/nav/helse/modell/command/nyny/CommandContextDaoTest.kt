@@ -18,109 +18,104 @@ import kotlin.test.assertNotNull
 internal class CommandContextDaoTest : AbstractEndToEndTest() {
 
     private companion object {
-        private val FNR = "FNR"
-        private val VEDTAKSPERIODE = UUID.randomUUID()
-        private val HENDELSE = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE)
+        private const val FNR = "FNR"
+        private val VEDTAKSPERIODE1 = UUID.randomUUID()
+        private val VEDTAKSPERIODE2 = UUID.randomUUID()
+        private val HENDELSE1 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE1)
+        private val HENDELSE2 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE2)
     }
 
-    private lateinit var commandContextDao: CommandContextDao
-
-    private fun context(id: UUID) = CommandContext(id)
+    private lateinit var dao: CommandContextDao
 
     @Test
     fun `lagrer og finner context i db`() {
-        val contextId = UUID.randomUUID()
-        context(contextId).opprett(commandContextDao, HENDELSE)
-        assertNotNull(commandContextDao.finn(contextId))
-        assertTilstand("NY", contextId)
+        val contextId = ny()
+        assertNotNull(dao.finn(contextId))
+        assertTilstand(contextId, "NY")
     }
 
     @Test
     fun `avbryter ikke seg selv`() {
-        val contextId = UUID.randomUUID()
-        context(contextId).apply {
-            opprett(commandContextDao, HENDELSE)
-            avbryt(commandContextDao, VEDTAKSPERIODE)
-        }
-        assertTilstand("NY", contextId)
+        val contextId = ny()
+        avbryt(contextId)
+        assertTilstand(contextId, "NY")
     }
 
     @Test
     fun `avbryter command som er NY eller SUSPENDERT`() {
         val contextId1 = UUID.randomUUID()
-        val contextId2 = UUID.randomUUID()
-        val contextId3 = UUID.randomUUID()
-        val contextId4 = UUID.randomUUID()
-        context(contextId2).opprett(commandContextDao, HENDELSE)
-        context(contextId3).opprett(commandContextDao, HENDELSE)
-        context(contextId4).opprett(commandContextDao, HENDELSE)
-        commandContextDao.ferdig(HENDELSE, contextId4)
-        commandContextDao.suspendert(HENDELSE, contextId3, listOf())
-
-        context(contextId1).avbryt(commandContextDao, VEDTAKSPERIODE)
-
-        assertTilstand("AVBRUTT", contextId2)
-        assertTilstand("AVBRUTT", contextId3)
-        assertTilstand("FERDIG", contextId4)
+        val contextId2 = ny()
+        val contextId3 = suspendert()
+        val contextId4 = ferdig()
+        avbryt(contextId1)
+        assertTilstand(contextId2, "NY", "AVBRUTT")
+        assertTilstand(contextId3, "NY", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(contextId4, "NY", "FERDIG")
     }
 
     @Test
     fun `avbryter ikke commands som er FEIL eller FERDIG`() {
         val contextId1 = UUID.randomUUID()
-        val contextId2 = UUID.randomUUID()
-        val contextId3 = UUID.randomUUID()
-        val contextId4 = UUID.randomUUID()
-        context(contextId2).opprett(commandContextDao, HENDELSE)
-        context(contextId3).opprett(commandContextDao, HENDELSE)
-        context(contextId4).opprett(commandContextDao, HENDELSE)
-        commandContextDao.ferdig(HENDELSE, contextId2)
-        commandContextDao.feil(HENDELSE, contextId3)
-        context(contextId1).avbryt(commandContextDao, VEDTAKSPERIODE)
-
-        assertTilstand("FERDIG", contextId2)
-        assertTilstand("FEIL", contextId3)
-        assertTilstand("AVBRUTT", contextId4)
+        val contextId2 = ferdig()
+        val contextId3 = feil()
+        val contextId4 = ny()
+        avbryt(contextId1)
+        assertTilstand(contextId2, "NY", "FERDIG")
+        assertTilstand(contextId3, "NY", "FEIL")
+        assertTilstand(contextId4, "NY", "AVBRUTT")
     }
 
     @Test
     fun `avbryter bare for riktig vedtaksperiode`() {
-        val contextId1 = UUID.randomUUID()
-        val forVedtaksperiode1 = UUID.randomUUID()
-        context(forVedtaksperiode1).opprett(commandContextDao, HENDELSE)
-
-        val hendelse2 = TestHendelse(UUID.randomUUID(), UUID.randomUUID())
-        testSpleisbehov(hendelse2.id)
-        val forVedtaksperiode2 = UUID.randomUUID()
-        context(forVedtaksperiode2).opprett(commandContextDao, hendelse2)
-
-        context(contextId1).avbryt(commandContextDao, VEDTAKSPERIODE)
-
-        assertTilstand("AVBRUTT", forVedtaksperiode1)
-        assertTilstand("NY", forVedtaksperiode2)
+        val contextId1 = ny(HENDELSE1)
+        val contextId2 = ny(HENDELSE2)
+        avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId())
+        assertTilstand(contextId1, "NY", "AVBRUTT")
+        assertTilstand(contextId2, "NY")
     }
 
-    private fun assertTilstand(expectedTilstand: String, contextId: UUID) {
+    private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
+        CommandContext(uuid).opprett(dao, hendelse)
+    }
+
+    private fun ferdig(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+        dao.ferdig(hendelse, uuid)
+    }
+
+    private fun suspendert(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+        dao.suspendert(hendelse, uuid, listOf())
+    }
+
+    private fun feil(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
+        dao.feil(hendelse, uuid)
+    }
+
+    private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE1) {
+        dao.avbryt(vedtaksperiodeId, contextId)
+    }
+
+    private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT tilstand FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1",
+                    "SELECT tilstand FROM command_context WHERE context_id = ? ORDER BY id ASC",
                     contextId
-                ).map { it.string("tilstand") }.asSingle
+                ).map { it.string("tilstand") }.asList
             )
         }.also {
-            assertEquals(expectedTilstand, it)
+            assertEquals(expectedTilstand.toList(), it)
         }
     }
 
-    private fun testSpleisbehov(hendelseId: UUID = HENDELSE.id) {
+    private fun testSpleisbehov(hendelse: Hendelse) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
                     "INSERT INTO spleisbehov(id, data, original, spleis_referanse, type) VALUES(?, ?::json, ?::json, ?, ?)",
-                    hendelseId,
+                    hendelse.id,
                     "{}",
                     "{}",
-                    hendelseId,
+                    hendelse.id,
                     "Godkjenningsbehov"
                 ).asExecute
             )
@@ -147,12 +142,13 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
 
     @BeforeAll
     internal fun setupAll() {
-        commandContextDao = CommandContextDao(dataSource)
+        dao = CommandContextDao(dataSource)
     }
 
 
     @BeforeEach
     internal fun setup() {
-        testSpleisbehov()
+        testSpleisbehov(HENDELSE1)
+        testSpleisbehov(HENDELSE2)
     }
 }
