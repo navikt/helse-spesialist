@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -32,8 +33,9 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private val testhendelsefabrikk = Hendelsefabrikk(vedtakDao, commandContextDao, snapshotDao, restClient)
     private val context = CommandContext(CONTEXT)
-    private val vedtaksperiodeForkastetMessage = NyVedtaksperiodeForkastetMessage(testmeldingfabrikk.lagVedtaksperiodeForkastet(HENDELSE, VEDTAKSPERIODE), commandContextDao, vedtakDao, snapshotDao, restClient)
+    private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(testmeldingfabrikk.lagVedtaksperiodeForkastet(HENDELSE, VEDTAKSPERIODE))
 
     @BeforeEach
     fun setup() {

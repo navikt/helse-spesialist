@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -17,18 +16,14 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class NyVedtaksperiodeEndretMessage(
+    override val id: UUID,
+    private val vedtaksperiodeId: UUID,
+    private val fødselsnummer: String,
     private val json: String,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
-    private val mapper = jacksonObjectMapper()
-    private val jsonNode = mapper.readTree(json)
-
-    override val id = UUID.fromString(jsonNode.path("@id").asText())
-    private val vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())
-    private val fødselsnummer = jsonNode.path("fødselsnummer").asText()
-
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     )
@@ -68,7 +63,7 @@ internal class NyVedtaksperiodeEndretMessage(
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("eventId", id)
             )
-            mediator.vedtaksperiodeEndret(packet, context)
+            mediator.vedtaksperiodeEndret(packet, id, vedtaksperiodeId, packet["fødselsnummer"].asText(), context)
         }
     }
 }

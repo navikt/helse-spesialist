@@ -35,11 +35,11 @@ internal class HendelseMediator(
     private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) : IHendelseMediator {
-    private val hendelsefabrikk = Hendelsefabrikk()
-
     private val vedtakDao: VedtakDao = VedtakDao(dataSource)
+
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource)
+    private val hendelsefabrikk = Hendelsefabrikk(vedtakDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
     private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
 
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -219,11 +219,11 @@ internal class HendelseMediator(
         sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
-    override fun vedtaksperiodeEndret(message: JsonMessage, context: RapidsConnection.MessageContext) {
-        håndter(hendelsefabrikk.nyNyVedtaksperiodeEndret(message.toJson()))
+    override fun vedtaksperiodeEndret(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
+        håndter(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
     }
 
-    override fun vedtaksperiodeForkastet(message: JsonMessage, context: RapidsConnection.MessageContext) {
+    override fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
         håndter(hendelsefabrikk.nyNyVedtaksperiodeForkastet(message.toJson()))
     }
 
@@ -493,13 +493,4 @@ internal class HendelseMediator(
         )
     }
 
-    private inner class Hendelsefabrikk : IHendelsefabrikk {
-        override fun nyNyVedtaksperiodeEndret(json: String): NyVedtaksperiodeEndretMessage {
-            return NyVedtaksperiodeEndretMessage(json, vedtakDao, snapshotDao, speilSnapshotRestClient)
-        }
-
-        override fun nyNyVedtaksperiodeForkastet(json: String): NyVedtaksperiodeForkastetMessage {
-            return NyVedtaksperiodeForkastetMessage(json, commandContextDao, vedtakDao, snapshotDao, speilSnapshotRestClient)
-        }
-    }
 }

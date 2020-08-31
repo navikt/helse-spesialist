@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -20,19 +19,15 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class NyVedtaksperiodeForkastetMessage(
+    override val id: UUID,
+    private val vedtaksperiodeId: UUID,
+    private val fødselsnummer: String,
     private val json: String,
     commandContextDao: CommandContextDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
-    private val mapper = jacksonObjectMapper()
-    private val jsonNode = mapper.readTree(json)
-
-    override val id = UUID.fromString(jsonNode.path("@id").asText())
-    private val vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText())
-    private val fødselsnummer = jsonNode.path("fødselsnummer").asText()
-
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao),
         OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
@@ -72,7 +67,7 @@ internal class NyVedtaksperiodeForkastetMessage(
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("eventId", id)
             )
-            mediator.vedtaksperiodeForkastet(packet, context)
+            mediator.vedtaksperiodeForkastet(packet, id, vedtaksperiodeId, packet["fødselsnummer"].asText(), context)
         }
     }
 }
