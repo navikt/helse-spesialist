@@ -247,13 +247,15 @@ internal class SpleisbehovMediator(
     }
 
     private fun håndter(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
-        try {
-            context.run(commandContextDao, hendelse)
-            behovMediator.håndter(hendelse, context, contextId)
-        } catch (err: Exception) {
-            log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
-            hendelse.undo(context)
-            throw err
+        withMDC(mapOf("context_id" to "$contextId")) {
+            try {
+                context.run(commandContextDao, hendelse)
+                behovMediator.håndter(hendelse, context, contextId)
+            } catch (err: Exception) {
+                log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
+                hendelse.undo(context)
+                throw err
+            }
         }
     }
 
