@@ -1,29 +1,22 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.auth.jwt.JWTPrincipal
-import io.ktor.auth.principal
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.features.CallId
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.callIdMdc
-import io.ktor.http.ContentType
-import io.ktor.jackson.JacksonConverter
-import io.ktor.request.path
-import io.ktor.request.uri
+import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.auth.jwt.*
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
+import io.ktor.client.features.json.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.jackson.*
+import io.ktor.request.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.api.adminApi
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -79,7 +72,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
-    private val spleisbehovMediator = SpleisbehovMediator(
+    private val spleisbehovMediator = HendelseMediator(
         dataSource = dataSource,
         speilSnapshotRestClient = speilSnapshotRestClient,
         spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))

@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.modell.Behovtype
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,7 +23,7 @@ class ArbeidsgiverMessage(
 
     internal class Factory(
         rapidsConnection: RapidsConnection,
-        private val spleisbehovMediator: SpleisbehovMediator
+        private val spleisbehovMediator: HendelseMediator
     ) : River.PacketListener {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 

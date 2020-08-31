@@ -2,14 +2,14 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
 internal class TilbakerullingMessageTest {
 
     private val rapid = TestRapid()
-    private val mediatorMock = mockk<SpleisbehovMediator>(relaxed = true)
+    private val mediatorMock = mockk<HendelseMediator>(relaxed = true)
     init {
         TilbakerullingMessage.Factory(rapid, mediatorMock)
     }

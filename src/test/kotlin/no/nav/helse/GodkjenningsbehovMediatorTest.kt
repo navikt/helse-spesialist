@@ -3,7 +3,7 @@ package no.nav.helse
 import AbstractEndToEndTest
 import kotliquery.Session
 import kotliquery.sessionOf
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.command.findBehov
 import no.nav.helse.modell.command.findNåværendeOppgave
@@ -42,7 +42,7 @@ internal class GodkjenningsbehovMediatorTest : AbstractEndToEndTest() {
 
     @Test
     fun `Spleisbehov persisteres`() {
-        val spleisbehovMediator = SpleisbehovMediator(
+        val spleisbehovMediator = HendelseMediator(
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID

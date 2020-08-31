@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.command.findBehov
 import no.nav.helse.modell.command.findNåværendeOppgave
@@ -41,7 +41,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     )
     private val spesialistOID: UUID = UUID.randomUUID()
 
-    private lateinit var spleisbehovMediator: SpleisbehovMediator
+    private lateinit var spleisbehovMediator: HendelseMediator
     private lateinit var vedtaksperiodeId: UUID
     private lateinit var spleisbehovId: UUID
 
@@ -54,7 +54,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     fun setup() {
         spleisbehovId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
-        spleisbehovMediator = SpleisbehovMediator(
+        spleisbehovMediator = HendelseMediator(
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID

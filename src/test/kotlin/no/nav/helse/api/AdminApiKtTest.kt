@@ -1,19 +1,14 @@
 package no.nav.helse.api
 
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.JacksonConverter
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.setBody
-import io.ktor.server.testing.withTestApplication
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.jackson.*
+import io.ktor.server.testing.*
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.basicAuthentication
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -21,7 +16,7 @@ import kotlin.test.assertEquals
 
 internal class AdminApiKtTest {
 
-    private val mediator: SpleisbehovMediator = mockk(relaxed = true)
+    private val mediator: HendelseMediator = mockk(relaxed = true)
 
     @Test
     fun `oppslag på rollback`() {

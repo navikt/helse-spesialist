@@ -3,7 +3,7 @@ package no.nav.helse
 import AbstractEndToEndTest
 import kotliquery.Session
 import kotliquery.sessionOf
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.BistandSaksbehandlerMessage
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -41,7 +41,7 @@ class BistandSaksbehandlerMediatorTest: AbstractEndToEndTest() {
 
     @Test
     fun `spleis trenger bistand fra saksbehandler`() {
-        val spleisbehovMediator = SpleisbehovMediator(
+        val spleisbehovMediator = HendelseMediator(
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID

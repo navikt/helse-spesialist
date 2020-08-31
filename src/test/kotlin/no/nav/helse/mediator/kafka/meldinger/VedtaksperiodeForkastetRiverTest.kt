@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeForkastetRiverTest {
 
     private val rapid = TestRapid()
-    private val mediator = mockk<SpleisbehovMediator>(relaxed = true)
+    private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val meldingsfabrikk = Testmeldingfabrikk("fnr")
     private val mapper = jacksonObjectMapper()
 

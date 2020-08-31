@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -12,7 +12,7 @@ class VedtaksperiodeEndretMessage(
 ) {
     internal class Factory(
         rapidsConnection: RapidsConnection,
-        private val spleisbehovMediator: SpleisbehovMediator
+        private val spleisbehovMediator: HendelseMediator
     ) : River.PacketListener {
 
         init {
@@ -36,7 +36,7 @@ class VedtaksperiodeEndretMessage(
 
     internal class ManuellFactory(
         rapidsConnection: RapidsConnection,
-        private val spleisbehovMediator: SpleisbehovMediator
+        private val spleisbehovMediator: HendelseMediator
     ) : River.PacketListener {
         init {
             River(rapidsConnection).apply {

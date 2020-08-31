@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
@@ -16,7 +16,6 @@ import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -39,7 +38,7 @@ class TestPerson(private val dataSource: DataSource) {
 
     val rapid = TestRapid()
 
-    private val mediator = SpleisbehovMediator(
+    private val mediator = HendelseMediator(
         dataSource = dataSource,
         speilSnapshotRestClient = speilSnapshotRestClient,
         spesialistOID = spesialistOID

@@ -3,28 +3,25 @@ package no.nav.helse.api
 import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.install
-import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.application.*
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpStatement
-import io.ktor.features.ContentNegotiation
+import io.ktor.client.statement.*
+import io.ktor.features.*
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.TextContent
-import io.ktor.jackson.JacksonConverter
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.engine.stop
-import io.ktor.server.netty.Netty
+import io.ktor.http.content.*
+import io.ktor.jackson.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.*
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -49,7 +46,7 @@ import java.util.concurrent.TimeUnit.SECONDS
 internal class RestApiTest : AbstractEndToEndTest() {
 
     private lateinit var app: ApplicationEngine
-    private lateinit var spleisbehovMediator: SpleisbehovMediator
+    private lateinit var spleisbehovMediator: HendelseMediator
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
@@ -93,7 +90,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             "spleisClientId"
         )
 
-        spleisbehovMediator = SpleisbehovMediator(
+        spleisbehovMediator = HendelseMediator(
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID

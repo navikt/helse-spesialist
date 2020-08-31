@@ -10,7 +10,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
@@ -23,7 +23,7 @@ import javax.sql.DataSource
 
 internal fun Application.vedtaksperiodeApi(
     vedtaksperiodeMediator: VedtaksperiodeMediator,
-    spleisbehovMediator: SpleisbehovMediator,
+    spleisbehovMediator: HendelseMediator,
     dataSource: DataSource
 ) {
     routing {

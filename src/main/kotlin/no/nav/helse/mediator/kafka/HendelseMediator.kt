@@ -30,7 +30,7 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
-internal class SpleisbehovMediator(
+internal class HendelseMediator(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val dataSource: DataSource,
     private val spesialistOID: UUID
@@ -43,7 +43,7 @@ internal class SpleisbehovMediator(
     private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
 
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    private val log = LoggerFactory.getLogger(SpleisbehovMediator::class.java)
+    private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private lateinit var rapidsConnection: RapidsConnection
     private var shutdown = false
     private lateinit var behovMediator: BehovMediator

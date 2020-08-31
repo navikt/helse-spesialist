@@ -1,17 +1,14 @@
 package no.nav.helse.api
 
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.auth.authenticate
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.post
-import io.ktor.routing.route
-import io.ktor.routing.routing
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import no.nav.helse.mediator.kafka.HendelseMediator
 
-internal fun Application.adminApi(spleisbehovMediator: SpleisbehovMediator) {
+internal fun Application.adminApi(spleisbehovMediator: HendelseMediator) {
     routing {
         authenticate("admin") {
             route("/admin") {

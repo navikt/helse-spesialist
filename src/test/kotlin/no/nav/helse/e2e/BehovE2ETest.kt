@@ -8,7 +8,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.SpleisbehovMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
@@ -37,7 +37,7 @@ internal class BehovE2ETest {
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
-    private lateinit var behovMediator: SpleisbehovMediator
+    private lateinit var behovMediator: HendelseMediator
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
     @Test
@@ -82,7 +82,7 @@ internal class BehovE2ETest {
         val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
         dataSource = HikariDataSource(hikariConfig)
 
-        behovMediator = SpleisbehovMediator(
+        behovMediator = HendelseMediator(
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
             spesialistOID = SPESIALIST_IOD
