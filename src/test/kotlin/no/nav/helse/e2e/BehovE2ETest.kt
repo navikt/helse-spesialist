@@ -9,8 +9,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -88,9 +86,6 @@ internal class BehovE2ETest {
             dataSource = dataSource,
             spesialistOID = SPESIALIST_IOD
         )
-
-        NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(testRapid, behovMediator)
-        NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(testRapid, behovMediator)
     }
 
     private fun createHikariConfig(jdbcUrl: String) =

@@ -37,7 +37,7 @@ internal class CommandContextTest {
     @Test
     fun `executer kommando uten tilstand`() {
         TestCommand().apply {
-            context.run(commandContextDao, this)
+            assertTrue(context.utfør(commandContextDao, this))
             assertTrue(executed)
             assertFalse(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply, CONTEXT) }
@@ -49,7 +49,7 @@ internal class CommandContextTest {
     fun `resumer kommando med tilstand`() {
         context = CommandContext(CONTEXT, listOf(1))
         TestCommand().apply {
-            context.run(commandContextDao, this)
+            assertTrue(context.utfør(commandContextDao, this))
             assertFalse(executed)
             assertTrue(resumed)
             verify(exactly = 1) { commandContextDao.ferdig(this@apply, CONTEXT) }
@@ -61,7 +61,7 @@ internal class CommandContextTest {
     fun `suspenderer ved execute`() {
         context = CommandContext(CONTEXT)
         TestCommand(executeAction = { false }).apply {
-            context.run(commandContextDao, this)
+            assertFalse(context.utfør(commandContextDao, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply, CONTEXT, any()) }
         }
@@ -72,7 +72,7 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { false }).apply {
-            context.run(commandContextDao, this)
+            assertFalse(context.utfør(commandContextDao, this))
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.suspendert(this@apply, CONTEXT, sti) }
         }
@@ -82,7 +82,7 @@ internal class CommandContextTest {
     fun `feil ved execute`() {
         context = CommandContext(CONTEXT)
         TestCommand(executeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.run(commandContextDao, this) }
+            assertThrows<Exception> { context.utfør(commandContextDao, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.feil(this@apply, CONTEXT) }
         }
@@ -93,7 +93,7 @@ internal class CommandContextTest {
         val sti = listOf(1)
         context = CommandContext(CONTEXT, sti)
         TestCommand(resumeAction = { throw Exception() }).apply {
-            assertThrows<Exception> { context.run(commandContextDao, this) }
+            assertThrows<Exception> { context.utfør(commandContextDao, this) }
             verify(exactly = 0) { commandContextDao.ferdig(any(), any()) }
             verify(exactly = 1) { commandContextDao.feil(this@apply, CONTEXT) }
         }

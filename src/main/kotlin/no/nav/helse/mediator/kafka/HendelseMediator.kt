@@ -15,7 +15,6 @@ import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.overstyring.BistandSaksbehandlerCommand
-import no.nav.helse.modell.overstyring.OverstyringCommand
 import no.nav.helse.modell.overstyring.OverstyringSaksbehandlerCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -60,6 +59,9 @@ internal class HendelseMediator(
         VedtaksperiodeEndretMessage.ManuellFactory(rapidsConnection, this)
         VedtaksperiodeForkastetMessage.Factory(rapidsConnection, this)
         TilbakerullingMessage.Factory(rapidsConnection, this)
+
+        NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(rapidsConnection, this)
+        NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(rapidsConnection, this)
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
@@ -229,11 +231,11 @@ internal class HendelseMediator(
     }
 
     override fun vedtaksperiodeEndret(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
-        håndter(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
+        utfør(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
     }
 
     override fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
-        håndter(hendelsefabrikk.nyNyVedtaksperiodeForkastet(message.toJson()))
+        utfør(hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
     }
 
     // fortsett en command (resume)
@@ -242,7 +244,8 @@ internal class HendelseMediator(
         val context = requireNotNull(commandContextDao.finn(løsning.contextId)).apply {
             løsning.context(this)
         }
-        håndter(hendelse, context, løsning.contextId)
+        log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${løsning.behovId} med context_id=${løsning.contextId} for hendelse_id=${hendelse.id}")
+        utfør(hendelse, context, løsning.contextId)
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
@@ -250,20 +253,25 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse)
     }
 
-    private fun håndter(hendelse: Hendelse) {
+    private fun utfør(hendelse: Hendelse) {
         val contextId = UUID.randomUUID()
-        håndter(hendelse, nyContext(hendelse, contextId), contextId)
+        log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id}")
+        utfør(hendelse, nyContext(hendelse, contextId), contextId)
     }
 
-    private fun håndter(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
+    private fun utfør(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         withMDC(mapOf("context_id" to "$contextId")) {
             try {
-                context.run(commandContextDao, hendelse)
+                log.info("utfører kommando med context_id=$context for hendelse_id=${hendelse.id}")
+                if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
+                else log.info("kommando er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
             } catch (err: Exception) {
                 log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
                 hendelse.undo(context)
                 throw err
+            } finally {
+                log.info("utført kommando med context_id=$context for hendelse_id=${hendelse.id}")
             }
         }
     }

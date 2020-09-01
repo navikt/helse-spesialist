@@ -19,7 +19,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         this.data.add(data)
     }
 
-    internal fun add(index: Int) {
+    internal fun suspendert(index: Int) {
         sti.add(0, index)
     }
 
@@ -46,8 +46,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
 
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
-    internal fun run(commandContextDao: CommandContextDao, hendelse: Hendelse) = try {
-        run(hendelse).also {
+    internal fun utfør(commandContextDao: CommandContextDao, hendelse: Hendelse) = try {
+        utfør(hendelse).also {
             if (it) commandContextDao.ferdig(hendelse, id)
             else commandContextDao.suspendert(hendelse, id, sti)
         }
@@ -60,8 +60,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         throw rootErr
     }
 
-    private fun run(hendelse: Hendelse) = when {
-        sti.isEmpty() -> hendelse.execute(this)
-        else -> hendelse.resume(this)
+    private fun utfør(command: Command) = when {
+        sti.isEmpty() -> command.execute(this)
+        else -> command.resume(this)
     }
 }
