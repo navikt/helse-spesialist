@@ -8,7 +8,6 @@ import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
-import no.nav.helse.mediator.kafka.meldinger.VedtaksperiodeEndretMessage
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -117,12 +116,6 @@ class TestPerson(private val dataSource: DataSource) {
                 dager = dager,
                 unntaFraInnsyn = false
             ))
-    }
-
-    fun sendVedtaksperiodeEndret(vedtaksperiodeId: UUID) {
-        mediator.håndter(
-            UUID.randomUUID(), VedtaksperiodeEndretMessage(vedtaksperiodeId, fødselsnummer)
-        )
     }
 
     fun finnOppgaver() {

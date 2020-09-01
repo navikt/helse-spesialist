@@ -89,7 +89,6 @@ class SaksbehandlerOverstyrerDagerTest: AbstractEndToEndTest() {
             periodeTom = LocalDate.of(2018, 1, 31),
             vedtaksperiodeId = vedtaksperiodeId
         )
-        person.sendVedtaksperiodeEndret(vedtaksperiodeId)
 
         assertTrue(session.findSaksbehandlerOppgaver().any { it.fødselsnummer == person.fødselsnummer })
 
@@ -125,7 +124,6 @@ class SaksbehandlerOverstyrerDagerTest: AbstractEndToEndTest() {
             periodeTom = LocalDate.of(2018, 1, 31),
             vedtaksperiodeId = vedtaksperiodeId
         )
-        person.sendVedtaksperiodeEndret(vedtaksperiodeId)
 
         assertTrue(session.findSaksbehandlerOppgaver().any { it.fødselsnummer == person.fødselsnummer })
 

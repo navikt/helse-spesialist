@@ -10,7 +10,6 @@ import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
-import no.nav.helse.modell.command.ny.NyOppdaterVedtaksperiodeCommand
 import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.command.nyny.CommandContext
@@ -55,9 +54,6 @@ internal class HendelseMediator(
         PersoninfoLøsningMessage.Factory(rapidsConnection, this)
         PåminnelseMessage.Factory(rapidsConnection, this)
         TilInfotrygdMessage.Factory(rapidsConnection, this)
-        VedtaksperiodeEndretMessage.Factory(rapidsConnection, this)
-        VedtaksperiodeEndretMessage.ManuellFactory(rapidsConnection, this)
-        VedtaksperiodeForkastetMessage.Factory(rapidsConnection, this)
         TilbakerullingMessage.Factory(rapidsConnection, this)
 
         NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(rapidsConnection, this)
@@ -216,20 +212,6 @@ internal class HendelseMediator(
         sessionOf(dataSource).use(annulleringCommand::execute)
     }
 
-    fun håndter(eventId: UUID, vedtaksperiodeEndretMessage: VedtaksperiodeEndretMessage) {
-        log.info(
-            "Mottok vedtaksperiode endret {}, {}",
-            keyValue("vedtaksperiodeId", vedtaksperiodeEndretMessage.vedtaksperiodeId),
-            keyValue("eventId", eventId)
-        )
-        val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtaksperiodeId = vedtaksperiodeEndretMessage.vedtaksperiodeId,
-            fødselsnummer = vedtaksperiodeEndretMessage.fødselsnummer
-        )
-        sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
-    }
-
     override fun vedtaksperiodeEndret(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
         utfør(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
     }
@@ -274,20 +256,6 @@ internal class HendelseMediator(
                 log.info("utført kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
             }
         }
-    }
-
-    fun håndter(eventId: UUID, vedtaksperiodeForkastetMessage: VedtaksperiodeForkastetMessage) {
-        log.info(
-            "Mottok vedtaksperiode forkastet {}, {}",
-            keyValue("vedtaksperiodeId", vedtaksperiodeForkastetMessage.vedtaksperiodeId),
-            keyValue("eventId", eventId)
-        )
-        val oppdaterVedtaksperiodeCommand = NyOppdaterVedtaksperiodeCommand(
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtaksperiodeId = vedtaksperiodeForkastetMessage.vedtaksperiodeId,
-            fødselsnummer = vedtaksperiodeForkastetMessage.fødselsnummer
-        )
-        sessionOf(dataSource, returnGeneratedKey = true).use(oppdaterVedtaksperiodeCommand::execute)
     }
 
     fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
