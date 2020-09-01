@@ -28,7 +28,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
         private val vedtak = VedtakDto(1, 2)
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk(FNR)
+    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)

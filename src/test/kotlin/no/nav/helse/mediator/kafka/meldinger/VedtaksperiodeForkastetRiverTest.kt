@@ -12,7 +12,7 @@ internal class VedtaksperiodeForkastetRiverTest {
 
     private val rapid = TestRapid()
     private val mediator = mockk<HendelseMediator>(relaxed = true)
-    private val meldingsfabrikk = Testmeldingfabrikk("fnr")
+    private val meldingsfabrikk = Testmeldingfabrikk("fnr", "aktørid")
     private val mapper = jacksonObjectMapper()
 
     init {

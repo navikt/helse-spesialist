@@ -33,7 +33,7 @@ internal class BehovE2ETest {
     }
 
     private val testRapid = TestRapid()
-    private val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018)
+    private val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, "aktørid")
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
