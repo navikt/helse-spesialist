@@ -46,6 +46,13 @@ internal class BehovE2ETest {
     }
 
     @Test
+    fun godkjenningsbehov() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(HENDELSE_ID, VEDTAKSPERIODE_ID))
+        assertSpleisbehov(HENDELSE_ID)
+        assertTilstand(HENDELSE_ID, VEDTAKSPERIODE_ID) // ingen tilstand før godkjenningsbehov er portert over
+    }
+
+    @Test
     fun `vedtaksperiode forkastet`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(HENDELSE_ID, VEDTAKSPERIODE_ID))
         assertSpleisbehov(HENDELSE_ID)

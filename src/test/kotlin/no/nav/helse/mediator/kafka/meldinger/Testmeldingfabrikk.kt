@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.rapids_rivers.JsonMessage
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -28,6 +29,21 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "organisasjonsnummer" to organisasjonsnummer
+        ))
+
+    fun lagGodkjenningsbehov(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+        nyHendelse(id, "behov", mapOf(
+            "@behov" to listOf("Godkjenning"),
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "periodeFom" to "${LocalDate.now()}",
+            "periodeTom" to "${LocalDate.now()}",
+            "warnings" to mapOf<String, Any>(
+                "aktiviteter" to emptyList<Any>(),
+                "kontekster" to emptyList<Any>()
+            )
         ))
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
