@@ -51,9 +51,13 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
             if (it) commandContextDao.ferdig(hendelse, id)
             else commandContextDao.suspendert(hendelse, id, sti)
         }
-    } catch (e: Exception) {
-        commandContextDao.feil(hendelse, id)
-        throw e
+    } catch (rootErr: Exception) {
+        try {
+            commandContextDao.feil(hendelse, id)
+        } catch (nestedErr: Exception) {
+            throw RuntimeException("Feil ved lagring av FEIL-tilstand: $nestedErr", rootErr)
+        }
+        throw rootErr
     }
 
     private fun run(hendelse: Hendelse) = when {
