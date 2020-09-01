@@ -6,5 +6,5 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class VedtakDao(private val dataSource: DataSource) {
-    fun findVedtak(id: UUID) = sessionOf(dataSource).findVedtak(id)
+    fun findVedtak(id: UUID) = sessionOf(dataSource).use { it.findVedtak(id) }
 }

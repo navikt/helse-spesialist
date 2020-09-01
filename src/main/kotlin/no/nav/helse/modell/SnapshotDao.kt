@@ -8,5 +8,5 @@ import javax.sql.DataSource
 internal class SnapshotDao(private val dataSource: DataSource) {
 
     fun oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId: UUID, snapshot: String) =
-        sessionOf(dataSource).oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, snapshot)
+        sessionOf(dataSource).use { it.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, snapshot) }
 }
