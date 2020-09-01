@@ -46,6 +46,41 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             )
         ))
 
+    fun lagPersoninfoløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+        nyHendelse(id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("HentEnhet", "HentPersoninfo", "HentInfotrygdutbetalinger"),
+            "spleisBehovId" to "$spleisbehovId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "HentInfotrygdutbetalinger" to mapOf(
+                "historikkFom" to "2017-01-01",
+                "historikkTom" to "2020-12-31"
+            ),
+            "@løsning" to mapOf(
+                "HentInfotrygdutbetalinger" to listOf(
+                    mapOf(
+                        "fom" to "2018-01-01",
+                        "tom" to "2018-01-31",
+                        "dagsats" to "1000.0",
+                        "grad" to "100",
+                        "typetekst" to "ArbRef",
+                        "organisasjonsnummer" to organisasjonsnummer
+                    )
+                ),
+                "HentEnhet" to "0301",
+                "HentPersoninfo" to mapOf(
+                    "fornavn" to "Kari",
+                    "mellomnavn" to "",
+                    "etternavn" to "Nordmann",
+                    "fødselsdato" to "1970-01-01",
+                    "kjønn" to "Kvinne"
+                )
+            )
+        ))
+
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 
