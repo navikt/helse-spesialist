@@ -16,6 +16,7 @@ import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.overstyring.BistandSaksbehandlerCommand
 import no.nav.helse.modell.overstyring.OverstyringCommand
+import no.nav.helse.modell.overstyring.OverstyringSaksbehandlerCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -313,7 +314,15 @@ internal class HendelseMediator(
 
     fun håndter(overstyringMessage: OverstyringMessage) {
         val eventId = UUID.randomUUID()
-        val overstyringCommand = OverstyringCommand(eventId, null, rapidsConnection)
+        val overstyringCommand = OverstyringSaksbehandlerCommand(
+            eventId = eventId,
+            rapidsConnection = rapidsConnection,
+            oid = overstyringMessage.saksbehandlerOid,
+            navn = overstyringMessage.saksbehandlerNavn,
+            epost = overstyringMessage.saksbehandlerEpost,
+            fødselsnummer = overstyringMessage.fødselsnummer,
+            orgnummer = overstyringMessage.organisasjonsnummer
+        )
         val invaliderSaksbehandlerOppgaveCommand = InvaliderSaksbehandlerOppgaveCommand(
             fødselsnummer = overstyringMessage.fødselsnummer,
             orgnummer = overstyringMessage.organisasjonsnummer,
@@ -321,10 +330,17 @@ internal class HendelseMediator(
         )
 
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            overstyringCommand.resume(session, Løsninger().apply {
+            val commandExecutor = CommandExecutor(
+                command = overstyringCommand,
+                spesialistOid = spesialistOID,
+                eventId = eventId,
+                nåværendeOppgave = null,
+                session = session
+            )
+            commandExecutor.execute()
+            commandExecutor.resume(session, Løsninger().apply {
                 add(overstyringMessage)
             })
-            overstyringCommand.execute(session)
             invaliderSaksbehandlerOppgaveCommand.execute(session)
         }
     }

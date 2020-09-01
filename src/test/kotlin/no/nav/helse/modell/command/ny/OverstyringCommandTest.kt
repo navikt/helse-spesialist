@@ -10,6 +10,7 @@ import no.nav.helse.modell.command.Command
 import no.nav.helse.modell.command.Løsninger
 import no.nav.helse.modell.overstyring.OverstyringCommand
 import no.nav.helse.modell.overstyring.finnOverstyring
+import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -26,6 +27,7 @@ class OverstyringCommandTest : AbstractEndToEndTest() {
         val overstyringMessage = OverstyringMessage(
             saksbehandlerEpost = "tbd@nav.no",
             saksbehandlerOid = UUID.randomUUID(),
+            saksbehandlerNavn = "Ola Nordmann",
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
             organisasjonsnummer = testPerson.orgnummer,
@@ -48,6 +50,11 @@ class OverstyringCommandTest : AbstractEndToEndTest() {
         val eventIdFraSaksbehandler = UUID.randomUUID()
         val overstyringCommand = OverstyringCommand(eventIdFraSaksbehandler, null, rapidsConnection = testPerson.rapid)
         val resultat = sessionOf(dataSource, returnGeneratedKey = true).use {
+            it.persisterSaksbehandler(
+                oid = overstyringMessage.saksbehandlerOid,
+                navn = overstyringMessage.saksbehandlerNavn,
+                epost = overstyringMessage.saksbehandlerEpost
+            )
             overstyringCommand.resume(it, Løsninger().apply {
                 add(overstyringMessage)
             })

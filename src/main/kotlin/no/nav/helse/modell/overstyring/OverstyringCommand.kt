@@ -28,7 +28,8 @@ internal class OverstyringCommand(
             organisasjonsnummer = overstyringMessage.organisasjonsnummer,
             begrunnelse = overstyringMessage.begrunnelse,
             unntaFraInnsyn = overstyringMessage.unntaFraInnsyn,
-            overstyrteDager = overstyringMessage.dager
+            overstyrteDager = overstyringMessage.dager,
+            saksbehandlerRef = overstyringMessage.saksbehandlerOid
         )
 
         val overstyring = mapOf<String, Any>(

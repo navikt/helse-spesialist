@@ -100,6 +100,42 @@ class SaksbehandlerOverstyrerDagerTest: AbstractEndToEndTest() {
         assertEquals(1, overstyringer.first().overstyrteDager.size)
     }
 
+    @Test
+    fun `persisterer saksbehandlerinformasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        person.sendGodkjenningMessage(
+            eventId = eventId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            vedtaksperiodeId = vedtaksperiodeId
+        )
+        person.sendPersoninfo(eventId)
+        saksbehandlerOverstyrer(
+            OverstyringMessage.OverstyringMessageDag(
+                dato = LocalDate.of(2018, 1, 20),
+                type = Dagtype.Feriedag,
+                grad = null
+            )
+        )
+
+        val eventId2 = UUID.randomUUID()
+        person.sendGodkjenningMessage(
+            eventId = eventId2,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            vedtaksperiodeId = vedtaksperiodeId
+        )
+        person.sendVedtaksperiodeEndret(vedtaksperiodeId)
+
+        assertTrue(session.findSaksbehandlerOppgaver().any { it.fødselsnummer == person.fødselsnummer })
+
+        val snapshot = vedtaksperiodeMediator.byggSpeilSnapshotForFnr(person.fødselsnummer)
+        assertNotNull(snapshot)
+        val overstyringer = snapshot.arbeidsgivere.first().overstyringer
+        assertEquals(1, overstyringer.size)
+        assertEquals(1, overstyringer.first().overstyrteDager.size)
+    }
+
     private fun saksbehandlerOverstyrer(vararg dager :OverstyringMessage.OverstyringMessageDag) {
         person.sendOverstyrteDager(dager.toList())
     }

@@ -18,16 +18,18 @@ fun Session.persisterOverstyring(
     organisasjonsnummer: String,
     begrunnelse: String,
     unntaFraInnsyn: Boolean,
-    overstyrteDager: List<OverstyringMessage.OverstyringMessageDag>
+    overstyrteDager: List<OverstyringMessage.OverstyringMessageDag>,
+    saksbehandlerRef: UUID
 ): Long? {
     @Language("PostgreSQL")
     val opprettOverstyringQuery = """
-        INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, unntafrainnsyn)
+        INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, unntafrainnsyn, saksbehandler_ref)
         VALUES (:hendelse_id,
                 :person_ref,
                 :arbeidsgiver_ref,
                 :begrunnelse,
-                :unntafrainnsyn)
+                :unntafrainnsyn,
+                :saksbehandler_ref)
     """
 
     @Language("PostgreSQL")
@@ -50,7 +52,8 @@ fun Session.persisterOverstyring(
                 "person_ref" to person_ref,
                 "arbeidsgiver_ref" to arbeidsgiver_ref,
                 "begrunnelse" to begrunnelse,
-                "unntafrainnsyn" to unntaFraInnsyn
+                "unntafrainnsyn" to unntaFraInnsyn,
+                "saksbehandler_ref" to saksbehandlerRef
             )
         ).asUpdateAndReturnGeneratedKey
     )

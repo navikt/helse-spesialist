@@ -133,10 +133,12 @@ internal fun Application.vedtaksperiodeApi(
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+                val saksbehandlerNavn = accessToken.payload.getClaim("name").asString()
 
                 val message = OverstyringMessage(
                     saksbehandlerEpost = epostadresse,
                     saksbehandlerOid = oid,
+                    saksbehandlerNavn = saksbehandlerNavn,
                     organisasjonsnummer = overstyring.organisasjonsnummer,
                     fødselsnummer = overstyring.fødselsnummer,
                     aktørId = overstyring.aktørId,

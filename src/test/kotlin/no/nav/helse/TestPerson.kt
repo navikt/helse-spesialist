@@ -108,6 +108,7 @@ class TestPerson(private val dataSource: DataSource) {
             OverstyringMessage(
                 saksbehandlerOid = UUID.randomUUID(),
                 saksbehandlerEpost = "saksbehandler@epost.com",
+                saksbehandlerNavn = "Ola Nordmann",
                 organisasjonsnummer = orgnummer,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,

@@ -6,6 +6,7 @@ import java.util.*
 class OverstyringMessage(
     val saksbehandlerOid: UUID,
     val saksbehandlerEpost: String,
+    val saksbehandlerNavn: String,
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,
