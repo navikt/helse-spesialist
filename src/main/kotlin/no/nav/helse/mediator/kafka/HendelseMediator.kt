@@ -23,6 +23,7 @@ import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.deleteVedtak
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -328,6 +329,8 @@ internal class HendelseMediator(
             orgnummer = overstyringMessage.organisasjonsnummer,
             eventId = eventId
         )
+
+        overstyringsteller.inc()
 
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val commandExecutor = CommandExecutor(

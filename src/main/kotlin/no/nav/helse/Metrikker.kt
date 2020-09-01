@@ -1,12 +1,16 @@
 package no.nav.helse
 
 import io.prometheus.client.Collector.NANOSECONDS_PER_SECOND
+import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 
 private val histogram =
     Histogram.build("latency", "Måler hvor lang tid en kodeblokk tar")
         .labelNames("measurement", "duration")
         .register()
+
+internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
+    .register()
 
 internal fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
     val result: T
