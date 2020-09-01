@@ -1,6 +1,5 @@
 package no.nav.helse.modell.command
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -18,13 +17,9 @@ import javax.sql.DataSource
 internal class SpleisbehovDao(private val dataSource: DataSource,
                               private val hendelsefabrikk: IHendelsefabrikk
 ) {
-    private companion object {
-        private val mapper = jacksonObjectMapper()
-    }
-
     fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) {
-            it.insertBehov(hendelse.id, UUID.fromString("00000000-0000-0000-0000-000000000000"), hendelse.toJson(), "{}", tilHendelsetype(hendelse).name )
+            it.insertBehov(hendelse.id, hendelse.vedtaksperiodeId(), hendelse.toJson(), "{}", tilHendelsetype(hendelse).name )
         }
     }
 
