@@ -83,12 +83,12 @@ internal class BehovE2ETest {
         dataSource = HikariDataSource(hikariConfig)
 
         behovMediator = HendelseMediator(
+            rapidsConnection = testRapid,
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
             spesialistOID = SPESIALIST_IOD
         )
 
-        behovMediator.init(testRapid)
         NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(testRapid, behovMediator)
         NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(testRapid, behovMediator)
     }

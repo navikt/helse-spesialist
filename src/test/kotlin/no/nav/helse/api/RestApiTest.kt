@@ -79,7 +79,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             }
         }
     }
-    var vedtaksperiodeId = UUID.randomUUID()
+    private var vedtaksperiodeId = UUID.randomUUID()
     private val spleisMockClient = SpleisMockClient()
 
     @BeforeAll
@@ -91,10 +91,11 @@ internal class RestApiTest : AbstractEndToEndTest() {
         )
 
         spleisbehovMediator = HendelseMediator(
+            rapidsConnection = testRapid,
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
-        ).apply { init(testRapid) }
+        )
         val oppgaveMediator = OppgaveMediator(dataSource)
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
             dataSource = dataSource

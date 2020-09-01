@@ -39,10 +39,11 @@ class TestPerson(private val dataSource: DataSource) {
     val rapid = TestRapid()
 
     private val mediator = HendelseMediator(
+        rapidsConnection = rapid,
         dataSource = dataSource,
         speilSnapshotRestClient = speilSnapshotRestClient,
         spesialistOID = spesialistOID
-    ).apply { init(rapid) }
+    )
 
     fun sendGodkjenningMessage(
         eventId: UUID = UUID.randomUUID(),

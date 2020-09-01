@@ -42,10 +42,11 @@ class BistandSaksbehandlerMediatorTest: AbstractEndToEndTest() {
     @Test
     fun `spleis trenger bistand fra saksbehandler`() {
         val spleisbehovMediator = HendelseMediator(
+            rapidsConnection = TestRapid(),
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
-        ).apply { init(TestRapid()) }
+        )
         val spleisbehovId = UUID.randomUUID()
         val eventId = UUID.randomUUID()
 

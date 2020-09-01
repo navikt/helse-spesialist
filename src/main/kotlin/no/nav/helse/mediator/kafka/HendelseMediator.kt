@@ -33,26 +33,33 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class HendelseMediator(
+    private val rapidsConnection: RapidsConnection,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) : IHendelseMediator {
-    private val vedtakDao: VedtakDao = VedtakDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
 
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource)
-    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
+    private val commandContextDao = CommandContextDao(dataSource)
     private val hendelsefabrikk = Hendelsefabrikk(vedtakDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
-    private val spleisbehovDao: SpleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
+    private val spleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
 
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
-    private lateinit var rapidsConnection: RapidsConnection
     private var shutdown = false
-    private lateinit var behovMediator: BehovMediator
+    private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
 
-    internal fun init(rapidsConnection: RapidsConnection) {
-        this.rapidsConnection = rapidsConnection
-        behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
+    init {
+        ArbeidsgiverMessage.Factory(rapidsConnection, this)
+        GodkjenningMessage.Factory(rapidsConnection, this)
+        PersoninfoLøsningMessage.Factory(rapidsConnection, this)
+        PåminnelseMessage.Factory(rapidsConnection, this)
+        TilInfotrygdMessage.Factory(rapidsConnection, this)
+        VedtaksperiodeEndretMessage.Factory(rapidsConnection, this)
+        VedtaksperiodeEndretMessage.ManuellFactory(rapidsConnection, this)
+        VedtaksperiodeForkastetMessage.Factory(rapidsConnection, this)
+        TilbakerullingMessage.Factory(rapidsConnection, this)
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {

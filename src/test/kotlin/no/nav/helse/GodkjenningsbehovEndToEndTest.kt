@@ -6,7 +6,8 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.meldinger.*
+import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.command.findBehov
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.command.findSaksbehandlerOppgaver
@@ -19,6 +20,7 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
 import no.nav.helse.vedtaksperiode.findVedtakByFnr
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -47,25 +49,29 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun setupAll() {
-        session = sessionOf(dataSource, returnGeneratedKey = true)
+        spleisbehovMediator = HendelseMediator(
+            rapidsConnection = testRapid,
+            dataSource = dataSource,
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            spesialistOID = spesialistOID
+        )
     }
 
     @BeforeEach
     fun setup() {
         spleisbehovId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
-        spleisbehovMediator = HendelseMediator(
-            dataSource = dataSource,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            spesialistOID = spesialistOID
-        ).apply { init(testRapid) }
+        session = sessionOf(dataSource, returnGeneratedKey = true)
+    }
+
+    @AfterEach
+    fun closeConnection() {
+        session.close()
     }
 
     @ExperimentalContracts
     @Test
     fun `Spleisbehov persisteres`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-
         sendGodkjenningsbehov()
 
         assertEquals(2, testRapid.inspektør.size)
@@ -107,8 +113,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     @ExperimentalContracts
     @Test
     fun `Mottar godkjennings message med warning fra topic`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-
         val warningTekst = "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
         val warningsJson = """
             {
@@ -183,8 +187,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `Persisterer og henter saksbehandleroppgavetype`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-
         sendGodkjenningsbehov(periodetype = Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE)
 
         spleisbehovMediator.håndter(
@@ -208,8 +210,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `Saksbehandleroppgavetype kan være null`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-
         sendGodkjenningsbehov(periodetype = null)
 
         spleisbehovMediator.håndter(
@@ -230,8 +230,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `Advarsler dedupliseres i oppgaver til saksbehandler`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-
         val warningTekst = "Personen tjener alt for mye"
         val duplicatedWarningTekst =
             "Infotrygd inneholder utbetalinger med varierende dagsats for en sammenhengende periode"
@@ -289,9 +287,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `Persisterer løsning for HentInfotrygdutbetalinger`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-        PersoninfoLøsningMessage.Factory(testRapid, spleisbehovMediator)
-
         testRapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
         testRapid.sendTestMessage(personinfoLøsningJson(spleisbehovId, vedtaksperiodeId))
 
@@ -308,7 +303,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `Ignorerer løsning på behov dersom det ikke finnes noen nåværende oppgave`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
         sendGodkjenningsbehov()
 
         spleisbehovMediator.håndter(
@@ -348,9 +342,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     @ExperimentalContracts
     @Test
     fun `Vedtaksperioder som går til infotrygd invaliderer oppgaver`() {
-        TilInfotrygdMessage.Factory(testRapid, spleisbehovMediator)
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-
         sendGodkjenningsbehov()
 
         testRapid.sendTestMessage(
@@ -416,7 +407,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `gjør ingen ting om man får en løsning på en invalidert oppgave`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
         sendGodkjenningsbehov(aktørId = "7653345", fødselsnummer = "3546756", organisasjonsnummer = "6546346")
         spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
         spleisbehovMediator.håndter(
@@ -434,9 +424,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     @ExperimentalContracts
     @Test
     fun `vedtaksperiode_endret fører til oppdatert speil snapshot`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-        VedtaksperiodeEndretMessage.Factory(testRapid, spleisbehovMediator)
-
         val fødselsnummer = "3546756"
         val aktørId = "7653345"
         val orgnummer = "6546346"
@@ -463,9 +450,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     @ExperimentalContracts
     @Test
     fun `vedtaksperiode_forkastet fører til oppdatert speil snapshot`() {
-        GodkjenningMessage.Factory(testRapid, spleisbehovMediator)
-        VedtaksperiodeForkastetMessage.Factory(testRapid, spleisbehovMediator)
-
         val fødselsnummer = "3546756"
         val aktørId = "7653345"
         val orgnummer = "6546346"

@@ -43,10 +43,11 @@ internal class GodkjenningsbehovMediatorTest : AbstractEndToEndTest() {
     @Test
     fun `Spleisbehov persisteres`() {
         val spleisbehovMediator = HendelseMediator(
+            rapidsConnection = TestRapid(),
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
-        ).apply { init(TestRapid()) }
+        )
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,

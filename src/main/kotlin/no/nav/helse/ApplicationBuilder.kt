@@ -17,7 +17,6 @@ import no.nav.helse.api.adminApi
 import no.nav.helse.api.oppgaveApi
 import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -72,11 +71,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
-    private val spleisbehovMediator = HendelseMediator(
-        dataSource = dataSource,
-        speilSnapshotRestClient = speilSnapshotRestClient,
-        spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
-    )
+    private lateinit var spleisbehovMediator: HendelseMediator
     private val oppgaveMediator = OppgaveMediator(dataSource)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(
         dataSource = dataSource
@@ -119,18 +114,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         }.build()
 
     init {
-        spleisbehovMediator.init(rapidsConnection)
         rapidsConnection.register(this)
-
-        ArbeidsgiverMessage.Factory(rapidsConnection, spleisbehovMediator)
-        GodkjenningMessage.Factory(rapidsConnection, spleisbehovMediator)
-        PersoninfoLøsningMessage.Factory(rapidsConnection, spleisbehovMediator)
-        PåminnelseMessage.Factory(rapidsConnection, spleisbehovMediator)
-        TilInfotrygdMessage.Factory(rapidsConnection, spleisbehovMediator)
-        VedtaksperiodeEndretMessage.Factory(rapidsConnection, spleisbehovMediator)
-        VedtaksperiodeEndretMessage.ManuellFactory(rapidsConnection, spleisbehovMediator)
-        VedtaksperiodeForkastetMessage.Factory(rapidsConnection, spleisbehovMediator)
-        TilbakerullingMessage.Factory(rapidsConnection, spleisbehovMediator)
+        spleisbehovMediator = HendelseMediator(
+            rapidsConnection = rapidsConnection,
+            dataSource = dataSource,
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
+        )
     }
 
     fun start() = rapidsConnection.start()
