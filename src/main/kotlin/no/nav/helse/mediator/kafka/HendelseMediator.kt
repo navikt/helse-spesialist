@@ -262,7 +262,7 @@ internal class HendelseMediator(
     private fun utfør(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         withMDC(mapOf("context_id" to "$contextId")) {
             try {
-                log.info("utfører kommando med context_id=$context for hendelse_id=${hendelse.id}")
+                log.info("utfører kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
                 else log.info("kommando er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
@@ -271,7 +271,7 @@ internal class HendelseMediator(
                 hendelse.undo(context)
                 throw err
             } finally {
-                log.info("utført kommando med context_id=$context for hendelse_id=${hendelse.id}")
+                log.info("utført kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
             }
         }
     }
