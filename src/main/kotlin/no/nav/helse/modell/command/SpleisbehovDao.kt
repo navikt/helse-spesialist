@@ -19,7 +19,7 @@ internal class SpleisbehovDao(private val dataSource: DataSource,
 ) {
     fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) {
-            it.insertBehov(hendelse.id, hendelse.vedtaksperiodeId(), hendelse.toJson(), "{}", tilHendelsetype(hendelse).name )
+            it.insertBehov(hendelse.id, hendelse.vedtaksperiodeId(), hendelse.toJson(), hendelse.toJson(), tilHendelsetype(hendelse).name )
         }
     }
 
