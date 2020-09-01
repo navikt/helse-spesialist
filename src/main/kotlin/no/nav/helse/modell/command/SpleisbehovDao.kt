@@ -99,7 +99,9 @@ internal fun Session.findBehov(id: UUID): SpleisbehovDBDto? =
     )
 
 internal fun Session.findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT id, data, type FROM spleisbehov WHERE spleis_referanse=?", spleisReferanse)
+    this.run(queryOf("SELECT id, data, type FROM spleisbehov WHERE spleis_referanse=? AND type IN(${
+        MacroCommandType.values().joinToString { "?" }
+    })", spleisReferanse, *MacroCommandType.values().map(Enum<*>::name).toTypedArray())
         .map {
             SpleisbehovDBDto(
                 id = UUID.fromString(it.string("id")),
