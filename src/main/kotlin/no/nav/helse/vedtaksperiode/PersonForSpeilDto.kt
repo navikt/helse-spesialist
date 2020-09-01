@@ -31,7 +31,8 @@ data class OverstyringForSpeilDto(
     val begrunnelse: String,
     val unntaFraInnsyn: Boolean,
     val timestamp: LocalDateTime,
-    val overstyrteDager: List<OverstyringDagForSpeilDto>
+    val overstyrteDager: List<OverstyringDagForSpeilDto>,
+    val saksbehandlerNavn: String
 )
 
 data class OverstyringDagForSpeilDto(

@@ -79,10 +79,11 @@ fun Session.persisterOverstyring(
 fun Session.finnOverstyring(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringDto> {
     @Language("PostgreSQL")
     val finnOverstyringQuery = """
-SELECT o.*, p.fodselsnummer, a.orgnummer
+SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn
 FROM overstyring o
          INNER JOIN person p ON p.id = o.person_ref
          INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
+         INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
 WHERE p.fodselsnummer = ?
   AND a.orgnummer = ?
     """
@@ -96,6 +97,7 @@ WHERE p.fodselsnummer = ?
             begrunnelse = overstyringRow.string("begrunnelse"),
             unntaFraInnsyn = overstyringRow.boolean("unntaFraInnsyn"),
             timestamp = overstyringRow.localDateTime("tidspunkt"),
+            saksbehandlerNavn = overstyringRow.string("navn"),
             overstyrteDager = this.run(queryOf(
                 "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
             ).map { overstyringDagRow ->
@@ -118,6 +120,7 @@ data class OverstyringDto(
     val begrunnelse: String,
     val unntaFraInnsyn: Boolean,
     val timestamp: LocalDateTime,
+    val saksbehandlerNavn: String,
     val overstyrteDager: List<OverstyringDagDto>
 )
 
