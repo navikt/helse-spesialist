@@ -27,7 +27,6 @@ internal class OverstyringCommand(
             fødselsnummer = overstyringMessage.fødselsnummer,
             organisasjonsnummer = overstyringMessage.organisasjonsnummer,
             begrunnelse = overstyringMessage.begrunnelse,
-            unntaFraInnsyn = overstyringMessage.unntaFraInnsyn,
             overstyrteDager = overstyringMessage.dager,
             saksbehandlerRef = overstyringMessage.saksbehandlerOid
         )

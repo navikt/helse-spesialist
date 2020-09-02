@@ -32,7 +32,6 @@ class OverstyringCommandTest : AbstractEndToEndTest() {
             fødselsnummer = testPerson.fødselsnummer,
             organisasjonsnummer = testPerson.orgnummer,
             begrunnelse = "En god grunn",
-            unntaFraInnsyn = false,
             dager = listOf(
                 OverstyringMessage.OverstyringMessageDag(
                     dato = LocalDate.of(2020, 1, 1),

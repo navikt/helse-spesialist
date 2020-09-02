@@ -149,8 +149,7 @@ internal fun Application.vedtaksperiodeApi(
                             type = enumValueOf(it.type),
                             grad = it.grad
                         )
-                    },
-                    unntaFraInnsyn = overstyring.unntaFraInnsyn
+                    }
                 )
 
                 spleisbehovMediator.håndter(message)
@@ -192,8 +191,7 @@ class Overstyring(
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<Overstyringdag>,
-    val unntaFraInnsyn: Boolean
+    val dager: List<Overstyringdag>
 ) {
     class Overstyringdag(
         val dato: LocalDate,

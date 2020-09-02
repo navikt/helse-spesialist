@@ -113,8 +113,7 @@ class TestPerson(private val dataSource: DataSource) {
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 begrunnelse = "en begrunnelse",
-                dager = dager,
-                unntaFraInnsyn = false
+                dager = dager
             ))
     }
 

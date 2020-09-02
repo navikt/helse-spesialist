@@ -17,18 +17,16 @@ fun Session.persisterOverstyring(
     fødselsnummer: String,
     organisasjonsnummer: String,
     begrunnelse: String,
-    unntaFraInnsyn: Boolean,
     overstyrteDager: List<OverstyringMessage.OverstyringMessageDag>,
     saksbehandlerRef: UUID
 ): Long? {
     @Language("PostgreSQL")
     val opprettOverstyringQuery = """
-        INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, unntafrainnsyn, saksbehandler_ref)
+        INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref)
         VALUES (:hendelse_id,
                 :person_ref,
                 :arbeidsgiver_ref,
                 :begrunnelse,
-                :unntafrainnsyn,
                 :saksbehandler_ref)
     """
 
@@ -52,7 +50,6 @@ fun Session.persisterOverstyring(
                 "person_ref" to person_ref,
                 "arbeidsgiver_ref" to arbeidsgiver_ref,
                 "begrunnelse" to begrunnelse,
-                "unntafrainnsyn" to unntaFraInnsyn,
                 "saksbehandler_ref" to saksbehandlerRef
             )
         ).asUpdateAndReturnGeneratedKey
@@ -95,7 +92,6 @@ WHERE p.fodselsnummer = ?
             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
             begrunnelse = overstyringRow.string("begrunnelse"),
-            unntaFraInnsyn = overstyringRow.boolean("unntaFraInnsyn"),
             timestamp = overstyringRow.localDateTime("tidspunkt"),
             saksbehandlerNavn = overstyringRow.string("navn"),
             overstyrteDager = this.run(queryOf(
@@ -118,7 +114,6 @@ data class OverstyringDto(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val begrunnelse: String,
-    val unntaFraInnsyn: Boolean,
     val timestamp: LocalDateTime,
     val saksbehandlerNavn: String,
     val overstyrteDager: List<OverstyringDagDto>

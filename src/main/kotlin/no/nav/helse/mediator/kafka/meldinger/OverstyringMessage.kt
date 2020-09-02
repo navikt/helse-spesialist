@@ -11,8 +11,7 @@ class OverstyringMessage(
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<OverstyringMessageDag>,
-    val unntaFraInnsyn: Boolean
+    val dager: List<OverstyringMessageDag>
 ) {
     class OverstyringMessageDag(
         val dato: LocalDate,

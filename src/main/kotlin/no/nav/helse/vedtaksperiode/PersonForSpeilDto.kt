@@ -29,7 +29,6 @@ data class ArbeidsgiverForSpeilDto(
 data class OverstyringForSpeilDto(
     val hendelseId: UUID,
     val begrunnelse: String,
-    val unntaFraInnsyn: Boolean,
     val timestamp: LocalDateTime,
     val overstyrteDager: List<OverstyringDagForSpeilDto>,
     val saksbehandlerNavn: String
