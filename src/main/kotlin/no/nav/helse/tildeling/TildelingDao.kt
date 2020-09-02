@@ -21,3 +21,9 @@ fun Session.hentSaksbehandlerFor(oppgaveReferanse: UUID): UUID? {
         UUID.fromString(row.string("saksbehandler_ref"))
     }.asSingle)
 }
+
+fun Session.slettOppgavetildeling(oppgaveReferanse: UUID) {
+    @Language("PostgreSQL")
+    val query = "DELETE FROM tildeling WHERE oppgave_ref=:oppgave_ref;"
+    run(queryOf(query, mapOf("oppgave_ref" to oppgaveReferanse)).asUpdate)
+}

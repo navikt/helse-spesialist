@@ -15,5 +15,9 @@ class TildelingMediator(private val dataSource: DataSource) {
         }
     }
 
-    fun fjernTildeling(oppgavereferanse: UUID) {}
+    fun fjernTildeling(oppgavereferanse: UUID) {
+        sessionOf(dataSource).use { session ->
+            session.slettOppgavetildeling(oppgavereferanse)
+        }
+    }
 }
