@@ -80,7 +80,7 @@ internal fun Session.insertPerson(
             navnId,
             enhetId,
             infotrygdutbetalingerId
-        ).asExecute
+        ).asUpdateAndReturnGeneratedKey
     )
 
 internal fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =

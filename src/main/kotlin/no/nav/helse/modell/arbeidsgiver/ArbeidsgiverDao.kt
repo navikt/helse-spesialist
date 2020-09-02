@@ -11,9 +11,9 @@ internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: Long): Int? = this.r
         .asSingle
 )
 
-internal fun Session.insertArbeidsgiver(orgnummer: Long, navn: String) {
+internal fun Session.insertArbeidsgiver(orgnummer: Long, navn: String): Long? {
     val navnRef = requireNotNull(
-        this.run(
+        run(
             queryOf(
                 "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
                 navn,
@@ -22,9 +22,9 @@ internal fun Session.insertArbeidsgiver(orgnummer: Long, navn: String) {
                 .asUpdateAndReturnGeneratedKey
         )
     )
-    this.run(
+    return run(
         queryOf("INSERT INTO arbeidsgiver(orgnummer, navn_ref) VALUES(?, ?);", orgnummer, navnRef)
-            .asUpdate
+            .asUpdateAndReturnGeneratedKey
     )
 }
 

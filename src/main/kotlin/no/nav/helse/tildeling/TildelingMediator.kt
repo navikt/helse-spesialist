@@ -1,10 +1,16 @@
 package no.nav.helse.tildeling
 
+import kotliquery.sessionOf
 import java.util.*
+import javax.sql.DataSource
 
-class TildelingMediator {
-    fun hentSaksbehandlerFor(oppgavereferanse: UUID): UUID? = UUID.randomUUID()
+class TildelingMediator(private val dataSource: DataSource) {
+    fun hentSaksbehandlerFor(oppgavereferanse: UUID): UUID? = sessionOf(dataSource).use { session ->
+        session.hentSaksbehandlerFor(oppgavereferanse)
+    }
     fun tildelOppgaveTilSaksbehandler(oppgavereferanse: UUID, saksbehandlerReferanse: UUID) {
-        TODO("Not yet implemented")
+        sessionOf(dataSource).use { session ->
+            session.tildelOppgave(oppgavereferanse, saksbehandlerReferanse)
+        }
     }
 }
