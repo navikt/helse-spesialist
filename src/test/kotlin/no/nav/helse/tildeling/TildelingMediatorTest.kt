@@ -17,7 +17,10 @@ import no.nav.helse.modell.vedtak.snapshot.insertSpeilSnapshot
 import no.nav.helse.modell.vedtak.upsertVedtak
 import no.nav.helse.objectMapper
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.time.LocalDate
@@ -59,7 +62,6 @@ class TildelingMediatorTest {
         assertEquals(saksbehandlerReferanse, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
     }
 
-    @Disabled
     @Test
     fun `oid til saksbehandler blir lagt til i saksbehandler payload`() {
         val oppgavereferanse = UUID.randomUUID()

@@ -84,6 +84,7 @@ FROM oppgave o
          INNER JOIN person_info pi ON p.info_ref = pi.id
          LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
          LEFT JOIN saksbehandleroppgavetype sot ON o.event_id = sot.spleisbehov_ref
+         LEFT JOIN tildeling t ON o.event_id = t.oppgave_ref
 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
 ORDER BY CASE WHEN sot.type = 'FORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC
 LIMIT 500
@@ -160,6 +161,7 @@ WHERE a.orgnummer = :orgnummer
 
 private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
     oppgavereferanse = UUID.fromString(it.string("event_id")),
+    saksbehandlerOid = it.stringOrNull("saksbehandler_ref")?.let(UUID::fromString),
     opprettet = it.localDateTime("opprettet"),
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
     periodeFom = it.localDate("fom"),
