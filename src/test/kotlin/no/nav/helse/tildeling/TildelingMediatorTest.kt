@@ -17,10 +17,7 @@ import no.nav.helse.modell.vedtak.snapshot.insertSpeilSnapshot
 import no.nav.helse.modell.vedtak.upsertVedtak
 import no.nav.helse.objectMapper
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.time.LocalDate
@@ -28,6 +25,7 @@ import java.util.*
 import javax.sql.DataSource
 import kotlin.properties.Delegates
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TildelingMediatorTest {
@@ -60,6 +58,21 @@ class TildelingMediatorTest {
         TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
 
         assertEquals(saksbehandlerReferanse, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
+    }
+
+    @Disabled
+    @Test
+    fun `fjerne en tildeling`() {
+        val tildelingMediator = TildelingMediator(dataSource)
+        val oppgavereferanse = UUID.randomUUID()
+        val saksbehandlerReferanse = UUID.randomUUID()
+
+        opprettSaksbehandler(saksbehandlerReferanse)
+
+        tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        tildelingMediator.fjernTildeling(oppgavereferanse)
+
+        assertNull(tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))
     }
 
     @Test
@@ -103,7 +116,14 @@ class TildelingMediatorTest {
 
     private fun opprettSaksbehandlerOppgave(oppgavereferanse: UUID) {
         sessionOf(dataSource).use {
-            it.insertOppgave(oppgavereferanse, "TestOppgave", Oppgavestatus.AvventerSaksbehandler, null, null, vedtakRef = vedtakId)
+            it.insertOppgave(
+                oppgavereferanse,
+                "TestOppgave",
+                Oppgavestatus.AvventerSaksbehandler,
+                null,
+                null,
+                vedtakRef = vedtakId
+            )
         }
     }
 
