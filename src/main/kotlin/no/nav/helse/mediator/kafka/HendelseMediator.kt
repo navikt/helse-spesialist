@@ -19,6 +19,7 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.deleteVedtak
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.overstyringsteller
@@ -26,6 +27,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -223,6 +225,22 @@ internal class HendelseMediator(
 
     override fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
         utfør(hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
+    }
+
+    override fun godkjenning(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        vedtaksperiodeId: UUID,
+        warnings: List<String>,
+        periodetype: Saksbehandleroppgavetype?,
+        context: RapidsConnection.MessageContext
+    ) {
+        // TODO
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
