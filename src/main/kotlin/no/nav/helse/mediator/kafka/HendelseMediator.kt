@@ -46,7 +46,7 @@ internal class HendelseMediator(
     private val snapshotDao = SnapshotDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
-    private val hendelsefabrikk = HendelsefabrikkBackup(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
+    private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
     private val spleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
 
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
