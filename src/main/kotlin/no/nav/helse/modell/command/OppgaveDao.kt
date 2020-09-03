@@ -1,8 +1,6 @@
 package no.nav.helse.modell.command
 
-import kotliquery.Row
-import kotliquery.Session
-import kotliquery.queryOf
+import kotliquery.*
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
@@ -12,6 +10,30 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.util.*
+import javax.sql.DataSource
+
+internal class OppgaveDao(private val dataSource: DataSource) {
+    internal fun insertOppgave(
+        eventId: UUID,
+        oppgavetype: String,
+        oppgavestatus: Oppgavestatus,
+        ferdigstiltAv: String?,
+        oid: UUID?,
+        vedtakRef: Long?
+    ) = using(sessionOf(dataSource)) {
+        it.insertOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid, vedtakRef)
+    }
+
+    fun updateOppgave(
+        eventId: UUID,
+        oppgavetype: String,
+        oppgavestatus: Oppgavestatus,
+        ferdigstiltAv: String?,
+        oid: UUID?
+    ) = using(sessionOf(dataSource)) {
+        it.updateOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid)
+    }
+}
 
 fun Session.insertOppgave(
     eventId: UUID,
