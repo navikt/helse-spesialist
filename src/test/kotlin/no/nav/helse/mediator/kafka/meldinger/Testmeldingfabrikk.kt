@@ -6,6 +6,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
+    companion object {
+        const val OSLO = "0301"
+    }
+
     fun lagVedtaksperiodeEndret(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -31,26 +35,27 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             "organisasjonsnummer" to organisasjonsnummer
         ))
 
-    fun lagGodkjenningsbehov(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+    fun lagGodkjenningsbehov(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr", periodeFom: LocalDate = LocalDate.now(), periodeTom: LocalDate = LocalDate.now()) =
         nyHendelse(id, "behov", mapOf(
             "@behov" to listOf("Godkjenning"),
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to "$vedtaksperiodeId",
-            "periodeFom" to "${LocalDate.now()}",
-            "periodeTom" to "${LocalDate.now()}",
+            "periodeFom" to "$periodeFom",
+            "periodeTom" to "$periodeTom",
             "warnings" to mapOf<String, Any>(
                 "aktiviteter" to emptyList<Any>(),
                 "kontekster" to emptyList<Any>()
             )
         ))
 
-    fun lagPersoninfoløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+    fun lagPersoninfoløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), contextId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
         nyHendelse(id, "behov", mapOf(
             "@final" to true,
             "@behov" to listOf("HentEnhet", "HentPersoninfo", "HentInfotrygdutbetalinger"),
             "spleisBehovId" to "$spleisbehovId",
+            "contextId" to "$contextId",
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
@@ -78,6 +83,68 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                     "fødselsdato" to "1970-01-01",
                     "kjønn" to "Kvinne"
                 )
+            )
+        ))
+
+    fun lagHentInfotrygdutbetalingerløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+        nyHendelse(id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("HentInfotrygdutbetalinger"),
+            "spleisBehovId" to "$spleisbehovId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "HentInfotrygdutbetalinger" to mapOf(
+                "historikkFom" to "2017-01-01",
+                "historikkTom" to "2020-12-31"
+            ),
+            "@løsning" to mapOf(
+                "HentInfotrygdutbetalinger" to listOf(
+                    mapOf(
+                        "fom" to "2018-01-01",
+                        "tom" to "2018-01-31",
+                        "dagsats" to "1000.0",
+                        "grad" to "100",
+                        "typetekst" to "ArbRef",
+                        "organisasjonsnummer" to organisasjonsnummer
+                    )
+                )
+            )
+        ))
+
+    fun lagHentPersoninfoløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+        nyHendelse(id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("HentPersoninfo"),
+            "spleisBehovId" to "$spleisbehovId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "HentPersoninfo" to mapOf(
+                    "fornavn" to "Kari",
+                    "mellomnavn" to "",
+                    "etternavn" to "Nordmann",
+                    "fødselsdato" to "1970-01-01",
+                    "kjønn" to "Kvinne"
+                )
+            )
+        ))
+
+    fun lagHentEnhetløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), contextId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr", enhet: String = OSLO) =
+        nyHendelse(id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("HentEnhet"),
+            "spleisBehovId" to "$spleisbehovId",
+            "contextId" to contextId,
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "HentEnhet" to enhet
             )
         ))
 

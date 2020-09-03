@@ -60,6 +60,11 @@ internal class HendelseMediator(
         NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(rapidsConnection, this)
     }
 
+    // samler opp løsninger
+    override fun løsning(hendelseId: UUID, contextId: UUID, løsning: Any, context: RapidsConnection.MessageContext) {
+        // TODO
+    }
+
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             if (session.findBehov(godkjenningMessage.id) != null) {
@@ -218,16 +223,6 @@ internal class HendelseMediator(
 
     override fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
         utfør(hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
-    }
-
-    // fortsett en command (resume)
-    internal fun håndter(løsning: Delløsning) {
-        val hendelse = requireNotNull(spleisbehovDao.finn(løsning.behovId))
-        val context = requireNotNull(commandContextDao.finn(løsning.contextId)).apply {
-            løsning.context(this)
-        }
-        log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${løsning.behovId} med context_id=${løsning.contextId} for hendelse_id=${hendelse.id}")
-        utfør(hendelse, context, løsning.contextId)
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
@@ -494,5 +489,4 @@ internal class HendelseMediator(
             speilSnapshotRestClient = speilSnapshotRestClient
         )
     }
-
 }
