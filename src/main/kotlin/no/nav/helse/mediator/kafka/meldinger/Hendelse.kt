@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -15,15 +14,6 @@ internal interface Hendelse : Command {
     fun vedtaksperiodeId(): UUID
 
     fun toJson(): String
-}
-
-internal interface Delløsning {
-    val behovId: UUID
-    val contextId: UUID
-
-    fun context(context: CommandContext) {
-        context.add(this)
-    }
 }
 
 internal interface IHendelseMediator {
