@@ -101,8 +101,9 @@ internal class BehovE2ETest {
     private fun sendGodkjenningsbehov() = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(id, VEDTAKSPERIODE_ID, ORGNR))
     }
+
     private fun sendPersoninfoløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, VEDTAKSPERIODE_ID, ORGNR))
+        testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, UUID.randomUUID(), VEDTAKSPERIODE_ID, ORGNR))
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
