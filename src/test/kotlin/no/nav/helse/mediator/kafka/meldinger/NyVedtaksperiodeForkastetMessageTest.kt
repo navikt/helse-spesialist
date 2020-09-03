@@ -33,7 +33,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val testhendelsefabrikk = Hendelsefabrikk(vedtakDao, commandContextDao, snapshotDao, restClient)
+    private val testhendelsefabrikk = Hendelsefabrikk(mockk(), mockk(), vedtakDao, mockk(), commandContextDao, snapshotDao, restClient)
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(testmeldingfabrikk.lagVedtaksperiodeForkastet(HENDELSE, VEDTAKSPERIODE))
 

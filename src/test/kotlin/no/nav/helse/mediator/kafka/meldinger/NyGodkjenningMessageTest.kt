@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.kafka.HendelsefabrikkBackup
+import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -42,7 +42,7 @@ internal class NyGodkjenningMessageTest {
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val hendelsefabrikk = HendelsefabrikkBackup(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, restClient)
+    private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, restClient)
     private val godkjenningMessage = hendelsefabrikk.nyGodkjenning(
         HENDELSE_ID, FNR, AKTØR, ORGNR, LocalDate.MIN, LocalDate.MAX, VEDTAKSPERIODE_ID, emptyList(), Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, HENDELSE_JSON
     )

@@ -5,11 +5,11 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.mediator.kafka.meldinger.NyGodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.modell.IHendelsefabrikk
-import no.nav.helse.modell.command.SpleisbehovDao.Hendelsetype.VEDTAKSPERIODE_ENDRET
-import no.nav.helse.modell.command.SpleisbehovDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.modell.command.SpleisbehovDao.Hendelsetype.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 import javax.sql.DataSource
@@ -34,16 +34,18 @@ internal class SpleisbehovDao(private val dataSource: DataSource,
         when(hendelsetype) {
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.nyNyVedtaksperiodeEndret(json)
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.nyNyVedtaksperiodeForkastet(json)
+            GODKJENNING -> hendelsefabrikk.nyGodkjenning(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when(hendelse) {
         is NyVedtaksperiodeEndretMessage -> VEDTAKSPERIODE_ENDRET
         is NyVedtaksperiodeForkastetMessage -> VEDTAKSPERIODE_FORKASTET
+        is NyGodkjenningMessage -> GODKJENNING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET
+        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING
     }
 }
 

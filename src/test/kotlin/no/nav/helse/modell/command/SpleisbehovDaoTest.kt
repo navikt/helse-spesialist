@@ -29,7 +29,7 @@ internal class SpleisbehovDaoTest : AbstractEndToEndTest() {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val hendelsefabrikk = Hendelsefabrikk(vedtakDao, commandContextDao, snapshotDao, restClient)
+    private val hendelsefabrikk = Hendelsefabrikk(mockk(), mockk(), vedtakDao, mockk(), commandContextDao, snapshotDao, restClient)
     private val vedtaksperiodeForkastetMessage = hendelsefabrikk.nyNyVedtaksperiodeForkastet(testmeldingfabrikk.lagVedtaksperiodeForkastet(
         HENDELSE_ID,
         VEDTAKSPERIODE_ID
