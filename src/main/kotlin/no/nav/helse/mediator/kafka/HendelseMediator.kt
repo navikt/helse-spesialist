@@ -7,6 +7,7 @@ import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.*
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
 import no.nav.helse.modell.command.ny.AnnulleringCommand
@@ -18,6 +19,7 @@ import no.nav.helse.modell.overstyring.OverstyringSaksbehandlerCommand
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.deleteVedtak
@@ -38,11 +40,13 @@ internal class HendelseMediator(
     private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) : IHendelseMediator {
+    private val personDao = PersonDao(dataSource)
+    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
-
     private val snapshotDao = SnapshotDao(dataSource)
+    private val oppgaveDao = OppgaveDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
-    private val hendelsefabrikk = Hendelsefabrikk(vedtakDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
+    private val hendelsefabrikk = HendelsefabrikkBackup(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
     private val spleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
 
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
