@@ -14,6 +14,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.JacksonConverter
+import io.ktor.routing.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
@@ -27,16 +28,6 @@ import kotlin.test.assertEquals
 
 class OppgaveApiTest: AbstractEndToEndTest() {
     private val httpPort = ServerSocket(0).use { it.localPort }
-
-    private val jwtStub = JwtStub()
-    private val clientId = "client_id"
-    private val speilClientId = "speil_id"
-    private val issuer = "https://jwt-provider-domain"
-    private val requiredGroup = "required_group"
-
-    private val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
-    private val azureConfig = AzureAdAppConfig(clientId = clientId, speilClientId = speilClientId, requiredGroup = requiredGroup)
-    private val jwkProvider = jwtStub.getJwkProviderMock()
     private lateinit var oppgaveMediator: OppgaveMediator
 
     @BeforeAll
@@ -44,8 +35,10 @@ class OppgaveApiTest: AbstractEndToEndTest() {
         oppgaveMediator = OppgaveMediator(dataSource)
         embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
-            oppgaveApi(oppgaveMediator)
+            routing {
+                oppgaveApi(oppgaveMediator)
+                direkteOppgaveApi(oppgaveMediator)
+            }
         }.also {
             it.start(wait = false)
         }
@@ -56,16 +49,6 @@ class OppgaveApiTest: AbstractEndToEndTest() {
         defaultRequest {
             host = "localhost"
             port = httpPort
-            header(
-                "Authorization",
-                "Bearer ${jwtStub.getToken(
-                    arrayOf(requiredGroup),
-                    UUID.randomUUID().toString(),
-                    "tbd@nav.no",
-                    speilClientId,
-                    issuer
-                )}"
-            )
         }
         install(JsonFeature) {
             serializer = JacksonSerializer {
@@ -74,8 +57,6 @@ class OppgaveApiTest: AbstractEndToEndTest() {
             }
         }
     }
-
-
 
     @Test
     fun `finner oppgave for person via fødselsnummer`() {

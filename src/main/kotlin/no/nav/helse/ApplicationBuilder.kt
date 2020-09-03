@@ -11,7 +11,9 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.request.*
+import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.api.*
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.api.adminApi
 import no.nav.helse.api.oppgaveApi
@@ -104,12 +106,20 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 config = azureConfig
             )
             basicAuthentication(env.getValue("ADMIN_SECRET"))
-            oppgaveApi(oppgaveMediator)
             vedtaksperiodeApi(
                 spleisbehovMediator = spleisbehovMediator,
                 vedtaksperiodeMediator = vedtaksperiodeMediator,
                 dataSource = dataSource
             )
+            routing {
+                authenticate("saksbehandler") {
+                    oppgaveApi(oppgaveMediator)
+                }
+                authenticate("saksbehandler-direkte") {
+                    tildelingApi()
+                    direkteOppgaveApi(oppgaveMediator)
+                }
+            }
             adminApi(spleisbehovMediator)
         }.build()
 

@@ -15,6 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.*
 import io.ktor.jackson.*
+import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
@@ -110,7 +111,9 @@ internal class RestApiTest : AbstractEndToEndTest() {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             basicAuthentication("🅱️")
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
-            oppgaveApi(oppgaveMediator)
+            routing {
+                oppgaveApi(oppgaveMediator)
+            }
             vedtaksperiodeApi(vedtaksperiodeMediator, spleisbehovMediator, dataSource)
         }
 
