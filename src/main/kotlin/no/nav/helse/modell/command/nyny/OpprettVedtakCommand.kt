@@ -29,7 +29,7 @@ internal class OpprettVedtakCommand(
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val speilSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
-        val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer.toLong()))
+        val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
         log.info("Oppretter vedtak for vedtaksperiode: $vedtaksperiodeId for person=$personRef, arbeidsgiver=$arbeidsgiverRef")
         vedtakDao.upsertVedtak(

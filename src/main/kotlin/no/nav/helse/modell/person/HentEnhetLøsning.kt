@@ -18,7 +18,7 @@ internal class HentEnhetLøsning(internal val enhetNr: String) {
         infotrygdutbetalingerId: Int
     ) =
         personDao.insertPerson(
-            fødselsnummer = fødselsnummer.toLong(),
+            fødselsnummer = fødselsnummer,
             aktørId = aktørId.toLong(),
             navnId = navnId,
             enhetId = enhetNr.toInt(),
@@ -26,7 +26,7 @@ internal class HentEnhetLøsning(internal val enhetNr: String) {
         )
 
     fun oppdater(personDao: PersonDao, fødselsnummer: String) =
-        personDao.updateEnhet(fødselsnummer.toLong(), enhetNr.toInt())
+        personDao.updateEnhet(fødselsnummer, enhetNr.toInt())
 
     internal class HentEnhetRiver(rapidsConnection: RapidsConnection,
                                   private val mediator: IHendelseMediator) : River.PacketListener {

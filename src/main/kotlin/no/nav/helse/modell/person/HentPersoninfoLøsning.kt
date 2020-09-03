@@ -20,7 +20,7 @@ internal class HentPersoninfoLøsning(
 
     internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
         personDao.updatePersoninfo(
-            fødselsnummer = fødselsnummer.toLong(),
+            fødselsnummer = fødselsnummer,
             fornavn = fornavn,
             mellomnavn = mellomnavn,
             etternavn = etternavn,

@@ -15,11 +15,11 @@ internal class HentInfotrygdutbetalingerLøsning(internal val utbetalinger: Json
         personDao.insertInfotrygdutbetalinger(utbetalinger)
 
     fun oppdater(personDao: PersonDao, fødselsnummer: String) {
-        if (personDao.findInfotrygdutbetalinger(fødselsnummer.toLong()) != null) {
-            personDao.updateInfotrygdutbetalinger(fødselsnummer.toLong(), utbetalinger)
+        if (personDao.findInfotrygdutbetalinger(fødselsnummer) != null) {
+            personDao.updateInfotrygdutbetalinger(fødselsnummer, utbetalinger)
         } else {
             val utbetalingRef = personDao.insertInfotrygdutbetalinger(utbetalinger)
-            personDao.updateInfotrygdutbetalingerRef(fødselsnummer.toLong(), utbetalingRef)
+            personDao.updateInfotrygdutbetalingerRef(fødselsnummer, utbetalingRef)
         }
     }
 

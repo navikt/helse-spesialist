@@ -40,7 +40,7 @@ internal class OpprettPersonCommandTest {
     fun `oppretter ikke person når person finnes fra før`() {
         personFinnes()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.insertPerson(FNR.toLong(), any(), any(), any(), any()) }
+        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class OpprettPersonCommandTest {
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { dao.insertPerson(FNR.toLong(), AKTØR.toLong(), any(), any(), any()) }
+        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR.toLong(), any(), any(), any()) }
     }
 
     @Test
@@ -88,14 +88,14 @@ internal class OpprettPersonCommandTest {
     private fun assertHarBehov() {
         assertTrue(context.harBehov())
         assertEquals(listOf("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger"), context.behov().keys.toList())
-        verify(exactly = 0) { dao.insertPerson(FNR.toLong(), any(), any(), any(), any()) }
+        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 
     private fun personFinnes() {
-        every { dao.findPersonByFødselsnummer(FNR.toLong()) } returns 1
+        every { dao.findPersonByFødselsnummer(FNR) } returns 1
     }
     private fun personFinnesIkke() {
-        every { dao.findPersonByFødselsnummer(FNR.toLong()) } returns null
+        every { dao.findPersonByFødselsnummer(FNR) } returns null
     }
 
 }

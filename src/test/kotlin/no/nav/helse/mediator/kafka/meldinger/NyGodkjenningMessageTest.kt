@@ -63,7 +63,7 @@ internal class NyGodkjenningMessageTest {
 
     @Test
     fun `lager oppgave`() {
-        every { personDao.findPersonByFødselsnummer(FNR.toLong()) } returnsMany listOf(null, 1)
+        every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returnsMany listOf(1)
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
@@ -77,7 +77,7 @@ internal class NyGodkjenningMessageTest {
     @Test
     fun `løser godkjenningsbehov`() {
         val godkjenttidspunkt = LocalDateTime.now()
-        every { personDao.findPersonByFødselsnummer(FNR.toLong()) } returnsMany listOf(null, 1)
+        every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returnsMany listOf(1)
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
@@ -103,7 +103,7 @@ internal class NyGodkjenningMessageTest {
     }
 
     private fun personFinnesIkke() {
-        every { personDao.findPersonByFødselsnummer(FNR.toLong()) } returns null
+        every { personDao.findPersonByFødselsnummer(FNR) } returns null
     }
 
     private fun assertJsonEquals(expected: String, actual: String) {

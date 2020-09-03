@@ -20,13 +20,13 @@ internal class HentEnhetLøsningTest {
     fun `lagre person`() {
         val enhet = HentEnhetLøsning(ENHET_OSLO)
         enhet.lagrePerson(dao, FNR, AKTØR, NAVN_REF, INFOTRYGDUTBETALINGER_REF)
-        verify(exactly = 1) { dao.insertPerson(FNR.toLong(), AKTØR.toLong(), NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
+        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR.toLong(), NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
     }
 
     @Test
     fun `oppdatere enhet`() {
         val enhet = HentEnhetLøsning(ENHET_SVALBARD)
         enhet.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.updateEnhet(FNR.toLong(), ENHET_SVALBARD.toInt()) }
+        verify(exactly = 1) { dao.updateEnhet(FNR, ENHET_SVALBARD.toInt()) }
     }
 }

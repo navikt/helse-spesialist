@@ -73,7 +73,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
     private fun opprettPerson(): Triple<Long, Long, Long> {
         val personinfoRef = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
-        val personRef = personDao.insertPerson(FNR.toLong(), AKTØR.toLong(), personinfoRef, ENHET_OSLO.toInt(), utbetalingerRef) ?: fail { "Kunne ikke opprette person" }
+        val personRef = personDao.insertPerson(FNR, AKTØR.toLong(), personinfoRef, ENHET_OSLO.toInt(), utbetalingerRef) ?: fail { "Kunne ikke opprette person" }
         val arbeidsgiverRef = arbeidsgiverDao.insertArbeidsgiver(ORGNR.toLong(), ORGNAVN) ?: fail { "Kunne ikke opprette arbeidsgiver" }
         val snapshotRef = snapshotDao.insertSpeilSnapshot("{}")
         return Triple(personRef, arbeidsgiverRef, snapshotRef.toLong())

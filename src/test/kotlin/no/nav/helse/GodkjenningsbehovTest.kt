@@ -10,8 +10,11 @@ import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -76,7 +79,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
             )
         )
-        assertNotNull(session.findPersonByFødselsnummer(12345))
+        assertNotNull(session.findPersonByFødselsnummer("12345"))
     }
 
     fun løsningify(vararg løsninger: Any) = Løsninger().also { løsninger.forEach { løsning -> it.add(løsning) } }
@@ -122,8 +125,8 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
         spleisExecutor.resume(session, løsningify(HentEnhetLøsning("1119")))
         spleisExecutor.execute()
 
-        assertNotNull(session.findPersonByFødselsnummer(13245))
-        assertEquals(LocalDate.now(), session.findEnhetSistOppdatert(13245))
+        assertNotNull(session.findPersonByFødselsnummer("13245"))
+        assertEquals(LocalDate.now(), session.findEnhetSistOppdatert("13245"))
     }
 
     @Test

@@ -28,6 +28,6 @@ internal class HentPersoninfoLøsningTest {
     fun `oppdater personinfo`() {
         val info = HentPersoninfoLøsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         info.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.updatePersoninfo(FNR.toLong(), FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN) }
+        verify(exactly = 1) { dao.updatePersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN) }
     }
 }

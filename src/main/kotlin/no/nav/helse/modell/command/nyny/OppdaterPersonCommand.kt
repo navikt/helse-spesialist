@@ -43,7 +43,7 @@ internal class OppdaterPersonCommand(
 
     private class OppdaterPersoninfoCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao) {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
-            val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer.toLong())
+            val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(14)
         }
 
@@ -63,7 +63,7 @@ internal class OppdaterPersonCommand(
 
     private class OppdaterEnhetCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao) {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
-            val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer.toLong())
+            val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(5)
         }
 
@@ -83,7 +83,7 @@ internal class OppdaterPersonCommand(
 
     private class OppdaterInfotrygdutbetalingerCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao) {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
-            val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer.toLong())
+            val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(1)
         }
 

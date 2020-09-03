@@ -39,7 +39,7 @@ fun Session.persisterOverstyring(
                 :grad)
     """
 
-    val person_ref = findPersonByFødselsnummer(fødselsnummer.toLong())
+    val person_ref = findPersonByFødselsnummer(fødselsnummer)
     val arbeidsgiver_ref = findArbeidsgiverByOrgnummer(organisasjonsnummer.toLong())
 
     val overstyringRef = this.run(

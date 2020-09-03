@@ -18,7 +18,7 @@ internal class OpprettPersonCommand(
     timeout = Duration.ofHours(1)
 ) {
     override fun execute(session: Session): Resultat =
-        if (session.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) {
+        if (session.findPersonByFødselsnummer(fødselsnummer) != null) {
             Resultat.Ok.System
         } else {
             Resultat.HarBehov(
@@ -45,7 +45,7 @@ internal class OpprettPersonCommand(
             session.insertInfotrygdutbetalinger(hentInfotrygdutbetalingerLøsning.utbetalinger)
 
         session.insertPerson(
-            fødselsnummer = fødselsnummer.toLong(),
+            fødselsnummer = fødselsnummer,
             aktørId = aktørId.toLong(),
             navnId = navnId,
             enhetId = enhetId,

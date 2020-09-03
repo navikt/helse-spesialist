@@ -44,7 +44,7 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
                 requireNotNull(session.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
             }
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
-                session.findInfotrygdutbetalinger(vedtak.fødselsnummer.toLong())?.let { objectMapper.readTree(it) }
+                session.findInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
             }
             val speilSnapshot = measureAsHistogram("byggSpeilSnapshot_findSpeilSnapshot") {
                 requireNotNull(session.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
@@ -92,7 +92,7 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
             }
 
             val enhet = measureAsHistogram("byggSpeilSnapshot_findEnhet") {
-                session.findEnhet(vedtak.fødselsnummer.toLong())
+                session.findEnhet(vedtak.fødselsnummer)
             }
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,

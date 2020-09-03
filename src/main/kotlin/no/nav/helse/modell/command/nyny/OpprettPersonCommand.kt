@@ -18,7 +18,7 @@ internal class OpprettPersonCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer.toLong()) != null) return ignorer()
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) return ignorer()
         return behandle(context)
     }
 
