@@ -21,7 +21,7 @@ internal class OppdatertArbeidsgiverCommand(
 
     override fun resume(session: Session, løsninger: Løsninger) {
         val løsning = løsninger.løsning<ArbeidsgiverLøsning>()
-        session.updateNavn(orgnummer, løsning.navn)
+        session.updateNavn(orgnummer.toLong(), løsning.navn)
 
     }
 }
