@@ -8,7 +8,21 @@ internal class HentPersoninfoLøsning(
     internal val etternavn: String,
     internal val fødselsdato: LocalDate,
     internal val kjønn: Kjønn
-)
+) {
+
+    internal fun lagre(personDao: PersonDao) =
+        personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+
+    internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
+        personDao.updatePersoninfo(
+            fødselsnummer = fødselsnummer.toLong(),
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn,
+            fødselsdato = fødselsdato,
+            kjønn = kjønn
+        )
+}
 
 enum class Kjønn { Mann, Kvinne, Ukjent }
 
