@@ -33,6 +33,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import no.nav.helse.modell.command.Løsninger as LøsningerOld
 
 internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
@@ -40,6 +41,10 @@ internal class HendelseMediator(
     private val dataSource: DataSource,
     private val spesialistOID: UUID
 ) : IHendelseMediator {
+    private companion object {
+        private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
     private val personDao = PersonDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
@@ -49,26 +54,58 @@ internal class HendelseMediator(
     private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
     private val spleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
 
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
     private var shutdown = false
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
 
     init {
-        ArbeidsgiverMessage.Factory(rapidsConnection, this)
-        GodkjenningMessage.Factory(rapidsConnection, this)
-        PersoninfoLøsningMessage.Factory(rapidsConnection, this)
-        PåminnelseMessage.Factory(rapidsConnection, this)
-        TilInfotrygdMessage.Factory(rapidsConnection, this)
-        TilbakerullingMessage.Factory(rapidsConnection, this)
+        DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
+            ArbeidsgiverMessage.Factory(it, this)
+            GodkjenningMessage.Factory(it, this)
+            PersoninfoLøsningMessage.Factory(it, this)
+            SaksbehandlerLøsning.SaksbehandlerLøsningRiver(it, this)
+            HentPersoninfoLøsning.PersoninfoRiver(it, this)
+            HentEnhetLøsning.HentEnhetRiver(it, this)
+            HentInfotrygdutbetalingerLøsning.InfotrygdutbetalingerRiver(it, this)
+            PåminnelseMessage.Factory(it, this)
+            TilInfotrygdMessage.Factory(it, this)
+            TilbakerullingMessage.Factory(it, this)
 
-        NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(rapidsConnection, this)
-        NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(rapidsConnection, this)
+            //NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
+            NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
+            NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
+        }
+    }
+    private var løsninger: Løsninger? = null
+
+    private fun forbered() {
+        løsninger = null
     }
 
     // samler opp løsninger
     override fun løsning(hendelseId: UUID, contextId: UUID, løsning: Any, context: RapidsConnection.MessageContext) {
-        // TODO
+        løsninger(hendelseId, contextId)?.add(hendelseId, contextId, løsning)
+    }
+
+    private fun løsninger(hendelseId: UUID, contextId: UUID): Løsninger? {
+        return løsninger ?: run {
+            val hendelse = spleisbehovDao.finn(hendelseId)
+            val commandContext = commandContextDao.finn(contextId)
+            if (hendelse == null || commandContext == null) {
+                log.error("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")
+                return null
+            }
+            Løsninger(hendelse, contextId, commandContext).also { løsninger = it }
+        }
+    }
+
+    // fortsetter en command (resume) med oppsamlet løsninger
+    private fun fortsett(message: String, context: RapidsConnection.MessageContext) {
+        løsninger?.fortsett(this, message, context)
+    }
+
+    private fun errorHandler(err: Exception, message: String) {
+        log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
+        sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err)
     }
 
     internal fun håndter(godkjenningMessage: GodkjenningMessage, originalJson: String) {
@@ -192,7 +229,7 @@ internal class HendelseMediator(
         ).filter { it.value != null }.keys.toList()
 
         log.info("Mottok løsninger for $behovSomHarLøsninger for Spleis-behov {}", keyValue("eventId", eventId))
-        val løsninger = Løsninger()
+        val løsninger = LøsningerOld()
         behandlendeEnhet?.also(løsninger::add)
         hentPersoninfoLøsning?.also(løsninger::add)
         hentInfotrygdutbetalingerLøsning?.also(løsninger::add)
@@ -201,19 +238,19 @@ internal class HendelseMediator(
 
     fun håndter(eventId: UUID, løsning: ArbeidsgiverLøsning) {
         log.info("Mottok arbeidsgiverløsning for Spleis-behov {}", keyValue("eventId", eventId))
-        val løsninger = Løsninger().also { it.add(løsning) }
+        val løsninger = LøsningerOld().also { it.add(løsning) }
         resume(eventId, løsninger)
     }
 
     fun håndter(eventId: UUID, løsning: SaksbehandlerLøsning) {
         log.info("Mottok godkjenningsløsning for Spleis-behov {}", keyValue("eventId", eventId))
-        val løsninger = Løsninger().also { it.add(løsning) }
+        val løsninger = LøsningerOld().also { it.add(løsning) }
         resume(eventId, løsninger)
     }
 
     fun håndter(eventId: UUID, påminnelseMessage: PåminnelseMessage) {
         log.info("Mottok påminnelse for Spleis-behov {}", keyValue("eventId", eventId))
-        val løsninger = Løsninger().also { it.add(påminnelseMessage) }
+        val løsninger = LøsningerOld().also { it.add(påminnelseMessage) }
         resume(eventId, løsninger)
     }
 
@@ -244,7 +281,7 @@ internal class HendelseMediator(
         periodetype: Saksbehandleroppgavetype?,
         context: RapidsConnection.MessageContext
     ) {
-        // TODO
+        utfør(hendelsefabrikk.nyGodkjenning(id, fødselsnummer, aktørId, organisasjonsnummer, periodeFom, periodeTom, vedtaksperiodeId, warnings, periodetype, message.toJson()))
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
@@ -341,7 +378,7 @@ internal class HendelseMediator(
                 session = session
             )
             commandExecutor.execute()
-            commandExecutor.resume(session, Løsninger().apply {
+            commandExecutor.resume(session, LøsningerOld().apply {
                 add(overstyringMessage)
             })
             invaliderSaksbehandlerOppgaveCommand.execute(session)
@@ -360,7 +397,7 @@ internal class HendelseMediator(
         sessionOf(dataSource).use(rollbackDeletePersonCommand::execute)
     }
 
-    private fun resume(eventId: UUID, løsninger: Løsninger) {
+    private fun resume(eventId: UUID, løsninger: LøsningerOld) {
         if (shutdown) {
             throw IllegalStateException("Stopper håndtering av behov når appen er i shutdown")
         }
@@ -510,5 +547,20 @@ internal class HendelseMediator(
             data = spleisbehovDbDTO.data,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
+    }
+
+    private class Løsninger(private val hendelse: Hendelse, private val contextId: UUID, private val commandContext: CommandContext) {
+        fun add(hendelseId: UUID, contextId: UUID, løsning: Any) {
+            check(hendelseId == hendelse.id)
+            check(contextId == this.contextId)
+            commandContext.add(løsning)
+        }
+
+        fun fortsett(mediator: HendelseMediator, message: String, context: RapidsConnection.MessageContext) {
+            log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
+            sikkerLogg.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
+                "Innkommende melding:\n\t$message")
+            mediator.utfør(hendelse, commandContext, contextId)
+        }
     }
 }
