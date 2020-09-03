@@ -86,11 +86,12 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             )
         ))
 
-    fun lagHentInfotrygdutbetalingerløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+    fun lagHentInfotrygdutbetalingerløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), contextId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
         nyHendelse(id, "behov", mapOf(
             "@final" to true,
             "@behov" to listOf("HentInfotrygdutbetalinger"),
             "spleisBehovId" to "$spleisbehovId",
+            "contextId" to "$contextId",
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
