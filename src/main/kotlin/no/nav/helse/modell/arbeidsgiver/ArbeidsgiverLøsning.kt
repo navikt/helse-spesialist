@@ -1,3 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
-class ArbeidsgiverLøsning(internal val navn: String)
+internal class ArbeidsgiverLøsning(internal val navn: String) {
+    internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) =
+        arbeidsgiverDao.updateNavn(orgnummer.toLong(), navn)
+}
