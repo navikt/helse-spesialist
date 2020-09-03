@@ -4,11 +4,84 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
+import javax.sql.DataSource
+
+internal class PersonDao(private val dataSource: DataSource) {
+    internal fun findPersonByFødselsnummer(fødselsnummer: Long) = using(sessionOf(dataSource)) {
+        it.findPersonByFødselsnummer(fødselsnummer)
+    }
+
+    internal fun findPersoninfoSistOppdatert(fødselsnummer: Long) =
+        using(sessionOf(dataSource)) {
+            it.findPersoninfoSistOppdatert(fødselsnummer)
+        }
+
+    internal fun insertPersoninfo(
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn
+    ) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        it.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+    }
+    internal fun updatePersoninfo(
+        fødselsnummer: Long,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn
+    ) = using(sessionOf(dataSource)) {
+        it.updatePersoninfo(fødselsnummer, fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+    }
+
+    internal fun findEnhetSistOppdatert(fødselsnummer: Long) = using(sessionOf(dataSource)) {
+        it.findEnhetSistOppdatert(fødselsnummer)
+    }
+
+    internal fun updateEnhet(fødselsnummer: Long, enhetNr: Int) = using(sessionOf(dataSource)) {
+        it.updateEnhet(fødselsnummer, enhetNr)
+    }
+
+    internal fun findInfotrygdutbetalinger(fødselsnummer: Long) = using(sessionOf(dataSource)) {
+        it.findInfotrygdutbetalinger(fødselsnummer)
+    }
+
+    internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: Long) = using(sessionOf(dataSource)) {
+        it.findITUtbetalingsperioderSistOppdatert(fødselsnummer)
+    }
+
+    internal fun insertInfotrygdutbetalinger(data: JsonNode) =
+        using(sessionOf(dataSource, returnGeneratedKey = true)) {
+            it.insertInfotrygdutbetalinger(data)
+        }
+
+    internal fun updateInfotrygdutbetalinger(fødselsnummer: Long, data: JsonNode) = using(sessionOf(dataSource)) {
+        it.updateInfotrygdutbetalinger(fødselsnummer, data)
+    }
+
+    internal fun updateInfotrygdutbetalingerRef(fødselsnummer: Long, ref: Int) = using(sessionOf(dataSource)) {
+        it.updateInfotrygdutbetalingerRef(fødselsnummer, ref)
+    }
+
+    internal fun insertPerson(
+        fødselsnummer: Long,
+        aktørId: Long,
+        navnId: Int,
+        enhetId: Int,
+        infotrygdutbetalingerId: Int
+    ) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        it.insertPerson(fødselsnummer, aktørId, navnId, enhetId, infotrygdutbetalingerId)
+    }
+}
 
 internal fun Session.findPersonByFødselsnummer(fødselsnummer: Long): Int? = this.run(
     queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer)
