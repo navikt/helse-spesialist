@@ -11,6 +11,7 @@ import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -25,7 +26,7 @@ import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BehovE2ETest {
+internal class GodkjenningE2ETest {
     private companion object {
         private val SPESIALIST_IOD = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -41,10 +42,19 @@ internal class BehovE2ETest {
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     private lateinit var dataSource: DataSource
-    private lateinit var behovMediator: HendelseMediator
+    private lateinit var hendelseMediator: HendelseMediator
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
     private fun nyHendelseId() = UUID.randomUUID()
+
+    @BeforeAll
+    fun activate() {
+        FeatureToggle.nyGodkjenningRiver = true
+    }
+    @AfterAll
+    fun deactivate() {
+        FeatureToggle.nyGodkjenningRiver = false
+    }
 
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
@@ -58,6 +68,7 @@ internal class BehovE2ETest {
     fun `oppretter ikke vedtak ved godkjenningsbehov uten nødvendig informasjon`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         assertSpleisbehov(godkjenningsmeldingId)
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT")
         verify(exactly = 0) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
     }
 
@@ -67,6 +78,18 @@ internal class BehovE2ETest {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1)
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
+        verify(exactly = 1) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+    }
+
+    @Test
+    fun `løser godkjenningsbehov ved svar fra saksbehandler`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val godkjenningsmeldingId = sendGodkjenningsbehov()
+        sendPersoninfoløsning(godkjenningsmeldingId)
+        sendSaksbehandlerløsning(godkjenningsmeldingId)
+        assertSnapshot(SNAPSHOTV1)
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         verify(exactly = 1) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
     }
 
@@ -76,8 +99,8 @@ internal class BehovE2ETest {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
         val endringsmeldingId = sendVedtaksperiodeEndret()
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID) // ingen tilstand før godkjenningsbehov er portert over
-        assertTilstand(endringsmeldingId, VEDTAKSPERIODE_ID, "NY", "FERDIG") // ingen tilstand før godkjenningsbehov er portert over
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(endringsmeldingId, VEDTAKSPERIODE_ID, "NY", "FERDIG")
         assertSnapshot(SNAPSHOTV2)
         verify(exactly = 2) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
     }
@@ -103,7 +126,11 @@ internal class BehovE2ETest {
     }
 
     private fun sendPersoninfoløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, UUID.randomUUID(), VEDTAKSPERIODE_ID, ORGNR))
+        testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, testRapid.inspektør.contextId(), VEDTAKSPERIODE_ID, ORGNR))
+    }
+
+    private fun sendSaksbehandlerløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId()))
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -147,7 +174,7 @@ internal class BehovE2ETest {
         val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
         dataSource = HikariDataSource(hikariConfig)
 
-        behovMediator = HendelseMediator(
+        hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
@@ -186,4 +213,17 @@ internal class BehovE2ETest {
 
         testRapid.reset()
     }
+
+    private fun TestRapid.RapidInspector.meldinger() =
+        (0 until size).map { index -> message(index) }
+
+    private fun TestRapid.RapidInspector.hendelser(type: String) =
+        meldinger().filter { it.path("@event_name").asText() == type }
+
+    private fun TestRapid.RapidInspector.contextId() =
+        hendelser("behov")
+            .last { it.hasNonNull("contextId") }
+            .path("contextId")
+            .asText()
+            .let { UUID.fromString(it) }
 }

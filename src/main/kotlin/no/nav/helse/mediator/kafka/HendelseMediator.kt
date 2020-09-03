@@ -60,8 +60,10 @@ internal class HendelseMediator(
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             ArbeidsgiverMessage.Factory(it, this)
-            GodkjenningMessage.Factory(it, this)
-            PersoninfoLøsningMessage.Factory(it, this)
+            if (!FeatureToggle.nyGodkjenningRiver) {
+                GodkjenningMessage.Factory(it, this)
+                PersoninfoLøsningMessage.Factory(it, this)
+            }
             SaksbehandlerLøsning.SaksbehandlerLøsningRiver(it, this)
             HentPersoninfoLøsning.PersoninfoRiver(it, this)
             HentEnhetLøsning.HentEnhetRiver(it, this)
@@ -70,7 +72,7 @@ internal class HendelseMediator(
             TilInfotrygdMessage.Factory(it, this)
             TilbakerullingMessage.Factory(it, this)
 
-            //NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
+            if (FeatureToggle.nyGodkjenningRiver) NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
         }
