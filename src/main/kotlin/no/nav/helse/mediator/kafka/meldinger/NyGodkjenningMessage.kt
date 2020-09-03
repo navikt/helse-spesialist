@@ -5,8 +5,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.command.nyny.MacroCommand
+import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -34,7 +33,23 @@ internal class NyGodkjenningMessage(
     snapshotDao: SnapshotDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
-    override val commands: List<Command> = listOf()
+    override val commands: List<Command> = listOf(
+        PersonCommand(fødselsnummer, aktørId, personDao),
+        ArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
+        OpprettVedtakCommand(
+            speilSnapshotRestClient,
+            fødselsnummer,
+            organisasjonsnummer,
+            vedtaksperiodeId,
+            periodeFom,
+            periodeTom,
+            personDao,
+            arbeidsgiverDao,
+            snapshotDao,
+            vedtakDao
+        ),
+        SaksbehandlerGodkjenningCommand(id, vedtaksperiodeId, oppgaveDao, vedtakDao, json)
+    )
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId

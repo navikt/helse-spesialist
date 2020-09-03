@@ -1,13 +1,16 @@
 package no.nav.helse.mediator.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.mediator.kafka.meldinger.NyGodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import java.time.LocalDate
 import java.util.*
 
 internal class Hendelsefabrikk(
@@ -18,6 +21,25 @@ internal class Hendelsefabrikk(
 ) : IHendelsefabrikk {
     private companion object {
         private val mapper = jacksonObjectMapper()
+    }
+
+    override fun nyGodkjenning(
+        id: UUID,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        vedtaksperiodeId: UUID,
+        warnings: List<String>,
+        periodetype: Saksbehandleroppgavetype?,
+        json: String
+    ): NyGodkjenningMessage {
+        TODO()
+    }
+
+    override fun nyGodkjenning(json: String): NyGodkjenningMessage {
+        TODO()
     }
 
     override fun nyNyVedtaksperiodeEndret(id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, json: String): NyVedtaksperiodeEndretMessage {
