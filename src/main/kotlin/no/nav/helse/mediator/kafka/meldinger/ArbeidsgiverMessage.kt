@@ -11,7 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class ArbeidsgiverMessage(
+internal class ArbeidsgiverMessage(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val vedtaksperiodeId: String,
