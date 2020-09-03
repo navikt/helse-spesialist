@@ -113,11 +113,12 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             )
         ))
 
-    fun lagHentPersoninfoløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
+    fun lagHentPersoninfoløsning(id: UUID = UUID.randomUUID(), spleisbehovId: UUID = UUID.randomUUID(), contextId: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), organisasjonsnummer: String = "orgnr") =
         nyHendelse(id, "behov", mapOf(
             "@final" to true,
             "@behov" to listOf("HentPersoninfo"),
             "spleisBehovId" to "$spleisbehovId",
+            "contextId" to "$contextId",
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,

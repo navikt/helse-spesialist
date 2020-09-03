@@ -1,6 +1,11 @@
 package no.nav.helse.modell.person
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.mediator.kafka.meldinger.IHendelseMediator
+import no.nav.helse.rapids_rivers.*
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.util.*
 
 internal class HentPersoninfoLøsning(
     internal val fornavn: String,
@@ -22,6 +27,44 @@ internal class HentPersoninfoLøsning(
             fødselsdato = fødselsdato,
             kjønn = kjønn
         )
+
+    internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
+        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+        init {
+            River(rapidsConnection)
+                .apply {  validate {
+                    it.demandValue("@event_name", "behov")
+                    it.demandValue("@final", true)
+                    it.demandAll("@behov", listOf("HentPersoninfo"))
+                    it.requireKey("spleisBehovId", "contextId")
+                    it.requireKey("@løsning.HentPersoninfo.fornavn", "@løsning.HentPersoninfo.etternavn",
+                        "@løsning.HentPersoninfo.fødselsdato", "@løsning.HentPersoninfo.kjønn")
+                    it.interestedIn("@løsning.HentPersoninfo.mellomnavn")
+                }
+                }.register(this)
+        }
+
+        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+            sikkerLog.error("forstod ikke HentPersoninfo:\n${problems.toExtendedReport()}")
+        }
+
+        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+            val hendelseId = UUID.fromString(packet["spleisBehovId"].asText())
+            val contextId = UUID.fromString(packet["contextId"].asText())
+            val fornavn = packet["@løsning.HentPersoninfo.fornavn"].asText()
+            val mellomnavn = packet["@løsning.HentPersoninfo.mellomnavn"].takeUnless(JsonNode::isMissingOrNull)?.asText()
+            val etternavn = packet["@løsning.HentPersoninfo.etternavn"].asText()
+            val fødselsdato = packet["@løsning.HentPersoninfo.fødselsdato"].asLocalDate()
+            val kjønn = Kjønn.valueOf(packet["@løsning.HentPersoninfo.kjønn"].textValue())
+            mediator.løsning(hendelseId, contextId, HentPersoninfoLøsning(
+                fornavn,
+                mellomnavn,
+                etternavn,
+                fødselsdato,
+                kjønn
+            ), context)
+        }
+    }
 }
 
 enum class Kjønn { Mann, Kvinne, Ukjent }
