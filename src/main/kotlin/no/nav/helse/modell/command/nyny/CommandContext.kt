@@ -8,12 +8,18 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     private val data = mutableListOf<Any>()
     private val behov = mutableMapOf<String, Map<String, Any>>()
     private val sti: MutableList<Int> = sti.toMutableList()
+    private val meldinger = mutableListOf<String>()
 
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
         this.behov[behovtype] = params
     }
 
     internal fun behov() = behov.toMap()
+    internal fun meldinger() = meldinger.toList()
+
+    internal fun publiser(melding: String) {
+        meldinger.add(melding)
+    }
 
     internal fun add(data: Any) {
         this.data.add(data)

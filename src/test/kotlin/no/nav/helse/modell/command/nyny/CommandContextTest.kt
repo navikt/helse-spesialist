@@ -136,6 +136,13 @@ internal class CommandContextTest {
         assertEquals(emptyMap<String, Any>(), result)
     }
 
+    @Test
+    fun `holder på meldinger`() {
+        val melding = """{ "a_key": "with_a_value" }"""
+        context.publiser(melding)
+        assertEquals(listOf(melding), context.meldinger())
+    }
+
     private class TestObject1(val data: String)
     private class TestObject2(val data: String)
     private class TestCommand(

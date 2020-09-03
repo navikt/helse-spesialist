@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -13,15 +14,18 @@ import java.util.*
 import kotlin.test.assertEquals
 
 internal class BehovMediatorTest {
+    private companion object {
+        private const val FNR = "fødselsnummer"
+        private val hendelseId = UUID.randomUUID()
+        private val contextId = UUID.randomUUID()
+        private val vedtaksperiodeId = UUID.randomUUID()
+        private val objectMapper = jacksonObjectMapper()
+    }
     private val testRapid: TestRapid = TestRapid()
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val behovMediator: BehovMediator = BehovMediator(testRapid, sikkerLogg)
     private lateinit var testHendelse: TestHendelse
     private lateinit var testContext: CommandContext
-    private val hendelseId = UUID.randomUUID()
-    private val contextId = UUID.randomUUID()
-    private val vedtaksperiodeId = UUID.randomUUID()
-    private val FNR = "fødselsnummer"
 
     @BeforeEach
     fun setupEach() {
@@ -31,7 +35,7 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    fun `sender behov på kafka`() {
+    fun `sender behov`() {
         val params = mapOf(
             "param 1" to 1,
             "param 2" to 2
@@ -48,7 +52,19 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    fun `standardfelter`() {
+    fun `sender meldinger`() {
+        val melding1 = """{ "a_key": "with_a_value" }"""
+        val melding2 = """{ "a_key": "with_a_value" }"""
+        testContext.publiser(melding1)
+        testContext.publiser(melding2)
+        behovMediator.håndter(testHendelse, testContext, contextId)
+        assertEquals(2, testRapid.inspektør.size)
+        assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0))
+        assertEquals(objectMapper.readTree(melding2), testRapid.inspektør.message(1))
+    }
+
+    @Test
+    fun standardfelter() {
         testContext.behov("testbehov")
         behovMediator.håndter(testHendelse, testContext, contextId)
         assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
