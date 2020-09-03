@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.header
 import io.ktor.response.respond
 import io.ktor.routing.*
+import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
 
 internal fun Route.oppgaveApi(
     oppgaveMediator: OppgaveMediator
@@ -31,7 +32,7 @@ internal fun Route.direkteOppgaveApi(oppgaveMediator: OppgaveMediator) {
         if (oppgavereferanse == null) {
             call.respond(HttpStatusCode.NotFound)
         } else {
-            call.respond(no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto(oppgavereferanse))
+            call.respond(SaksbehandleroppgavereferanseDto(oppgavereferanse))
         }
     }
 }

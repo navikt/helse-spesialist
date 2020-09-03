@@ -22,6 +22,7 @@ import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.TildelingMediator
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -75,9 +76,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var spleisbehovMediator: HendelseMediator
     private val oppgaveMediator = OppgaveMediator(dataSource)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(
-        dataSource = dataSource
-    )
+    private val tildelingMediator = TildelingMediator(dataSource)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -116,7 +116,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     oppgaveApi(oppgaveMediator)
                 }
                 authenticate("saksbehandler-direkte") {
-                    tildelingApi()
+                    tildelingApi(tildelingMediator)
                     direkteOppgaveApi(oppgaveMediator)
                 }
             }
