@@ -39,7 +39,8 @@ internal class HentEnhetLøsning(internal val enhetNr: String) {
                         it.demandValue("@event_name", "behov")
                         it.demandValue("@final", true)
                         it.demandAll("@behov", listOf("HentEnhet"))
-                        it.requireKey("spleisBehovId", "contextId")
+                        it.demandKey("contextId")
+                        it.requireKey("spleisBehovId")
                         it.requireKey("@løsning.HentEnhet")
                     }
                 }.register(this)

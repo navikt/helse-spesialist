@@ -36,7 +36,8 @@ internal class HentPersoninfoLøsning(
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("HentPersoninfo"))
-                    it.requireKey("spleisBehovId", "contextId")
+                    it.demandKey("contextId")
+                    it.requireKey("spleisBehovId")
                     it.requireKey("@løsning.HentPersoninfo.fornavn", "@løsning.HentPersoninfo.etternavn",
                         "@løsning.HentPersoninfo.fødselsdato", "@løsning.HentPersoninfo.kjønn")
                     it.interestedIn("@løsning.HentPersoninfo.mellomnavn")

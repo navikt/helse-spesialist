@@ -31,7 +31,8 @@ internal class HentInfotrygdutbetalingerLøsning(internal val utbetalinger: Json
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("HentInfotrygdutbetalinger"))
-                    it.requireKey("spleisBehovId", "contextId")
+                    it.demandKey("contextId")
+                    it.requireKey("spleisBehovId")
                     it.requireKey("@løsning.HentInfotrygdutbetalinger")
                 }
                 }.register(this)
