@@ -98,22 +98,22 @@ class TildelingApiTest {
 
     @Test
     fun `kan tildele en oppgave til seg selv`() {
-        val oppgaveId = UUID.randomUUID()
-        val saksbehandlerId = UUID.randomUUID()
+        val oppgavereferanse = UUID.randomUUID()
+        val saksbehandlerreferanse = UUID.randomUUID()
 
-        dataSource.opprettSaksbehandler(saksbehandlerId)
-        dataSource.opprettSaksbehandlerOppgave(oppgaveId, vedtakId)
+        dataSource.opprettSaksbehandler(saksbehandlerreferanse)
+        dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
         val response = runBlocking {
-            client.post<HttpResponse>("/api/v1/tildeling/${oppgaveId}/selv") {
+            client.post<HttpResponse>("/api/v1/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
-                authentication(saksbehandlerId)
+                authentication(saksbehandlerreferanse)
             }
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
-        assertEquals(saksbehandlerId, tildelingMediator.hentSaksbehandlerFor(oppgaveId))
+        assertEquals(saksbehandlerreferanse, tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))
     }
 
     @Test

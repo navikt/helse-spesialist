@@ -10,7 +10,7 @@ import no.nav.helse.tildeling.TildelingMediator
 import java.util.*
 
 internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
-    post("/api/v1/tildeling/{oppgavereferanse}/selv") {
+    post("/api/v1/tildeling/{oppgavereferanse}") {
         val oppgavereferanse =
             UUID.fromString(requireNotNull(call.parameters["oppgavereferanse"]) { "Ugyldig oppgavereferanse i path parameter" })
         val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
