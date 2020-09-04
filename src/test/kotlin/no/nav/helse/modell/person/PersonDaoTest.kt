@@ -59,7 +59,7 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
         assertEquals(LocalDate.now(), dao.findITUtbetalingsperioderSistOppdatert(FNR))
         assertEquals(LocalDate.now(), dao.findPersoninfoSistOppdatert(FNR))
         assertEquals(1, person().size)
-        person().first().assertEquals(FNR, AKTØR.toLong(), personinfoId, enhetId, infotrygdutbetalingerId)
+        person().first().assertEquals(FNR, AKTØR, personinfoId, enhetId, infotrygdutbetalingerId)
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
         val personinfoId = dao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val infotrygdutbetalingerId = dao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val enhetId = ENHET_OSLO.toInt()
-        dao.insertPerson(FNR, AKTØR.toLong(), personinfoId, enhetId, infotrygdutbetalingerId)
+        dao.insertPerson(FNR, AKTØR, personinfoId, enhetId, infotrygdutbetalingerId)
         return Triple(personinfoId, enhetId, infotrygdutbetalingerId)
     }
 
@@ -115,7 +115,7 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
             it.run(queryOf("SELECT fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person").map {
                 Person(
                     it.long("fodselsnummer").toFødselsnummer(),
-                    it.long("aktor_id"),
+                    it.long("aktor_id").toString(),
                     it.int("info_ref"),
                     it.int("enhet_ref"),
                     it.int("infotrygdutbetalinger_ref")
@@ -138,12 +138,12 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
 
     private class Person(
         private val fødselsnummer: String,
-        private val aktørId: Long,
+        private val aktørId: String,
         private val infoRef: Int,
         private val enhetRef: Int,
         private val infotrygdutbetalingerRef: Int
     ) {
-        fun assertEquals(forventetFødselsnummer: String, forventetAktørId: Long, forventetInfoRef: Int, forventetEnhetRef: Int, forventetInfotrygdutbetalingerRef: Int) {
+        fun assertEquals(forventetFødselsnummer: String, forventetAktørId: String, forventetInfoRef: Int, forventetEnhetRef: Int, forventetInfotrygdutbetalingerRef: Int) {
             assertEquals(forventetFødselsnummer, fødselsnummer)
             assertEquals(forventetAktørId, aktørId)
             assertEquals(forventetInfoRef, infoRef)

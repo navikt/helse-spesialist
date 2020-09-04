@@ -19,7 +19,7 @@ internal class HentEnhetLøsning(internal val enhetNr: String) {
     ) =
         personDao.insertPerson(
             fødselsnummer = fødselsnummer,
-            aktørId = aktørId.toLong(),
+            aktørId = aktørId,
             navnId = navnId,
             enhetId = enhetNr.toInt(),
             infotrygdutbetalingerId = infotrygdutbetalingerId

@@ -74,7 +74,7 @@ internal class PersonDao(private val dataSource: DataSource) {
 
     internal fun insertPerson(
         fødselsnummer: String,
-        aktørId: Long,
+        aktørId: String,
         navnId: Int,
         enhetId: Int,
         infotrygdutbetalingerId: Int
@@ -89,7 +89,7 @@ internal fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = 
         .asSingle
 )
 
-internal fun Session.findVedtaksperioderByAktørId(aktørId: Long): Pair<String, List<UUID>>? =
+internal fun Session.findVedtaksperioderByAktørId(aktørId: String): Pair<String, List<UUID>>? =
     this.run(
         queryOf(
             """
@@ -98,7 +98,7 @@ internal fun Session.findVedtaksperioderByAktørId(aktørId: Long): Pair<String,
                         INNER JOIN person AS p ON v.person_ref = p.id
                     WHERE p.aktor_id = ?
                     GROUP BY p.fodselsnummer;""",
-            aktørId
+            aktørId.toLong()
         )
             .map { row ->
                 row.long("fodselsnummer").toFødselsnummer() to
@@ -140,7 +140,7 @@ internal fun Session.insertPersoninfo(
 
 internal fun Session.insertPerson(
     fødselsnummer: String,
-    aktørId: Long,
+    aktørId: String,
     navnId: Int,
     enhetId: Int,
     infotrygdutbetalingerId: Int
@@ -149,7 +149,7 @@ internal fun Session.insertPerson(
         queryOf(
             "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?);",
             fødselsnummer.toLong(),
-            aktørId,
+            aktørId.toLong(),
             navnId,
             enhetId,
             infotrygdutbetalingerId

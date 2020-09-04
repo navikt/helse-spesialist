@@ -51,7 +51,7 @@ internal class OpprettPersonCommandTest {
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR.toLong(), any(), any(), any()) }
+        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, any(), any(), any()) }
     }
 
     @Test

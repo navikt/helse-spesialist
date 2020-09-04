@@ -20,7 +20,7 @@ internal class HentEnhetLøsningTest {
     fun `lagre person`() {
         val enhet = HentEnhetLøsning(ENHET_OSLO)
         enhet.lagrePerson(dao, FNR, AKTØR, NAVN_REF, INFOTRYGDUTBETALINGER_REF)
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR.toLong(), NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
+        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
     }
 
     @Test

@@ -46,7 +46,7 @@ internal class OpprettPersonCommand(
 
         session.insertPerson(
             fødselsnummer = fødselsnummer,
-            aktørId = aktørId.toLong(),
+            aktørId = aktørId,
             navnId = navnId,
             enhetId = enhetId,
             infotrygdutbetalingerId = infotrygdutbetalingerId
