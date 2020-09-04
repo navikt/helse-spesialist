@@ -9,9 +9,9 @@ class TildelingMediator(private val dataSource: DataSource) {
         session.hentSaksbehandlerFor(oppgavereferanse)
     }
 
-    fun tildelOppgaveTilSaksbehandler(oppgavereferanse: UUID, saksbehandlerReferanse: UUID) {
+    fun tildelOppgaveTilSaksbehandler(oppgavereferanse: UUID, saksbehandlerreferanse: UUID) {
         sessionOf(dataSource).use { session ->
-            session.tildelOppgave(oppgavereferanse, saksbehandlerReferanse)
+            session.tildelOppgave(oppgavereferanse, saksbehandlerreferanse)
         }
     }
 

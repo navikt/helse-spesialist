@@ -1,9 +1,10 @@
-package no.nav.helse.tildeling
+package no.nav.helse.api
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
@@ -16,10 +17,15 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.*
-import no.nav.helse.api.JwtStub
-import no.nav.helse.api.tildelingApi
-import org.junit.jupiter.api.*
+import no.nav.helse.AzureAdAppConfig
+import no.nav.helse.OidcDiscovery
+import no.nav.helse.azureAdAppAuthentication
+import no.nav.helse.objectMapper
+import no.nav.helse.tildeling.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import java.net.ServerSocket
 import java.nio.file.Path
@@ -72,24 +78,30 @@ class TildelingApiTest {
 
             val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
             val azureConfig =
-                AzureAdAppConfig(clientId = clientId, speilClientId = UUID.randomUUID().toString(), requiredGroup = requiredGroup)
+                AzureAdAppConfig(
+                    clientId = UUID.randomUUID().toString(),
+                    speilClientId = clientId,
+                    requiredGroup = requiredGroup
+                )
             val jwkProvider = jwtStub.getJwkProviderMock()
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
 
             routing {
-                tildelingApi(tildelingMediator)
+                authenticate("saksbehandler-direkte") {
+                    tildelingApi(tildelingMediator)
+                }
             }
         }.also {
             it.start(wait = false)
         }
     }
 
-    @Disabled
     @Test
     fun `kan tildele en oppgave til seg selv`() {
         val oppgaveId = UUID.randomUUID()
         val saksbehandlerId = UUID.randomUUID()
 
+        dataSource.opprettSaksbehandler(saksbehandlerId)
         dataSource.opprettSaksbehandlerOppgave(oppgaveId, vedtakId)
         val response = runBlocking {
             client.post<HttpResponse>("/api/v1/tildeling/${oppgaveId}/selv") {
@@ -107,13 +119,15 @@ class TildelingApiTest {
     private fun HttpRequestBuilder.authentication(oid: UUID) {
         header(
             "Authorization",
-            "Bearer ${jwtStub.getToken(
-                arrayOf(requiredGroup),
-                oid.toString(),
-                epostadresse,
-                clientId,
-                issuer
-            )}"
+            "Bearer ${
+                jwtStub.getToken(
+                    arrayOf(requiredGroup),
+                    oid.toString(),
+                    epostadresse,
+                    clientId,
+                    issuer
+                )
+            }"
         )
     }
 
