@@ -125,7 +125,7 @@ class TildelingApiTest {
         dataSource.opprettSaksbehandlerOppgave(oppgaveId, vedtakId)
         dataSource.opprettTildeling(oppgaveId, saksbehandlerId)
         val response = runBlocking {
-            client.post<HttpResponse>("/api/v1/tildeling/${oppgaveId}/fjern") {
+            client.delete<HttpResponse>("/api/v1/tildeling/${oppgaveId}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()

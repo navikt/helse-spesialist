@@ -1,7 +1,10 @@
 package no.nav.helse.tildeling
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.util.*
@@ -52,6 +55,19 @@ class TildelingMediatorTest {
         dataSource.opprettSaksbehandler(saksbehandlerReferanse)
 
         tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        tildelingMediator.fjernTildeling(oppgavereferanse)
+
+        assertNull(tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))
+    }
+
+    @Test
+    fun `kan fjerne en ikke eksisterende tildeling`() {
+        val tildelingMediator = TildelingMediator(dataSource)
+        val oppgavereferanse = UUID.randomUUID()
+        val saksbehandlerReferanse = UUID.randomUUID()
+
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse)
+
         tildelingMediator.fjernTildeling(oppgavereferanse)
 
         assertNull(tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))

@@ -20,7 +20,7 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
         call.respond(HttpStatusCode.OK)
     }
 
-    post("/api/v1/tildeling/{oppgavereferanse}/fjern") {
+    delete("/api/v1/tildeling/{oppgavereferanse}") {
         val oppgavereferanse =
             UUID.fromString(requireNotNull(call.parameters["oppgavereferanse"]) { "Ugyldig oppgavereferanse i path parameter" })
         tildelingMediator.fjernTildeling(oppgavereferanse)
