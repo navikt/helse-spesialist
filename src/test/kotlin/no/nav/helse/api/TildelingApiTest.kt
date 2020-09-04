@@ -22,7 +22,10 @@ import no.nav.helse.OidcDiscovery
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.*
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import java.net.ServerSocket
 import java.nio.file.Path
@@ -113,7 +116,6 @@ class TildelingApiTest {
         assertEquals(saksbehandlerId, tildelingMediator.hentSaksbehandlerFor(oppgaveId))
     }
 
-    @Disabled
     @Test
     fun `kan fjerne tildeling av en oppgave`() {
         val oppgaveId = UUID.randomUUID()
