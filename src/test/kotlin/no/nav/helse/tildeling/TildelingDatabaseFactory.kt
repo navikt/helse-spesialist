@@ -56,6 +56,12 @@ fun DataSource.opprettSaksbehandlerOppgave(oppgavereferanse: UUID, vedtakId: Lon
     }
 }
 
+fun DataSource.opprettTildeling(oppgavereferanse: UUID, saksbehandlerreferanse: UUID) {
+    sessionOf(this).use {
+        it.tildelOppgave(oppgavereferanse, saksbehandlerreferanse)
+    }
+}
+
 fun DataSource.finnSaksbehandlerOppgaver() = sessionOf(this).use {
     it.findSaksbehandlerOppgaver()
 }
