@@ -3,30 +3,34 @@ package no.nav.helse.api
 import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.install
-import io.ktor.client.HttpClient
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.application.*
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpStatement
-import io.ktor.features.ContentNegotiation
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.JacksonConverter
+import io.ktor.client.statement.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.jackson.*
 import io.ktor.routing.*
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.*
+import no.nav.helse.TestPerson
+import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
+import no.nav.helse.objectMapper
+import no.nav.helse.tildeling.opprettSaksbehandler
+import no.nav.helse.tildeling.opprettSaksbehandlerOppgave
+import no.nav.helse.tildeling.opprettTildeling
+import no.nav.helse.tildeling.opprettVedtak
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.net.ServerSocket
 import java.util.*
 import kotlin.test.assertEquals
 
-class OppgaveApiTest: AbstractEndToEndTest() {
+class OppgaveApiTest : AbstractEndToEndTest() {
     private val httpPort = ServerSocket(0).use { it.localPort }
     private lateinit var oppgaveMediator: OppgaveMediator
 
@@ -84,5 +88,23 @@ class OppgaveApiTest: AbstractEndToEndTest() {
         }
 
         assertEquals(HttpStatusCode.NotFound, response.status)
+    }
+
+    @Test
+    fun `får med tildelinger når man henter oppgaver`() {
+        val saksbehandlerreferanse = UUID.randomUUID()
+        val oppgavereferanse = UUID.randomUUID()
+        val vedtakId = dataSource.opprettVedtak().toLong()
+        dataSource.opprettSaksbehandler(saksbehandlerreferanse)
+        dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
+        dataSource.opprettTildeling(oppgavereferanse, saksbehandlerreferanse)
+
+        val oppgaver = runBlocking {
+            client.get<List<SaksbehandleroppgaveDto>>("/api/oppgaver")
+        }
+        assertEquals(
+            saksbehandlerreferanse,
+            oppgaver.find { it.oppgavereferanse == oppgavereferanse }?.saksbehandlerOid
+        )
     }
 }
