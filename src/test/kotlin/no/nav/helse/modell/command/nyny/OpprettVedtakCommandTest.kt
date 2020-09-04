@@ -50,7 +50,7 @@ internal class OpprettVedtakCommandTest {
         val arbeidsgiverRef = 2
         val snapshotRef = 3
         every { personDao.findPersonByFødselsnummer(FNR) } returns personRef
-        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returns arbeidsgiverRef
+        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returns arbeidsgiverRef
         every { snapshotDao.insertSpeilSnapshot(any()) } returns snapshotRef
         return Triple(personRef, arbeidsgiverRef, snapshotRef)
     }

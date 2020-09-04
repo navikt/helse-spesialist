@@ -30,7 +30,7 @@ internal class ArbeidsgiverCommandTest {
     fun `opprett arbeidsgiver`() {
         arbeidsgiverFinnesIkke()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR.toLong(), "Ukjent") }
+        verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, "Ukjent") }
     }
 
     @Test
@@ -41,10 +41,10 @@ internal class ArbeidsgiverCommandTest {
     }
 
     private fun arbeidsgiverFinnes() {
-        every { dao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returns 1
+        every { dao.findArbeidsgiverByOrgnummer(ORGNR) } returns 1
     }
 
     private fun arbeidsgiverFinnesIkke() {
-        every { dao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returns null
+        every { dao.findArbeidsgiverByOrgnummer(ORGNR) } returns null
     }
 }

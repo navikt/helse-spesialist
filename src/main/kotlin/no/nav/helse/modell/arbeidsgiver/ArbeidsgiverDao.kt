@@ -9,15 +9,15 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 internal class ArbeidsgiverDao(private val dataSource: DataSource) {
-    internal fun findArbeidsgiverByOrgnummer(orgnummer: Long) = using(sessionOf(dataSource)) {
+    internal fun findArbeidsgiverByOrgnummer(orgnummer: String) = using(sessionOf(dataSource)) {
         it.findArbeidsgiverByOrgnummer(orgnummer)
     }
 
-    internal fun insertArbeidsgiver(orgnummer: Long, navn: String) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
+    internal fun insertArbeidsgiver(orgnummer: String, navn: String) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
         it.insertArbeidsgiver(orgnummer, navn)
     }
 
-    internal fun findNavnSistOppdatert(orgnummer: Long) = using(sessionOf(dataSource)) {
+    internal fun findNavnSistOppdatert(orgnummer: String) = using(sessionOf(dataSource)) {
         it.findNavnSistOppdatert(orgnummer)
     }
 
@@ -25,18 +25,18 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         it.findArbeidsgiver(arbeidsgiverId)
     }
 
-    internal fun updateNavn(orgnummer: Long, navn: String) = using(sessionOf(dataSource)) {
+    internal fun updateNavn(orgnummer: String, navn: String) = using(sessionOf(dataSource)) {
         it.updateNavn(orgnummer, navn)
     }
 }
 
-internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: Long): Int? = this.run(
-    queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer)
+internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: String): Int? = this.run(
+    queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
         .map { it.int("id") }
         .asSingle
 )
 
-internal fun Session.insertArbeidsgiver(orgnummer: Long, navn: String): Long? {
+internal fun Session.insertArbeidsgiver(orgnummer: String, navn: String): Long? {
     val navnRef = requireNotNull(
         run(
             queryOf(
@@ -48,16 +48,16 @@ internal fun Session.insertArbeidsgiver(orgnummer: Long, navn: String): Long? {
         )
     )
     return run(
-        queryOf("INSERT INTO arbeidsgiver(orgnummer, navn_ref) VALUES(?, ?);", orgnummer, navnRef)
+        queryOf("INSERT INTO arbeidsgiver(orgnummer, navn_ref) VALUES(?, ?);", orgnummer.toLong(), navnRef)
             .asUpdateAndReturnGeneratedKey
     )
 }
 
-internal fun Session.findNavnSistOppdatert(orgnummer: Long): LocalDate = requireNotNull(
+internal fun Session.findNavnSistOppdatert(orgnummer: String): LocalDate = requireNotNull(
     this.run(
         queryOf(
             "SELECT navn_oppdatert FROM arbeidsgiver_navn WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
-            orgnummer
+            orgnummer.toLong()
         ).map {
             it.localDate("navn_oppdatert")
         }.asSingle
@@ -77,11 +77,11 @@ internal fun Session.findArbeidsgiver(arbeidsgiverId: Int): ArbeidsgiverDto? = t
     }.asSingle
 )
 
-internal fun Session.updateNavn(orgnummer: Long, navn: String) = this.run(
+internal fun Session.updateNavn(orgnummer: String, navn: String) = this.run(
     queryOf(
         "UPDATE arbeidsgiver_navn SET navn=?, navn_oppdatert=? WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
         navn,
         LocalDateTime.now(),
-        orgnummer
+        orgnummer.toLong()
     ).asUpdate
 )

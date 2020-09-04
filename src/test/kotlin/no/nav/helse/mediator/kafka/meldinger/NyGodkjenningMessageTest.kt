@@ -64,7 +64,7 @@ internal class NyGodkjenningMessageTest {
     @Test
     fun `lager oppgave`() {
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
-        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returnsMany listOf(1)
+        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
@@ -78,7 +78,7 @@ internal class NyGodkjenningMessageTest {
     fun `løser godkjenningsbehov`() {
         val godkjenttidspunkt = LocalDateTime.now()
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
-        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR.toLong()) } returnsMany listOf(1)
+        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))

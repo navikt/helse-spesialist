@@ -41,7 +41,7 @@ internal class OpprettVedtakCommand(
             requireNotNull(session.findPersonByFødselsnummer(fødselsnummer))
         }
         val arbeidsgiverRef = measureAsHistogram("OpprettVedtakCommand_findArbeidsgiverByOrgnummer") {
-            requireNotNull(session.findArbeidsgiverByOrgnummer(orgnummer.toLong()))
+            requireNotNull(session.findArbeidsgiverByOrgnummer(orgnummer))
         }
         measureAsHistogram("OpprettVedtakCommand_insertVedtak") {
             session.upsertVedtak(

@@ -11,7 +11,7 @@ internal class OpprettArbeidsgiverCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) return ignorer()
+        if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer) != null) return ignorer()
         return behandle(context)
     }
 
@@ -28,7 +28,7 @@ internal class OpprettArbeidsgiverCommand(
         // TODO: Faktisk hente arbeidsgiver info
         //val arbeidsgiver = context.get<Arbeidsgiverløsning>() ?: trengerMerInformasjon(context)
         log.info("oppretter arbeidsgiver")
-        arbeidsgiverDao.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")
+        arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent")
         return true
     }
 

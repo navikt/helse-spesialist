@@ -25,7 +25,7 @@ fun DataSource.opprettVedtak() = sessionOf(this, returnGeneratedKey = true).use 
     val personinfo = it.insertPersoninfo("Ola", null, "Nordmann", LocalDate.now(), Kjønn.Ukjent)
     val infotrygdUtbetalinger = it.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
     val person = it.insertPerson("123456789", "987654321", personinfo, 315, infotrygdUtbetalinger)
-    val arbeidsgiver = it.insertArbeidsgiver(98765432, "Boomer AS")
+    val arbeidsgiver = it.insertArbeidsgiver("98765432", "Boomer AS")
     val speilSnapshot = it.insertSpeilSnapshot("{}")
     it.upsertVedtak(
         vedtaksperiodeId = UUID.randomUUID(),

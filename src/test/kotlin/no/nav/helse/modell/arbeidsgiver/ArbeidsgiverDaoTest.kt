@@ -25,20 +25,20 @@ internal class ArbeidsgiverDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `opprette arbeidsgiver`() {
-        dao.insertArbeidsgiver(ORGNR.toLong(), NAVN)
-        assertNotNull(dao.findArbeidsgiverByOrgnummer(ORGNR.toLong()))
-        assertEquals(LocalDate.now(), dao.findNavnSistOppdatert(ORGNR.toLong()))
+        dao.insertArbeidsgiver(ORGNR, NAVN)
+        assertNotNull(dao.findArbeidsgiverByOrgnummer(ORGNR))
+        assertEquals(LocalDate.now(), dao.findNavnSistOppdatert(ORGNR))
         assertEquals(1, arbeidsgiver().size)
         assertEquals(1, arbeidsgivernavn().size)
-        assertEquals(ORGNR.toLong(), arbeidsgiver().first().first)
+        assertEquals(ORGNR, arbeidsgiver().first().first)
         assertEquals(NAVN, arbeidsgivernavn().first().second)
     }
 
     @Test
     fun `oppdatere arbeidsgiver`() {
-        dao.insertArbeidsgiver(ORGNR.toLong(), NAVN)
+        dao.insertArbeidsgiver(ORGNR, NAVN)
         val nyttNavn = "Nærbutikken ASA"
-        dao.updateNavn(ORGNR.toLong(), nyttNavn)
+        dao.updateNavn(ORGNR, nyttNavn)
         assertEquals(1, arbeidsgivernavn().size)
         assertEquals(nyttNavn, arbeidsgivernavn().first().second)
     }
@@ -46,7 +46,7 @@ internal class ArbeidsgiverDaoTest : AbstractEndToEndTest() {
     private fun arbeidsgiver() =
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT orgnummer, navn_ref FROM arbeidsgiver").map {
-                it.long("orgnummer") to it.int("navn_ref")
+                it.string("orgnummer") to it.int("navn_ref")
             }.asList)
         }
     private fun arbeidsgivernavn() =

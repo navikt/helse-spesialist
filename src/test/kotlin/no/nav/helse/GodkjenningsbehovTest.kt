@@ -167,7 +167,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
         )
         spleisExecutor.execute()
 
-        assertNotNull(session.findArbeidsgiverByOrgnummer(98765432))
+        assertNotNull(session.findArbeidsgiverByOrgnummer("98765432"))
     }
 
     @Test

@@ -40,7 +40,7 @@ fun Session.persisterOverstyring(
     """
 
     val person_ref = findPersonByFødselsnummer(fødselsnummer)
-    val arbeidsgiver_ref = findArbeidsgiverByOrgnummer(organisasjonsnummer.toLong())
+    val arbeidsgiver_ref = findArbeidsgiverByOrgnummer(organisasjonsnummer)
 
     val overstyringRef = this.run(
         queryOf(

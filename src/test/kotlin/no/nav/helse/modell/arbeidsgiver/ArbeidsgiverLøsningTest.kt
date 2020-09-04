@@ -16,6 +16,6 @@ internal class ArbeidsgiverLøsningTest {
     fun `oppdatere navn`() {
         val arbeidsgiver = ArbeidsgiverLøsning(NAVN)
         arbeidsgiver.oppdater(dao, ORGNR)
-        verify(exactly = 1) { dao.updateNavn(ORGNR.toLong(), NAVN) }
+        verify(exactly = 1) { dao.updateNavn(ORGNR, NAVN) }
     }
 }

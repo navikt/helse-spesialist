@@ -17,10 +17,10 @@ internal class OpprettArbeidsgiverCommand(
 ) {
 
     override fun execute(session: Session): Resultat {
-        return if (session.findArbeidsgiverByOrgnummer(orgnummer.toLong()) != null) {
+        return if (session.findArbeidsgiverByOrgnummer(orgnummer) != null) {
             Resultat.Ok.System
         } else {
-            session.insertArbeidsgiver(orgnummer.toLong(), "Ukjent")
+            session.insertArbeidsgiver(orgnummer, "Ukjent")
             Resultat.Ok.System
             //spleisbehov.håndter(Behovtype.HentArbeidsgiverNavn)
         }
