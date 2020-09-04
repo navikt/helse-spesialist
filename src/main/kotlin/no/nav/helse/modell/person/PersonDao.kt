@@ -223,7 +223,7 @@ internal fun Session.updateInfotrygdutbetalingerRef(fødselsnummer: String, ref:
         queryOf(
             "UPDATE person SET infotrygdutbetalinger_ref=?, infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
             ref,
-            fødselsnummer
+            fødselsnummer.toLong()
         ).asUpdate
     )
 

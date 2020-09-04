@@ -82,6 +82,15 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
         person().first().assertEnhet(nyEnhet)
     }
 
+    @Test
+    fun `oppdaterer infotrygdutbetalingerRef`() {
+        opprettPerson()
+        dao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
+        val infotrygdUtbetalingerRef = "2".toInt()
+        dao.updateInfotrygdutbetalingerRef(FNR, infotrygdUtbetalingerRef)
+        person().first().assertInfotrygdUtbetalingerRef(infotrygdUtbetalingerRef)
+    }
+
     private fun opprettPerson(): Triple<Int, Int, Int> {
         val personinfoId = dao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val infotrygdutbetalingerId = dao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
@@ -144,6 +153,9 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
 
         fun assertEnhet(forventetEnhet: Int) {
             assertEquals(forventetEnhet, enhetRef)
+        }
+        fun assertInfotrygdUtbetalingerRef(forventetInfotrygdutbetalingerRef: Int) {
+            assertEquals(forventetInfotrygdutbetalingerRef, infotrygdutbetalingerRef)
         }
     }
 
