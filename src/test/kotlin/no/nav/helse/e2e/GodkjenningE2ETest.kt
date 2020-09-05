@@ -11,6 +11,7 @@ import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.sql.Connection
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -79,6 +81,7 @@ internal class GodkjenningE2ETest {
         sendPersoninfoløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
+        assertOppgave(godkjenningsmeldingId, Oppgavestatus.AvventerSaksbehandler)
         verify(exactly = 1) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
     }
 
@@ -90,7 +93,7 @@ internal class GodkjenningE2ETest {
         sendSaksbehandlerløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
-        verify(exactly = 1) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        assertOppgave(godkjenningsmeldingId, Oppgavestatus.Ferdigstilt)
     }
 
     @Test
@@ -116,10 +119,10 @@ internal class GodkjenningE2ETest {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, VEDTAKSPERIODE_ID, ORGNR))
     }
 
-
     private fun sendVedtaksperiodeEndret() = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, VEDTAKSPERIODE_ID, ORGNR))
     }
+
 
     private fun sendGodkjenningsbehov() = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(id, VEDTAKSPERIODE_ID, ORGNR))
@@ -151,6 +154,10 @@ internal class GodkjenningE2ETest {
         })
     }
 
+    private fun assertOppgave(hendelseId: UUID, forventetStatus: Oppgavestatus) {
+        oppgaver(hendelseId).first().assertEquals(forventetStatus)
+    }
+
     private fun assertSnapshot(forventet: String) {
         assertEquals(forventet, using(sessionOf(dataSource)) {
             it.run(
@@ -162,6 +169,39 @@ internal class GodkjenningE2ETest {
                 ).map { it.string("data") }.asSingle
             )
         })
+    }
+
+
+    private fun oppgaver(hendelseId: UUID) =
+        using(sessionOf(dataSource)) {
+            it.run(queryOf(
+                "SELECT oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref FROM oppgave WHERE event_id=:hendelse_id ORDER BY id DESC",
+                mapOf(
+                    "hendelse_id" to hendelseId
+                )
+            ).map {
+                Oppgave(
+                    it.string("type"),
+                    enumValueOf(it.string("status")),
+                    it.localDate("oppdatert"),
+                    it.stringOrNull("ferdigstilt_av"),
+                    it.stringOrNull("ferdigstilt_av_oid")?.let { UUID.fromString(it) },
+                    it.longOrNull("vedtak_ref")
+                )
+            }.asList)
+        }
+
+    private class Oppgave(
+        private val type: String,
+        private val status: Oppgavestatus,
+        private val oppdatert: LocalDate,
+        private val ferdigstiltAv: String?,
+        private val ferdigstiltAvOid: UUID?,
+        private val vedtakRef: Long?
+    ) {
+        fun assertEquals(forventetStatus: Oppgavestatus) {
+            assertEquals(forventetStatus, status)
+        }
     }
 
     @BeforeAll
