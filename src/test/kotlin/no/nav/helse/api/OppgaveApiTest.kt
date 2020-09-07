@@ -95,7 +95,8 @@ class OppgaveApiTest : AbstractEndToEndTest() {
         val saksbehandlerreferanse = UUID.randomUUID()
         val oppgavereferanse = UUID.randomUUID()
         val vedtakId = dataSource.opprettVedtak().toLong()
-        dataSource.opprettSaksbehandler(saksbehandlerreferanse)
+        val epost = "sara.saksbehandler@nav.no"
+        dataSource.opprettSaksbehandler(saksbehandlerreferanse, epost)
         dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
         dataSource.opprettTildeling(oppgavereferanse, saksbehandlerreferanse)
 
@@ -103,8 +104,8 @@ class OppgaveApiTest : AbstractEndToEndTest() {
             client.get<List<SaksbehandleroppgaveDto>>("/api/oppgaver")
         }
         assertEquals(
-            saksbehandlerreferanse,
-            oppgaver.find { it.oppgavereferanse == oppgavereferanse }?.saksbehandlerOid
+            epost,
+            oppgaver.find { it.oppgavereferanse == oppgavereferanse }?.saksbehandlerepost
         )
     }
 }

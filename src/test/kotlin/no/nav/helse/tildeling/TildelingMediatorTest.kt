@@ -38,12 +38,13 @@ class TildelingMediatorTest {
     fun `lagre en tildeling`() {
         val oppgavereferanse = UUID.randomUUID()
         val saksbehandlerReferanse = UUID.randomUUID()
+        val epost = "sara.saksbehandler@nav.no"
 
-        dataSource.opprettSaksbehandler(saksbehandlerReferanse)
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
 
         TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
 
-        assertEquals(saksbehandlerReferanse, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
+        assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
     }
 
     @Test
@@ -74,11 +75,12 @@ class TildelingMediatorTest {
     }
 
     @Test
-    fun `oid til saksbehandler blir lagt til i saksbehandler payload`() {
+    fun `epost til saksbehandler blir lagt til i saksbehandler payload`() {
         val oppgavereferanse = UUID.randomUUID()
         val saksbehandlerReferanse = UUID.randomUUID()
+        val epost = "sara.saksbehandler@nav.no"
 
-        dataSource.opprettSaksbehandler(saksbehandlerReferanse)
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
         dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
 
         val tildelingMediator = TildelingMediator(dataSource)
@@ -87,6 +89,6 @@ class TildelingMediatorTest {
         val oppgaver = dataSource.finnSaksbehandlerOppgaver()
         val oppgave = oppgaver.first { it.oppgavereferanse == oppgavereferanse }
 
-        assertEquals(saksbehandlerReferanse, oppgave.saksbehandlerOid)
+        assertEquals(epost, oppgave.saksbehandlerepost)
     }
 }

@@ -101,7 +101,8 @@ class TildelingApiTest {
         val oppgavereferanse = UUID.randomUUID()
         val saksbehandlerreferanse = UUID.randomUUID()
 
-        dataSource.opprettSaksbehandler(saksbehandlerreferanse)
+        val epost = "sara.saksbehandler@nav.no"
+        dataSource.opprettSaksbehandler(saksbehandlerreferanse, epost)
         dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
         val response = runBlocking {
             client.post<HttpResponse>("/api/v1/tildeling/${oppgavereferanse}") {
@@ -113,7 +114,7 @@ class TildelingApiTest {
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
-        assertEquals(saksbehandlerreferanse, tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))
+        assertEquals(epost, tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))
     }
 
     @Test

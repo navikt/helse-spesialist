@@ -16,9 +16,10 @@ fun Session.tildelOppgave(oppgaveReferanse: UUID, saksbehandlerOid: UUID) {
 
 fun Session.hentSaksbehandlerFor(oppgaveReferanse: UUID): UUID? {
     @Language("PostgreSQL")
-    val query = "SELECT * FROM tildeling WHERE oppgave_ref=:oppgave_ref;"
+    val query =
+        "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_ref=:oppgave_ref;"
     return run(queryOf(query, mapOf("oppgave_ref" to oppgaveReferanse)).map { row ->
-        UUID.fromString(row.string("saksbehandler_ref"))
+        row.string("epost")
     }.asSingle)
 }
 
