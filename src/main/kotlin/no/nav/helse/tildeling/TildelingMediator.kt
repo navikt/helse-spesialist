@@ -5,7 +5,7 @@ import java.util.*
 import javax.sql.DataSource
 
 class TildelingMediator(private val dataSource: DataSource) {
-    fun hentSaksbehandlerFor(oppgavereferanse: UUID): UUID? = sessionOf(dataSource).use { session ->
+    fun hentSaksbehandlerFor(oppgavereferanse: UUID): String? = sessionOf(dataSource).use { session ->
         session.hentSaksbehandlerFor(oppgavereferanse)
     }
 
