@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class PersonCommandTest {
+internal class KlargjørPersonCommandTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val AKTØR = "4321098765432"
@@ -27,7 +27,7 @@ internal class PersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = PersonCommand(FNR, AKTØR, dao)
+    private val command = KlargjørPersonCommand(FNR, AKTØR, dao)
     private lateinit var context: CommandContext
 
     @BeforeEach

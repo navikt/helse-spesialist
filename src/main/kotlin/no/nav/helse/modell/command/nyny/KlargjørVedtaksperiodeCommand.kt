@@ -1,0 +1,43 @@
+package no.nav.helse.modell.command.nyny
+
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import java.time.LocalDate
+import java.util.*
+
+internal class KlargjørVedtaksperiodeCommand(
+    speilSnapshotRestClient: SpeilSnapshotRestClient,
+    hendelseId: UUID,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
+    vedtaksperiodeId: UUID,
+    periodeFom: LocalDate,
+    periodeTom: LocalDate,
+    warnings: List<String>,
+    vedtaksperiodetype: Saksbehandleroppgavetype?,
+    personDao: PersonDao,
+    arbeidsgiverDao: ArbeidsgiverDao,
+    snapshotDao: SnapshotDao,
+    vedtakDao: VedtakDao
+) : MacroCommand() {
+    override val commands: List<Command> = listOf(
+        PersisterAdvarslerCommand(hendelseId, warnings, vedtakDao),
+        PersisterVedtaksperiodetypeCommand(hendelseId, vedtaksperiodetype, vedtakDao),
+        OpprettVedtakCommand(
+            speilSnapshotRestClient,
+            fødselsnummer,
+            organisasjonsnummer,
+            vedtaksperiodeId,
+            periodeFom,
+            periodeTom,
+            personDao,
+            arbeidsgiverDao,
+            snapshotDao,
+            vedtakDao
+        )
+    )
+}

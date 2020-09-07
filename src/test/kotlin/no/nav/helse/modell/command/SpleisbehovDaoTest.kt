@@ -3,12 +3,10 @@ package no.nav.helse.modell.command
 import AbstractEndToEndTest
 import io.mockk.mockk
 import no.nav.helse.mediator.kafka.Hendelsefabrikk
-import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -48,16 +46,5 @@ internal class SpleisbehovDaoTest : AbstractEndToEndTest() {
         val actual = dao.finn(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
         assertEquals(FNR, actual.fødselsnummer())
         assertEquals(VEDTAKSPERIODE_ID, actual.vedtaksperiodeId())
-    }
-
-    private class Testhendelse : Hendelse {
-        override val id = HENDELSE_ID
-        override fun fødselsnummer() = FNR
-        override fun vedtaksperiodeId() = VEDTAKSPERIODE_ID
-        override fun toJson() = "{}"
-
-        override fun execute(context: CommandContext): Boolean {
-            TODO("Not yet implemented")
-        }
     }
 }

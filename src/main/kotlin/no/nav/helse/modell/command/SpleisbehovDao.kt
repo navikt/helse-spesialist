@@ -17,16 +17,16 @@ import javax.sql.DataSource
 internal class SpleisbehovDao(private val dataSource: DataSource,
                               private val hendelsefabrikk: IHendelsefabrikk
 ) {
-    fun opprett(hendelse: Hendelse) {
-        using(sessionOf(dataSource)) {
-            it.insertBehov(hendelse.id, hendelse.vedtaksperiodeId(), hendelse.toJson(), hendelse.toJson(), tilHendelsetype(hendelse).name )
+    internal fun opprett(hendelse: Hendelse) {
+        using(sessionOf(dataSource)) { session ->
+            session.insertBehov(hendelse.id, hendelse.vedtaksperiodeId(), hendelse.toJson(), hendelse.toJson(), tilHendelsetype(hendelse).name )
         }
     }
 
-    fun finn(id: UUID): Hendelse? =
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT type,data FROM spleisbehov WHERE id = ?", id).map {
-                fraHendelsetype(enumValueOf(it.string("type")), it.string("data"))
+    internal fun finn(id: UUID): Hendelse? =
+        using(sessionOf(dataSource)) { session ->
+            session.run(queryOf("SELECT type,data FROM spleisbehov WHERE id = ?", id).map { row ->
+                fraHendelsetype(enumValueOf(row.string("type")), row.string("data"))
             }.asSingle)
         }
 

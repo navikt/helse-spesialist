@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class ArbeidsgiverCommandTest {
+internal class KlargjørArbeidsgiverCommandTest {
     private companion object {
         private const val ORGNR = "123456789"
     }
@@ -18,7 +18,7 @@ internal class ArbeidsgiverCommandTest {
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
 
     private lateinit var context: CommandContext
-    private val command = ArbeidsgiverCommand(ORGNR, dao)
+    private val command = KlargjørArbeidsgiverCommand(ORGNR, dao)
 
     @BeforeEach
     fun setup() {

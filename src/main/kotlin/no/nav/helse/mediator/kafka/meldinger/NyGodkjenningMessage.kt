@@ -23,8 +23,8 @@ internal class NyGodkjenningMessage(
     private val vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    private val warnings: List<String>,
-    private val periodetype: Saksbehandleroppgavetype? = null,
+    warnings: List<String>,
+    periodetype: Saksbehandleroppgavetype? = null,
     private val json: String,
     oppgaveDao: OppgaveDao,
     personDao: PersonDao,
@@ -34,15 +34,18 @@ internal class NyGodkjenningMessage(
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        PersonCommand(fødselsnummer, aktørId, personDao),
-        ArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
-        OpprettVedtakCommand(
+        KlargjørPersonCommand(fødselsnummer, aktørId, personDao),
+        KlargjørArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
+        KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient,
+            id,
             fødselsnummer,
             organisasjonsnummer,
             vedtaksperiodeId,
             periodeFom,
             periodeTom,
+            warnings,
+            periodetype,
             personDao,
             arbeidsgiverDao,
             snapshotDao,

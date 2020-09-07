@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -31,6 +32,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
         private val objectMapper = jacksonObjectMapper()
 
+        private val HENDELSE_ID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val FOM = LocalDate.of(2020, 1, 1)
         private val TOM = LocalDate.of(2020, 1, 31)
@@ -70,6 +72,30 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
         vedtak().first().assertEquals(VEDTAKSPERIODE_ID, nyFom, nyTom, personRef, arbeidsgiverRef, nySnapshotRef)
     }
 
+    @Test
+    fun `lagrer warnings`() {
+        testbehov(HENDELSE_ID)
+        val testwarnings= listOf("Warning A", "Warning B")
+        vedtakDao.leggTilWarnings(HENDELSE_ID, testwarnings)
+        assertWarnings(HENDELSE_ID, testwarnings)
+    }
+
+    @Test
+    fun `lagrer vedtaksperiodetype hvis den er satt`() {
+        testbehov(HENDELSE_ID)
+        val vedtaksperiodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+        vedtakDao.leggTilVedtaksperiodetype(HENDELSE_ID, vedtaksperiodetype)
+        assertVedtaksperiodetype(HENDELSE_ID, vedtaksperiodetype)
+    }
+
+    private fun assertVedtaksperiodetype(hendelseId: UUID, type: Saksbehandleroppgavetype) {
+        assertEquals(type, vedtaksperiodetype(hendelseId))
+    }
+
+    private fun assertWarnings(hendelseId: UUID, warnings: List<String>) {
+        assertEquals(warnings, finnWarnings(hendelseId))
+    }
+
     private fun opprettPerson(): Triple<Long, Long, Long> {
         val personinfoRef = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
@@ -77,6 +103,37 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
         val arbeidsgiverRef = arbeidsgiverDao.insertArbeidsgiver(ORGNR, ORGNAVN) ?: fail { "Kunne ikke opprette arbeidsgiver" }
         val snapshotRef = snapshotDao.insertSpeilSnapshot("{}")
         return Triple(personRef, arbeidsgiverRef, snapshotRef.toLong())
+    }
+
+    private fun vedtaksperiodetype(hendelseId: UUID): Saksbehandleroppgavetype? {
+        return using(sessionOf(dataSource)) {
+            it.run(queryOf("SELECT type FROM saksbehandleroppgavetype WHERE spleisbehov_ref = ?", hendelseId).map { row ->
+                Saksbehandleroppgavetype.valueOf(row.string("type"))
+            }.asSingle)
+        }
+    }
+
+    private fun finnWarnings(hendelseId: UUID) = using(sessionOf(dataSource)) {
+        it.run(
+            queryOf("SELECT melding FROM warning WHERE spleisbehov_ref = ?", hendelseId).map { row ->
+                row.string("melding")
+            }.asList
+        )
+    }
+
+    private fun testbehov(hendelseId: UUID) {
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    "INSERT INTO spleisbehov(id, data, original, spleis_referanse, type) VALUES(?, ?::json, ?::json, ?, ?)",
+                    hendelseId,
+                    "{}",
+                    "{}",
+                    UUID.randomUUID(),
+                    "TYPE"
+                ).asExecute
+            )
+        }
     }
 
     private fun vedtak() = using(sessionOf(dataSource)) {
