@@ -109,7 +109,7 @@ FROM oppgave o
          LEFT JOIN tildeling t ON o.event_id = t.oppgave_ref
          LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-ORDER BY CASE WHEN sot.type = 'FORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC
+ORDER BY CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END, CASE WHEN sot.type = 'FORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC
 LIMIT 500
 """
     return this.run(
