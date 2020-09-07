@@ -30,7 +30,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GodkjenningE2ETest {
     private companion object {
-        private val SPESIALIST_IOD = UUID.randomUUID()
+        private val SPESIALIST_OID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØR = "999999999"
@@ -218,7 +218,7 @@ internal class GodkjenningE2ETest {
             rapidsConnection = testRapid,
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
-            spesialistOID = SPESIALIST_IOD
+            spesialistOID = SPESIALIST_OID
         )
     }
 
@@ -244,7 +244,7 @@ internal class GodkjenningE2ETest {
         Flyway
             .configure()
             .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to SPESIALIST_IOD.toString()))
+            .placeholders(mapOf("spesialist_oid" to SPESIALIST_OID.toString()))
             .load()
             .also {
                 it.clean()

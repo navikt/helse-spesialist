@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.util.*
 
-internal class SpleisbehovDaoTest : AbstractEndToEndTest() {
+internal class HendelseDaoTest : AbstractEndToEndTest() {
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -33,11 +33,11 @@ internal class SpleisbehovDaoTest : AbstractEndToEndTest() {
         VEDTAKSPERIODE_ID
     ))
 
-    private lateinit var dao: SpleisbehovDao
+    private lateinit var dao: HendelseDao
 
     @BeforeAll
     fun setup() {
-        dao = SpleisbehovDao(dataSource, hendelsefabrikk)
+        dao = HendelseDao(dataSource, hendelsefabrikk)
     }
 
     @Test

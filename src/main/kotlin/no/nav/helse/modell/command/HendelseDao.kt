@@ -9,13 +9,13 @@ import no.nav.helse.mediator.kafka.meldinger.NyGodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.modell.IHendelsefabrikk
-import no.nav.helse.modell.command.SpleisbehovDao.Hendelsetype.*
+import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 import javax.sql.DataSource
 
-internal class SpleisbehovDao(private val dataSource: DataSource,
-                              private val hendelsefabrikk: IHendelsefabrikk
+internal class HendelseDao(private val dataSource: DataSource,
+                           private val hendelsefabrikk: IHendelsefabrikk
 ) {
     internal fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) { session ->

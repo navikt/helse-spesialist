@@ -52,7 +52,7 @@ internal class HendelseMediator(
     private val oppgaveDao = OppgaveDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
     private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
-    private val spleisbehovDao = SpleisbehovDao(dataSource, hendelsefabrikk)
+    private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
 
     private var shutdown = false
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
@@ -90,7 +90,7 @@ internal class HendelseMediator(
 
     private fun løsninger(hendelseId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {
-            val hendelse = spleisbehovDao.finn(hendelseId)
+            val hendelse = hendelseDao.finn(hendelseId)
             val commandContext = commandContextDao.finn(contextId)
             if (hendelse == null || commandContext == null) {
                 log.error("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")
@@ -287,7 +287,7 @@ internal class HendelseMediator(
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
-        spleisbehovDao.opprett(hendelse)
+        hendelseDao.opprett(hendelse)
         opprett(commandContextDao, hendelse)
     }
 
