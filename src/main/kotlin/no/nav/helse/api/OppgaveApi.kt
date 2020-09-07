@@ -12,10 +12,6 @@ internal fun Route.oppgaveApi(
 ) {
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = oppgaveMediator.hentOppgaver()
-        if (saksbehandlerOppgaver.isEmpty()) {
-            call.respond(HttpStatusCode.NotFound, "Fant ingen oppgaver")
-            return@get
-        }
         call.respond(saksbehandlerOppgaver)
     }
 }
