@@ -1,10 +1,10 @@
 package no.nav.helse.tildeling
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import io.ktor.http.*
+import no.nav.helse.modell.feilhåndtering.ModellFeil
+import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.util.*
@@ -90,5 +90,48 @@ class TildelingMediatorTest {
         val oppgave = oppgaver.first { it.oppgavereferanse == oppgavereferanse }
 
         assertEquals(epost, oppgave.saksbehandlerepost)
+    }
+
+    @Test
+    fun `stopper tildeling av allerede tildelt sak`() {
+        val oppgavereferanse = UUID.randomUUID()
+        val saksbehandlerReferanse = UUID.randomUUID()
+        val saksbehandlerReferanse2 = UUID.randomUUID()
+
+        val epost = "sara.saksbehandler@nav.no"
+        val epost2 = "mille.mellomleder@nav.no"
+
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse2, epost2)
+
+        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
+
+
+        val feil = assertThrows<ModellFeil> {
+            TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse2)
+        }
+        assertEquals(feil.httpKode(), HttpStatusCode.BadRequest)
+        assertEquals(feil.feil, OppgaveErAlleredeTildelt)
+    }
+
+    @Test
+    fun `stopper tildeling av allerede tildelt sak også for en selv`() {
+        val oppgavereferanse = UUID.randomUUID()
+        val saksbehandlerReferanse = UUID.randomUUID()
+
+        val epost = "sara.saksbehandler@nav.no"
+
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
+
+        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
+
+
+        val feil = assertThrows<ModellFeil> {
+            TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        }
+        assertEquals(feil.httpKode(), HttpStatusCode.BadRequest)
+        assertEquals(feil.feil, OppgaveErAlleredeTildelt)
     }
 }

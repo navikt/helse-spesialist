@@ -6,6 +6,7 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
@@ -20,6 +21,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.OidcDiscovery
 import no.nav.helse.azureAdAppAuthentication
+import no.nav.helse.modell.feilhåndtering.FeilDto
+import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.*
 import org.junit.jupiter.api.AfterAll
@@ -56,6 +59,7 @@ class TildelingApiTest {
             port = httpPort
 
         }
+        expectSuccess = false
         install(JsonFeature) {
             serializer = JacksonSerializer {
                 disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -136,6 +140,30 @@ class TildelingApiTest {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         assertEquals(null, tildelingMediator.hentSaksbehandlerFor(oppgaveId))
+    }
+
+    @Test
+    fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
+
+        val oppgaveId = UUID.randomUUID()
+        val saksbehandlerId = UUID.randomUUID()
+
+        dataSource.opprettSaksbehandler(saksbehandlerId)
+        dataSource.opprettSaksbehandlerOppgave(oppgaveId, vedtakId)
+        dataSource.opprettTildeling(oppgaveId, saksbehandlerId)
+
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/v1/tildeling/${oppgaveId}") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = objectMapper.createObjectNode()
+                authentication(saksbehandlerId)
+            }
+        }
+
+        assertEquals(response.status, HttpStatusCode.BadRequest)
+        val feilDto = runBlocking { response.receive<FeilDto>() }
+        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt.feilkode)
     }
 
     private fun HttpRequestBuilder.authentication(oid: UUID) {
