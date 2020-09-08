@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -16,14 +17,16 @@ import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.sql.Connection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -35,8 +38,10 @@ internal class GodkjenningE2ETest {
         private const val UNG_PERSON_FNR_2018 = "12020052345"
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
+        private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
         private const val SNAPSHOTV2 = """{"version": "this_is_version_2"}"""
+        private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
 
     private val testRapid = TestRapid()
@@ -64,6 +69,7 @@ internal class GodkjenningE2ETest {
         assertSpleisbehov(hendelseId)
         assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "FERDIG")
         verify(exactly = 0) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -71,7 +77,8 @@ internal class GodkjenningE2ETest {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         assertSpleisbehov(godkjenningsmeldingId)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT")
-        verify(exactly = 0) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        assertBehov("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger")
+        assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -82,18 +89,31 @@ internal class GodkjenningE2ETest {
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
         assertOppgave(godkjenningsmeldingId, Oppgavestatus.AvventerSaksbehandler)
-        verify(exactly = 1) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        assertVedtak(VEDTAKSPERIODE_ID)
     }
 
     @Test
-    fun `løser godkjenningsbehov ved svar fra saksbehandler`() {
+    fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
-        sendSaksbehandlerløsning(godkjenningsmeldingId)
+        sendSaksbehandlerløsning(godkjenningsmeldingId, true)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(godkjenningsmeldingId, Oppgavestatus.Ferdigstilt)
+        assertGodkjenningsbehovLøsning(true)
+    }
+
+    @Test
+    fun `løser godkjenningsbehov når saksbehandler avslår`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val godkjenningsmeldingId = sendGodkjenningsbehov()
+        sendPersoninfoløsning(godkjenningsmeldingId)
+        sendSaksbehandlerløsning(godkjenningsmeldingId, false)
+        assertSnapshot(SNAPSHOTV1)
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertOppgave(godkjenningsmeldingId, Oppgavestatus.Ferdigstilt)
+        assertGodkjenningsbehovLøsning(false)
     }
 
     @Test
@@ -113,6 +133,7 @@ internal class GodkjenningE2ETest {
         val hendelseId = sendVedtaksperiodeForkastet()
         assertSpleisbehov(hendelseId)
         assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "FERDIG")
+        assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 
     private fun sendVedtaksperiodeForkastet() = nyHendelseId().also { id ->
@@ -123,7 +144,6 @@ internal class GodkjenningE2ETest {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, VEDTAKSPERIODE_ID, ORGNR))
     }
 
-
     private fun sendGodkjenningsbehov() = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(id, VEDTAKSPERIODE_ID, ORGNR))
     }
@@ -132,14 +152,52 @@ internal class GodkjenningE2ETest {
         testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, testRapid.inspektør.contextId(), VEDTAKSPERIODE_ID, ORGNR))
     }
 
-    private fun sendSaksbehandlerløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId()))
+    private fun sendSaksbehandlerløsning(spleisbehovId: UUID, godkjent: Boolean) = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId(), godkjent, GODKJENTTIDSPUNKT, SAKSBEHANDLERIDENT))
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
         assertEquals(1, using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT COUNT(1) FROM spleisbehov WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
         })
+    }
+
+    private fun assertVedtak(vedtaksperiodeId: UUID) {
+        assertEquals(1, vedtak(vedtaksperiodeId))
+    }
+
+    private fun assertIkkeVedtak(vedtaksperiodeId: UUID) {
+        assertEquals(0, vedtak(vedtaksperiodeId))
+    }
+
+    private fun vedtak(vedtaksperiodeId: UUID): Int {
+        return using(sessionOf(dataSource)) { session ->
+            requireNotNull(session.run(queryOf(
+                "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?",
+                vedtaksperiodeId
+            ).map { row -> row.int(1) }.asSingle))
+        }
+    }
+
+    private fun assertGodkjenningsbehovLøsning(godkjent: Boolean) {
+        assertLøsning("Godkjenning") {
+            assertTrue(it.path("godkjent").isBoolean)
+            assertEquals(godkjent, it.path("godkjent").booleanValue())
+            assertEquals(SAKSBEHANDLERIDENT, it.path("saksbehandlerIdent").textValue())
+            assertEquals(GODKJENTTIDSPUNKT, it.path("godkjenttidspunkt").asLocalDateTime())
+        }
+    }
+
+    private fun assertLøsning(behov: String, assertBlock: (JsonNode) -> Unit) {
+        testRapid.inspektør.løsning(behov).also(assertBlock)
+    }
+
+    private fun assertBehov(vararg behov: String) {
+        assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
+    }
+
+    private fun assertIkkeBehov(vararg behov: String) {
+        assertFalse(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
     private fun assertTilstand(hendelseId: UUID, vedtaksperiodeId: UUID, vararg tilstand: String) {
@@ -253,6 +311,17 @@ internal class GodkjenningE2ETest {
 
         testRapid.reset()
     }
+
+    private fun TestRapid.RapidInspector.behov() =
+        hendelser("behov")
+            .filterNot { it.hasNonNull("@løsning") }
+            .flatMap { it.path("@behov").map(JsonNode::asText) }
+
+    private fun TestRapid.RapidInspector.løsning(behov: String) =
+        hendelser("behov")
+            .filter { it.hasNonNull("@løsning") }
+            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
+            .path("@løsning").path(behov)
 
     private fun TestRapid.RapidInspector.meldinger() =
         (0 until size).map { index -> message(index) }
