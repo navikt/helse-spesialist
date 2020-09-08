@@ -21,8 +21,8 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
         private const val FNR = "FNR"
         private val VEDTAKSPERIODE1 = UUID.randomUUID()
         private val VEDTAKSPERIODE2 = UUID.randomUUID()
-        private val HENDELSE1 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE1)
-        private val HENDELSE2 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE2)
+        private val HENDELSE1 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE1, FNR)
+        private val HENDELSE2 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE2, FNR)
     }
 
     private lateinit var dao: CommandContextDao
@@ -119,24 +119,6 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
                     "Godkjenningsbehov"
                 ).asExecute
             )
-        }
-    }
-
-    private class TestHendelse(override val id: UUID, private val vedtaksperiodeId: UUID) : Hendelse {
-        override fun execute(context: CommandContext): Boolean {
-            TODO("Not yet implemented")
-        }
-
-        override fun fødselsnummer(): String {
-            return FNR
-        }
-
-        override fun vedtaksperiodeId(): UUID {
-            return vedtaksperiodeId
-        }
-
-        override fun toJson(): String {
-            TODO("Not yet implemented")
         }
     }
 

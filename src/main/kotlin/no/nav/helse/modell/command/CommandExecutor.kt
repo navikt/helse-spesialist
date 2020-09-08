@@ -77,7 +77,8 @@ internal class CommandExecutor(
                 oppgavestatus = sisteCommand.oppgavestatus(),
                 ferdigstiltAv = sisteCommand.ferdigstiltAv(),
                 oid = sisteCommand.oid(),
-                vedtakRef = vedtakRef
+                vedtakRef = vedtakRef,
+                commandContextId = null
             )
         } else {
             log.warn(

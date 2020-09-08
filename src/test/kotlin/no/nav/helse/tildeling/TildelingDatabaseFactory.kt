@@ -51,7 +51,8 @@ fun DataSource.opprettSaksbehandlerOppgave(oppgavereferanse: UUID, vedtakId: Lon
             Oppgavestatus.AvventerSaksbehandler,
             null,
             null,
-            vedtakRef = vedtakId
+            vedtakId,
+            null
         )
     }
 }

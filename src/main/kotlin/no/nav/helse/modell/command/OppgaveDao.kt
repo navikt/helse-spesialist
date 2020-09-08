@@ -21,7 +21,15 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         oid: UUID?,
         vedtakRef: Long?
     ) = using(sessionOf(dataSource)) {
-        it.insertOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid, vedtakRef)
+        @Language("PostgreSQL")
+        val query = """
+            SELECT context_id FROM command_context WHERE spleisbehov_id = ? ORDER BY id DESC LIMIT 1
+        """
+        val commandContextId = it.run(
+            queryOf(query, eventId).map { UUID.fromString(it.string("context_id")) }.asSingle
+        ) ?: throw IllegalArgumentException("Fant ikke command context for hendelse $eventId")
+
+        it.insertOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid, vedtakRef, commandContextId)
     }
 
     fun updateOppgave(
@@ -41,20 +49,22 @@ fun Session.insertOppgave(
     oppgavestatus: Oppgavestatus,
     ferdigstiltAv: String?,
     oid: UUID?,
-    vedtakRef: Long?
+    vedtakRef: Long?,
+    commandContextId: UUID?
 ) =
     this.run(
         queryOf(
             """
-                INSERT INTO oppgave(event_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref)
-                VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?);
+                INSERT INTO oppgave(event_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
+                VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?, ?);
             """,
             eventId,
             oppgavetype,
             oppgavestatus.name,
             ferdigstiltAv,
             oid,
-            vedtakRef
+            vedtakRef,
+            commandContextId
         ).asUpdate
     )
 
