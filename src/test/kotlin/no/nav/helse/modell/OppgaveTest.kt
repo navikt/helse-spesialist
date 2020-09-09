@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,6 +30,7 @@ internal class OppgaveTest {
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>()
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
 
     private val oppgave = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)
 
@@ -40,14 +42,14 @@ internal class OppgaveTest {
     @Test
     fun `oppretter ny oppgave`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
-        oppgave.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN, Oppgavestatus.AvventerSaksbehandler, null, null, VEDTAKREF) }
     }
 
     @Test
     fun `oppdater oppgave`() {
         oppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        oppgave.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
     }
 

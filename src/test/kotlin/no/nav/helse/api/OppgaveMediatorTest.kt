@@ -36,8 +36,8 @@ internal class OppgaveMediatorTest() {
         mediator.oppgave(oppgave1)
         mediator.oppgave(oppgave2)
         mediator.lagreOppgaver(TESTHENDELSE, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgave1.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID) }
-        verify(exactly = 1) { oppgave2.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID) }
+        verify(exactly = 1) { oppgave1.lagre(mediator, HENDELSE_ID, COMMAND_CONTEXT_ID) }
+        verify(exactly = 1) { oppgave2.lagre(mediator, HENDELSE_ID, COMMAND_CONTEXT_ID) }
     }
 
     @Test
@@ -46,8 +46,8 @@ internal class OppgaveMediatorTest() {
         mediator.oppgave(oppgave2)
         mediator.lagreOppgaver(TESTHENDELSE, COMMAND_CONTEXT_ID)
         mediator.lagreOppgaver(TESTHENDELSE, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgave1.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID) }
-        verify(exactly = 1) { oppgave2.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID) }
+        verify(exactly = 1) { oppgave1.lagre(mediator, HENDELSE_ID, COMMAND_CONTEXT_ID) }
+        verify(exactly = 1) { oppgave2.lagre(mediator, HENDELSE_ID, COMMAND_CONTEXT_ID) }
     }
 
     @Test

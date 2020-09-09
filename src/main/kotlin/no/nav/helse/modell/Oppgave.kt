@@ -1,7 +1,7 @@
 package no.nav.helse.modell
 
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.api.OppgaveMediator
 import java.util.*
 
 internal class Oppgave private constructor(
@@ -24,25 +24,10 @@ internal class Oppgave private constructor(
         ferdigstiltAvOid = oid
     }
 
-    internal fun lagre(oppgaveDao: OppgaveDao, vedtakDao: VedtakDao, hendelseId: UUID, contextId: UUID) {
-        id?.also { oppdater(oppgaveDao, it) } ?: opprett(oppgaveDao, vedtakDao, hendelseId, contextId)
-    }
-
-    private fun opprett(oppgaveDao: OppgaveDao, vedtakDao: VedtakDao, hendelseId: UUID, contextId: UUID) {
-        val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
-        oppgaveDao.insertOppgave(
-            hendelseId,
-            contextId,
-            navn,
-            status,
-            null,
-            null,
-            vedtakRef
-        )
-    }
-
-    private fun oppdater(oppgaveDao: OppgaveDao, id: Long) {
-        oppgaveDao.updateOppgave(id, status, ferdigstiltAvIdent, ferdigstiltAvOid)
+    internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
+        id?.also {
+            oppgaveMediator.oppdater(hendelseId, contextId, vedtaksperiodeId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
+        } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn, status)
     }
 
     override fun equals(other: Any?): Boolean {
