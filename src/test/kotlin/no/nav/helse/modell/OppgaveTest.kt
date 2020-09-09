@@ -7,6 +7,8 @@ import io.mockk.verify
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.vedtak.VedtakDto
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -47,5 +49,29 @@ internal class OppgaveTest {
         oppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         oppgave.lagre(oppgaveDao, vedtakDao, HENDELSE_ID, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
+    }
+
+    @Test
+    fun equals() {
+        val oppgave1 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)
+        val oppgave2 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)
+        val oppgave3 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, UUID.randomUUID())
+        val oppgave4 = Oppgave.avventerSaksbehandler("ET_NAVN", VEDTAKSPERIODE_ID)
+        assertEquals(oppgave1, oppgave2)
+        assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
+        assertNotEquals(oppgave1, oppgave3)
+        assertNotEquals(oppgave1.hashCode(), oppgave3.hashCode())
+        assertNotEquals(oppgave1, oppgave4)
+        assertNotEquals(oppgave1.hashCode(), oppgave4.hashCode())
+
+        oppgave1.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+        assertNotEquals(oppgave1.hashCode(), oppgave2.hashCode())
+        assertNotEquals(oppgave1, oppgave2)
+        assertNotEquals(oppgave1, oppgave3)
+        assertNotEquals(oppgave1, oppgave4)
+
+        oppgave2.ferdigstill(OPPGAVE_ID, "ANNEN_SAKSBEHANDLER", UUID.randomUUID())
+        assertEquals(oppgave1, oppgave2)
+        assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 }

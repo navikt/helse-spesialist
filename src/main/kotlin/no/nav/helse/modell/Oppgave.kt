@@ -44,4 +44,14 @@ internal class Oppgave private constructor(
     private fun oppdater(oppgaveDao: OppgaveDao, id: Long) {
         oppgaveDao.updateOppgave(id, status, ferdigstiltAvIdent, ferdigstiltAvOid)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Oppgave) return false
+        if (this.id != other.id) return false
+        return this.navn == other.navn && this.vedtaksperiodeId == other.vedtaksperiodeId
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(id, navn, vedtaksperiodeId)
+    }
 }
