@@ -274,11 +274,11 @@ internal class HendelseMediator(
     }
 
     override fun vedtaksperiodeEndret(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
-        utfør(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
+        utfør(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
     }
 
     override fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
-        utfør(hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()))
+        utfør(hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
     }
 
     override fun godkjenning(
@@ -294,7 +294,7 @@ internal class HendelseMediator(
         periodetype: Saksbehandleroppgavetype?,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(hendelsefabrikk.nyGodkjenning(id, fødselsnummer, aktørId, organisasjonsnummer, periodeFom, periodeTom, vedtaksperiodeId, warnings, periodetype, message.toJson()))
+        utfør(hendelsefabrikk.nyGodkjenning(id, fødselsnummer, aktørId, organisasjonsnummer, periodeFom, periodeTom, vedtaksperiodeId, warnings, periodetype, message.toJson()), context)
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
@@ -302,20 +302,20 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse)
     }
 
-    private fun utfør(hendelse: Hendelse) {
+    private fun utfør(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
         val contextId = UUID.randomUUID()
         log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id}")
-        utfør(hendelse, nyContext(hendelse, contextId), contextId)
+        utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
     }
 
-    private fun utfør(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
+    private fun utfør(hendelse: Hendelse, context: CommandContext, contextId: UUID, messageContext: RapidsConnection.MessageContext) {
         withMDC(mapOf("context_id" to "$contextId", "hendelse_id" to "${hendelse.id}")) {
             try {
                 log.info("utfører kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
                 else log.info("kommando er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
-                oppgaveMediator.lagreOppgaver(hendelse, contextId)
+                oppgaveMediator.lagreOppgaver(hendelse, messageContext, contextId)
             } catch (err: Exception) {
                 log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
                 hendelse.undo(context)
@@ -574,7 +574,7 @@ internal class HendelseMediator(
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
             sikkerLogg.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                 "Innkommende melding:\n\t$message")
-            mediator.utfør(hendelse, commandContext, contextId)
+            mediator.utfør(hendelse, commandContext, contextId, context)
         }
     }
 }

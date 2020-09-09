@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.sql.Connection
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -88,7 +87,7 @@ internal class GodkjenningE2ETest {
         sendPersoninfoløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
-        assertOppgave(godkjenningsmeldingId, Oppgavestatus.AvventerSaksbehandler)
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
 
@@ -100,7 +99,7 @@ internal class GodkjenningE2ETest {
         sendSaksbehandlerløsning(godkjenningsmeldingId, true)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
-        assertOppgave(godkjenningsmeldingId, Oppgavestatus.Ferdigstilt)
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(true)
     }
 
@@ -112,7 +111,7 @@ internal class GodkjenningE2ETest {
         sendSaksbehandlerløsning(godkjenningsmeldingId, false)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
-        assertOppgave(godkjenningsmeldingId, Oppgavestatus.Ferdigstilt)
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(false)
     }
 
@@ -153,7 +152,7 @@ internal class GodkjenningE2ETest {
     }
 
     private fun sendSaksbehandlerløsning(spleisbehovId: UUID, godkjent: Boolean) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId(), godkjent, GODKJENTTIDSPUNKT, SAKSBEHANDLERIDENT, oppgaveId = oppgaveId))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId(), godkjent, GODKJENTTIDSPUNKT, SAKSBEHANDLERIDENT, oppgaveId = testRapid.inspektør.oppgaveId()))
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -212,8 +211,20 @@ internal class GodkjenningE2ETest {
         })
     }
 
-    private fun assertOppgave(hendelseId: UUID, forventetStatus: Oppgavestatus) {
-        oppgaver(hendelseId).first().assertEquals(forventetStatus)
+    private fun assertOppgave(indeks: Int, vararg status: Oppgavestatus) {
+        val oppgaver = mutableListOf<Pair<Long, MutableList<JsonNode>>>()
+        testRapid.inspektør.hendelser("oppgave_opprettet")
+            .forEach { oppgaver.add(it.path("oppgaveId").asLong() to mutableListOf(it)) }
+        testRapid.inspektør.hendelser("oppgave_oppdatert")
+            .forEach { oppgave ->
+                val id = oppgave.path("oppgaveId").asLong()
+                oppgaver.firstOrNull { id == it.first }
+                    ?.second?.add(oppgave)
+            }
+
+        assertEquals(status.toList(), oppgaver[indeks].second.map {
+            Oppgavestatus.valueOf(it.path("status").asText())
+        })
     }
 
     private fun assertSnapshot(forventet: String) {
@@ -227,44 +238,6 @@ internal class GodkjenningE2ETest {
                 ).map { it.string("data") }.asSingle
             )
         })
-    }
-
-    private fun oppgaver(hendelseId: UUID) =
-        using(sessionOf(dataSource)) {
-            it.run(queryOf(
-                "SELECT oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref FROM oppgave WHERE event_id=:hendelse_id ORDER BY id DESC",
-                mapOf(
-                    "hendelse_id" to hendelseId
-                )
-            ).map {
-                Oppgave(
-                    it.string("type"),
-                    enumValueOf(it.string("status")),
-                    it.localDate("oppdatert"),
-                    it.stringOrNull("ferdigstilt_av"),
-                    it.stringOrNull("ferdigstilt_av_oid")?.let { UUID.fromString(it) },
-                    it.longOrNull("vedtak_ref")
-                )
-            }.asList)
-        }
-
-    private val oppgaveId get() = using(sessionOf(dataSource)) {
-        requireNotNull(it.run(queryOf("SELECT id FROM oppgave WHERE command_context_id=? ORDER BY id DESC LIMIT 1", testRapid.inspektør.contextId()).map {
-            it.long("id")
-        }.asSingle)) { "Finner ikke oppgave ID for siste command context" }
-    }
-
-    private class Oppgave(
-        private val type: String,
-        private val status: Oppgavestatus,
-        private val oppdatert: LocalDate,
-        private val ferdigstiltAv: String?,
-        private val ferdigstiltAvOid: UUID?,
-        private val vedtakRef: Long?
-    ) {
-        fun assertEquals(forventetStatus: Oppgavestatus) {
-            assertEquals(forventetStatus, status)
-        }
     }
 
     @BeforeAll
@@ -317,6 +290,12 @@ internal class GodkjenningE2ETest {
         testRapid.reset()
     }
 
+    private fun TestRapid.RapidInspector.meldinger() =
+        (0 until size).map { index -> message(index) }
+
+    private fun TestRapid.RapidInspector.hendelser(type: String) =
+        meldinger().filter { it.path("@event_name").asText() == type }
+
     private fun TestRapid.RapidInspector.behov() =
         hendelser("behov")
             .filterNot { it.hasNonNull("@løsning") }
@@ -328,16 +307,16 @@ internal class GodkjenningE2ETest {
             .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
             .path("@løsning").path(behov)
 
-    private fun TestRapid.RapidInspector.meldinger() =
-        (0 until size).map { index -> message(index) }
-
-    private fun TestRapid.RapidInspector.hendelser(type: String) =
-        meldinger().filter { it.path("@event_name").asText() == type }
-
     private fun TestRapid.RapidInspector.contextId() =
         hendelser("behov")
             .last { it.hasNonNull("contextId") }
             .path("contextId")
             .asText()
             .let { UUID.fromString(it) }
+
+    private fun TestRapid.RapidInspector.oppgaveId() =
+        hendelser("oppgave_opprettet")
+            .last()
+            .path("oppgaveId")
+            .asLong()
 }
