@@ -373,6 +373,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
     @Test
     fun `godkjenning av vedtaksperiode`() {
         val spleisbehovId = UUID.randomUUID()
+        val oppgaveId = "2"
         val godkjenningMessage = GodkjenningMessage(
             id = spleisbehovId,
             fødselsnummer = "12345",
@@ -395,7 +396,55 @@ internal class RestApiTest : AbstractEndToEndTest() {
                 body = TextContent(
                     objectMapper.writeValueAsString(
                         Godkjenning(
-                            spleisbehovId,
+                            oppgaveId,
+                            true,
+                            saksbehandlerIdent = saksbehandlerIdent,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null
+                        )
+                    ),
+                    contentType = ContentType.Application.Json
+                )
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Created, response.status)
+        val løsning = 0.until(testRapid.inspektør.size)
+            .map(testRapid.inspektør::message)
+            .first { it.hasNonNull("@løsning") }
+            .path("@løsning")
+        requireNotNull(løsning)
+        assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
+        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
+        assertNotNull(løsning["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
+    }
+
+    @Test
+    fun `godkjenning av vedtaksperiode med bruk av hendelseId`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "12345",
+            aktørId = "12345",
+            organisasjonsnummer = "89123",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            hentPersoninfoLøsning(),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        val response = runBlocking {
+            client.post<HttpStatement>("/api/vedtak") {
+                body = TextContent(
+                    objectMapper.writeValueAsString(
+                        Godkjenning(
+                            spleisbehovId.toString(),
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
                             årsak = null,
@@ -439,11 +488,12 @@ internal class RestApiTest : AbstractEndToEndTest() {
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
         runBlocking {
+            val oppgaveId = "2"
             val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
                         Godkjenning(
-                            spleisbehovId,
+                            oppgaveId,
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
                             årsak = null,
@@ -460,7 +510,64 @@ internal class RestApiTest : AbstractEndToEndTest() {
                 body = TextContent(
                     objectMapper.writeValueAsString(
                         Godkjenning(
-                            spleisbehovId,
+                            oppgaveId,
+                            true,
+                            saksbehandlerIdent = saksbehandlerIdent,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null
+                        )
+                    ),
+                    contentType = ContentType.Application.Json
+                )
+            }.execute()
+            assertEquals(HttpStatusCode.Conflict, godkjenning2.status)
+        }
+    }
+
+    @Test
+    fun `en vedtaksperiode kan kun godkjennes en gang ved bruk av eventId`() {
+        val spleisbehovId = UUID.randomUUID()
+        val godkjenningMessage = GodkjenningMessage(
+            id = spleisbehovId,
+            fødselsnummer = "6745",
+            aktørId = "45637",
+            organisasjonsnummer = "56783456",
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31),
+            warnings = emptyList()
+        )
+        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            hentPersoninfoLøsning(),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        runBlocking {
+            val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
+                body = TextContent(
+                    objectMapper.writeValueAsString(
+                        Godkjenning(
+                            spleisbehovId.toString(),
+                            true,
+                            saksbehandlerIdent = saksbehandlerIdent,
+                            årsak = null,
+                            begrunnelser = null,
+                            kommentar = null
+                        )
+                    ),
+                    contentType = ContentType.Application.Json
+                )
+            }.execute()
+            assertEquals(HttpStatusCode.Created, godkjenning1.status)
+
+            val godkjenning2 = client.post<HttpStatement>("/api/vedtak") {
+                body = TextContent(
+                    objectMapper.writeValueAsString(
+                        Godkjenning(
+                            spleisbehovId.toString(),
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
                             årsak = null,

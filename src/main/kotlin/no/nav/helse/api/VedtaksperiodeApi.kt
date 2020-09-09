@@ -14,6 +14,7 @@ import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
+import no.nav.helse.modell.command.finnHendelseId
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDate
@@ -83,9 +84,7 @@ internal fun Application.vedtaksperiodeApi(
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
-                val oppgave =
-                    using(sessionOf(dataSource)) { session -> session.findNåværendeOppgave(godkjenning.oppgavereferanse) }
-                if (oppgave == null) {
+                if(!godkjenning.harVentendeOppgave(dataSource)){
                     call.respondText(
                         "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
                         status = HttpStatusCode.Conflict
@@ -106,7 +105,9 @@ internal fun Application.vedtaksperiodeApi(
                     kommentar = godkjenning.kommentar
                 )
 
-                spleisbehovMediator.håndter(godkjenning.oppgavereferanse, løsning)
+                val hendelseId = godkjenning.hendelseId(dataSource)
+
+                spleisbehovMediator.håndter(hendelseId, løsning)
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
             post("/api/annullering") {
@@ -151,7 +152,6 @@ internal fun Application.vedtaksperiodeApi(
                         )
                     }
                 )
-
                 spleisbehovMediator.håndter(message)
                 call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
             }
@@ -167,13 +167,19 @@ fun validerSaksbehandlerInput(godkjenning: Godkjenning) {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Godkjenning(
-    val oppgavereferanse: UUID,
+    val oppgavereferanse: String,
     val godkjent: Boolean,
     val saksbehandlerIdent: String,
     val årsak: String?,
     val begrunnelser: List<String>?,
     val kommentar: String?
-)
+) {
+    internal fun harVentendeOppgave(dataSource: DataSource) = Oppgavereferanse(oppgavereferanse)
+        .harVentendeOppgave(dataSource)
+
+    internal fun hendelseId(dataSource: DataSource) = Oppgavereferanse(oppgavereferanse)
+        .hendelseId(dataSource)
+}
 
 @JsonIgnoreProperties
 data class Annullering(
@@ -198,4 +204,29 @@ class Overstyring(
         val type: String,
         val grad: Int?
     )
+}
+
+// Understands different types of Oppgavereferanser
+private class Oppgavereferanse(private val referanse: String) {
+
+    internal fun hendelseId(dataSource: DataSource) = either(
+        { using(sessionOf(dataSource)) { session -> session.finnHendelseId(it) } },
+        { it }
+    )
+
+    internal fun harVentendeOppgave(dataSource: DataSource) = using(sessionOf(dataSource)) { session ->
+        either(
+            { session.findNåværendeOppgave(it) },
+            { session.findNåværendeOppgave(it) }
+        )
+    } != null
+
+    private fun <T> either(oppgaveIdBlock: (Int) -> T, hendelseIdBlock: (UUID) -> T) =
+        referanse.toIntOrNull().let {
+            if (it != null) {
+                oppgaveIdBlock(it)
+            } else {
+                hendelseIdBlock(UUID.fromString(referanse))
+            }
+        }
 }

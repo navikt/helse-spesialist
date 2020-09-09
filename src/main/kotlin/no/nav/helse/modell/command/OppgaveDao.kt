@@ -112,6 +112,33 @@ fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
         .asSingle
 )
 
+fun Session.findNåværendeOppgave(oppgaveId: Int): OppgaveDto? = this.run(
+    queryOf(
+        """
+            SELECT *
+            FROM oppgave
+            WHERE id=?
+              AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
+        """,
+        oppgaveId
+    )
+        .map(::oppgaveDto)
+        .asSingle
+)
+
+fun Session.finnHendelseId(oppgaveId: Int): UUID = requireNotNull(
+    this.run(
+        queryOf(
+            """
+            SELECT event_id
+            FROM oppgave
+            WHERE id=?
+        """,
+            oppgaveId
+        ).map { UUID.fromString(it.string("event_id")) }.asSingle
+    )
+)
+
 fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
     @Language("PostgreSQL")
     val query = """
