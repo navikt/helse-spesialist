@@ -153,7 +153,7 @@ internal class GodkjenningE2ETest {
     }
 
     private fun sendSaksbehandlerløsning(spleisbehovId: UUID, godkjent: Boolean) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId(), godkjent, GODKJENTTIDSPUNKT, SAKSBEHANDLERIDENT))
+        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId(), godkjent, GODKJENTTIDSPUNKT, SAKSBEHANDLERIDENT, oppgaveId = oppgaveId))
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -229,7 +229,6 @@ internal class GodkjenningE2ETest {
         })
     }
 
-
     private fun oppgaver(hendelseId: UUID) =
         using(sessionOf(dataSource)) {
             it.run(queryOf(
@@ -248,6 +247,12 @@ internal class GodkjenningE2ETest {
                 )
             }.asList)
         }
+
+    private val oppgaveId get() = using(sessionOf(dataSource)) {
+        requireNotNull(it.run(queryOf("SELECT id FROM oppgave WHERE command_context_id=? ORDER BY id DESC LIMIT 1", testRapid.inspektør.contextId()).map {
+            it.long("id")
+        }.asSingle)) { "Finner ikke oppgave ID for siste command context" }
+    }
 
     private class Oppgave(
         private val type: String,

@@ -1,10 +1,10 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -26,12 +26,12 @@ internal class NyGodkjenningMessage(
     warnings: List<String>,
     periodetype: Saksbehandleroppgavetype? = null,
     private val json: String,
-    oppgaveDao: OppgaveDao,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
-    speilSnapshotRestClient: SpeilSnapshotRestClient
+    speilSnapshotRestClient: SpeilSnapshotRestClient,
+    oppgaveMediator: OppgaveMediator
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         KlargjørPersonCommand(fødselsnummer, aktørId, personDao),
@@ -51,7 +51,7 @@ internal class NyGodkjenningMessage(
             snapshotDao,
             vedtakDao
         ),
-        SaksbehandlerGodkjenningCommand(id, vedtaksperiodeId, oppgaveDao, vedtakDao, json)
+        SaksbehandlerGodkjenningCommand(vedtaksperiodeId, json, oppgaveMediator)
     )
 
     override fun fødselsnummer() = fødselsnummer

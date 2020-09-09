@@ -210,7 +210,8 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
         saksbehandlerOID: UUID = UUID.randomUUID(),
         årsak: String? = null,
         begrunnelser: List<String>? = null,
-        kommentar: String? = null
+        kommentar: String? = null,
+        oppgaveId: Long? = null
     ) =
         nyHendelse(
             id, "saksbehandler_løsning", mutableMapOf<String, Any>(
@@ -222,9 +223,10 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 "saksbehandlerepost" to saksbehandlerepost,
                 "saksbehandleroid" to saksbehandlerOID
             ).apply {
-                if (årsak != null) put("årsak", årsak)
-                if (begrunnelser != null) put("begrunnelser", begrunnelser)
-                if (kommentar != null) put("kommentar", kommentar)
+                årsak?.also { put("årsak", it) }
+                begrunnelser?.also { put("begrunnelser", it) }
+                kommentar?.also { put("kommentar", it) }
+                oppgaveId?.also { put("oppgaveId", it) }
             }
         )
 

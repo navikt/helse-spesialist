@@ -13,33 +13,41 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class OppgaveDao(private val dataSource: DataSource) {
+    internal fun hentSaksbehandlerOppgaver() =
+        using(sessionOf(dataSource)) { session ->
+            session.findSaksbehandlerOppgaver()
+        }
+
+    internal fun hentSaksbehandlerOppgave(fødselsnummer: String) =
+        using(sessionOf(dataSource)) {
+            it.findOppgave(fødselsnummer)
+        }
+
     internal fun insertOppgave(
         eventId: UUID,
+        commandContextId: UUID,
         oppgavetype: String,
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String?,
         oid: UUID?,
         vedtakRef: Long?
-    ) = using(sessionOf(dataSource)) {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT context_id FROM command_context WHERE spleisbehov_id = ? ORDER BY id DESC LIMIT 1
-        """
-        val commandContextId = it.run(
-            queryOf(query, eventId).map { UUID.fromString(it.string("context_id")) }.asSingle
-        ) ?: throw IllegalArgumentException("Fant ikke command context for hendelse $eventId")
-
+    ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
         it.insertOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid, vedtakRef, commandContextId)
-    }
+    }) { "Kunne ikke opprette oppgave" }
 
-    fun updateOppgave(
-        eventId: UUID,
-        oppgavetype: String,
+    internal fun updateOppgave(
+        oppgaveId: Long,
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String?,
         oid: UUID?
     ) = using(sessionOf(dataSource)) {
-        it.updateOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid)
+        it.run(
+            queryOf("UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus WHERE id=?",
+                ferdigstiltAv,
+                oid,
+                oppgavestatus.name,
+                oppgaveId
+            ).asUpdate)
     }
 }
 
@@ -65,7 +73,7 @@ fun Session.insertOppgave(
             oid,
             vedtakRef,
             commandContextId
-        ).asUpdate
+        ).asUpdateAndReturnGeneratedKey
     )
 
 fun Session.updateOppgave(

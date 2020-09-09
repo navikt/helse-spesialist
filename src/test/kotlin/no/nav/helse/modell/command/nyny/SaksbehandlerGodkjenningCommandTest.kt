@@ -1,69 +1,68 @@
 package no.nav.helse.modell.command.nyny
 
+import io.mockk.Ordering
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.modell.vedtak.VedtakDto
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.random.Random.Default.nextLong
 
 internal class SaksbehandlerGodkjenningCommandTest {
     private companion object {
-        private val HENDELSE_ID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val JSON = "{}"
         private const val SAKSBEHANDLER = "Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
         private const val EPOST = "saksbehandler@nav.no"
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
+        private val OPPGAVE_ID = nextLong()
     }
 
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private lateinit var context: CommandContext
-    private val command = SaksbehandlerGodkjenningCommand(HENDELSE_ID, VEDTAKSPERIODE_ID, oppgaveDao, vedtakDao, JSON)
+    private val command = SaksbehandlerGodkjenningCommand(VEDTAKSPERIODE_ID, JSON, oppgaveMediator)
+    private lateinit var forventetOppgave: Oppgave
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(oppgaveDao, vedtakDao)
+        forventetOppgave = Oppgave.avventerSaksbehandler(SaksbehandlerGodkjenningCommand::class.java.simpleName, VEDTAKSPERIODE_ID)
+        clearMocks(oppgaveMediator)
     }
 
     @Test
     fun `oppretter oppgave`() {
-        val vedtakRef = 1L
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VedtakDto(vedtakRef, 0L)
         assertFalse(command.execute(context))
-        verify(exactly = 1) { oppgaveDao.insertOppgave(HENDELSE_ID, any(), Oppgavestatus.AvventerSaksbehandler, null, null, vedtakRef) }
-        verify(exactly = 0) { oppgaveDao.updateOppgave(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { oppgaveMediator.oppgave(forventetOppgave) }
     }
 
     @Test
     fun `ferdigstiller oppgave`() {
-        val vedtakRef = 1L
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VedtakDto(vedtakRef, 0L)
-        context.add(SaksbehandlerLøsning(true, SAKSBEHANDLER, SAKSBEHANDLER_OID, EPOST, GODKJENTTIDSPUNKT, null, null, null))
+        context.add(SaksbehandlerLøsning(true, SAKSBEHANDLER, SAKSBEHANDLER_OID, EPOST, GODKJENTTIDSPUNKT, null, null, null, OPPGAVE_ID))
         assertTrue(command.execute(context))
         assertEquals(1, context.meldinger().size)
-        verify(exactly = 1) { oppgaveDao.updateOppgave(HENDELSE_ID, any(), Oppgavestatus.Ferdigstilt, EPOST, SAKSBEHANDLER_OID) }
+
+        verify(ordering = Ordering.SEQUENCE) {
+            oppgaveMediator.oppgave(eq(forventetOppgave))
+            forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
+            oppgaveMediator.oppgave(eq(forventetOppgave))
+        }
     }
 
     @Test
     fun resume() {
-        val vedtakRef = 1L
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VedtakDto(vedtakRef, 0L)
-        context.add(SaksbehandlerLøsning(true, SAKSBEHANDLER, SAKSBEHANDLER_OID, EPOST, GODKJENTTIDSPUNKT, null, null, null))
+        context.add(SaksbehandlerLøsning(true, SAKSBEHANDLER, SAKSBEHANDLER_OID, EPOST, GODKJENTTIDSPUNKT, null, null, null, OPPGAVE_ID))
         assertTrue(command.resume(context))
         assertEquals(1, context.meldinger().size)
-        verify(exactly = 0) { oppgaveDao.insertOppgave(any(), any(), any(), any(), any(), any()) }
-        verify(exactly = 1) { oppgaveDao.updateOppgave(HENDELSE_ID, any(), Oppgavestatus.Ferdigstilt, EPOST, SAKSBEHANDLER_OID) }
+
+        forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
+        verify(exactly = 1) { oppgaveMediator.oppgave(eq(forventetOppgave)) }
     }
 }

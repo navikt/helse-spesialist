@@ -6,12 +6,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
@@ -38,11 +38,11 @@ internal class NyGodkjenningMessageTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, restClient)
+    private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, commandContextDao, snapshotDao, restClient, oppgaveMediator)
     private val godkjenningMessage = hendelsefabrikk.nyGodkjenning(
         HENDELSE_ID, FNR, AKTØR, ORGNR, LocalDate.MIN, LocalDate.MAX, VEDTAKSPERIODE_ID, emptyList(), Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, HENDELSE_JSON
     )
@@ -71,7 +71,7 @@ internal class NyGodkjenningMessageTest {
 
         assertFalse(godkjenningMessage.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { oppgaveDao.insertOppgave(HENDELSE_ID, any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { oppgaveMediator.oppgave(any()) }
     }
 
     @Test

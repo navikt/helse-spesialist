@@ -27,7 +27,7 @@ internal class HendelseDaoTest : AbstractEndToEndTest() {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val hendelsefabrikk = Hendelsefabrikk(mockk(), mockk(), vedtakDao, mockk(), commandContextDao, snapshotDao, restClient)
+    private val hendelsefabrikk = Hendelsefabrikk(mockk(), mockk(), vedtakDao, commandContextDao, snapshotDao, restClient, mockk())
     private val vedtaksperiodeForkastetMessage = hendelsefabrikk.nyNyVedtaksperiodeForkastet(testmeldingfabrikk.lagVedtaksperiodeForkastet(
         HENDELSE_ID,
         VEDTAKSPERIODE_ID

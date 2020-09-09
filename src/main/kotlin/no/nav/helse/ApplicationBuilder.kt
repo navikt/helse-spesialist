@@ -14,11 +14,9 @@ import io.ktor.request.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.*
-import no.nav.helse.api.OppgaveMediator
-import no.nav.helse.api.adminApi
-import no.nav.helse.api.oppgaveApi
-import no.nav.helse.api.vedtaksperiodeApi
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -75,7 +73,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var spleisbehovMediator: HendelseMediator
-    private val oppgaveMediator = OppgaveMediator(dataSource)
+    private val oppgaveDao = OppgaveDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
     private val tildelingMediator = TildelingMediator(dataSource)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
     private val rapidsConnection =
@@ -129,7 +129,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             rapidsConnection = rapidsConnection,
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID"))
+            spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID")),
+            oppgaveMediator = oppgaveMediator,
+            oppgaveDao = oppgaveDao,
+            vedtakDao = vedtakDao
         )
     }
 

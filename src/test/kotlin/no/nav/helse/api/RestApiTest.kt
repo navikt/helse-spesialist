@@ -24,6 +24,8 @@ import kotliquery.sessionOf
 import no.nav.helse.*
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
@@ -97,7 +99,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             speilSnapshotRestClient = speilSnapshotRestClient,
             spesialistOID = spesialistOID
         )
-        val oppgaveMediator = OppgaveMediator(dataSource)
+        val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource))
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
             dataSource = dataSource
         )

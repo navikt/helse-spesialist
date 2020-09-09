@@ -11,7 +11,6 @@ import no.nav.helse.modell.command.nyny.TestHendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
 
@@ -38,7 +37,7 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `lagre oppgave`() {
-        dao.insertOppgave(HENDELSE_ID, OPPGAVETYPE, OPPGAVESTATUS, FERDIGSTIL_AV, FERDIGSTILT_AV_OID, null)
+        dao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, OPPGAVESTATUS, FERDIGSTIL_AV, FERDIGSTILT_AV_OID, null)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             HENDELSE_ID,
@@ -53,24 +52,10 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `thrower ved manglende command context`() {
-        assertThrows<IllegalArgumentException> {
-            dao.insertOppgave(
-                UUID.randomUUID(),
-                OPPGAVETYPE,
-                OPPGAVESTATUS,
-                FERDIGSTIL_AV,
-                FERDIGSTILT_AV_OID,
-                null
-            )
-        }
-    }
-
-    @Test
     fun `oppdatere oppgave`() {
         val nyStatus = Oppgavestatus.Ferdigstilt
-        dao.insertOppgave(HENDELSE_ID, OPPGAVETYPE, OPPGAVESTATUS, FERDIGSTIL_AV, FERDIGSTILT_AV_OID, null)
-        dao.updateOppgave(HENDELSE_ID, OPPGAVETYPE, nyStatus, null, null)
+        val id = dao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, OPPGAVESTATUS, FERDIGSTIL_AV, FERDIGSTILT_AV_OID, null)
+        dao.updateOppgave(id, nyStatus, null, null)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             HENDELSE_ID,
@@ -79,34 +64,6 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
             nyStatus,
             null,
             null,
-            null,
-            COMMAND_CONTEXT_ID
-        )
-    }
-
-    @Test
-    fun `oppdatere riktig oppgave`() {
-        dao.insertOppgave(HENDELSE_ID, "EN_TYPE", Oppgavestatus.AvventerSaksbehandler, null, null, null)
-        dao.insertOppgave(HENDELSE_ID, "EN_ANNEN_TYPE", OPPGAVESTATUS, null, null, null)
-        dao.updateOppgave(HENDELSE_ID, "EN_TYPE", Oppgavestatus.Ferdigstilt, FERDIGSTIL_AV, FERDIGSTILT_AV_OID)
-        assertEquals(2, oppgave().size)
-        oppgave().first().assertEquals(
-            HENDELSE_ID,
-            LocalDate.now(),
-            "EN_ANNEN_TYPE",
-            OPPGAVESTATUS,
-            null,
-            null,
-            null,
-            COMMAND_CONTEXT_ID
-        )
-        oppgave().last().assertEquals(
-            HENDELSE_ID,
-            LocalDate.now(),
-            "EN_TYPE",
-            Oppgavestatus.Ferdigstilt,
-            FERDIGSTIL_AV,
-            FERDIGSTILT_AV_OID,
             null,
             COMMAND_CONTEXT_ID
         )

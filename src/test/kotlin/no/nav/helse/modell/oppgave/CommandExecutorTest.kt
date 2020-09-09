@@ -22,7 +22,7 @@ class CommandExecutorTest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun setup() {
-        session = sessionOf(dataSource)
+        session = sessionOf(dataSource, returnGeneratedKey = true)
     }
 
     @AfterAll

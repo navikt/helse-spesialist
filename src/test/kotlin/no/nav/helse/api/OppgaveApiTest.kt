@@ -17,6 +17,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.TestPerson
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
 import no.nav.helse.objectMapper
@@ -36,7 +38,7 @@ class OppgaveApiTest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun setup() {
-        oppgaveMediator = OppgaveMediator(dataSource)
+        oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource))
         embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             routing {

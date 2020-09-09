@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.meldinger.NyGodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
 import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
@@ -10,7 +11,6 @@ import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -22,10 +22,10 @@ internal class Hendelsefabrikk(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
-    private val oppgaveDao: OppgaveDao,
     private val commandContextDao: CommandContextDao,
     private val snapshotDao: SnapshotDao,
-    private val speilSnapshotRestClient: SpeilSnapshotRestClient
+    private val speilSnapshotRestClient: SpeilSnapshotRestClient,
+    private val oppgaveMediator: OppgaveMediator
 ) : IHendelsefabrikk {
     private companion object {
         private val mapper = jacksonObjectMapper()
@@ -45,7 +45,7 @@ internal class Hendelsefabrikk(
     ): NyGodkjenningMessage {
         return NyGodkjenningMessage(
             id, fødselsnummer, aktørId, organisasjonsnummer, vedtaksperiodeId, periodeFom, periodeTom, warnings, periodetype, json,
-            oppgaveDao, personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestClient
+            personDao, arbeidsgiverDao, vedtakDao, snapshotDao, speilSnapshotRestClient, oppgaveMediator
         )
     }
 

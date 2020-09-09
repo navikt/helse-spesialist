@@ -44,7 +44,7 @@ fun DataSource.opprettSaksbehandler(saksbehandlerId: UUID, epost: String = "sara
 }
 
 fun DataSource.opprettSaksbehandlerOppgave(oppgavereferanse: UUID, vedtakId: Long) {
-    sessionOf(this).use {
+    sessionOf(this, returnGeneratedKey = true).use {
         it.insertOppgave(
             oppgavereferanse,
             "TestOppgave",

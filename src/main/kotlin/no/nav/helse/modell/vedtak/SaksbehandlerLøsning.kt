@@ -1,9 +1,8 @@
 package no.nav.helse.modell.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.Oppgavestatus
 import no.nav.helse.mediator.kafka.meldinger.IHendelseMediator
-import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.Oppgave
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -17,16 +16,11 @@ internal class SaksbehandlerLøsning(
     val godkjenttidspunkt: LocalDateTime,
     val årsak: String?,
     val begrunnelser: List<String>?,
-    val kommentar: String?
+    val kommentar: String?,
+    private val oppgaveId: Long? = null // @TODO defaults only to retain backwards compatibility
 ) {
-    fun ferdigstillOppgave(oppgaveDao: OppgaveDao, eventId: UUID, oppgavetype: String, løsning: JsonMessage) {
-        oppgaveDao.updateOppgave(
-            eventId = eventId,
-            oppgavetype = oppgavetype,
-            oppgavestatus = Oppgavestatus.Ferdigstilt,
-            ferdigstiltAv = epostadresse,
-            oid = oid
-        )
+    fun ferdigstillOppgave(oppgave: Oppgave, løsning: JsonMessage) {
+        oppgaveId?.also { oppgave.ferdigstill(it, saksbehandlerIdent, oid) }
         løsning["@løsning"] = mapOf(
             "Godkjenning" to mapOf(
                 "godkjent" to godkjent,
@@ -48,7 +42,7 @@ internal class SaksbehandlerLøsning(
                         it.requireKey("spleisBehovId", "contextId")
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
-                        it.interestedIn("årsak", "begrunnelser", "kommentar")
+                        it.interestedIn("årsak", "begrunnelser", "kommentar", "oppgaveId")
                     }
                 }.register(this)
         }
@@ -68,7 +62,8 @@ internal class SaksbehandlerLøsning(
                 packet["godkjenttidspunkt"].asLocalDateTime(),
                 packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
-                packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText()
+                packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+                packet["oppgaveId"].takeUnless(JsonNode::isMissingOrNull)?.asLong()
             ), context)
         }
     }

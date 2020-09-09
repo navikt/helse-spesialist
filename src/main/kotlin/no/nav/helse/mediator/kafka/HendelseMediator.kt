@@ -3,6 +3,7 @@ package no.nav.helse.mediator.kafka
 import kotliquery.Session
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
 import no.nav.helse.mediator.kafka.meldinger.*
@@ -39,7 +40,10 @@ internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val dataSource: DataSource,
-    private val spesialistOID: UUID
+    private val spesialistOID: UUID,
+    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
 ) : IHendelseMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -47,11 +51,17 @@ internal class HendelseMediator(
     }
     private val personDao = PersonDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
-    private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, oppgaveDao, commandContextDao, snapshotDao, speilSnapshotRestClient)
+    private val hendelsefabrikk = Hendelsefabrikk(
+        personDao,
+        arbeidsgiverDao,
+        vedtakDao,
+        commandContextDao,
+        snapshotDao,
+        speilSnapshotRestClient,
+        oppgaveMediator
+    )
     private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
 
     private var shutdown = false
@@ -257,6 +267,7 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(annullering: AnnulleringMessage) {
+        // oppdater status på oppgave
         log.info("Publiserer annullering på fagsystemId {}", keyValue("fagsystemId", annullering.fagsystemId))
         val annulleringCommand = AnnulleringCommand(rapidsConnection, annullering)
         sessionOf(dataSource).use(annulleringCommand::execute)
@@ -304,6 +315,7 @@ internal class HendelseMediator(
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
                 else log.info("kommando er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
+                oppgaveMediator.lagreOppgaver(hendelse, contextId)
             } catch (err: Exception) {
                 log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
                 hendelse.undo(context)
