@@ -17,7 +17,10 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
                 UUID.fromString(requireNotNull(call.parameters["oppgavereferanse"]) { "Ugyldig oppgavereferanse i path parameter" })
             val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
             val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-            tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerreferanse)
+            val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+            val navn = accessToken.payload.getClaim("name").asString()
+
+            tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerreferanse, epostadresse, navn)
 
             call.respond(HttpStatusCode.OK)
         }

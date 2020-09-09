@@ -42,7 +42,7 @@ class TildelingMediatorTest {
 
         dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
 
-        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse, epost, "navn")
 
         assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
     }
@@ -55,7 +55,7 @@ class TildelingMediatorTest {
 
         dataSource.opprettSaksbehandler(saksbehandlerReferanse)
 
-        tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse, "epost", "navn")
         tildelingMediator.fjernTildeling(oppgavereferanse)
 
         assertNull(tildelingMediator.hentSaksbehandlerFor(oppgavereferanse))
@@ -84,7 +84,7 @@ class TildelingMediatorTest {
         dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
 
         val tildelingMediator = TildelingMediator(dataSource)
-        tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse, epost, "navn")
 
         val oppgaver = dataSource.finnSaksbehandlerOppgaver()
         val oppgave = oppgaver.first { it.oppgavereferanse == oppgavereferanse }
@@ -104,12 +104,12 @@ class TildelingMediatorTest {
         dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
         dataSource.opprettSaksbehandler(saksbehandlerReferanse2, epost2)
 
-        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse, epost, "navn")
         assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
 
 
         val feil = assertThrows<ModellFeil> {
-            TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse2)
+            TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse2, epost2, "navn2")
         }
         assertEquals(feil.httpKode(), HttpStatusCode.BadRequest)
         assertEquals(feil.feil, OppgaveErAlleredeTildelt)
@@ -124,12 +124,12 @@ class TildelingMediatorTest {
 
         dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
 
-        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+        TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse, epost, "nanv")
         assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
 
 
         val feil = assertThrows<ModellFeil> {
-            TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse)
+            TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(oppgavereferanse, saksbehandlerReferanse, epost, "navn")
         }
         assertEquals(feil.httpKode(), HttpStatusCode.BadRequest)
         assertEquals(feil.feil, OppgaveErAlleredeTildelt)
