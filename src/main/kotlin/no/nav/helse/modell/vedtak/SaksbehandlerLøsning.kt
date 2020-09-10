@@ -39,10 +39,10 @@ internal class SaksbehandlerLøsning(
                 .apply {
                     validate {
                         it.demandValue("@event_name", "saksbehandler_løsning")
-                        it.requireKey("spleisBehovId", "contextId")
+                        it.requireKey("oppgaveId", "contextId", "hendelseId")
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
-                        it.interestedIn("årsak", "begrunnelser", "kommentar", "oppgaveId")
+                        it.interestedIn("årsak", "begrunnelser", "kommentar")
                     }
                 }.register(this)
         }
@@ -52,7 +52,7 @@ internal class SaksbehandlerLøsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val hendelseId = UUID.fromString(packet["spleisBehovId"].asText())
+            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             mediator.løsning(hendelseId, contextId, SaksbehandlerLøsning(
                 packet["godkjent"].asBoolean(),
@@ -63,7 +63,7 @@ internal class SaksbehandlerLøsning(
                 packet["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 packet["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
                 packet["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
-                packet["oppgaveId"].takeUnless(JsonNode::isMissingOrNull)?.asLong()
+                packet["oppgaveId"].asLong()
             ), context)
         }
     }

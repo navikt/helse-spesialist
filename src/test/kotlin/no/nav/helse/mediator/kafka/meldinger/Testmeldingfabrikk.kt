@@ -4,6 +4,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.random.Random.Default.nextLong
 
 class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
     companion object {
@@ -201,8 +202,9 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
 
     fun lagSaksbehandlerløsning(
         id: UUID = UUID.randomUUID(),
-        spleisbehovId: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
+        oppgaveId: Long = nextLong(),
         godkjent: Boolean = true,
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
         saksbehandlerident: String = "Z999999",
@@ -210,13 +212,13 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
         saksbehandlerOID: UUID = UUID.randomUUID(),
         årsak: String? = null,
         begrunnelser: List<String>? = null,
-        kommentar: String? = null,
-        oppgaveId: Long? = null
+        kommentar: String? = null
     ) =
         nyHendelse(
             id, "saksbehandler_løsning", mutableMapOf<String, Any>(
-                "spleisBehovId" to spleisbehovId,
+                "hendelseId" to hendelseId,
                 "contextId" to contextId,
+                "oppgaveId" to oppgaveId,
                 "godkjent" to godkjent,
                 "godkjenttidspunkt" to godkjenttidspunkt,
                 "saksbehandlerident" to saksbehandlerident,
@@ -226,7 +228,6 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 årsak?.also { put("årsak", it) }
                 begrunnelser?.also { put("begrunnelser", it) }
                 kommentar?.also { put("kommentar", it) }
-                oppgaveId?.also { put("oppgaveId", it) }
             }
         )
 

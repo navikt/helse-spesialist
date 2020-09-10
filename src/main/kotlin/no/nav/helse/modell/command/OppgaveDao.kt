@@ -49,6 +49,16 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 oppgaveId
             ).asUpdate)
     }
+
+    internal fun finnContextId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT command_context_id FROM oppgave WHERE id = ?", oppgaveId)
+            .map { row -> UUID.fromString(row.string("command_context_id"))}.asSingle)
+    })
+
+    internal fun finnHendelseId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT event_id FROM oppgave WHERE id = ?", oppgaveId)
+            .map { row -> UUID.fromString(row.string("event_id")) }.asSingle)
+    })
 }
 
 fun Session.insertOppgave(

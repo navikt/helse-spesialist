@@ -395,7 +395,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
-                        Godkjenning(
+                        GodkjenningDTO(
                             oppgaveId,
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
@@ -443,7 +443,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
-                        Godkjenning(
+                        GodkjenningDTO(
                             spleisbehovId.toString(),
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
@@ -492,7 +492,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
-                        Godkjenning(
+                        GodkjenningDTO(
                             oppgaveId,
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
@@ -509,7 +509,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             val godkjenning2 = client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
-                        Godkjenning(
+                        GodkjenningDTO(
                             oppgaveId,
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
@@ -549,7 +549,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
-                        Godkjenning(
+                        GodkjenningDTO(
                             spleisbehovId.toString(),
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,
@@ -566,7 +566,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             val godkjenning2 = client.post<HttpStatement>("/api/vedtak") {
                 body = TextContent(
                     objectMapper.writeValueAsString(
-                        Godkjenning(
+                        GodkjenningDTO(
                             spleisbehovId.toString(),
                             true,
                             saksbehandlerIdent = saksbehandlerIdent,

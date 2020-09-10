@@ -3,6 +3,7 @@ package no.nav.helse.mediator.kafka
 import kotliquery.Session
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.api.GodkjenningDTO
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.api.Rollback
 import no.nav.helse.api.RollbackDelete
@@ -69,22 +70,22 @@ internal class HendelseMediator(
 
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
-            ArbeidsgiverMessage.Factory(it, this)
-            if (!FeatureToggle.nyGodkjenningRiver) {
+            if (FeatureToggle.nyGodkjenningRiver) {
+                NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
+                HentPersoninfoLøsning.PersoninfoRiver(it, this)
+                HentEnhetLøsning.HentEnhetRiver(it, this)
+                HentInfotrygdutbetalingerLøsning.InfotrygdutbetalingerRiver(it, this)
+                SaksbehandlerLøsning.SaksbehandlerLøsningRiver(it, this)
+            } else {
                 GodkjenningMessage.Factory(it, this)
                 PersoninfoLøsningMessage.Factory(it, this)
             }
-            SaksbehandlerLøsning.SaksbehandlerLøsningRiver(it, this)
-            HentPersoninfoLøsning.PersoninfoRiver(it, this)
-            HentEnhetLøsning.HentEnhetRiver(it, this)
-            HentInfotrygdutbetalingerLøsning.InfotrygdutbetalingerRiver(it, this)
+            ArbeidsgiverMessage.Factory(it, this)
             PåminnelseMessage.Factory(it, this)
             TilInfotrygdMessage.Factory(it, this)
             TilbakerullingMessage.Factory(it, this)
-
-            if (FeatureToggle.nyGodkjenningRiver) NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
-            NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
+            NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
         }
     }
     private var løsninger: Løsninger? = null
@@ -258,6 +259,44 @@ internal class HendelseMediator(
         log.info("Mottok godkjenningsløsning for Spleis-behov {}", keyValue("eventId", eventId))
         val løsninger = LøsningerOld().also { it.add(løsning) }
         resume(eventId, løsninger)
+    }
+
+    private fun standardfelter(hendelsetype: String, fødselsnummer: String): MutableMap<String, Any> {
+        return mutableMapOf(
+            "@event_name" to hendelsetype,
+            "@opprettet" to LocalDateTime.now(),
+            "@id" to UUID.randomUUID(),
+            "fødselsnummer" to fødselsnummer
+        )
+    }
+
+    internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
+        val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse.toLong())
+        val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse.toLong())
+        val fødselsnummer = personDao.finnFødselsnummer(hendelseId)
+        val godkjenningMessage = JsonMessage.newMessage(
+            standardfelter("saksbehandler_løsning", fødselsnummer).apply {
+                put("oppgaveId", godkjenningDTO.oppgavereferanse)
+                put("contextId", contextId)
+                put("hendelseId", hendelseId)
+                put("godkjent", godkjenningDTO.godkjent)
+                put("saksbehandlerident", godkjenningDTO.saksbehandlerIdent)
+                put("saksbehandleroid", oid)
+                put("saksbehandlerepost", epost)
+                put("godkjenttidspunkt", LocalDateTime.now())
+                godkjenningDTO.årsak?.let { put("årsak", it) }
+                godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
+                godkjenningDTO.kommentar?.let<String, Unit> { put("kommentar", it) }
+            }).also {
+            sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
+        }
+        log.info(
+            "Publiserer saksbehandler-løsning for {}. {}. {}",
+            keyValue("opgpaveId", godkjenningDTO.oppgavereferanse),
+            keyValue("contextId", contextId),
+            keyValue("hendelseId", hendelseId)
+        )
+        rapidsConnection.publish(godkjenningMessage.toJson())
     }
 
     fun håndter(eventId: UUID, påminnelseMessage: PåminnelseMessage) {

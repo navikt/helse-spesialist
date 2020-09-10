@@ -23,6 +23,20 @@ internal class PersonDao(private val dataSource: DataSource) {
             it.findPersoninfoSistOppdatert(fødselsnummer)
         }
 
+    internal fun finnFødselsnummer(hendelseId: UUID): String {
+        return using(sessionOf(dataSource)) { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                    SELECT fodselsnummer FROM person WHERE id = (
+                        SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = (
+                            SELECT spleis_referanse FROM spleisbehov WHERE id = ?
+                        )
+                    )
+                """
+            session.run(queryOf(statement, hendelseId).map { it.string("fodselsnummer") }.asSingle)!!
+        }
+    }
+
     internal fun insertPersoninfo(
         fornavn: String,
         mellomnavn: String?,
@@ -154,7 +168,7 @@ internal fun Session.insertPerson(
             enhetId,
             infotrygdutbetalingerId
         ).asUpdateAndReturnGeneratedKey
-    )
+    )?.toInt()
 
 internal fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =
     requireNotNull(

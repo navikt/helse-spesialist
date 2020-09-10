@@ -36,7 +36,7 @@ internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: String): Int? = this
         .asSingle
 )
 
-internal fun Session.insertArbeidsgiver(orgnummer: String, navn: String): Long? {
+internal fun Session.insertArbeidsgiver(orgnummer: String, navn: String): Int? {
     val navnRef = requireNotNull(
         run(
             queryOf(
@@ -50,7 +50,7 @@ internal fun Session.insertArbeidsgiver(orgnummer: String, navn: String): Long? 
     return run(
         queryOf("INSERT INTO arbeidsgiver(orgnummer, navn_ref) VALUES(?, ?);", orgnummer.toLong(), navnRef)
             .asUpdateAndReturnGeneratedKey
-    )
+    )?.toInt()
 }
 
 internal fun Session.findNavnSistOppdatert(orgnummer: String): LocalDate = requireNotNull(

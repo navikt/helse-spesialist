@@ -96,7 +96,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
         assertEquals(warnings, finnWarnings(hendelseId))
     }
 
-    private fun opprettPerson(): Triple<Long, Long, Long> {
+    private fun opprettPerson(): Triple<Int, Int, Long> {
         val personinfoRef = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val personRef = personDao.insertPerson(FNR, AKTØR, personinfoRef, ENHET_OSLO.toInt(), utbetalingerRef) ?: fail { "Kunne ikke opprette person" }
@@ -142,8 +142,8 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
                 UUID.fromString(it.string("vedtaksperiode_id")),
                 it.localDate("fom"),
                 it.localDate("tom"),
-                it.long("person_ref"),
-                it.long("arbeidsgiver_ref"),
+                it.int("person_ref"),
+                it.int("arbeidsgiver_ref"),
                 it.long("speil_snapshot_ref")
             )
         }.asList)
@@ -153,11 +153,11 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
         private val vedtaksperiodeId: UUID,
         private val fom: LocalDate,
         private val tom: LocalDate,
-        private val personRef: Long,
-        private val arbeidsgiverRef: Long,
+        private val personRef: Int,
+        private val arbeidsgiverRef: Int,
         private val snapshotRef: Long
     ) {
-        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Long, forventetArbeidsgiverRef: Long, forventetSnapshotRef: Long) {
+        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Int, forventetArbeidsgiverRef: Int, forventetSnapshotRef: Long) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetFom, fom)
             assertEquals(forventetTom, tom)

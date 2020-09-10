@@ -19,7 +19,7 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
         private val HENDELSE_ID = UUID.randomUUID()
         private const val OPPGAVETYPE = "EN OPPGAVE"
         private val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
-        private const val FERDIGSTIL_AV = "saksbehandler@nav.no"
+        private const val FERDIGSTILT_AV = "saksbehandler@nav.no"
         private val FERDIGSTILT_AV_OID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
         private val TESTHENDELSE =
@@ -37,14 +37,14 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `lagre oppgave`() {
-        dao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, OPPGAVESTATUS, FERDIGSTIL_AV, FERDIGSTILT_AV_OID, null)
+        nyOppgave()
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             HENDELSE_ID,
             LocalDate.now(),
             OPPGAVETYPE,
             OPPGAVESTATUS,
-            FERDIGSTIL_AV,
+            FERDIGSTILT_AV,
             FERDIGSTILT_AV_OID,
             null,
             COMMAND_CONTEXT_ID
@@ -54,7 +54,7 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
     @Test
     fun `oppdatere oppgave`() {
         val nyStatus = Oppgavestatus.Ferdigstilt
-        val id = dao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, OPPGAVESTATUS, FERDIGSTIL_AV, FERDIGSTILT_AV_OID, null)
+        val id = nyOppgave()
         dao.updateOppgave(id, nyStatus, null, null)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
@@ -68,6 +68,20 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
             COMMAND_CONTEXT_ID
         )
     }
+
+    @Test
+    fun `finner contextId`() {
+        val id = nyOppgave()
+        assertEquals(COMMAND_CONTEXT_ID, dao.finnContextId(id))
+    }
+
+    @Test
+    fun `finner hendelseId`() {
+        val id = nyOppgave()
+        assertEquals(HENDELSE_ID, dao.finnHendelseId(id))
+    }
+
+    private fun nyOppgave() = dao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, FERDIGSTILT_AV, FERDIGSTILT_AV_OID, null)
 
     private fun oppgave() =
         using(sessionOf(dataSource)) {

@@ -13,6 +13,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.api.GodkjenningDTO
 import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.sql.Connection
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -38,9 +38,10 @@ internal class GodkjenningE2ETest {
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
         private const val SAKSBEHANDLERIDENT = "Z999999"
+        private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
+        private val SAKSBEHANDLEROID = UUID.randomUUID()
         private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
         private const val SNAPSHOTV2 = """{"version": "this_is_version_2"}"""
-        private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
 
     private val testRapid = TestRapid()
@@ -96,7 +97,7 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
-        sendSaksbehandlerløsning(godkjenningsmeldingId, true)
+        sendSaksbehandlerløsning(1L, true)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
@@ -108,7 +109,7 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
-        sendSaksbehandlerløsning(godkjenningsmeldingId, false)
+        sendSaksbehandlerløsning(1L, false)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
@@ -151,8 +152,16 @@ internal class GodkjenningE2ETest {
         testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, testRapid.inspektør.contextId(), VEDTAKSPERIODE_ID, ORGNR))
     }
 
-    private fun sendSaksbehandlerløsning(spleisbehovId: UUID, godkjent: Boolean) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagSaksbehandlerløsning(id, spleisbehovId, testRapid.inspektør.contextId(), godkjent, GODKJENTTIDSPUNKT, SAKSBEHANDLERIDENT, oppgaveId = testRapid.inspektør.oppgaveId()))
+    private fun sendSaksbehandlerløsning(oppgaveId: Long, godkjent: Boolean) = nyHendelseId().also { id ->
+        hendelseMediator.håndter(GodkjenningDTO(
+            oppgaveId.toString(),
+            godkjent,
+            SAKSBEHANDLERIDENT,
+            if (godkjent) null else "årsak",
+            null,
+            null
+        ), SAKSBEHANDLEREPOST, SAKSBEHANDLEROID)
+        testRapid.sendTestMessage(testRapid.inspektør.meldinger().last().toString())
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -183,7 +192,7 @@ internal class GodkjenningE2ETest {
             assertTrue(it.path("godkjent").isBoolean)
             assertEquals(godkjent, it.path("godkjent").booleanValue())
             assertEquals(SAKSBEHANDLERIDENT, it.path("saksbehandlerIdent").textValue())
-            assertEquals(GODKJENTTIDSPUNKT, it.path("godkjenttidspunkt").asLocalDateTime())
+            assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
         }
     }
 

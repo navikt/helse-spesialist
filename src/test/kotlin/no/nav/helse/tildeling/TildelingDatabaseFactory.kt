@@ -32,7 +32,7 @@ fun DataSource.opprettVedtak() = sessionOf(this, returnGeneratedKey = true).use 
         fom = LocalDate.now(),
         tom = LocalDate.now(),
         personRef = person!!.toInt(),
-        arbeidsgiverRef = arbeidsgiver!!.toInt(),
+        arbeidsgiverRef = arbeidsgiver!!,
         speilSnapshotRef = speilSnapshot
     )
 }

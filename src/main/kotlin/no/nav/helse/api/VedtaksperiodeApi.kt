@@ -10,6 +10,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
@@ -78,21 +79,19 @@ internal fun Application.vedtaksperiodeApi(
                 }
             }
             post("/api/vedtak") {
-                val godkjenning = call.receive<Godkjenning>()
+                val godkjenning = call.receive<GodkjenningDTO>()
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>())
                 val saksbehandlerIdent = godkjenning.saksbehandlerIdent
                 val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
 
-                if(!godkjenning.harVentendeOppgave(dataSource)){
+                if (!godkjenning.harVentendeOppgave(dataSource)) {
                     call.respondText(
                         "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
                         status = HttpStatusCode.Conflict
                     )
                     return@post
                 }
-
-                validerSaksbehandlerInput(godkjenning)
 
                 val løsning = SaksbehandlerLøsning(
                     godkjent = godkjenning.godkjent,
@@ -107,7 +106,11 @@ internal fun Application.vedtaksperiodeApi(
 
                 val hendelseId = godkjenning.hendelseId(dataSource)
 
-                spleisbehovMediator.håndter(hendelseId, løsning)
+                if (FeatureToggle.nyGodkjenningRiver) {
+                    spleisbehovMediator.håndter(godkjenning, epostadresse, oid)
+                } else {
+                    spleisbehovMediator.håndter(hendelseId, løsning)
+                }
                 call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
             }
             post("/api/annullering") {
@@ -159,14 +162,8 @@ internal fun Application.vedtaksperiodeApi(
     }
 }
 
-fun validerSaksbehandlerInput(godkjenning: Godkjenning) {
-    if (!godkjenning.godkjent) {
-        requireNotNull(godkjenning.årsak)
-    }
-}
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Godkjenning(
+data class GodkjenningDTO(
     val oppgavereferanse: String,
     val godkjent: Boolean,
     val saksbehandlerIdent: String,
@@ -174,6 +171,10 @@ data class Godkjenning(
     val begrunnelser: List<String>?,
     val kommentar: String?
 ) {
+    init {
+        if (!godkjent) requireNotNull(årsak)
+    }
+
     internal fun harVentendeOppgave(dataSource: DataSource) = Oppgavereferanse(oppgavereferanse)
         .harVentendeOppgave(dataSource)
 
