@@ -20,7 +20,7 @@ internal fun Session.upsertVedtak(
     personRef: Int,
     arbeidsgiverRef: Int,
     speilSnapshotRef: Int
-): Int =
+): Long =
     requireNotNull(
         this.run(
             queryOf(
@@ -35,7 +35,7 @@ internal fun Session.upsertVedtak(
                 )
             ).asUpdate
         )
-    ).toInt()
+    ).toLong()
 
 internal fun Session.findVedtak(vedtaksperiodeId: UUID): VedtakDto? =
     this.run(

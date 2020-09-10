@@ -32,3 +32,18 @@ fun Session.slettOppgavetildeling(oppgaveReferanse: UUID) {
     val query = "DELETE FROM tildeling WHERE oppgave_ref=:oppgave_ref;"
     run(queryOf(query, mapOf("oppgave_ref" to oppgaveReferanse)).asUpdate)
 }
+
+fun Session.tildelingForPerson(fødselsnummer: String): String? {
+    @Language("PostgreSQL")
+    val query = """
+SELECT epost FROM person
+     RIGHT JOIN vedtak v on person.id = v.person_ref
+     RIGHT JOIN oppgave o on v.id = o.vedtak_ref
+     RIGHT JOIN tildeling t on o.event_id = t.oppgave_ref
+     RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+WHERE fodselsnummer = :fodselsnummer;
+    """
+    return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { row ->
+        row.string("epost")
+    }.asSingle)
+}

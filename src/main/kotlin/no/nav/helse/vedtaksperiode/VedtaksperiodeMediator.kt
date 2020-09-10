@@ -13,6 +13,7 @@ import no.nav.helse.modell.person.findInfotrygdutbetalinger
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
 import no.nav.helse.objectMapper
+import no.nav.helse.tildeling.tildelingForPerson
 import java.util.*
 import javax.sql.DataSource
 
@@ -94,13 +95,17 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
             val enhet = measureAsHistogram("byggSpeilSnapshot_findEnhet") {
                 session.findEnhet(vedtak.fødselsnummer)
             }
+
+            val saksbehandlerepost = session.tildelingForPerson(vedtak.fødselsnummer)
+
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,
                 fødselsnummer = speilSnapshot.fødselsnummer,
                 personinfo = vedtak.personinfo,
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
-                enhet = enhet
+                enhet = enhet,
+                saksbehandlerepost = saksbehandlerepost
             )
         }
 }

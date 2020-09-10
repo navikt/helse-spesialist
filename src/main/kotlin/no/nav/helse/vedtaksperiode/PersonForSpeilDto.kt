@@ -15,7 +15,8 @@ data class PersonForSpeilDto(
     val personinfo: PersoninfoDto,
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
-    val enhet: EnhetDto
+    val enhet: EnhetDto,
+    val saksbehandlerepost: String?
 )
 
 data class ArbeidsgiverForSpeilDto(

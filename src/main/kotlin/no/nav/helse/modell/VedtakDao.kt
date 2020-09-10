@@ -21,7 +21,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         personRef: Int,
         arbeidsgiverRef: Int,
         speilSnapshotRef: Int
-    ) = using(sessionOf(dataSource)) {
+    ) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
         it.upsertVedtak(vedtaksperiodeId, fom, tom, personRef, arbeidsgiverRef, speilSnapshotRef)
     }
 
