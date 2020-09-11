@@ -38,7 +38,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda:
                 keyValue("feilkode", f.feilkode())
             )
         }
-        call.respond(status = f.httpKode(), message = FeilDto(f.feilkode()))
+        call.respond(status = f.httpKode(), message = FeilDto(f.feilkode(), f.feil.eksternKontekst))
     }
 }
 

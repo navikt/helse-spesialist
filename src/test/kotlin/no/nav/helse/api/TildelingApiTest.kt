@@ -164,6 +164,7 @@ class TildelingApiTest {
         assertEquals(response.status, HttpStatusCode.Conflict)
         val feilDto = runBlocking { response.receive<FeilDto>() }
         assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt("navn").feilkode)
+        assertEquals("Sara Saksbehandler", feilDto.kontekst["tildeltTil"])
     }
 
     private fun HttpRequestBuilder.authentication(oid: UUID) {
