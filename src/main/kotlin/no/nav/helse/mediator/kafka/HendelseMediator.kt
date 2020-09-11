@@ -292,7 +292,7 @@ internal class HendelseMediator(
         }
         log.info(
             "Publiserer saksbehandler-løsning for {}. {}. {}",
-            keyValue("opgpaveId", godkjenningDTO.oppgavereferanse),
+            keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
             keyValue("contextId", contextId),
             keyValue("hendelseId", hendelseId)
         )

@@ -39,6 +39,7 @@ internal class GodkjenningE2ETest {
         private const val ORGNR = "222222222"
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
+        private const val OPPGAVEID = 1L
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
         private const val SNAPSHOTV2 = """{"version": "this_is_version_2"}"""
@@ -97,7 +98,7 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
-        sendSaksbehandlerløsning(1L, true)
+        sendSaksbehandlerløsning(OPPGAVEID, true)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
@@ -109,7 +110,7 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
-        sendSaksbehandlerløsning(1L, false)
+        sendSaksbehandlerløsning(OPPGAVEID, false)
         assertSnapshot(SNAPSHOTV1)
         assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
@@ -161,7 +162,7 @@ internal class GodkjenningE2ETest {
             null,
             null
         ), SAKSBEHANDLEREPOST, SAKSBEHANDLEROID)
-        testRapid.sendTestMessage(testRapid.inspektør.meldinger().last().toString())
+        testRapid.sendTestMessage(testRapid.inspektør.meldinger().last { it.path("@event_name").asText() == "saksbehandler_løsning"}.toString())
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
