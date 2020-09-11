@@ -1,8 +1,6 @@
 package no.nav.helse.api
 
 import AbstractEndToEndTest
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -76,10 +74,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             )
         }
         install(JsonFeature) {
-            serializer = JacksonSerializer {
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                registerModule(JavaTimeModule())
-            }
+            serializer = JacksonSerializer(jackson = objectMapper)
         }
     }
     private var vedtaksperiodeId = UUID.randomUUID()

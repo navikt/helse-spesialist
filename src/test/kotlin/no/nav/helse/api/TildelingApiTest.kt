@@ -1,7 +1,5 @@
 package no.nav.helse.api
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -61,10 +59,7 @@ class TildelingApiTest {
         }
         expectSuccess = false
         install(JsonFeature) {
-            serializer = JacksonSerializer {
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                registerModule(JavaTimeModule())
-            }
+            serializer = JacksonSerializer(jackson = objectMapper)
         }
     }
 

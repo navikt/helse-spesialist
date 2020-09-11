@@ -16,9 +16,9 @@ internal class OppgaveMediator(private val oppgaveDao: OppgaveDao,
     private val oppgaver = mutableListOf<Oppgave>()
     private val meldinger = mutableListOf<String>()
 
-    fun hentOppgaver() = oppgaveDao.hentSaksbehandlerOppgaver()
+    fun hentOppgaver() = oppgaveDao.finnOppgaver()
 
-    fun hentOppgave(fødselsnummer: String) = oppgaveDao.hentSaksbehandlerOppgave(fødselsnummer)
+    fun hentOppgave(fødselsnummer: String) = oppgaveDao.finnOppgave(fødselsnummer)
 
     internal fun oppgave(oppgave: Oppgave) {
         oppgaver.add(oppgave)

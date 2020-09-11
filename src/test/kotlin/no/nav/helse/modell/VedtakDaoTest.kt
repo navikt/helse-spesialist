@@ -1,12 +1,10 @@
 package no.nav.helse.modell
 
 import AbstractEndToEndTest
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,30 +16,6 @@ import java.time.LocalDate
 import java.util.*
 
 internal class VedtakDaoTest : AbstractEndToEndTest() {
-    private companion object {
-        private const val FNR = "12345678911"
-        private const val AKTØR = "4321098765432"
-        private const val ORGNR = "123456789"
-        private const val ORGNAVN = "Bedrift AS"
-        private const val FORNAVN = "KARI"
-        private const val MELLOMNAVN = "Mellomnavn"
-        private const val ETTERNAVN = "Nordmann"
-        private const val ENHET_OSLO = "0301"
-        private val FØDSELSDATO = LocalDate.EPOCH
-        private val KJØNN = Kjønn.Kvinne
-
-        private val objectMapper = jacksonObjectMapper()
-
-        private val HENDELSE_ID = UUID.randomUUID()
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val FOM = LocalDate.of(2020, 1, 1)
-        private val TOM = LocalDate.of(2020, 1, 31)
-    }
-
-    private lateinit var personDao: PersonDao
-    private lateinit var arbeidsgiverDao: ArbeidsgiverDao
-    private lateinit var snapshotDao: SnapshotDao
-    private lateinit var vedtakDao: VedtakDao
 
     @BeforeEach
     fun setup() {
@@ -54,22 +28,22 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
     @Test
     fun `lagre vedtak`() {
         val (personRef, arbeidsgiverRef, snapshotRef) = opprettPerson()
-        vedtakDao.upsertVedtak(VEDTAKSPERIODE_ID, FOM, TOM, personRef.toInt(), arbeidsgiverRef.toInt(), snapshotRef.toInt())
-        assertNotNull(vedtakDao.findVedtak(VEDTAKSPERIODE_ID))
+        vedtakDao.upsertVedtak(VEDTAKSPERIODE, FOM, TOM, personRef, arbeidsgiverRef, snapshotRef.toInt())
+        assertNotNull(vedtakDao.findVedtak(VEDTAKSPERIODE))
         assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE_ID, FOM, TOM, personRef, arbeidsgiverRef, snapshotRef)
+        vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personRef, arbeidsgiverRef, snapshotRef)
     }
 
     @Test
     fun `oppdatere vedtak`() {
         val (personRef, arbeidsgiverRef, snapshotRef) = opprettPerson()
-        vedtakDao.upsertVedtak(VEDTAKSPERIODE_ID, FOM, TOM, personRef.toInt(), arbeidsgiverRef.toInt(), snapshotRef.toInt())
+        vedtakDao.upsertVedtak(VEDTAKSPERIODE, FOM, TOM, personRef, arbeidsgiverRef, snapshotRef.toInt())
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
         val nySnapshotRef = snapshotDao.insertSpeilSnapshot("{}").toLong()
-        vedtakDao.upsertVedtak(VEDTAKSPERIODE_ID, nyFom, nyTom, personRef.toInt(), arbeidsgiverRef.toInt(), nySnapshotRef.toInt())
+        vedtakDao.upsertVedtak(VEDTAKSPERIODE, nyFom, nyTom, personRef, arbeidsgiverRef, nySnapshotRef.toInt())
         assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE_ID, nyFom, nyTom, personRef, arbeidsgiverRef, nySnapshotRef)
+        vedtak().first().assertEquals(VEDTAKSPERIODE, nyFom, nyTom, personRef, arbeidsgiverRef, nySnapshotRef)
     }
 
     @Test
@@ -99,8 +73,8 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
     private fun opprettPerson(): Triple<Int, Int, Long> {
         val personinfoRef = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
-        val personRef = personDao.insertPerson(FNR, AKTØR, personinfoRef, ENHET_OSLO.toInt(), utbetalingerRef) ?: fail { "Kunne ikke opprette person" }
-        val arbeidsgiverRef = arbeidsgiverDao.insertArbeidsgiver(ORGNR, ORGNAVN) ?: fail { "Kunne ikke opprette arbeidsgiver" }
+        val personRef = personDao.insertPerson(FNR, AKTØR, personinfoRef, ENHET.toInt(), utbetalingerRef) ?: fail { "Kunne ikke opprette person" }
+        val arbeidsgiverRef = arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN) ?: fail { "Kunne ikke opprette arbeidsgiver" }
         val snapshotRef = snapshotDao.insertSpeilSnapshot("{}")
         return Triple(personRef, arbeidsgiverRef, snapshotRef.toLong())
     }
@@ -119,21 +93,6 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
                 row.string("melding")
             }.asList
         )
-    }
-
-    private fun testbehov(hendelseId: UUID) {
-        using(sessionOf(dataSource)) {
-            it.run(
-                queryOf(
-                    "INSERT INTO spleisbehov(id, data, original, spleis_referanse, type) VALUES(?, ?::json, ?::json, ?, ?)",
-                    hendelseId,
-                    "{}",
-                    "{}",
-                    UUID.randomUUID(),
-                    "TYPE"
-                ).asExecute
-            )
-        }
     }
 
     private fun vedtak() = using(sessionOf(dataSource)) {

@@ -13,12 +13,12 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class OppgaveDao(private val dataSource: DataSource) {
-    internal fun hentSaksbehandlerOppgaver() =
+    internal fun finnOppgaver() =
         using(sessionOf(dataSource)) { session ->
             session.findSaksbehandlerOppgaver()
         }
 
-    internal fun hentSaksbehandlerOppgave(fødselsnummer: String) =
+    internal fun finnOppgave(fødselsnummer: String) =
         using(sessionOf(dataSource)) {
             it.findOppgave(fødselsnummer)
         }

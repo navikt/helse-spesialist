@@ -33,7 +33,7 @@ internal class PersonDao(private val dataSource: DataSource) {
                         )
                     )
                 """
-            session.run(queryOf(statement, hendelseId).map { it.string("fodselsnummer") }.asSingle)!!
+            requireNotNull(session.run(queryOf(statement, hendelseId).map { it.string("fodselsnummer") }.asSingle))
         }
     }
 

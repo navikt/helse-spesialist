@@ -5,8 +5,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
-import no.nav.helse.modell.CommandContextDao
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -25,12 +23,10 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
         private val HENDELSE2 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE2, FNR)
     }
 
-    private lateinit var dao: CommandContextDao
-
     @Test
     fun `lagrer og finner context i db`() {
         val contextId = ny()
-        assertNotNull(dao.finn(contextId))
+        assertNotNull(commandContextDao.finn(contextId))
         assertTilstand(contextId, "NY")
     }
 
@@ -75,23 +71,23 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
     }
 
     private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
-        CommandContext(uuid).opprett(dao, hendelse)
+        CommandContext(uuid).opprett(commandContextDao, hendelse)
     }
 
     private fun ferdig(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        dao.ferdig(hendelse, uuid)
+        commandContextDao.ferdig(hendelse, uuid)
     }
 
     private fun suspendert(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        dao.suspendert(hendelse, uuid, listOf())
+        commandContextDao.suspendert(hendelse, uuid, listOf())
     }
 
     private fun feil(hendelse: Hendelse = HENDELSE1) = ny(hendelse).also { uuid ->
-        dao.feil(hendelse, uuid)
+        commandContextDao.feil(hendelse, uuid)
     }
 
     private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE1) {
-        dao.avbryt(vedtaksperiodeId, contextId)
+        commandContextDao.avbryt(vedtaksperiodeId, contextId)
     }
 
     private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {
@@ -107,30 +103,10 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
         }
     }
 
-    private fun testSpleisbehov(hendelse: Hendelse) {
-        using(sessionOf(dataSource)) {
-            it.run(
-                queryOf(
-                    "INSERT INTO spleisbehov(id, data, original, spleis_referanse, type) VALUES(?, ?::json, ?::json, ?, ?)",
-                    hendelse.id,
-                    "{}",
-                    "{}",
-                    hendelse.id,
-                    "Godkjenningsbehov"
-                ).asExecute
-            )
-        }
-    }
-
-    @BeforeAll
-    internal fun setupAll() {
-        dao = CommandContextDao(dataSource)
-    }
-
 
     @BeforeEach
     internal fun setup() {
-        testSpleisbehov(HENDELSE1)
-        testSpleisbehov(HENDELSE2)
+        testbehov(HENDELSE1.id, "Godkjenningsbehov")
+        testbehov(HENDELSE2.id, "Godkjenningsbehov")
     }
 }

@@ -3,13 +3,13 @@ package no.nav.helse.modell.command
 import AbstractEndToEndTest
 import io.mockk.mockk
 import no.nav.helse.mediator.kafka.Hendelsefabrikk
+import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.util.*
@@ -23,21 +23,26 @@ internal class HendelseDaoTest : AbstractEndToEndTest() {
     }
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
-    private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val hendelsefabrikk = Hendelsefabrikk(mockk(), mockk(), vedtakDao, commandContextDao, snapshotDao, restClient, mockk())
-    private val vedtaksperiodeForkastetMessage = hendelsefabrikk.nyNyVedtaksperiodeForkastet(testmeldingfabrikk.lagVedtaksperiodeForkastet(
-        HENDELSE_ID,
-        VEDTAKSPERIODE_ID
-    ))
+    private lateinit var hendelsefabrikk: IHendelsefabrikk
+    private lateinit var vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage
 
     private lateinit var dao: HendelseDao
 
     @BeforeAll
     fun setup() {
+        hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, commandContextDao, snapshotDao, restClient, mockk())
         dao = HendelseDao(dataSource, hendelsefabrikk)
+    }
+
+    @BeforeEach
+    fun setupEach() {
+        vedtaksperiodeForkastetMessage = hendelsefabrikk.nyNyVedtaksperiodeForkastet(
+            testmeldingfabrikk.lagVedtaksperiodeForkastet(
+                HENDELSE_ID,
+                VEDTAKSPERIODE_ID
+            )
+        )
     }
 
     @Test

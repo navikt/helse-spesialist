@@ -6,7 +6,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -16,18 +15,11 @@ internal class ArbeidsgiverDaoTest : AbstractEndToEndTest() {
         private const val NAVN = "Bedrift AS"
     }
 
-    private lateinit var dao: ArbeidsgiverDao
-
-    @BeforeEach
-    fun setup() {
-        dao = ArbeidsgiverDao(dataSource)
-    }
-
     @Test
     fun `opprette arbeidsgiver`() {
-        dao.insertArbeidsgiver(ORGNR, NAVN)
-        assertNotNull(dao.findArbeidsgiverByOrgnummer(ORGNR))
-        assertEquals(LocalDate.now(), dao.findNavnSistOppdatert(ORGNR))
+        arbeidsgiverDao.insertArbeidsgiver(ORGNR, NAVN)
+        assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR))
+        assertEquals(LocalDate.now(), arbeidsgiverDao.findNavnSistOppdatert(ORGNR))
         assertEquals(1, arbeidsgiver().size)
         assertEquals(1, arbeidsgivernavn().size)
         assertEquals(ORGNR, arbeidsgiver().first().first)
@@ -36,9 +28,9 @@ internal class ArbeidsgiverDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppdatere arbeidsgiver`() {
-        dao.insertArbeidsgiver(ORGNR, NAVN)
+        arbeidsgiverDao.insertArbeidsgiver(ORGNR, NAVN)
         val nyttNavn = "Nærbutikken ASA"
-        dao.updateNavn(ORGNR, nyttNavn)
+        arbeidsgiverDao.updateNavn(ORGNR, nyttNavn)
         assertEquals(1, arbeidsgivernavn().size)
         assertEquals(nyttNavn, arbeidsgivernavn().first().second)
     }

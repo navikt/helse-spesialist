@@ -93,13 +93,13 @@ internal class OppgaveMediatorTest() {
     @Test
     fun `henter oppgave med fødselsnummer`() {
         mediator.hentOppgave(FNR)
-        verify(exactly = 1) { oppgaveDao.hentSaksbehandlerOppgave(FNR) }
+        verify(exactly = 1) { oppgaveDao.finnOppgave(FNR) }
     }
 
     @Test
     fun `henter kun saksbehandleroppgaver`() {
         mediator.hentOppgaver()
-        verify(exactly = 1) { oppgaveDao.hentSaksbehandlerOppgaver() }
+        verify(exactly = 1) { oppgaveDao.finnOppgaver() }
     }
 
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {

@@ -1,8 +1,6 @@
 package no.nav.helse.api
 
 import AbstractEndToEndTest
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -21,7 +19,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
-import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.opprettSaksbehandler
 import no.nav.helse.tildeling.opprettSaksbehandlerOppgave
 import no.nav.helse.tildeling.opprettTildeling
@@ -57,10 +54,7 @@ class OppgaveApiTest : AbstractEndToEndTest() {
             port = httpPort
         }
         install(JsonFeature) {
-            serializer = JacksonSerializer {
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                registerModule(JavaTimeModule())
-            }
+            serializer = JacksonSerializer(jackson = objectMapper)
         }
     }
 
@@ -96,7 +90,7 @@ class OppgaveApiTest : AbstractEndToEndTest() {
     fun `får med tildelinger når man henter oppgaver`() {
         val saksbehandlerreferanse = UUID.randomUUID()
         val oppgavereferanse = UUID.randomUUID()
-        val vedtakId = dataSource.opprettVedtak().toLong()
+        val vedtakId = dataSource.opprettVedtak()
         val epost = "sara.saksbehandler@nav.no"
         dataSource.opprettSaksbehandler(saksbehandlerreferanse, epost)
         dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
@@ -105,9 +99,6 @@ class OppgaveApiTest : AbstractEndToEndTest() {
         val oppgaver = runBlocking {
             client.get<List<SaksbehandleroppgaveDto>>("/api/oppgaver")
         }
-        assertEquals(
-            epost,
-            oppgaver.find { it.oppgavereferanse == oppgavereferanse }?.saksbehandlerepost
-        )
+        assertEquals(epost, oppgaver.find { it.oppgavereferanse == oppgavereferanse }?.saksbehandlerepost)
     }
 }
