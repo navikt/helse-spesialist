@@ -26,7 +26,7 @@ class TildelingMediatorTest {
             .setDataDirectory(postgresPath.resolve("datadir"))
             .start()
         dataSource = embeddedPostgres.setupDataSource()
-        vedtakId = dataSource.opprettVedtak().toLong()
+        vedtakId = dataSource.opprettVedtak()
     }
 
     @AfterAll
@@ -94,7 +94,7 @@ class TildelingMediatorTest {
         val oppgaver = dataSource.finnSaksbehandlerOppgaver()
         val oppgave = oppgaver.first { it.oppgavereferanse == oppgavereferanse }
 
-        assertEquals(epost, oppgave.saksbehandlerepost)
+        assertEquals(oppgave.saksbehandlerepost, epost)
     }
 
     @Test
@@ -104,16 +104,18 @@ class TildelingMediatorTest {
         val saksbehandlerReferanse2 = UUID.randomUUID()
 
         val epost = "sara.saksbehandler@nav.no"
+        val navn = "Sara Saksbehandler"
         val epost2 = "mille.mellomleder@nav.no"
+        val navn2 = "Mille Mellomleder"
 
-        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
-        dataSource.opprettSaksbehandler(saksbehandlerReferanse2, epost2)
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost, navn)
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse2, epost2, navn2)
 
         TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(
             oppgavereferanse,
             saksbehandlerReferanse,
             epost,
-            "navn"
+            navn
         )
         assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
 
@@ -123,11 +125,12 @@ class TildelingMediatorTest {
                 oppgavereferanse,
                 saksbehandlerReferanse2,
                 epost2,
-                "navn2"
+                navn2
             )
         }
-        assertEquals(feil.httpKode(), HttpStatusCode.BadRequest)
-        assertEquals(feil.feil, OppgaveErAlleredeTildelt)
+        assertEquals(HttpStatusCode.Conflict, feil.httpKode())
+        assertEquals(OppgaveErAlleredeTildelt(navn), feil.feil)
+        assertEquals(navn, feil.feil.eksternKontekst["tildeltTil"])
     }
 
     @Test
@@ -136,14 +139,15 @@ class TildelingMediatorTest {
         val saksbehandlerReferanse = UUID.randomUUID()
 
         val epost = "sara.saksbehandler@nav.no"
+        val navn = "Sara Saksbehandler"
 
-        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost)
+        dataSource.opprettSaksbehandler(saksbehandlerReferanse, epost, navn)
 
         TildelingMediator(dataSource).tildelOppgaveTilSaksbehandler(
             oppgavereferanse,
             saksbehandlerReferanse,
             epost,
-            "nanv"
+            navn
         )
         assertEquals(epost, TildelingMediator(dataSource).hentSaksbehandlerFor(oppgavereferanse))
 
@@ -153,10 +157,11 @@ class TildelingMediatorTest {
                 oppgavereferanse,
                 saksbehandlerReferanse,
                 epost,
-                "navn"
+                navn
             )
         }
-        assertEquals(feil.httpKode(), HttpStatusCode.BadRequest)
-        assertEquals(feil.feil, OppgaveErAlleredeTildelt)
+        assertEquals(HttpStatusCode.Conflict, feil.httpKode())
+        assertEquals(OppgaveErAlleredeTildelt(navn), feil.feil)
+        assertEquals(navn, feil.feil.eksternKontekst["tildeltTil"])
     }
 }

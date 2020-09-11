@@ -37,9 +37,13 @@ fun DataSource.opprettVedtak() = sessionOf(this, returnGeneratedKey = true).use 
     )
 }
 
-fun DataSource.opprettSaksbehandler(saksbehandlerId: UUID, epost: String = "sara.saksbehandler@nav.no") {
+fun DataSource.opprettSaksbehandler(
+    saksbehandlerId: UUID,
+    epost: String = "sara.saksbehandler@nav.no",
+    navn: String = "Sara Saksbehandler"
+) {
     sessionOf(this).use {
-        it.persisterSaksbehandler(saksbehandlerId, "Sara Saksbehandler", epost)
+        it.persisterSaksbehandler(saksbehandlerId, navn, epost)
     }
 }
 

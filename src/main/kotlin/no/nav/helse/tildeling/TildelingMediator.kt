@@ -9,7 +9,7 @@ import javax.sql.DataSource
 
 class TildelingMediator(private val dataSource: DataSource) {
     fun hentSaksbehandlerFor(oppgavereferanse: UUID): String? = sessionOf(dataSource).use { session ->
-        session.hentSaksbehandlerFor(oppgavereferanse)
+        session.hentSaksbehandlerEpostFor(oppgavereferanse)
     }
 
     fun tildelOppgaveTilSaksbehandler(
@@ -19,9 +19,9 @@ class TildelingMediator(private val dataSource: DataSource) {
         navn: String
     ) {
         sessionOf(dataSource).use { session ->
-            val hentSaksbehandlerFor = session.hentSaksbehandlerFor(oppgavereferanse)
-            if (hentSaksbehandlerFor != null) {
-                throw ModellFeil(OppgaveErAlleredeTildelt)
+            val saksbehandlerFor = session.hentSaksbehandlerNavnFor(oppgavereferanse)
+            if (saksbehandlerFor != null) {
+                throw ModellFeil(OppgaveErAlleredeTildelt(saksbehandlerFor))
             }
             session.persisterSaksbehandler(saksbehandlerreferanse, navn, epostadresse)
             session.tildelOppgave(oppgavereferanse, saksbehandlerreferanse)

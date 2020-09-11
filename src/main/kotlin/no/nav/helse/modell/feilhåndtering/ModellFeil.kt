@@ -12,23 +12,26 @@ class ModellFeil(val feil: Feil) : RuntimeException(feil.feilkode) {
     fun feilkode() = this.feil.feilkode
 
     fun httpKode() = this.feil.kategori.httpStatus
+
+    fun loggNivå() = this.feil.kategori.loggnivå
 }
 
 enum class Loggnivå {
     Warning
 }
 
-sealed class Feil(val feilkode: String, val kategori: Feilkategori, val loggnivå: Loggnivå)
-object OppgaveErAlleredeTildelt : Feil("oppgave_er_allerede_tildelt", Brukerfeil, Loggnivå.Warning)
+sealed class Feil(val feilkode: String, val kategori: Feilkategori, val eksternKontekst: Map<String, String> = mapOf())
+data class OppgaveErAlleredeTildelt(val tildeltTil: String) :
+    Feil("oppgave_er_allerede_tildelt", Konflikt, mapOf("tildeltTil" to tildeltTil))
 
-sealed class Feilkategori(val httpStatus: HttpStatusCode)
-object Brukerfeil : Feilkategori(HttpStatusCode.BadRequest)
+sealed class Feilkategori(val httpStatus: HttpStatusCode, val loggnivå: Loggnivå)
+object Konflikt : Feilkategori(HttpStatusCode.Conflict, Loggnivå.Warning)
 
 suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda: () -> Unit) {
     try {
         lambda()
     } catch (f: ModellFeil) {
-        when (f.feil.loggnivå) {
+        when (f.loggNivå()) {
             Loggnivå.Warning -> logg(this).warn(
                 "Returnerer {} for {}",
                 keyValue("httpKode", f.httpKode().value),

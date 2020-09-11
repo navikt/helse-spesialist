@@ -75,7 +75,7 @@ class TildelingApiTest {
             .setDataDirectory(postgresPath.resolve("datadir"))
             .start()
         dataSource = embeddedPostgres.setupDataSource()
-        vedtakId = dataSource.opprettVedtak().toLong()
+        vedtakId = dataSource.opprettVedtak()
         tildelingMediator = TildelingMediator(dataSource)
         server = embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
@@ -161,9 +161,9 @@ class TildelingApiTest {
             }
         }
 
-        assertEquals(response.status, HttpStatusCode.BadRequest)
+        assertEquals(response.status, HttpStatusCode.Conflict)
         val feilDto = runBlocking { response.receive<FeilDto>() }
-        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt.feilkode)
+        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt("navn").feilkode)
     }
 
     private fun HttpRequestBuilder.authentication(oid: UUID) {
