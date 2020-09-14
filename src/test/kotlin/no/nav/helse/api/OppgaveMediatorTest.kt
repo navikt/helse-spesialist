@@ -92,8 +92,8 @@ internal class OppgaveMediatorTest() {
 
     @Test
     fun `henter oppgave med fødselsnummer`() {
-        mediator.hentOppgave(FNR)
-        verify(exactly = 1) { oppgaveDao.finnOppgave(FNR) }
+        mediator.hentHendelseId(FNR)
+        verify(exactly = 1) { oppgaveDao.finnHendelseId(FNR) }
     }
 
     @Test

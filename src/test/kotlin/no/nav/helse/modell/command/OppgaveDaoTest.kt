@@ -8,6 +8,7 @@ import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -42,6 +43,28 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
             null,
             CONTEXT_ID
         )
+    }
+
+    @Test
+    fun `finner hendelseId på oppgave ved hjelp av fødselsnummer`() {
+        nyPerson()
+        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(FNR))
+    }
+
+    @Test
+    fun `finner oppgaver`() {
+        nyPerson()
+        val oppgaver = oppgaveDao.finnOppgaver()
+        assertTrue(oppgaver.isNotEmpty())
+    }
+
+    @Test
+    fun `finner oppgaver med tildeling`() {
+        nyPerson()
+        assertEquals(null, oppgaveDao.finnOppgaver().first().saksbehandlerepost)
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+        tildelingDao.tildelOppgave(HENDELSE_ID, SAKSBEHANDLER_OID)
+        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver().first().saksbehandlerepost)
     }
 
     @Test

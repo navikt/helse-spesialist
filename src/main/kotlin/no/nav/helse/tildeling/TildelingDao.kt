@@ -2,8 +2,19 @@ package no.nav.helse.tildeling
 
 import kotliquery.Session
 import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import org.intellij.lang.annotations.Language
 import java.util.*
+import javax.sql.DataSource
+
+internal class TildelingDao(private val dataSource: DataSource) {
+    internal fun tildelOppgave(oppgavereferanse: UUID, saksbehandleroid: UUID) {
+        using(sessionOf(dataSource)) {
+            it.tildelOppgave(oppgavereferanse, saksbehandleroid)
+        }
+    }
+}
 
 fun Session.tildelOppgave(oppgaveReferanse: UUID, saksbehandlerOid: UUID) {
     @Language("PostgreSQL")

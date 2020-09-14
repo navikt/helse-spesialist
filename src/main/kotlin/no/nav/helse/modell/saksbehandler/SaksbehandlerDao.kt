@@ -1,8 +1,25 @@
 package no.nav.helse.modell.saksbehandler
 import kotliquery.Session
 import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import org.intellij.lang.annotations.Language
 import java.util.*
+import javax.sql.DataSource
+
+internal class SaksbehandlerDao(private val dataSource: DataSource) {
+    internal fun opprettSaksbehandler(
+        oid: UUID,
+        navn: String,
+        epost: String
+    ) = using(sessionOf(dataSource)) {
+        it.persisterSaksbehandler(oid, navn, epost)
+    }
+
+    internal fun finnSaksbehandler(oid: UUID) = using(sessionOf(dataSource)) {
+        it.finnSaksbehandler(oid)
+    }
+}
 
 fun Session.persisterSaksbehandler(
     oid: UUID,

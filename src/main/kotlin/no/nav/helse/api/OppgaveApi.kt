@@ -1,9 +1,9 @@
 package no.nav.helse.api
 
-import io.ktor.application.call
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.header
-import io.ktor.response.respond
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
 
@@ -24,11 +24,8 @@ internal fun Route.direkteOppgaveApi(oppgaveMediator: OppgaveMediator) {
             return@get
         }
 
-        val oppgavereferanse = oppgaveMediator.hentOppgave(fødselsnummer)?.eventId
-        if (oppgavereferanse == null) {
-            call.respond(HttpStatusCode.NotFound)
-        } else {
-            call.respond(SaksbehandleroppgavereferanseDto(oppgavereferanse))
-        }
+        oppgaveMediator.hentHendelseId(fødselsnummer)?.let {
+            call.respond(SaksbehandleroppgavereferanseDto(it))
+        } ?: call.respond(HttpStatusCode.NotFound)
     }
 }

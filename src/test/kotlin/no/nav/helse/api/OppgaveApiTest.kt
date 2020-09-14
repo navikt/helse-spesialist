@@ -1,6 +1,5 @@
 package no.nav.helse.api
 
-import AbstractEndToEndTest
 import io.ktor.application.*
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -13,29 +12,24 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.TestPerson
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
-import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
-import no.nav.helse.tildeling.opprettSaksbehandler
-import no.nav.helse.tildeling.opprettSaksbehandlerOppgave
-import no.nav.helse.tildeling.opprettTildeling
-import no.nav.helse.tildeling.opprettVedtak
+import no.nav.helse.objectMapper
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.net.ServerSocket
-import java.util.*
 import kotlin.test.assertEquals
 
-class OppgaveApiTest : AbstractEndToEndTest() {
+@TestInstance(Lifecycle.PER_CLASS)
+class OppgaveApiTest {
     private val httpPort = ServerSocket(0).use { it.localPort }
-    private lateinit var oppgaveMediator: OppgaveMediator
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
 
     @BeforeAll
     fun setup() {
-        oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource))
         embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             routing {
@@ -59,46 +53,19 @@ class OppgaveApiTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `finner oppgave for person via fødselsnummer`() {
-        val eventId = UUID.randomUUID()
-        val person = TestPerson(dataSource)
-
-        person.sendGodkjenningMessage(eventId)
-        person.sendPersoninfo(eventId)
-
-        val referanse = runBlocking {
-            client.get<SaksbehandleroppgavereferanseDto>("/api/v1/oppgave") {
-                header("fodselsnummer", person.fødselsnummer)
-            }
+    fun `returnerer 400 bad request hvis fødselsnummer ikke er satt eller er null`() {
+        val respons = runBlocking {
+            client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", null) }.execute()
         }
-
-        assertEquals(eventId, referanse.oppgavereferanse)
+        assertEquals(HttpStatusCode.BadRequest, respons.status)
     }
 
     @Test
-    fun `får 404 når oppgaven ikke finnes`() {
+    fun `får 404 not found hvis oppgaven ikke finnes`() {
+        every { oppgaveMediator.hentHendelseId(any()) } returns null
         val response = runBlocking {
-            client.get<HttpStatement>("/api/v1/oppgave") {
-                header("fodselsnummer", "42069")
-            }.execute()
+            client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", "42069") }.execute()
         }
-
         assertEquals(HttpStatusCode.NotFound, response.status)
-    }
-
-    @Test
-    fun `får med tildelinger når man henter oppgaver`() {
-        val saksbehandlerreferanse = UUID.randomUUID()
-        val oppgavereferanse = UUID.randomUUID()
-        val vedtakId = dataSource.opprettVedtak()
-        val epost = "sara.saksbehandler@nav.no"
-        dataSource.opprettSaksbehandler(saksbehandlerreferanse, epost)
-        dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)
-        dataSource.opprettTildeling(oppgavereferanse, saksbehandlerreferanse)
-
-        val oppgaver = runBlocking {
-            client.get<List<SaksbehandleroppgaveDto>>("/api/oppgaver")
-        }
-        assertEquals(epost, oppgaver.find { it.oppgavereferanse == oppgavereferanse }?.saksbehandlerepost)
     }
 }

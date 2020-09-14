@@ -16,7 +16,9 @@ import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.tildeling.TildelingDao
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -66,10 +68,12 @@ abstract class AbstractEndToEndTest {
         internal val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
     }
 
-    private var personId: Int = 0
-    private var arbeidsgiverId: Int = 0
-    private var snapshotId: Int = 0
-    private var vedtakId: Long = 0
+    private var personId: Int = -1
+    private var arbeidsgiverId: Int = -1
+    private var snapshotId: Int = -1
+    private var vedtakId: Long = -1
+    internal var oppgaveId: Long = -1
+        private set
 
     internal lateinit var personDao: PersonDao
     internal lateinit var oppgaveDao: OppgaveDao
@@ -77,6 +81,8 @@ abstract class AbstractEndToEndTest {
     internal lateinit var snapshotDao: SnapshotDao
     internal lateinit var vedtakDao: VedtakDao
     internal lateinit var commandContextDao: CommandContextDao
+    internal lateinit var tildelingDao: TildelingDao
+    internal lateinit var saksbehandlerDao: SaksbehandlerDao
 
     @BeforeAll
     fun setupAllE2E(@TempDir postgresPath: Path) {
@@ -102,6 +108,8 @@ abstract class AbstractEndToEndTest {
         snapshotDao = SnapshotDao(dataSource)
         vedtakDao = VedtakDao(dataSource)
         commandContextDao = CommandContextDao(dataSource)
+        tildelingDao = TildelingDao(dataSource)
+        saksbehandlerDao = SaksbehandlerDao(dataSource)
     }
 
     @BeforeEach
@@ -168,7 +176,7 @@ abstract class AbstractEndToEndTest {
     }
 
     protected fun opprettOppgave(saksbehandleroid: UUID = SAKSBEHANDLER_OID) {
-        oppgaveDao.insertOppgave(HENDELSE_ID, CONTEXT_ID, "OPPGAVE", Oppgavestatus.AvventerSaksbehandler, null, saksbehandleroid, vedtakId)
+        oppgaveId = oppgaveDao.insertOppgave(HENDELSE_ID, CONTEXT_ID, "OPPGAVE", Oppgavestatus.AvventerSaksbehandler, null, saksbehandleroid, vedtakId)
     }
 
     protected data class Persondata(

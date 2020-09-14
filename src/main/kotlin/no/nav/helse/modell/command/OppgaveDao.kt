@@ -18,9 +18,22 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             session.findSaksbehandlerOppgaver()
         }
 
-    internal fun finnOppgave(fødselsnummer: String) =
-        using(sessionOf(dataSource)) {
-            it.findOppgave(fødselsnummer)
+    internal fun finnHendelseId(fødselsnummer: String) =
+        using(sessionOf(dataSource)) { session ->
+            @Language("PostgreSQL")
+            val query =
+                """
+                    SELECT o.event_id as eventId
+                    FROM oppgave o
+                             JOIN vedtak v ON v.id = o.vedtak_ref
+                             JOIN person p ON v.person_ref = p.id
+                    WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
+                      AND p.fodselsnummer = :fodselsnummer;
+                """
+            session.run(
+                queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
+                    .map { UUID.fromString(it.string("eventId")) }.asSingle
+            )
         }
 
     internal fun insertOppgave(
@@ -173,7 +186,6 @@ LIMIT 500
             .asList
     )
 }
-
 
 fun Session.findOppgave(fødselsnummer: String): OppgaveDto? {
     @Language("PostgreSQL")
