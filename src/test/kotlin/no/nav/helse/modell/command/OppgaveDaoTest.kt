@@ -63,7 +63,7 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
         nyPerson()
         assertEquals(null, oppgaveDao.finnOppgaver().first().saksbehandlerepost)
         saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
-        tildelingDao.tildelOppgave(HENDELSE_ID, SAKSBEHANDLER_OID)
+        tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
         assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver().first().saksbehandlerepost)
     }
 

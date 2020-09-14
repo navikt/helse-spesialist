@@ -19,6 +19,7 @@ abstract class Command(
 
     internal abstract fun execute(session: Session): Resultat
     internal open fun resume(session: Session, løsninger: Løsninger) {}
+    internal open fun afterOppgaveOpprettet(session: Session) {}
 
     sealed class Resultat(private val oppgavestatus: Oppgavestatus) {
         internal fun tilOppgavestatus() = oppgavestatus

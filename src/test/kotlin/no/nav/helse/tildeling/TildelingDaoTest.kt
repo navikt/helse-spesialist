@@ -17,11 +17,11 @@ class TildelingDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppretter tildeling`() {
-        val oppgavereferanse = UUID.randomUUID()
+        nyPerson()
         val saksbehandleroid = UUID.randomUUID()
         saksbehandlerDao.opprettSaksbehandler(saksbehandleroid, "Navn Navnesen", "navn@navnesen.no")
-        tildelingDao.tildelOppgave(oppgavereferanse, saksbehandleroid)
-        assertTildeling(oppgavereferanse, saksbehandleroid)
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid)
+        assertTildeling(oppgaveId, saksbehandleroid)
     }
 
     @Test
@@ -32,6 +32,16 @@ class TildelingDaoTest : AbstractEndToEndTest() {
             it.tildelingForPerson(FNR)
         }
         assertEquals(SAKSBEHANDLEREPOST, saksbehandlerepost)
+    }
+
+    @Test
+    fun `slett tildeling`() {
+        nyPerson()
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+        tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
+        assertTildeling(oppgaveId, SAKSBEHANDLER_OID)
+        tildelingDao.slettTildeling(oppgaveId)
+        assertTildeling(oppgaveId, null)
     }
 
     @Test
@@ -49,14 +59,14 @@ class TildelingDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `henter den siste saksbehandlereposten for tildeling med fødselsnummer`() {
-        val nyOppgavereferanse = UUID.randomUUID()
+        val nyHendelseId = UUID.randomUUID()
         val nySaksbehandlerepost = "ny.saksbehandler@nav.no"
         nyPerson()
         tildelTilSaksbehandler()
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID())
-        opprettOppgave(oppgavereferanse = nyOppgavereferanse)
+        opprettOppgave(hendelseId = nyHendelseId)
         tildelTilSaksbehandler(
-            hendelseId = nyOppgavereferanse,
+            oppgaveId = oppgaveId,
             oid = UUID.randomUUID(),
             navn = "Ny Saksbehandler",
             epost = nySaksbehandlerepost
@@ -76,29 +86,29 @@ class TildelingDaoTest : AbstractEndToEndTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave(oppgavereferanse = oppgavereferanse)
+        opprettOppgave()
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Sara Saksbehandler", saksbehandlerEpost)
-        tildelingDao.tildelOppgave(oppgavereferanse, saksbehandlerOid, LocalDateTime.now().minusDays(1))
-        assertNull(tildelingDao.hentSaksbehandlerEpostFor(oppgavereferanse))
-        assertNull(tildelingDao.hentSaksbehandlerNavnFor(oppgavereferanse))
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusDays(1))
+        assertNull(tildelingDao.finnSaksbehandlerEpost(oppgaveId))
+        assertNull(tildelingDao.finnSaksbehandlerNavn(oppgaveId))
         assertNull(tildelingDao.tildelingForPerson(FNR))
         assertTrue(oppgaveDao.finnOppgaver().none { it.saksbehandlerepost == saksbehandlerEpost })
     }
 
     private fun tildelTilSaksbehandler(
-        hendelseId: UUID = HENDELSE_ID,
+        oppgaveId: Long = this.oppgaveId,
         oid: UUID = SAKSBEHANDLER_OID,
         navn: String = "Sara Saksbehandler",
         epost: String = SAKSBEHANDLEREPOST
     ) = sessionOf(dataSource).use {
         it.persisterSaksbehandler(oid, navn, epost)
-        it.tildelOppgave(hendelseId, oid)
+        it.tildelOppgave(oppgaveId, oid)
     }
 
-    private fun assertTildeling(oppgavereferanse: UUID, saksbehandleroid: UUID) {
+    private fun assertTildeling(oppgaveId: Long, saksbehandleroid: UUID?) {
         val result = using(sessionOf(dataSource)) { session ->
             session.run(
-                queryOf("SELECT saksbehandler_ref FROM tildeling WHERE oppgave_ref = ?", oppgavereferanse)
+                queryOf("SELECT saksbehandler_ref FROM tildeling WHERE oppgave_id_ref = ?", oppgaveId)
                     .map { UUID.fromString(it.string("saksbehandler_ref")) }.asSingle
             )
         }

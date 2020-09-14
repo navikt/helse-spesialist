@@ -2,6 +2,7 @@ package no.nav.helse.modell.tildeling
 
 import kotliquery.Session
 import no.nav.helse.modell.command.Command
+import no.nav.helse.modell.command.findOppgave
 import no.nav.helse.tildeling.ReservasjonDao
 import no.nav.helse.tildeling.tildelOppgave
 import java.time.Duration
@@ -16,8 +17,12 @@ internal class TildelOppgaveCommand(
 
 
     override fun execute(session: Session): Resultat {
-        val reservasjon = reservasjonDao.hentReservasjonFor(fødselsnummer) ?: return Resultat.Ok.System
-        session.tildelOppgave(eventId, reservasjon.saksbehandlerOid, reservasjon.gyldigTil)
         return Resultat.Ok.System
+    }
+
+    override fun afterOppgaveOpprettet(session: Session) {
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let {
+            session.tildelOppgave(session.findOppgave(fødselsnummer)!!.id, it.saksbehandlerOid, it.gyldigTil)
+        }
     }
 }

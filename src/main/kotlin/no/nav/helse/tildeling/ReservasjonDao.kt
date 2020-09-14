@@ -1,6 +1,7 @@
 package no.nav.helse.tildeling
 
 import kotliquery.Row
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -75,6 +76,27 @@ WHERE p.fodselsnummer = :fodselsnummer
         row.localDateTime("gyldig_til")
     )
 }
+
+
+internal fun Session.hentReservasjonFor(fødselsnummer: String) = run(
+        queryOf(
+            """
+        SELECT r.*
+        FROM reserver_person r
+                 JOIN person p ON p.id = r.person_ref
+        WHERE p.fodselsnummer = :fodselsnummer
+          AND r.gyldig_til > now();
+        """,
+            mapOf("fodselsnummer" to fødselsnummer.toLong())
+        )
+            .map(::tilReservasjon)
+            .asSingle
+    )
+
+private fun tilReservasjon(row: Row): ReservasjonDto = ReservasjonDto(
+    UUID.fromString(row.string("saksbehandler_ref")),
+    row.localDateTime("gyldig_til")
+)
 
 data class ReservasjonDto(
     val saksbehandlerOid: UUID,

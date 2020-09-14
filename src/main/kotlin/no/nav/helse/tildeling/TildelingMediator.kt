@@ -3,34 +3,26 @@ package no.nav.helse.tildeling
 import kotliquery.sessionOf
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
 import java.util.*
 import javax.sql.DataSource
 
-class TildelingMediator(private val dataSource: DataSource) {
-    fun hentSaksbehandlerFor(oppgavereferanse: UUID): String? = sessionOf(dataSource).use { session ->
-        session.hentSaksbehandlerEpostFor(oppgavereferanse)
-    }
+internal class TildelingMediator(private val saksbehandlerDao: SaksbehandlerDao, private val tildelingDao: TildelingDao) {
 
-    fun tildelOppgaveTilSaksbehandler(
-        oppgavereferanse: UUID,
+    internal fun tildelOppgaveTilSaksbehandler(
+        oppgaveId: Long,
         saksbehandlerreferanse: UUID,
         epostadresse: String,
         navn: String
     ) {
-        sessionOf(dataSource).use { session ->
-            val saksbehandlerFor = session.hentSaksbehandlerNavnFor(oppgavereferanse)
-            if (saksbehandlerFor != null) {
-                throw ModellFeil(OppgaveErAlleredeTildelt(saksbehandlerFor))
-            }
-            session.persisterSaksbehandler(saksbehandlerreferanse, navn, epostadresse)
-            session.tildelOppgave(oppgavereferanse, saksbehandlerreferanse)
+        val saksbehandlerFor = tildelingDao.finnSaksbehandlerNavn(oppgaveId)
+        if (saksbehandlerFor != null) {
+            throw ModellFeil(OppgaveErAlleredeTildelt(saksbehandlerFor))
         }
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse)
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerreferanse)
     }
 
-    fun fjernTildeling(oppgavereferanse: UUID) {
-        sessionOf(dataSource).use { session ->
-            session.slettOppgavetildeling(oppgavereferanse)
-        }
-    }
+    internal fun fjernTildeling(oppgaveId: Long) = tildelingDao.slettTildeling(oppgaveId)
 }

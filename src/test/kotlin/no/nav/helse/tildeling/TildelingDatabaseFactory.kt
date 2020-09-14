@@ -47,8 +47,8 @@ fun DataSource.opprettSaksbehandler(
     }
 }
 
-fun DataSource.opprettSaksbehandlerOppgave(oppgavereferanse: UUID, vedtakId: Long) {
-    sessionOf(this, returnGeneratedKey = true).use {
+fun DataSource.opprettSaksbehandlerOppgave(oppgavereferanse: UUID, vedtakId: Long): Long? {
+    return sessionOf(this, returnGeneratedKey = true).use {
         it.insertOppgave(
             oppgavereferanse,
             "TestOppgave",
@@ -61,9 +61,9 @@ fun DataSource.opprettSaksbehandlerOppgave(oppgavereferanse: UUID, vedtakId: Lon
     }
 }
 
-fun DataSource.opprettTildeling(oppgavereferanse: UUID, saksbehandlerreferanse: UUID) {
+fun DataSource.opprettTildeling(oppgaveId: Long, saksbehandlerreferanse: UUID) {
     sessionOf(this).use {
-        it.tildelOppgave(oppgavereferanse, saksbehandlerreferanse)
+        it.tildelOppgave(oppgaveId, saksbehandlerreferanse)
     }
 }
 

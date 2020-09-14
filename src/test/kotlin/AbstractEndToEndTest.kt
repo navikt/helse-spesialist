@@ -161,12 +161,12 @@ abstract class AbstractEndToEndTest {
     }
 
     protected fun opprettOppgave(
-        oppgavereferanse: UUID = HENDELSE_ID,
+        hendelseId: UUID = HENDELSE_ID,
         saksbehandleroid: UUID = SAKSBEHANDLER_OID,
         oppgavestatus: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler
     ) {
         oppgaveId = oppgaveDao.insertOppgave(
-            oppgavereferanse,
+            hendelseId,
             CONTEXT_ID,
             "OPPGAVE",
             oppgavestatus,

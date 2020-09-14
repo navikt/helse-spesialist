@@ -18,9 +18,11 @@ import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.tildeling.TildelingMediator
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
@@ -76,8 +78,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private lateinit var spleisbehovMediator: HendelseMediator
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
+    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val tildelingDao = TildelingDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
-    private val tildelingMediator = TildelingMediator(dataSource)
+    private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val rapidsConnection =
