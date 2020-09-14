@@ -10,8 +10,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.LocalDateTime
 import java.util.*
 
-internal class OppgaveMediator(private val oppgaveDao: OppgaveDao,
-                               private val vedtakDao: VedtakDao) {
+internal class OppgaveMediator(
+    private val oppgaveDao: OppgaveDao,
+    private val vedtakDao: VedtakDao
+) {
 
     private val oppgaver = mutableListOf<Oppgave>()
     private val meldinger = mutableListOf<String>()
@@ -32,7 +34,13 @@ internal class OppgaveMediator(private val oppgaveDao: OppgaveDao,
             .clear()
     }
 
-    internal fun opprett(hendelseId: UUID, contextId: UUID, vedtaksperiodeId: UUID, navn: String, status: Oppgavestatus) {
+    internal fun opprett(
+        hendelseId: UUID,
+        contextId: UUID,
+        vedtaksperiodeId: UUID,
+        navn: String,
+        status: Oppgavestatus
+    ) {
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
         val oppgaveId = oppgaveDao.insertOppgave(
             hendelseId,
@@ -46,9 +54,26 @@ internal class OppgaveMediator(private val oppgaveDao: OppgaveDao,
         køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, status)
     }
 
-    internal fun oppdater(hendelseId: UUID, contextId: UUID, vedtaksperiodeId: UUID, oppgaveId: Long, status: Oppgavestatus, ferdigstiltAvIdent: String?, ferdigstiltAvOid: UUID?) {
+    internal fun oppdater(
+        hendelseId: UUID,
+        contextId: UUID,
+        vedtaksperiodeId: UUID,
+        oppgaveId: Long,
+        status: Oppgavestatus,
+        ferdigstiltAvIdent: String?,
+        ferdigstiltAvOid: UUID?
+    ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        køMelding("oppgave_oppdatert", hendelseId, contextId, vedtaksperiodeId, oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
+        køMelding(
+            "oppgave_oppdatert",
+            hendelseId,
+            contextId,
+            vedtaksperiodeId,
+            oppgaveId,
+            status,
+            ferdigstiltAvIdent,
+            ferdigstiltAvOid
+        )
     }
 
     private fun køMelding(

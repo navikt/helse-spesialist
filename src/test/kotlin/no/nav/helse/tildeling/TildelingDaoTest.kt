@@ -30,6 +30,26 @@ class TildelingDaoTest : AbstractEndToEndTest() {
         assertEquals(SAKSBEHANDLEREPOST, saksbehandlerepost)
     }
 
+    @Test
+    fun `henter den siste saksbehandlereposten for tildeling med fødselsnummer`() {
+        val nyOppgavereferanse = UUID.randomUUID()
+        val nySaksbehandlerepost = "ny.saksbehandler@nav.no"
+        nyPerson()
+        tildelTilSaksbehandler()
+        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID())
+        opprettOppgave(oppgavereferanse = nyOppgavereferanse)
+        tildelTilSaksbehandler(
+            hendelseId = nyOppgavereferanse,
+            oid = UUID.randomUUID(),
+            navn = "Ny Saksbehandler",
+            epost = nySaksbehandlerepost
+        )
+        val saksbehandlerepost = sessionOf(dataSource).use {
+            it.tildelingForPerson(FNR)
+        }
+        assertEquals(nySaksbehandlerepost, saksbehandlerepost)
+    }
+
     private fun tildelTilSaksbehandler(
         hendelseId: UUID = HENDELSE_ID,
         oid: UUID = SAKSBEHANDLER_OID,

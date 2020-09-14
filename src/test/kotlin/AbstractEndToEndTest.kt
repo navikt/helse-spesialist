@@ -175,8 +175,8 @@ abstract class AbstractEndToEndTest {
         return vedtakDao.upsertVedtak(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId).also { vedtakId = it }
     }
 
-    protected fun opprettOppgave(saksbehandleroid: UUID = SAKSBEHANDLER_OID) {
-        oppgaveId = oppgaveDao.insertOppgave(HENDELSE_ID, CONTEXT_ID, "OPPGAVE", Oppgavestatus.AvventerSaksbehandler, null, saksbehandleroid, vedtakId)
+    protected fun opprettOppgave(oppgavereferanse: UUID = HENDELSE_ID, saksbehandleroid: UUID = SAKSBEHANDLER_OID) {
+        oppgaveId = oppgaveDao.insertOppgave(oppgavereferanse, CONTEXT_ID, "OPPGAVE", Oppgavestatus.AvventerSaksbehandler, null, saksbehandleroid, vedtakId)
     }
 
     protected data class Persondata(
