@@ -1,6 +1,5 @@
 package no.nav.helse.api
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.client.*
@@ -15,49 +14,96 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.OidcDiscovery
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.modell.feilhåndtering.FeilDto
+import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.objectMapper
-import no.nav.helse.tildeling.*
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.io.TempDir
+import no.nav.helse.tildeling.TildelingMediator
+import org.junit.jupiter.api.*
 import java.net.ServerSocket
-import java.nio.file.Path
 import java.util.*
-import javax.sql.DataSource
-import kotlin.properties.Delegates
+import kotlin.random.Random.Default.nextLong
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TildelingApiTest {
 
+    private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private val SAKSBEHANDLERIOD = UUID.randomUUID()
-    private val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
-    private val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
-
-    private lateinit var embeddedPostgres: EmbeddedPostgres
-    private lateinit var dataSource: DataSource
-    private var vedtakId by Delegates.notNull<Long>()
-    private lateinit var saksbehandlerDao: SaksbehandlerDao
-    private lateinit var tildelingDao: TildelingDao
     private lateinit var tildelingMediator: TildelingMediator
+
+    @Test
+    fun `kan tildele en oppgave til seg selv`() {
+        val oppgavereferanse = nextLong()
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/v1/tildeling/${oppgavereferanse}") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = objectMapper.createObjectNode()
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+
+        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
+        verify(exactly = 1) {
+            tildelingMediator.tildelOppgaveTilSaksbehandler(
+                oppgavereferanse,
+                SAKSBEHANDLER_OID,
+                any(),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
+        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws ModellFeil(
+            OppgaveErAlleredeTildelt("en annen saksbehandler")
+        )
+        val oppgavereferanse = nextLong()
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/v1/tildeling/${oppgavereferanse}") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = objectMapper.createObjectNode()
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+
+        assertEquals(HttpStatusCode.Conflict, response.status)
+        val feilDto = runBlocking { response.receive<FeilDto>() }
+        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt("").feilkode)
+        assertEquals("en annen saksbehandler", feilDto.kontekst["tildeltTil"])
+    }
+
+    private fun HttpRequestBuilder.authentication(oid: UUID) {
+        header(
+            "Authorization",
+            "Bearer ${
+                jwtStub.getToken(
+                    arrayOf(requiredGroup),
+                    oid.toString(),
+                    "epostadresse",
+                    clientId,
+                    issuer
+                )
+            }"
+        )
+    }
+
     private lateinit var server: ApplicationEngine
-
     private val httpPort = ServerSocket(0).use { it.localPort }
-
     private val jwtStub = JwtStub()
     private val requiredGroup = "required_group"
-    private val epostadresse = "epostadresse"
     private val clientId = "client_id"
     private val issuer = "https://jwt-provider-domain"
     private val client = HttpClient {
@@ -73,16 +119,9 @@ class TildelingApiTest {
     }
 
     @BeforeAll
-    fun setup(@TempDir postgresPath: Path) {
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        dataSource = embeddedPostgres.setupDataSource()
-        vedtakId = dataSource.opprettVedtak()
-        saksbehandlerDao = SaksbehandlerDao(dataSource)
-        tildelingDao = TildelingDao(dataSource)
-        tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
+    fun setup() {
+        tildelingMediator = mockk(relaxed = true)
+
         server = embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
@@ -106,91 +145,13 @@ class TildelingApiTest {
         }
     }
 
-    @Test
-    fun `kan tildele en oppgave til seg selv`() {
-        val oppgavereferanse = UUID.randomUUID()
-
-        opprettSaksBehandler()
-        val oppgaveId = dataSource.opprettSaksbehandlerOppgave(oppgavereferanse, vedtakId)!!
-        val response = runBlocking {
-            client.post<HttpResponse>("/api/v1/tildeling/${oppgaveId}") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
-                authentication(SAKSBEHANDLERIOD)
-            }
-        }
-
-        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
-        assertEquals(SAKSBEHANDLER_NAVN, tildelingDao.finnSaksbehandlerNavn(oppgaveId))
-    }
-
-    @Test
-    fun `kan fjerne tildeling av en oppgave`() {
-        val hendelseId = UUID.randomUUID()
-
-        opprettSaksBehandler()
-        val oppgaveId = dataSource.opprettSaksbehandlerOppgave(hendelseId, vedtakId)!!
-        tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLERIOD)
-        val response = runBlocking {
-            client.delete<HttpResponse>("/api/v1/tildeling/${oppgaveId}") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
-                authentication(SAKSBEHANDLERIOD)
-            }
-        }
-
-        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
-        assertEquals(null, tildelingDao.finnSaksbehandlerNavn(oppgaveId))
-    }
-
-    @Test
-    fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
-
-        val hendelseId = UUID.randomUUID()
-        val saksbehandlerId = UUID.randomUUID()
-
-        dataSource.opprettSaksbehandler(saksbehandlerId)
-        val oppgaveId = dataSource.opprettSaksbehandlerOppgave(hendelseId, vedtakId)!!
-        dataSource.opprettTildeling(oppgaveId, saksbehandlerId)
-
-        val response = runBlocking {
-            client.post<HttpResponse>("/api/v1/tildeling/${oppgaveId}") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
-                authentication(saksbehandlerId)
-            }
-        }
-
-        assertEquals(response.status, HttpStatusCode.Conflict)
-        val feilDto = runBlocking { response.receive<FeilDto>() }
-        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt("navn").feilkode)
-        assertEquals("Sara Saksbehandler", feilDto.kontekst["tildeltTil"])
-    }
-
-    private fun opprettSaksBehandler() =
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLERIOD, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST)
-
-    private fun HttpRequestBuilder.authentication(oid: UUID) {
-        header(
-            "Authorization",
-            "Bearer ${
-                jwtStub.getToken(
-                    arrayOf(requiredGroup),
-                    oid.toString(),
-                    epostadresse,
-                    clientId,
-                    issuer
-                )
-            }"
-        )
-    }
-
     @AfterAll
     fun tearDown() {
-        embeddedPostgres.close()
         server.stop(1000, 1000)
+    }
+
+    @AfterEach
+    fun tearDownEach () {
+        clearMocks(tildelingMediator)
     }
 }
