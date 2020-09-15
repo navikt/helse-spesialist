@@ -1,6 +1,7 @@
 package no.nav.helse.api
 
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.VedtakDao
@@ -38,18 +39,16 @@ internal class OppgaveMediator(
         hendelseId: UUID,
         contextId: UUID,
         vedtaksperiodeId: UUID,
-        navn: String,
-        status: Oppgavestatus
+        navn: String
     ) {
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
         val oppgaveId = oppgaveDao.opprettOppgave(
             hendelseId,
             contextId,
             navn,
-            status,
             vedtakRef
         )
-        køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, status)
+        køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, AvventerSaksbehandler)
     }
 
     internal fun oppdater(

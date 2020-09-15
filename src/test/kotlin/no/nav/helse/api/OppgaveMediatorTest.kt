@@ -58,8 +58,8 @@ internal class OppgaveMediatorTest() {
         mediator.oppgave(oppgave1)
         mediator.oppgave(oppgave2)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, any(), VEDTAKREF) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, any(), VEDTAKREF) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, VEDTAKREF) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, VEDTAKREF) }
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertOppgaveevent(1, "oppgave_opprettet")
@@ -86,8 +86,8 @@ internal class OppgaveMediatorTest() {
         testRapid.reset()
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         assertEquals(0, testRapid.inspektør.size)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, any(), any()) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, any(), any()) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, any()) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, any()) }
     }
 
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {

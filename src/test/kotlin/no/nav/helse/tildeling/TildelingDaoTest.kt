@@ -49,7 +49,8 @@ class TildelingDaoTest : AbstractEndToEndTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(oppgavestatus = Oppgavestatus.Ferdigstilt)
+        opprettOppgave()
+        oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Ferdigstilt, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         tildelTilSaksbehandler()
         val saksbehandlerepost = sessionOf(dataSource).use {
             it.tildelingForPerson(FNR)

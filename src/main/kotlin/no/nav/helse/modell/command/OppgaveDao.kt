@@ -2,6 +2,7 @@ package no.nav.helse.modell.command
 
 import kotliquery.*
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
@@ -40,10 +41,9 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         eventId: UUID,
         commandContextId: UUID,
         oppgavetype: String,
-        oppgavestatus: Oppgavestatus,
         vedtakRef: Long?
     ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertOppgave(eventId, oppgavetype, oppgavestatus, null, null, vedtakRef, commandContextId)
+        it.insertOppgave(eventId, oppgavetype, AvventerSaksbehandler, null, null, vedtakRef, commandContextId)
     }) { "Kunne ikke opprette oppgave" }
 
     internal fun updateOppgave(
