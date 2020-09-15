@@ -9,9 +9,7 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.features.*
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.*
+import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
@@ -32,7 +30,6 @@ import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.vedtaksperiode.PersonForSpeilDto
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.junit.jupiter.api.AfterAll
@@ -98,7 +95,8 @@ internal class RestApiTest : AbstractEndToEndTest() {
         )
         val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource))
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
-            dataSource = dataSource
+            dataSource = dataSource,
+            oppgaveDao = oppgaveDao
         )
 
         val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
@@ -108,12 +106,11 @@ internal class RestApiTest : AbstractEndToEndTest() {
 
         app = embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            basicAuthentication("🅱️")
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
             routing {
                 oppgaveApi(oppgaveMediator)
+                vedtaksperiodeApi(vedtaksperiodeMediator, spleisbehovMediator)
             }
-            vedtaksperiodeApi(vedtaksperiodeMediator, spleisbehovMediator, dataSource)
         }
 
         app.start(wait = false)
@@ -365,218 +362,6 @@ internal class RestApiTest : AbstractEndToEndTest() {
             vedtaksperiodeId.toString(),
             personForSpeilDto.arbeidsgivere.first().vedtaksperioder.first()["id"].asText()
         )
-    }
-
-    @Test
-    fun `godkjenning av vedtaksperiode`() {
-        val spleisbehovId = UUID.randomUUID()
-        val oppgaveId = "2"
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "12345",
-            aktørId = "12345",
-            organisasjonsnummer = "89123",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31),
-            warnings = emptyList()
-        )
-        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-        val response = runBlocking {
-            client.post<HttpStatement>("/api/vedtak") {
-                body = TextContent(
-                    objectMapper.writeValueAsString(
-                        GodkjenningDTO(
-                            oppgaveId,
-                            true,
-                            saksbehandlerIdent = saksbehandlerIdent,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null
-                        )
-                    ),
-                    contentType = ContentType.Application.Json
-                )
-            }.execute()
-        }
-        assertEquals(HttpStatusCode.Created, response.status)
-        val løsning = 0.until(testRapid.inspektør.size)
-            .map(testRapid.inspektør::message)
-            .first { it.hasNonNull("@løsning") }
-            .path("@løsning")
-        requireNotNull(løsning)
-        assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
-        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
-        assertNotNull(løsning["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
-    }
-
-    @Test
-    fun `godkjenning av vedtaksperiode med bruk av hendelseId`() {
-        val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "12345",
-            aktørId = "12345",
-            organisasjonsnummer = "89123",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31),
-            warnings = emptyList()
-        )
-        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-        val response = runBlocking {
-            client.post<HttpStatement>("/api/vedtak") {
-                body = TextContent(
-                    objectMapper.writeValueAsString(
-                        GodkjenningDTO(
-                            spleisbehovId.toString(),
-                            true,
-                            saksbehandlerIdent = saksbehandlerIdent,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null
-                        )
-                    ),
-                    contentType = ContentType.Application.Json
-                )
-            }.execute()
-        }
-        assertEquals(HttpStatusCode.Created, response.status)
-        val løsning = 0.until(testRapid.inspektør.size)
-            .map(testRapid.inspektør::message)
-            .first { it.hasNonNull("@løsning") }
-            .path("@løsning")
-        requireNotNull(løsning)
-        assertEquals(løsning["Godkjenning"]["godkjent"].asBoolean(), true)
-        assertEquals(løsning["Godkjenning"]["saksbehandlerIdent"].asText(), saksbehandlerIdent)
-        assertNotNull(løsning["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
-    }
-
-    @Test
-    fun `en vedtaksperiode kan kun godkjennes en gang`() {
-        val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "6745",
-            aktørId = "45637",
-            organisasjonsnummer = "56783456",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31),
-            warnings = emptyList()
-        )
-        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-        runBlocking {
-            val oppgaveId = "2"
-            val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
-                body = TextContent(
-                    objectMapper.writeValueAsString(
-                        GodkjenningDTO(
-                            oppgaveId,
-                            true,
-                            saksbehandlerIdent = saksbehandlerIdent,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null
-                        )
-                    ),
-                    contentType = ContentType.Application.Json
-                )
-            }.execute()
-            assertEquals(HttpStatusCode.Created, godkjenning1.status)
-
-            val godkjenning2 = client.post<HttpStatement>("/api/vedtak") {
-                body = TextContent(
-                    objectMapper.writeValueAsString(
-                        GodkjenningDTO(
-                            oppgaveId,
-                            true,
-                            saksbehandlerIdent = saksbehandlerIdent,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null
-                        )
-                    ),
-                    contentType = ContentType.Application.Json
-                )
-            }.execute()
-            assertEquals(HttpStatusCode.Conflict, godkjenning2.status)
-        }
-    }
-
-    @Test
-    fun `en vedtaksperiode kan kun godkjennes en gang ved bruk av eventId`() {
-        val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "6745",
-            aktørId = "45637",
-            organisasjonsnummer = "56783456",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31),
-            warnings = emptyList()
-        )
-        spleisbehovMediator.håndter(godkjenningMessage, """{"@id": "$spleisbehovId"}""")
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-        runBlocking {
-            val godkjenning1 = client.post<HttpStatement>("/api/vedtak") {
-                body = TextContent(
-                    objectMapper.writeValueAsString(
-                        GodkjenningDTO(
-                            spleisbehovId.toString(),
-                            true,
-                            saksbehandlerIdent = saksbehandlerIdent,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null
-                        )
-                    ),
-                    contentType = ContentType.Application.Json
-                )
-            }.execute()
-            assertEquals(HttpStatusCode.Created, godkjenning1.status)
-
-            val godkjenning2 = client.post<HttpStatement>("/api/vedtak") {
-                body = TextContent(
-                    objectMapper.writeValueAsString(
-                        GodkjenningDTO(
-                            spleisbehovId.toString(),
-                            true,
-                            saksbehandlerIdent = saksbehandlerIdent,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null
-                        )
-                    ),
-                    contentType = ContentType.Application.Json
-                )
-            }.execute()
-            assertEquals(HttpStatusCode.Conflict, godkjenning2.status)
-        }
     }
 
     @Test

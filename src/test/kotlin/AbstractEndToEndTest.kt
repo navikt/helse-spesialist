@@ -41,6 +41,9 @@ abstract class AbstractEndToEndTest {
 
         internal val VEDTAKSPERIODE = UUID.randomUUID()
 
+        internal const val OPPGAVETYPE = "EN OPPGAVE"
+        internal val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
+
         internal const val ORGNUMMER = "123456789"
         internal const val ORGNAVN = "NAVN AS"
 
@@ -82,7 +85,8 @@ abstract class AbstractEndToEndTest {
     private var personId: Int = -1
     private var arbeidsgiverId: Int = -1
     private var snapshotId: Int = -1
-    private var vedtakId: Long = -1
+    internal var vedtakId: Long = -1
+        private set
     internal var oppgaveId: Long = -1
         private set
 
@@ -135,7 +139,7 @@ abstract class AbstractEndToEndTest {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave()
+        opprettOppgave(vedtakId = vedtakId)
     }
 
     protected fun opprettPerson(fødselsnummer: String = FNR, aktørId: String = AKTØR): Persondata {
@@ -162,16 +166,14 @@ abstract class AbstractEndToEndTest {
 
     protected fun opprettOppgave(
         hendelseId: UUID = HENDELSE_ID,
-        saksbehandleroid: UUID = SAKSBEHANDLER_OID,
-        oppgavestatus: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler
+        oppgavestatus: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
+        vedtakId: Long? = null
     ) {
-        oppgaveId = oppgaveDao.insertOppgave(
+        oppgaveId = oppgaveDao.opprettOppgave(
             hendelseId,
             CONTEXT_ID,
-            "OPPGAVE",
+            OPPGAVETYPE,
             oppgavestatus,
-            null,
-            saksbehandleroid,
             vedtakId
         )
     }

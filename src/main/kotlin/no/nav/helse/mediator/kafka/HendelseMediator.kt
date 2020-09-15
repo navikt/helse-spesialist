@@ -297,8 +297,8 @@ internal class HendelseMediator(
     }
 
     internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
-        val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse.toLong())
-        val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse.toLong())
+        val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
+        val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = personDao.finnFødselsnummer(hendelseId)
         val godkjenningMessage = JsonMessage.newMessage(
             standardfelter("saksbehandler_løsning", fødselsnummer).apply {

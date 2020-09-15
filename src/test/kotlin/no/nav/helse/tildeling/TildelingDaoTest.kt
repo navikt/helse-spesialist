@@ -64,7 +64,7 @@ class TildelingDaoTest : AbstractEndToEndTest() {
         nyPerson()
         tildelTilSaksbehandler()
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID())
-        opprettOppgave(hendelseId = nyHendelseId)
+        opprettOppgave(hendelseId = nyHendelseId, vedtakId = vedtakId)
         tildelTilSaksbehandler(
             oppgaveId = oppgaveId,
             oid = UUID.randomUUID(),

@@ -83,7 +83,7 @@ class OverstyringE2ETest {
         )
         oppgaveDao = OppgaveDao(dataSource)
         overstyringDao = OverstyringDao(dataSource)
-        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
     }
 
     @BeforeEach

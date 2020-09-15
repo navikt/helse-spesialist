@@ -5,23 +5,17 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.Oppgavestatus.Ferdigstilt
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.command.nyny.CommandContext
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
 internal class OppgaveDaoTest : AbstractEndToEndTest() {
-
-    internal companion object {
-        private const val OPPGAVETYPE = "EN OPPGAVE"
-        private val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
-        private const val FERDIGSTILT_AV = "saksbehandler@nav.no"
-        private val FERDIGSTILT_AV_OID = UUID.randomUUID()
-    }
 
     @BeforeEach
     fun setupDaoTest() {
@@ -31,15 +25,15 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `lagre oppgave`() {
-        nyOppgave()
+        opprettOppgave()
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             HENDELSE_ID,
             LocalDate.now(),
             OPPGAVETYPE,
             OPPGAVESTATUS,
-            FERDIGSTILT_AV,
-            FERDIGSTILT_AV_OID,
+            null,
+            null,
             null,
             CONTEXT_ID
         )
@@ -47,14 +41,14 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `finner contextId`() {
-        val id = nyOppgave()
-        assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(id))
+        opprettOppgave()
+        assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(oppgaveId))
     }
 
     @Test
     fun `finner hendelseId`() {
-        val id = nyOppgave()
-        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(id))
+        opprettOppgave()
+        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(oppgaveId))
     }
 
     @Test
@@ -81,23 +75,31 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppdatere oppgave`() {
-        val nyStatus = Oppgavestatus.Ferdigstilt
-        val id = nyOppgave()
-        oppgaveDao.updateOppgave(id, nyStatus, null, null)
+        val nyStatus = Ferdigstilt
+        opprettOppgave()
+        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             HENDELSE_ID,
             LocalDate.now(),
             OPPGAVETYPE,
             nyStatus,
-            null,
-            null,
+            SAKSBEHANDLEREPOST,
+            SAKSBEHANDLER_OID,
             null,
             CONTEXT_ID
         )
     }
 
-    private fun nyOppgave() = oppgaveDao.insertOppgave(HENDELSE_ID, CONTEXT_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, FERDIGSTILT_AV, FERDIGSTILT_AV_OID, null)
+    @Test
+    fun `sjekker om det fins aktiv oppgave`() {
+        opprettOppgave()
+        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
+        assertTrue(oppgaveDao.harAktivOppgave(oppgaveId))
+
+        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, null, null)
+        assertFalse(oppgaveDao.harAktivOppgave(oppgaveId))
+    }
 
     private fun oppgave() =
         using(sessionOf(dataSource)) {

@@ -4,7 +4,6 @@ import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.TestPerson
-import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -17,7 +16,7 @@ class VedtaksperiodeMediatorEndToEndTest: AbstractEndToEndTest() {
 
     @BeforeAll
     fun setup() {
-        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
     }
 
     @Test

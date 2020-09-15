@@ -42,13 +42,11 @@ internal class OppgaveMediator(
         status: Oppgavestatus
     ) {
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
-        val oppgaveId = oppgaveDao.insertOppgave(
+        val oppgaveId = oppgaveDao.opprettOppgave(
             hendelseId,
             contextId,
             navn,
             status,
-            null,
-            null,
             vedtakRef
         )
         køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, status)

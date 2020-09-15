@@ -184,7 +184,7 @@ internal class GodkjenningE2ETest {
     private fun sendSaksbehandlerløsning(oppgaveId: Long, godkjent: Boolean) = nyHendelseId().also { id ->
         hendelseMediator.håndter(
             GodkjenningDTO(
-                oppgaveId.toString(),
+                oppgaveId,
                 godkjent,
                 SAKSBEHANDLERIDENT,
                 if (godkjent) null else "årsak",

@@ -82,7 +82,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val tildelingDao = TildelingDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
@@ -112,14 +112,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 config = azureConfig
             )
             basicAuthentication(env.getValue("ADMIN_SECRET"))
-            vedtaksperiodeApi(
-                spleisbehovMediator = spleisbehovMediator,
-                vedtaksperiodeMediator = vedtaksperiodeMediator,
-                dataSource = dataSource
-            )
             routing {
                 authenticate("saksbehandler") {
                     oppgaveApi(oppgaveMediator)
+                    vedtaksperiodeApi(
+                        spleisbehovMediator = spleisbehovMediator,
+                        vedtaksperiodeMediator = vedtaksperiodeMediator
+                    )
                 }
                 authenticate("saksbehandler-direkte") {
                     tildelingApi(tildelingMediator)

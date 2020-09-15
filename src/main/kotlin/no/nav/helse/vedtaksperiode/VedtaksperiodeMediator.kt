@@ -6,6 +6,7 @@ import kotliquery.Session
 import kotliquery.sessionOf
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.arbeidsgiver.findArbeidsgiver
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.eventIdForVedtaksperiode
 import no.nav.helse.modell.overstyring.finnOverstyring
 import no.nav.helse.modell.person.findEnhet
@@ -17,7 +18,7 @@ import no.nav.helse.tildeling.tildelingForPerson
 import java.util.*
 import javax.sql.DataSource
 
-internal class VedtaksperiodeMediator(val dataSource: DataSource) {
+internal class VedtaksperiodeMediator(private val dataSource: DataSource, private val oppgaveDao: OppgaveDao) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
             sessionOf(dataSource).use { session ->
@@ -108,4 +109,6 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
                 saksbehandlerepost = saksbehandlerepost
             )
         }
+
+    fun harAktivOppgave(oppgaveId: Long) = oppgaveDao.harAktivOppgave(oppgaveId)
 }

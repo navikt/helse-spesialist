@@ -36,16 +36,14 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun insertOppgave(
+    internal fun opprettOppgave(
         eventId: UUID,
         commandContextId: UUID,
         oppgavetype: String,
         oppgavestatus: Oppgavestatus,
-        ferdigstiltAv: String?,
-        oid: UUID?,
         vedtakRef: Long?
     ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertOppgave(eventId, oppgavetype, oppgavestatus, ferdigstiltAv, oid, vedtakRef, commandContextId)
+        it.insertOppgave(eventId, oppgavetype, oppgavestatus, null, null, vedtakRef, commandContextId)
     }) { "Kunne ikke opprette oppgave" }
 
     internal fun updateOppgave(
@@ -71,6 +69,19 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun finnHendelseId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(queryOf("SELECT event_id FROM oppgave WHERE id = ?", oppgaveId)
             .map { row -> UUID.fromString(row.string("event_id")) }.asSingle)
+    })
+
+    internal fun harAktivOppgave(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM oppgave
+                    WHERE id=?
+                      AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
+                )
+            """
+        session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
 }
 
@@ -130,20 +141,6 @@ fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
               AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
         """,
         eventId
-    )
-        .map(::oppgaveDto)
-        .asSingle
-)
-
-fun Session.findNåværendeOppgave(oppgaveId: Int): OppgaveDto? = this.run(
-    queryOf(
-        """
-            SELECT *
-            FROM oppgave
-            WHERE id=?
-              AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
-        """,
-        oppgaveId
     )
         .map(::oppgaveDto)
         .asSingle
