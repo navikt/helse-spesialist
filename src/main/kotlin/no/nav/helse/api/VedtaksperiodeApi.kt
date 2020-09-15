@@ -14,7 +14,7 @@ import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
-import no.nav.helse.modell.command.finnHendelseId
+import no.nav.helse.modell.command.finnOppgaveId
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDate
@@ -229,7 +229,7 @@ class Overstyring(
 private class Oppgavereferanse(private val referanse: String) {
 
     internal fun hendelseId(dataSource: DataSource) = either(
-        { using(sessionOf(dataSource)) { session -> session.finnHendelseId(it) } },
+        { using(sessionOf(dataSource)) { session -> session.finnOppgaveId(it) } },
         { it }
     )
 

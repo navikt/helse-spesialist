@@ -18,12 +18,12 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             session.findSaksbehandlerOppgaver()
         }
 
-    internal fun finnHendelseId(fødselsnummer: String) =
+    internal fun finnOppgaveId(fødselsnummer: String) =
         using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
             val query =
                 """
-                    SELECT o.event_id as eventId
+                    SELECT o.id as oppgaveId
                     FROM oppgave o
                              JOIN vedtak v ON v.id = o.vedtak_ref
                              JOIN person p ON v.person_ref = p.id
@@ -32,7 +32,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 """
             session.run(
                 queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
-                    .map { UUID.fromString(it.string("eventId")) }.asSingle
+                    .map { it.long("oppgaveId") }.asSingle
             )
         }
 
@@ -149,7 +149,7 @@ fun Session.findNåværendeOppgave(oppgaveId: Int): OppgaveDto? = this.run(
         .asSingle
 )
 
-fun Session.finnHendelseId(oppgaveId: Int): UUID = requireNotNull(
+fun Session.finnOppgaveId(oppgaveId: Int): UUID = requireNotNull(
     this.run(
         queryOf(
             """

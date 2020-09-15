@@ -90,18 +90,6 @@ internal class OppgaveMediatorTest() {
         verify(exactly = 1) { oppgaveDao.insertOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, any(), any(), any(), any()) }
     }
 
-    @Test
-    fun `henter oppgave med fødselsnummer`() {
-        mediator.hentHendelseId(FNR)
-        verify(exactly = 1) { oppgaveDao.finnHendelseId(FNR) }
-    }
-
-    @Test
-    fun `henter kun saksbehandleroppgaver`() {
-        mediator.hentOppgaver()
-        verify(exactly = 1) { oppgaveDao.finnOppgaver() }
-    }
-
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {
         testRapid.inspektør.message(indeks).also {
             assertEquals(navn, it.path("@event_name").asText())

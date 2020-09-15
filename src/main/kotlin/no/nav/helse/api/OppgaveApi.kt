@@ -24,7 +24,7 @@ internal fun Route.direkteOppgaveApi(oppgaveMediator: OppgaveMediator) {
             return@get
         }
 
-        oppgaveMediator.hentHendelseId(fødselsnummer)?.let {
+        oppgaveMediator.hentOppgaveId(fødselsnummer)?.let {
             call.respond(SaksbehandleroppgavereferanseDto(it))
         } ?: call.respond(HttpStatusCode.NotFound)
     }

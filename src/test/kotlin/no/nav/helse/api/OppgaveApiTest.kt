@@ -62,7 +62,7 @@ class OppgaveApiTest {
 
     @Test
     fun `får 404 not found hvis oppgaven ikke finnes`() {
-        every { oppgaveMediator.hentHendelseId(any()) } returns null
+        every { oppgaveMediator.hentOppgaveId(any()) } returns null
         val response = runBlocking {
             client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", "42069") }.execute()
         }

@@ -20,7 +20,7 @@ internal class OppgaveMediator(
 
     fun hentOppgaver() = oppgaveDao.finnOppgaver()
 
-    fun hentHendelseId(fødselsnummer: String) = oppgaveDao.finnHendelseId(fødselsnummer)
+    fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 
     internal fun oppgave(oppgave: Oppgave) {
         oppgaver.add(oppgave)

@@ -34,7 +34,7 @@ data class SaksbehandleroppgaveDto(
 )
 
 data class SaksbehandleroppgavereferanseDto(
-    val oppgavereferanse: UUID
+    val oppgavereferanse: Long
 )
 
 enum class Saksbehandleroppgavetype {

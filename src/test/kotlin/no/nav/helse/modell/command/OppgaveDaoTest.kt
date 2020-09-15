@@ -46,9 +46,21 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `finner hendelseId på oppgave ved hjelp av fødselsnummer`() {
+    fun `finner contextId`() {
+        val id = nyOppgave()
+        assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(id))
+    }
+
+    @Test
+    fun `finner hendelseId`() {
+        val id = nyOppgave()
+        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(id))
+    }
+
+    @Test
+    fun `finner oppgaveId ved hjelp av fødselsnummer`() {
         nyPerson()
-        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(FNR))
+        assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR))
     }
 
     @Test
@@ -83,18 +95,6 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
             null,
             CONTEXT_ID
         )
-    }
-
-    @Test
-    fun `finner contextId`() {
-        val id = nyOppgave()
-        assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(id))
-    }
-
-    @Test
-    fun `finner hendelseId`() {
-        val id = nyOppgave()
-        assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(id))
     }
 
     private fun nyOppgave() = oppgaveDao.insertOppgave(HENDELSE_ID, CONTEXT_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, FERDIGSTILT_AV, FERDIGSTILT_AV_OID, null)
