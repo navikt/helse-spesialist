@@ -37,6 +37,7 @@ abstract class AbstractEndToEndTest {
     private lateinit var embeddedPostgres: EmbeddedPostgres
     private lateinit var postgresConnection: Connection
     protected val testRapid = TestRapid()
+
     internal companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -132,7 +133,11 @@ abstract class AbstractEndToEndTest {
         embeddedPostgres.close()
     }
 
-    protected fun testbehov(hendelseId: UUID, type: String = "Godkjenningsbehov", vedtaksperiodeId: UUID = VEDTAKSPERIODE) {
+    protected fun testbehov(
+        hendelseId: UUID,
+        type: String = "Godkjenningsbehov",
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE
+    ) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
@@ -172,11 +177,24 @@ abstract class AbstractEndToEndTest {
         tom: LocalDate = TOM
     ): Long {
         snapshotId = snapshotDao.insertSpeilSnapshot("{}")
-        return vedtakDao.upsertVedtak(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId).also { vedtakId = it }
+        return vedtakDao.upsertVedtak(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
+            .also { vedtakId = it }
     }
 
-    protected fun opprettOppgave(oppgavereferanse: UUID = HENDELSE_ID, saksbehandleroid: UUID = SAKSBEHANDLER_OID) {
-        oppgaveId = oppgaveDao.insertOppgave(oppgavereferanse, CONTEXT_ID, "OPPGAVE", Oppgavestatus.AvventerSaksbehandler, null, saksbehandleroid, vedtakId)
+    protected fun opprettOppgave(
+        oppgavereferanse: UUID = HENDELSE_ID,
+        saksbehandleroid: UUID = SAKSBEHANDLER_OID,
+        oppgavestatus: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler
+    ) {
+        oppgaveId = oppgaveDao.insertOppgave(
+            oppgavereferanse,
+            CONTEXT_ID,
+            "OPPGAVE",
+            oppgavestatus,
+            null,
+            saksbehandleroid,
+            vedtakId
+        )
     }
 
     protected data class Persondata(

@@ -62,9 +62,11 @@ SELECT epost FROM person
      RIGHT JOIN tildeling t on o.event_id = t.oppgave_ref
      RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
 WHERE fodselsnummer = :fodselsnummer
-ORDER BY opprettet DESC;
+    AND o.status = 'AvventerSaksbehandler'
+ORDER BY o.opprettet DESC;
     """
     return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { row ->
         row.string("epost")
     }.asSingle)
 }
+

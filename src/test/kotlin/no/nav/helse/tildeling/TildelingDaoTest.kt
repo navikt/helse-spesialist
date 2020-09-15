@@ -4,10 +4,12 @@ import AbstractEndToEndTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class TildelingDaoTest : AbstractEndToEndTest() {
 
@@ -28,6 +30,19 @@ class TildelingDaoTest : AbstractEndToEndTest() {
             it.tildelingForPerson(FNR)
         }
         assertEquals(SAKSBEHANDLEREPOST, saksbehandlerepost)
+    }
+
+    @Test
+    fun `henter bare tildelinger som har en aktiv oppgave`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(oppgavestatus = Oppgavestatus.Ferdigstilt)
+        tildelTilSaksbehandler()
+        val saksbehandlerepost = sessionOf(dataSource).use {
+            it.tildelingForPerson(FNR)
+        }
+        assertNull(saksbehandlerepost)
     }
 
     @Test
