@@ -9,7 +9,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
 import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.command.finnOppgaveId
@@ -88,20 +87,11 @@ internal fun Route.vedtaksperiodeApi(
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
     post("/api/annullering") {
-        val annullering = call.receive<Annullering>()
-        val accessToken = requireNotNull(call.principal<JWTPrincipal>())
-        val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+        val annullering = call.receive<AnnulleringDto>()
+        val epostadresse = requireNotNull(call.principal<JWTPrincipal>())
+            .payload.getClaim("preferred_username").asString()
 
-        val message = AnnulleringMessage(
-            aktørId = annullering.aktørId,
-            fødselsnummer = annullering.fødselsnummer,
-            organisasjonsnummer = annullering.organisasjonsnummer,
-            fagsystemId = annullering.fagsystemId,
-            saksbehandler = annullering.saksbehandlerIdent,
-            saksbehandlerEpost = epostadresse
-        )
-
-        spleisbehovMediator.håndter(message)
+        spleisbehovMediator.håndter(annullering, epostadresse)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
@@ -168,7 +158,7 @@ data class GodkjenningDTO(
 }
 
 @JsonIgnoreProperties
-data class Annullering(
+data class AnnulleringDto(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,

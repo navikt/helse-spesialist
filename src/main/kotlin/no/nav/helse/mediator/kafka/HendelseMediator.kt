@@ -331,11 +331,27 @@ internal class HendelseMediator(
         resume(eventId, løsninger)
     }
 
-    internal fun håndter(annullering: AnnulleringMessage) {
-        // oppdater status på oppgave
-        log.info("Publiserer annullering på fagsystemId {}", keyValue("fagsystemId", annullering.fagsystemId))
-        val annulleringCommand = AnnulleringCommand(rapidsConnection, annullering)
-        sessionOf(dataSource).use(annulleringCommand::execute)
+    internal fun håndter(annulleringDto: AnnulleringDto, epostadresse: String) {
+        val annulleringMessage = annulleringDto.run {
+            JsonMessage.newMessage(
+                standardfelter("kanseller_utbetaling", fødselsnummer).apply {
+                    putAll(mapOf(
+                        "organisasjonsnummer" to organisasjonsnummer,
+                        "aktørId" to aktørId,
+                        "fagsystemId" to fagsystemId,
+                        "saksbehandler" to saksbehandlerIdent,
+                        "saksbehandlerEpost" to epostadresse
+                    ))
+                }
+            )
+        }
+
+        rapidsConnection.publish(annulleringMessage.toJson().also {
+            sikkerLogg.info(
+                "sender annullering for {}\n\t$it",
+                keyValue("fagsystemId", annulleringDto.fagsystemId)
+            )
+        })
     }
 
     override fun vedtaksperiodeEndret(
