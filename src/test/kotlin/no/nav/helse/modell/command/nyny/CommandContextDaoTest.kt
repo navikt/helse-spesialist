@@ -24,10 +24,16 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `lagrer og finner context i db`() {
+    fun `lagrer context i db`() {
         val contextId = ny()
-        assertNotNull(commandContextDao.finn(contextId))
         assertTilstand(contextId, "NY")
+    }
+
+    @Test
+    fun `finner suspendert context i db`() {
+        val contextId = suspendert()
+        assertNotNull(commandContextDao.finn(contextId))
+        assertTilstand(contextId, "NY", "SUSPENDERT")
     }
 
     @Test

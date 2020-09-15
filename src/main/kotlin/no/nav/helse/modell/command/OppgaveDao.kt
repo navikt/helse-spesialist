@@ -2,7 +2,7 @@ package no.nav.helse.modell.command
 
 import kotliquery.*
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.Oppgavestatus.*
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
@@ -83,6 +83,16 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             """
         session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
+
+    internal fun invaliderOppgaver(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+            UPDATE oppgave SET status = ?::oppgavestatus, oppdatert=now()
+            WHERE vedtak_ref in (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
+            AND status != ?::oppgavestatus
+        """
+        session.run(queryOf(query, Invalidert.name, vedtaksperiodeId, Ferdigstilt.name).asUpdate)
+    }
 }
 
 fun Session.insertOppgave(

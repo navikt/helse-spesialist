@@ -12,6 +12,7 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -40,6 +41,7 @@ internal class NyGodkjenningMessageTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
@@ -51,6 +53,7 @@ internal class NyGodkjenningMessageTest {
         vedtakDao = vedtakDao,
         commandContextDao = commandContextDao,
         snapshotDao = snapshotDao,
+        oppgaveDao = oppgaveDao,
         risikovurderingDao = risikovurderingDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,

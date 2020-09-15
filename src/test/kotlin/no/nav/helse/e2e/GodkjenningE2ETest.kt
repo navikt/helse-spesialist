@@ -144,6 +144,18 @@ internal class GodkjenningE2ETest {
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 
+    @Test
+    fun `gjør ingen ting om man får tilbake løsning på en avbrutt command context`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val hendelseId = sendGodkjenningsbehov()
+
+        sendVedtaksperiodeForkastet()
+
+        assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "AVBRUTT")
+        sendPersoninfoløsning(hendelseId)
+        assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "AVBRUTT")
+    }
+
     private fun sendVedtaksperiodeForkastet() = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, VEDTAKSPERIODE_ID, ORGNR))
     }

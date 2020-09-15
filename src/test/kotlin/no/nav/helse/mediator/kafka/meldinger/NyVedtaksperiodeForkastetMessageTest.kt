@@ -8,6 +8,7 @@ import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.VedtakDto
@@ -32,12 +33,14 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val testhendelsefabrikk =
         Hendelsefabrikk(
             vedtakDao = vedtakDao,
+            oppgaveDao = oppgaveDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             risikovurderingDao = risikovurderingDao,

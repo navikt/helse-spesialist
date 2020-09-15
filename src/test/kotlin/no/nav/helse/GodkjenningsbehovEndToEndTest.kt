@@ -11,9 +11,7 @@ import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
-import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.command.findBehov
-import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.command.findSaksbehandlerOppgaver
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -365,88 +363,6 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
             null,
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-    }
-
-    @ExperimentalContracts
-    @Test
-    fun `Vedtaksperioder som går til infotrygd invaliderer oppgaver`() {
-        sendGodkjenningsbehov()
-
-        testRapid.sendTestMessage(
-            """
-            {
-            "@event_name": "vedtaksperiode_endret",
-            "vedtaksperiodeId": "$vedtaksperiodeId",
-            "gjeldendeTilstand": "TIL_INFOTRYGD"
-            }
-        """
-        )
-
-        val oppgavestatus = session.run(
-            queryOf(
-                "SELECT * FROM oppgave where event_id=?",
-                spleisbehovId
-            ).map { Oppgavestatus.valueOf(it.string("status")) }
-                .asSingle
-        )
-
-        assertEquals(Oppgavestatus.Invalidert, oppgavestatus)
-    }
-
-    @ExperimentalContracts
-    @Test
-    fun `ignorerer TIL_INFOTRYGD når et spleisbehov er fullført`() {
-        val spleisbehovId = UUID.randomUUID()
-        val godkjenningMessage = GodkjenningMessage(
-            id = spleisbehovId,
-            fødselsnummer = "456546",
-            aktørId = "7345626534",
-            organisasjonsnummer = "756876",
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31),
-            warnings = emptyList()
-        )
-        spleisbehovMediator.håndter(godkjenningMessage, "{}")
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-
-        spleisbehovMediator.håndter(
-            spleisbehovId, SaksbehandlerLøsning(
-                godkjent = false,
-                saksbehandlerIdent = "abcd",
-                godkjenttidspunkt = LocalDateTime.now(),
-                oid = UUID.randomUUID(),
-                epostadresse = "epost",
-                årsak = null,
-                begrunnelser = null,
-                kommentar = null
-            )
-        )
-
-        assertDoesNotThrow {
-            spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
-        }
-    }
-
-    @Test
-    fun `gjør ingen ting om man får en løsning på en invalidert oppgave`() {
-        sendGodkjenningsbehov(aktørId = "7653345", fødselsnummer = "3546756", organisasjonsnummer = "6546346")
-        spleisbehovMediator.håndter(vedtaksperiodeId, TilInfotrygdMessage())
-        spleisbehovMediator.håndter(
-            spleisbehovId,
-            HentEnhetLøsning("1234"),
-            hentPersoninfoLøsning(),
-            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
-        )
-
-        assertEquals(
-            Oppgavestatus.Invalidert,
-            sessionOf(dataSource).use { it.findNåværendeOppgave(spleisbehovId)?.status })
     }
 
     @ExperimentalContracts

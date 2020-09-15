@@ -1,14 +1,18 @@
 package no.nav.helse.modell.command.nyny
 
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.command.OppgaveDao
 import java.util.*
 
 internal class AvbrytCommand(
-    private val vedtaksperiodeId: UUID,
-    private val commandContextDao: CommandContextDao
-) : Command {
-    override fun execute(context: CommandContext): Boolean {
-        context.avbryt(commandContextDao, vedtaksperiodeId)
-        return true
-    }
+    vedtaksperiodeId: UUID,
+    oppgaveDao: OppgaveDao,
+    commandContextDao: CommandContextDao
+) : MacroCommand() {
+
+    override val commands: List<Command> = listOf(
+        AvbrytOppgaveCommand(vedtaksperiodeId, oppgaveDao),
+        AvbrytContextCommand(vedtaksperiodeId, commandContextDao)
+    )
+
 }

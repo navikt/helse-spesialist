@@ -101,6 +101,31 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
         assertFalse(oppgaveDao.harAktivOppgave(oppgaveId))
     }
 
+    @Test
+    fun `kan invalidere oppgaver`() {
+        nyPerson()
+        opprettOppgave(vedtakId = vedtakId)
+        assertFalse(oppgaveDao.finnOppgaver().isEmpty())
+
+        oppgaveDao.invaliderOppgaver(VEDTAKSPERIODE)
+        assertTrue(oppgaveDao.finnOppgaver().isEmpty())
+    }
+
+    @Test
+    fun `invaliderer ikke ferdigstilte oppgaver`() {
+        nyPerson()
+        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
+
+        oppgaveDao.invaliderOppgaver(VEDTAKSPERIODE)
+        assertEquals(Ferdigstilt, statusForOppgave(oppgaveId))
+    }
+
+    private fun statusForOppgave(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
+            session.run(queryOf("SELECT status FROM oppgave WHERE id = ?", oppgaveId).map {
+                enumValueOf<Oppgavestatus>(it.string(1))
+            }.asSingle)
+        }
+
     private fun oppgave() =
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
@@ -110,9 +135,9 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
                     type = it.string("type"),
                     status = enumValueOf(it.string("status")),
                     ferdigstiltAv = it.stringOrNull("ferdigstilt_av"),
-                    ferdigstiltAvOid = it.stringOrNull("ferdigstilt_av_oid")?.let { UUID.fromString(it) },
+                    ferdigstiltAvOid = it.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
                     vedtakRef = it.longOrNull("vedtak_ref"),
-                    commandContextId = it.stringOrNull("command_context_id")?.let { UUID.fromString(it) }
+                    commandContextId = it.stringOrNull("command_context_id")?.let(UUID::fromString)
                 )
             }.asList)
         }

@@ -66,6 +66,7 @@ internal class HendelseMediator(
         vedtakDao = vedtakDao,
         commandContextDao = commandContextDao,
         snapshotDao = snapshotDao,
+        oppgaveDao = oppgaveDao,
         reservasjonsDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
@@ -93,7 +94,6 @@ internal class HendelseMediator(
             }
             ArbeidsgiverMessage.Factory(it, this)
             PåminnelseMessage.Factory(it, this)
-            TilInfotrygdMessage.Factory(it, this)
             TilbakerullingMessage.Factory(it, this)
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
@@ -429,23 +429,6 @@ internal class HendelseMediator(
                 throw err
             } finally {
                 log.info("utført kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
-            }
-        }
-    }
-
-    fun håndter(vedtaksperiodeId: UUID, tilInfotrygdMessage: TilInfotrygdMessage) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.findBehovMedSpleisReferanse(vedtaksperiodeId)?.also { spleisbehovDBDto ->
-                val nåværendeOppgave = session.findNåværendeOppgave(spleisbehovDBDto.id) ?: return@use
-                log.info(
-                    "Vedtaksperiode {} i Spleis gikk TIL_INFOTRYGD",
-                    keyValue("vedtaksperiodeId", vedtaksperiodeId)
-                )
-                spleisbehovExecutor(
-                    spleisbehovDBDto = spleisbehovDBDto,
-                    session = session,
-                    nåværendeOppgave = nåværendeOppgave
-                ).invalider()
             }
         }
     }

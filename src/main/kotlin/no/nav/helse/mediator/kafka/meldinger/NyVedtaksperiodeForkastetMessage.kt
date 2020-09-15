@@ -5,6 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.AvbrytCommand
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.MacroCommand
@@ -25,11 +26,12 @@ internal class NyVedtaksperiodeForkastetMessage(
     private val json: String,
     commandContextDao: CommandContextDao,
     vedtakDao: VedtakDao,
+    oppgaveDao: OppgaveDao,
     snapshotDao: SnapshotDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        AvbrytCommand(vedtaksperiodeId, commandContextDao),
+        AvbrytCommand(vedtaksperiodeId, oppgaveDao, commandContextDao),
         OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     )
 

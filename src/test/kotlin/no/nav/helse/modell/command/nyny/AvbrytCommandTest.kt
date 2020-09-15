@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.command.OppgaveDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -15,10 +16,11 @@ internal class AvbrytCommandTest {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
     }
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val context = CommandContext(CONTEXT)
 
-    private val command = AvbrytCommand(VEDTAKSPERIODE, commandContextDao)
+    private val command = AvbrytCommand(VEDTAKSPERIODE, oppgaveDao, commandContextDao)
 
     @BeforeEach
     fun setup() {

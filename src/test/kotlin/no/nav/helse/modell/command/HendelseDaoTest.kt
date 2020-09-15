@@ -41,6 +41,7 @@ internal class HendelseDaoTest : AbstractEndToEndTest() {
             reservasjonsDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
+            oppgaveDao = mockk(),
             oppgaveMediator = mockk(),
             risikovurderingDao = mockk(),
             miljøstyrtFeatureToggle = mockk(relaxed = true)

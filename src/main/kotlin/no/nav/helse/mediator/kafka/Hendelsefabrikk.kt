@@ -12,6 +12,7 @@ import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -29,6 +30,7 @@ internal class Hendelsefabrikk(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
+    private val oppgaveDao: OppgaveDao,
     private val commandContextDao: CommandContextDao,
     private val snapshotDao: SnapshotDao,
     private val reservasjonsDao: ReservasjonDao,
@@ -183,6 +185,7 @@ internal class Hendelsefabrikk(
             json = json,
             commandContextDao = commandContextDao,
             vedtakDao = vedtakDao,
+            oppgaveDao = oppgaveDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
