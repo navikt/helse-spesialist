@@ -35,6 +35,7 @@ internal class NyGodkjenningMessageTest {
         private const val SAKSBEHANDLER = "Sak Saksen"
         private val objectMapper = jacksonObjectMapper()
     }
+
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
@@ -42,9 +43,29 @@ internal class NyGodkjenningMessageTest {
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, commandContextDao, snapshotDao, restClient, oppgaveMediator)
+    private val hendelsefabrikk = Hendelsefabrikk(
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        vedtakDao = vedtakDao,
+        commandContextDao = commandContextDao,
+        snapshotDao = snapshotDao,
+        speilSnapshotRestClient = restClient,
+        oppgaveMediator = oppgaveMediator,
+        reservasjonsDao = mockk(),
+        saksbehandlerDao = mockk(),
+        overstyringDao = mockk()
+    )
     private val godkjenningMessage = hendelsefabrikk.nyGodkjenning(
-        HENDELSE_ID, FNR, AKTØR, ORGNR, LocalDate.MIN, LocalDate.MAX, VEDTAKSPERIODE_ID, emptyList(), Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, HENDELSE_JSON
+        id = HENDELSE_ID,
+        fødselsnummer = FNR,
+        aktørId = AKTØR,
+        organisasjonsnummer = ORGNR,
+        periodeFom = LocalDate.MIN,
+        periodeTom = LocalDate.MAX,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        warnings = emptyList(),
+        periodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
+        json = HENDELSE_JSON
     )
 
     private lateinit var context: CommandContext
@@ -82,7 +103,18 @@ internal class NyGodkjenningMessageTest {
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
-        context.add(SaksbehandlerLøsning(true, SAKSBEHANDLER, UUID.randomUUID(), "saksbehandler@nav.no", godkjenttidspunkt, null, emptyList(), null))
+        context.add(
+            SaksbehandlerLøsning(
+                godkjent = true,
+                saksbehandlerIdent = SAKSBEHANDLER,
+                oid = UUID.randomUUID(),
+                epostadresse = "saksbehandler@nav.no",
+                godkjenttidspunkt = godkjenttidspunkt,
+                årsak = null,
+                begrunnelser = emptyList(),
+                kommentar = null
+            )
+        )
 
         assertTrue(godkjenningMessage.execute(context))
         assertFalse(context.harBehov())
@@ -113,10 +145,16 @@ internal class NyGodkjenningMessageTest {
     }
 
     private fun assertJsonEquals(field: String, expected: JsonNode, actual: JsonNode) {
-        assertEquals(expected.nodeType, actual.nodeType) { "Field <$field> was not of expected value. Expected <${expected.nodeType}> got <${actual.nodeType}>" }
+        assertEquals(
+            expected.nodeType,
+            actual.nodeType
+        ) { "Field <$field> was not of expected value. Expected <${expected.nodeType}> got <${actual.nodeType}>" }
         when (expected.nodeType) {
             JsonNodeType.OBJECT -> assertJsonEquals(expected, actual)
-            else -> assertEquals(expected, actual) { "Field <$field> was not of expected value. Expected <${expected}> got <${actual}>" }
+            else -> assertEquals(
+                expected,
+                actual
+            ) { "Field <$field> was not of expected value. Expected <${expected}> got <${actual}>" }
         }
     }
 

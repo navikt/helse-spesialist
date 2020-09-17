@@ -4,22 +4,26 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.meldinger.Hendelse
-import no.nav.helse.mediator.kafka.meldinger.NyGodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
+import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 import javax.sql.DataSource
 
-internal class HendelseDao(private val dataSource: DataSource,
-                           private val hendelsefabrikk: IHendelsefabrikk
+internal class HendelseDao(
+    private val dataSource: DataSource,
+    private val hendelsefabrikk: IHendelsefabrikk
 ) {
     internal fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) { session ->
-            session.insertBehov(hendelse.id, hendelse.vedtaksperiodeId(), hendelse.toJson(), hendelse.toJson(), tilHendelsetype(hendelse).name )
+            session.insertBehov(
+                hendelse.id,
+                hendelse.vedtaksperiodeId() ?: UUID.randomUUID(),
+                hendelse.toJson(),
+                hendelse.toJson(),
+                tilHendelsetype(hendelse).name
+            )
         }
     }
 
@@ -31,21 +35,23 @@ internal class HendelseDao(private val dataSource: DataSource,
         }
 
     private fun fraHendelsetype(hendelsetype: Hendelsetype, json: String): Hendelse? =
-        when(hendelsetype) {
+        when (hendelsetype) {
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.nyNyVedtaksperiodeEndret(json)
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.nyNyVedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.nyGodkjenning(json)
+            OVERSTYRING -> hendelsefabrikk.overstyring(json)
         }
 
-    private fun tilHendelsetype(hendelse: Hendelse) = when(hendelse) {
+    private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
         is NyVedtaksperiodeEndretMessage -> VEDTAKSPERIODE_ENDRET
         is NyVedtaksperiodeForkastetMessage -> VEDTAKSPERIODE_FORKASTET
         is NyGodkjenningMessage -> GODKJENNING
+        is OverstyringMessage -> OVERSTYRING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING
+        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING
     }
 }
 

@@ -59,6 +59,7 @@ internal class GodkjenningE2ETest {
     fun activate() {
         FeatureToggle.nyGodkjenningRiver = true
     }
+
     @AfterAll
     fun deactivate() {
         FeatureToggle.nyGodkjenningRiver = false
@@ -150,19 +151,32 @@ internal class GodkjenningE2ETest {
     }
 
     private fun sendPersoninfoløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagPersoninfoløsning(id, spleisbehovId, testRapid.inspektør.contextId(), VEDTAKSPERIODE_ID, ORGNR))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagPersoninfoløsning(
+                id,
+                spleisbehovId,
+                testRapid.inspektør.contextId(),
+                VEDTAKSPERIODE_ID,
+                ORGNR
+            )
+        )
     }
 
     private fun sendSaksbehandlerløsning(oppgaveId: Long, godkjent: Boolean) = nyHendelseId().also { id ->
-        hendelseMediator.håndter(GodkjenningDTO(
-            oppgaveId.toString(),
-            godkjent,
-            SAKSBEHANDLERIDENT,
-            if (godkjent) null else "årsak",
-            null,
-            null
-        ), SAKSBEHANDLEREPOST, SAKSBEHANDLEROID)
-        testRapid.sendTestMessage(testRapid.inspektør.meldinger().last { it.path("@event_name").asText() == "saksbehandler_løsning"}.toString())
+        hendelseMediator.håndter(
+            GodkjenningDTO(
+                oppgaveId.toString(),
+                godkjent,
+                SAKSBEHANDLERIDENT,
+                if (godkjent) null else "årsak",
+                null,
+                null
+            ), SAKSBEHANDLEREPOST, SAKSBEHANDLEROID
+        )
+        testRapid.sendTestMessage(
+            testRapid.inspektør.meldinger().last { it.path("@event_name").asText() == "saksbehandler_løsning" }
+                .toString()
+        )
     }
 
     private fun assertSpleisbehov(hendelseId: UUID) {
@@ -181,10 +195,14 @@ internal class GodkjenningE2ETest {
 
     private fun vedtak(vedtaksperiodeId: UUID): Int {
         return using(sessionOf(dataSource)) { session ->
-            requireNotNull(session.run(queryOf(
-                "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?",
-                vedtaksperiodeId
-            ).map { row -> row.int(1) }.asSingle))
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?",
+                        vedtaksperiodeId
+                    ).map { row -> row.int(1) }.asSingle
+                )
+            )
         }
     }
 

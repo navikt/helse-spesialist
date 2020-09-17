@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.api.OverstyringRestDto
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.mediator.kafka.meldinger.TilbakerullingMessage
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -18,7 +18,10 @@ import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-class TestPerson(private val dataSource: DataSource) {
+internal class TestPerson(
+    private val dataSource: DataSource,
+    val rapid: TestRapid = TestRapid()
+) {
     val fødselsnummer = nyttFødselsnummer()
     val aktørId = nyAktørId(fødselsnummer)
     val orgnummer = nyttOrgnummer()
@@ -34,8 +37,6 @@ class TestPerson(private val dataSource: DataSource) {
         accessTokenClient(),
         "spleisClientId"
     )
-
-    val rapid = TestRapid()
 
     private val mediator = HendelseMediator(
         rapidsConnection = rapid,
@@ -103,18 +104,19 @@ class TestPerson(private val dataSource: DataSource) {
             .filter { UUID.fromString(it["vedtaksperiodeId"].asText()) in forIder }
     }
 
-    fun sendOverstyrteDager(dager: List<OverstyringMessage.OverstyringMessageDag>) {
+    fun sendOverstyrteDager(dager: List<OverstyringRestDto.Dag>) {
         mediator.håndter(
-            OverstyringMessage(
-                saksbehandlerOid = UUID.randomUUID(),
-                saksbehandlerEpost = "saksbehandler@epost.com",
+            OverstyringRestDto(
                 saksbehandlerNavn = "Ola Nordmann",
                 organisasjonsnummer = orgnummer,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 begrunnelse = "en begrunnelse",
-                dager = dager
-            ))
+                dager = dager,
+                saksbehandlerEpost = "ola.nordmann@nav.no",
+                saksbehandlerOid = UUID.randomUUID()
+            )
+        )
     }
 
     fun finnOppgaver() {

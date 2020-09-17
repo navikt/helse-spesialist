@@ -33,9 +33,26 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val testhendelsefabrikk = Hendelsefabrikk(mockk(), mockk(), vedtakDao, commandContextDao, snapshotDao, restClient, mockk())
+    private val testhendelsefabrikk =
+        Hendelsefabrikk(
+            vedtakDao = vedtakDao,
+            commandContextDao = commandContextDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestClient = restClient,
+            personDao = mockk(),
+            arbeidsgiverDao = mockk(),
+            reservasjonsDao = mockk(),
+            saksbehandlerDao = mockk(),
+            overstyringDao = mockk(),
+            oppgaveMediator = mockk ()
+        )
     private val context = CommandContext(CONTEXT)
-    private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(testmeldingfabrikk.lagVedtaksperiodeForkastet(HENDELSE, VEDTAKSPERIODE))
+    private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(
+        testmeldingfabrikk.lagVedtaksperiodeForkastet(
+            HENDELSE,
+            VEDTAKSPERIODE
+        )
+    )
 
     @BeforeEach
     fun setup() {

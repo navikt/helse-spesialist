@@ -13,7 +13,6 @@ import kotliquery.using
 import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.AnnulleringMessage
-import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
 import no.nav.helse.modell.command.findNåværendeOppgave
 import no.nav.helse.modell.command.finnHendelseId
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
@@ -139,7 +138,7 @@ internal fun Application.vedtaksperiodeApi(
                 val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
                 val saksbehandlerNavn = accessToken.payload.getClaim("name").asString()
 
-                val message = OverstyringMessage(
+                val message = OverstyringRestDto(
                     saksbehandlerEpost = epostadresse,
                     saksbehandlerOid = oid,
                     saksbehandlerNavn = saksbehandlerNavn,
@@ -148,7 +147,7 @@ internal fun Application.vedtaksperiodeApi(
                     aktørId = overstyring.aktørId,
                     begrunnelse = overstyring.begrunnelse,
                     dager = overstyring.dager.map {
-                        OverstyringMessage.OverstyringMessageDag(
+                        OverstyringRestDto.Dag(
                             dato = it.dato,
                             type = enumValueOf(it.type),
                             grad = it.grad
@@ -159,6 +158,25 @@ internal fun Application.vedtaksperiodeApi(
                 call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
             }
         }
+    }
+}
+
+data class OverstyringRestDto(
+    val saksbehandlerEpost: String,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val organisasjonsnummer: String,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val begrunnelse: String,
+    val dager: List<Dag>
+) {
+    data class Dag(
+        val dato: LocalDate,
+        val type: Type,
+        val grad: Int?
+    ) {
+        enum class Type { Sykedag, Feriedag, Egenmeldingsdag }
     }
 }
 

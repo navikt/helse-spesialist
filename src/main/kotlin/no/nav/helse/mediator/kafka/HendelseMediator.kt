@@ -3,10 +3,7 @@ package no.nav.helse.mediator.kafka
 import kotliquery.Session
 import kotliquery.sessionOf
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.api.GodkjenningDTO
-import no.nav.helse.api.OppgaveMediator
-import no.nav.helse.api.Rollback
-import no.nav.helse.api.RollbackDelete
+import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -17,11 +14,12 @@ import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.overstyring.BistandSaksbehandlerCommand
-import no.nav.helse.modell.overstyring.OverstyringSaksbehandlerCommand
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.deleteVedtak
@@ -30,6 +28,7 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.ReservasjonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -50,18 +49,25 @@ internal class HendelseMediator(
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
+
     private val personDao = PersonDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
+    private val reservasjonDao = ReservasjonDao(dataSource)
+    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
     private val hendelsefabrikk = Hendelsefabrikk(
-        personDao,
-        arbeidsgiverDao,
-        vedtakDao,
-        commandContextDao,
-        snapshotDao,
-        speilSnapshotRestClient,
-        oppgaveMediator
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        vedtakDao = vedtakDao,
+        commandContextDao = commandContextDao,
+        snapshotDao = snapshotDao,
+        reservasjonsDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
+        overstyringDao = overstyringDao,
+        speilSnapshotRestClient = speilSnapshotRestClient,
+        oppgaveMediator = oppgaveMediator
     )
     private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
 
@@ -86,8 +92,10 @@ internal class HendelseMediator(
             TilbakerullingMessage.Factory(it, this)
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
+            OverstyringMessage.OverstyringRiver(it, this)
         }
     }
+
     private var løsninger: Løsninger? = null
 
     private fun forbered() {
@@ -312,12 +320,27 @@ internal class HendelseMediator(
         sessionOf(dataSource).use(annulleringCommand::execute)
     }
 
-    override fun vedtaksperiodeEndret(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
+    override fun vedtaksperiodeEndret(
+        message: JsonMessage,
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        context: RapidsConnection.MessageContext
+    ) {
         utfør(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
     }
 
-    override fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext) {
-        utfør(hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
+    override fun vedtaksperiodeForkastet(
+        message: JsonMessage,
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        context: RapidsConnection.MessageContext
+    ) {
+        utfør(
+            hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
+            context
+        )
     }
 
     override fun godkjenning(
@@ -333,7 +356,29 @@ internal class HendelseMediator(
         periodetype: Saksbehandleroppgavetype?,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(hendelsefabrikk.nyGodkjenning(id, fødselsnummer, aktørId, organisasjonsnummer, periodeFom, periodeTom, vedtaksperiodeId, warnings, periodetype, message.toJson()), context)
+        utfør(
+            hendelsefabrikk.nyGodkjenning(
+                id,
+                fødselsnummer,
+                aktørId,
+                organisasjonsnummer,
+                periodeFom,
+                periodeTom,
+                vedtaksperiodeId,
+                warnings,
+                periodetype,
+                message.toJson()
+            ), context
+        )
+    }
+
+    override fun overstyring(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        context: RapidsConnection.MessageContext
+    ) {
+        utfør(hendelsefabrikk.overstyring(message.toJson()), context)
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
@@ -347,7 +392,12 @@ internal class HendelseMediator(
         utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
     }
 
-    private fun utfør(hendelse: Hendelse, context: CommandContext, contextId: UUID, messageContext: RapidsConnection.MessageContext) {
+    private fun utfør(
+        hendelse: Hendelse,
+        context: CommandContext,
+        contextId: UUID,
+        messageContext: RapidsConnection.MessageContext
+    ) {
         withMDC(mapOf("context_id" to "$contextId", "hendelse_id" to "${hendelse.id}")) {
             try {
                 log.info("utfører kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
@@ -374,7 +424,7 @@ internal class HendelseMediator(
                     keyValue("vedtaksperiodeId", vedtaksperiodeId)
                 )
                 spleisbehovExecutor(
-                    spleisbehovDBDto = spleisbehovDBDto ,
+                    spleisbehovDBDto = spleisbehovDBDto,
                     session = session,
                     nåværendeOppgave = nåværendeOppgave
                 ).invalider()
@@ -393,7 +443,7 @@ internal class HendelseMediator(
                         keyValue("vedtaksperiodeId", it)
                     )
                     spleisbehovExecutor(
-                        spleisbehovDBDto = spleisbehovDBDto ,
+                        spleisbehovDBDto = spleisbehovDBDto,
                         session = session,
                         nåværendeOppgave = nåværendeOppgave
                     ).invalider()
@@ -403,39 +453,24 @@ internal class HendelseMediator(
         }
     }
 
-    fun håndter(overstyringMessage: OverstyringMessage) {
-        val eventId = UUID.randomUUID()
-        val overstyringCommand = OverstyringSaksbehandlerCommand(
-            eventId = eventId,
-            rapidsConnection = rapidsConnection,
-            oid = overstyringMessage.saksbehandlerOid,
-            navn = overstyringMessage.saksbehandlerNavn,
-            epost = overstyringMessage.saksbehandlerEpost,
-            fødselsnummer = overstyringMessage.fødselsnummer,
-            orgnummer = overstyringMessage.organisasjonsnummer
-        )
-        val invaliderSaksbehandlerOppgaveCommand = InvaliderSaksbehandlerOppgaveCommand(
-            fødselsnummer = overstyringMessage.fødselsnummer,
-            orgnummer = overstyringMessage.organisasjonsnummer,
-            eventId = eventId
-        )
-
+    fun håndter(overstyringMessage: OverstyringRestDto) {
         overstyringsteller.inc()
 
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val commandExecutor = CommandExecutor(
-                command = overstyringCommand,
-                spesialistOid = spesialistOID,
-                eventId = eventId,
-                nåværendeOppgave = null,
-                session = session
-            )
-            commandExecutor.execute()
-            commandExecutor.resume(session, LøsningerOld().apply {
-                add(overstyringMessage)
-            })
-            invaliderSaksbehandlerOppgaveCommand.execute(session)
+        val overstyring = JsonMessage.newMessage(
+            standardfelter("overstyr_tidslinje", overstyringMessage.fødselsnummer).apply {
+                put("aktørId", overstyringMessage.aktørId)
+                put("organisasjonsnummer", overstyringMessage.organisasjonsnummer)
+                put("dager", overstyringMessage.dager)
+                put("begrunnelse", overstyringMessage.begrunnelse)
+                put("saksbehandlerOid", overstyringMessage.saksbehandlerOid)
+                put("saksbehandlerNavn", overstyringMessage.saksbehandlerNavn)
+                put("saksbehandlerEpost", overstyringMessage.saksbehandlerEpost)
+            }
+        ).also {
+            sikkerLogg.info("Publiserer overstyring: ${it.toJson()}")
         }
+
+        rapidsConnection.publish(overstyring.toJson())
     }
 
     internal fun rollbackPerson(rollback: Rollback) {
@@ -572,17 +607,17 @@ internal class HendelseMediator(
     }
 
     private fun spleisbehovExecutor(
-        spleisbehovDBDto : SpleisbehovDBDto,
+        spleisbehovDBDto: SpleisbehovDBDto,
         session: Session,
         nåværendeOppgave: OppgaveDto
     ) = CommandExecutor(
         session = session,
-        command = restore(spleisbehovDBDto ),
+        command = restore(spleisbehovDBDto),
         spesialistOid = spesialistOID,
-        eventId = spleisbehovDBDto .id,
+        eventId = spleisbehovDBDto.id,
         nåværendeOppgave = nåværendeOppgave,
         loggingData = *arrayOf(
-            keyValue("vedtaksperiodeId", spleisbehovDBDto .spleisReferanse),
+            keyValue("vedtaksperiodeId", spleisbehovDBDto.spleisReferanse),
             keyValue("eventId", spleisbehovDBDto.id)
         )
     )
@@ -602,7 +637,11 @@ internal class HendelseMediator(
         )
     }
 
-    private class Løsninger(private val hendelse: Hendelse, private val contextId: UUID, private val commandContext: CommandContext) {
+    private class Løsninger(
+        private val hendelse: Hendelse,
+        private val contextId: UUID,
+        private val commandContext: CommandContext
+    ) {
         fun add(hendelseId: UUID, contextId: UUID, løsning: Any) {
             check(hendelseId == hendelse.id)
             check(contextId == this.contextId)
@@ -611,8 +650,10 @@ internal class HendelseMediator(
 
         fun fortsett(mediator: HendelseMediator, message: String, context: RapidsConnection.MessageContext) {
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
-            sikkerLogg.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
-                "Innkommende melding:\n\t$message")
+            sikkerLogg.info(
+                "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
+                    "Innkommende melding:\n\t$message"
+            )
             mediator.utfør(hendelse, commandContext, contextId, context)
         }
     }

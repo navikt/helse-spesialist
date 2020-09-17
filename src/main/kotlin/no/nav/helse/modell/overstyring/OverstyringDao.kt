@@ -2,8 +2,7 @@ package no.nav.helse.modell.overstyring
 
 import kotliquery.Session
 import kotliquery.queryOf
-import no.nav.helse.mediator.kafka.meldinger.Dagtype
-import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
+import kotliquery.sessionOf
 import no.nav.helse.modell.arbeidsgiver.findArbeidsgiverByOrgnummer
 import no.nav.helse.modell.person.findPersonByFødselsnummer
 import no.nav.helse.modell.person.toFødselsnummer
@@ -11,13 +10,42 @@ import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import javax.sql.DataSource
+
+internal class OverstyringDao(private val dataSource: DataSource) {
+    fun persisterOverstyring(
+        hendelseId: UUID,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        begrunnelse: String,
+        overstyrteDager: List<OverstyringDagDto>,
+        saksbehandlerRef: UUID
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.persisterOverstyring(
+                hendelseId,
+                fødselsnummer,
+                organisasjonsnummer,
+                begrunnelse,
+                overstyrteDager,
+                saksbehandlerRef
+            )
+        }
+    }
+
+    fun finnOverstyring(
+        fødselsnummer: String,
+        organisasjonsnummer: String
+    ) = sessionOf(dataSource).use { it.finnOverstyring(fødselsnummer, organisasjonsnummer) }
+
+}
 
 fun Session.persisterOverstyring(
     hendelseId: UUID,
     fødselsnummer: String,
     organisasjonsnummer: String,
     begrunnelse: String,
-    overstyrteDager: List<OverstyringMessage.OverstyringMessageDag>,
+    overstyrteDager: List<OverstyringDagDto>,
     saksbehandlerRef: UUID
 ): Long? {
     @Language("PostgreSQL")
@@ -63,7 +91,7 @@ fun Session.persisterOverstyring(
                     mapOf(
                         "overstyring_ref" to overstyringRef,
                         "dato" to dag.dato,
-                        "dagtype" to dag.type.toString(),
+                        "dagtype" to dag.dagtype.toString(),
                         "grad" to dag.grad
                     )
                 ).asUpdate
@@ -84,30 +112,36 @@ FROM overstyring o
 WHERE p.fodselsnummer = ?
   AND a.orgnummer = ?
     """
-    return this.run(queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong()).map { overstyringRow ->
-        val id = overstyringRow.long("id")
+    return this.run(
+        queryOf(
+            finnOverstyringQuery,
+            fødselsnummer.toLong(),
+            organisasjonsnummer.toLong()
+        ).map { overstyringRow ->
+            val id = overstyringRow.long("id")
 
-        OverstyringDto(
-            hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
-            fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
-            organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
-            begrunnelse = overstyringRow.string("begrunnelse"),
-            timestamp = overstyringRow.localDateTime("tidspunkt"),
-            saksbehandlerNavn = overstyringRow.string("navn"),
-            overstyrteDager = this.run(queryOf(
-                "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
-            ).map { overstyringDagRow ->
-                OverstyringDagDto(
-                    dato = overstyringDagRow.localDate("dato"),
-                    dagtype = enumValueOf(overstyringDagRow.string("dagtype")),
-                    grad = overstyringDagRow.intOrNull("grad")
+            OverstyringDto(
+                hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
+                fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
+                begrunnelse = overstyringRow.string("begrunnelse"),
+                timestamp = overstyringRow.localDateTime("tidspunkt"),
+                saksbehandlerNavn = overstyringRow.string("navn"),
+                overstyrteDager = this.run(
+                    queryOf(
+                        "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
+                    ).map { overstyringDagRow ->
+                        OverstyringDagDto(
+                            dato = overstyringDagRow.localDate("dato"),
+                            dagtype = enumValueOf(overstyringDagRow.string("dagtype")),
+                            grad = overstyringDagRow.intOrNull("grad")
+                        )
+                    }.asList
                 )
-            }.asList
             )
-        )
-    }.asList)
+        }.asList
+    )
 }
-
 
 data class OverstyringDto(
     val hendelseId: UUID,
@@ -124,3 +158,5 @@ data class OverstyringDagDto(
     val dagtype: Dagtype,
     val grad: Int?
 )
+
+enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag }

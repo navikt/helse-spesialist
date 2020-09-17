@@ -31,7 +31,18 @@ internal class HendelseDaoTest : AbstractEndToEndTest() {
 
     @BeforeAll
     fun setup() {
-        hendelsefabrikk = Hendelsefabrikk(personDao, arbeidsgiverDao, vedtakDao, commandContextDao, snapshotDao, restClient, mockk())
+        hendelsefabrikk = Hendelsefabrikk(
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            commandContextDao = commandContextDao,
+            snapshotDao = snapshotDao,
+            speilSnapshotRestClient = restClient,
+            reservasjonsDao = mockk(),
+            saksbehandlerDao = mockk(),
+            overstyringDao = mockk(),
+            oppgaveMediator = mockk()
+        )
         dao = HendelseDao(dataSource, hendelsefabrikk)
     }
 

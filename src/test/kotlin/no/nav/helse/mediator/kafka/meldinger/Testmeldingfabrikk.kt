@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
+import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -230,6 +231,25 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 kommentar?.also { put("kommentar", it) }
             }
         )
+
+    fun lagOverstyring(
+        id: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String = "orgnr",
+        dager: List<OverstyringDagDto> = emptyList(),
+        begrunnelse: String = "begrunnelse",
+        saksbehandlerOid: UUID = UUID.randomUUID(),
+        saksbehandlerNavn: String = "saksbehandler",
+        saksbehandlerEpost: String = "saksbehandler@nav.no"
+    ) = nyHendelse(id, "overstyr_tidslinje", mapOf(
+        "aktørId" to aktørId,
+        "fødselsnummer" to fødselsnummer,
+        "organisasjonsnummer" to organisasjonsnummer,
+        "dager" to dager,
+        "begrunnelse" to begrunnelse,
+        "saksbehandlerOid" to saksbehandlerOid,
+        "saksbehandlerNavn" to saksbehandlerNavn,
+        "saksbehandlerEpost" to saksbehandlerEpost
+    ))
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()

@@ -11,7 +11,7 @@ internal interface Hendelse : Command {
     val id: UUID
 
     fun fødselsnummer(): String
-    fun vedtaksperiodeId(): UUID
+    fun vedtaksperiodeId(): UUID?
 
     fun toJson(): String
 }
@@ -33,4 +33,5 @@ internal interface IHendelseMediator {
         periodetype: Saksbehandleroppgavetype?,
         context: RapidsConnection.MessageContext
     )
+    fun overstyring(message: JsonMessage, id: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext)
 }

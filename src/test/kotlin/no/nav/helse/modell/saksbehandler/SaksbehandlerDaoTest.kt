@@ -17,6 +17,12 @@ internal class SaksbehandlerDaoTest : AbstractEndToEndTest() {
         assertSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
     }
 
+    @Test
+    fun `tåler dobbel insert`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+    }
+
     private fun assertSaksbehandler(oid: UUID, navn: String, epost: String) {
         val saksbehandler = saksbehandlere.firstOrNull { it.oid == oid }
         assertNotNull(saksbehandler)

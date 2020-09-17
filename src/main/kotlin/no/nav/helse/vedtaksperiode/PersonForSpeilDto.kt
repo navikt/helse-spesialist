@@ -1,7 +1,7 @@
 package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.kafka.meldinger.Dagtype
+import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
 import java.time.LocalDate
