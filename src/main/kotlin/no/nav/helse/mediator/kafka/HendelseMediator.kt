@@ -9,8 +9,6 @@ import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
-import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
-import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.overstyring.BistandSaksbehandlerCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -494,22 +492,34 @@ internal class HendelseMediator(
                 put("saksbehandlerEpost", overstyringMessage.saksbehandlerEpost)
             }
         ).also {
-            sikkerLogg.info("Publiserer overstyring: ${it.toJson()}")
+            sikkerLogg.info("Publiserer overstyring:\n${it.toJson()}")
         }
 
         rapidsConnection.publish(overstyring.toJson())
     }
 
-    internal fun rollbackPerson(rollback: Rollback) {
-        log.info("Publiserer rollback på aktør: ${rollback.aktørId}")
-        val rollbackPersonCommand = RollbackPersonCommand(rapidsConnection, rollback)
-        sessionOf(dataSource).use(rollbackPersonCommand::execute)
+    internal fun håndter(tilbakerullingMedSlettingDTO: TilbakerullingMedSlettingDTO) {
+
+        val tilbakerulling = JsonMessage.newMessage(
+            standardfelter("rollback_person_delete", tilbakerullingMedSlettingDTO.fødselsnummer).apply {
+                put("aktørId", tilbakerullingMedSlettingDTO.aktørId)
+            }
+        ).also {
+            sikkerLogg.info("Publiserer rollback_person_delete for ${tilbakerullingMedSlettingDTO.fødselsnummer}:\n${it.toJson()}")
+        }
+        rapidsConnection.publish(tilbakerulling.toJson())
     }
 
-    internal fun rollbackDeletePerson(rollback: RollbackDelete) {
-        log.info("Publiserer rollback_delete på aktør: ${rollback.aktørId}")
-        val rollbackDeletePersonCommand = RollbackDeletePersonCommand(rapidsConnection, rollback)
-        sessionOf(dataSource).use(rollbackDeletePersonCommand::execute)
+    internal fun håndter(tilbakerullingDTO: TilbakerullingDTO) {
+        val tilbakerulling = JsonMessage.newMessage(
+            standardfelter("rollback_person", tilbakerullingDTO.fødselsnummer).apply {
+                put("aktørId", tilbakerullingDTO.aktørId)
+                put("personVersjon", tilbakerullingDTO.personVersjon)
+            }
+        ).also {
+            sikkerLogg.info("Publiserer rollback_person for ${tilbakerullingDTO.fødselsnummer}:\n${it.toJson()}")
+        }
+        rapidsConnection.publish(tilbakerulling.toJson())
     }
 
     private fun resume(eventId: UUID, løsninger: LøsningerOld) {

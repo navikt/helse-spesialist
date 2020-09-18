@@ -5,11 +5,13 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.server.testing.*
+import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.basicAuthentication
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.objectMapper
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -32,7 +34,7 @@ internal class AdminApiKtTest {
                 setBody("""[{ "fødselsnummer": "fnr", "aktørId": "aktørId", "personVersjon": 4 }]""")
             }) {
                 assertEquals(HttpStatusCode.OK, response.status())
-                verify { mediator.rollbackPerson(any()) }
+                verify(exactly = 1) { mediator.håndter(TilbakerullingDTO("fnr", "aktørId", 4L)) }
             }
         }
     }
@@ -51,7 +53,7 @@ internal class AdminApiKtTest {
                 setBody("""[{ "fødselsnummer": "fnr", "aktørId": "aktørId" }]""")
             }) {
                 assertEquals(HttpStatusCode.OK, response.status())
-                verify { mediator.rollbackDeletePerson(any()) }
+                verify(exactly = 1) { mediator.håndter(TilbakerullingMedSlettingDTO("fnr", "aktørId")) }
             }
         }
     }
@@ -70,8 +72,13 @@ internal class AdminApiKtTest {
                 setBody("""[{ "fødselsnummer": "fnr", "aktørId": "aktørId" }]""")
             }) {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
-                verify(exactly = 0) { mediator.rollbackDeletePerson(any()) }
+                verify(exactly = 0) { mediator.håndter(any<TilbakerullingMedSlettingDTO>()) }
             }
         }
+    }
+
+    @AfterEach
+    fun setupAfterEach() {
+        clearMocks(mediator)
     }
 }

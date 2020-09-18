@@ -13,16 +13,16 @@ internal fun Application.adminApi(spleisbehovMediator: HendelseMediator) {
         authenticate("admin") {
             route("/admin") {
                 post("/rollback") {
-                    val rollback = call.receive<Array<Rollback>>()
+                    val rollback = call.receive<Array<TilbakerullingDTO>>()
                     rollback.forEach {
-                        spleisbehovMediator.rollbackPerson(it)
+                        spleisbehovMediator.håndter(it)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
                 post("/rollback_delete") {
-                    val rollback = call.receive<Array<RollbackDelete>>()
+                    val rollback = call.receive<Array<TilbakerullingMedSlettingDTO>>()
                     rollback.forEach {
-                        spleisbehovMediator.rollbackDeletePerson(it)
+                        spleisbehovMediator.håndter(it)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -31,5 +31,5 @@ internal fun Application.adminApi(spleisbehovMediator: HendelseMediator) {
     }
 }
 
-data class Rollback(val fødselsnummer: String, val aktørId: String, val personVersjon: Long)
-data class RollbackDelete(val fødselsnummer: String, val aktørId: String)
+data class TilbakerullingDTO(val fødselsnummer: String, val aktørId: String, val personVersjon: Long)
+data class TilbakerullingMedSlettingDTO(val fødselsnummer: String, val aktørId: String)
