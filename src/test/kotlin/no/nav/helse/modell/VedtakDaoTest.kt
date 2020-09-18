@@ -80,6 +80,17 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
         assertEquals(type, vedtaksperiodetype(hendelseId))
     }
 
+    @Test
+    fun `fjerner vedtak`() {
+        val NY_VEDTAKSPERIODE = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettVedtaksperiode(NY_VEDTAKSPERIODE)
+        vedtakDao.fjernVedtaksperioder(listOf(VEDTAKSPERIODE, NY_VEDTAKSPERIODE))
+        assertEquals(0, vedtak().size)
+    }
+
     private fun assertWarnings(hendelseId: UUID, warnings: List<String>) {
         assertEquals(warnings, finnWarnings(hendelseId))
     }

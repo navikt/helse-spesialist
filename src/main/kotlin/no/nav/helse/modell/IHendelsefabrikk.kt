@@ -49,4 +49,12 @@ internal interface IHendelsefabrikk {
         json: String
     ): OverstyringMessage
     fun overstyring(json: String): OverstyringMessage
+
+    fun tilbakerulling(
+        id: UUID,
+        fødselsnummer: String,
+        vedtaksperiodeIder: List<UUID>,
+        json: String
+    ): NyTilbakerullingMessage
+    fun tilbakerulling(json: String): NyTilbakerullingMessage
 }

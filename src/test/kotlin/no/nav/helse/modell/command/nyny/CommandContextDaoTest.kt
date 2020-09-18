@@ -16,11 +16,10 @@ import kotlin.test.assertNotNull
 internal class CommandContextDaoTest : AbstractEndToEndTest() {
 
     private companion object {
-        private const val FNR = "FNR"
-        private val VEDTAKSPERIODE1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE2 = UUID.randomUUID()
-        private val HENDELSE1 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE1, FNR)
-        private val HENDELSE2 = TestHendelse(UUID.randomUUID(), VEDTAKSPERIODE2, FNR)
+        private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
+        private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
+        private lateinit var HENDELSE1: TestHendelse
+        private lateinit var HENDELSE2: TestHendelse
     }
 
     @Test
@@ -49,7 +48,7 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
         val contextId2 = ny()
         val contextId3 = suspendert()
         val contextId4 = ferdig()
-        avbryt(contextId1)
+        avbrytForPerson(contextId1)
         assertTilstand(contextId2, "NY", "AVBRUTT")
         assertTilstand(contextId3, "NY", "SUSPENDERT", "AVBRUTT")
         assertTilstand(contextId4, "NY", "FERDIG")
@@ -71,9 +70,18 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
     fun `avbryter bare for riktig vedtaksperiode`() {
         val contextId1 = ny(HENDELSE1)
         val contextId2 = ny(HENDELSE2)
-        avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId())
+        avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId()!!)
         assertTilstand(contextId1, "NY", "AVBRUTT")
         assertTilstand(contextId2, "NY")
+    }
+
+    @Test
+    fun `avbryter alle contexter for person`() {
+        val contextId1 = ny(HENDELSE1)
+        val contextId2 = ny(HENDELSE2)
+        avbrytForPerson(UUID.randomUUID())
+        assertTilstand(contextId1, "NY", "AVBRUTT")
+        assertTilstand(contextId2, "NY", "AVBRUTT")
     }
 
     private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
@@ -92,8 +100,12 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
         commandContextDao.feil(hendelse, uuid)
     }
 
-    private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE1) {
+    private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1) {
         commandContextDao.avbryt(vedtaksperiodeId, contextId)
+    }
+
+    private fun avbrytForPerson(contextId: UUID, fødselsnummer: String = FNR) {
+        commandContextDao.avbryt(fødselsnummer, contextId)
     }
 
     private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {
@@ -112,13 +124,13 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
 
     @BeforeEach
     internal fun setup() {
+        HENDELSE1 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID1)
+        HENDELSE2 = testhendelse(UUID.randomUUID(), vedtaksperiodeId = VEDTAKSPERIODE_ID2)
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(VEDTAKSPERIODE1)
-        opprettVedtaksperiode(VEDTAKSPERIODE2)
-        testbehov(HENDELSE1.id, "Godkjenningsbehov", VEDTAKSPERIODE1)
-        vedtakDao.opprettKobling(VEDTAKSPERIODE1, HENDELSE1.id)
-        testbehov(HENDELSE2.id, "Godkjenningsbehov", VEDTAKSPERIODE2)
-        vedtakDao.opprettKobling(VEDTAKSPERIODE2, HENDELSE2.id)
+        opprettVedtaksperiode(VEDTAKSPERIODE_ID1)
+        opprettVedtaksperiode(VEDTAKSPERIODE_ID2)
+        vedtakDao.opprettKobling(VEDTAKSPERIODE_ID1, HENDELSE1.id)
+        vedtakDao.opprettKobling(VEDTAKSPERIODE_ID2, HENDELSE2.id)
     }
 }

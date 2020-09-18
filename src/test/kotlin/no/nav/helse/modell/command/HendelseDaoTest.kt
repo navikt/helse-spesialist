@@ -21,8 +21,6 @@ import java.util.*
 internal class HendelseDaoTest : AbstractEndToEndTest() {
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()
-        private const val FNR = "fnr"
-        private const val AKTØR = "aktør"
     }
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)

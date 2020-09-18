@@ -93,6 +93,26 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         """
         session.run(queryOf(query, Invalidert.name, vedtaksperiodeId, Ferdigstilt.name).asUpdate)
     }
+
+    internal fun invaliderOppgaver(fødselsnummer: String) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+            UPDATE oppgave SET status = :nyStatus::oppgavestatus, oppdatert=now()
+            WHERE vedtak_ref in (SELECT id FROM vedtak WHERE person_ref = (
+                SELECT id FROM person WHERE fodselsnummer = :fodselsnummer
+            ))
+            AND status != :ignorertStatus::oppgavestatus
+        """
+        session.run(
+            queryOf(
+                query, mapOf(
+                    "nyStatus" to Invalidert.name,
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "ignorertStatus" to Ferdigstilt.name
+                )
+            ).asUpdate
+        )
+    }
 }
 
 fun Session.insertOppgave(

@@ -133,6 +133,33 @@ internal class Hendelsefabrikk(
         )
     }
 
+    override fun tilbakerulling(
+        id: UUID,
+        fødselsnummer: String,
+        vedtaksperiodeIder: List<UUID>,
+        json: String
+    ): NyTilbakerullingMessage {
+        return NyTilbakerullingMessage(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            json = json,
+            vedtaksperiodeIder = vedtaksperiodeIder,
+            commandContextDao = commandContextDao,
+            oppgaveDao = oppgaveDao,
+            vedtakDao = vedtakDao
+        )
+    }
+
+    override fun tilbakerulling(json: String): NyTilbakerullingMessage {
+        val jsonNode = mapper.readTree(json)
+        return tilbakerulling(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer ").asText(),
+            vedtaksperiodeIder = jsonNode.path("vedtaksperioderSlettet").map { UUID.fromString(it.asText()) },
+            json = json
+        )
+    }
+
     private fun JsonNode.toOverstyrteDagerDto() =
         map {
             OverstyringDagDto(

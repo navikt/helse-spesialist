@@ -67,6 +67,17 @@ internal class VedtakDao(private val dataSource: DataSource) {
         meldinger.forEach { melding -> session.insertWarning(melding, hendelseId) }
     }
 
+    internal fun fjernVedtaksperioder(vedtaksperiodeIder: List<UUID>) {
+        @Language("PostgreSQL")
+        val statement = """
+            DELETE FROM vedtak WHERE vedtaksperiode_id in (${vedtaksperiodeIder.joinToString { "?" }})
+        """
+
+        using(sessionOf(dataSource)) {
+            it.run(queryOf(statement, *vedtaksperiodeIder.toTypedArray()).asUpdate)
+        }
+    }
+
     internal fun leggTilVedtaksperiodetype(hendelseId: UUID, type: Saksbehandleroppgavetype) =
         using(sessionOf(dataSource)) {
             it.insertSaksbehandleroppgavetype(type, hendelseId)

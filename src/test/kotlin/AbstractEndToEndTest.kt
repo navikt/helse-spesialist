@@ -119,16 +119,30 @@ abstract class AbstractEndToEndTest {
         testRapid.reset()
     }
 
+    internal fun testhendelse(
+        hendelseId: UUID = HENDELSE_ID,
+        vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
+        fødselsnummer: String = FNR
+    ) = TestHendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
+        testbehov(
+            hendelseId = it.id,
+            fødselsnummer = it.fødselsnummer(),
+            vedtaksperiodeId = it.vedtaksperiodeId()
+        )
+    }
+
     protected fun testbehov(
         hendelseId: UUID,
-        type: String = "Godkjenningsbehov",
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE
+        fødselsnummer: String = FNR,
+        vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
+        type: String = "Godkjenningsbehov"
     ) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "INSERT INTO spleisbehov(id, data, original, spleis_referanse, type) VALUES(?, ?::json, ?::json, ?, ?)",
+                    "INSERT INTO spleisbehov(id, fodselsnummer, data, original, spleis_referanse, type) VALUES(?, ?, ?::json, ?::json, ?, ?)",
                     hendelseId,
+                    fødselsnummer.toLong(),
                     "{}",
                     "{}",
                     vedtaksperiodeId,

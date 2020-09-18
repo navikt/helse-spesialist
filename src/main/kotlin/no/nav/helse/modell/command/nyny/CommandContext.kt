@@ -50,6 +50,10 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         commandContextDao.avbryt(vedtaksperiodeId, id)
     }
 
+    internal fun avbryt(commandContextDao: CommandContextDao, fødselsnummer: String) {
+        commandContextDao.avbryt(fødselsnummer, id)
+    }
+
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
     internal fun utfør(commandContextDao: CommandContextDao, hendelse: Hendelse) = try {

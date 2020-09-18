@@ -29,11 +29,14 @@ internal class HendelseDao(
 
     private fun TransactionalSession.opprettHendelse(hendelse: Hendelse) {
         @Language("PostgreSQL")
-        val hendelseStatement =
-            "INSERT INTO spleisbehov(id, spleis_referanse, data, original, type) VALUES(?, ?, CAST(? as json), CAST(? as json), ?)"
+        val hendelseStatement = """
+            INSERT INTO spleisbehov(id, fodselsnummer, spleis_referanse, data, original, type)
+                VALUES(?, ?, ?, CAST(? as json), CAST(? as json), ?)
+            """
         run(queryOf(
             hendelseStatement,
             hendelse.id,
+            hendelse.fødselsnummer().toLong(),
             hendelse.vedtaksperiodeId()?: UUID.randomUUID(),
             hendelse.toJson(),
             hendelse.toJson(),
@@ -73,6 +76,7 @@ internal class HendelseDao(
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.nyNyVedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.nyGodkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyring(json)
+            TILBAKERULLING -> hendelsefabrikk.tilbakerulling(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -80,11 +84,12 @@ internal class HendelseDao(
         is NyVedtaksperiodeForkastetMessage -> VEDTAKSPERIODE_FORKASTET
         is NyGodkjenningMessage -> GODKJENNING
         is OverstyringMessage -> OVERSTYRING
+        is NyTilbakerullingMessage -> TILBAKERULLING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING
+        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING, TILBAKERULLING
     }
 }
 

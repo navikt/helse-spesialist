@@ -34,4 +34,5 @@ internal interface IHendelseMediator {
         context: RapidsConnection.MessageContext
     )
     fun overstyring(message: JsonMessage, id: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext)
+    fun tilbakerulling(message: JsonMessage, id: UUID, fødselsnummer: String, vedtaksperiodeIder: List<UUID>, context: RapidsConnection.MessageContext)
 }

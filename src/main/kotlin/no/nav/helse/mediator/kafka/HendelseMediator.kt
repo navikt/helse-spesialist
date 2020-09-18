@@ -83,6 +83,7 @@ internal class HendelseMediator(
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             if (FeatureToggle.nyGodkjenningRiver) {
                 NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
+                NyTilbakerullingMessage.TilbakerullingRiver(it, this)
                 HentPersoninfoLøsning.PersoninfoRiver(it, this)
                 HentEnhetLøsning.HentEnhetRiver(it, this)
                 HentInfotrygdutbetalingerLøsning.InfotrygdutbetalingerRiver(it, this)
@@ -412,6 +413,16 @@ internal class HendelseMediator(
         context: RapidsConnection.MessageContext
     ) {
         utfør(hendelsefabrikk.overstyring(message.toJson()), context)
+    }
+
+    override fun tilbakerulling(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        vedtaksperiodeIder: List<UUID>,
+        context: RapidsConnection.MessageContext
+    ) {
+        utfør(hendelsefabrikk.tilbakerulling(message.toJson()), context)
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
