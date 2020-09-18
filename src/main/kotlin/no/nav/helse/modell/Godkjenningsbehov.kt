@@ -9,11 +9,13 @@ import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
 import no.nav.helse.modell.command.MacroCommand
 import no.nav.helse.modell.person.OppdaterPersonCommand
 import no.nav.helse.modell.person.OpprettPersonCommand
+import no.nav.helse.modell.tildeling.TildelOppgaveCommand
 import no.nav.helse.modell.vedtak.OpprettVedtakCommand
 import no.nav.helse.modell.vedtak.SaksbehandlerGodkjenningCommand
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.tildeling.ReservasjonDao
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -26,6 +28,7 @@ internal class Godkjenningsbehov(
     override val fødselsnummer: String,
     override val orgnummer: String,
     override val vedtaksperiodeId: UUID,
+    private val reservasjonDao: ReservasjonDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : MacroCommand(
     eventId = id,
@@ -54,6 +57,7 @@ internal class Godkjenningsbehov(
             eventId = id,
             parent = this
         ),
+        TildelOppgaveCommand(fødselsnummer, reservasjonDao, id, this),
         SaksbehandlerGodkjenningCommand(id, this)
     )
 
@@ -78,7 +82,8 @@ internal class Godkjenningsbehov(
             id: UUID,
             vedtaksperiodeId: UUID,
             data: String,
-            speilSnapshotRestClient: SpeilSnapshotRestClient
+            speilSnapshotRestClient: SpeilSnapshotRestClient,
+            reservasjonDao: ReservasjonDao
         ): Godkjenningsbehov {
             val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
             return Godkjenningsbehov(
@@ -89,6 +94,7 @@ internal class Godkjenningsbehov(
                 periodeTom = spleisbehovDTO.periodeTom,
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             )
         }

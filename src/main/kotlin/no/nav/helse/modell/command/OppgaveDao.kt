@@ -174,7 +174,7 @@ FROM oppgave o
          INNER JOIN person_info pi ON p.info_ref = pi.id
          LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
          LEFT JOIN saksbehandleroppgavetype sot ON o.event_id = sot.spleisbehov_ref
-         LEFT JOIN tildeling t ON o.event_id = t.oppgave_ref
+         LEFT JOIN tildeling t ON o.event_id = t.oppgave_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
          LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
 ORDER BY CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END, CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC

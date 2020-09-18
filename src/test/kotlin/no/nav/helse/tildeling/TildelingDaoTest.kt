@@ -7,9 +7,11 @@ import kotliquery.using
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TildelingDaoTest : AbstractEndToEndTest() {
 
@@ -63,6 +65,24 @@ class TildelingDaoTest : AbstractEndToEndTest() {
             it.tildelingForPerson(FNR)
         }
         assertEquals(nySaksbehandlerepost, saksbehandlerepost)
+    }
+
+    @Test
+    fun `utgått tildeling blir ikke tatt med i snapshot`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        val oppgavereferanse = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val saksbehandlerEpost = "${UUID.randomUUID()}@nav.no"
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
+        opprettOppgave(oppgavereferanse = oppgavereferanse)
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Sara Saksbehandler", saksbehandlerEpost)
+        tildelingDao.tildelOppgave(oppgavereferanse, saksbehandlerOid, LocalDateTime.now().minusDays(1))
+        assertNull(tildelingDao.hentSaksbehandlerEpostFor(oppgavereferanse))
+        assertNull(tildelingDao.hentSaksbehandlerNavnFor(oppgavereferanse))
+        assertNull(tildelingDao.tildelingForPerson(FNR))
+        assertTrue(oppgaveDao.finnOppgaver().none { it.saksbehandlerepost == saksbehandlerEpost })
     }
 
     private fun tildelTilSaksbehandler(

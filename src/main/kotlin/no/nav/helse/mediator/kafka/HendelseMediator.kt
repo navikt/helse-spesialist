@@ -150,7 +150,8 @@ internal class HendelseMediator(
                     vedtaksperiodeId = godkjenningMessage.vedtaksperiodeId,
                     aktørId = godkjenningMessage.aktørId,
                     orgnummer = godkjenningMessage.organisasjonsnummer,
-                    speilSnapshotRestClient = speilSnapshotRestClient
+                    speilSnapshotRestClient = speilSnapshotRestClient,
+                    reservasjonDao = reservasjonDao
                 ),
                 spesialistOid = spesialistOID,
                 eventId = godkjenningMessage.id,
@@ -627,6 +628,7 @@ internal class HendelseMediator(
             id = spleisbehovDbDTO.id,
             vedtaksperiodeId = spleisbehovDbDTO.spleisReferanse,
             data = spleisbehovDbDTO.data,
+            reservasjonDao = reservasjonDao,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
         MacroCommandType.BistandSaksbehandler -> BistandSaksbehandlerCommand.restore(

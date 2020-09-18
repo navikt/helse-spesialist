@@ -40,6 +40,7 @@ class OverstyringE2ETest {
         private const val FØDSELSNUMMER = "12020052345"
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
+        private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SNAPSHOTV1 = "{}"
     }
 
@@ -117,7 +118,7 @@ class OverstyringE2ETest {
     }
 
     @Test
-    fun `mottar, lagrer og videresender overstyring`() {
+    fun `saksbehandler overstyrer sykdomstidslinje`() {
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
         val spleisbehovId = sendGodkjenningsbehov(
             periodeFom = LocalDate.of(2018, 1, 1),
@@ -138,6 +139,14 @@ class OverstyringE2ETest {
 
         assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
         assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == spleisbehovId })
+
+        sendGodkjenningsbehov(
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
+        )
+        val oppgave = oppgaveDao.finnOppgaver().find { it.fødselsnummer == FØDSELSNUMMER }
+        assertNotNull(oppgave)
+        assertEquals(SAKSBEHANDLER_EPOST, oppgave.saksbehandlerepost)
     }
 
     @Test
@@ -216,7 +225,12 @@ class OverstyringE2ETest {
 
     private fun sendOverstyrteDager(dager: List<OverstyringDagDto>) = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
-            meldingsfabrikk.lagOverstyring(id = id, dager = dager, organisasjonsnummer = ORGNR)
+            meldingsfabrikk.lagOverstyring(
+                id = id,
+                dager = dager,
+                organisasjonsnummer = ORGNR,
+                saksbehandlerEpost = SAKSBEHANDLER_EPOST
+            )
         )
     }
 }

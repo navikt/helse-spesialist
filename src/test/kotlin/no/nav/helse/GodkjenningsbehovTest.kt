@@ -10,6 +10,7 @@ import no.nav.helse.modell.command.*
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.tildeling.ReservasjonDao
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
@@ -31,11 +32,13 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
             "spleisClientId"
         )
     private lateinit var testDao: TestPersonDao
+    private lateinit var reservasjonDao: ReservasjonDao
 
     @BeforeAll
     fun setup() {
         session = sessionOf(dataSource, returnGeneratedKey = true)
         testDao = TestPersonDao(dataSource)
+        reservasjonDao = ReservasjonDao(dataSource)
     }
 
     @AfterAll
@@ -57,6 +60,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765432",
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -98,6 +102,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "13245",
                 orgnummer = "98765432",
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -143,6 +148,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765432",
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -184,6 +190,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765433",
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -227,6 +234,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123455",
                 orgnummer = "98765433",
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -292,6 +300,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "47839",
                 orgnummer = "98765433",
+                reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = failingSpeilSnapshotDao
             ),
             spesialistOid = UUID.randomUUID(),

@@ -252,8 +252,8 @@ internal class RestApiTest : AbstractEndToEndTest() {
         assertEquals(LocalDate.of(1950, 10, 29), personinfo.fødselsdato)
 
         // For å simulere de innslagene i person_info som stammer fra før vi begynte å lagre fødselsdato og kjønn
-        sessionOf(dataSource).run {
-            run(
+        sessionOf(dataSource).use { session ->
+            session.run(
                 queryOf(
                     "UPDATE person_info SET fodselsdato=?, kjonn=? WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);",
                     null,
@@ -261,7 +261,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
                     12345
                 ).asUpdate
             )
-            run(
+            session.run(
                 queryOf(
                     "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
                     12345

@@ -1,8 +1,10 @@
 package no.nav.helse.tildeling
 
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -13,13 +15,34 @@ internal class ReservasjonDao(private val dataSource: DataSource) {
 SELECT :saksbehandler_ref, person.id
 FROM person
 WHERE person.fodselsnummer = :fodselsnummer;"""
-        sessionOf(dataSource).run(
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query, mapOf(
+                        "saksbehandler_ref" to saksbehandlerOid,
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
+    fun hentReservasjonFor(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+SELECT r.*
+FROM reserver_person r
+         JOIN person p ON p.id = r.person_ref
+WHERE p.fodselsnummer = :fodselsnummer
+  AND r.gyldig_til > now();
+"""
+        session.run(
             queryOf(
-                query, mapOf(
-                    "saksbehandler_ref" to saksbehandlerOid,
-                    "fodselsnummer" to fødselsnummer.toLong()
-                )
-            ).asUpdate
+                query,
+                mapOf("fodselsnummer" to fødselsnummer.toLong())
+            )
+                .map(::tilReservasjon)
+                .asSingle
         )
     }
 
@@ -46,4 +69,14 @@ WHERE person.fodselsnummer = :fodselsnummer;"""
             )
         }
     }
+
+    private fun tilReservasjon(row: Row): ReservasjonDto = ReservasjonDto(
+        UUID.fromString(row.string("saksbehandler_ref")),
+        row.localDateTime("gyldig_til")
+    )
 }
+
+data class ReservasjonDto(
+    val saksbehandlerOid: UUID,
+    val gyldigTil: LocalDateTime
+)
