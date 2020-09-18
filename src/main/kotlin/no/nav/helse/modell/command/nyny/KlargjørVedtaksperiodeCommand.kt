@@ -38,6 +38,7 @@ internal class KlargjørVedtaksperiodeCommand(
             arbeidsgiverDao,
             snapshotDao,
             vedtakDao
-        )
+        ),
+        OpprettKoblingTilHendelseCommand(hendelseId, vedtaksperiodeId, vedtakDao)
     )
 }

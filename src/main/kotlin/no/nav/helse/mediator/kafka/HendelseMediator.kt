@@ -9,7 +9,6 @@ import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.*
-import no.nav.helse.modell.command.ny.AnnulleringCommand
 import no.nav.helse.modell.command.ny.RollbackDeletePersonCommand
 import no.nav.helse.modell.command.ny.RollbackPersonCommand
 import no.nav.helse.modell.command.nyny.CommandContext

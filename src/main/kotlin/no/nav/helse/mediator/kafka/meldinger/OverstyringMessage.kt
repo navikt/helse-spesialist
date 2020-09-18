@@ -47,7 +47,6 @@ internal class OverstyringMessage(
     )
 
     override fun fødselsnummer() = fødselsnummer
-    override fun vedtaksperiodeId() = null
     override fun toJson() = json
 
     internal class OverstyringRiver(

@@ -1,13 +1,11 @@
 package no.nav.helse.modell.command
 
-import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
+import kotliquery.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
@@ -17,12 +15,47 @@ internal class HendelseDao(
 ) {
     internal fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) { session ->
-            session.insertBehov(
-                hendelse.id,
-                hendelse.vedtaksperiodeId() ?: UUID.randomUUID(),
-                hendelse.toJson(),
-                hendelse.toJson(),
-                tilHendelsetype(hendelse).name
+            session.transaction { transactionalSession ->
+                transactionalSession.run {
+                    opprettHendelse(hendelse)
+
+                    hendelse.vedtaksperiodeId()?.let {
+                        opprettKobling(it, hendelse.id)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun TransactionalSession.opprettHendelse(hendelse: Hendelse) {
+        @Language("PostgreSQL")
+        val hendelseStatement =
+            "INSERT INTO spleisbehov(id, spleis_referanse, data, original, type) VALUES(?, ?, CAST(? as json), CAST(? as json), ?)"
+        run(queryOf(
+            hendelseStatement,
+            hendelse.id,
+            hendelse.vedtaksperiodeId()?: UUID.randomUUID(),
+            hendelse.toJson(),
+            hendelse.toJson(),
+            tilHendelsetype(hendelse).name
+        ).asUpdate)
+    }
+
+    private fun TransactionalSession.opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) {
+        @Language("PostgreSQL")
+        val vedtaksperiodeQuery = "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id"
+        run(
+            queryOf(vedtaksperiodeQuery, mapOf("vedtaksperiode_id" to vedtaksperiodeId))
+                .map { it.long(1) }.asSingle
+        )?.let { vedtaksperiodeRef ->
+            @Language("PostgreSQL")
+            val koblingStatement = "INSERT INTO vedtaksperiode_hendelse VALUES(?,?)"
+            run(
+                queryOf(
+                    koblingStatement,
+                    vedtaksperiodeRef,
+                    hendelseId
+                ).asUpdate
             )
         }
     }

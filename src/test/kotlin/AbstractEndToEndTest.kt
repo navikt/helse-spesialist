@@ -82,9 +82,12 @@ abstract class AbstractEndToEndTest {
         internal val dataSource = HikariDataSource(hikariConfig)
     }
 
-    private var personId: Int = -1
-    private var arbeidsgiverId: Int = -1
-    private var snapshotId: Int = -1
+    internal var personId: Int = -1
+        private set
+    internal var arbeidsgiverId: Int = -1
+        private set
+    internal var snapshotId: Int = -1
+        private set
     internal var vedtakId: Long = -1
         private set
     internal var oppgaveId: Long = -1
@@ -154,12 +157,16 @@ abstract class AbstractEndToEndTest {
         return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn)!!.also { arbeidsgiverId = it }
     }
 
+    protected fun opprettSnapshot(personBlob: String = "{}") {
+        snapshotId = snapshotDao.insertSpeilSnapshot(personBlob)
+    }
+
     protected fun opprettVedtaksperiode(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
         tom: LocalDate = TOM
     ): Long {
-        snapshotId = snapshotDao.insertSpeilSnapshot("{}")
+        opprettSnapshot()
         return vedtakDao.upsertVedtak(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
             .also { vedtakId = it }
     }

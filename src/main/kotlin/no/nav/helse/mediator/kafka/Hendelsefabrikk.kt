@@ -3,10 +3,7 @@ package no.nav.helse.mediator.kafka
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.api.OppgaveMediator
-import no.nav.helse.mediator.kafka.meldinger.NyGodkjenningMessage
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeEndretMessage
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
-import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
+import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.SnapshotDao

@@ -37,16 +37,20 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             @Language("PostgreSQL")
             val query = """
-                INSERT INTO command_context(context_id, spleisbehov_id, tilstand, vedtaksperiode_id, data)
-                    SELECT context_id, spleisbehov_id, :avbrutt, vedtaksperiode_id, data
+                INSERT INTO command_context(context_id, spleisbehov_id, tilstand, data)
+                    SELECT context_id, spleisbehov_id, :avbrutt, data
                     FROM (
-                             SELECT DISTINCT ON (context_id) *
-                             FROM command_context
-                             WHERE vedtaksperiode_id = :vedtaksperiodeId
-                               AND context_id != :contextId
-                             ORDER BY context_id, id DESC
-                         ) AS command_contexts
-                    WHERE tilstand IN (:ny, :suspendert)
+                        SELECT DISTINCT ON (context_id) *
+                        FROM command_context
+                        WHERE spleisbehov_id in (
+                            SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_ref = (
+                                SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiodeId
+                            )
+                        )
+                        AND context_id != :contextId
+                        ORDER BY context_id, id DESC
+                ) AS command_contexts
+                WHERE tilstand IN (:ny, :suspendert)
             """
             it.run(
                 queryOf(
@@ -58,7 +62,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                         "ny" to NY.name,
                         "suspendert" to SUSPENDERT.name
                     )
-                ).asExecute
+                ).asUpdate
             )
         }
     }
@@ -72,11 +76,10 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "INSERT INTO command_context(context_id,spleisbehov_id,tilstand,vedtaksperiode_id,data) VALUES (?, ?, ?, ?, ?::json)",
+                    "INSERT INTO command_context(context_id,spleisbehov_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
                     contextId,
                     hendelse.id,
                     tilstand.name,
-                    hendelse.vedtaksperiodeId(),
                     mapper.writeValueAsString(CommandContextDto(sti))
                 ).asExecute
             )

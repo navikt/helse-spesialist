@@ -112,7 +112,13 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
 
     @BeforeEach
     internal fun setup() {
-        testbehov(HENDELSE1.id, "Godkjenningsbehov")
-        testbehov(HENDELSE2.id, "Godkjenningsbehov")
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(VEDTAKSPERIODE1)
+        opprettVedtaksperiode(VEDTAKSPERIODE2)
+        testbehov(HENDELSE1.id, "Godkjenningsbehov", VEDTAKSPERIODE1)
+        vedtakDao.opprettKobling(VEDTAKSPERIODE1, HENDELSE1.id)
+        testbehov(HENDELSE2.id, "Godkjenningsbehov", VEDTAKSPERIODE2)
+        vedtakDao.opprettKobling(VEDTAKSPERIODE2, HENDELSE2.id)
     }
 }

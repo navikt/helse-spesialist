@@ -72,7 +72,7 @@ internal class GodkjenningE2ETest {
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
         val hendelseId = sendVedtaksperiodeEndret()
         assertSpleisbehov(hendelseId)
-        assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "FERDIG")
+        assertTilstand(hendelseId, "NY", "FERDIG")
         verify(exactly = 0) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
@@ -81,7 +81,7 @@ internal class GodkjenningE2ETest {
     fun `oppretter ikke vedtak ved godkjenningsbehov uten nødvendig informasjon`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         assertSpleisbehov(godkjenningsmeldingId)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT")
         assertBehov("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger")
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
@@ -93,7 +93,7 @@ internal class GodkjenningE2ETest {
         sendPersoninfoløsning(godkjenningsmeldingId)
         sendRisikovurderingløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
@@ -106,7 +106,7 @@ internal class GodkjenningE2ETest {
         sendRisikovurderingløsning(godkjenningsmeldingId)
         sendSaksbehandlerløsning(OPPGAVEID, true)
         assertSnapshot(SNAPSHOTV1)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(true)
     }
@@ -119,7 +119,7 @@ internal class GodkjenningE2ETest {
         sendRisikovurderingløsning(godkjenningsmeldingId)
         sendSaksbehandlerløsning(OPPGAVEID, false)
         assertSnapshot(SNAPSHOTV1)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(false)
     }
@@ -130,8 +130,8 @@ internal class GodkjenningE2ETest {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
         val endringsmeldingId = sendVedtaksperiodeEndret()
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
-        assertTilstand(endringsmeldingId, VEDTAKSPERIODE_ID, "NY", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOTV2)
         verify(exactly = 2) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
     }
@@ -140,7 +140,7 @@ internal class GodkjenningE2ETest {
     fun `vedtaksperiode forkastet`() {
         val hendelseId = sendVedtaksperiodeForkastet()
         assertSpleisbehov(hendelseId)
-        assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "FERDIG")
+        assertTilstand(hendelseId, "NY", "FERDIG")
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 
@@ -148,12 +148,12 @@ internal class GodkjenningE2ETest {
     fun `gjør ingen ting om man får tilbake løsning på en avbrutt command context`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val hendelseId = sendGodkjenningsbehov()
-
+        sendPersoninfoløsning(hendelseId)
         sendVedtaksperiodeForkastet()
 
-        assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
         sendPersoninfoløsning(hendelseId)
-        assertTilstand(hendelseId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
     }
 
     private fun sendVedtaksperiodeForkastet() = nyHendelseId().also { id ->
@@ -258,16 +258,17 @@ internal class GodkjenningE2ETest {
         assertFalse(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
-    private fun assertTilstand(hendelseId: UUID, vedtaksperiodeId: UUID, vararg tilstand: String) {
-        assertEquals(tilstand.toList(), using(sessionOf(dataSource)) {
-            it.run(
+    private fun assertTilstand(hendelseId: UUID, vararg tilstand: String) {
+        using(sessionOf(dataSource)) { session ->
+            session.run(
                 queryOf(
-                    "SELECT tilstand FROM command_context WHERE spleisbehov_id = ? AND vedtaksperiode_id = ? ORDER BY id ASC",
-                    hendelseId,
-                    vedtaksperiodeId
+                    "SELECT tilstand FROM command_context WHERE spleisbehov_id = ? ORDER BY id ASC",
+                    hendelseId
                 ).map { it.string("tilstand") }.asList
             )
-        })
+        }.also {
+            assertEquals(tilstand.toList(), it)
+        }
     }
 
     private fun assertOppgave(indeks: Int, vararg status: Oppgavestatus) {

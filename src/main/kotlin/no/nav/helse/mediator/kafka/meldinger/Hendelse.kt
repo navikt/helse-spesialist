@@ -11,7 +11,7 @@ internal interface Hendelse : Command {
     val id: UUID
 
     fun fødselsnummer(): String
-    fun vedtaksperiodeId(): UUID?
+    fun vedtaksperiodeId(): UUID? = null
 
     fun toJson(): String
 }
