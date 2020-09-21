@@ -91,7 +91,7 @@ fun Session.persisterOverstyring(
                     mapOf(
                         "overstyring_ref" to overstyringRef,
                         "dato" to dag.dato,
-                        "dagtype" to dag.dagtype.toString(),
+                        "dagtype" to dag.type.toString(),
                         "grad" to dag.grad
                     )
                 ).asUpdate
@@ -133,7 +133,7 @@ WHERE p.fodselsnummer = ?
                     ).map { overstyringDagRow ->
                         OverstyringDagDto(
                             dato = overstyringDagRow.localDate("dato"),
-                            dagtype = enumValueOf(overstyringDagRow.string("dagtype")),
+                            type = enumValueOf(overstyringDagRow.string("dagtype")),
                             grad = overstyringDagRow.intOrNull("grad")
                         )
                     }.asList
@@ -155,7 +155,7 @@ data class OverstyringDto(
 
 data class OverstyringDagDto(
     val dato: LocalDate,
-    val dagtype: Dagtype,
+    val type: Dagtype,
     val grad: Int?
 )
 

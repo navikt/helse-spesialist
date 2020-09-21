@@ -30,7 +30,7 @@ internal class OverstyringDaoTest : AbstractEndToEndTest() {
         private val OVERSTYRTE_DAGER = listOf(
             OverstyringDagDto(
                 dato = LocalDate.of(2020, 1, 1),
-                dagtype = Dagtype.Sykedag,
+                type = Dagtype.Sykedag,
                 grad = 100
             )
         )

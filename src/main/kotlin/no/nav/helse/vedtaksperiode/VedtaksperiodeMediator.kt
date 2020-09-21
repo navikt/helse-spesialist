@@ -67,7 +67,7 @@ internal class VedtaksperiodeMediator(val dataSource: DataSource) {
                             overstyrteDager = overstyring.overstyrteDager.map { dag ->
                                 OverstyringDagForSpeilDto(
                                     dato = dag.dato,
-                                    dagtype = dag.dagtype,
+                                    dagtype = dag.type,
                                     grad = dag.grad
                                 )
                             }

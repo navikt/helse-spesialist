@@ -131,7 +131,7 @@ class OverstyringE2ETest {
             listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
-                    dagtype = Dagtype.Feriedag,
+                    type = Dagtype.Feriedag,
                     grad = null
                 )
             )
@@ -174,7 +174,7 @@ class OverstyringE2ETest {
             listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
-                    dagtype = Dagtype.Feriedag,
+                    type = Dagtype.Feriedag,
                     grad = null
                 )
             )
