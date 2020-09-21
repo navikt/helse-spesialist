@@ -30,7 +30,7 @@ internal class HendelseDao(
     private fun TransactionalSession.opprettHendelse(hendelse: Hendelse) {
         @Language("PostgreSQL")
         val hendelseStatement = """
-            INSERT INTO spleisbehov(id, fodselsnummer, spleis_referanse, data, original, type)
+            INSERT INTO hendelse(id, fodselsnummer, spleis_referanse, data, original, type)
                 VALUES(?, ?, ?, CAST(? as json), CAST(? as json), ?)
             """
         run(queryOf(
@@ -65,7 +65,7 @@ internal class HendelseDao(
 
     internal fun finn(id: UUID): Hendelse? =
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT type,data FROM spleisbehov WHERE id = ?", id).map { row ->
+            session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
                 fraHendelsetype(enumValueOf(row.string("type")), row.string("data"))
             }.asSingle)
         }
@@ -96,7 +96,7 @@ internal class HendelseDao(
 internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String, original: String, type: String) {
     this.run(
         queryOf(
-            "INSERT INTO spleisbehov(id, spleis_referanse, data, original, type) VALUES(?, ?, CAST(? as json), CAST(? as json), ?)",
+            "INSERT INTO hendelse(id, spleis_referanse, data, original, type) VALUES(?, ?, CAST(? as json), CAST(? as json), ?)",
             id,
             spleisReferanse,
             behov,
@@ -108,31 +108,31 @@ internal fun Session.insertBehov(id: UUID, spleisReferanse: UUID, behov: String,
 
 fun Session.insertWarning(melding: String, spleisbehovRef: UUID) = this.run(
     queryOf(
-        "INSERT INTO warning (melding, spleisbehov_ref) VALUES (?, ?)",
+        "INSERT INTO warning (melding, hendelse_id) VALUES (?, ?)",
         melding,
         spleisbehovRef
     ).asUpdate
 )
 
-fun Session.insertSaksbehandleroppgavetype(type: Saksbehandleroppgavetype, spleisbehovRef: UUID) =
+fun Session.insertSaksbehandleroppgavetype(type: Saksbehandleroppgavetype, hendelseId: UUID) =
     this.run(
         queryOf(
-            "INSERT INTO saksbehandleroppgavetype (type, spleisbehov_ref) VALUES (?, ?)",
+            "INSERT INTO saksbehandleroppgavetype (type, hendelse_id) VALUES (?, ?)",
             type.name,
-            spleisbehovRef
+            hendelseId
         ).asUpdate
     )
 
 internal fun Session.updateBehov(id: UUID, behov: String) {
     this.run(
         queryOf(
-            "UPDATE spleisbehov SET data=CAST(? as json) WHERE id=?", behov, id
+            "UPDATE hendelse SET data=CAST(? as json) WHERE id=?", behov, id
         ).asUpdate
     )
 }
 
 internal fun Session.findBehov(id: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT spleis_referanse, data, type FROM spleisbehov WHERE id=?", id)
+    this.run(queryOf("SELECT spleis_referanse, data, type FROM hendelse WHERE id=?", id)
         .map {
             SpleisbehovDBDto(
                 id = id,
@@ -145,7 +145,7 @@ internal fun Session.findBehov(id: UUID): SpleisbehovDBDto? =
     )
 
 internal fun Session.findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT id, data, type FROM spleisbehov WHERE spleis_referanse=? AND type IN(${
+    this.run(queryOf("SELECT id, data, type FROM hendelse WHERE spleis_referanse=? AND type IN(${
         MacroCommandType.values().joinToString { "?" }
     })", spleisReferanse, *MacroCommandType.values().map(Enum<*>::name).toTypedArray())
         .map {
@@ -160,6 +160,6 @@ internal fun Session.findBehovMedSpleisReferanse(spleisReferanse: UUID): Spleisb
     )
 
 internal fun Session.findOriginalBehov(id: UUID): String? =
-    this.run(queryOf("SELECT original FROM spleisbehov WHERE id=?", id)
+    this.run(queryOf("SELECT original FROM hendelse WHERE id=?", id)
         .map { it.string("original") }
         .asSingle)

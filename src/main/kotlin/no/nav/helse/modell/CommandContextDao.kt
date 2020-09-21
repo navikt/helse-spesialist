@@ -37,11 +37,11 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             @Language("PostgreSQL")
             val query = """
-                INSERT INTO command_context(context_id, spleisbehov_id, tilstand, data)
-                    SELECT context_id, spleisbehov_id, :avbrutt, data
+                INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
+                    SELECT context_id, hendelse_id, :avbrutt, data
                     FROM (
-                        SELECT DISTINCT ON (context_id) * FROM command_context WHERE spleisbehov_id IN (
-                           SELECT id FROM spleisbehov WHERE fodselsnummer = :fodselsnummer
+                        SELECT DISTINCT ON (context_id) * FROM command_context WHERE hendelse_id IN (
+                           SELECT id FROM hendelse WHERE fodselsnummer = :fodselsnummer
                         )
                         AND context_id != :contextId
                         ORDER BY context_id, id DESC
@@ -67,12 +67,12 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             @Language("PostgreSQL")
             val query = """
-                INSERT INTO command_context(context_id, spleisbehov_id, tilstand, data)
-                    SELECT context_id, spleisbehov_id, :avbrutt, data
+                INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
+                    SELECT context_id, hendelse_id, :avbrutt, data
                     FROM (
                         SELECT DISTINCT ON (context_id) *
                         FROM command_context
-                        WHERE spleisbehov_id in (
+                        WHERE hendelse_id in (
                             SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_ref = (
                                 SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiodeId
                             )
@@ -106,7 +106,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "INSERT INTO command_context(context_id,spleisbehov_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
+                    "INSERT INTO command_context(context_id,hendelse_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
                     contextId,
                     hendelse.id,
                     tilstand.name,

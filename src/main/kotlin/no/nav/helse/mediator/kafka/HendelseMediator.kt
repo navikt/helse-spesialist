@@ -191,7 +191,7 @@ internal class HendelseMediator(
                 )
             }
             godkjenningMessage.periodetype?.let {
-                session.insertSaksbehandleroppgavetype(type = it, spleisbehovRef = godkjenningMessage.id)
+                session.insertSaksbehandleroppgavetype(type = it, hendelseId = godkjenningMessage.id)
             }
             publiserBehov(
                 spleisreferanse = godkjenningMessage.id,

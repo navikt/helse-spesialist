@@ -29,7 +29,7 @@ internal class PersonDao(private val dataSource: DataSource) {
             val statement = """
                     SELECT fodselsnummer FROM person WHERE id = (
                         SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = (
-                            SELECT spleis_referanse FROM spleisbehov WHERE id = ?
+                            SELECT spleis_referanse FROM hendelse WHERE id = ?
                         )
                     )
                 """

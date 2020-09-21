@@ -212,7 +212,7 @@ internal class GodkjenningE2ETest {
 
     private fun assertSpleisbehov(hendelseId: UUID) {
         assertEquals(1, using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT COUNT(1) FROM spleisbehov WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
+            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
         })
     }
 
@@ -262,7 +262,7 @@ internal class GodkjenningE2ETest {
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT tilstand FROM command_context WHERE spleisbehov_id = ? ORDER BY id ASC",
+                    "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id ASC",
                     hendelseId
                 ).map { it.string("tilstand") }.asList
             )

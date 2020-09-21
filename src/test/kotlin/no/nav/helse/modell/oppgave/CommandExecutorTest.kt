@@ -45,7 +45,7 @@ class CommandExecutorTest : AbstractEndToEndTest() {
         val oppgaverForBehov = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM oppgave where event_id=?;",
+                    "SELECT * FROM oppgave where hendelse_id=?;",
                     eventId
                 ).map {
                     FerdigstiltAv(

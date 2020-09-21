@@ -130,7 +130,7 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
                 Oppgave(
-                    hendelseId = UUID.fromString(it.string("event_id")),
+                    hendelseId = UUID.fromString(it.string("hendelse_id")),
                     oppdatert = it.localDate("oppdatert"),
                     type = it.string("type"),
                     status = enumValueOf(it.string("status")),

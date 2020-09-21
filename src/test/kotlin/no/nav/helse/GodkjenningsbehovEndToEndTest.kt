@@ -47,7 +47,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     private lateinit var spleisbehovMediator: HendelseMediator
     private lateinit var vedtaksperiodeId: UUID
-    private lateinit var spleisbehovId: UUID
+    private lateinit var hendelseId: UUID
 
     private val featuretoggleMock = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
@@ -66,7 +66,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        spleisbehovId = UUID.randomUUID()
+        hendelseId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
         session = sessionOf(dataSource, returnGeneratedKey = true)
         every { featuretoggleMock.risikovurdering() }.returns(false)
@@ -83,9 +83,9 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov()
 
         assertEquals(2, testRapid.inspektør.size)
-        assertNotNull(session.findBehov(spleisbehovId))
+        assertNotNull(session.findBehov(hendelseId))
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
@@ -95,7 +95,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         assertTrue(saksbehandlerOppgaver.any { it.vedtaksperiodeId == vedtaksperiodeId })
 
         spleisbehovMediator.håndter(
-            spleisbehovId, SaksbehandlerLøsning(
+            hendelseId, SaksbehandlerLøsning(
                 godkjent = true,
                 saksbehandlerIdent = "abcd",
                 godkjenttidspunkt = LocalDateTime.now(),
@@ -188,15 +188,15 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         val warnings = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM warning where spleisbehov_ref=?",
-                    spleisbehovId
+                    "SELECT * FROM warning where hendelse_id=?",
+                    hendelseId
                 ).map { it.string("melding") }.asList
             )
         }
         assertEquals(listOf(warningTekst), warnings)
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning(
                 "Test",
@@ -216,7 +216,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov(periodetype = Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE)
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning(
                 "Test",
@@ -239,7 +239,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov(periodetype = null)
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning(
                 "Test",
@@ -288,15 +288,15 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         val warnings = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT * FROM warning where spleisbehov_ref=?",
-                    spleisbehovId
+                    "SELECT * FROM warning where hendelse_id=?",
+                    hendelseId
                 ).map { it.string("melding") }.asList
             )
         }
         assertEquals(listOf(warningTekst, duplicatedWarningTekst, duplicatedWarningTekst), warnings)
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning(
                 "Test",
@@ -313,8 +313,8 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `Persisterer løsning for HentInfotrygdutbetalinger`() {
-        testRapid.sendTestMessage(godkjenningbehov(spleisbehovId, vedtaksperiodeId))
-        testRapid.sendTestMessage(personinfoLøsningJson(spleisbehovId, vedtaksperiodeId))
+        testRapid.sendTestMessage(godkjenningbehov(hendelseId, vedtaksperiodeId))
+        testRapid.sendTestMessage(personinfoLøsningJson(hendelseId, vedtaksperiodeId))
 
         val utbetaling = sessionOf(dataSource).use { session ->
             session.run(
@@ -332,7 +332,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov()
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             HentPersoninfoLøsning(
                 "Test",
@@ -345,7 +345,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         )
 
         spleisbehovMediator.håndter(
-            spleisbehovId, SaksbehandlerLøsning(
+            hendelseId, SaksbehandlerLøsning(
                 godkjent = true,
                 saksbehandlerIdent = "Tester",
                 godkjenttidspunkt = LocalDateTime.now(),
@@ -358,7 +358,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         )
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             null,
             null,
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
@@ -375,7 +375,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov(aktørId = aktørId, fødselsnummer = fødselsnummer, organisasjonsnummer = orgnummer)
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
@@ -408,7 +408,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov(aktørId = aktørId, fødselsnummer = fødselsnummer, organisasjonsnummer = orgnummer)
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
@@ -470,7 +470,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
             """
             {
               "@behov": ["Godkjenning"],
-              "@id": "$spleisbehovId",
+              "@id": "$hendelseId",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
               "organisasjonsnummer": "$organisasjonsnummer",

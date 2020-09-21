@@ -97,7 +97,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
     private fun vedtaksperiodetype(hendelseId: UUID): Saksbehandleroppgavetype? {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT type FROM saksbehandleroppgavetype WHERE spleisbehov_ref = ?", hendelseId).map { row ->
+            it.run(queryOf("SELECT type FROM saksbehandleroppgavetype WHERE hendelse_id = ?", hendelseId).map { row ->
                 Saksbehandleroppgavetype.valueOf(row.string("type"))
             }.asSingle)
         }
@@ -105,7 +105,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
     private fun finnWarnings(hendelseId: UUID) = using(sessionOf(dataSource)) {
         it.run(
-            queryOf("SELECT melding FROM warning WHERE spleisbehov_ref = ?", hendelseId).map { row ->
+            queryOf("SELECT melding FROM warning WHERE hendelse_id = ?", hendelseId).map { row ->
                 row.string("melding")
             }.asList
         )

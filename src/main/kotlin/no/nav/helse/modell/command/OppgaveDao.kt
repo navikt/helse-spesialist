@@ -67,8 +67,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     })
 
     internal fun finnHendelseId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT event_id FROM oppgave WHERE id = ?", oppgaveId)
-            .map { row -> UUID.fromString(row.string("event_id")) }.asSingle)
+        session.run(queryOf("SELECT hendelse_id FROM oppgave WHERE id = ?", oppgaveId)
+            .map { row -> UUID.fromString(row.string("hendelse_id")) }.asSingle)
     })
 
     internal fun harAktivOppgave(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
@@ -127,7 +127,7 @@ fun Session.insertOppgave(
     this.run(
         queryOf(
             """
-                INSERT INTO oppgave(event_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
+                INSERT INTO oppgave(hendelse_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
                 VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?, ?);
             """,
             eventId,
@@ -151,7 +151,7 @@ fun Session.updateOppgave(
         queryOf(
             """
                 UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus
-                WHERE event_id=? AND type=?;
+                WHERE hendelse_id=? AND type=?;
             """,
             ferdigstiltAv,
             oid,
@@ -167,7 +167,7 @@ fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
         """
             SELECT *
             FROM oppgave
-            WHERE event_id=?
+            WHERE hendelse_id=?
               AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
         """,
         eventId
@@ -180,12 +180,12 @@ fun Session.finnOppgaveId(oppgaveId: Int): UUID = requireNotNull(
     this.run(
         queryOf(
             """
-            SELECT event_id
+            SELECT hendelse_id
             FROM oppgave
             WHERE id=?
         """,
             oppgaveId
-        ).map { UUID.fromString(it.string("event_id")) }.asSingle
+        ).map { UUID.fromString(it.string("hendelse_id")) }.asSingle
     )
 )
 
@@ -193,14 +193,14 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
     @Language("PostgreSQL")
     val query = """
 SELECT *,
-       (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE spleisbehov_ref = o.event_id),
+       (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE hendelse_id = o.hendelse_id),
        sot.type AS saksbehandleroppgavetype
 FROM oppgave o
          INNER JOIN vedtak v ON o.vedtak_ref = v.id
          INNER JOIN person p ON v.person_ref = p.id
          INNER JOIN person_info pi ON p.info_ref = pi.id
          LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
-         LEFT JOIN saksbehandleroppgavetype sot ON o.event_id = sot.spleisbehov_ref
+         LEFT JOIN saksbehandleroppgavetype sot ON o.hendelse_id = sot.hendelse_id
          LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
          LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
 WHERE status = 'AvventerSaksbehandler'::oppgavestatus
@@ -229,7 +229,7 @@ WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
             id = it.long("id"),
             opprettet = it.localDateTime("opprettet"),
             oppdatert = it.localDateTime("oppdatert"),
-            eventId = UUID.fromString(it.string("event_id")),
+            eventId = UUID.fromString(it.string("hendelse_id")),
             oppgaveType = it.string("type"),
             status = Oppgavestatus.valueOf(it.string("status")),
             vedtaksref = it.longOrNull("vedtak_ref")
@@ -240,14 +240,14 @@ WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
 fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
     queryOf(
         """
-            SELECT event_id
+            SELECT hendelse_id
             FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = ? AND status = 'AvventerSaksbehandler'::oppgavestatus
         """,
         vedtaksperiodeId
     )
-        .map { UUID.fromString(it.stringOrNull("event_id")) }
+        .map { UUID.fromString(it.stringOrNull("hendelse_id")) }
         .asSingle
 )
 
@@ -277,7 +277,7 @@ WHERE a.orgnummer = :orgnummer
 }
 
 private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
-    oppgavereferanse = UUID.fromString(it.string("event_id")),
+    oppgavereferanse = UUID.fromString(it.string("hendelse_id")),
     saksbehandlerepost = it.stringOrNull("epost"),
     opprettet = it.localDateTime("opprettet"),
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
@@ -302,7 +302,7 @@ private fun oppgaveDto(it: Row) = OppgaveDto(
     opprettet = it.localDateTime("opprettet"),
     oppdatert = it.localDateTimeOrNull("oppdatert"),
     oppgaveType = it.string("type"),
-    eventId = UUID.fromString(it.string("event_id")),
+    eventId = UUID.fromString(it.string("hendelse_id")),
     status = Oppgavestatus.valueOf(it.string("status")),
     vedtaksref = it.longOrNull("vedtak_ref")
 )

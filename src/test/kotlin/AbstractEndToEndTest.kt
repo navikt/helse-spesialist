@@ -140,7 +140,7 @@ abstract class AbstractEndToEndTest {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "INSERT INTO spleisbehov(id, fodselsnummer, data, original, spleis_referanse, type) VALUES(?, ?, ?::json, ?::json, ?, ?)",
+                    "INSERT INTO hendelse(id, fodselsnummer, data, original, spleis_referanse, type) VALUES(?, ?, ?::json, ?::json, ?, ?)",
                     hendelseId,
                     fødselsnummer.toLong(),
                     "{}",
