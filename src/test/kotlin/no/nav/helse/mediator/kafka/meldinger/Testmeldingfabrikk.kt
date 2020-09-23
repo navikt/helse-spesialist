@@ -232,6 +232,35 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             }
         )
 
+    fun lagRisikovurderingløsning(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID()
+    ): String =
+        nyHendelse(
+            id,
+            "behov", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("Risikovurdering"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "Risikovurdering" to mapOf("vedtaksperiodeId" to "0aebb71a-43a8-4529-89e9-3ab1df12e342"),
+                "@løsning" to mapOf(
+                    "Risikovurdering" to mapOf(
+                        "begrunnelserSomAleneKreverManuellBehandling" to listOf(
+                            "8-4: Har Z-diagnose som bi-diagnose",
+                            "8-4: Treff på søkeord (6.2.1)"
+                        ),
+                        "samletScore" to 10.0,
+                        "begrunnelser" to emptyList<String>(),
+                        "ufullstendig" to false,
+                        "begrunnelser" to emptyList<String>()
+                    )
+                )
+            )
+        )
+
     fun lagOverstyring(
         id: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",

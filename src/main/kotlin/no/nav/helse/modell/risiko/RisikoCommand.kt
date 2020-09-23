@@ -1,6 +1,7 @@
 package no.nav.helse.modell.risiko
 
 import no.nav.helse.mediator.kafka.FeatureToggle
+import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
 import java.util.*
@@ -19,9 +20,9 @@ internal class RisikoCommand(
 
     override fun resume(context: CommandContext): Boolean {
         if (!FeatureToggle.risikovurdering) return true
-        val løsning = context.get<RisikovurderingDto>() ?: return false
+        val løsning = context.get<RisikovurderingLøsning>() ?: return false
 
-        risikovurderingDao.persisterRisikovurdering(løsning)
+        løsning.lagre(risikovurderingDao)
         return true
     }
 }

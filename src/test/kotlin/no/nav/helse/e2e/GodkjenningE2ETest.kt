@@ -58,11 +58,13 @@ internal class GodkjenningE2ETest {
     @BeforeAll
     fun activate() {
         FeatureToggle.nyGodkjenningRiver = true
+        FeatureToggle.risikovurdering = true
     }
 
     @AfterAll
     fun deactivate() {
         FeatureToggle.nyGodkjenningRiver = false
+        FeatureToggle.risikovurdering = false
     }
 
     @Test
@@ -88,8 +90,9 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
+        sendRisikovurderingløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
@@ -99,9 +102,10 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
+        sendRisikovurderingløsning(godkjenningsmeldingId)
         sendSaksbehandlerløsning(OPPGAVEID, true)
         assertSnapshot(SNAPSHOTV1)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(true)
     }
@@ -111,9 +115,10 @@ internal class GodkjenningE2ETest {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov()
         sendPersoninfoløsning(godkjenningsmeldingId)
+        sendRisikovurderingløsning(godkjenningsmeldingId)
         sendSaksbehandlerløsning(OPPGAVEID, false)
         assertSnapshot(SNAPSHOTV1)
-        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, VEDTAKSPERIODE_ID, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(false)
     }
@@ -160,6 +165,19 @@ internal class GodkjenningE2ETest {
                 ORGNR
             )
         )
+    }
+
+    private fun sendRisikovurderingløsning(godkjenningsmeldingId: UUID) {
+        nyHendelseId().also {id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagRisikovurderingløsning(
+                    id,
+                    godkjenningsmeldingId,
+                    testRapid.inspektør.contextId()
+                )
+            )
+        }
+
     }
 
     private fun sendSaksbehandlerløsning(oppgaveId: Long, godkjent: Boolean) = nyHendelseId().also { id ->
