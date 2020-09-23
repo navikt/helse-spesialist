@@ -7,6 +7,8 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikoCommand
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
@@ -30,6 +32,7 @@ internal class NyGodkjenningMessage(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
+    risikovurderingDao: RisikovurderingDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator
 ) : Hendelse, MacroCommand() {
@@ -51,6 +54,7 @@ internal class NyGodkjenningMessage(
             snapshotDao,
             vedtakDao
         ),
+        RisikoCommand(id, vedtaksperiodeId, risikovurderingDao),
         SaksbehandlerGodkjenningCommand(vedtaksperiodeId, json, oppgaveMediator)
     )
 

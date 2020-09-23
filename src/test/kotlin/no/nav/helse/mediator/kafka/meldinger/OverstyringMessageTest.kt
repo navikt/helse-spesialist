@@ -7,6 +7,7 @@ import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.ReservasjonDao
 import org.junit.jupiter.api.BeforeEach
@@ -37,10 +38,12 @@ internal class OverstyringMessageTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
+    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         reservasjonsDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
+        risikovurderingDao = risikovurderingDao,
         personDao = mockk(),
         arbeidsgiverDao = mockk(),
         vedtakDao = mockk(),

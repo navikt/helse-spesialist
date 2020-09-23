@@ -9,6 +9,7 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -33,18 +34,20 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val testhendelsefabrikk =
         Hendelsefabrikk(
             vedtakDao = vedtakDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
+            risikovurderingDao = risikovurderingDao,
             speilSnapshotRestClient = restClient,
             personDao = mockk(),
             arbeidsgiverDao = mockk(),
             reservasjonsDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
-            oppgaveMediator = mockk ()
+            oppgaveMediator = mockk()
         )
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(

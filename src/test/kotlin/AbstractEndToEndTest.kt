@@ -16,6 +16,7 @@ import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.tildeling.TildelingDao
@@ -84,6 +85,7 @@ abstract class AbstractEndToEndTest {
     internal lateinit var commandContextDao: CommandContextDao
     internal lateinit var tildelingDao: TildelingDao
     internal lateinit var saksbehandlerDao: SaksbehandlerDao
+    internal lateinit var risikovurderingDao: RisikovurderingDao
 
     @BeforeAll
     fun setupAllE2E(@TempDir postgresPath: Path) {
@@ -111,6 +113,7 @@ abstract class AbstractEndToEndTest {
         commandContextDao = CommandContextDao(dataSource)
         tildelingDao = TildelingDao(dataSource)
         saksbehandlerDao = SaksbehandlerDao(dataSource)
+        risikovurderingDao = RisikovurderingDao(dataSource)
     }
 
     @BeforeEach

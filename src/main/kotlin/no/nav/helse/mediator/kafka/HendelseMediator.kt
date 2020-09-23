@@ -19,6 +19,7 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -57,6 +58,7 @@ internal class HendelseMediator(
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val hendelsefabrikk = Hendelsefabrikk(
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
@@ -66,6 +68,7 @@ internal class HendelseMediator(
         reservasjonsDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
+        risikovurderingDao = risikovurderingDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
         oppgaveMediator = oppgaveMediator
     )
@@ -93,6 +96,9 @@ internal class HendelseMediator(
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
+            if (FeatureToggle.risikovurdering) {
+                RisikovurderingLøsning.Factory(it, this)
+            }
         }
     }
 

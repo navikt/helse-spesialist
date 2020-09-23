@@ -15,6 +15,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -33,6 +34,7 @@ internal class Hendelsefabrikk(
     private val reservasjonsDao: ReservasjonDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val overstyringDao: OverstyringDao,
+    private val risikovurderingDao: RisikovurderingDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val oppgaveMediator: OppgaveMediator
 ) : IHendelsefabrikk {
@@ -67,6 +69,7 @@ internal class Hendelsefabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
+            risikovurderingDao = risikovurderingDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator
         )
