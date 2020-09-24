@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
+import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
 import no.nav.helse.modell.command.findBehov
 import no.nav.helse.modell.command.findNåværendeOppgave
@@ -67,6 +69,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     @AfterEach
     fun closeConnection() {
         session.close()
+        FeatureToggle.risikovurdering = false
     }
 
     @ExperimentalContracts
@@ -109,6 +112,24 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         løsning as ObjectNode
         assertEquals(listOf("Godkjenning"), løsning.fieldNames().asSequence().toList())
     }
+
+    @Test
+    fun `godkjenningsbehov med risikovurdering`() {
+        FeatureToggle.risikovurdering = true
+        sendGodkjenningsbehov()
+
+        spleisbehovMediator.håndter(
+            spleisbehovId,
+            HentEnhetLøsning("1234"),
+            hentPersoninfoLøsning(),
+            HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
+        )
+        spleisbehovMediator.håndter(spleisbehovId, risikovurderingLøsning(spleisbehovId, vedtaksperiodeId, listOf("8.4: Feil diagnose")))
+        spleisbehovMediator.håndter(spleisbehovId, saksbehandlerLøsning())
+
+        assertNotNull(finnLøsning("Godkjenning"))
+    }
+
 
     @ExperimentalContracts
     @Test
@@ -447,6 +468,13 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         assertNotEquals(snapshotFør, snapshotEtter)
     }
 
+    private fun finnLøsning(behovstype: String): ObjectNode? {
+        return 0.until(testRapid.inspektør.size)
+            .map(testRapid.inspektør::message)
+            .firstOrNull { it.hasNonNull("@behov") && it["@behov"].map { type -> type.textValue() }.contains(behovstype) && it.hasNonNull("@løsning") }
+            ?.path("@løsning") as ObjectNode?
+    }
+
     @ExperimentalContracts
     @Test
     fun `vedtaksperiode_forkastet fører til oppdatert speil snapshot`() {
@@ -532,6 +560,28 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         """
         )
     }
+
+    private fun saksbehandlerLøsning() = SaksbehandlerLøsning(
+        godkjent = true,
+        saksbehandlerIdent = "abcd",
+        godkjenttidspunkt = LocalDateTime.now(),
+        oid = UUID.randomUUID(),
+        epostadresse = "epost",
+        årsak = null,
+        begrunnelser = null,
+        kommentar = null
+    )
+
+    private fun risikovurderingLøsning(hendelseId: UUID, vedtaksperiodeId: UUID, arbeidsuførhetvurdering: List<String> = emptyList()): RisikovurderingLøsning = RisikovurderingLøsning(
+        hendelseId = hendelseId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        opprettet = LocalDateTime.now(),
+        samletScore = 10.0,
+        begrunnelser = emptyList(),
+        ufullstendig = false,
+        faresignaler = emptyList(),
+        arbeidsuførhetvurdering = arbeidsuførhetvurdering
+    )
 }
 
 @ExperimentalContracts

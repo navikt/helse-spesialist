@@ -19,7 +19,7 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
                             "INSERT INTO risikovurdering (vedtaksperiode_id, opprettet, samlet_score, ufullstendig) VALUES (?, ?, ?, ?);",
                             risikovurdering.vedtaksperiodeId,
                             risikovurdering.opprettet,
-                            risikovurdering.samletScore,
+                            risikovurdering.samletScore.toInt(),
                             risikovurdering.ufullstendig
                         ).asUpdateAndReturnGeneratedKey
                     )
@@ -80,7 +80,7 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
     private fun tilRisikovurdering(row: Row) = Risikovurdering.restore(
         vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
         opprettet = row.localDateTime("opprettet"),
-        samletScore = row.int("samlet_score"),
+        samletScore = row.int("samlet_score").toDouble(),
         faresignaler = objectMapper.readValue(row.string("faresignaler")),
         arbeidsuførhetvurdering = objectMapper.readValue(row.string("arbeidsuførhetvurderinger")),
         ufullstendig = row.boolean("ufullstendig")

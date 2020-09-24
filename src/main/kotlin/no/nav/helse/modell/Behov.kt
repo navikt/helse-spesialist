@@ -35,6 +35,8 @@ internal sealed class Behovtype {
 
     internal object HentEnhet : Behovtype()
     internal object HentPersoninfo : Behovtype()
+    internal object Risikovurdering : Behovtype()
+
     internal object HentArbeidsgiverNavn : Behovtype()
     internal class HentInfotrygdutbetalinger : Behovtype() {
         private val nå = LocalDate.now()

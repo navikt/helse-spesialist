@@ -20,7 +20,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class GodkjenningsbehovTest: AbstractEndToEndTest() {
+class GodkjenningsbehovTest : AbstractEndToEndTest() {
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()
 
@@ -61,6 +61,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 aktørId = "123455",
                 orgnummer = "98765432",
                 reservasjonDao = reservasjonDao,
+                risikovurderingDao = risikovurderingDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -103,6 +104,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 aktørId = "13245",
                 orgnummer = "98765432",
                 reservasjonDao = reservasjonDao,
+                risikovurderingDao = risikovurderingDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -149,6 +151,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 aktørId = "123455",
                 orgnummer = "98765432",
                 reservasjonDao = reservasjonDao,
+                risikovurderingDao = risikovurderingDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -191,6 +194,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 aktørId = "123455",
                 orgnummer = "98765433",
                 reservasjonDao = reservasjonDao,
+                risikovurderingDao = risikovurderingDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -235,6 +239,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 aktørId = "123455",
                 orgnummer = "98765433",
                 reservasjonDao = reservasjonDao,
+                risikovurderingDao = risikovurderingDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             ),
             spesialistOid = UUID.randomUUID(),
@@ -301,6 +306,7 @@ class GodkjenningsbehovTest: AbstractEndToEndTest() {
                 aktørId = "47839",
                 orgnummer = "98765433",
                 reservasjonDao = reservasjonDao,
+                risikovurderingDao = risikovurderingDao,
                 speilSnapshotRestClient = failingSpeilSnapshotDao
             ),
             spesialistOid = UUID.randomUUID(),

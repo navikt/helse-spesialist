@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
+import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
@@ -15,7 +16,7 @@ internal class RisikovurderingLøsning(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val opprettet: LocalDateTime,
-    private val samletScore: Int,
+    private val samletScore: Double,
     private val begrunnelser: List<String>,
     private val ufullstendig: Boolean,
     private val faresignaler: List<String>,
@@ -70,25 +71,32 @@ internal class RisikovurderingLøsning(
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
 
             val løsning = packet["@løsning.Risikovurdering"]
-            val samletScore = løsning["samletScore"].asInt()
+            val samletScore = løsning["samletScore"].asDouble()
             val ufullstendig = løsning["ufullstendig"].asBoolean()
             val faresignaler = løsning["begrunnelser"].map { it.asText() }
             val arbeidsuførhetvurdering = løsning["begrunnelserSomAleneKreverManuellBehandling"].map { it.asText() }
-            hendelseMediator.løsning(
+
+            val risikovurdering = RisikovurderingLøsning(
                 hendelseId = hendelseId,
-                contextId = contextId,
-                løsning = RisikovurderingLøsning(
-                    hendelseId = hendelseId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    opprettet = opprettet,
-                    samletScore = samletScore,
-                    begrunnelser = faresignaler,
-                    ufullstendig = ufullstendig,
-                    faresignaler = faresignaler,
-                    arbeidsuførhetvurdering = arbeidsuførhetvurdering
-                ),
-                context = context
+                vedtaksperiodeId = vedtaksperiodeId,
+                opprettet = opprettet,
+                samletScore = samletScore,
+                begrunnelser = faresignaler,
+                ufullstendig = ufullstendig,
+                faresignaler = faresignaler,
+                arbeidsuførhetvurdering = arbeidsuførhetvurdering
             )
+
+            if(FeatureToggle.nyGodkjenningRiver) {
+                hendelseMediator.løsning(
+                    hendelseId = hendelseId,
+                    contextId = contextId,
+                    løsning = risikovurdering,
+                    context = context
+                )
+            } else {
+                hendelseMediator.håndter(hendelseId, risikovurdering)
+            }
         }
     }
 }

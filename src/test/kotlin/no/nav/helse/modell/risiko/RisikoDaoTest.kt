@@ -14,7 +14,7 @@ internal class RisikoDaoTest : AbstractEndToEndTest() {
         risikovurderingDao.persisterRisikovurdering(RisikovurderingDto(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
-            samletScore = 100,
+            samletScore = 10.0,
             faresignaler = listOf("Signal1", "Signal2"),
             arbeidsuførhetvurdering = listOf("Vurdering1", "Vurdering2"),
             ufullstendig = true

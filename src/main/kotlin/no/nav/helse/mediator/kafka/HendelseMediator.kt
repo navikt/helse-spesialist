@@ -157,7 +157,8 @@ internal class HendelseMediator(
                     aktørId = godkjenningMessage.aktørId,
                     orgnummer = godkjenningMessage.organisasjonsnummer,
                     speilSnapshotRestClient = speilSnapshotRestClient,
-                    reservasjonDao = reservasjonDao
+                    reservasjonDao = reservasjonDao,
+                    risikovurderingDao = risikovurderingDao
                 ),
                 spesialistOid = spesialistOID,
                 eventId = godkjenningMessage.id,
@@ -197,6 +198,12 @@ internal class HendelseMediator(
                 session = session
             )
         }
+    }
+
+    internal fun håndter(eventId: UUID, risikovurderingLøsning: RisikovurderingLøsning) {
+        val løsning = LøsningerOld()
+        løsning.add(risikovurderingLøsning)
+        resume(eventId, løsning)
     }
 
     internal fun håndter(bistandSaksbehandler: BistandSaksbehandlerMessage, originalJson: String) {
@@ -635,6 +642,7 @@ internal class HendelseMediator(
             vedtaksperiodeId = spleisbehovDbDTO.spleisReferanse,
             data = spleisbehovDbDTO.data,
             reservasjonDao = reservasjonDao,
+            risikovurderingDao = risikovurderingDao,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
         MacroCommandType.BistandSaksbehandler -> BistandSaksbehandlerCommand.restore(

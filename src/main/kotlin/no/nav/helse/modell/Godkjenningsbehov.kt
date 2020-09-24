@@ -9,6 +9,8 @@ import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
 import no.nav.helse.modell.command.MacroCommand
 import no.nav.helse.modell.person.OppdaterPersonCommand
 import no.nav.helse.modell.person.OpprettPersonCommand
+import no.nav.helse.modell.risiko.OldRisikoCommando
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelOppgaveCommand
 import no.nav.helse.modell.vedtak.OpprettVedtakCommand
 import no.nav.helse.modell.vedtak.SaksbehandlerGodkjenningCommand
@@ -29,6 +31,7 @@ internal class Godkjenningsbehov(
     override val orgnummer: String,
     override val vedtaksperiodeId: UUID,
     private val reservasjonDao: ReservasjonDao,
+    private val risikovurderingDao: RisikovurderingDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : MacroCommand(
     eventId = id,
@@ -57,6 +60,7 @@ internal class Godkjenningsbehov(
             eventId = id,
             parent = this
         ),
+        OldRisikoCommando(id, risikovurderingDao, this),
         TildelOppgaveCommand(fødselsnummer, reservasjonDao, id, this),
         SaksbehandlerGodkjenningCommand(id, this)
     )
@@ -83,7 +87,8 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId: UUID,
             data: String,
             speilSnapshotRestClient: SpeilSnapshotRestClient,
-            reservasjonDao: ReservasjonDao
+            reservasjonDao: ReservasjonDao,
+            risikovurderingDao: RisikovurderingDao
         ): Godkjenningsbehov {
             val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
             return Godkjenningsbehov(
@@ -94,6 +99,7 @@ internal class Godkjenningsbehov(
                 periodeTom = spleisbehovDTO.periodeTom,
                 aktørId = spleisbehovDTO.aktørId,
                 orgnummer = spleisbehovDTO.orgnummer,
+                risikovurderingDao = risikovurderingDao,
                 reservasjonDao = reservasjonDao,
                 speilSnapshotRestClient = speilSnapshotRestClient
             )
