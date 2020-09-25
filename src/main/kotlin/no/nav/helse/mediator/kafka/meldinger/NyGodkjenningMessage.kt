@@ -54,7 +54,7 @@ internal class NyGodkjenningMessage(
             snapshotDao,
             vedtakDao
         ),
-        RisikoCommand(id, vedtaksperiodeId, risikovurderingDao),
+        RisikoCommand(organisasjonsnummer, vedtaksperiodeId, risikovurderingDao),
         SaksbehandlerGodkjenningCommand(vedtaksperiodeId, json, oppgaveMediator)
     )
 

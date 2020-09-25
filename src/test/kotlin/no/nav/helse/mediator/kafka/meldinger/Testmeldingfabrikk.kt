@@ -245,7 +245,10 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 "@behov" to listOf("Risikovurdering"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
-                "Risikovurdering" to mapOf("vedtaksperiodeId" to "0aebb71a-43a8-4529-89e9-3ab1df12e342"),
+                "Risikovurdering" to mapOf(
+                    "vedtaksperiodeId" to "0aebb71a-43a8-4529-89e9-3ab1df12e342",
+                    "organisasjonsnummer" to "815493000"
+                ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
                         "begrunnelserSomAleneKreverManuellBehandling" to listOf(
