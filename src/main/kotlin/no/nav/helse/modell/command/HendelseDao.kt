@@ -19,11 +19,19 @@ internal class HendelseDao(
                 transactionalSession.run {
                     opprettHendelse(hendelse)
 
-                    hendelse.vedtaksperiodeId()?.let {
+                    finnVedtaksperiode(hendelse.vedtaksperiodeId())?.let {
                         opprettKobling(it, hendelse.id)
                     }
                 }
             }
+        }
+    }
+
+    private fun finnVedtaksperiode(vedtaksperiodeId: UUID?): Long? = using(sessionOf(dataSource)) { session ->
+        vedtaksperiodeId?.let {
+            @Language("PostgreSQL")
+            val query = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
+            session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle)
         }
     }
 
@@ -44,23 +52,16 @@ internal class HendelseDao(
         ).asUpdate)
     }
 
-    private fun TransactionalSession.opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    private fun TransactionalSession.opprettKobling(vedtakId: Long, hendelseId: UUID) {
         @Language("PostgreSQL")
-        val vedtaksperiodeQuery = "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id"
+        val koblingStatement = "INSERT INTO vedtaksperiode_hendelse VALUES(?,?)"
         run(
-            queryOf(vedtaksperiodeQuery, mapOf("vedtaksperiode_id" to vedtaksperiodeId))
-                .map { it.long(1) }.asSingle
-        )?.let { vedtaksperiodeRef ->
-            @Language("PostgreSQL")
-            val koblingStatement = "INSERT INTO vedtaksperiode_hendelse VALUES(?,?)"
-            run(
-                queryOf(
-                    koblingStatement,
-                    vedtaksperiodeRef,
-                    hendelseId
-                ).asUpdate
-            )
-        }
+            queryOf(
+                koblingStatement,
+                vedtakId,
+                hendelseId
+            ).asUpdate
+        )
     }
 
     internal fun finn(id: UUID): Hendelse? =
