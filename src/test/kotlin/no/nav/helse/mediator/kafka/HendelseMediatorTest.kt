@@ -12,7 +12,18 @@ internal class HendelseMediatorTest {
 
     private val testRapid = TestRapid()
 
-    private val mediator = HendelseMediator(testRapid, mockk(), mockk(), UUID.randomUUID(), mockk(), mockk(), mockk())
+    private val mediator = HendelseMediator(
+        testRapid,
+        mockk(),
+        mockk(),
+        UUID.randomUUID(),
+        mockk(),
+        mockk(),
+        mockk(),
+        MiljøstyrtFeatureToggle(
+            emptyMap()
+        )
+    )
 
     @Test
     fun `publiserer tilbakerulling på rapid`() {

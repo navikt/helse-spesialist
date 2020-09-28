@@ -9,7 +9,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
 import no.nav.helse.modell.command.findBehov
 import no.nav.helse.modell.command.findSaksbehandlerOppgaver
@@ -124,13 +123,13 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         sendGodkjenningsbehov()
 
         spleisbehovMediator.håndter(
-            spleisbehovId,
+            hendelseId,
             HentEnhetLøsning("1234"),
             hentPersoninfoLøsning(),
             HentInfotrygdutbetalingerLøsning(infotrygdutbetalingerLøsning())
         )
-        spleisbehovMediator.håndter(spleisbehovId, risikovurderingLøsning(spleisbehovId, vedtaksperiodeId, listOf("8.4: Feil diagnose")))
-        spleisbehovMediator.håndter(spleisbehovId, saksbehandlerLøsning())
+        spleisbehovMediator.håndter(hendelseId, risikovurderingLøsning(hendelseId, vedtaksperiodeId, listOf("8.4: Feil diagnose")))
+        spleisbehovMediator.håndter(hendelseId, saksbehandlerLøsning())
 
         assertNotNull(finnLøsning("Godkjenning"))
     }
