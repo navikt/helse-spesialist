@@ -16,6 +16,7 @@ import no.nav.helse.Oppgavestatus
 import no.nav.helse.api.GodkjenningDTO
 import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -52,19 +53,19 @@ internal class GodkjenningE2ETest {
     private lateinit var dataSource: DataSource
     private lateinit var hendelseMediator: HendelseMediator
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private val featuretoggleMock = mockk<MiljøstyrtFeatureToggle>()
 
     private fun nyHendelseId() = UUID.randomUUID()
 
     @BeforeAll
     fun activate() {
         FeatureToggle.nyGodkjenningRiver = true
-        FeatureToggle.risikovurdering = true
+        every { featuretoggleMock.risikovurdering() }.returns(true)
     }
 
     @AfterAll
     fun deactivate() {
         FeatureToggle.nyGodkjenningRiver = false
-        FeatureToggle.risikovurdering = false
     }
 
     @Test
@@ -300,7 +301,8 @@ internal class GodkjenningE2ETest {
             rapidsConnection = testRapid,
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
-            spesialistOID = SPESIALIST_OID
+            spesialistOID = SPESIALIST_OID,
+            miljøstyrtFeatureToggle = featuretoggleMock
         )
     }
 

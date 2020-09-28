@@ -16,6 +16,7 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -92,7 +93,8 @@ internal class RestApiTest : AbstractEndToEndTest() {
             rapidsConnection = testRapid,
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            spesialistOID = spesialistOID
+            spesialistOID = spesialistOID,
+            miljøstyrtFeatureToggle = mockk(relaxed = true)
         )
         val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource))
         val vedtaksperiodeMediator = VedtaksperiodeMediator(

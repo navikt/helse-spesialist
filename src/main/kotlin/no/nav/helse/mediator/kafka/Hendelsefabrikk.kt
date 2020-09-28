@@ -36,7 +36,8 @@ internal class Hendelsefabrikk(
     private val overstyringDao: OverstyringDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
-    private val oppgaveMediator: OppgaveMediator
+    private val oppgaveMediator: OppgaveMediator,
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : IHendelsefabrikk {
     private companion object {
         private val mapper = jacksonObjectMapper()
@@ -71,7 +72,8 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             risikovurderingDao = risikovurderingDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
     }
 

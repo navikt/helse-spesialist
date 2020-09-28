@@ -44,7 +44,8 @@ internal class HendelseMediator(
     private val spesialistOID: UUID,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
+    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao),
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : IHendelseMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -70,7 +71,8 @@ internal class HendelseMediator(
         overstyringDao = overstyringDao,
         risikovurderingDao = risikovurderingDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
-        oppgaveMediator = oppgaveMediator
+        oppgaveMediator = oppgaveMediator,
+        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
     )
     private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
 
@@ -96,7 +98,7 @@ internal class HendelseMediator(
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
-            if (FeatureToggle.risikovurdering) {
+            if (miljøstyrtFeatureToggle.risikovurdering()) {
                 RisikovurderingLøsning.Factory(it, this)
             }
         }
@@ -158,7 +160,8 @@ internal class HendelseMediator(
                     orgnummer = godkjenningMessage.organisasjonsnummer,
                     speilSnapshotRestClient = speilSnapshotRestClient,
                     reservasjonDao = reservasjonDao,
-                    risikovurderingDao = risikovurderingDao
+                    risikovurderingDao = risikovurderingDao,
+                    miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
                 ),
                 spesialistOid = spesialistOID,
                 eventId = godkjenningMessage.id,
@@ -643,7 +646,8 @@ internal class HendelseMediator(
             data = spleisbehovDbDTO.data,
             reservasjonDao = reservasjonDao,
             risikovurderingDao = risikovurderingDao,
-            speilSnapshotRestClient = speilSnapshotRestClient
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
         MacroCommandType.BistandSaksbehandler -> BistandSaksbehandlerCommand.restore(
             id = spleisbehovDbDTO.id,

@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import AbstractEndToEndTest
+import io.mockk.mockk
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -62,7 +63,8 @@ class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 orgnummer = "98765432",
                 reservasjonDao = reservasjonDao,
                 risikovurderingDao = risikovurderingDao,
-                speilSnapshotRestClient = speilSnapshotRestClient
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                miljøstyrtFeatureToggle = mockk(relaxed = true)
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -105,7 +107,8 @@ class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 orgnummer = "98765432",
                 reservasjonDao = reservasjonDao,
                 risikovurderingDao = risikovurderingDao,
-                speilSnapshotRestClient = speilSnapshotRestClient
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                miljøstyrtFeatureToggle = mockk(relaxed = true)
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -152,7 +155,8 @@ class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 orgnummer = "98765432",
                 reservasjonDao = reservasjonDao,
                 risikovurderingDao = risikovurderingDao,
-                speilSnapshotRestClient = speilSnapshotRestClient
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                miljøstyrtFeatureToggle = mockk(relaxed = true)
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -195,7 +199,8 @@ class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 orgnummer = "98765433",
                 reservasjonDao = reservasjonDao,
                 risikovurderingDao = risikovurderingDao,
-                speilSnapshotRestClient = speilSnapshotRestClient
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                miljøstyrtFeatureToggle = mockk(relaxed = true)
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -240,7 +245,8 @@ class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 orgnummer = "98765433",
                 reservasjonDao = reservasjonDao,
                 risikovurderingDao = risikovurderingDao,
-                speilSnapshotRestClient = speilSnapshotRestClient
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                miljøstyrtFeatureToggle = mockk(relaxed = true)
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,
@@ -307,7 +313,8 @@ class GodkjenningsbehovTest : AbstractEndToEndTest() {
                 orgnummer = "98765433",
                 reservasjonDao = reservasjonDao,
                 risikovurderingDao = risikovurderingDao,
-                speilSnapshotRestClient = failingSpeilSnapshotDao
+                speilSnapshotRestClient = failingSpeilSnapshotDao,
+                miljøstyrtFeatureToggle = mockk(relaxed = true)
             ),
             spesialistOid = UUID.randomUUID(),
             eventId = eventId,

@@ -2,11 +2,13 @@ package no.nav.helse
 
 import AbstractEndToEndTest
 import com.fasterxml.jackson.databind.node.ObjectNode
+import io.mockk.every
+import io.mockk.mockk
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.GodkjenningMessage
 import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
 import no.nav.helse.mediator.kafka.meldinger.TilInfotrygdMessage
@@ -49,13 +51,18 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     private lateinit var vedtaksperiodeId: UUID
     private lateinit var spleisbehovId: UUID
 
+    private val featuretoggleMock = mockk<MiljøstyrtFeatureToggle> {
+        every { risikovurdering() }.returns(false)
+    }
+
     @BeforeAll
     fun setupAll() {
         spleisbehovMediator = HendelseMediator(
             rapidsConnection = testRapid,
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            spesialistOID = spesialistOID
+            spesialistOID = spesialistOID,
+            miljøstyrtFeatureToggle = featuretoggleMock
         )
     }
 
@@ -64,12 +71,12 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
         spleisbehovId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
         session = sessionOf(dataSource, returnGeneratedKey = true)
+        every { featuretoggleMock.risikovurdering() }.returns(false)
     }
 
     @AfterEach
     fun closeConnection() {
         session.close()
-        FeatureToggle.risikovurdering = false
     }
 
     @ExperimentalContracts
@@ -115,7 +122,7 @@ class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
 
     @Test
     fun `godkjenningsbehov med risikovurdering`() {
-        FeatureToggle.risikovurdering = true
+        every { featuretoggleMock.risikovurdering() }.returns(true)
         sendGodkjenningsbehov()
 
         spleisbehovMediator.håndter(

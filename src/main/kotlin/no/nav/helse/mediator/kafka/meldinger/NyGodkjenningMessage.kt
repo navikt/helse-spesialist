@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -34,7 +35,8 @@ internal class NyGodkjenningMessage(
     snapshotDao: SnapshotDao,
     risikovurderingDao: RisikovurderingDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    oppgaveMediator: OppgaveMediator
+    oppgaveMediator: OppgaveMediator,
+    miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         KlargjørPersonCommand(fødselsnummer, aktørId, personDao),
@@ -54,7 +56,7 @@ internal class NyGodkjenningMessage(
             snapshotDao,
             vedtakDao
         ),
-        RisikoCommand(organisasjonsnummer, vedtaksperiodeId, risikovurderingDao),
+        RisikoCommand(organisasjonsnummer, vedtaksperiodeId, risikovurderingDao, miljøstyrtFeatureToggle),
         SaksbehandlerGodkjenningCommand(vedtaksperiodeId, json, oppgaveMediator)
     )
 

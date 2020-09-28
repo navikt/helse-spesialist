@@ -15,6 +15,7 @@ import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -78,6 +79,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
     private val tildelingMediator = TildelingMediator(dataSource)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+    private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -132,7 +134,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID")),
             oppgaveMediator = oppgaveMediator,
             oppgaveDao = oppgaveDao,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
     }
 

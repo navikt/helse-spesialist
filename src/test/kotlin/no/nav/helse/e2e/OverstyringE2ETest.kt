@@ -78,7 +78,8 @@ class OverstyringE2ETest {
             rapidsConnection = testRapid,
             speilSnapshotRestClient = speilSnapshotRestClient,
             dataSource = dataSource,
-            spesialistOID = SPESIALIST_OID
+            spesialistOID = SPESIALIST_OID,
+            miljøstyrtFeatureToggle = mockk(relaxed = true)
         )
         oppgaveDao = OppgaveDao(dataSource)
         overstyringDao = OverstyringDao(dataSource)

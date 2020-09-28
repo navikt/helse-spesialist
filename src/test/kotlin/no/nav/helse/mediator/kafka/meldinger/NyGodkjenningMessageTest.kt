@@ -56,7 +56,8 @@ internal class NyGodkjenningMessageTest {
         oppgaveMediator = oppgaveMediator,
         reservasjonsDao = mockk(),
         saksbehandlerDao = mockk(),
-        overstyringDao = mockk()
+        overstyringDao = mockk(),
+        miljøstyrtFeatureToggle = mockk(relaxed = true)
     )
     private val godkjenningMessage = hendelsefabrikk.nyGodkjenning(
         id = HENDELSE_ID,

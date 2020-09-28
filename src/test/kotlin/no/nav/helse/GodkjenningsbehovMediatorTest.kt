@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import AbstractEndToEndTest
+import io.mockk.mockk
 import kotliquery.Session
 import kotliquery.sessionOf
 import no.nav.helse.mediator.kafka.HendelseMediator
@@ -46,7 +47,8 @@ internal class GodkjenningsbehovMediatorTest : AbstractEndToEndTest() {
             rapidsConnection = TestRapid(),
             dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            spesialistOID = spesialistOID
+            spesialistOID = spesialistOID,
+            miljøstyrtFeatureToggle = mockk(relaxed = true)
         )
         val spleisbehovId = UUID.randomUUID()
         val godkjenningMessage = GodkjenningMessage(

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
+import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.arbeidsgiver.OppdatertArbeidsgiverCommand
 import no.nav.helse.modell.arbeidsgiver.OpprettArbeidsgiverCommand
 import no.nav.helse.modell.command.MacroCommand
@@ -32,6 +33,7 @@ internal class Godkjenningsbehov(
     override val vedtaksperiodeId: UUID,
     private val reservasjonDao: ReservasjonDao,
     private val risikovurderingDao: RisikovurderingDao,
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : MacroCommand(
     eventId = id,
@@ -60,7 +62,7 @@ internal class Godkjenningsbehov(
             eventId = id,
             parent = this
         ),
-        OldRisikoCommando(id, risikovurderingDao, this),
+        OldRisikoCommando(id, risikovurderingDao, miljøstyrtFeatureToggle, this),
         TildelOppgaveCommand(fødselsnummer, reservasjonDao, id, this),
         SaksbehandlerGodkjenningCommand(id, this)
     )
@@ -88,7 +90,8 @@ internal class Godkjenningsbehov(
             data: String,
             speilSnapshotRestClient: SpeilSnapshotRestClient,
             reservasjonDao: ReservasjonDao,
-            risikovurderingDao: RisikovurderingDao
+            risikovurderingDao: RisikovurderingDao,
+            miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
         ): Godkjenningsbehov {
             val spleisbehovDTO = objectMapper.readValue<SpleisbehovDTO>(data)
             return Godkjenningsbehov(
@@ -101,7 +104,8 @@ internal class Godkjenningsbehov(
                 orgnummer = spleisbehovDTO.orgnummer,
                 risikovurderingDao = risikovurderingDao,
                 reservasjonDao = reservasjonDao,
-                speilSnapshotRestClient = speilSnapshotRestClient
+                speilSnapshotRestClient = speilSnapshotRestClient,
+                miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
             )
         }
     }

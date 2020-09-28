@@ -50,7 +50,8 @@ internal class OverstyringMessageTest {
         commandContextDao = mockk(),
         snapshotDao = mockk(),
         speilSnapshotRestClient = mockk(),
-        oppgaveMediator = mockk()
+        oppgaveMediator = mockk(),
+        miljøstyrtFeatureToggle = mockk(relaxed = true)
     )
 
     private val overstyringMessage = hendelsefabrikk.overstyring(

@@ -68,3 +68,5 @@ spec:
       value: be87b958-4ff0-405d-80b5-f47e836f0a0e
     - name: SPEIL_CLIENT_ID
       value: 9b484b08-503a-4c72-9861-c59acec774e6
+    - name: RISK_FEATURE_TOGGLE
+      value: true

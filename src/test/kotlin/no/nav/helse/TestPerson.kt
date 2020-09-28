@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.convertValue
+import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.api.OverstyringRestDto
@@ -42,7 +43,8 @@ internal class TestPerson(
         rapidsConnection = rapid,
         dataSource = dataSource,
         speilSnapshotRestClient = speilSnapshotRestClient,
-        spesialistOID = spesialistOID
+        spesialistOID = spesialistOID,
+        miljøstyrtFeatureToggle = mockk(relaxed = true)
     )
 
     fun sendGodkjenningMessage(
