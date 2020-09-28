@@ -3,11 +3,8 @@ package no.nav.helse.tildeling
 import AbstractEndToEndTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -20,16 +17,6 @@ internal class ReservasjonDaoTest : AbstractEndToEndTest() {
         private const val FNR = "12345678911"
         private val objectMapper = jacksonObjectMapper()
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
-    }
-
-    private lateinit var reservasjonDao: ReservasjonDao
-
-    @BeforeEach
-    fun setup() {
-        personDao = PersonDao(dataSource)
-        reservasjonDao = ReservasjonDao(dataSource)
-        snapshotDao = SnapshotDao(dataSource)
-
     }
 
     @Test

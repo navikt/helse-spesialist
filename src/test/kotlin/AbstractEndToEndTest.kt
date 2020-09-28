@@ -14,29 +14,22 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.tildeling.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Path
-import java.sql.Connection
 import java.time.LocalDate
 import java.util.*
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractEndToEndTest {
-    protected lateinit var dataSource: DataSource
-    private lateinit var embeddedPostgres: EmbeddedPostgres
-    private lateinit var postgresConnection: Connection
     protected val testRapid = TestRapid()
 
     internal companion object {
@@ -68,6 +61,22 @@ abstract class AbstractEndToEndTest {
         internal val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
 
         internal val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
+
+        private val postgresPath = createTempDir()
+        private val embeddedPostgres = EmbeddedPostgres.builder()
+            .setOverrideWorkingDirectory(postgresPath)
+            .setDataDirectory(postgresPath.resolve("datadir"))
+            .start()
+
+        private val hikariConfig = HikariConfig().apply {
+            this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres").also(::println)
+            maximumPoolSize = 5
+            minimumIdle = 1
+            idleTimeout = 10001
+            connectionTimeout = 1000
+            maxLifetime = 30001
+        }
+        internal val dataSource = HikariDataSource(hikariConfig)
     }
 
     private var personId: Int = -1
@@ -77,44 +86,17 @@ abstract class AbstractEndToEndTest {
     internal var oppgaveId: Long = -1
         private set
 
-    internal lateinit var personDao: PersonDao
-    internal lateinit var oppgaveDao: OppgaveDao
-    internal lateinit var arbeidsgiverDao: ArbeidsgiverDao
-    internal lateinit var snapshotDao: SnapshotDao
-    internal lateinit var vedtakDao: VedtakDao
-    internal lateinit var commandContextDao: CommandContextDao
-    internal lateinit var tildelingDao: TildelingDao
-    internal lateinit var saksbehandlerDao: SaksbehandlerDao
-    internal lateinit var risikovurderingDao: RisikovurderingDao
-
-    @BeforeAll
-    fun setupAllE2E(@TempDir postgresPath: Path) {
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        postgresConnection = embeddedPostgres.postgresDatabase.connection
-
-        val hikariConfig = HikariConfig().apply {
-            this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres")
-            maximumPoolSize = 5
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        }
-
-        dataSource = HikariDataSource(hikariConfig)
-        personDao = PersonDao(dataSource)
-        oppgaveDao = OppgaveDao(dataSource)
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        snapshotDao = SnapshotDao(dataSource)
-        vedtakDao = VedtakDao(dataSource)
-        commandContextDao = CommandContextDao(dataSource)
-        tildelingDao = TildelingDao(dataSource)
-        saksbehandlerDao = SaksbehandlerDao(dataSource)
-        risikovurderingDao = RisikovurderingDao(dataSource)
-    }
+    internal val personDao = PersonDao(dataSource)
+    internal val oppgaveDao = OppgaveDao(dataSource)
+    internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    internal val snapshotDao = SnapshotDao(dataSource)
+    internal val vedtakDao = VedtakDao(dataSource)
+    internal val commandContextDao = CommandContextDao(dataSource)
+    internal val tildelingDao = TildelingDao(dataSource)
+    internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    internal val overstyringDao = OverstyringDao(dataSource)
+    internal val reservasjonDao = ReservasjonDao(dataSource)
+    internal val risikovurderingDao = RisikovurderingDao(dataSource)
 
     @BeforeEach
     internal fun setupEachE2E() {
@@ -128,12 +110,6 @@ abstract class AbstractEndToEndTest {
                 it.migrate()
             }
         testRapid.reset()
-    }
-
-    @AfterAll
-    internal fun teardown() {
-        postgresConnection.close()
-        embeddedPostgres.close()
     }
 
     protected fun testbehov(

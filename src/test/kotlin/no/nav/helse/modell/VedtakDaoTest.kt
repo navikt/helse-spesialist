@@ -4,26 +4,15 @@ import AbstractEndToEndTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.util.*
 
 internal class VedtakDaoTest : AbstractEndToEndTest() {
-
-    @BeforeEach
-    fun setup() {
-        personDao = PersonDao(dataSource)
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-        snapshotDao = SnapshotDao(dataSource)
-        vedtakDao = VedtakDao(dataSource)
-    }
 
     @Test
     fun `lagre vedtak`() {

@@ -1,11 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import AbstractEndToEndTest
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -34,16 +30,6 @@ internal class OverstyringDaoTest : AbstractEndToEndTest() {
                 grad = 100
             )
         )
-    }
-
-    private lateinit var overstyringDao: OverstyringDao
-
-    @BeforeEach
-    fun setup() {
-        overstyringDao = OverstyringDao(dataSource)
-        personDao = PersonDao(dataSource)
-        saksbehandlerDao = SaksbehandlerDao(dataSource)
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     }
 
     @Test
