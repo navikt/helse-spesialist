@@ -4,10 +4,7 @@ import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -49,7 +46,8 @@ internal class RisikovurderingLøsning(
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("Risikovurdering"))
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
+                    it.interestedIn("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
+                    it.interestedIn("vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
                     it.demandKey("contextId")
                     it.demandKey("hendelseId")
                     it.requireKey("@løsning.Risikovurdering")
@@ -66,7 +64,9 @@ internal class RisikovurderingLøsning(
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             sikkerLogg.info("Mottok melding RisikovurderingMessage: ", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
-            val vedtaksperiodeId = UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
+            // TODO: Her støtter vi nytt og gammelt format samtidig. Når refactoren er ute kan første del droppes
+            val vedtaksperiodeId = takeIf { !packet["vedtaksperiodeId"].isMissingOrNull() }?.let { UUID.fromString(packet["vedtaksperiodeId"].asText()) }
+                ?: UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
 
