@@ -27,6 +27,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.tildeling.ReservasjonDao
+import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -41,7 +42,8 @@ internal class HendelseMediator(
     private val spesialistOID: UUID,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao),
+    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
+    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : IHendelseMediator {
     private companion object {
@@ -64,7 +66,7 @@ internal class HendelseMediator(
         commandContextDao = commandContextDao,
         snapshotDao = snapshotDao,
         oppgaveDao = oppgaveDao,
-        reservasjonsDao = reservasjonDao,
+        reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
         risikovurderingDao = risikovurderingDao,

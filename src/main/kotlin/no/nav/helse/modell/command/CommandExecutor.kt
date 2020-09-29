@@ -4,8 +4,6 @@ import kotliquery.Session
 import net.logstash.logback.argument.StructuredArgument
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.vedtak.findVedtak
-import no.nav.helse.tildeling.hentReservasjonFor
-import no.nav.helse.tildeling.tildelOppgave
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*

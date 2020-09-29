@@ -30,6 +30,7 @@ import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.PersonForSpeilDto
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.junit.jupiter.api.AfterAll
@@ -93,7 +94,7 @@ internal class RestApiTest : AbstractEndToEndTest() {
             spesialistOID = spesialistOID,
             miljøstyrtFeatureToggle = mockk(relaxed = true)
         )
-        val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource))
+        val oppgaveMediator = OppgaveMediator(OppgaveDao(dataSource), VedtakDao(dataSource), TildelingDao(dataSource))
         val vedtaksperiodeMediator = VedtaksperiodeMediator(
             dataSource = dataSource,
             oppgaveDao = oppgaveDao

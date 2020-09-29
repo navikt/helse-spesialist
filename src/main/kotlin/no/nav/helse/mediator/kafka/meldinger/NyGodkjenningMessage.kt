@@ -13,6 +13,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
+import no.nav.helse.tildeling.ReservasjonDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -34,6 +35,7 @@ internal class NyGodkjenningMessage(
     vedtakDao: VedtakDao,
     snapshotDao: SnapshotDao,
     risikovurderingDao: RisikovurderingDao,
+    reservasjonDao: ReservasjonDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
@@ -57,7 +59,7 @@ internal class NyGodkjenningMessage(
             vedtakDao
         ),
         RisikoCommand(organisasjonsnummer, vedtaksperiodeId, risikovurderingDao, miljøstyrtFeatureToggle),
-        SaksbehandlerGodkjenningCommand(vedtaksperiodeId, json, oppgaveMediator)
+        SaksbehandlerGodkjenningCommand(fødselsnummer, vedtaksperiodeId, json, reservasjonDao, oppgaveMediator)
     )
 
     override fun fødselsnummer() = fødselsnummer

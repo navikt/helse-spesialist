@@ -80,7 +80,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vedtakDao = VedtakDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
@@ -138,6 +138,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             oppgaveMediator = oppgaveMediator,
             oppgaveDao = oppgaveDao,
             vedtakDao = vedtakDao,
+            tildelingDao = tildelingDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
     }

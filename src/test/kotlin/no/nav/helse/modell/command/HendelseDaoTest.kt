@@ -40,7 +40,7 @@ internal class HendelseDaoTest : AbstractEndToEndTest() {
             snapshotDao = snapshotDao,
             oppgaveDao = oppgaveDao,
             speilSnapshotRestClient = restClient,
-            reservasjonsDao = mockk(),
+            reservasjonDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
             oppgaveMediator = mockk(),

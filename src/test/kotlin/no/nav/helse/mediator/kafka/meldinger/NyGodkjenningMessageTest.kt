@@ -19,6 +19,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,6 +46,7 @@ internal class NyGodkjenningMessageTest {
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
+    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
@@ -57,7 +59,7 @@ internal class NyGodkjenningMessageTest {
         risikovurderingDao = risikovurderingDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
-        reservasjonsDao = mockk(),
+        reservasjonDao = reservasjonDao,
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true)
@@ -93,13 +95,30 @@ internal class NyGodkjenningMessageTest {
     fun `lager oppgave`() {
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
 
         assertFalse(godkjenningMessage.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { oppgaveMediator.oppgave(any()) }
+        verify(exactly = 1) { oppgaveMediator.oppgave(any(), any()) }
+    }
+
+    @Test
+    fun `lager oppgave med tildeling`() {
+        val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
+
+        every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
+        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
+        context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
+        context.add(HentEnhetLøsning("3101"))
+        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
+
+        assertFalse(godkjenningMessage.execute(context))
+        assertFalse(context.harBehov())
+        verify(exactly = 1) { oppgaveMediator.oppgave(any(), reservasjon) }
     }
 
     @Test
@@ -107,6 +126,7 @@ internal class NyGodkjenningMessageTest {
         val godkjenttidspunkt = LocalDateTime.now()
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetLøsning("3101"))
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))

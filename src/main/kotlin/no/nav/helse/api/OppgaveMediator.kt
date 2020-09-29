@@ -8,31 +8,40 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.TildelingDao
 import java.time.LocalDateTime
 import java.util.*
 
 internal class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
-    private val vedtakDao: VedtakDao
+    private val vedtakDao: VedtakDao,
+    private val tildelingDao: TildelingDao
 ) {
 
-    private val oppgaver = mutableListOf<Oppgave>()
+    private val oppgaver = mutableMapOf<Oppgave, Pair<UUID, LocalDateTime>?>()
     private val meldinger = mutableListOf<String>()
 
-    fun hentOppgaver() = oppgaveDao.finnOppgaver()
+    internal fun hentOppgaver() = oppgaveDao.finnOppgaver()
 
-    fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
+    internal fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 
-    internal fun oppgave(oppgave: Oppgave) {
-        oppgaver.add(oppgave)
+    internal fun oppgave(oppgave: Oppgave, reservasjon: Pair<UUID, LocalDateTime>?) {
+        oppgaver[oppgave] = reservasjon
     }
 
-    fun lagreOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
+    internal fun lagreOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
         oppgaver
-            .onEach { it.lagre(this, hendelse.id, contextId) }
-            .clear()
-        meldinger.onEach { messageContext.send(it) }
-            .clear()
+            .onEach { (oppgave, reservasjon) ->
+                oppgave.lagre(this, hendelse.id, contextId)
+                reservasjon?.let {
+                    oppgave.tildel(this, reservasjon)
+                }
+            }.clear()
+        meldinger.onEach { messageContext.send(it) }.clear()
+    }
+
+    internal fun tildel(oppgaveId: Long, reservasjon: Pair<UUID, LocalDateTime>) {
+        tildelingDao.opprettTildeling(oppgaveId, reservasjon.first, reservasjon.second)
     }
 
     internal fun opprett(
@@ -40,15 +49,16 @@ internal class OppgaveMediator(
         contextId: UUID,
         vedtaksperiodeId: UUID,
         navn: String
-    ) {
+    ): Long {
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
-        val oppgaveId = oppgaveDao.opprettOppgave(
+        return oppgaveDao.opprettOppgave(
             hendelseId,
             contextId,
             navn,
             vedtakRef
-        )
-        køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, AvventerSaksbehandler)
+        ).also { oppgaveId ->
+            køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, AvventerSaksbehandler)
+        }
     }
 
     internal fun oppdater(

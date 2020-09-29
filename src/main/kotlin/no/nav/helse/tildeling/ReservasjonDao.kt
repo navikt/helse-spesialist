@@ -1,11 +1,8 @@
 package no.nav.helse.tildeling
 
-import kotliquery.Row
-import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -30,19 +27,18 @@ WHERE person.fodselsnummer = :fodselsnummer;"""
 
     fun hentReservasjonFor(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val query = """
-SELECT r.*
-FROM reserver_person r
-         JOIN person p ON p.id = r.person_ref
-WHERE p.fodselsnummer = :fodselsnummer
-  AND r.gyldig_til > now();
-"""
+        val query =
+            """
+                SELECT r.* FROM reserver_person r
+                    JOIN person p ON p.id = r.person_ref
+                WHERE p.fodselsnummer = ? AND r.gyldig_til > now();
+            """
         session.run(
-            queryOf(
-                query,
-                mapOf("fodselsnummer" to fødselsnummer.toLong())
-            )
-                .map(::tilReservasjon)
+            queryOf(query, fødselsnummer.toLong())
+                .map {
+                    UUID.fromString(it.string("saksbehandler_ref")) to
+                        it.localDateTime("gyldig_til")
+                }
                 .asSingle
         )
     }
@@ -70,35 +66,4 @@ WHERE p.fodselsnummer = :fodselsnummer
             )
         }
     }
-
-    private fun tilReservasjon(row: Row): ReservasjonDto = ReservasjonDto(
-        UUID.fromString(row.string("saksbehandler_ref")),
-        row.localDateTime("gyldig_til")
-    )
 }
-
-
-internal fun Session.hentReservasjonFor(fødselsnummer: String) = run(
-        queryOf(
-            """
-        SELECT r.*
-        FROM reserver_person r
-                 JOIN person p ON p.id = r.person_ref
-        WHERE p.fodselsnummer = :fodselsnummer
-          AND r.gyldig_til > now();
-        """,
-            mapOf("fodselsnummer" to fødselsnummer.toLong())
-        )
-            .map(::tilReservasjon)
-            .asSingle
-    )
-
-private fun tilReservasjon(row: Row): ReservasjonDto = ReservasjonDto(
-    UUID.fromString(row.string("saksbehandler_ref")),
-    row.localDateTime("gyldig_til")
-)
-
-data class ReservasjonDto(
-    val saksbehandlerOid: UUID,
-    val gyldigTil: LocalDateTime
-)

@@ -1,12 +1,9 @@
 package no.nav.helse.tildeling
 
-import kotliquery.sessionOf
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
-import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
 import java.util.*
-import javax.sql.DataSource
 
 internal class TildelingMediator(private val saksbehandlerDao: SaksbehandlerDao, private val tildelingDao: TildelingDao) {
 

@@ -21,8 +21,8 @@ internal class TildelOppgaveCommand(
     }
 
     override fun afterOppgaveOpprettet(session: Session) {
-        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let {
-            session.tildelOppgave(session.findOppgave(fødselsnummer)!!.id, it.saksbehandlerOid, it.gyldigTil)
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, gyldigTil) ->
+            session.tildelOppgave(session.findOppgave(fødselsnummer)!!.id, oid, gyldigTil)
         }
     }
 }

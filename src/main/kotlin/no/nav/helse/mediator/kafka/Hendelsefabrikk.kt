@@ -30,7 +30,7 @@ internal class Hendelsefabrikk(
     private val oppgaveDao: OppgaveDao,
     private val commandContextDao: CommandContextDao,
     private val snapshotDao: SnapshotDao,
-    private val reservasjonsDao: ReservasjonDao,
+    private val reservasjonDao: ReservasjonDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val overstyringDao: OverstyringDao,
     private val risikovurderingDao: RisikovurderingDao,
@@ -70,6 +70,7 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             risikovurderingDao = risikovurderingDao,
+            reservasjonDao = reservasjonDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
@@ -113,7 +114,7 @@ internal class Hendelsefabrikk(
         begrunnelse = begrunnelse,
         overstyrteDager = overstyrteDager,
         json = json,
-        reservasjonDao = reservasjonsDao,
+        reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao
     )

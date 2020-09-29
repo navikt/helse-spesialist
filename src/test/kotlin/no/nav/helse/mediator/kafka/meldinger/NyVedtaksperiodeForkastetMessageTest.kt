@@ -47,7 +47,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
             speilSnapshotRestClient = restClient,
             personDao = mockk(),
             arbeidsgiverDao = mockk(),
-            reservasjonsDao = mockk(),
+            reservasjonDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
             oppgaveMediator = mockk(),

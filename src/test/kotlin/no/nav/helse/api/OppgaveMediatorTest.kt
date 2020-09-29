@@ -13,14 +13,16 @@ import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.random.Random.Default.nextLong
 
-internal class OppgaveMediatorTest() {
+internal class OppgaveMediatorTest {
     private companion object {
         private const val FNR = "12345678911"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -37,7 +39,8 @@ internal class OppgaveMediatorTest() {
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val mediator = OppgaveMediator(oppgaveDao, vedtakDao)
+    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
+    private val mediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private lateinit var oppgave1: Oppgave
     private lateinit var oppgave2: Oppgave
 
@@ -46,7 +49,7 @@ internal class OppgaveMediatorTest() {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, vedtakDao)
+        clearMocks(oppgaveDao, vedtakDao, tildelingDao)
         testRapid.reset()
         oppgave1 = Oppgave.avventerSaksbehandler(OPPGAVENAVN1, VEDTAKSPERIODE_ID)
         oppgave2 = Oppgave.avventerSaksbehandler(OPPGAVENAVN2, VEDTAKSPERIODE_ID)
@@ -55,8 +58,8 @@ internal class OppgaveMediatorTest() {
     @Test
     fun `lagrer oppgaver`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VedtakDto(VEDTAKREF, 2L)
-        mediator.oppgave(oppgave1)
-        mediator.oppgave(oppgave2)
+        mediator.oppgave(oppgave1, null)
+        mediator.oppgave(oppgave2, null)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, VEDTAKREF) }
         verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, VEDTAKREF) }
@@ -66,9 +69,17 @@ internal class OppgaveMediatorTest() {
     }
 
     @Test
+    fun `lagrer tildeling`() {
+        val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
+        mediator.oppgave(oppgave1, reservasjon)
+        mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
+        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), reservasjon.first, reservasjon.second) }
+    }
+
+    @Test
     fun `oppdaterer oppgave`() {
         oppgave1.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        mediator.oppgave(oppgave1)
+        mediator.oppgave(oppgave1, null)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
@@ -80,8 +91,8 @@ internal class OppgaveMediatorTest() {
 
     @Test
     fun `lagrer ikke dobbelt`() {
-        mediator.oppgave(oppgave1)
-        mediator.oppgave(oppgave2)
+        mediator.oppgave(oppgave1, null)
+        mediator.oppgave(oppgave2, null)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         testRapid.reset()
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)

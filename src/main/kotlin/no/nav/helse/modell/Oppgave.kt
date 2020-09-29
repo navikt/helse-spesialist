@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.api.OppgaveMediator
+import java.time.LocalDateTime
 import java.util.*
 
 internal class Oppgave private constructor(
@@ -27,7 +28,13 @@ internal class Oppgave private constructor(
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
         id?.also {
             oppgaveMediator.oppdater(hendelseId, contextId, vedtaksperiodeId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn)
+        } ?: run {
+            id = oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn)
+        }
+    }
+
+    internal fun tildel(oppgaveMediator: OppgaveMediator, reservasjon: Pair<UUID, LocalDateTime>) {
+        oppgaveMediator.tildel(requireNotNull(id), reservasjon)
     }
 
     override fun equals(other: Any?): Boolean {
