@@ -4,28 +4,23 @@ import java.time.LocalDateTime
 import java.util.*
 
 class Risikovurdering private constructor(
-    private val vedtaksperiodeId: UUID,
-    private val opprettet: LocalDateTime,
-    private val samletScore: Double,
-    private val faresignaler: List<String>,
+    vedtaksperiodeId: UUID,
+    opprettet: LocalDateTime,
+    samletScore: Double,
+    faresignaler: List<String>,
     private val arbeidsuførhetvurdering: List<String>,
-    private val ufullstendig: Boolean
+    ufullstendig: Boolean
 ) {
     companion object {
         fun restore(
-            vedtaksperiodeId: UUID,
-            opprettet: LocalDateTime,
-            samletScore: Double,
-            faresignaler: List<String>,
-            arbeidsuførhetvurdering: List<String>,
-            ufullstendig: Boolean
+            risikovurderingDto: RisikovurderingDto
         ) = Risikovurdering(
-            vedtaksperiodeId = vedtaksperiodeId,
-            opprettet = opprettet,
-            samletScore = samletScore,
-            faresignaler = faresignaler,
-            arbeidsuførhetvurdering = arbeidsuførhetvurdering,
-            ufullstendig = ufullstendig
+            vedtaksperiodeId = risikovurderingDto.vedtaksperiodeId,
+            opprettet = risikovurderingDto.opprettet,
+            samletScore = risikovurderingDto.samletScore,
+            faresignaler = risikovurderingDto.faresignaler,
+            arbeidsuførhetvurdering = risikovurderingDto.arbeidsuførhetvurdering,
+            ufullstendig = risikovurderingDto.ufullstendig
         )
     }
 

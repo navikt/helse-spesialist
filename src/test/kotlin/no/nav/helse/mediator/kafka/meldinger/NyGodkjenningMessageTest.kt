@@ -62,7 +62,8 @@ internal class NyGodkjenningMessageTest {
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
-        miljøstyrtFeatureToggle = mockk(relaxed = true)
+        miljøstyrtFeatureToggle = mockk(relaxed = true),
+        automatisering = mockk(relaxed = true)
     )
     private val godkjenningMessage = hendelsefabrikk.nyGodkjenning(
         id = HENDELSE_ID,

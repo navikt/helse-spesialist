@@ -22,6 +22,10 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -86,6 +90,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val overstyringDao = OverstyringDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
+    private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -109,8 +114,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
                     auditLog.info(
-                        "Bruker=\"${principal.payload.getClaim("NAVident")
-                            .asString()}\" gjør kall mot url=\"${call.request.uri}\""
+                        "Bruker=\"${
+                            principal.payload.getClaim("NAVident")
+                                .asString()
+                        }\" gjør kall mot url=\"${call.request.uri}\""
                     )
                 }
             }
@@ -154,7 +161,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-            automatiseringsdings = automatiseringsdings
+            risikovurderingDao = risikovurderingDao
         )
     }
 

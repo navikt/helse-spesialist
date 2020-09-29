@@ -45,7 +45,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             overstyringDao = mockk(),
             oppgaveMediator = mockk(),
             risikovurderingDao = mockk(),
-            miljøstyrtFeatureToggle = mockk(relaxed = true)
+            miljøstyrtFeatureToggle = mockk(relaxed = true),
+            automatisering = mockk(relaxed = true)
         )
         dao = HendelseDao(dataSource, hendelsefabrikk)
     }

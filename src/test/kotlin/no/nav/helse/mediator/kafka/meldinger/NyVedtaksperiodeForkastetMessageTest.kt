@@ -51,7 +51,8 @@ internal class NyVedtaksperiodeForkastetMessageTest {
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
             oppgaveMediator = mockk(),
-            miljøstyrtFeatureToggle = mockk(relaxed = true)
+            miljøstyrtFeatureToggle = mockk(relaxed = true),
+            automatisering = mockk(relaxed = true)
         )
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(

@@ -16,6 +16,7 @@ import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -60,11 +61,13 @@ internal abstract class AbstractE2ETest {
     private val featuretoggleMock = MiljøstyrtFeatureToggle(mapOf(
         "RISK_FEATURE_TOGGLE" to "true"
     ))
+    protected var miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     protected val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
         speilSnapshotRestClient = restClient,
         dataSource = dataSource,
         miljøstyrtFeatureToggle = featuretoggleMock
+        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
     )
 
     @BeforeEach
@@ -96,6 +99,23 @@ internal abstract class AbstractE2ETest {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, vedtaksperiodeId, orgnr))
     }
 
+    protected fun sendGodkjenningsbehov(
+        orgnr: String,
+        vedtaksperiodeId: UUID,
+        periodeFom: LocalDate = LocalDate.now(),
+        periodeTom: LocalDate = LocalDate.now(),
+        warnings: List<String> = emptyList(),
+        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+    ) = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagGodkjenningsbehov(
+                id = id,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = orgnr,
+                periodeFom = periodeFom,
+                periodeTom = periodeTom,
+                warnings = warnings,
+                periodetype = periodetype
     protected fun sendGodkjenningsbehov(orgnr: String, vedtaksperiodeId: UUID, periodeFom: LocalDate = LocalDate.now(), periodeTom: LocalDate = LocalDate.now()) = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(id, vedtaksperiodeId, orgnr, periodeFom, periodeTom))
     }
@@ -123,6 +143,44 @@ internal abstract class AbstractE2ETest {
         )
     }
 
+    protected fun sendPersoninfoløsning(hendelseId: UUID, orgnr: String, vedtaksperiodeId: UUID) =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagPersoninfoløsning(
+                    id,
+                    hendelseId,
+                    testRapid.inspektør.contextId(),
+                    vedtaksperiodeId,
+                    orgnr
+                )
+            )
+        }
+
+    protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>) =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOverstyring(
+                    id = id,
+                    dager = dager,
+                    organisasjonsnummer = orgnr,
+                    saksbehandlerEpost = saksbehandlerEpost
+                )
+            )
+        }
+
+    protected fun sendRisikovurderingløsning(
+        godkjenningsmeldingId: UUID,
+        vedtaksperiodeId: UUID,
+        begrunnelser: List<String> = emptyList()
+    ) {
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagRisikovurderingløsning(
+                    id = id,
+                    hendelseId = godkjenningsmeldingId,
+                    contextId = testRapid.inspektør.contextId(),
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    begrunnelserSomAleneKreverManuellBehandling = begrunnelser
     protected fun sendRisikovurderingløsning(godkjenningsmeldingId: UUID) {
         nyHendelseId().also {id ->
             testRapid.sendTestMessage(
@@ -136,6 +194,13 @@ internal abstract class AbstractE2ETest {
 
     }
 
+    protected fun sendSaksbehandlerløsning(
+        oppgaveId: Long,
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        saksbehandlerOid: UUID,
+        godkjent: Boolean
+    ) = nyHendelseId().also { id ->
     protected fun sendSaksbehandlerløsning(oppgaveId: Long, saksbehandlerIdent: String, saksbehandlerEpost: String, saksbehandlerOid: UUID, godkjent: Boolean) = nyHendelseId().also { id ->
         hendelseMediator.håndter(
             GodkjenningDTO(

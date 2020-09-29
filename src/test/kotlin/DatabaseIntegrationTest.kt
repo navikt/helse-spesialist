@@ -4,14 +4,18 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -99,6 +103,7 @@ internal abstract class DatabaseIntegrationTest {
     internal val overstyringDao = OverstyringDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
+    internal val automatiseringDao = AutomatiseringDao(dataSource)
 
     @BeforeEach
     internal fun resetDatabase() {

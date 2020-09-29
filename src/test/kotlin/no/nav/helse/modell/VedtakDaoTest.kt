@@ -52,23 +52,23 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `lagrer warnings`() {
+    fun `lagrer og leser warnings`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         val testwarnings= listOf("Warning A", "Warning B")
         vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
-        assertWarnings(VEDTAKSPERIODE, testwarnings)
+        assertEquals(testwarnings, vedtakDao.finnWarnings(HENDELSE_ID))
     }
 
     @Test
-    fun `lagrer vedtaksperiodetype hvis den er satt`() {
+    fun `lagrer og leser vedtaksperiodetype hvis den er satt`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         val vedtaksperiodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
         vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype)
-        assertVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype)
+        assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, vedtakDao.finnVedtaksperiodetype(HENDELSE_ID))
     }
 
     @Test

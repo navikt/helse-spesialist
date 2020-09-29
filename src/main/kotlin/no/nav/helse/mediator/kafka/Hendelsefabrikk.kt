@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -36,7 +37,8 @@ internal class Hendelsefabrikk(
     private val risikovurderingDao: RisikovurderingDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val oppgaveMediator: OppgaveMediator,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
+    private val automatisering: Automatisering
 ) : IHendelsefabrikk {
     private companion object {
         private val mapper = jacksonObjectMapper()
@@ -73,7 +75,8 @@ internal class Hendelsefabrikk(
             reservasjonDao = reservasjonDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+            automatisering = automatisering
         )
     }
 

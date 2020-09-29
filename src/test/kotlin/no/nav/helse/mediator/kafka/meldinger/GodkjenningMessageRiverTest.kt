@@ -3,6 +3,7 @@ package no.nav.helse.mediator.kafka.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +34,6 @@ internal class GodkjenningMessageRiverTest {
     @Test
     fun `leser Godkjenningbehov`() {
         testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, organisasjonsnummer = ORGNR, periodeFom = FOM, periodeTom = TOM))
-        verify(exactly = 1) { mediator.godkjenning(any(), HENDELSE, FNR, AKTØR, ORGNR, FOM, TOM, VEDTAKSPERIODE, emptyList(), null, any()) }
+        verify(exactly = 1) { mediator.godkjenning(any(), HENDELSE, FNR, AKTØR, ORGNR, FOM, TOM, VEDTAKSPERIODE, emptyList(), Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, any()) }
     }
 }

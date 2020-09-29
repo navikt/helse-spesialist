@@ -6,6 +6,23 @@ import io.mockk.verify
 import no.nav.helse.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import no.nav.helse.api.GodkjenningDTO
+import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
+import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.flywaydb.core.Flyway
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.io.TempDir
+import java.nio.file.Path
+import java.sql.Connection
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -44,9 +61,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendRisikovurderingløsning(godkjenningsmeldingId)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
@@ -56,10 +72,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendRisikovurderingløsning(godkjenningsmeldingId)
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(true, SAKSBEHANDLERIDENT)
     }
@@ -69,10 +84,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendRisikovurderingløsning(godkjenningsmeldingId)
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(false, SAKSBEHANDLERIDENT)
     }

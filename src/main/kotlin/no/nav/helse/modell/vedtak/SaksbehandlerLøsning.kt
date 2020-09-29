@@ -19,13 +19,14 @@ internal class SaksbehandlerLøsning(
     private val kommentar: String?,
     private val oppgaveId: Long
 ) {
-    fun ferdigstillOppgave(oppgave: Oppgave, løsning: JsonMessage) {
+    fun ferdigstillOppgave(oppgave: Oppgave, behov: JsonMessage) {
         oppgave.ferdigstill(oppgaveId, saksbehandlerIdent, oid)
-        løsning["@løsning"] = mapOf(
+        behov["@løsning"] = mapOf(
             "Godkjenning" to mapOf(
                 "godkjent" to godkjent,
                 "saksbehandlerIdent" to saksbehandlerIdent,
                 "godkjenttidspunkt" to godkjenttidspunkt,
+                "automatiskBehandling" to false,
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
                 "kommentar" to kommentar

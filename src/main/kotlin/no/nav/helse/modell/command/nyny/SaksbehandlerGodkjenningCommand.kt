@@ -1,5 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
+import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
@@ -11,10 +12,14 @@ import java.util.*
 
 internal class SaksbehandlerGodkjenningCommand(
     private val fødselsnummer: String,
+    private val vedtaksperiodeId: UUID,
+    private val fødselsnummer: String,
     vedtaksperiodeId: UUID,
     private val godkjenningsbehovJson: String,
     private val reservasjonDao: ReservasjonDao,
-    private val oppgaveMediator: OppgaveMediator
+    private val oppgaveMediator: OppgaveMediator,
+    private val automatisering: Automatisering,
+    private val hendelseId: UUID
 ) : Command {
 
     private companion object {
@@ -24,6 +29,11 @@ internal class SaksbehandlerGodkjenningCommand(
     private val oppgave = Oppgave.avventerSaksbehandler(this::class.java.simpleName, vedtaksperiodeId)
 
     override fun execute(context: CommandContext): Boolean {
+        if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
+
+        logg.info("Oppretter saksbehandleroppgave")
+        val reservasjon = reservasjonDao.hentReservasjonFor(fødselsnummer)
+        oppgaveMediator.oppgave(oppgave, reservasjon)
         logg.info("Oppretter saksbehandleroppgave")
         val reservasjon = reservasjonDao.hentReservasjonFor(fødselsnummer)
         oppgaveMediator.oppgave(oppgave, reservasjon)
@@ -35,6 +45,8 @@ internal class SaksbehandlerGodkjenningCommand(
     }
 
     private fun behandle(context: CommandContext): Boolean {
+        if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
+
         val behov = JsonMessage(godkjenningsbehovJson, MessageProblems(godkjenningsbehovJson))
         val løsning = context.get<SaksbehandlerLøsning>() ?: return false
         logg.info("Ferdigstiller saksbehandleroppgave")

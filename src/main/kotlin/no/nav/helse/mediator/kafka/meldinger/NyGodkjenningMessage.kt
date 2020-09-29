@@ -8,6 +8,8 @@ import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
@@ -40,7 +42,8 @@ internal class NyGodkjenningMessage(
     reservasjonDao: ReservasjonDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
-    miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
+    automatisering: Automatisering
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         KlargjørPersonCommand(fødselsnummer, aktørId, personDao),
@@ -60,8 +63,28 @@ internal class NyGodkjenningMessage(
             snapshotDao,
             vedtakDao
         ),
-        RisikoCommand(organisasjonsnummer, vedtaksperiodeId, risikovurderingDao, miljøstyrtFeatureToggle),
-        SaksbehandlerGodkjenningCommand(fødselsnummer, vedtaksperiodeId, json, reservasjonDao, oppgaveMediator)
+        RisikoCommand(
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            risikovurderingDao = risikovurderingDao,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+        ),
+        AutomatiseringCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            hendelseId = id,
+            automatisering = automatisering,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+            godkjenningsbehovJson = json
+        ),
+        SaksbehandlerGodkjenningCommand(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            godkjenningsbehovJson = json,
+            reservasjonDao = reservasjonDao,
+            oppgaveMediator = oppgaveMediator,
+            automatisering = automatisering,
+            hendelseId = id
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer
@@ -114,7 +137,8 @@ internal class NyGodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
                 warnings = packet["warnings"].toWarnings(),
-                periodetype = packet["periodetype"].takeUnless(JsonNode::isMissingOrNull)?.let { Saksbehandleroppgavetype.valueOf(it.asText()) },
+                periodetype = packet["periodetype"].takeUnless(JsonNode::isMissingOrNull)
+                    ?.let { Saksbehandleroppgavetype.valueOf(it.asText()) },
                 context = context
             )
         }

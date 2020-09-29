@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -61,10 +62,13 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         periodeFom: LocalDate = LocalDate.now(),
-        periodeTom: LocalDate = LocalDate.now()
+        periodeTom: LocalDate = LocalDate.now(),
+        warnings: List<String> = emptyList(),
+        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
     ) =
         nyHendelse(
-            id, "behov", mapOf(
+            id, "behov",
+            mapOf(
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -72,10 +76,11 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "periodeFom" to "$periodeFom",
                 "periodeTom" to "$periodeTom",
-                "warnings" to mapOf<String, Any>(
-                    "aktiviteter" to emptyList<Any>(),
+                "warnings" to mapOf(
+                    "aktiviteter" to warnings.map { mapOf("melding" to it) },
                     "kontekster" to emptyList<Any>()
-                )
+                ),
+                "periodetype" to periodetype.name
             )
         )
 
@@ -246,7 +251,9 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
     fun lagRisikovurderingløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
+        contextId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID,
+        begrunnelserSomAleneKreverManuellBehandling: List<String> = emptyList()
     ): String =
         nyHendelse(
             id,
@@ -257,19 +264,15 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
                 "Risikovurdering" to mapOf(
-                    "vedtaksperiodeId" to "0aebb71a-43a8-4529-89e9-3ab1df12e342",
+                    "vedtaksperiodeId" to vedtaksperiodeId.toString(),
                     "organisasjonsnummer" to "815493000"
                 ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
-                        "begrunnelserSomAleneKreverManuellBehandling" to listOf(
-                            "8-4: Har Z-diagnose som bi-diagnose",
-                            "8-4: Treff på søkeord (6.2.1)"
-                        ),
+                        "begrunnelserSomAleneKreverManuellBehandling" to begrunnelserSomAleneKreverManuellBehandling,
                         "samletScore" to 10.0,
-                        "begrunnelser" to emptyList<String>(),
-                        "ufullstendig" to false,
-                        "begrunnelser" to emptyList<String>()
+                        "begrunnelser" to emptyList<String>() + begrunnelserSomAleneKreverManuellBehandling,
+                        "ufullstendig" to false
                     )
                 )
             )
@@ -283,16 +286,18 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
         saksbehandlerOid: UUID = UUID.randomUUID(),
         saksbehandlerNavn: String = "saksbehandler",
         saksbehandlerEpost: String = "saksbehandler@nav.no"
-    ) = nyHendelse(id, "overstyr_tidslinje", mapOf(
-        "aktørId" to aktørId,
-        "fødselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "dager" to dager,
-        "begrunnelse" to begrunnelse,
-        "saksbehandlerOid" to saksbehandlerOid,
-        "saksbehandlerNavn" to saksbehandlerNavn,
-        "saksbehandlerEpost" to saksbehandlerEpost
-    ))
+    ) = nyHendelse(
+        id, "overstyr_tidslinje", mapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "dager" to dager,
+            "begrunnelse" to begrunnelse,
+            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerNavn" to saksbehandlerNavn,
+            "saksbehandlerEpost" to saksbehandlerEpost
+        )
+    )
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
