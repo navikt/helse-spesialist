@@ -99,7 +99,8 @@ internal class HendelseMediator(
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
             if (miljøstyrtFeatureToggle.risikovurdering()) {
-                RisikovurderingLøsning.Factory(it, this)
+                RisikovurderingLøsning.V1River(it, this)
+                RisikovurderingLøsning.V2River(it, this)
             }
         }
     }

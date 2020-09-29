@@ -32,7 +32,7 @@ internal class RisikovurderingLøsning(
         )
     }
 
-    internal class Factory(
+    internal class V2River(
         rapidsConnection: RapidsConnection,
         private val hendelseMediator: HendelseMediator
     ) : River.PacketListener {
@@ -46,8 +46,7 @@ internal class RisikovurderingLøsning(
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("Risikovurdering"))
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.interestedIn("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
-                    it.interestedIn("vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
+                    it.require("Risikovurdering.vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
                     it.demandKey("contextId")
                     it.demandKey("hendelseId")
                     it.requireKey("@løsning.Risikovurdering")
@@ -64,11 +63,73 @@ internal class RisikovurderingLøsning(
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             sikkerLogg.info("Mottok melding RisikovurderingMessage: ", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
-            // TODO: Her støtter vi nytt og gammelt format samtidig. Når refactoren er ute kan første del droppes
-            val vedtaksperiodeId = takeIf { !packet["vedtaksperiodeId"].isMissingOrNull() }?.let { UUID.fromString(packet["vedtaksperiodeId"].asText()) }
-                ?: UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
+            val vedtaksperiodeId = UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
+
+            val løsning = packet["@løsning.Risikovurdering"]
+            val samletScore = løsning["samletScore"].asDouble()
+            val ufullstendig = løsning["ufullstendig"].asBoolean()
+            val faresignaler = løsning["begrunnelser"].map { it.asText() }
+            val arbeidsuførhetvurdering = løsning["begrunnelserSomAleneKreverManuellBehandling"].map { it.asText() }
+
+            val risikovurdering = RisikovurderingLøsning(
+                hendelseId = hendelseId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                opprettet = opprettet,
+                samletScore = samletScore,
+                begrunnelser = faresignaler,
+                ufullstendig = ufullstendig,
+                faresignaler = faresignaler,
+                arbeidsuførhetvurdering = arbeidsuførhetvurdering
+            )
+
+            if(FeatureToggle.nyGodkjenningRiver) {
+                hendelseMediator.løsning(
+                    hendelseId = hendelseId,
+                    contextId = contextId,
+                    løsning = risikovurdering,
+                    context = context
+                )
+            } else {
+                hendelseMediator.håndter(hendelseId, risikovurdering)
+            }
+        }
+    }
+
+    internal class V1River(
+        rapidsConnection: RapidsConnection,
+        private val hendelseMediator: HendelseMediator
+    ) : River.PacketListener {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        init {
+            River(rapidsConnection).apply {
+                validate {
+                    it.requireKey("@id")
+                    it.demandValue("@event_name", "behov")
+                    it.demandValue("@final", true)
+                    it.demandAll("@behov", listOf("Risikovurdering"))
+                    it.require("@opprettet") { message -> message.asLocalDateTime() }
+                    it.require("vedtaksperiodeId") { message -> UUID.fromString(message.asText()) }
+                    it.demandKey("spleisBehovId")
+                    it.requireKey("@løsning.Risikovurdering")
+                    it.requireKey(
+                        "@løsning.Risikovurdering.samletScore",
+                        "@løsning.Risikovurdering.begrunnelser",
+                        "@løsning.Risikovurdering.ufullstendig",
+                        "@løsning.Risikovurdering.begrunnelserSomAleneKreverManuellBehandling"
+                    )
+                }
+            }.register(this)
+        }
+
+        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+            sikkerLogg.info("Mottok melding RisikovurderingMessage: ", packet.toJson())
+            val opprettet = packet["@opprettet"].asLocalDateTime()
+            val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
+            val contextId = UUID.fromString(packet["contextId"].asText())
+            val hendelseId = UUID.fromString(packet["spleisBehovId"].asText())
 
             val løsning = packet["@løsning.Risikovurdering"]
             val samletScore = løsning["samletScore"].asDouble()
