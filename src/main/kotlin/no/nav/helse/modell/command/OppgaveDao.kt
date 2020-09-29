@@ -194,7 +194,8 @@ fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
     val query = """
 SELECT *,
        (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE hendelse_id = o.hendelse_id),
-       sot.type AS saksbehandleroppgavetype
+       sot.type AS saksbehandleroppgavetype,
+       o.id AS oppgave_id
 FROM oppgave o
          INNER JOIN vedtak v ON o.vedtak_ref = v.id
          INNER JOIN person p ON v.person_ref = p.id
@@ -277,7 +278,7 @@ WHERE a.orgnummer = :orgnummer
 }
 
 private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
-    oppgavereferanse = UUID.fromString(it.string("hendelse_id")),
+    oppgavereferanse = it.long("oppgave_id"),
     saksbehandlerepost = it.stringOrNull("epost"),
     opprettet = it.localDateTime("opprettet"),
     vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),

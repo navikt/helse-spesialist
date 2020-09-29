@@ -61,7 +61,9 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
     fun `finner oppgaver`() {
         nyPerson()
         val oppgaver = oppgaveDao.finnOppgaver()
+        val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
+        assertEquals(oppgaveId, oppgave.oppgavereferanse)
     }
 
     @Test

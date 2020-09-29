@@ -1,5 +1,6 @@
 package no.nav.helse.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -8,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.SpleisMockClient
 import no.nav.helse.accessTokenClient
+import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.command.OppgaveDao
@@ -59,6 +61,7 @@ class OverstyringE2ETest {
 
     @BeforeAll
     internal fun setupAll(@TempDir postgresPath: Path) {
+        FeatureToggle.nyGodkjenningRiver = true
         embeddedPostgres = EmbeddedPostgres.builder()
             .setOverrideWorkingDirectory(postgresPath.toFile())
             .setDataDirectory(postgresPath.resolve("datadir"))
@@ -121,12 +124,12 @@ class OverstyringE2ETest {
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
-        val spleisbehovId = sendGodkjenningsbehov(
+        val hendelseId = sendGodkjenningsbehov(
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 31)
         )
-        sendPersoninfoløsning(spleisbehovId)
-        assertSaksbehandlerOppgaveOpprettet(spleisbehovId)
+        sendPersoninfoløsning(hendelseId)
+        assertSaksbehandlerOppgaveOpprettet(hendelseId)
 
         sendOverstyrteDager(
             listOf(
@@ -139,7 +142,7 @@ class OverstyringE2ETest {
         )
 
         assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
-        assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == spleisbehovId })
+        assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
 
         sendGodkjenningsbehov(
             periodeFom = LocalDate.of(2018, 1, 1),
@@ -195,10 +198,10 @@ class OverstyringE2ETest {
         assertEquals(1, overstyringer.first().overstyrteDager.size)
     }
 
-    private fun assertSaksbehandlerOppgaveOpprettet(spleisbehovId: UUID) {
+    private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
         val saksbehandlerOppgaver = oppgaveDao.finnOppgaver()
-        assertEquals(1, saksbehandlerOppgaver.filter { it.oppgavereferanse == spleisbehovId }.size)
-        assertTrue(saksbehandlerOppgaver.any { it.oppgavereferanse == spleisbehovId })
+        assertEquals(1, saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size)
+        assertTrue(saksbehandlerOppgaver.any { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
     }
 
     private fun sendGodkjenningsbehov(periodeFom: LocalDate, periodeTom: LocalDate) = nyHendelseId().also { id ->
@@ -213,13 +216,14 @@ class OverstyringE2ETest {
         )
     }
 
-    private fun sendPersoninfoløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
+    private fun sendPersoninfoløsning(hendelseId: UUID) = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagPersoninfoløsning(
                 id = id,
-                spleisbehovId = spleisbehovId,
+                spleisbehovId = hendelseId,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                organisasjonsnummer = ORGNR
+                organisasjonsnummer = ORGNR,
+                contextId = testRapid.inspektør.contextId(hendelseId)
             )
         )
     }
@@ -234,4 +238,34 @@ class OverstyringE2ETest {
             )
         )
     }
+
+    private fun TestRapid.RapidInspector.meldinger() =
+        (0 until size).map { index -> message(index) }
+
+    private fun TestRapid.RapidInspector.hendelser(type: String) =
+        meldinger().filter { it.path("@event_name").asText() == type }
+
+    private fun TestRapid.RapidInspector.behov() =
+        hendelser("behov")
+            .filterNot { it.hasNonNull("@løsning") }
+            .flatMap { it.path("@behov").map(JsonNode::asText) }
+
+    private fun TestRapid.RapidInspector.løsning(behov: String) =
+        hendelser("behov")
+            .filter { it.hasNonNull("@løsning") }
+            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
+            .path("@løsning").path(behov)
+
+    private fun TestRapid.RapidInspector.contextId(hendelseId: UUID) =
+        hendelser("behov")
+            .last { it.hasNonNull("contextId") && it.path("hendelseId").asText() == hendelseId.toString() }
+            .path("contextId")
+            .asText()
+            .let { UUID.fromString(it) }
+
+    private fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID) =
+        hendelser("oppgave_opprettet")
+            .last { it.path("hendelseId").asText() == hendelseId.toString() }
+            .path("oppgaveId")
+            .asLong()
 }

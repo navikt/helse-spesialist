@@ -32,6 +32,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         val statement = """
             INSERT INTO vedtaksperiode_hendelse
             SELECT id, :hendelse_id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id
+            ON CONFLICT DO NOTHING
         """
         session.run(
             queryOf(
