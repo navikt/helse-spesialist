@@ -91,6 +91,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(vedtakDao, personDao, arbeidsgiverDao, snapshotDao, overstyringDao, oppgaveDao, tildelingDao)
+    private val automatiseringsdings = Automatiseringsdings(vedtakDao)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
@@ -152,7 +153,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             vedtakDao = vedtakDao,
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+            automatiseringsdings = automatiseringsdings
         )
     }
 

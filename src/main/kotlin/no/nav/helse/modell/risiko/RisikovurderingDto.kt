@@ -29,9 +29,7 @@ class Risikovurdering private constructor(
         )
     }
 
-    fun kanBehandlesAutomatisk(): Boolean {
-        return TODO()
-    }
+    fun kanBehandlesAutomatisk() = arbeidsuførhetvurdering.isEmpty()
 }
 
 class RisikovurderingDto(

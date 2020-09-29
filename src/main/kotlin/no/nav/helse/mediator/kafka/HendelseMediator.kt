@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
+import no.nav.helse.Automatiseringsdings
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -49,7 +50,8 @@ internal class HendelseMediator(
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
+    private val automatiseringsdings: Automatiseringsdings
 ) : IHendelseMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
