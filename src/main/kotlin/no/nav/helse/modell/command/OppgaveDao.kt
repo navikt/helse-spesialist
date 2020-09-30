@@ -176,18 +176,19 @@ fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
         .asSingle
 )
 
-fun Session.finnOppgaveId(oppgaveId: Int): UUID = requireNotNull(
-    this.run(
-        queryOf(
+fun Session.finnOppgaveId(vedtaksperiodeId: UUID): Long? {
+    @Language("PostgreSQL")
+    val statement = """
+            SELECT id FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
             """
-            SELECT hendelse_id
-            FROM oppgave
-            WHERE id=?
-        """,
-            oppgaveId
-        ).map { UUID.fromString(it.string("hendelse_id")) }.asSingle
+    return this.run(
+        queryOf(statement, vedtaksperiodeId)
+            .map { it.long("id") }.asSingle
     )
-)
+}
 
 fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
     @Language("PostgreSQL")

@@ -7,7 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.arbeidsgiver.findArbeidsgiver
 import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.eventIdForVedtaksperiode
+import no.nav.helse.modell.command.finnOppgaveId
 import no.nav.helse.modell.overstyring.finnOverstyring
 import no.nav.helse.modell.person.findEnhet
 import no.nav.helse.modell.person.findInfotrygdutbetalinger
@@ -86,9 +86,9 @@ internal class VedtaksperiodeMediator(private val dataSource: DataSource, privat
                 speilSnapshot.arbeidsgivere.forEach { arbeidsgiver ->
                     arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
-                        val eventId = session.eventIdForVedtaksperiode(vedtaksperiodeId)
+                        val oppgaveId = session.finnOppgaveId(vedtaksperiodeId)
                         vedtaksperiode as ObjectNode
-                        vedtaksperiode.put("oppgavereferanse", eventId?.toString())
+                        vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
                     }
                 }
             }

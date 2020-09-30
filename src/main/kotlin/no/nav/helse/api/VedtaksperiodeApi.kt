@@ -9,10 +9,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.meldinger.OverstyringMessage
-import no.nav.helse.modell.command.findNåværendeOppgave
-import no.nav.helse.modell.command.finnOppgaveId
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import java.time.LocalDate
 import java.util.*
