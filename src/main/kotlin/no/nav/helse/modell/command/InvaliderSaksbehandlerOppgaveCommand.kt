@@ -10,7 +10,7 @@ class InvaliderSaksbehandlerOppgaveCommand(
     eventId: UUID
 ) : Command(eventId, null, Duration.ZERO) {
     override fun execute(session: Session): Resultat {
-        session.invaliderSaksbehandlerOppgaver(fødselsnummer, orgnummer)
+        session.invaliderSaksbehandleroppgaver(fødselsnummer, orgnummer)
         return Resultat.Ok.System
     }
 }

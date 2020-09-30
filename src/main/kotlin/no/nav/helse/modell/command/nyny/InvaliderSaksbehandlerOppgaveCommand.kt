@@ -8,7 +8,7 @@ internal class InvaliderSaksbehandlerOppgaveCommand(
     private val saksbehandlerDao: SaksbehandlerDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        saksbehandlerDao.invaliderSaksbehandlerOppgaver(fødselsnummer, orgnummer)
+        saksbehandlerDao.invaliderSaksbehandleroppgaver(fødselsnummer, orgnummer)
         return true
     }
 }

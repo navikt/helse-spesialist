@@ -3,7 +3,7 @@ package no.nav.helse.modell.saksbehandler
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.command.invaliderSaksbehandlerOppgaver
+import no.nav.helse.modell.command.invaliderSaksbehandleroppgaver
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
@@ -21,8 +21,8 @@ internal class SaksbehandlerDao(private val dataSource: DataSource) {
         it.finnSaksbehandler(oid)
     }
 
-    internal fun invaliderSaksbehandlerOppgaver(fødselsnummer: String, orgnummer: String) =
-        sessionOf(dataSource).use { it.invaliderSaksbehandlerOppgaver(fødselsnummer, orgnummer) }
+    internal fun invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) =
+        sessionOf(dataSource).use { it.invaliderSaksbehandleroppgaver(fødselsnummer, orgnummer) }
 }
 
 fun Session.persisterSaksbehandler(

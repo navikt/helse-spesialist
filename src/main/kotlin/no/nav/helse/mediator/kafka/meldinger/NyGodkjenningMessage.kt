@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.SnapshotDao
@@ -70,6 +71,7 @@ internal class NyGodkjenningMessage(
         rapidsConnection: RapidsConnection,
         private val mediator: IHendelseMediator
     ) : River.PacketListener {
+        private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
         init {
@@ -91,9 +93,19 @@ internal class NyGodkjenningMessage(
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+            val hendelseId = UUID.fromString(packet["@id"].asText())
+            logg.info(
+                "Mottok godkjenningsbehov med {}",
+                keyValue("hendelseId", hendelseId)
+            )
+            sikkerLogg.info(
+                "Mottok godkjenningsbehov med {}, {}",
+                keyValue("hendelseId", hendelseId),
+                keyValue("hendelse", packet.toJson())
+            )
             mediator.godkjenning(
                 message = packet,
-                id = UUID.fromString(packet["@id"].asText()),
+                id = hendelseId,
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 aktørId = packet["aktørId"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),

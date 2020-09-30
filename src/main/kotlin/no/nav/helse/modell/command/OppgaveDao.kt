@@ -253,7 +253,7 @@ fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
 )
 
 
-fun Session.invaliderSaksbehandlerOppgaver(fødselsnummer: String, orgnummer: String) {
+fun Session.invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) {
     @Language("PostgreSQL")
     val finnOppgaveIder = """
 SELECT o.*

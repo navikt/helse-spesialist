@@ -25,7 +25,7 @@ internal class OppgaveMediator(
 
     internal fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 
-    internal fun oppgave(oppgave: Oppgave, reservasjon: Pair<UUID, LocalDateTime>?) {
+    internal fun oppgave(oppgave: Oppgave, reservasjon: Pair<UUID, LocalDateTime>? = null) {
         oppgaver[oppgave] = reservasjon
     }
 

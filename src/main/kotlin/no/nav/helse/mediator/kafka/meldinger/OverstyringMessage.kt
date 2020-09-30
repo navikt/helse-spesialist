@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -9,6 +9,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.tildeling.ReservasjonDao
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -53,7 +54,8 @@ internal class OverstyringMessage(
         rapidsConnection: RapidsConnection,
         private val mediator: IHendelseMediator
     ) : River.PacketListener {
-        private val log = LoggerFactory.getLogger(this::class.java)
+        private val logg = LoggerFactory.getLogger(this::class.java)
+        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
         init {
             River(rapidsConnection).apply {
@@ -69,12 +71,17 @@ internal class OverstyringMessage(
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val id = UUID.fromString(packet["@id"].asText())
-            log.info(
-                "Mottok overstyringevent {}",
-                StructuredArguments.keyValue("eventId", id)
+            val hendelseId = UUID.fromString(packet["@id"].asText())
+            logg.info(
+                "Mottok overstyring med {}",
+                keyValue("eventId", hendelseId)
             )
-            mediator.overstyring(packet, id, packet["fødselsnummer"].asText(), context)
+            sikkerLogg.info(
+                "Mottok overstyring med {}, {}",
+                keyValue("hendelseId", hendelseId),
+                keyValue("hendelse", packet.toJson())
+            )
+            mediator.overstyring(packet, hendelseId, packet["fødselsnummer"].asText(), context)
         }
     }
 }
