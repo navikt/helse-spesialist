@@ -132,13 +132,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         rapidsConnection.register(this)
         spleisbehovMediator = HendelseMediator(
             rapidsConnection = rapidsConnection,
-            dataSource = dataSource,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            spesialistOID = UUID.fromString(env.getValue("SPESIALIST_OID")),
-            oppgaveMediator = oppgaveMediator,
+            dataSource = dataSource,
             oppgaveDao = oppgaveDao,
             vedtakDao = vedtakDao,
             tildelingDao = tildelingDao,
+            oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
     }

@@ -140,42 +140,6 @@ fun Session.insertOppgave(
         ).asUpdateAndReturnGeneratedKey
     )
 
-fun Session.updateOppgave(
-    eventId: UUID,
-    oppgavetype: String,
-    oppgavestatus: Oppgavestatus,
-    ferdigstiltAv: String?,
-    oid: UUID?
-) =
-    this.run(
-        queryOf(
-            """
-                UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus
-                WHERE hendelse_id=? AND type=?;
-            """,
-            ferdigstiltAv,
-            oid,
-            oppgavestatus.name,
-            eventId,
-            oppgavetype
-        ).asUpdate
-    )
-
-
-fun Session.findNåværendeOppgave(eventId: UUID): OppgaveDto? = this.run(
-    queryOf(
-        """
-            SELECT *
-            FROM oppgave
-            WHERE hendelse_id=?
-              AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
-        """,
-        eventId
-    )
-        .map(::oppgaveDto)
-        .asSingle
-)
-
 fun Session.finnOppgaveId(vedtaksperiodeId: UUID): Long? {
     @Language("PostgreSQL")
     val statement = """
@@ -215,44 +179,6 @@ LIMIT 500
             .asList
     )
 }
-
-fun Session.findOppgave(fødselsnummer: String): OppgaveDto? {
-    @Language("PostgreSQL")
-    val query = """
-SELECT o.*
-FROM oppgave o
-         JOIN vedtak v ON v.id = o.vedtak_ref
-         JOIN person p ON v.person_ref = p.id
-WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
-  AND p.fodselsnummer = ?;
-"""
-    return run(queryOf(query, fødselsnummer.toLong()).map {
-        OppgaveDto(
-            id = it.long("id"),
-            opprettet = it.localDateTime("opprettet"),
-            oppdatert = it.localDateTime("oppdatert"),
-            eventId = UUID.fromString(it.string("hendelse_id")),
-            oppgaveType = it.string("type"),
-            status = Oppgavestatus.valueOf(it.string("status")),
-            vedtaksref = it.longOrNull("vedtak_ref")
-        )
-    }.asSingle)
-}
-
-fun Session.eventIdForVedtaksperiode(vedtaksperiodeId: UUID) = this.run(
-    queryOf(
-        """
-            SELECT hendelse_id
-            FROM oppgave o
-                INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE v.vedtaksperiode_id = ? AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """,
-        vedtaksperiodeId
-    )
-        .map { UUID.fromString(it.stringOrNull("hendelse_id")) }
-        .asSingle
-)
-
 
 fun Session.invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) {
     @Language("PostgreSQL")

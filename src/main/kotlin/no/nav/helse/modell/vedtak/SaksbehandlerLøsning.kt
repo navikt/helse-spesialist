@@ -9,18 +9,18 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class SaksbehandlerLøsning(
-    val godkjent: Boolean,
-    val saksbehandlerIdent: String,
-    val oid: UUID,
-    val epostadresse: String,
-    val godkjenttidspunkt: LocalDateTime,
-    val årsak: String?,
-    val begrunnelser: List<String>?,
-    val kommentar: String?,
-    private val oppgaveId: Long? = null // @TODO defaults only to retain backwards compatibility
+    private val godkjent: Boolean,
+    private val saksbehandlerIdent: String,
+    private val oid: UUID,
+    private val epostadresse: String,
+    private val godkjenttidspunkt: LocalDateTime,
+    private val årsak: String?,
+    private val begrunnelser: List<String>?,
+    private val kommentar: String?,
+    private val oppgaveId: Long
 ) {
     fun ferdigstillOppgave(oppgave: Oppgave, løsning: JsonMessage) {
-        oppgaveId?.also { oppgave.ferdigstill(it, saksbehandlerIdent, oid) }
+        oppgave.ferdigstill(oppgaveId, saksbehandlerIdent, oid)
         løsning["@løsning"] = mapOf(
             "Godkjenning" to mapOf(
                 "godkjent" to godkjent,

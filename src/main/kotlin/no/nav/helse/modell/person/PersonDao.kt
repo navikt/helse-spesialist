@@ -1,7 +1,6 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -102,23 +101,6 @@ internal fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = 
         .map { it.int("id") }
         .asSingle
 )
-
-internal fun Session.findVedtaksperioderByAktørId(aktørId: String): Pair<String, List<UUID>>? =
-    this.run(
-        queryOf(
-            """
-                    SELECT p.fodselsnummer, json_agg(DISTINCT v.vedtaksperiode_id) AS json
-                    FROM vedtak AS v
-                        INNER JOIN person AS p ON v.person_ref = p.id
-                    WHERE p.aktor_id = ?
-                    GROUP BY p.fodselsnummer;""",
-            aktørId.toLong()
-        )
-            .map { row ->
-                row.long("fodselsnummer").toFødselsnummer() to
-                    objectMapper.readValue<List<String>>(row.string("json")).map { UUID.fromString(it) }
-            }.asSingle
-    )
 
 internal fun Session.findInfotrygdutbetalinger(fødselsnummer: String): String? =
     this.run(

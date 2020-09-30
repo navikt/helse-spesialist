@@ -8,11 +8,11 @@ import java.time.LocalDate
 import java.util.*
 
 internal class HentPersoninfoLøsning(
-    internal val fornavn: String,
-    internal val mellomnavn: String?,
-    internal val etternavn: String,
-    internal val fødselsdato: LocalDate,
-    internal val kjønn: Kjønn
+    private val fornavn: String,
+    private val mellomnavn: String?,
+    private val etternavn: String,
+    private val fødselsdato: LocalDate,
+    private val kjønn: Kjønn
 ) {
 
     internal fun lagre(personDao: PersonDao) =
@@ -69,11 +69,3 @@ internal class HentPersoninfoLøsning(
 }
 
 enum class Kjønn { Mann, Kvinne, Ukjent }
-
-internal enum class PersonEgenskap(private val diskresjonskode: String) {
-    Kode6("SPSF"), Kode7("SPFO"); // TODO: Hvilke fler egenskaper kan man ha?
-
-    companion object {
-        internal fun find(diskresjonskode: String?) = values().firstOrNull { it.diskresjonskode == diskresjonskode }
-    }
-}

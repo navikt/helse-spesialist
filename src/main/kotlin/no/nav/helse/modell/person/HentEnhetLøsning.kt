@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class HentEnhetLøsning(internal val enhetNr: String) {
+internal class HentEnhetLøsning(private val enhetNr: String) {
 
     internal fun lagrePerson(
         personDao: PersonDao,

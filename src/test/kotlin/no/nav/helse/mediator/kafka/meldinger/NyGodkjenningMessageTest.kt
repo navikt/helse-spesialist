@@ -139,7 +139,8 @@ internal class NyGodkjenningMessageTest {
                 godkjenttidspunkt = godkjenttidspunkt,
                 årsak = null,
                 begrunnelser = emptyList(),
-                kommentar = null
+                kommentar = null,
+                oppgaveId = 1L
             )
         )
 

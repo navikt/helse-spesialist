@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-
 import com.fasterxml.jackson.databind.JsonNode
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
@@ -14,7 +13,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.api.GodkjenningDTO
-import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
@@ -53,20 +51,11 @@ internal class GodkjenningE2ETest {
     private lateinit var dataSource: DataSource
     private lateinit var hendelseMediator: HendelseMediator
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val featuretoggleMock = mockk<MiljøstyrtFeatureToggle>()
+    private val featuretoggleMock = MiljøstyrtFeatureToggle(mapOf(
+        "RISK_FEATURE_TOGGLE" to "true"
+    ))
 
     private fun nyHendelseId() = UUID.randomUUID()
-
-    @BeforeAll
-    fun activate() {
-        FeatureToggle.nyGodkjenningRiver = true
-        every { featuretoggleMock.risikovurdering() }.returns(true)
-    }
-
-    @AfterAll
-    fun deactivate() {
-        FeatureToggle.nyGodkjenningRiver = false
-    }
 
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
@@ -314,7 +303,6 @@ internal class GodkjenningE2ETest {
             rapidsConnection = testRapid,
             speilSnapshotRestClient = restClient,
             dataSource = dataSource,
-            spesialistOID = SPESIALIST_OID,
             miljøstyrtFeatureToggle = featuretoggleMock
         )
     }

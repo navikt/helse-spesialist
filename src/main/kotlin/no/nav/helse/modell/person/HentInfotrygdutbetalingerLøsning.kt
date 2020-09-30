@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class HentInfotrygdutbetalingerLøsning(internal val utbetalinger: JsonNode) {
+internal class HentInfotrygdutbetalingerLøsning(private val utbetalinger: JsonNode) {
 
     internal fun lagre(personDao: PersonDao) =
         personDao.insertInfotrygdutbetalinger(utbetalinger)

@@ -6,7 +6,6 @@ import no.nav.helse.api.TilbakerullingMedSlettingDTO
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class HendelseMediatorTest {
 
@@ -16,7 +15,6 @@ internal class HendelseMediatorTest {
         testRapid,
         mockk(),
         mockk(),
-        UUID.randomUUID(),
         mockk(),
         mockk(),
         mockk(),

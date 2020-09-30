@@ -48,10 +48,3 @@ internal fun Session.findVedtak(vedtaksperiodeId: UUID): VedtakDto? =
             }.asSingle
     )
 
-internal fun Session.deleteVedtak(vedtaksperiodeId: UUID) {
-    val vedtak = findVedtak(vedtaksperiodeId) ?: return
-    run(queryOf("UPDATE oppgave SET vedtak_ref = null WHERE vedtak_ref = ?", vedtak.id).asUpdate)
-    run(queryOf("DELETE FROM vedtak WHERE id = ?", vedtak.id).asUpdate)
-    run(queryOf("DELETE FROM speil_snapshot WHERE id = ?", vedtak.speilSnapshotRef).asUpdate)
-}
-

@@ -7,9 +7,6 @@ import com.zaxxer.hikari.HikariDataSource
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.SpleisMockClient
-import no.nav.helse.accessTokenClient
-import no.nav.helse.mediator.kafka.FeatureToggle
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.command.OppgaveDao
@@ -59,16 +56,6 @@ class OverstyringE2ETest {
 
     private fun nyHendelseId() = UUID.randomUUID()
 
-    @BeforeAll
-    fun activate() {
-        FeatureToggle.nyGodkjenningRiver = true
-    }
-
-    @BeforeAll
-    fun deactivate() {
-        FeatureToggle.nyGodkjenningRiver = false
-    }
-
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
@@ -115,7 +102,7 @@ class OverstyringE2ETest {
                     ArbeidsgiverFraSpleisDto(
                         organisasjonsnummer = ORGNR,
                         id = spleisbehovId,
-                        vedtaksperioder = listOf(objectMapper.nullNode())
+                        vedtaksperioder = emptyList()
                     )
                 )
             )
@@ -197,18 +184,10 @@ class OverstyringE2ETest {
         val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
         dataSource = HikariDataSource(hikariConfig)
 
-        val spleisMockClient = SpleisMockClient(FØDSELSNUMMER, AKTØR, ORGNR)
-        val speilSnapshotRestClient = SpeilSnapshotRestClient(
-            spleisMockClient.client,
-            accessTokenClient(),
-            "spleisClientId"
-        )
-
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
-            speilSnapshotRestClient = speilSnapshotRestClient,
+            speilSnapshotRestClient = restClient,
             dataSource = dataSource,
-            spesialistOID = SPESIALIST_OID,
             miljøstyrtFeatureToggle = mockk(relaxed = true)
         )
         oppgaveDao = OppgaveDao(dataSource)
