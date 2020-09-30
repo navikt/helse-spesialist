@@ -21,17 +21,15 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
 import no.nav.helse.vedtaksperiode.findVedtakByFnr
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
+@Disabled
 class GodkjenningsbehovEndToEndTest : AbstractEndToEndTest() {
     private val spleisMockClient = SpleisMockClient()
     private val accessTokenClient = accessTokenClient()

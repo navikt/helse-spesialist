@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.kafka
 
 internal object FeatureToggle {
-    var nyGodkjenningRiver = false
+    var nyGodkjenningRiver = true
 }
 
 internal class MiljøstyrtFeatureToggle(private val env: Map<String, String>) {

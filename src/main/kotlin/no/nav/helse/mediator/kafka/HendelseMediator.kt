@@ -91,10 +91,10 @@ internal class HendelseMediator(
             } else {
                 GodkjenningMessage.Factory(it, this)
                 PersoninfoLøsningMessage.Factory(it, this)
+                TilbakerullingMessage.Factory(it, this)
             }
             ArbeidsgiverMessage.Factory(it, this)
             PåminnelseMessage.Factory(it, this)
-            TilbakerullingMessage.Factory(it, this)
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
