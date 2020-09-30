@@ -116,14 +116,21 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         }
     }
 
-    fun finn(id: UUID) =
+    fun finnSuspendert(id: UUID) = finnSiste(id)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto) ->
+        CommandContext(id, dto.sti)
+    }
+
+    private fun finnSiste(id: UUID) =
         using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT tilstand, data FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1", id).map {
-                if (enumValueOf<CommandContextTilstand>(it.string("tilstand")) == SUSPENDERT) {
-                    val dto = mapper.readValue<CommandContextDto>(it.string("data"))
-                    CommandContext(id, dto.sti)
-                } else null
-            }.asSingle)
+            session.run(
+                queryOf(
+                    "SELECT tilstand, data FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1",
+                    id
+                ).map {
+                    enumValueOf<CommandContextTilstand>(it.string("tilstand")) to
+                        mapper.readValue<CommandContextDto>(it.string("data"))
+                }.asSingle
+            )
         }
 
     private class CommandContextDto(val sti: List<Int>)

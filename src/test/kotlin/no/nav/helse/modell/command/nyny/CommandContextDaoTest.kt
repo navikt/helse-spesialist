@@ -31,7 +31,7 @@ internal class CommandContextDaoTest : AbstractEndToEndTest() {
     @Test
     fun `finner suspendert context i db`() {
         val contextId = suspendert()
-        assertNotNull(commandContextDao.finn(contextId))
+        assertNotNull(commandContextDao.finnSuspendert(contextId))
         assertTilstand(contextId, "NY", "SUSPENDERT")
     }
 
