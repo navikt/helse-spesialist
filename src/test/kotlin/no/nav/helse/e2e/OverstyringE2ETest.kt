@@ -60,65 +60,13 @@ class OverstyringE2ETest {
     private fun nyHendelseId() = UUID.randomUUID()
 
     @BeforeAll
-    internal fun setupAll(@TempDir postgresPath: Path) {
+    fun activate() {
         FeatureToggle.nyGodkjenningRiver = true
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        postgresConnection = embeddedPostgres.postgresDatabase.connection
-        val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
-        dataSource = HikariDataSource(hikariConfig)
-
-        val spleisMockClient = SpleisMockClient(FØDSELSNUMMER, AKTØR, ORGNR)
-        val speilSnapshotRestClient = SpeilSnapshotRestClient(
-            spleisMockClient.client,
-            accessTokenClient(),
-            "spleisClientId"
-        )
-
-        hendelseMediator = HendelseMediator(
-            rapidsConnection = testRapid,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            dataSource = dataSource,
-            spesialistOID = SPESIALIST_OID,
-            miljøstyrtFeatureToggle = mockk(relaxed = true)
-        )
-        oppgaveDao = OppgaveDao(dataSource)
-        overstyringDao = OverstyringDao(dataSource)
-        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
     }
 
-    @BeforeEach
-    internal fun setupEach() {
-        clearMocks(restClient)
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to SPESIALIST_OID.toString()))
-            .load()
-            .also {
-                it.clean()
-                it.migrate()
-            }
-
-        testRapid.reset()
-    }
-
-    private fun createHikariConfig(jdbcUrl: String) =
-        HikariConfig().apply {
-            this.jdbcUrl = jdbcUrl
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        }
-
-    @AfterAll
+    @BeforeAll
     fun deactivate() {
-        postgresConnection.close()
-        embeddedPostgres.close()
+        FeatureToggle.nyGodkjenningRiver = false
     }
 
     @Test
@@ -237,6 +185,67 @@ class OverstyringE2ETest {
                 saksbehandlerEpost = SAKSBEHANDLER_EPOST
             )
         )
+    }
+
+    @BeforeAll
+    internal fun setupAll(@TempDir postgresPath: Path) {
+        embeddedPostgres = EmbeddedPostgres.builder()
+            .setOverrideWorkingDirectory(postgresPath.toFile())
+            .setDataDirectory(postgresPath.resolve("datadir"))
+            .start()
+        postgresConnection = embeddedPostgres.postgresDatabase.connection
+        val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
+        dataSource = HikariDataSource(hikariConfig)
+
+        val spleisMockClient = SpleisMockClient(FØDSELSNUMMER, AKTØR, ORGNR)
+        val speilSnapshotRestClient = SpeilSnapshotRestClient(
+            spleisMockClient.client,
+            accessTokenClient(),
+            "spleisClientId"
+        )
+
+        hendelseMediator = HendelseMediator(
+            rapidsConnection = testRapid,
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            dataSource = dataSource,
+            spesialistOID = SPESIALIST_OID,
+            miljøstyrtFeatureToggle = mockk(relaxed = true)
+        )
+        oppgaveDao = OppgaveDao(dataSource)
+        overstyringDao = OverstyringDao(dataSource)
+        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
+    }
+
+    @BeforeEach
+    internal fun setupEach() {
+        clearMocks(restClient)
+        Flyway
+            .configure()
+            .dataSource(dataSource)
+            .placeholders(mapOf("spesialist_oid" to SPESIALIST_OID.toString()))
+            .load()
+            .also {
+                it.clean()
+                it.migrate()
+            }
+
+        testRapid.reset()
+    }
+
+    private fun createHikariConfig(jdbcUrl: String) =
+        HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            maximumPoolSize = 3
+            minimumIdle = 1
+            idleTimeout = 10001
+            connectionTimeout = 1000
+            maxLifetime = 30001
+        }
+
+    @AfterAll
+    fun tearDown() {
+        postgresConnection.close()
+        embeddedPostgres.close()
     }
 
     private fun TestRapid.RapidInspector.meldinger() =
