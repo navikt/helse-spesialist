@@ -1,4 +1,4 @@
-INSERT INTO vedtaksperiode_hendelse (vedtaksperiode_ref, hendelse_ref) SELECT (SELECT id FROM vedtak WHERE vedtaksperiode_id = h.spleis_referanse LIMIT 1), id FROM hendelse h;
+INSERT INTO vedtaksperiode_hendelse (vedtaksperiode_ref, hendelse_ref) SELECT v.id, h.id FROM hendelse h, vedtak v WHERE h.spleis_referanse = v.vedtaksperiode_id;
 
 ALTER TABLE warning ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
 UPDATE warning w SET vedtak_ref = vh.vedtaksperiode_ref FROM vedtaksperiode_hendelse vh WHERE w.hendelse_id = vh.hendelse_ref;
