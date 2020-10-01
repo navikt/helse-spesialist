@@ -31,49 +31,51 @@ internal class TildelingDao(private val dataSource: DataSource) {
 
     internal fun tildelingForPerson(fødselsnummer: String) = sessionOf(dataSource)
         .use { it.tildelingForPerson(fødselsnummer) }
-}
 
-fun Session.tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
-    @Language("PostgreSQL")
-    val query = "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, gyldig_til) VALUES(:oppgave_id_ref, :saksbehandler_ref, :gyldig_til);"
-    run(
-        queryOf(
-            query, mapOf(
-                "oppgave_id_ref" to oppgaveId,
-                "saksbehandler_ref" to saksbehandleroid,
-                "gyldig_til" to gyldigTil
-            )
-        ).asUpdate
-    )
-}
+    internal fun tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) =
+        using(sessionOf(dataSource)) { it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil) }
 
-fun Session.hentSaksbehandlerEpostFor(oppgaveId: Long): String? {
-    @Language("PostgreSQL")
-    val query =
-        "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_id_ref=:oppgave_id_ref AND (gyldig_til IS NULL OR gyldig_til > now());"
-    return run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).map { row ->
-        row.string("epost")
-    }.asSingle)
-}
+    private fun Session.tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, gyldig_til) VALUES(:oppgave_id_ref, :saksbehandler_ref, :gyldig_til);"
+        run(
+            queryOf(
+                query, mapOf(
+                    "oppgave_id_ref" to oppgaveId,
+                    "saksbehandler_ref" to saksbehandleroid,
+                    "gyldig_til" to gyldigTil
+                )
+            ).asUpdate
+        )
+    }
 
-fun Session.hentSaksbehandlerNavnFor(oppgaveId: Long): String? {
-    @Language("PostgreSQL")
-    val query =
-        "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_id_ref=:oppgave_id_ref AND (gyldig_til IS NULL OR gyldig_til > now());"
-    return run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).map { row ->
-        row.string("navn")
-    }.asSingle)
-}
+    private fun Session.hentSaksbehandlerEpostFor(oppgaveId: Long): String? {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_id_ref=:oppgave_id_ref AND (gyldig_til IS NULL OR gyldig_til > now());"
+        return run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).map { row ->
+            row.string("epost")
+        }.asSingle)
+    }
 
-fun Session.slettOppgavetildeling(oppgaveId: Long) {
-    @Language("PostgreSQL")
-    val query = "DELETE FROM tildeling WHERE oppgave_id_ref=:oppgave_id_ref;"
-    run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
-}
+    private fun Session.hentSaksbehandlerNavnFor(oppgaveId: Long): String? {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_id_ref=:oppgave_id_ref AND (gyldig_til IS NULL OR gyldig_til > now());"
+        return run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).map { row ->
+            row.string("navn")
+        }.asSingle)
+    }
 
-fun Session.tildelingForPerson(fødselsnummer: String): String? {
-    @Language("PostgreSQL")
-    val query = """
+    private fun Session.slettOppgavetildeling(oppgaveId: Long) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM tildeling WHERE oppgave_id_ref=:oppgave_id_ref;"
+        run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
+    }
+
+    private fun Session.tildelingForPerson(fødselsnummer: String): String? {
+        @Language("PostgreSQL")
+        val query = """
 SELECT s.epost FROM person
      RIGHT JOIN vedtak v on person.id = v.person_ref
      RIGHT JOIN oppgave o on v.id = o.vedtak_ref
@@ -83,8 +85,10 @@ WHERE fodselsnummer = :fodselsnummer
     AND o.status = 'AvventerSaksbehandler'
 ORDER BY o.opprettet DESC;
     """
-    return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { row ->
-        row.string("epost")
-    }.asSingle)
-}
+        return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { row ->
+            row.string("epost")
+        }.asSingle)
+    }
 
+
+}

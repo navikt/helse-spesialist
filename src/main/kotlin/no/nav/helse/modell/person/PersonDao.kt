@@ -79,182 +79,185 @@ internal class PersonDao(private val dataSource: DataSource) {
     ) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
         it.insertPerson(fødselsnummer, aktørId, navnId, enhetId, infotrygdutbetalingerId)
     }
-}
 
-internal fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = this.run(
-    queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer.toLong())
-        .map { it.int("id") }
-        .asSingle
-)
-
-internal fun Session.findInfotrygdutbetalinger(fødselsnummer: String): String? =
-    this.run(
-        queryOf(
-            "SELECT data FROM infotrygdutbetalinger WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
-            fødselsnummer.toLong()
-        ).map { it.string("data") }.asSingle
+    private fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = this.run(
+        queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer.toLong())
+            .map { it.int("id") }
+            .asSingle
     )
 
-
-internal fun Session.insertPersoninfo(
-    fornavn: String,
-    mellomnavn: String?,
-    etternavn: String,
-    fødselsdato: LocalDate,
-    kjønn: Kjønn
-): Int =
-    requireNotNull(
+    private fun Session.findInfotrygdutbetalinger(fødselsnummer: String): String? =
         this.run(
             queryOf(
-                """
+                "SELECT data FROM infotrygdutbetalinger WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
+                fødselsnummer.toLong()
+            ).map { it.string("data") }.asSingle
+        )
+
+
+    private fun Session.insertPersoninfo(
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn
+    ): Int =
+        requireNotNull(
+            this.run(
+                queryOf(
+                    """
                     INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn)
                     VALUES(?, ?, ?, ?, CAST(? as person_kjonn));
                 """,
-                fornavn,
-                mellomnavn,
-                etternavn,
-                fødselsdato,
-                kjønn.name
-            ).asUpdateAndReturnGeneratedKey
-        )?.toInt()
-    )
+                    fornavn,
+                    mellomnavn,
+                    etternavn,
+                    fødselsdato,
+                    kjønn.name
+                ).asUpdateAndReturnGeneratedKey
+            )?.toInt()
+        )
 
-internal fun Session.insertPerson(
-    fødselsnummer: String,
-    aktørId: String,
-    navnId: Int,
-    enhetId: Int,
-    infotrygdutbetalingerId: Int
-) =
-    this.run(
-        queryOf(
-            "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?);",
-            fødselsnummer.toLong(),
-            aktørId.toLong(),
-            navnId,
-            enhetId,
-            infotrygdutbetalingerId
-        ).asUpdateAndReturnGeneratedKey
-    )?.toInt()
-
-internal fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =
-    requireNotNull(
+    private fun Session.insertPerson(
+        fødselsnummer: String,
+        aktørId: String,
+        navnId: Int,
+        enhetId: Int,
+        infotrygdutbetalingerId: Int
+    ) =
         this.run(
             queryOf(
-                "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));",
-                objectMapper.writeValueAsString(data)
+                "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?);",
+                fødselsnummer.toLong(),
+                aktørId.toLong(),
+                navnId,
+                enhetId,
+                infotrygdutbetalingerId
             ).asUpdateAndReturnGeneratedKey
-        )
-            ?.toInt()
-    )
+        )?.toInt()
 
-internal fun Session.updatePersoninfo(
-    fødselsnummer: String,
-    fornavn: String,
-    mellomnavn: String?,
-    etternavn: String,
-    fødselsdato: LocalDate,
-    kjønn: Kjønn
-): Int {
-    @Language("PostgreSQL")
-    val query =
-        """
+    private fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =
+        requireNotNull(
+            this.run(
+                queryOf(
+                    "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));",
+                    objectMapper.writeValueAsString(data)
+                ).asUpdateAndReturnGeneratedKey
+            )
+                ?.toInt()
+        )
+
+    private fun Session.updatePersoninfo(
+        fødselsnummer: String,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn
+    ): Int {
+        @Language("PostgreSQL")
+        val query =
+            """
             UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=?, fodselsdato=?, kjonn=CAST(? as person_kjonn)
             WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);
         """
-    run(
-        queryOf(
-            query,
-            fornavn, mellomnavn, etternavn, fødselsdato, kjønn.name, fødselsnummer.toLong()
-        ).asUpdate
-    )
-    return run(
-        queryOf(
-            "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
-            fødselsnummer.toLong()
-        ).asUpdate
-    )
-}
+        run(
+            queryOf(
+                query,
+                fornavn, mellomnavn, etternavn, fødselsdato, kjønn.name, fødselsnummer.toLong()
+            ).asUpdate
+        )
+        return run(
+            queryOf(
+                "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
+                fødselsnummer.toLong()
+            ).asUpdate
+        )
+    }
 
-internal fun Session.updateEnhet(fødselsnummer: String, enhetNr: Int) = this.run(
-    queryOf(
-        "UPDATE person SET enhet_ref=?, enhet_ref_oppdatert=now() WHERE fodselsnummer=?;",
-        enhetNr,
-        fødselsnummer.toLong()
-    ).asUpdate
-)
-
-internal fun Session.updateInfotrygdutbetalinger(fødselsnummer: String, data: JsonNode): Int {
-    run(
+    private fun Session.updateEnhet(fødselsnummer: String, enhetNr: Int) = this.run(
         queryOf(
-            "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
-            objectMapper.writeValueAsString(data), fødselsnummer.toLong()
-        ).asUpdate
-    )
-    return run(
-        queryOf(
-            "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
-            fødselsnummer.toLong()
-        ).asUpdate
-    )
-}
-
-internal fun Session.updateInfotrygdutbetalingerRef(fødselsnummer: String, ref: Int) =
-    this.run(
-        queryOf(
-            "UPDATE person SET infotrygdutbetalinger_ref=?, infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
-            ref,
+            "UPDATE person SET enhet_ref=?, enhet_ref_oppdatert=now() WHERE fodselsnummer=?;",
+            enhetNr,
             fødselsnummer.toLong()
         ).asUpdate
     )
 
-internal fun Session.findPersoninfoSistOppdatert(fødselsnummer: String) =
-    requireNotNull(
+    private fun Session.updateInfotrygdutbetalinger(fødselsnummer: String, data: JsonNode): Int {
+        run(
+            queryOf(
+                "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
+                objectMapper.writeValueAsString(data), fødselsnummer.toLong()
+            ).asUpdate
+        )
+        return run(
+            queryOf(
+                "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
+                fødselsnummer.toLong()
+            ).asUpdate
+        )
+    }
+
+    private fun Session.updateInfotrygdutbetalingerRef(fødselsnummer: String, ref: Int) =
         this.run(
             queryOf(
-                "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
+                "UPDATE person SET infotrygdutbetalinger_ref=?, infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
+                ref,
                 fødselsnummer.toLong()
-            ).map {
-                it.sqlDate("personinfo_oppdatert").toLocalDate()
-            }.asSingle
+            ).asUpdate
         )
-    )
 
-internal fun Session.findEnhetSistOppdatert(fødselsnummer: String) = requireNotNull(
-    this.run(
-        queryOf(
-            "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;",
-            fødselsnummer.toLong()
-        ).map {
-            it.sqlDate("enhet_ref_oppdatert").toLocalDate()
-        }.asSingle
-    )
-)
-
-internal fun Session.findEnhet(fødselsnummer: String): EnhetDto = requireNotNull(
-    this.run(
-        queryOf(
-            "SELECT id, navn from enhet WHERE id=(SELECT enhet_ref FROM person where fodselsnummer =?);",
-            fødselsnummer.toLong()
-        ).map {
-            EnhetDto(
-                it.string("id"),
-                it.string("navn")
+    private fun Session.findPersoninfoSistOppdatert(fødselsnummer: String) =
+        requireNotNull(
+            this.run(
+                queryOf(
+                    "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
+                    fødselsnummer.toLong()
+                ).map {
+                    it.sqlDate("personinfo_oppdatert").toLocalDate()
+                }.asSingle
             )
-        }.asSingle
-    )
-)
+        )
 
-internal fun Session.findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
-    requireNotNull(
+    private fun Session.findEnhetSistOppdatert(fødselsnummer: String) = requireNotNull(
         this.run(
             queryOf(
-                "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;",
+                "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;",
                 fødselsnummer.toLong()
             ).map {
-                it.sqlDate("infotrygdutbetalinger_oppdatert").toLocalDate()
+                it.sqlDate("enhet_ref_oppdatert").toLocalDate()
             }.asSingle
         )
     )
+
+    internal fun findEnhet(fødselsnummer: String) = using(sessionOf(dataSource)) { it.findEnhet(fødselsnummer) }
+
+    private fun Session.findEnhet(fødselsnummer: String): EnhetDto = requireNotNull(
+        this.run(
+            queryOf(
+                "SELECT id, navn from enhet WHERE id=(SELECT enhet_ref FROM person where fodselsnummer =?);",
+                fødselsnummer.toLong()
+            ).map {
+                EnhetDto(
+                    it.string("id"),
+                    it.string("navn")
+                )
+            }.asSingle
+        )
+    )
+
+    private fun Session.findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
+        requireNotNull(
+            this.run(
+                queryOf(
+                    "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;",
+                    fødselsnummer.toLong()
+                ).map {
+                    it.sqlDate("infotrygdutbetalinger_oppdatert").toLocalDate()
+                }.asSingle
+            )
+        )
+
+}
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

@@ -4,7 +4,6 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.arbeidsgiver.findArbeidsgiverByOrgnummer
-import no.nav.helse.modell.person.findPersonByFødselsnummer
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -38,18 +37,16 @@ internal class OverstyringDao(private val dataSource: DataSource) {
         organisasjonsnummer: String
     ) = sessionOf(dataSource).use { it.finnOverstyring(fødselsnummer, organisasjonsnummer) }
 
-}
-
-fun Session.persisterOverstyring(
-    hendelseId: UUID,
-    fødselsnummer: String,
-    organisasjonsnummer: String,
-    begrunnelse: String,
-    overstyrteDager: List<OverstyringDagDto>,
-    saksbehandlerRef: UUID
-): Long? {
-    @Language("PostgreSQL")
-    val opprettOverstyringQuery = """
+    private fun Session.persisterOverstyring(
+        hendelseId: UUID,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        begrunnelse: String,
+        overstyrteDager: List<OverstyringDagDto>,
+        saksbehandlerRef: UUID
+    ): Long? {
+        @Language("PostgreSQL")
+        val opprettOverstyringQuery = """
         INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref)
         VALUES (:hendelse_id,
                 :person_ref,
@@ -58,8 +55,8 @@ fun Session.persisterOverstyring(
                 :saksbehandler_ref)
     """
 
-    @Language("PostgreSQL")
-    val opprettOverstyringDagQuery = """
+        @Language("PostgreSQL")
+        val opprettOverstyringDagQuery = """
         INSERT INTO overstyrtdag(overstyring_ref, dato, dagtype, grad)
         VALUES (:overstyring_ref,
                 :dato,
@@ -67,43 +64,49 @@ fun Session.persisterOverstyring(
                 :grad)
     """
 
-    val person_ref = findPersonByFødselsnummer(fødselsnummer)
-    val arbeidsgiver_ref = findArbeidsgiverByOrgnummer(organisasjonsnummer)
+        val person_ref = findPersonByFødselsnummer(fødselsnummer)
+        val arbeidsgiver_ref = findArbeidsgiverByOrgnummer(organisasjonsnummer)
 
-    val overstyringRef = this.run(
-        queryOf(
-            opprettOverstyringQuery,
-            mapOf(
-                "hendelse_id" to hendelseId,
-                "person_ref" to person_ref,
-                "arbeidsgiver_ref" to arbeidsgiver_ref,
-                "begrunnelse" to begrunnelse,
-                "saksbehandler_ref" to saksbehandlerRef
-            )
-        ).asUpdateAndReturnGeneratedKey
+        val overstyringRef = this.run(
+            queryOf(
+                opprettOverstyringQuery,
+                mapOf(
+                    "hendelse_id" to hendelseId,
+                    "person_ref" to person_ref,
+                    "arbeidsgiver_ref" to arbeidsgiver_ref,
+                    "begrunnelse" to begrunnelse,
+                    "saksbehandler_ref" to saksbehandlerRef
+                )
+            ).asUpdateAndReturnGeneratedKey
+        )
+
+        this.transaction { transactionalSession ->
+            overstyrteDager.forEach { dag ->
+                transactionalSession.run(
+                    queryOf(
+                        opprettOverstyringDagQuery,
+                        mapOf(
+                            "overstyring_ref" to overstyringRef,
+                            "dato" to dag.dato,
+                            "dagtype" to dag.type.toString(),
+                            "grad" to dag.grad
+                        )
+                    ).asUpdate
+                )
+            }
+        }
+        return overstyringRef
+    }
+
+    private fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = this.run(
+        queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer.toLong())
+            .map { it.int("id") }
+            .asSingle
     )
 
-    this.transaction { transactionalSession ->
-        overstyrteDager.forEach { dag ->
-            transactionalSession.run(
-                queryOf(
-                    opprettOverstyringDagQuery,
-                    mapOf(
-                        "overstyring_ref" to overstyringRef,
-                        "dato" to dag.dato,
-                        "dagtype" to dag.type.toString(),
-                        "grad" to dag.grad
-                    )
-                ).asUpdate
-            )
-        }
-    }
-    return overstyringRef
-}
-
-fun Session.finnOverstyring(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringDto> {
-    @Language("PostgreSQL")
-    val finnOverstyringQuery = """
+    private fun Session.finnOverstyring(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringDto> {
+        @Language("PostgreSQL")
+        val finnOverstyringQuery = """
 SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn
 FROM overstyring o
          INNER JOIN person p ON p.id = o.person_ref
@@ -112,35 +115,36 @@ FROM overstyring o
 WHERE p.fodselsnummer = ?
   AND a.orgnummer = ?
     """
-    return this.run(
-        queryOf(
-            finnOverstyringQuery,
-            fødselsnummer.toLong(),
-            organisasjonsnummer.toLong()
-        ).map { overstyringRow ->
-            val id = overstyringRow.long("id")
+        return this.run(
+            queryOf(
+                finnOverstyringQuery,
+                fødselsnummer.toLong(),
+                organisasjonsnummer.toLong()
+            ).map { overstyringRow ->
+                val id = overstyringRow.long("id")
 
-            OverstyringDto(
-                hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
-                fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
-                organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
-                begrunnelse = overstyringRow.string("begrunnelse"),
-                timestamp = overstyringRow.localDateTime("tidspunkt"),
-                saksbehandlerNavn = overstyringRow.string("navn"),
-                overstyrteDager = this.run(
-                    queryOf(
-                        "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
-                    ).map { overstyringDagRow ->
-                        OverstyringDagDto(
-                            dato = overstyringDagRow.localDate("dato"),
-                            type = enumValueOf(overstyringDagRow.string("dagtype")),
-                            grad = overstyringDagRow.intOrNull("grad")
-                        )
-                    }.asList
+                OverstyringDto(
+                    hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
+                    fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                    organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
+                    begrunnelse = overstyringRow.string("begrunnelse"),
+                    timestamp = overstyringRow.localDateTime("tidspunkt"),
+                    saksbehandlerNavn = overstyringRow.string("navn"),
+                    overstyrteDager = this.run(
+                        queryOf(
+                            "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
+                        ).map { overstyringDagRow ->
+                            OverstyringDagDto(
+                                dato = overstyringDagRow.localDate("dato"),
+                                type = enumValueOf(overstyringDagRow.string("dagtype")),
+                                grad = overstyringDagRow.intOrNull("grad")
+                            )
+                        }.asList
+                    )
                 )
-            )
-        }.asList
-    )
+            }.asList
+        )
+    }
 }
 
 data class OverstyringDto(

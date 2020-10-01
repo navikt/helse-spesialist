@@ -19,6 +19,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             session.findSaksbehandlerOppgaver()
         }
 
+    internal fun finnOppgaveId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { it.finnOppgaveId(vedtaksperiodeId)}
+
     internal fun finnOppgaveId(fødselsnummer: String) =
         using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
@@ -113,50 +115,49 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             ).asUpdate
         )
     }
-}
 
-fun Session.insertOppgave(
-    eventId: UUID,
-    oppgavetype: String,
-    oppgavestatus: Oppgavestatus,
-    ferdigstiltAv: String?,
-    oid: UUID?,
-    vedtakRef: Long?,
-    commandContextId: UUID?
-) =
-    this.run(
-        queryOf(
-            """
+    fun Session.insertOppgave(
+        eventId: UUID,
+        oppgavetype: String,
+        oppgavestatus: Oppgavestatus,
+        ferdigstiltAv: String?,
+        oid: UUID?,
+        vedtakRef: Long?,
+        commandContextId: UUID?
+    ) =
+        this.run(
+            queryOf(
+                """
                 INSERT INTO oppgave(hendelse_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
                 VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?, ?);
             """,
-            eventId,
-            oppgavetype,
-            oppgavestatus.name,
-            ferdigstiltAv,
-            oid,
-            vedtakRef,
-            commandContextId
-        ).asUpdateAndReturnGeneratedKey
-    )
+                eventId,
+                oppgavetype,
+                oppgavestatus.name,
+                ferdigstiltAv,
+                oid,
+                vedtakRef,
+                commandContextId
+            ).asUpdateAndReturnGeneratedKey
+        )
 
-fun Session.finnOppgaveId(vedtaksperiodeId: UUID): Long? {
-    @Language("PostgreSQL")
-    val statement = """
+    private fun Session.finnOppgaveId(vedtaksperiodeId: UUID): Long? {
+        @Language("PostgreSQL")
+        val statement = """
             SELECT id FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
             AND status = 'AvventerSaksbehandler'::oppgavestatus
             """
-    return this.run(
-        queryOf(statement, vedtaksperiodeId)
-            .map { it.long("id") }.asSingle
-    )
-}
+        return this.run(
+            queryOf(statement, vedtaksperiodeId)
+                .map { it.long("id") }.asSingle
+        )
+    }
 
-fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
-    @Language("PostgreSQL")
-    val query = """
+    fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
+        @Language("PostgreSQL")
+        val query = """
 SELECT *,
        (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE hendelse_id = o.hendelse_id),
        sot.type AS saksbehandleroppgavetype,
@@ -173,66 +174,35 @@ WHERE status = 'AvventerSaksbehandler'::oppgavestatus
 ORDER BY CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END, CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC
 LIMIT 500
 """
-    return this.run(
-        queryOf(query)
-            .map(::saksbehandleroppgaveDto)
-            .asList
+        return this.run(
+            queryOf(query)
+                .map(::saksbehandleroppgaveDto)
+                .asList
+        )
+    }
+
+
+
+    private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
+        oppgavereferanse = it.long("oppgave_id"),
+        saksbehandlerepost = it.stringOrNull("epost"),
+        opprettet = it.localDateTime("opprettet"),
+        vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
+        periodeFom = it.localDate("fom"),
+        periodeTom = it.localDate("tom"),
+        personinfo = PersoninfoDto(
+            it.string("fornavn"),
+            it.stringOrNull("mellomnavn"),
+            it.string("etternavn"),
+            it.localDateOrNull("fodselsdato"),
+            it.stringOrNull("kjonn")?.let(Kjønn::valueOf)
+        ),
+        aktørId = it.long("aktor_id").toString(),
+        fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
+        antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count(),
+        type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) },
+        boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn"))
     )
+
+    private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }
-
-fun Session.invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) {
-    @Language("PostgreSQL")
-    val finnOppgaveIder = """
-SELECT o.*
-FROM vedtak v
-         JOIN oppgave o ON o.vedtak_ref = v.id
-         JOIN person p ON v.person_ref = p.id
-         JOIN arbeidsgiver a ON v.arbeidsgiver_ref = a.id
-WHERE a.orgnummer = :orgnummer
-  AND p.fodselsnummer = :fodselsnummer
-  AND o.status = 'AvventerSaksbehandler'::oppgavestatus;
-"""
-
-    @Language("PostgreSQL")
-    val invaliderOppgave = "UPDATE oppgave SET status = 'Invalidert'::oppgavestatus WHERE id=:id;"
-
-    run(
-        queryOf(
-            finnOppgaveIder,
-            mapOf("orgnummer" to orgnummer.toLong(), "fodselsnummer" to fødselsnummer.toLong())
-        ).map { it.long("id") }.asList
-    ).forEach { id -> run(queryOf(invaliderOppgave, mapOf("id" to id)).asUpdate) }
-}
-
-private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
-    oppgavereferanse = it.long("oppgave_id"),
-    saksbehandlerepost = it.stringOrNull("epost"),
-    opprettet = it.localDateTime("opprettet"),
-    vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-    periodeFom = it.localDate("fom"),
-    periodeTom = it.localDate("tom"),
-    personinfo = PersoninfoDto(
-        it.string("fornavn"),
-        it.stringOrNull("mellomnavn"),
-        it.string("etternavn"),
-        it.localDateOrNull("fodselsdato"),
-        it.stringOrNull("kjonn")?.let(Kjønn::valueOf)
-    ),
-    aktørId = it.long("aktor_id").toString(),
-    fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
-    antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count(),
-    type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) },
-    boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn"))
-)
-
-private fun oppgaveDto(it: Row) = OppgaveDto(
-    id = it.long("id"),
-    opprettet = it.localDateTime("opprettet"),
-    oppdatert = it.localDateTimeOrNull("oppdatert"),
-    oppgaveType = it.string("type"),
-    eventId = UUID.fromString(it.string("hendelse_id")),
-    status = Oppgavestatus.valueOf(it.string("status")),
-    vedtaksref = it.longOrNull("vedtak_ref")
-)
-
-private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

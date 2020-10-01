@@ -35,10 +35,18 @@ import javax.sql.DataSource
 internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    private val dataSource: DataSource,
+    dataSource: DataSource,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
+    private val personDao: PersonDao = PersonDao(dataSource),
+    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
+    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
+    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
+    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
+    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : IHendelseMediator {
@@ -47,14 +55,6 @@ internal class HendelseMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val personDao = PersonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val commandContextDao = CommandContextDao(dataSource)
-    private val reservasjonDao = ReservasjonDao(dataSource)
-    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val overstyringDao = OverstyringDao(dataSource)
-    private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val hendelsefabrikk = Hendelsefabrikk(
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,

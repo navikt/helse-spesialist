@@ -5,7 +5,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.modell.saksbehandler.persisterSaksbehandler
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -28,9 +27,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     fun `henter saksbehandlerepost for tildeling med fødselsnummer`() {
         nyPerson()
         tildelTilSaksbehandler()
-        val saksbehandlerepost = sessionOf(dataSource).use {
-            it.tildelingForPerson(FNR)
-        }
+        val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertEquals(SAKSBEHANDLEREPOST, saksbehandlerepost)
     }
 
@@ -52,9 +49,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         opprettOppgave()
         oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Ferdigstilt, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         tildelTilSaksbehandler()
-        val saksbehandlerepost = sessionOf(dataSource).use {
-            it.tildelingForPerson(FNR)
-        }
+        val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertNull(saksbehandlerepost)
     }
 
@@ -72,9 +67,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
             navn = "Ny Saksbehandler",
             epost = nySaksbehandlerepost
         )
-        val saksbehandlerepost = sessionOf(dataSource).use {
-            it.tildelingForPerson(FNR)
-        }
+        val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertEquals(nySaksbehandlerepost, saksbehandlerepost)
     }
 
@@ -101,9 +94,9 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         oid: UUID = SAKSBEHANDLER_OID,
         navn: String = "Sara Saksbehandler",
         epost: String = SAKSBEHANDLEREPOST
-    ) = sessionOf(dataSource).use {
-        it.persisterSaksbehandler(oid, navn, epost)
-        it.tildelOppgave(oppgaveId, oid)
+    ) {
+        saksbehandlerDao.persisterSaksbehandler(oid, navn, epost)
+        tildelingDao.tildelOppgave(oppgaveId, oid)
     }
 
     private fun assertTildeling(oppgaveId: Long, saksbehandleroid: UUID?) {

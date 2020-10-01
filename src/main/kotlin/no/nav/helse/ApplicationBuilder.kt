@@ -17,8 +17,12 @@ import no.nav.helse.annullering.AnnulleringMediator
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -78,13 +82,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var annulleringMediator: AnnulleringMediator
     private lateinit var hendelseMediator: HendelseMediator
+    private val personDao = PersonDao(dataSource)
+    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(vedtakDao, personDao, arbeidsgiverDao, snapshotDao, overstyringDao, oppgaveDao, tildelingDao)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
@@ -138,6 +146,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             speilSnapshotRestClient = speilSnapshotRestClient,
             dataSource = dataSource,
             oppgaveDao = oppgaveDao,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            snapshotDao = snapshotDao,
+            overstyringDao = overstyringDao,
+            saksbehandlerDao = saksbehandlerDao,
             vedtakDao = vedtakDao,
             tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,

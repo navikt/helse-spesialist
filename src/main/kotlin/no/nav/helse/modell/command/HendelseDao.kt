@@ -1,11 +1,13 @@
 package no.nav.helse.modell.command
 
-import kotliquery.*
+import kotliquery.TransactionalSession
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.person.toFødselsnummer
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
@@ -98,20 +100,3 @@ internal class HendelseDao(
         VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING, TILBAKERULLING
     }
 }
-
-fun Session.insertWarning(melding: String, hendelseId: UUID) = this.run(
-    queryOf(
-        "INSERT INTO warning (melding, hendelse_id) VALUES (?, ?)",
-        melding,
-        hendelseId
-    ).asUpdate
-)
-
-fun Session.insertSaksbehandleroppgavetype(type: Saksbehandleroppgavetype, hendelseId: UUID) =
-    this.run(
-        queryOf(
-            "INSERT INTO saksbehandleroppgavetype (type, hendelse_id) VALUES (?, ?)",
-            type.name,
-            hendelseId
-        ).asUpdate
-    )

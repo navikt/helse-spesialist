@@ -2,54 +2,50 @@ package no.nav.helse.vedtaksperiode
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.Session
-import kotliquery.sessionOf
 import no.nav.helse.measureAsHistogram
-import no.nav.helse.modell.arbeidsgiver.findArbeidsgiver
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.finnOppgaveId
-import no.nav.helse.modell.overstyring.finnOverstyring
-import no.nav.helse.modell.person.findEnhet
-import no.nav.helse.modell.person.findInfotrygdutbetalinger
+import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
-import no.nav.helse.modell.vedtak.snapshot.findSpeilSnapshot
 import no.nav.helse.objectMapper
-import no.nav.helse.tildeling.tildelingForPerson
+import no.nav.helse.tildeling.TildelingDao
 import java.util.*
-import javax.sql.DataSource
 
-internal class VedtaksperiodeMediator(private val dataSource: DataSource, private val oppgaveDao: OppgaveDao) {
+internal class VedtaksperiodeMediator(private val vedtakDao: VedtakDao,
+                                      private val personDao: PersonDao,
+                                      private val arbeidsgiverDao: ArbeidsgiverDao,
+                                      private val snapshotDao: SnapshotDao,
+                                      private val overstyringDao: OverstyringDao,
+                                      private val oppgaveDao: OppgaveDao,
+                                      private val tildelingDao: TildelingDao) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            sessionOf(dataSource).use { session ->
-                session.findVedtakByFnr(fnr)?.let { byggSpeilSnapshot(session, it) }
-            }
+            vedtakDao.findVedtakByFnr(fnr)?.let { byggSpeilSnapshot(it) }
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            sessionOf(dataSource).use { session ->
-                session.findVedtakByAktørId(aktørId)?.let { byggSpeilSnapshot(session, it) }
-            }
+            vedtakDao.findVedtakByAktørId(aktørId)?.let { byggSpeilSnapshot(it) }
         }
 
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            sessionOf(dataSource).use { session ->
-                session.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSpeilSnapshot(session, it) }
-            }
+            vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSpeilSnapshot(it) }
         }
 
-    private fun byggSpeilSnapshot(session: Session, vedtak: VedtaksperiodeDto) =
+    private fun byggSpeilSnapshot(vedtak: VedtaksperiodeDto) =
         measureAsHistogram("byggSpeilSnapshot") {
             val arbeidsgiverDto = measureAsHistogram("byggSpeilSnapshot_findArbeidsgiver") {
-                requireNotNull(session.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
+                requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
             }
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
-                session.findInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
+                personDao.findInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
             }
             val speilSnapshot = measureAsHistogram("byggSpeilSnapshot_findSpeilSnapshot") {
-                requireNotNull(session.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
+                requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
                     .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
             }
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
@@ -58,7 +54,7 @@ internal class VedtaksperiodeMediator(private val dataSource: DataSource, privat
                         arbeidsgiverDto.navn
                     else
                         "Ikke tilgjengelig"
-                val overstyringer = session.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
+                val overstyringer = overstyringDao.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
                         OverstyringForSpeilDto(
                             hendelseId = overstyring.hendelseId,
@@ -86,7 +82,7 @@ internal class VedtaksperiodeMediator(private val dataSource: DataSource, privat
                 speilSnapshot.arbeidsgivere.forEach { arbeidsgiver ->
                     arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
-                        val oppgaveId = session.finnOppgaveId(vedtaksperiodeId)
+                        val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
                     }
@@ -94,10 +90,10 @@ internal class VedtaksperiodeMediator(private val dataSource: DataSource, privat
             }
 
             val enhet = measureAsHistogram("byggSpeilSnapshot_findEnhet") {
-                session.findEnhet(vedtak.fødselsnummer)
+                personDao.findEnhet(vedtak.fødselsnummer)
             }
 
-            val saksbehandlerepost = session.tildelingForPerson(vedtak.fødselsnummer)
+            val saksbehandlerepost = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
 
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,

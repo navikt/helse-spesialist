@@ -2,12 +2,17 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
+import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -28,9 +33,14 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         private const val SNAPSHOTV1 = "{}"
     }
 
+    private val vedtakDao = VedtakDao(dataSource)
+    private val personDao = PersonDao(dataSource)
+    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
+    private val tildelingDao = TildelingDao(dataSource)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(vedtakDao, personDao, arbeidsgiverDao, snapshotDao, overstyringDao, oppgaveDao, tildelingDao)
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
