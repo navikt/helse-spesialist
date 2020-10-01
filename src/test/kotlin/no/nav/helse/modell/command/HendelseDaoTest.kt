@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.util.*
 
-internal class HendelseDaoTest : AbstractEndToEndTest() {
+internal class HendelseDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()
     }

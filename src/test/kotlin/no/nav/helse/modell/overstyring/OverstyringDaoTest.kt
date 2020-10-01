@@ -1,13 +1,13 @@
 package no.nav.helse.modell.overstyring
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import no.nav.helse.modell.person.Kjønn
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
-internal class OverstyringDaoTest : AbstractEndToEndTest() {
+internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
     companion object {
         private const val PERSON_FORNAVN = "Per"

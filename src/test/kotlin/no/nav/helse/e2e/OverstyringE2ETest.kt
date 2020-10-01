@@ -1,40 +1,25 @@
 package no.nav.helse.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import io.mockk.clearMocks
+import AbstractE2ETest
 import io.mockk.every
-import io.mockk.mockk
-import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.objectMapper
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
-import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Path
-import java.sql.Connection
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
-import javax.sql.DataSource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OverstyringE2ETest {
+internal class OverstyringE2ETest : AbstractE2ETest() {
     private companion object {
-        private val SPESIALIST_OID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
         private const val AKTØR = "999999999"
@@ -43,46 +28,40 @@ class OverstyringE2ETest {
         private const val SNAPSHOTV1 = "{}"
     }
 
-    private val testRapid = TestRapid()
-    private val meldingsfabrikk = Testmeldingfabrikk(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR)
-    private lateinit var embeddedPostgres: EmbeddedPostgres
-    private lateinit var postgresConnection: Connection
-    private lateinit var dataSource: DataSource
-    private lateinit var oppgaveDao: OppgaveDao
-    private lateinit var overstyringDao: OverstyringDao
-    private lateinit var hendelseMediator: HendelseMediator
-    private lateinit var vedtaksperiodeMediator: VedtaksperiodeMediator
-    private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-
-    private fun nyHendelseId() = UUID.randomUUID()
+    private val overstyringDao = OverstyringDao(dataSource)
+    private val oppgaveDao = OppgaveDao(dataSource)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
         val hendelseId = sendGodkjenningsbehov(
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            LocalDate.of(2018, 1, 1),
+            LocalDate.of(2018, 1, 31)
         )
-        sendPersoninfoløsning(hendelseId)
+        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendRisikovurderingløsning(hendelseId)
         assertSaksbehandlerOppgaveOpprettet(hendelseId)
-
-        sendOverstyrteDager(
-            listOf(
-                OverstyringDagDto(
-                    dato = LocalDate.of(2018, 1, 20),
-                    type = Dagtype.Feriedag,
-                    grad = null
-                )
+        sendOverstyrteDager(ORGNR, SAKSBEHANDLER_EPOST, listOf(
+            OverstyringDagDto(
+                dato = LocalDate.of(2018, 1, 20),
+                type = Dagtype.Feriedag,
+                grad = null
             )
-        )
+        ))
 
         assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
         assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
 
         sendGodkjenningsbehov(
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            LocalDate.of(2018, 1, 1),
+            LocalDate.of(2018, 1, 31)
         )
+        sendRisikovurderingløsning(hendelseId)
         val oppgave = oppgaveDao.finnOppgaver().find { it.fødselsnummer == FØDSELSNUMMER }
         assertNotNull(oppgave)
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.saksbehandlerepost)
@@ -91,8 +70,10 @@ class OverstyringE2ETest {
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
         val hendelseId = sendGodkjenningsbehov(
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            LocalDate.of(2018, 1, 1),
+            LocalDate.of(2018, 1, 31)
         )
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns objectMapper.writeValueAsString(
             PersonFraSpleisDto(
@@ -107,10 +88,10 @@ class OverstyringE2ETest {
                 )
             )
         )
-        sendPersoninfoløsning(hendelseId)
-
+        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendRisikovurderingløsning(hendelseId)
         sendOverstyrteDager(
-            listOf(
+            ORGNR, SAKSBEHANDLER_EPOST, listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,
@@ -120,10 +101,14 @@ class OverstyringE2ETest {
         )
 
         sendGodkjenningsbehov(
-            periodeFom = LocalDate.of(2018, 1, 1),
-            periodeTom = LocalDate.of(2018, 1, 31)
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            LocalDate.of(2018, 1, 1),
+            LocalDate.of(2018, 1, 31)
         )
+        sendRisikovurderingløsning(hendelseId)
 
+        // TODO: bør ikke koble seg på daoer i E2E
         assertTrue(oppgaveDao.finnOppgaver().any { it.fødselsnummer == FØDSELSNUMMER })
 
         val snapshot = vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER)
@@ -138,122 +123,4 @@ class OverstyringE2ETest {
         assertEquals(1, saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size)
         assertTrue(saksbehandlerOppgaver.any { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
     }
-
-    private fun sendGodkjenningsbehov(periodeFom: LocalDate, periodeTom: LocalDate) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagGodkjenningsbehov(
-                id = id,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                organisasjonsnummer = ORGNR,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom
-            )
-        )
-    }
-
-    private fun sendPersoninfoløsning(hendelseId: UUID) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagPersoninfoløsning(
-                id = id,
-                hendelseId = hendelseId,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                organisasjonsnummer = ORGNR,
-                contextId = testRapid.inspektør.contextId(hendelseId)
-            )
-        )
-    }
-
-    private fun sendOverstyrteDager(dager: List<OverstyringDagDto>) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagOverstyring(
-                id = id,
-                dager = dager,
-                organisasjonsnummer = ORGNR,
-                saksbehandlerEpost = SAKSBEHANDLER_EPOST
-            )
-        )
-    }
-
-    @BeforeAll
-    internal fun setupAll(@TempDir postgresPath: Path) {
-        embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath.toFile())
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        postgresConnection = embeddedPostgres.postgresDatabase.connection
-        val hikariConfig = createHikariConfig(embeddedPostgres.getJdbcUrl("postgres", "postgres"))
-        dataSource = HikariDataSource(hikariConfig)
-
-        hendelseMediator = HendelseMediator(
-            rapidsConnection = testRapid,
-            speilSnapshotRestClient = restClient,
-            dataSource = dataSource,
-            miljøstyrtFeatureToggle = mockk(relaxed = true)
-        )
-        oppgaveDao = OppgaveDao(dataSource)
-        overstyringDao = OverstyringDao(dataSource)
-        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource, oppgaveDao)
-    }
-
-    @BeforeEach
-    internal fun setupEach() {
-        clearMocks(restClient)
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to SPESIALIST_OID.toString()))
-            .load()
-            .also {
-                it.clean()
-                it.migrate()
-            }
-
-        testRapid.reset()
-    }
-
-    private fun createHikariConfig(jdbcUrl: String) =
-        HikariConfig().apply {
-            this.jdbcUrl = jdbcUrl
-            maximumPoolSize = 3
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        }
-
-    @AfterAll
-    fun tearDown() {
-        postgresConnection.close()
-        embeddedPostgres.close()
-    }
-
-    private fun TestRapid.RapidInspector.meldinger() =
-        (0 until size).map { index -> message(index) }
-
-    private fun TestRapid.RapidInspector.hendelser(type: String) =
-        meldinger().filter { it.path("@event_name").asText() == type }
-
-    private fun TestRapid.RapidInspector.behov() =
-        hendelser("behov")
-            .filterNot { it.hasNonNull("@løsning") }
-            .flatMap { it.path("@behov").map(JsonNode::asText) }
-
-    private fun TestRapid.RapidInspector.løsning(behov: String) =
-        hendelser("behov")
-            .filter { it.hasNonNull("@løsning") }
-            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
-            .path("@løsning").path(behov)
-
-    private fun TestRapid.RapidInspector.contextId(hendelseId: UUID) =
-        hendelser("behov")
-            .last { it.hasNonNull("contextId") && it.path("hendelseId").asText() == hendelseId.toString() }
-            .path("contextId")
-            .asText()
-            .let { UUID.fromString(it) }
-
-    private fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID) =
-        hendelser("oppgave_opprettet")
-            .last { it.path("hendelseId").asText() == hendelseId.toString() }
-            .path("oppgaveId")
-            .asLong()
 }

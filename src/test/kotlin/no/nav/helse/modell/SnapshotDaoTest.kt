@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class SnapshotDaoTest : AbstractEndToEndTest() {
+internal class SnapshotDaoTest : DatabaseIntegrationTest() {
 
 
     @Test

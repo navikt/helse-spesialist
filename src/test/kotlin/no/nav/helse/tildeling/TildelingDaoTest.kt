@@ -1,6 +1,6 @@
 package no.nav.helse.tildeling
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class TildelingDaoTest : AbstractEndToEndTest() {
+internal class TildelingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppretter tildeling`() {

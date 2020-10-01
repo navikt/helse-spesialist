@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class VedtakDaoTest : AbstractEndToEndTest() {
+internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre vedtak`() {

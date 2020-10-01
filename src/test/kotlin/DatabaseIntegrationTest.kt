@@ -19,7 +19,6 @@ import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.tildeling.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.flywaydb.core.Flyway
@@ -29,9 +28,7 @@ import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractEndToEndTest {
-    protected val testRapid = TestRapid()
-
+internal abstract class DatabaseIntegrationTest {
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -103,7 +100,7 @@ abstract class AbstractEndToEndTest {
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
 
     @BeforeEach
-    internal fun setupEachE2E() {
+    internal fun resetDatabase() {
         Flyway
             .configure()
             .dataSource(dataSource)
@@ -113,7 +110,6 @@ abstract class AbstractEndToEndTest {
                 it.clean()
                 it.migrate()
             }
-        testRapid.reset()
     }
 
     internal fun testhendelse(

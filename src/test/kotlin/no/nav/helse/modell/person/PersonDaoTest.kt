@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class PersonDaoTest : AbstractEndToEndTest() {
+internal class PersonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre personinfo`() {

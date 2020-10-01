@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class OppgaveDaoTest : AbstractEndToEndTest() {
+internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private val CONTEXT_ID = UUID.randomUUID()
         private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)

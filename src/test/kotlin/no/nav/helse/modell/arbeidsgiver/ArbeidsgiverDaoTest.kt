@@ -1,6 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class ArbeidsgiverDaoTest : AbstractEndToEndTest() {
+internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private const val ORGNR = "123456789"
         private const val NAVN = "Bedrift AS"

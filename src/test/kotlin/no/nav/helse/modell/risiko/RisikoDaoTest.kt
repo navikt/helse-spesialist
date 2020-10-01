@@ -1,12 +1,12 @@
 package no.nav.helse.modell.risiko
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertNotNull
 
-internal class RisikoDaoTest : AbstractEndToEndTest() {
+internal class RisikoDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `les og skriv`() {

@@ -1,6 +1,6 @@
 package no.nav.helse.tildeling
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.modell.person.Kjønn
@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-internal class ReservasjonDaoTest : AbstractEndToEndTest() {
+internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 
     private companion object {
         private const val FNR = "12345678911"

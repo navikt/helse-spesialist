@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class CommandContextDaoTest : AbstractEndToEndTest() {
+internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 
     private companion object {
         private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()

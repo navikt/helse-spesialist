@@ -1,12 +1,12 @@
 package no.nav.helse.modell.saksbehandler
 
-import AbstractEndToEndTest
+import DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class SaksbehandlerDaoTest : AbstractEndToEndTest() {
+internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
 
     private var saksbehandlere: List<SaksbehandlerDto> = emptyList()
 
