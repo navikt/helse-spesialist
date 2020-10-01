@@ -1,10 +1,12 @@
+INSERT INTO vedtaksperiode_hendelse (vedtaksperiode_ref, hendelse_ref) SELECT (SELECT id FROM vedtak WHERE vedtaksperiode_id = h.spleis_referanse LIMIT 1), id FROM hendelse h;
+
 ALTER TABLE warning ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
-UPDATE warning w SET vedtak_ref = o.vedtak_ref FROM oppgave o WHERE w.hendelse_id = o.hendelse_id;
+UPDATE warning w SET vedtak_ref = vh.vedtaksperiode_ref FROM vedtaksperiode_hendelse vh WHERE w.hendelse_id = vh.hendelse_ref;
 ALTER TABLE warning DROP COLUMN hendelse_id;
 ALTER TABLE warning ALTER COLUMN vedtak_ref SET NOT NULL;
 
 ALTER TABLE saksbehandleroppgavetype ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
-UPDATE saksbehandleroppgavetype s SET vedtak_ref = o.vedtak_ref FROM oppgave o WHERE s.hendelse_id = o.hendelse_id;
+UPDATE saksbehandleroppgavetype s SET vedtak_ref = vh.vedtaksperiode_ref FROM vedtaksperiode_hendelse vh WHERE s.hendelse_id = vh.hendelse_ref;
 ALTER TABLE saksbehandleroppgavetype DROP COLUMN hendelse_id;
 ALTER TABLE saksbehandleroppgavetype ALTER COLUMN vedtak_ref SET NOT NULL;
 
