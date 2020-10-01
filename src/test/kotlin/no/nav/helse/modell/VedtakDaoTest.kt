@@ -6,9 +6,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -42,7 +39,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `lagrer warnings`() {
-        testbehov(HENDELSE_ID)
+        godkjenningsbehov(HENDELSE_ID)
         val testwarnings= listOf("Warning A", "Warning B")
         vedtakDao.leggTilWarnings(HENDELSE_ID, testwarnings)
         assertWarnings(HENDELSE_ID, testwarnings)
@@ -50,7 +47,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `lagrer vedtaksperiodetype hvis den er satt`() {
-        testbehov(HENDELSE_ID)
+        godkjenningsbehov(HENDELSE_ID)
         val vedtaksperiodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
         vedtakDao.leggTilVedtaksperiodetype(HENDELSE_ID, vedtaksperiodetype)
         assertVedtaksperiodetype(HENDELSE_ID, vedtaksperiodetype)
@@ -58,7 +55,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppretter innslag i koblingstabellen`() {
-        testbehov(HENDELSE_ID)
+        godkjenningsbehov(HENDELSE_ID)
         nyPerson()
         vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
         assertEquals(vedtakId, finnKobling(HENDELSE_ID))
@@ -66,7 +63,7 @@ internal class VedtakDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `fjerner innslag i koblingstabellen`() {
-        testbehov(HENDELSE_ID)
+        godkjenningsbehov(HENDELSE_ID)
         nyPerson()
         vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
         assertEquals(vedtakId, finnKobling(HENDELSE_ID))

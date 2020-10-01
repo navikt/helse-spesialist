@@ -36,8 +36,7 @@ internal class HentPersoninfoLøsning(
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("HentPersoninfo"))
-                    it.demandKey("contextId")
-                    it.requireKey("spleisBehovId")
+                    it.requireKey("contextId", "hendelseId")
                     it.requireKey("@løsning.HentPersoninfo.fornavn", "@løsning.HentPersoninfo.etternavn",
                         "@løsning.HentPersoninfo.fødselsdato", "@løsning.HentPersoninfo.kjønn")
                     it.interestedIn("@løsning.HentPersoninfo.mellomnavn")
@@ -50,7 +49,7 @@ internal class HentPersoninfoLøsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val hendelseId = UUID.fromString(packet["spleisBehovId"].asText())
+            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val fornavn = packet["@løsning.HentPersoninfo.fornavn"].asText()
             val mellomnavn = packet["@løsning.HentPersoninfo.mellomnavn"].takeUnless(JsonNode::isMissingOrNull)?.asText()

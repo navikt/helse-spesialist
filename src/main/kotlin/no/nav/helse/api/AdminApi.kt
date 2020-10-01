@@ -8,21 +8,21 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.mediator.kafka.HendelseMediator
 
-internal fun Application.adminApi(spleisbehovMediator: HendelseMediator) {
+internal fun Application.adminApi(mediator: HendelseMediator) {
     routing {
         authenticate("admin") {
             route("/admin") {
                 post("/rollback") {
                     val rollback = call.receive<Array<TilbakerullingDTO>>()
                     rollback.forEach {
-                        spleisbehovMediator.håndter(it)
+                        mediator.håndter(it)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
                 post("/rollback_delete") {
                     val rollback = call.receive<Array<TilbakerullingMedSlettingDTO>>()
                     rollback.forEach {
-                        spleisbehovMediator.håndter(it)
+                        mediator.håndter(it)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

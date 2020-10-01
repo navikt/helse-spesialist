@@ -81,7 +81,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
 
     fun lagPersoninfoløsning(
         id: UUID = UUID.randomUUID(),
-        spleisbehovId: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr"
@@ -90,7 +90,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             id, "behov", mapOf(
                 "@final" to true,
                 "@behov" to listOf("HentEnhet", "HentPersoninfo", "HentInfotrygdutbetalinger"),
-                "spleisBehovId" to "$spleisbehovId",
+                "hendelseId" to "$hendelseId",
                 "contextId" to "$contextId",
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "fødselsnummer" to fødselsnummer,
@@ -125,7 +125,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
 
     fun lagHentInfotrygdutbetalingerløsning(
         id: UUID = UUID.randomUUID(),
-        spleisbehovId: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr"
@@ -134,7 +134,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             id, "behov", mapOf(
                 "@final" to true,
                 "@behov" to listOf("HentInfotrygdutbetalinger"),
-                "spleisBehovId" to "$spleisbehovId",
+                "hendelseId" to "$hendelseId",
                 "contextId" to "$contextId",
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "fødselsnummer" to fødselsnummer,
@@ -161,7 +161,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
 
     fun lagHentPersoninfoløsning(
         id: UUID = UUID.randomUUID(),
-        spleisbehovId: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr"
@@ -170,7 +170,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             id, "behov", mapOf(
                 "@final" to true,
                 "@behov" to listOf("HentPersoninfo"),
-                "spleisBehovId" to "$spleisbehovId",
+                "hendelseId" to "$hendelseId",
                 "contextId" to "$contextId",
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "fødselsnummer" to fødselsnummer,
@@ -190,7 +190,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
 
     fun lagHentEnhetløsning(
         id: UUID = UUID.randomUUID(),
-        spleisbehovId: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
@@ -200,7 +200,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             id, "behov", mapOf(
                 "@final" to true,
                 "@behov" to listOf("HentEnhet"),
-                "spleisBehovId" to "$spleisbehovId",
+                "hendelseId" to "$hendelseId",
                 "contextId" to contextId,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "fødselsnummer" to fødselsnummer,

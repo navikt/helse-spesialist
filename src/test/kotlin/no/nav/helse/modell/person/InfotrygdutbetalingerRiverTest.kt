@@ -29,13 +29,13 @@ internal class InfotrygdutbetalingerRiverTest {
 
     @Test
     fun `leser selvstendig HentInfotrygdutbetalinger-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagHentInfotrygdutbetalingerløsning(spleisbehovId = HENDELSE, contextId = CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagHentInfotrygdutbetalingerløsning(hendelseId = HENDELSE, contextId = CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any<HentPersoninfoLøsning>(), any()) }
     }
 
     @Test
     fun `leser HentInfotrygdutbetalinger i et behov med flere ting`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagPersoninfoløsning(spleisbehovId = HENDELSE, contextId = CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagPersoninfoløsning(hendelseId = HENDELSE, contextId = CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any<HentPersoninfoLøsning>(), any()) }
     }
 }

@@ -4,6 +4,7 @@ import kotliquery.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
+import no.nav.helse.modell.person.toFødselsnummer
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import java.util.*
@@ -19,7 +20,7 @@ internal class HendelseDao(
                 transactionalSession.run {
                     opprettHendelse(hendelse)
 
-                    finnVedtaksperiode(hendelse.vedtaksperiodeId())?.let {
+                    hendelse.vedtaksperiodeId()?.let(::finnVedtaksperiode)?.let {
                         opprettKobling(it, hendelse.id)
                     }
                 }
@@ -27,26 +28,30 @@ internal class HendelseDao(
         }
     }
 
-    private fun finnVedtaksperiode(vedtaksperiodeId: UUID?): Long? = using(sessionOf(dataSource)) { session ->
-        vedtaksperiodeId?.let {
+    internal fun finnFødselsnummer(hendelseId: UUID): String {
+        return using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
-            val query = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
-            session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle)
+            val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
+            requireNotNull(session.run(queryOf(statement, hendelseId).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle))
         }
+    }
+
+    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
+        session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle)
     }
 
     private fun TransactionalSession.opprettHendelse(hendelse: Hendelse) {
         @Language("PostgreSQL")
         val hendelseStatement = """
-            INSERT INTO hendelse(id, fodselsnummer, spleis_referanse, data, original, type)
-                VALUES(?, ?, ?, CAST(? as json), CAST(? as json), ?)
+            INSERT INTO hendelse(id, fodselsnummer, data, type)
+                VALUES(?, ?, CAST(? as json), ?)
             """
         run(queryOf(
             hendelseStatement,
             hendelse.id,
             hendelse.fødselsnummer().toLong(),
-            hendelse.vedtaksperiodeId()?: UUID.randomUUID(),
-            hendelse.toJson(),
             hendelse.toJson(),
             tilHendelsetype(hendelse).name
         ).asUpdate)
@@ -94,11 +99,11 @@ internal class HendelseDao(
     }
 }
 
-fun Session.insertWarning(melding: String, spleisbehovRef: UUID) = this.run(
+fun Session.insertWarning(melding: String, hendelseId: UUID) = this.run(
     queryOf(
         "INSERT INTO warning (melding, hendelse_id) VALUES (?, ?)",
         melding,
-        spleisbehovRef
+        hendelseId
     ).asUpdate
 )
 

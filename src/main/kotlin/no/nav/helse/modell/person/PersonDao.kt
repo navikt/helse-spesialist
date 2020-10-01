@@ -9,7 +9,6 @@ import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
-import java.util.*
 import javax.sql.DataSource
 
 internal class PersonDao(private val dataSource: DataSource) {
@@ -21,20 +20,6 @@ internal class PersonDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) {
             it.findPersoninfoSistOppdatert(fødselsnummer)
         }
-
-    internal fun finnFødselsnummer(hendelseId: UUID): String {
-        return using(sessionOf(dataSource)) { session ->
-            @Language("PostgreSQL")
-            val statement = """
-                    SELECT fodselsnummer FROM person WHERE id = (
-                        SELECT person_ref FROM vedtak WHERE vedtaksperiode_id = (
-                            SELECT spleis_referanse FROM hendelse WHERE id = ?
-                        )
-                    )
-                """
-            requireNotNull(session.run(queryOf(statement, hendelseId).map { it.string("fodselsnummer") }.asSingle))
-        }
-    }
 
     internal fun insertPersoninfo(
         fornavn: String,

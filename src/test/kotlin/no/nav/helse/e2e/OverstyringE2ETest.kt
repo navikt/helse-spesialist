@@ -90,7 +90,7 @@ class OverstyringE2ETest {
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
-        val spleisbehovId = sendGodkjenningsbehov(
+        val hendelseId = sendGodkjenningsbehov(
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 31)
         )
@@ -101,13 +101,13 @@ class OverstyringE2ETest {
                 arbeidsgivere = listOf(
                     ArbeidsgiverFraSpleisDto(
                         organisasjonsnummer = ORGNR,
-                        id = spleisbehovId,
+                        id = hendelseId,
                         vedtaksperioder = emptyList()
                     )
                 )
             )
         )
-        sendPersoninfoløsning(spleisbehovId)
+        sendPersoninfoløsning(hendelseId)
 
         sendOverstyrteDager(
             listOf(
@@ -155,7 +155,7 @@ class OverstyringE2ETest {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagPersoninfoløsning(
                 id = id,
-                spleisbehovId = hendelseId,
+                hendelseId = hendelseId,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 organisasjonsnummer = ORGNR,
                 contextId = testRapid.inspektør.contextId(hendelseId)

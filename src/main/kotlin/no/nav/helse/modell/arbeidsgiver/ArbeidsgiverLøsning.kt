@@ -24,8 +24,7 @@ internal class ArbeidsgiverLøsning(private val navn: String) {
                         it.demandValue("@event_name", "behov")
                         it.demandValue("@final", true)
                         it.demandAll("@behov", listOf("HentArbeidsgiverNavn"))
-                        it.demandKey("contextId")
-                        it.requireKey("spleisBehovId")
+                        it.requireKey("contextId", "hendelseId")
                         it.requireKey("@løsning.HentArbeidsgiverNavn")
                     }
                 }.register(this)
@@ -36,7 +35,7 @@ internal class ArbeidsgiverLøsning(private val navn: String) {
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val hendelseId = UUID.fromString(packet["spleisBehovId"].asText())
+            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             mediator.løsning(hendelseId, contextId, ArbeidsgiverLøsning(packet["@løsning.HentArbeidsgiverNavn"].asText()), context)
         }

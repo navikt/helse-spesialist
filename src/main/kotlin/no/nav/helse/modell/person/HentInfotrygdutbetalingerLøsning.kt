@@ -31,8 +31,7 @@ internal class HentInfotrygdutbetalingerLøsning(private val utbetalinger: JsonN
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("HentInfotrygdutbetalinger"))
-                    it.demandKey("contextId")
-                    it.requireKey("spleisBehovId")
+                    it.requireKey("contextId", "hendelseId")
                     it.requireKey("@løsning.HentInfotrygdutbetalinger")
                 }
                 }.register(this)
@@ -43,7 +42,7 @@ internal class HentInfotrygdutbetalingerLøsning(private val utbetalinger: JsonN
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val hendelseId = UUID.fromString(packet["spleisBehovId"].asText())
+            val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             mediator.løsning(hendelseId, contextId, HentInfotrygdutbetalingerLøsning(packet["@løsning.HentInfotrygdutbetalinger"]), context)
         }

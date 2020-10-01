@@ -9,6 +9,7 @@ import no.nav.helse.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.Oppgavestatus.Ferdigstilt
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.command.nyny.TestHendelse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,16 +17,20 @@ import java.time.LocalDate
 import java.util.*
 
 internal class OppgaveDaoTest : AbstractEndToEndTest() {
+    private companion object {
+        private val CONTEXT_ID = UUID.randomUUID()
+        private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
+    }
 
     @BeforeEach
     fun setupDaoTest() {
-        testbehov(TESTHENDELSE.id)
+        godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE)
     }
 
     @Test
     fun `lagre oppgave`() {
-        opprettOppgave()
+        opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             HENDELSE_ID,
@@ -41,13 +46,13 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
 
     @Test
     fun `finner contextId`() {
-        opprettOppgave()
+        opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(oppgaveId))
     }
 
     @Test
     fun `finner hendelseId`() {
-        opprettOppgave()
+        opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(oppgaveId))
     }
 
@@ -78,7 +83,7 @@ internal class OppgaveDaoTest : AbstractEndToEndTest() {
     @Test
     fun `oppdatere oppgave`() {
         val nyStatus = Ferdigstilt
-        opprettOppgave()
+        opprettOppgave(contextId = CONTEXT_ID)
         oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(

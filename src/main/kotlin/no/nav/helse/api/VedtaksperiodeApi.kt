@@ -15,7 +15,7 @@ import java.util.*
 
 internal fun Route.vedtaksperiodeApi(
     vedtaksperiodeMediator: VedtaksperiodeMediator,
-    spleisbehovMediator: HendelseMediator
+    hendelseMediator: HendelseMediator
 ) {
     get("/api/person/{vedtaksperiodeId}") {
         val speilSnapshot = vedtaksperiodeMediator
@@ -79,7 +79,7 @@ internal fun Route.vedtaksperiodeApi(
             return@post
         }
 
-        spleisbehovMediator.håndter(godkjenning, epostadresse, oid)
+        hendelseMediator.håndter(godkjenning, epostadresse, oid)
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
     post("/api/annullering") {
@@ -87,7 +87,7 @@ internal fun Route.vedtaksperiodeApi(
         val epostadresse = requireNotNull(call.principal<JWTPrincipal>())
             .payload.getClaim("preferred_username").asString()
 
-        spleisbehovMediator.håndter(annullering, epostadresse)
+        hendelseMediator.håndter(annullering, epostadresse)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
@@ -115,7 +115,7 @@ internal fun Route.vedtaksperiodeApi(
                 )
             }
         )
-        spleisbehovMediator.håndter(message)
+        hendelseMediator.håndter(message)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }

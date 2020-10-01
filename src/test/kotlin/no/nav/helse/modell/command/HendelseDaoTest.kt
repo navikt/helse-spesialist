@@ -82,6 +82,13 @@ internal class HendelseDaoTest : AbstractEndToEndTest() {
         assertEquals(vedtakId, finnKobling())
     }
 
+    @Test
+    fun `finner fødselsnummer ved hjelp av hendelseId`() {
+        nyPerson()
+        godkjenningsbehov(HENDELSE_ID)
+        assertEquals(FNR, dao.finnFødselsnummer(HENDELSE_ID))
+    }
+
     private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf("SELECT vedtaksperiode_ref FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)

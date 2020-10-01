@@ -32,12 +32,11 @@ import java.util.*
 abstract class AbstractEndToEndTest {
     protected val testRapid = TestRapid()
 
-    internal companion object {
+    protected companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
         internal val HENDELSE_ID = UUID.randomUUID()
-        internal val CONTEXT_ID = UUID.randomUUID()
 
         internal val VEDTAKSPERIODE = UUID.randomUUID()
 
@@ -47,7 +46,7 @@ abstract class AbstractEndToEndTest {
         internal const val ORGNUMMER = "123456789"
         internal const val ORGNAVN = "NAVN AS"
 
-        internal const val FNR = "12345678911"
+        internal const val FNR = "02345678911"
         internal const val AKTØR = "4321098765432"
         internal const val FORNAVN = "Kari"
         internal const val MELLOMNAVN = "Mellomnavn"
@@ -61,9 +60,7 @@ abstract class AbstractEndToEndTest {
         internal val TOM = LocalDate.of(2018, 1, 31)
         internal val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-        internal val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
-
-        internal val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
+        internal const val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
 
         private val postgresPath = createTempDir()
         private val embeddedPostgres = EmbeddedPostgres.builder()
@@ -122,30 +119,31 @@ abstract class AbstractEndToEndTest {
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
         vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
-        fødselsnummer: String = FNR
+        fødselsnummer: String = FNR,
+        type: String = "GODKJENNING"
     ) = TestHendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
-        testbehov(
-            hendelseId = it.id,
-            fødselsnummer = it.fødselsnummer(),
-            vedtaksperiodeId = it.vedtaksperiodeId()
-        )
+        lagreHendelse(it.id, it.fødselsnummer(), type)
     }
 
-    protected fun testbehov(
+    protected fun godkjenningsbehov(
+        hendelseId: UUID,
+        fødselsnummer: String = FNR
+    ) {
+        lagreHendelse(hendelseId, fødselsnummer, "GODKJENNING")
+    }
+
+    private fun lagreHendelse(
         hendelseId: UUID,
         fødselsnummer: String = FNR,
-        vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
-        type: String = "Godkjenningsbehov"
+        type: String
     ) {
         using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
-                    "INSERT INTO hendelse(id, fodselsnummer, data, original, spleis_referanse, type) VALUES(?, ?, ?::json, ?::json, ?, ?)",
+                    "INSERT INTO hendelse(id, fodselsnummer, data, type) VALUES(?, ?, ?::json, ?)",
                     hendelseId,
                     fødselsnummer.toLong(),
                     "{}",
-                    "{}",
-                    vedtaksperiodeId,
                     type
                 ).asExecute
             )
@@ -187,11 +185,12 @@ abstract class AbstractEndToEndTest {
 
     protected fun opprettOppgave(
         hendelseId: UUID = HENDELSE_ID,
+        contextId: UUID = UUID.randomUUID(),
         vedtakId: Long? = null
     ) {
         oppgaveId = oppgaveDao.opprettOppgave(
             hendelseId,
-            CONTEXT_ID,
+            contextId,
             OPPGAVETYPE,
             vedtakId
         )

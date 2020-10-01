@@ -71,13 +71,6 @@ internal class PersonDaoTest : AbstractEndToEndTest() {
         person().first().assertInfotrygdUtbetalingerRef(infotrygdUtbetalingerRef)
     }
 
-    @Test
-    fun `finner fødselsnummer ved hjelp av hendelseId`() {
-        nyPerson()
-        testbehov(HENDELSE_ID)
-        assertEquals(FNR, personDao.finnFødselsnummer(HENDELSE_ID))
-    }
-
     private fun assertPersoninfo(forventetNavn: String, forventetMellomnavn: String?, forventetEtternavn: String?, forventetFødselsdato: LocalDate, forventetKjønn: Kjønn) {
         val personinfo = personinfo()
         assertEquals(1, personinfo.size)

@@ -103,7 +103,7 @@ internal class HendelseMediator(
     internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
         val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
-        val fødselsnummer = personDao.finnFødselsnummer(hendelseId)
+        val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val godkjenningMessage = JsonMessage.newMessage(
             standardfelter("saksbehandler_løsning", fødselsnummer).apply {
                 put("oppgaveId", godkjenningDTO.oppgavereferanse)

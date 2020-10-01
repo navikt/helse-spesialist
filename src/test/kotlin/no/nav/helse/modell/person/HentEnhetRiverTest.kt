@@ -29,13 +29,13 @@ internal class HentEnhetRiverTest {
 
     @Test
     fun `leser selvstendig HentEnhet-melding`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagHentEnhetløsning(spleisbehovId = HENDELSE, contextId = CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagHentEnhetløsning(hendelseId = HENDELSE, contextId = CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any<HentEnhetLøsning>(), any()) }
     }
 
     @Test
     fun `leser HentEnhet i et behov med flere ting`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagPersoninfoløsning(spleisbehovId = HENDELSE, contextId = CONTEXT))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagPersoninfoløsning(hendelseId = HENDELSE, contextId = CONTEXT))
         verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any<HentEnhetLøsning>(), any()) }
     }
 }

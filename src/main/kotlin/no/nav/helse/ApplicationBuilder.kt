@@ -75,7 +75,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
-    private lateinit var spleisbehovMediator: HendelseMediator
+    private lateinit var hendelseMediator: HendelseMediator
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -116,7 +116,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("saksbehandler") {
                     oppgaveApi(oppgaveMediator)
                     vedtaksperiodeApi(
-                        spleisbehovMediator = spleisbehovMediator,
+                        hendelseMediator = hendelseMediator,
                         vedtaksperiodeMediator = vedtaksperiodeMediator
                     )
                 }
@@ -125,12 +125,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     direkteOppgaveApi(oppgaveMediator)
                 }
             }
-            adminApi(spleisbehovMediator)
+            adminApi(hendelseMediator)
         }.build()
 
     init {
         rapidsConnection.register(this)
-        spleisbehovMediator = HendelseMediator(
+        hendelseMediator = HendelseMediator(
             rapidsConnection = rapidsConnection,
             speilSnapshotRestClient = speilSnapshotRestClient,
             dataSource = dataSource,
@@ -146,7 +146,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     fun stop() = rapidsConnection.stop()
 
     override fun onShutdown(rapidsConnection: RapidsConnection) {
-        spleisbehovMediator.shutdown()
+        hendelseMediator.shutdown()
     }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {

@@ -60,7 +60,7 @@ internal class GodkjenningE2ETest {
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
         val hendelseId = sendVedtaksperiodeEndret()
-        assertSpleisbehov(hendelseId)
+        assertHendelse(hendelseId)
         assertTilstand(hendelseId, "NY", "FERDIG")
         verify(exactly = 0) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
@@ -69,7 +69,7 @@ internal class GodkjenningE2ETest {
     @Test
     fun `oppretter ikke vedtak ved godkjenningsbehov uten nødvendig informasjon`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov()
-        assertSpleisbehov(godkjenningsmeldingId)
+        assertHendelse(godkjenningsmeldingId)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT")
         assertBehov("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger")
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
@@ -128,7 +128,7 @@ internal class GodkjenningE2ETest {
     @Test
     fun `vedtaksperiode forkastet`() {
         val hendelseId = sendVedtaksperiodeForkastet()
-        assertSpleisbehov(hendelseId)
+        assertHendelse(hendelseId)
         assertTilstand(hendelseId, "NY", "FERDIG")
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
@@ -157,11 +157,11 @@ internal class GodkjenningE2ETest {
         testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(id, VEDTAKSPERIODE_ID, ORGNR))
     }
 
-    private fun sendPersoninfoløsning(spleisbehovId: UUID) = nyHendelseId().also { id ->
+    private fun sendPersoninfoløsning(hendelseId: UUID) = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagPersoninfoløsning(
                 id,
-                spleisbehovId,
+                hendelseId,
                 testRapid.inspektør.contextId(),
                 VEDTAKSPERIODE_ID,
                 ORGNR
@@ -199,7 +199,7 @@ internal class GodkjenningE2ETest {
         )
     }
 
-    private fun assertSpleisbehov(hendelseId: UUID) {
+    private fun assertHendelse(hendelseId: UUID) {
         assertEquals(1, using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
         })
