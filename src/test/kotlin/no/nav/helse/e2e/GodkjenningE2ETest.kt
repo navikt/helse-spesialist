@@ -6,23 +6,6 @@ import io.mockk.verify
 import no.nav.helse.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import no.nav.helse.api.GodkjenningDTO
-import no.nav.helse.mediator.kafka.HendelseMediator
-import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Path
-import java.sql.Connection
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

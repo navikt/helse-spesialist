@@ -13,8 +13,6 @@ import java.util.*
 internal class SaksbehandlerGodkjenningCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val fødselsnummer: String,
-    vedtaksperiodeId: UUID,
     private val godkjenningsbehovJson: String,
     private val reservasjonDao: ReservasjonDao,
     private val oppgaveMediator: OppgaveMediator,
@@ -31,9 +29,6 @@ internal class SaksbehandlerGodkjenningCommand(
     override fun execute(context: CommandContext): Boolean {
         if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
 
-        logg.info("Oppretter saksbehandleroppgave")
-        val reservasjon = reservasjonDao.hentReservasjonFor(fødselsnummer)
-        oppgaveMediator.oppgave(oppgave, reservasjon)
         logg.info("Oppretter saksbehandleroppgave")
         val reservasjon = reservasjonDao.hentReservasjonFor(fødselsnummer)
         oppgaveMediator.oppgave(oppgave, reservasjon)

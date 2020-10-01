@@ -30,7 +30,6 @@ internal class SaksbehandlerGodkjenningCommandTest {
     }
 
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
-    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
@@ -91,34 +90,6 @@ internal class SaksbehandlerGodkjenningCommandTest {
 
         verify(ordering = Ordering.SEQUENCE) {
             oppgaveMediator.oppgave(eq(forventetOppgave), null)
-            oppgaveMediator.oppgave(eq(forventetOppgave), null)
-            forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
-            oppgaveMediator.oppgave(eq(forventetOppgave), null)
-        }
-    }
-
-    @Test
-    fun `ferdigstilling av oppgave når det finnes en reservasjon`() {
-        val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
-        every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
-
-        context.add(
-            SaksbehandlerLøsning(
-                true,
-                SAKSBEHANDLER,
-                SAKSBEHANDLER_OID,
-                EPOST,
-                GODKJENTTIDSPUNKT,
-                null,
-                null,
-                null,
-                OPPGAVE_ID
-            )
-        )
-        assertTrue(command.execute(context))
-
-        verify(ordering = Ordering.SEQUENCE) {
-            oppgaveMediator.oppgave(eq(forventetOppgave), reservasjon)
             forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
             oppgaveMediator.oppgave(eq(forventetOppgave), null)
         }
@@ -135,7 +106,6 @@ internal class SaksbehandlerGodkjenningCommandTest {
         verify(ordering = Ordering.SEQUENCE) {
             oppgaveMediator.oppgave(eq(forventetOppgave), reservasjon)
             forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
-            oppgaveMediator.oppgave(eq(forventetOppgave), null)
             oppgaveMediator.oppgave(eq(forventetOppgave), null)
         }
     }

@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.Oppgavestatus
-import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.junit.jupiter.api.*
@@ -45,8 +44,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            godkjenningsmeldingId = godkjenningsmeldingId
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertAutomatisertLøsning()
@@ -67,8 +66,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            godkjenningsmeldingId = godkjenningsmeldingId
+            begrunnelser = listOf("8-4 ikke oppfylt")
         )
         sendSaksbehandlerløsning(
             oppgaveId = OPPGAVEID,
@@ -86,9 +86,10 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak for førstegangsbehandling`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            periodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
             orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            warnings = listOf("WARNING"),
+            periodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
@@ -96,8 +97,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            godkjenningsmeldingId = godkjenningsmeldingId
+            begrunnelser = listOf("8-4 ikke oppfylt")
         )
         sendSaksbehandlerløsning(
             oppgaveId = OPPGAVEID,
@@ -115,8 +117,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            periodetype = Saksbehandleroppgavetype.FORLENGELSE, orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
+            orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            warnings = listOf("WARNING"),
+            periodetype = Saksbehandleroppgavetype.FORLENGELSE
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

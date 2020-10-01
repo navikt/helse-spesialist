@@ -1,9 +1,6 @@
 package no.nav.helse.modell.command
 
-import kotliquery.TransactionalSession
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
+import kotliquery.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
@@ -100,44 +97,3 @@ internal class HendelseDao(
         VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING, TILBAKERULLING
     }
 }
-
-internal fun Session.updateBehov(id: UUID, behov: String) {
-    this.run(
-        queryOf(
-            "UPDATE hendelse SET data=CAST(? as json) WHERE id=?", behov, id
-        ).asUpdate
-    )
-}
-
-internal fun Session.findBehov(id: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT spleis_referanse, data, type FROM hendelse WHERE id=?", id)
-        .map {
-            SpleisbehovDBDto(
-                id = id,
-                spleisReferanse = UUID.fromString(it.string("spleis_referanse")),
-                data = it.string("data"),
-                type = enumValueOf(it.string("type"))
-            )
-        }
-        .asSingle
-    )
-
-internal fun Session.findBehovMedSpleisReferanse(spleisReferanse: UUID): SpleisbehovDBDto? =
-    this.run(queryOf("SELECT id, data, type FROM hendelse WHERE spleis_referanse=? AND type IN(${
-        MacroCommandType.values().joinToString { "?" }
-    })", spleisReferanse, *MacroCommandType.values().map(Enum<*>::name).toTypedArray())
-        .map {
-            SpleisbehovDBDto(
-                id = UUID.fromString(it.string("id")),
-                spleisReferanse = spleisReferanse,
-                data = it.string("data"),
-                type = enumValueOf(it.string("type"))
-            )
-        }
-        .asSingle
-    )
-
-internal fun Session.findOriginalBehov(id: UUID): String? =
-    this.run(queryOf("SELECT original FROM hendelse WHERE id=?", id)
-        .map { it.string("original") }
-        .asSingle)

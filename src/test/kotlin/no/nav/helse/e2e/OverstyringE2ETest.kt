@@ -10,6 +10,7 @@ import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.tildeling.TildelingDao
@@ -52,7 +53,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
-        sendRisikovurderingløsning(hendelseId)
         assertSaksbehandlerOppgaveOpprettet(hendelseId)
         sendOverstyrteDager(ORGNR, SAKSBEHANDLER_EPOST, listOf(
             OverstyringDagDto(
@@ -71,7 +71,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
-        sendRisikovurderingløsning(hendelseId)
         val oppgave = oppgaveDao.finnOppgaver().find { it.fødselsnummer == FØDSELSNUMMER }
         assertNotNull(oppgave)
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.saksbehandlerepost)

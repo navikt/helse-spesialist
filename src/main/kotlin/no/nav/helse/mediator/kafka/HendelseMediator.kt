@@ -3,7 +3,6 @@ package no.nav.helse.mediator.kafka
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.annulleringsteller
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -12,8 +11,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.modell.command.HendelseDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
@@ -54,16 +51,6 @@ internal class HendelseMediator(
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
     private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
-    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
-    private val personDao: PersonDao = PersonDao(dataSource),
-    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
-    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
-    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
-    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : IHendelseMediator {
     private companion object {
@@ -71,15 +58,7 @@ internal class HendelseMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val personDao = PersonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val commandContextDao = CommandContextDao(dataSource)
-    private val reservasjonDao = ReservasjonDao(dataSource)
-    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val overstyringDao = OverstyringDao(dataSource)
-    private val automatiseringDao = AutomatiseringDao(dataSource)
-    private val automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao)
+    private val automatisering = Automatisering(vedtakDao, risikovurderingDao, AutomatiseringDao(dataSource))
     private val hendelsefabrikk = Hendelsefabrikk(
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
