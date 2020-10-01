@@ -30,8 +30,6 @@ internal class SaksbehandlerGodkjenningCommandTest {
     }
 
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
-    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private lateinit var context: CommandContext
