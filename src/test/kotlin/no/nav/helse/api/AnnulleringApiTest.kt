@@ -7,7 +7,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.annullering.AnnulleringMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -19,19 +19,19 @@ class AnnulleringApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private lateinit var annulleringMediator: AnnulleringMediator
+    private lateinit var hendelseMediator: HendelseMediator
 
     @BeforeAll
     fun setupTildeling() {
-        annulleringMediator = mockk(relaxed = true)
+        hendelseMediator = mockk(relaxed = true)
         setupServer {
-            annulleringApi(annulleringMediator)
+            annulleringApi(hendelseMediator)
         }
     }
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(annulleringMediator)
+        clearMocks(hendelseMediator)
     }
 
     @Test
@@ -59,7 +59,7 @@ class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            annulleringMediator.håndter(any(), SAKSBEHANDLER_OID, epostadresse)
+            hendelseMediator.håndter(any(), SAKSBEHANDLER_OID, epostadresse)
         }
     }
 

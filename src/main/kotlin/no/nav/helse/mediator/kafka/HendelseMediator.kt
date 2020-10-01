@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.annulleringsteller
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -152,7 +153,7 @@ internal class HendelseMediator(
         )
     }
 
-    fun godkjenning(
+    override fun godkjenning(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -181,7 +182,7 @@ internal class HendelseMediator(
         )
     }
 
-    fun overstyring(
+    override fun overstyring(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -190,7 +191,7 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.overstyring(message.toJson()), context)
     }
 
-    fun tilbakerulling(
+    override fun tilbakerulling(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -244,6 +245,34 @@ internal class HendelseMediator(
         rapidsConnection.publish(tilbakerulling.toJson())
     }
 
+    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandlerOid: UUID, epostadresse: String) {
+        annulleringsteller.inc()
+
+        val annulleringMessage = annulleringDto.run {
+            JsonMessage.newMessage(
+                standardfelter("annuller", fødselsnummer).apply {
+                    putAll(
+                        mapOf(
+                            "organisasjonsnummer" to organisasjonsnummer,
+                            "aktørId" to aktørId,
+                            "saksbehandler" to saksbehandlerOid,
+                            "saksbehandlerEpost" to epostadresse,
+                            "dager" to dager
+                        )
+                    )
+                }
+            )
+        }
+
+        rapidsConnection.publish(annulleringMessage.toJson().also {
+            sikkerLogg.info(
+                "sender annullering for {}, {}\n\t$it",
+                keyValue("fødselsnummer", annulleringDto.fødselsnummer),
+                keyValue("organisasjonsnummer", annulleringDto.organisasjonsnummer)
+            )
+        })
+    }
+
     fun shutdown() {
         shutdown = true
     }
@@ -251,6 +280,13 @@ internal class HendelseMediator(
     private fun forbered() {
         løsninger = null
     }
+
+    private fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf(
+        "@event_name" to hendelsetype,
+        "@opprettet" to LocalDateTime.now(),
+        "@id" to UUID.randomUUID(),
+        "fødselsnummer" to fødselsnummer
+    )
 
     private fun løsninger(hendelseId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {

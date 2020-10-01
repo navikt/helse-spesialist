@@ -12,6 +12,9 @@ private val histogram =
 internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
     .register()
 
+internal val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
+    .register()
+
 internal fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
     val result: T
     val start = System.nanoTime()

@@ -8,11 +8,11 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import no.nav.helse.annullering.AnnulleringMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import java.time.LocalDate
 import java.util.*
 
-internal fun Route.annulleringApi(annulleringMediator: AnnulleringMediator) {
+internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
     post("/api/v1/annullering") {
         val annullering = call.receive<AnnulleringDto>()
         val oid = requireNotNull(call.principal<JWTPrincipal>())
@@ -20,7 +20,7 @@ internal fun Route.annulleringApi(annulleringMediator: AnnulleringMediator) {
         val epostadresse = requireNotNull(call.principal<JWTPrincipal>())
             .payload.getClaim("preferred_username").asString()
 
-        annulleringMediator.håndter(annulleringDto = annullering, oid = oid, epostadresse = epostadresse)
+        hendelseMediator.håndter(annulleringDto = annullering, saksbehandlerOid = oid, epostadresse = epostadresse)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }
