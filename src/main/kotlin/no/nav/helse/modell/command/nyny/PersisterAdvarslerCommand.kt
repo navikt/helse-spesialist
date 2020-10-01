@@ -4,13 +4,13 @@ import no.nav.helse.modell.VedtakDao
 import java.util.*
 
 internal class PersisterAdvarslerCommand(
-    private val godkjenninghendelseId: UUID,
+    private val vedtaksperiodeId: UUID,
     private val warnings: List<String>,
     private val vedtakDao: VedtakDao
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
-        vedtakDao.leggTilWarnings(godkjenninghendelseId, warnings)
+        vedtakDao.leggTilWarnings(vedtaksperiodeId, warnings)
         return true
     }
 }

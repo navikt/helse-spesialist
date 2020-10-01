@@ -39,18 +39,22 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer warnings`() {
-        godkjenningsbehov(HENDELSE_ID)
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val testwarnings= listOf("Warning A", "Warning B")
-        vedtakDao.leggTilWarnings(HENDELSE_ID, testwarnings)
-        assertWarnings(HENDELSE_ID, testwarnings)
+        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
+        assertWarnings(VEDTAKSPERIODE, testwarnings)
     }
 
     @Test
     fun `lagrer vedtaksperiodetype hvis den er satt`() {
-        godkjenningsbehov(HENDELSE_ID)
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val vedtaksperiodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
-        vedtakDao.leggTilVedtaksperiodetype(HENDELSE_ID, vedtaksperiodetype)
-        assertVedtaksperiodetype(HENDELSE_ID, vedtaksperiodetype)
+        vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype)
+        assertVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype)
     }
 
     @Test
@@ -73,8 +77,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertNull(finnKobling(HENDELSE_ID))
     }
 
-    private fun assertVedtaksperiodetype(hendelseId: UUID, type: Saksbehandleroppgavetype) {
-        assertEquals(type, vedtaksperiodetype(hendelseId))
+    private fun assertVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype) {
+        assertEquals(type, vedtaksperiodetype(vedtaksperiodeId))
     }
 
     @Test
@@ -88,21 +92,21 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, vedtak().size)
     }
 
-    private fun assertWarnings(hendelseId: UUID, warnings: List<String>) {
-        assertEquals(warnings, finnWarnings(hendelseId))
+    private fun assertWarnings(vedtaksperiodeId: UUID, warnings: List<String>) {
+        assertEquals(warnings, finnWarnings(vedtaksperiodeId))
     }
 
-    private fun vedtaksperiodetype(hendelseId: UUID): Saksbehandleroppgavetype? {
+    private fun vedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? {
         return using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT type FROM saksbehandleroppgavetype WHERE hendelse_id = ?", hendelseId).map { row ->
+            it.run(queryOf("SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)", vedtaksperiodeId).map { row ->
                 Saksbehandleroppgavetype.valueOf(row.string("type"))
             }.asSingle)
         }
     }
 
-    private fun finnWarnings(hendelseId: UUID) = using(sessionOf(dataSource)) {
+    private fun finnWarnings(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) {
         it.run(
-            queryOf("SELECT melding FROM warning WHERE hendelse_id = ?", hendelseId).map { row ->
+            queryOf("SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)", vedtaksperiodeId).map { row ->
                 row.string("melding")
             }.asList
         )

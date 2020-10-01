@@ -63,15 +63,15 @@ internal class VedtakDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun leggTilWarnings(hendelseId: UUID, meldinger: List<String>) = using(sessionOf(dataSource)) { session ->
-        meldinger.forEach { melding -> session.insertWarning(melding, hendelseId) }
+    internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<String>) = using(sessionOf(dataSource)) { session ->
+        meldinger.forEach { melding -> session.insertWarning(melding, vedtaksperiodeId) }
     }
 
-    private fun Session.insertWarning(melding: String, hendelseId: UUID) = this.run(
+    private fun Session.insertWarning(melding: String, vedtaksperiodeId: UUID) = this.run(
         queryOf(
-            "INSERT INTO warning (melding, hendelse_id) VALUES (?, ?)",
+            "INSERT INTO warning (melding, vedtak_ref) VALUES (?, (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?))",
             melding,
-            hendelseId
+            vedtaksperiodeId
         ).asUpdate
     )
 
@@ -86,9 +86,15 @@ internal class VedtakDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun leggTilVedtaksperiodetype(hendelseId: UUID, type: Saksbehandleroppgavetype) =
+    internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype) =
         using(sessionOf(dataSource)) {
-            it.insertSaksbehandleroppgavetype(type, hendelseId)
+            it.run(
+                queryOf(
+                    "INSERT INTO saksbehandleroppgavetype (type, vedtak_ref) VALUES (?, (SELECT id FROM vedtak WHERE vedtaksperiode_id = ? LIMIT 1))",
+                    type.name,
+                    vedtaksperiodeId
+                ).asUpdate
+            )
         }
 
     internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { it.findVedtakByVedtaksperiodeId(vedtaksperiodeId) }
@@ -161,13 +167,4 @@ internal class VedtakDao(private val dataSource: DataSource) {
     )
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
-
-    private fun Session.insertSaksbehandleroppgavetype(type: Saksbehandleroppgavetype, hendelseId: UUID) =
-        this.run(
-            queryOf(
-                "INSERT INTO saksbehandleroppgavetype (type, hendelse_id) VALUES (?, ?)",
-                type.name,
-                hendelseId
-            ).asUpdate
-        )
 }

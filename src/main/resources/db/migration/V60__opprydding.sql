@@ -1,5 +1,20 @@
-ALTER TABLE warning DROP CONSTRAINT warning_spleisbehov_ref_fkey;
-ALTER TABLE warning ADD CONSTRAINT warning_hendelse_ref_fkey FOREIGN KEY(hendelse_id) REFERENCES hendelse(id) ON DELETE CASCADE;
+ALTER TABLE warning ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
+UPDATE warning SET vedtak_ref = (SELECT vedtak_ref FROM oppgave WHERE oppgave.hendelse_id = warning.hendelse_id LIMIT 1);
+ALTER TABLE warning DROP COLUMN hendelse_id;
+ALTER TABLE warning ALTER COLUMN vedtak_ref SET NOT NULL;
+
+ALTER TABLE saksbehandleroppgavetype ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
+UPDATE saksbehandleroppgavetype SET vedtak_ref = (SELECT vedtak_ref FROM oppgave WHERE oppgave.hendelse_id = saksbehandleroppgavetype.hendelse_id LIMIT 1);
+ALTER TABLE saksbehandleroppgavetype DROP COLUMN hendelse_id;
+ALTER TABLE saksbehandleroppgavetype ALTER COLUMN vedtak_ref SET NOT NULL;
+
+ALTER TABLE command_context DROP CONSTRAINT command_context_spleisbehov_id_fkey;
+ALTER TABLE command_context ADD CONSTRAINT command_context_hendelse_id_fkey FOREIGN KEY(hendelse_id) REFERENCES hendelse(id) ON DELETE CASCADE;
+
+ALTER TABLE vedtaksperiode_hendelse DROP CONSTRAINT vedtaksperiode_hendelse_hendelse_ref_fkey;
+ALTER TABLE vedtaksperiode_hendelse ADD CONSTRAINT vedtaksperiode_hendelse_hendelse_ref_fkey FOREIGN KEY(hendelse_ref) REFERENCES hendelse(id) ON DELETE CASCADE;
+
+ALTER TABLE oppgave DROP COLUMN hendelse_id;
 
 DELETE FROM hendelse WHERE fodselsnummer IS NULL OR type = 'Godkjenningsbehov';
 ALTER TABLE hendelse DROP COLUMN original, DROP COLUMN spleis_referanse, ALTER COLUMN fodselsnummer SET NOT NULL;

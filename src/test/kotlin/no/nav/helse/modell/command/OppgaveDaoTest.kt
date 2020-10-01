@@ -33,7 +33,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
-            HENDELSE_ID,
             LocalDate.now(),
             OPPGAVETYPE,
             OPPGAVESTATUS,
@@ -87,7 +86,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
-            HENDELSE_ID,
             LocalDate.now(),
             OPPGAVETYPE,
             nyStatus,
@@ -137,7 +135,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
                 Oppgave(
-                    hendelseId = UUID.fromString(it.string("hendelse_id")),
                     oppdatert = it.localDate("oppdatert"),
                     type = it.string("type"),
                     status = enumValueOf(it.string("status")),
@@ -150,7 +147,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         }
 
     private class Oppgave(
-        private val hendelseId: UUID,
         private val oppdatert: LocalDate,
         private val type: String,
         private val status: Oppgavestatus,
@@ -160,7 +156,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         private val commandContextId: UUID?
     ) {
         fun assertEquals(
-            forventetHendelseId: UUID,
             forventetOppdatert: LocalDate,
             forventetType: String,
             forventetStatus: Oppgavestatus,
@@ -169,7 +164,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
             forventetVedtakRef: Long?,
             forventetCommandContextId: UUID
         ) {
-            assertEquals(forventetHendelseId, hendelseId)
             assertEquals(forventetOppdatert, oppdatert)
             assertEquals(forventetType, type)
             assertEquals(forventetStatus, status)

@@ -69,7 +69,9 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     })
 
     internal fun finnHendelseId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT hendelse_id FROM oppgave WHERE id = ?", oppgaveId)
+        @Language("PostgreSQL")
+        val statement = "SELECT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = ?)"
+        session.run(queryOf(statement, oppgaveId)
             .map { row -> UUID.fromString(row.string("hendelse_id")) }.asSingle)
     })
 
@@ -128,10 +130,9 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         this.run(
             queryOf(
                 """
-                INSERT INTO oppgave(hendelse_id, oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
-                VALUES (?, now(), ?, CAST(? as oppgavestatus), ?, ?, ?, ?);
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
+                VALUES (now(), ?, CAST(? as oppgavestatus), ?, ?, ?, ?);
             """,
-                eventId,
                 oppgavetype,
                 oppgavestatus.name,
                 ferdigstiltAv,
@@ -158,21 +159,24 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
         @Language("PostgreSQL")
         val query = """
-SELECT *,
-       (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE hendelse_id = o.hendelse_id),
-       sot.type AS saksbehandleroppgavetype,
-       o.id AS oppgave_id
-FROM oppgave o
-         INNER JOIN vedtak v ON o.vedtak_ref = v.id
-         INNER JOIN person p ON v.person_ref = p.id
-         INNER JOIN person_info pi ON p.info_ref = pi.id
-         LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
-         LEFT JOIN saksbehandleroppgavetype sot ON o.hendelse_id = sot.hendelse_id
-         LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
-         LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-ORDER BY CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END, CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END, opprettet DESC
-LIMIT 500
+        SELECT *,
+            (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE vedtak_ref = o.vedtak_ref),
+            sot.type AS saksbehandleroppgavetype,
+            o.id AS oppgave_id
+        FROM oppgave o
+        INNER JOIN vedtak v ON o.vedtak_ref = v.id
+        INNER JOIN person p ON v.person_ref = p.id
+        INNER JOIN person_info pi ON p.info_ref = pi.id
+        LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
+        LEFT JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
+        LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
+        LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+        WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+        ORDER BY
+            CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
+            CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
+            opprettet DESC
+        LIMIT 500;
 """
         return this.run(
             queryOf(query)

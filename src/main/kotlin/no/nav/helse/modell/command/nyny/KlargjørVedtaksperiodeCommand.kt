@@ -25,8 +25,6 @@ internal class KlargjørVedtaksperiodeCommand(
     vedtakDao: VedtakDao
 ) : MacroCommand() {
     override val commands: List<Command> = listOf(
-        PersisterAdvarslerCommand(hendelseId, warnings, vedtakDao),
-        PersisterVedtaksperiodetypeCommand(hendelseId, vedtaksperiodetype, vedtakDao),
         OpprettVedtakCommand(
             speilSnapshotRestClient,
             fødselsnummer,
@@ -39,6 +37,8 @@ internal class KlargjørVedtaksperiodeCommand(
             snapshotDao,
             vedtakDao
         ),
+        PersisterAdvarslerCommand(vedtaksperiodeId, warnings, vedtakDao),
+        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, vedtakDao),
         OpprettKoblingTilHendelseCommand(hendelseId, vedtaksperiodeId, vedtakDao)
     )
 }
