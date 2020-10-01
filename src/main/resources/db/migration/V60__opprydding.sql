@@ -1,10 +1,10 @@
 ALTER TABLE warning ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
-UPDATE warning SET vedtak_ref = (SELECT vedtak_ref FROM oppgave WHERE oppgave.hendelse_id = warning.hendelse_id LIMIT 1);
+UPDATE warning w SET vedtak_ref = o.vedtak_ref FROM oppgave o WHERE w.hendelse_id = o.hendelse_id;
 ALTER TABLE warning DROP COLUMN hendelse_id;
 ALTER TABLE warning ALTER COLUMN vedtak_ref SET NOT NULL;
 
 ALTER TABLE saksbehandleroppgavetype ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
-UPDATE saksbehandleroppgavetype SET vedtak_ref = (SELECT vedtak_ref FROM oppgave WHERE oppgave.hendelse_id = saksbehandleroppgavetype.hendelse_id LIMIT 1);
+UPDATE saksbehandleroppgavetype s SET vedtak_ref = o.vedtak_ref FROM oppgave o WHERE s.hendelse_id = o.hendelse_id;
 ALTER TABLE saksbehandleroppgavetype DROP COLUMN hendelse_id;
 ALTER TABLE saksbehandleroppgavetype ALTER COLUMN vedtak_ref SET NOT NULL;
 
