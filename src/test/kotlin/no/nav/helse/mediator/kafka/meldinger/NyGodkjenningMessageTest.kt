@@ -62,6 +62,7 @@ internal class NyGodkjenningMessageTest {
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
+        digitalKontaktinformasjonDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)
     )

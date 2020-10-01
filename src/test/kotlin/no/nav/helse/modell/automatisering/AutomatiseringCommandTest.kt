@@ -16,13 +16,14 @@ import java.util.*
 internal class AutomatiseringCommandTest {
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
+        private const val fødselsnummer = "12345678910"
         private val hendelseId = UUID.randomUUID()
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     private val command =
-        AutomatiseringCommand(vedtaksperiodeId, hendelseId, automatisering, miljøstyrtFeatureToggle, "{}")
+        AutomatiseringCommand(fødselsnummer, vedtaksperiodeId, hendelseId, automatisering, miljøstyrtFeatureToggle, "{}")
     private var captureBleAutomatisert = CapturingSlot<Boolean>()
     private var captureVedtaksperiodeId = CapturingSlot<UUID>()
     private var captureHendelseId = CapturingSlot<UUID>()
@@ -52,7 +53,7 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `feature toggle på og ikke automatiserbar gir ikke-automatiserbar behandling`() {
         every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
-        every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(false)
+        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = false)
@@ -62,7 +63,7 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `feature toggle av og ikke automatiserbar gir ikke-automatiserbar behandling`() {
         every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
-        every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(false)
+        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = false)
@@ -72,7 +73,7 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `feature toggle på og automatiserbar gir automatiserbar behandling`() {
         every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
-        every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(true)
+        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(true)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = true)

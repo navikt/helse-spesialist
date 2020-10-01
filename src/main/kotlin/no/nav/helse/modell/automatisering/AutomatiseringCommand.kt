@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class AutomatiseringCommand(
+    private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
@@ -24,7 +25,7 @@ internal class AutomatiseringCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val kanAutomatiseres = miljøstyrtFeatureToggle.risikovurdering() && miljøstyrtFeatureToggle.automatisering()
-            && automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId)
+            && automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId)
 
         if (kanAutomatiseres) {
             val behov = JsonMessage(godkjenningsbehovJson, MessageProblems(godkjenningsbehovJson))

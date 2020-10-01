@@ -14,6 +14,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
@@ -50,6 +51,7 @@ internal class HendelseMediator(
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
+    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource),
     private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : IHendelseMediator {
@@ -58,7 +60,7 @@ internal class HendelseMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val automatisering = Automatisering(vedtakDao, risikovurderingDao, AutomatiseringDao(dataSource))
+    private val automatisering = Automatisering(vedtakDao, risikovurderingDao, AutomatiseringDao(dataSource), digitalKontaktinformasjonDao)
     private val hendelsefabrikk = Hendelsefabrikk(
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
@@ -70,6 +72,7 @@ internal class HendelseMediator(
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
         risikovurderingDao = risikovurderingDao,
+        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
@@ -92,6 +95,8 @@ internal class HendelseMediator(
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
+            //TODO: Driver å legger til sjekk av DKIF
+//            DigitalKontaktinformasjonLøsning.DigitalKontaktinformasjonRiver(it, this)
             RisikovurderingLøsning.V2River(it, this)
         }
     }

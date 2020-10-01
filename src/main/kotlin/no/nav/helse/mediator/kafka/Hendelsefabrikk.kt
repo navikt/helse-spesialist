@@ -11,6 +11,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -35,6 +36,7 @@ internal class Hendelsefabrikk(
     private val saksbehandlerDao: SaksbehandlerDao,
     private val overstyringDao: OverstyringDao,
     private val risikovurderingDao: RisikovurderingDao,
+    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val oppgaveMediator: OppgaveMediator,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
@@ -72,6 +74,7 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             risikovurderingDao = risikovurderingDao,
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             reservasjonDao = reservasjonDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,

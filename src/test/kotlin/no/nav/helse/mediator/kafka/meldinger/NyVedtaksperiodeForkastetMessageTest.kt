@@ -51,6 +51,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
             oppgaveMediator = mockk(),
+            digitalKontaktinformasjonDao = mockk(),
             miljøstyrtFeatureToggle = mockk(relaxed = true),
             automatisering = mockk(relaxed = true)
         )

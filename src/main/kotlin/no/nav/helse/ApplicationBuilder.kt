@@ -20,6 +20,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -90,6 +91,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
+    private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
     private val vedtaksperiodeMediator = VedtaksperiodeMediator(vedtakDao, personDao, arbeidsgiverDao, snapshotDao, overstyringDao, oppgaveDao, tildelingDao)
@@ -155,6 +157,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             saksbehandlerDao = saksbehandlerDao,
             vedtakDao = vedtakDao,
             tildelingDao = tildelingDao,
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             risikovurderingDao = risikovurderingDao
