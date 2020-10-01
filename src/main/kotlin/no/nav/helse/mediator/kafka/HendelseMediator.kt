@@ -129,29 +129,6 @@ internal class HendelseMediator(
         rapidsConnection.publish(godkjenningMessage.toJson())
     }
 
-    internal fun håndter(annulleringDto: AnnulleringDto, epostadresse: String) {
-        val annulleringMessage = annulleringDto.run {
-            JsonMessage.newMessage(
-                standardfelter("kanseller_utbetaling", fødselsnummer).apply {
-                    putAll(mapOf(
-                        "organisasjonsnummer" to organisasjonsnummer,
-                        "aktørId" to aktørId,
-                        "fagsystemId" to fagsystemId,
-                        "saksbehandler" to saksbehandlerIdent,
-                        "saksbehandlerEpost" to epostadresse
-                    ))
-                }
-            )
-        }
-
-        rapidsConnection.publish(annulleringMessage.toJson().also {
-            sikkerLogg.info(
-                "sender annullering for {}\n\t$it",
-                keyValue("fagsystemId", annulleringDto.fagsystemId)
-            )
-        })
-    }
-
     override fun vedtaksperiodeEndret(
         message: JsonMessage,
         id: UUID,
@@ -175,7 +152,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun godkjenning(
+    fun godkjenning(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -204,7 +181,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun overstyring(
+    fun overstyring(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -213,7 +190,7 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.overstyring(message.toJson()), context)
     }
 
-    override fun tilbakerulling(
+    fun tilbakerulling(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -295,15 +272,6 @@ internal class HendelseMediator(
     private fun errorHandler(err: Exception, message: String) {
         log.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
         sikkerLogg.error("alvorlig feil: ${err.message}\n\t$message", err)
-    }
-
-    private fun standardfelter(hendelsetype: String, fødselsnummer: String): MutableMap<String, Any> {
-        return mutableMapOf(
-            "@event_name" to hendelsetype,
-            "@opprettet" to LocalDateTime.now(),
-            "@id" to UUID.randomUUID(),
-            "fødselsnummer" to fødselsnummer
-        )
     }
 
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {

@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.OppgaveDao
@@ -36,7 +37,7 @@ internal class NyTilbakerullingMessage(
 
     internal class TilbakerullingRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : River.PacketListener {
         private val log = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

@@ -82,14 +82,6 @@ internal fun Route.vedtaksperiodeApi(
         hendelseMediator.håndter(godkjenning, epostadresse, oid)
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
-    post("/api/annullering") {
-        val annullering = call.receive<AnnulleringDto>()
-        val epostadresse = requireNotNull(call.principal<JWTPrincipal>())
-            .payload.getClaim("preferred_username").asString()
-
-        hendelseMediator.håndter(annullering, epostadresse)
-        call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
-    }
 
     post("/api/overstyr/dager") {
         val overstyring = call.receive<Overstyring>()
@@ -152,16 +144,6 @@ data class GodkjenningDTO(
         if (!godkjent) requireNotNull(årsak)
     }
 }
-
-@JsonIgnoreProperties
-data class AnnulleringDto(
-    val aktørId: String,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
-    val fagsystemId: String,
-    val saksbehandlerIdent: String,
-    val vedtaksperiodeId: String
-)
 
 @JsonIgnoreProperties
 class Overstyring(

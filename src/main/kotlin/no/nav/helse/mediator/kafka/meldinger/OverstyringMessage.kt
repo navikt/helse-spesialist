@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -52,7 +53,7 @@ internal class OverstyringMessage(
 
     internal class OverstyringRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : River.PacketListener {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

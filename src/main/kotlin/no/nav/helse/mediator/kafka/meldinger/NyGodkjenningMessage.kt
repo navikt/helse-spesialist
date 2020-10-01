@@ -3,6 +3,7 @@ package no.nav.helse.mediator.kafka.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -69,7 +70,7 @@ internal class NyGodkjenningMessage(
 
     internal class GodkjenningMessageRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : River.PacketListener {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

@@ -2,6 +2,7 @@ package no.nav.helse.mediator.kafka.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ internal class GodkjenningMessageRiverTest {
         private val TOM = LocalDate.of(2020, 1, 31)
     }
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
-    private val mediator = mockk<IHendelseMediator>(relaxed = true)
+    private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         NyGodkjenningMessage.GodkjenningMessageRiver(this, mediator)
     }

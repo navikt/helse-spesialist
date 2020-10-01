@@ -13,6 +13,7 @@ import io.ktor.jackson.*
 import io.ktor.request.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.annullering.AnnulleringMediator
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.HendelseMediator
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
@@ -75,6 +76,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
+    private lateinit var annulleringMediator: AnnulleringMediator
     private lateinit var hendelseMediator: HendelseMediator
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
@@ -123,6 +125,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("saksbehandler-direkte") {
                     tildelingApi(tildelingMediator)
                     direkteOppgaveApi(oppgaveMediator)
+                    annulleringApi(annulleringMediator)
                 }
             }
             adminApi(hendelseMediator)
@@ -140,6 +143,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
+        annulleringMediator = AnnulleringMediator(rapidsConnection)
     }
 
     fun start() = rapidsConnection.start()

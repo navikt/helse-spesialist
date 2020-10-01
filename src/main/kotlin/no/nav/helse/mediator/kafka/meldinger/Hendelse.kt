@@ -1,10 +1,9 @@
 package no.nav.helse.mediator.kafka.meldinger
 
 import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal interface Hendelse : Command {
@@ -17,22 +16,28 @@ internal interface Hendelse : Command {
 }
 
 internal interface IHendelseMediator {
-    fun vedtaksperiodeEndret(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext)
-    fun vedtaksperiodeForkastet(message: JsonMessage, id: UUID, vedtaksperiodeId: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext)
-    fun løsning(hendelseId: UUID, contextId: UUID, løsning: Any, context: RapidsConnection.MessageContext)
-    fun godkjenning(
+    fun vedtaksperiodeEndret(
         message: JsonMessage,
         id: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-        periodeFom: LocalDate,
-        periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        warnings: List<String>,
-        periodetype: Saksbehandleroppgavetype?,
+        fødselsnummer: String,
         context: RapidsConnection.MessageContext
     )
-    fun overstyring(message: JsonMessage, id: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext)
-    fun tilbakerulling(message: JsonMessage, id: UUID, fødselsnummer: String, vedtaksperiodeIder: List<UUID>, context: RapidsConnection.MessageContext)
+
+    fun vedtaksperiodeForkastet(
+        message: JsonMessage,
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        context: RapidsConnection.MessageContext
+    )
+
+    fun løsning(hendelseId: UUID, contextId: UUID, løsning: Any, context: RapidsConnection.MessageContext)
+
+    fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf(
+        "@event_name" to hendelsetype,
+        "@opprettet" to LocalDateTime.now(),
+        "@id" to UUID.randomUUID(),
+        "fødselsnummer" to fødselsnummer
+    )
 }
