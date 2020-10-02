@@ -3,11 +3,13 @@ INSERT INTO vedtaksperiode_hendelse (vedtaksperiode_ref, hendelse_ref) SELECT v.
 ALTER TABLE warning ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
 UPDATE warning w SET vedtak_ref = vh.vedtaksperiode_ref FROM vedtaksperiode_hendelse vh WHERE w.hendelse_id = vh.hendelse_ref;
 ALTER TABLE warning DROP COLUMN hendelse_id;
+DELETE FROM warning WHERE vedtak_ref IS NULL;
 ALTER TABLE warning ALTER COLUMN vedtak_ref SET NOT NULL;
 
 ALTER TABLE saksbehandleroppgavetype ADD COLUMN vedtak_ref BIGINT REFERENCES vedtak(id) ON DELETE CASCADE;
 UPDATE saksbehandleroppgavetype s SET vedtak_ref = vh.vedtaksperiode_ref FROM vedtaksperiode_hendelse vh WHERE s.hendelse_id = vh.hendelse_ref;
 ALTER TABLE saksbehandleroppgavetype DROP COLUMN hendelse_id;
+DELETE FROM saksbehandleroppgavetype WHERE vedtak_ref IS NULL;
 ALTER TABLE saksbehandleroppgavetype ALTER COLUMN vedtak_ref SET NOT NULL;
 
 ALTER TABLE command_context DROP CONSTRAINT command_context_spleisbehov_id_fkey;
