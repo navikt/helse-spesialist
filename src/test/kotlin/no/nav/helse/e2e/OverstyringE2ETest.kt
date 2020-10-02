@@ -53,6 +53,10 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = hendelseId,
+            erDigital = true
+        )
         assertSaksbehandlerOppgaveOpprettet(hendelseId)
         sendOverstyrteDager(ORGNR, SAKSBEHANDLER_EPOST, listOf(
             OverstyringDagDto(
@@ -65,11 +69,15 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
         assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
 
-        sendGodkjenningsbehov(
+        val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = hendelseId2,
+            erDigital = true
         )
         val oppgave = oppgaveDao.finnOppgaver().find { it.fødselsnummer == FØDSELSNUMMER }
         assertNotNull(oppgave)
@@ -98,6 +106,10 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = hendelseId,
+            erDigital = true
+        )
         sendOverstyrteDager(
             ORGNR, SAKSBEHANDLER_EPOST, listOf(
                 OverstyringDagDto(
@@ -108,11 +120,15 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
 
-        sendGodkjenningsbehov(
+        val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = hendelseId2,
+            erDigital = true
         )
 
         // TODO: bør ikke koble seg på daoer i E2E

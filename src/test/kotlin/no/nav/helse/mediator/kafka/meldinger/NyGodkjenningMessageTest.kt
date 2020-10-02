@@ -62,7 +62,7 @@ internal class NyGodkjenningMessageTest {
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
-        digitalKontaktinformasjonDao = mockk(),
+        digitalKontaktinformasjonDao = mockk(relaxed = true),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)
     )
@@ -103,7 +103,11 @@ internal class NyGodkjenningMessageTest {
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
 
         assertFalse(godkjenningMessage.execute(context))
-        assertFalse(context.harBehov())
+
+        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+
+        assertFalse(godkjenningMessage.resume(context))
+        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.oppgave(any(), any()) }
     }
 
@@ -119,7 +123,11 @@ internal class NyGodkjenningMessageTest {
         context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
 
         assertFalse(godkjenningMessage.execute(context))
-        assertFalse(context.harBehov())
+
+        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+
+        assertFalse(godkjenningMessage.resume(context))
+        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.oppgave(any(), reservasjon) }
     }
 
@@ -146,8 +154,12 @@ internal class NyGodkjenningMessageTest {
             )
         )
 
-        assertTrue(godkjenningMessage.execute(context))
-        assertFalse(context.harBehov())
+        assertFalse(godkjenningMessage.execute(context))
+
+        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+
+        assertTrue(godkjenningMessage.resume(context))
+        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
 
         context.meldinger().also { meldinger ->
             assertEquals(1, meldinger.size)
