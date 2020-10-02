@@ -86,6 +86,6 @@ internal class AutomatiseringTest {
         samletScore = 10.0,
         faresignaler = emptyList(),
         arbeidsuførhetvurdering = arbeidsuførhetsvurdering,
-        ufullstendig = true
+        ufullstendig = false
     )
 }

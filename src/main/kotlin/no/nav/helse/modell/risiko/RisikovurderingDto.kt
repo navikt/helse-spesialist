@@ -9,7 +9,7 @@ class Risikovurdering private constructor(
     samletScore: Double,
     faresignaler: List<String>,
     private val arbeidsuførhetvurdering: List<String>,
-    ufullstendig: Boolean
+    private val ufullstendig: Boolean
 ) {
     companion object {
         fun restore(
@@ -24,7 +24,7 @@ class Risikovurdering private constructor(
         )
     }
 
-    fun kanBehandlesAutomatisk() = arbeidsuførhetvurdering.isEmpty()
+    fun kanBehandlesAutomatisk() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
 }
 
 class RisikovurderingDto(

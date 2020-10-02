@@ -12,9 +12,10 @@ class AutomatiseringDao(val dataSource: DataSource) {
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert) VALUES (?, ?, ?);",
+                    "INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert) VALUES (?, ?, ?) ON CONFLICT (vedtaksperiode_ref, hendelse_ref) DO UPDATE SET automatisert = ?;",
                     finnVedtaksperiode(vedtaksperiodeId),
                     hendelseId,
+                    automatisert,
                     automatisert
                 ).asUpdate
             )

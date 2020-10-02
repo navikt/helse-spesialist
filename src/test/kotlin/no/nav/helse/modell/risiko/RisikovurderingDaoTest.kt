@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
 
@@ -85,5 +86,10 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(vurdering.faresignaler, listOf("Signal1", "Signal2"))
         assertEquals(vurdering.arbeidsuførhetvurdering, listOf("Vurdering1", "Vurdering2"))
         assertEquals(vurdering.ufullstendig, true)
+    }
+
+    @Test
+    fun `leser manglende risikovurdering`() {
+        assertNull(risikovurderingDao.hentRisikovurdering(UUID.randomUUID()))
     }
 }
