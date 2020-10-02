@@ -19,6 +19,7 @@ internal class OpprettVedtakCommandTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val ORGNR = "123456789"
+        private const val VEDTAK_REF = 1L
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val FOM = LocalDate.of(2020, 1, 1)
         private val TOM = LocalDate.of(2020, 1, 31)
@@ -41,8 +42,17 @@ internal class OpprettVedtakCommandTest {
     @Test
     fun `opprette vedtak`() {
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
+        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
-        verify(exactly = 1) { vedtakDao.upsertVedtak(VEDTAKSPERIODE_ID, FOM, TOM, personRef, arbeidsgiverRef, snapshotRef) }
+        verify(exactly = 1) { vedtakDao.opprett(VEDTAKSPERIODE_ID, FOM, TOM, personRef, arbeidsgiverRef, snapshotRef) }
+    }
+
+    @Test
+    fun `oppdatere vedtak`() {
+        val (_, _, snapshotRef) = personFinnes()
+        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { vedtakDao.oppdater(VEDTAK_REF, FOM, TOM, snapshotRef) }
     }
 
     private fun personFinnes(): Triple<Int, Int, Int> {

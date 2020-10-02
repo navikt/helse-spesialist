@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,7 +19,7 @@ internal class OppdaterSnapshotCommandTest {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private const val FNR = "fnr"
         private const val SNAPSHOT = "json"
-        private val vedtak = VedtakDto(1, 2)
+        private const val VEDTAK_REF = 1L
     }
 
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
@@ -37,7 +36,7 @@ internal class OppdaterSnapshotCommandTest {
 
     @Test
     fun `ignorerer vedtaksperioder som ikke finnes`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE) } returns null
+        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns null
         assertTrue(command.execute(context))
         verify(exactly = 0) { restClient.hentSpeilSpapshot(FNR) }
         verify(exactly = 0) { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, any()) }
@@ -72,7 +71,7 @@ internal class OppdaterSnapshotCommandTest {
     }
 
     private fun test(ok: Boolean, block: () -> Unit) {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE) } returns vedtak
+        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns VEDTAK_REF
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns if (ok) 1 else 0
         block()

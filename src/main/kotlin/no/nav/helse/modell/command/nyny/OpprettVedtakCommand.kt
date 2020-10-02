@@ -26,13 +26,31 @@ internal class OpprettVedtakCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
+        val vedtakRef = vedtakDao.finnVedtakId(vedtaksperiodeId) ?: return opprett()
+        return oppdater(vedtakRef)
+    }
+
+    private fun oppdater(vedtakRef: Long): Boolean {
+        log.info("Henter oppdatert snapshot for vedtaksperiode: $vedtaksperiodeId")
+        val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer))
+        log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
+        vedtakDao.oppdater(
+            vedtakRef = vedtakRef,
+            fom = periodeFom,
+            tom = periodeTom,
+            speilSnapshotRef = snapshotId
+        )
+        return true
+    }
+
+    private fun opprett(): Boolean {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val speilSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
         val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer))
         log.info("Oppretter vedtak for vedtaksperiode: $vedtaksperiodeId for person=$personRef, arbeidsgiver=$arbeidsgiverRef")
-        vedtakDao.upsertVedtak(
+        vedtakDao.opprett(
             vedtaksperiodeId = vedtaksperiodeId,
             fom = periodeFom,
             tom = periodeTom,

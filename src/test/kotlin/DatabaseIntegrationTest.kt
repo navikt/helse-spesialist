@@ -24,6 +24,7 @@ import no.nav.helse.tildeling.TildelingDao
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.util.*
 
@@ -175,8 +176,10 @@ internal abstract class DatabaseIntegrationTest {
         tom: LocalDate = TOM
     ): Long {
         opprettSnapshot()
-        return vedtakDao.upsertVedtak(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
-            .also { vedtakId = it }
+        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
+            .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
+            ?.also { vedtakId = it }
+            ?: fail { "Kunne ikke opprette vedtak" }
     }
 
     protected fun opprettOppgave(

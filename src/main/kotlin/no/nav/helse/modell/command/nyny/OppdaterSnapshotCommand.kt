@@ -18,7 +18,7 @@ internal class OppdaterSnapshotCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (null == vedtakDao.findVedtak(vedtaksperiodeId)) return ignorer()
+        if (null == vedtakDao.finnVedtakId(vedtaksperiodeId)) return ignorer()
         return oppdaterSnapshot()
     }
 

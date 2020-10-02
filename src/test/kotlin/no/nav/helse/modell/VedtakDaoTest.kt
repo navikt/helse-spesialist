@@ -7,6 +7,8 @@ import kotliquery.using
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.postgresql.util.PSQLException
 import java.time.LocalDate
 import java.util.*
 
@@ -17,10 +19,22 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        vedtakDao.upsertVedtak(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
         assertNotNull(vedtakDao.findVedtak(VEDTAKSPERIODE))
         assertEquals(1, vedtak().size)
         vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+    }
+
+    @Test
+    fun `opprette duplikat vedtak`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettSnapshot()
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        val nyFom = LocalDate.now().minusMonths(1)
+        val nyTom = LocalDate.now()
+        val nySnapshotRef = snapshotDao.insertSpeilSnapshot("{}")
+        assertThrows<PSQLException> { vedtakDao.opprett(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef) }
     }
 
     @Test
@@ -28,11 +42,11 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        vedtakDao.upsertVedtak(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        opprettVedtaksperiode()
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
         val nySnapshotRef = snapshotDao.insertSpeilSnapshot("{}")
-        vedtakDao.upsertVedtak(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef)
+        vedtakDao.oppdater(vedtakId, nyFom, nyTom, nySnapshotRef)
         assertEquals(1, vedtak().size)
         vedtak().first().assertEquals(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef)
     }
