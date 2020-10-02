@@ -24,9 +24,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
         val hendelseId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
-        assertHendelse(hendelseId)
-        assertTilstand(hendelseId, "NY", "FERDIG")
-        verify(exactly = 0) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        assertIkkeHendelse(hendelseId)
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 
@@ -89,8 +87,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtaksperiode forkastet`() {
         val hendelseId = sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
-        assertHendelse(hendelseId)
-        assertTilstand(hendelseId, "NY", "FERDIG")
+        assertIkkeHendelse(hendelseId)
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 

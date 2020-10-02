@@ -173,6 +173,12 @@ internal abstract class AbstractE2ETest {
         })
     }
 
+    protected fun assertIkkeHendelse(hendelseId: UUID) {
+        assertEquals(0, using(sessionOf(dataSource)) {
+            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
+        })
+    }
+
     protected fun assertVedtak(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }

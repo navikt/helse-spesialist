@@ -139,7 +139,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
+        utfør(vedtaksperiodeId, hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
     }
 
     override fun vedtaksperiodeForkastet(
@@ -150,6 +150,7 @@ internal class HendelseMediator(
         context: RapidsConnection.MessageContext
     ) {
         utfør(
+            vedtaksperiodeId,
             hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
             context
         )
@@ -190,7 +191,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(hendelsefabrikk.overstyring(message.toJson()), context)
+        utfør(fødselsnummer, hendelsefabrikk.overstyring(message.toJson()), context)
     }
 
     override fun tilbakerulling(
@@ -317,6 +318,16 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse)
     }
 
+    private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
+        if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
+        return utfør(hendelse, messageContext)
+    }
+
+    private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
+        return utfør(hendelse, messageContext)
+    }
+
     private fun utfør(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
         val contextId = UUID.randomUUID()
         log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id}")
@@ -331,17 +342,17 @@ internal class HendelseMediator(
     ) {
         withMDC(mapOf("context_id" to "$contextId", "hendelse_id" to "${hendelse.id}")) {
             try {
-                log.info("utfører kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
+                log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
-                else log.info("kommando er suspendert")
+                else log.info("${hendelse::class.simpleName} er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
                 oppgaveMediator.lagreOppgaver(hendelse, messageContext, contextId)
             } catch (err: Exception) {
-                log.warn("Feil ved kjøring av kommando: contextId={}, message={}", contextId, err.message, err)
+                log.warn("Feil ved kjøring av ${hendelse::class.simpleName}: contextId={}, message={}", contextId, err.message, err)
                 hendelse.undo(context)
                 throw err
             } finally {
-                log.info("utført kommando med context_id=$contextId for hendelse_id=${hendelse.id}")
+                log.info("utført ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
             }
         }
     }

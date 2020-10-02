@@ -19,20 +19,20 @@ internal abstract class MacroCommand : Command {
 
     final override fun execute(context: CommandContext): Boolean {
         require(commands.isNotEmpty())
-        logg.info("Utfører macro command ${this::class.simpleName}")
+        logg.info("Utfører ${this::class.simpleName}")
         context.register(this)
         return run(context, commands)
     }
 
     final override fun resume(context: CommandContext): Boolean {
-        logg.info("Gjenopptar macro command ${this::class.simpleName}")
+        logg.info("Gjenopptar ${this::class.simpleName}")
         context.register(this)
         if (!runCommand(context, commands[currentIndex], Command::resume)) return false
         return run(context, commands.subList(currentIndex, commands.size))
     }
 
     final override fun undo(context: CommandContext) {
-        logg.info("Reverserer utførelse av macro command ${this::class.simpleName}")
+        logg.info("Reverserer utførelse av ${this::class.simpleName}")
         context.register(this)
         historikk.forEach { it.undo(context) }
         context.clear()
@@ -43,7 +43,7 @@ internal abstract class MacroCommand : Command {
     }
 
     private fun runCommand(context: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
-        logg.info("Utfører command ${command::class.simpleName}")
+        logg.info("Utfører ${command::class.simpleName}")
         if (!commandAction(command, context)) return false.also { context.suspendert(currentIndex) }
         currentIndex += 1
         return true
