@@ -37,7 +37,6 @@
     <logger name="tjenestekall" level="DEBUG" additivity="false">
         <appender-ref ref="secureLog" />
     </logger>
-    <logger name="com.zaxxer.hikari.pool.HikariPool" level="DEBUG" />
     <logger name="io.ktor.auth.jwt" level="trace" />
 
     <root level="INFO">
