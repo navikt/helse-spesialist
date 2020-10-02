@@ -109,21 +109,21 @@ internal class VedtakDao(private val dataSource: DataSource) {
             it.run(queryOf(statement, type.name, vedtakRef).asUpdate)
         }
 
-    internal fun finnWarnings(hendelseId: UUID): List<String> = sessionOf(dataSource).use { session ->
+    internal fun finnWarnings(vedtaksperiodeId: UUID): List<String> = sessionOf(dataSource).use { session ->
         session.run(
             queryOf(
-                "SELECT * FROM warning where hendelse_id = ?",
-                hendelseId
+                "SELECT * FROM warning where vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ? LIMIT 1)",
+                vedtaksperiodeId
             ).map { it.string("melding") }.asList
         )
     }
 
-    internal fun finnVedtaksperiodetype(hendelseId: UUID): Saksbehandleroppgavetype? =
+    internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? =
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT type FROM saksbehandleroppgavetype where hendelse_id = ?",
-                    hendelseId
+                    "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ? LIMIT 1)",
+                    vedtaksperiodeId
                 ).map { enumValueOf<Saksbehandleroppgavetype>(it.string("type")) }.asSingle
             )
         }
