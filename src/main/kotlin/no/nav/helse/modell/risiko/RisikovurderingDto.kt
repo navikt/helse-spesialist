@@ -26,7 +26,7 @@ class Risikovurdering private constructor(
     }
 
     fun kanBehandlesAutomatisk() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
-    fun speilVariant() = RisikovurderingForSpeilDto(arbeidsuførhetvurdering, ufullstendig)
+    fun speilDto() = RisikovurderingForSpeilDto(arbeidsuførhetvurdering, ufullstendig)
 }
 
 class RisikovurderingDto(

@@ -94,7 +94,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(vedtakDao, personDao, arbeidsgiverDao, snapshotDao, overstyringDao, oppgaveDao, tildelingDao, risikovurderingDao)
+    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {

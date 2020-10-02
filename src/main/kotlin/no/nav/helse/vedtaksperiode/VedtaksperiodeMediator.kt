@@ -14,16 +14,18 @@ import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.TildelingDao
 import java.util.*
+import javax.sql.DataSource
 
 internal class VedtaksperiodeMediator(
-    private val vedtakDao: VedtakDao,
-    private val personDao: PersonDao,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val snapshotDao: SnapshotDao,
-    private val overstyringDao: OverstyringDao,
-    private val oppgaveDao: OppgaveDao,
-    private val tildelingDao: TildelingDao,
-    private val risikovurderingDao: RisikovurderingDao
+    private val dataSource: DataSource,
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val personDao: PersonDao = PersonDao(dataSource),
+    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
+    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
+    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
+    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource)
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
@@ -91,10 +93,10 @@ internal class VedtaksperiodeMediator(
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
-                        vedtaksperiode.put(
+                        risikovurdering?.let { vedtaksperiode.put(
                             "risikovurdering",
-                            objectMapper.writeValueAsString(risikovurdering?.speilVariant())
-                        )
+                            objectMapper.writeValueAsString(it.speilDto())
+                        )}
                     }
                 }
             }

@@ -33,16 +33,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SNAPSHOTV1 = "{}"
     }
-
-    private val vedtakDao = VedtakDao(dataSource)
-    private val personDao = PersonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
-    private val tildelingDao = TildelingDao(dataSource)
-    private val risikovurderingDao = RisikovurderingDao(dataSource)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(vedtakDao, personDao, arbeidsgiverDao, snapshotDao, overstyringDao, oppgaveDao, tildelingDao, risikovurderingDao)
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {

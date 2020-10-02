@@ -21,6 +21,7 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,6 +70,7 @@ internal abstract class AbstractE2ETest {
         dataSource = dataSource,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
     )
+    protected val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
 
     @BeforeEach
     internal fun resetDatabase() {
@@ -107,31 +109,43 @@ internal abstract class AbstractE2ETest {
         warnings: List<String> = emptyList(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
     ) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagGodkjenningsbehov(id, vedtaksperiodeId, orgnr, periodeFom, periodeTom, warnings, periodetype))
-    }
-
-    protected fun sendPersoninfoløsning(hendelseId: UUID, orgnr: String, vedtaksperiodeId: UUID) = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
-            meldingsfabrikk.lagPersoninfoløsning(
+            meldingsfabrikk.lagGodkjenningsbehov(
                 id,
-                hendelseId,
-                testRapid.inspektør.contextId(),
                 vedtaksperiodeId,
-                orgnr
+                orgnr,
+                periodeFom,
+                periodeTom,
+                warnings,
+                periodetype
             )
         )
     }
 
-    protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagOverstyring(
-                id = id,
-                dager = dager,
-                organisasjonsnummer = orgnr,
-                saksbehandlerEpost = saksbehandlerEpost
+    protected fun sendPersoninfoløsning(hendelseId: UUID, orgnr: String, vedtaksperiodeId: UUID) =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagPersoninfoløsning(
+                    id,
+                    hendelseId,
+                    testRapid.inspektør.contextId(),
+                    vedtaksperiodeId,
+                    orgnr
+                )
             )
-        )
-    }
+        }
+
+    protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>) =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOverstyring(
+                    id = id,
+                    dager = dager,
+                    organisasjonsnummer = orgnr,
+                    saksbehandlerEpost = saksbehandlerEpost
+                )
+            )
+        }
 
     protected fun sendDigitalKontaktinformasjonløsning(
         godkjenningsmeldingId: UUID,
@@ -154,7 +168,7 @@ internal abstract class AbstractE2ETest {
         vedtaksperiodeId: UUID,
         begrunnelser: List<String> = emptyList()
     ) {
-        nyHendelseId().also {id ->
+        nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagRisikovurderingløsning(
                     id,
@@ -167,7 +181,13 @@ internal abstract class AbstractE2ETest {
         }
     }
 
-    protected fun sendSaksbehandlerløsning(oppgaveId: Long, saksbehandlerIdent: String, saksbehandlerEpost: String, saksbehandlerOid: UUID, godkjent: Boolean) = nyHendelseId().also { id ->
+    protected fun sendSaksbehandlerløsning(
+        oppgaveId: Long,
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        saksbehandlerOid: UUID,
+        godkjent: Boolean
+    ) = nyHendelseId().also { id ->
         hendelseMediator.håndter(
             GodkjenningDTO(
                 oppgaveId,
