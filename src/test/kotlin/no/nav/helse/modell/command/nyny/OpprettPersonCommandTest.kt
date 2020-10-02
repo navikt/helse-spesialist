@@ -88,6 +88,12 @@ internal class OpprettPersonCommandTest {
     private fun assertHarBehov() {
         assertTrue(context.harBehov())
         assertEquals(listOf("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger"), context.behov().keys.toList())
+        assertTrue(context.behov()
+            .filter { it.key in listOf("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger") }
+            .all { it.value.containsKey("vedtaksperiodeId") }
+        ) {
+            "Behovappene trenger vedtaksperiodeId til loggformål, men bør på sikt fjernes til fordel for @id i meldingen"
+        }
         verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 

@@ -6,6 +6,7 @@ import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.util.*
 
 internal class OpprettPersonCommand(
     private val fødselsnummer: String,
@@ -42,9 +43,16 @@ internal class OpprettPersonCommand(
     // ha trengt å bedt om det som faktisk manglet
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
         log.info("Trenger mer informasjon for å opprette person")
-        context.behov("HentPersoninfo")
-        context.behov("HentEnhet")
+        // TODO: Behovappene bruker bare "vedtaksperiodeId" til logging
+        val liksomId = UUID.randomUUID()
+        context.behov("HentPersoninfo", mapOf(
+            "vedtaksperiodeId" to liksomId
+        ))
+        context.behov("HentEnhet", mapOf(
+            "vedtaksperiodeId" to liksomId
+        ))
         context.behov("HentInfotrygdutbetalinger", mapOf(
+            "vedtaksperiodeId" to liksomId,
             "historikkFom" to LocalDate.now().minusYears(3),
             "historikkTom" to LocalDate.now()
         ))
