@@ -31,7 +31,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    @Disabled
     fun `fatter automatisk vedtak`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(

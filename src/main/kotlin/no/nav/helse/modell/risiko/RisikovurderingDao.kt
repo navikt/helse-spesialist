@@ -45,7 +45,7 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
     internal fun hentRisikovurdering(vedtaksperiodeId: UUID): RisikovurderingDto? {
         return sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.run(
-                queryOf("SELECT * FROM risikovurdering WHERE vedtaksperiode_id = ?", vedtaksperiodeId).map {
+                queryOf("SELECT * FROM risikovurdering WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1", vedtaksperiodeId).map {
                     val id = it.long("id")
                     RisikovurderingDto(
                         vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
