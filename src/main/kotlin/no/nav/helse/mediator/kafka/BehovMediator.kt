@@ -34,6 +34,7 @@ internal class BehovMediator(
         this["@behov"] = context.behov().keys.toList()
         this["contextId"] = contextId
         this["hendelseId"] = hendelse.id
+        this["spleisBehovId"] = hendelse.id // only for BC because the need apps requires updating to use "hendelseId"
         putAll(context.behov())
     }.let { JsonMessage.newMessage(it).toJson() }
 
