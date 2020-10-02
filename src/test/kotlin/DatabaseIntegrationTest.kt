@@ -15,6 +15,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
+import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
@@ -101,6 +102,7 @@ internal abstract class DatabaseIntegrationTest {
     internal val reservasjonDao = ReservasjonDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
     internal val automatiseringDao = AutomatiseringDao(dataSource)
+    internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
 
     @BeforeEach
     internal fun resetDatabase() {
