@@ -133,6 +133,22 @@ internal abstract class AbstractE2ETest {
         )
     }
 
+    protected fun sendDigitalKontaktinformasjonløsning(
+        godkjenningsmeldingId: UUID,
+        erDigital: Boolean = true
+    ) {
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
+                    id,
+                    godkjenningsmeldingId,
+                    testRapid.inspektør.contextId(),
+                    erDigital
+                )
+            )
+        }
+    }
+
     protected fun sendRisikovurderingløsning(
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,

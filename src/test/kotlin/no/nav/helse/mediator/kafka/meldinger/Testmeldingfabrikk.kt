@@ -248,6 +248,28 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             }
         )
 
+    fun lagDigitalKontaktinformasjonløsning(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        erDigital: Boolean = true
+    ): String =
+        nyHendelse(
+            id,
+            "behov", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("DigitalKontaktinformasjon"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "@løsning" to mapOf(
+                    "DigitalKontaktinformasjon" to mapOf(
+                        "erDigital" to erDigital
+                    )
+                )
+            )
+        )
+
     fun lagRisikovurderingløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),

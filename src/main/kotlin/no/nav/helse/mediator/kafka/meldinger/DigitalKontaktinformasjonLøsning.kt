@@ -42,6 +42,7 @@ internal class DigitalKontaktinformasjonLøsning(
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.demandKey("contextId")
                     it.demandKey("hendelseId")
+                    it.demandKey("fødselsnummer")
                     it.requireKey("@løsning.DigitalKontaktinformasjon.erDigital")
                 }
             }.register(this)
@@ -54,8 +55,7 @@ internal class DigitalKontaktinformasjonLøsning(
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
 
-            val løsning = packet["@løsning.DigitalKontaktinformasjon"]
-            val erDigital = løsning["erDigital"].asBoolean()
+            val erDigital = packet["@løsning.DigitalKontaktinformasjon.erDigital"].asBoolean()
 
             val digitalKontaktinformasjon = DigitalKontaktinformasjonLøsning(
                 opprettet = opprettet,
