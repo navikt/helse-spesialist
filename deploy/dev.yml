@@ -70,3 +70,5 @@ spec:
       value: 9b484b08-503a-4c72-9861-c59acec774e6
     - name: RISK_FEATURE_TOGGLE
       value: "false"
+    - name: AUTOMATISERING_FEATURE_TOGGLE
+      value: "false"

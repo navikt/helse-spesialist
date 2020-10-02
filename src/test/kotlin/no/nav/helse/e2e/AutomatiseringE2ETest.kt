@@ -23,11 +23,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @BeforeAll
     fun setup() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
     }
 
     @AfterAll
     fun tearDown() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
     }
 
     @Test

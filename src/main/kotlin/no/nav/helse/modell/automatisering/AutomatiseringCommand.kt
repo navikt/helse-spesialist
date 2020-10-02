@@ -23,7 +23,7 @@ internal class AutomatiseringCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val kanAutomatiseres = miljøstyrtFeatureToggle.risikovurdering()
+        val kanAutomatiseres = miljøstyrtFeatureToggle.risikovurdering() && miljøstyrtFeatureToggle.automatisering()
             && automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId)
 
         if (kanAutomatiseres) {

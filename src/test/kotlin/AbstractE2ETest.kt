@@ -61,6 +61,7 @@ internal abstract class AbstractE2ETest {
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     protected val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
+        every { automatisering() }.returns(false)
     }
     protected val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.command.nyny.CommandContext
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -31,11 +32,17 @@ internal class AutomatiseringCommandTest {
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
+        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
     }
 
     @Test
     fun `feature toggle av gir ikke-automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = false)
@@ -44,7 +51,7 @@ internal class AutomatiseringCommandTest {
 
     @Test
     fun `feature toggle på og ikke automatiserbar gir ikke-automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
         every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
@@ -54,7 +61,7 @@ internal class AutomatiseringCommandTest {
 
     @Test
     fun `feature toggle av og ikke automatiserbar gir ikke-automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
         every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
@@ -64,7 +71,7 @@ internal class AutomatiseringCommandTest {
 
     @Test
     fun `feature toggle på og automatiserbar gir automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
         every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(true)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
