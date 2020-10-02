@@ -23,7 +23,7 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurdering(vedtaksperiodeId))
+        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurderingDto(vedtaksperiodeId))
         assertEquals(vurdering.vedtaksperiodeId, vedtaksperiodeId)
         assertEquals(vurdering.opprettet, LocalDate.of(2020, 9, 22).atStartOfDay())
         assertEquals(vurdering.samletScore, 10.0)
@@ -46,7 +46,7 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurdering(vedtaksperiodeId))
+        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurderingDto(vedtaksperiodeId))
         assertEquals(vurdering.vedtaksperiodeId, vedtaksperiodeId)
         assertEquals(vurdering.opprettet, LocalDate.of(2020, 9, 22).atStartOfDay())
         assertEquals(vurdering.samletScore, 10.0)
@@ -79,7 +79,7 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurdering(vedtaksperiodeId))
+        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurderingDto(vedtaksperiodeId))
         assertEquals(vurdering.vedtaksperiodeId, vedtaksperiodeId)
         assertEquals(vurdering.opprettet, LocalDate.of(2020, 9, 23).atStartOfDay())
         assertEquals(vurdering.samletScore, 10.0)
@@ -90,6 +90,6 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `leser manglende risikovurdering`() {
-        assertNull(risikovurderingDao.hentRisikovurdering(UUID.randomUUID()))
+        assertNull(risikovurderingDao.hentRisikovurderingDto(UUID.randomUUID()))
     }
 }

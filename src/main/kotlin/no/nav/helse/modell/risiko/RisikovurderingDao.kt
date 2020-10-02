@@ -42,7 +42,7 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
         }
     }
 
-    internal fun hentRisikovurdering(vedtaksperiodeId: UUID): RisikovurderingDto? {
+    internal fun hentRisikovurderingDto(vedtaksperiodeId: UUID): RisikovurderingDto? {
         return sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.run(
                 queryOf("SELECT * FROM risikovurdering WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1", vedtaksperiodeId).map {
@@ -68,5 +68,10 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
                 }.asSingle
             )
         }
+    }
+
+
+    internal fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering? {
+        return hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) }
     }
 }

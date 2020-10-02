@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -18,10 +19,13 @@ internal class AutomatiseringTest {
 
     private val vedtakDaoMock = mockk<VedtakDao>()
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
-        every { hentRisikovurdering(vedtaksperiodeId) }.returns(risikovurderingDto())
+        every { hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto())
+        every { hentRisikovurdering(vedtaksperiodeId) }.returns(Risikovurdering.restore(risikovurderingDto()))
     }
     private val digitalKontaktinformasjonDaoMock = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
-    private val automatisering = Automatisering(
+
+    private val automatisering =
+        Automatisering(
         vedtakDaoMock, risikovurderingDaoMock, mockk(relaxed = true),
         digitalKontaktinformasjonDaoMock
     )
@@ -59,7 +63,7 @@ internal class AutomatiseringTest {
     fun `vedtaksperiode uten warnings, med type forlengelse og ikke ok risikovurdering er ikke automatiserbar`() {
         every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) }.returns(emptyList())
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) }.returns(risikovurderingDto(listOf("8-4 ikke fin")))
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) }.returns(Risikovurdering.restore(risikovurderingDto(listOf("8-4 ikke fin"))))
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) }.returns(true)
         assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
     }

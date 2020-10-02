@@ -40,3 +40,8 @@ data class OverstyringDagForSpeilDto(
     val dagtype: Dagtype,
     val grad: Int?
 )
+
+data class RisikovurderingForSpeilDto(
+    val arbeidsuførhetvurdering: List<String>,
+    val ufullstendig: Boolean
+)

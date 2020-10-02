@@ -1,5 +1,6 @@
 package no.nav.helse.modell.risiko
 
+import no.nav.helse.vedtaksperiode.RisikovurderingForSpeilDto
 import java.time.LocalDateTime
 import java.util.*
 
@@ -25,6 +26,7 @@ class Risikovurdering private constructor(
     }
 
     fun kanBehandlesAutomatisk() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
+    fun speilVariant() = RisikovurderingForSpeilDto(arbeidsuførhetvurdering, ufullstendig)
 }
 
 class RisikovurderingDto(

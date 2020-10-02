@@ -9,18 +9,22 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.TildelingDao
 import java.util.*
 
-internal class VedtaksperiodeMediator(private val vedtakDao: VedtakDao,
-                                      private val personDao: PersonDao,
-                                      private val arbeidsgiverDao: ArbeidsgiverDao,
-                                      private val snapshotDao: SnapshotDao,
-                                      private val overstyringDao: OverstyringDao,
-                                      private val oppgaveDao: OppgaveDao,
-                                      private val tildelingDao: TildelingDao) {
+internal class VedtaksperiodeMediator(
+    private val vedtakDao: VedtakDao,
+    private val personDao: PersonDao,
+    private val arbeidsgiverDao: ArbeidsgiverDao,
+    private val snapshotDao: SnapshotDao,
+    private val overstyringDao: OverstyringDao,
+    private val oppgaveDao: OppgaveDao,
+    private val tildelingDao: TildelingDao,
+    private val risikovurderingDao: RisikovurderingDao
+) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
             vedtakDao.findVedtakByFnr(fnr)?.let { byggSpeilSnapshot(it) }
@@ -83,8 +87,14 @@ internal class VedtaksperiodeMediator(private val vedtakDao: VedtakDao,
                     arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
+                        val risikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
+
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
+                        vedtaksperiode.put(
+                            "risikovurdering",
+                            objectMapper.writeValueAsString(risikovurdering?.speilVariant())
+                        )
                     }
                 }
             }
