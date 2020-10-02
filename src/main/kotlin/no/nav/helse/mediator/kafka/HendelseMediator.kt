@@ -95,8 +95,7 @@ internal class HendelseMediator(
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
-            //TODO: Driver å legger til sjekk av DKIF
-//            DigitalKontaktinformasjonLøsning.DigitalKontaktinformasjonRiver(it, this)
+            DigitalKontaktinformasjonLøsning.DigitalKontaktinformasjonRiver(it, this)
             RisikovurderingLøsning.V2River(it, this)
         }
     }

@@ -20,7 +20,7 @@ internal class Automatisering(
         val støttetOppgavetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) == Saksbehandleroppgavetype.FORLENGELSE
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer) ?: false
 
-        return okRisikovurdering && ingenWarnings && støttetOppgavetype && (erDigital || true) //TODO: Driver å legger til sjekk av DKIF
+        return okRisikovurdering && ingenWarnings && støttetOppgavetype && erDigital
     }
 
     fun lagre(bleAutomatisert: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID) {

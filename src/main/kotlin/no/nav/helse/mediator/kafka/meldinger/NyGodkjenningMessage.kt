@@ -66,10 +66,9 @@ internal class NyGodkjenningMessage(
             snapshotDao,
             vedtakDao
         ),
-        //TODO: Driver å legger til sjekk av DKIF
-//        DigitalKontaktinformasjonCommand(
-//            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
-//        ),
+        DigitalKontaktinformasjonCommand(
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
+        ),
         RisikoCommand(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
