@@ -4,14 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.mediator.kafka.meldinger.Hendelse
 import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.test.assertEquals
 
 internal class BehovMediatorTest {
     private companion object {
@@ -46,6 +48,9 @@ internal class BehovMediatorTest {
         assertEquals("$contextId", testRapid.inspektør.field(0, "contextId").asText())
         assertEquals("$hendelseId", testRapid.inspektør.field(0, "hendelseId").asText())
         assertEquals("$hendelseId", testRapid.inspektør.field(0, "spleisBehovId").asText())
+        assertFalse(testRapid.inspektør.field(0, "vedtaksperiodeId").isMissingOrNull()) {
+            "Behovappene trenger vedtaksperiodeId til loggformål, men bør på sikt fjernes til fordel for @id i meldingen"
+        }
         testRapid.inspektør.field(0, "type 1").also {
             assertEquals(1, it.path("param 1").asInt())
             assertEquals(2, it.path("param 2").asInt())
