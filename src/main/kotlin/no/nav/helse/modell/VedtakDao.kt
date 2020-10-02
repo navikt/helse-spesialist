@@ -78,6 +78,9 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<String>) = using(sessionOf(dataSource)) { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        @Language("PostgreSQL")
+        val statement = "DELETE FROM warning WHERE vedtak_ref=?"
+        session.run(queryOf(statement, vedtakRef).asExecute)
         meldinger.forEach { melding -> session.insertWarning(vedtakRef, melding) }
     }
 

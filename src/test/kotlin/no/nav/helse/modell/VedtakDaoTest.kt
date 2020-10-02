@@ -62,6 +62,18 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sletter gamle warnings`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        val testwarnings1= listOf("Warning A", "Warning B")
+        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
+        val testwarnings2= listOf("Warning C", "Warning D")
+        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings2)
+        assertEquals(testwarnings2, vedtakDao.finnWarnings(VEDTAKSPERIODE))
+    }
+
+    @Test
     fun `lagrer og leser vedtaksperiodetype hvis den er satt`() {
         opprettPerson()
         opprettArbeidsgiver()
