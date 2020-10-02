@@ -11,11 +11,11 @@ internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
     private val automatiseringDao: AutomatiseringDao
 ) {
-    fun godkjentForAutomatisertBehandling(eventId: UUID, vedtaksperiodeId: UUID): Boolean {
+    fun godkjentForAutomatisertBehandling(vedtaksperiodeId: UUID): Boolean {
         val okRisikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
             ?.let { Risikovurdering.restore(it).kanBehandlesAutomatisk() } ?: false
-        val ingenWarnings = vedtakDao.finnWarnings(eventId).isEmpty()
-        val støttetOppgavetype = vedtakDao.finnVedtaksperiodetype(eventId) == Saksbehandleroppgavetype.FORLENGELSE
+        val ingenWarnings = vedtakDao.finnWarnings(vedtaksperiodeId).isEmpty()
+        val støttetOppgavetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) == Saksbehandleroppgavetype.FORLENGELSE
 
         return okRisikovurdering && ingenWarnings && støttetOppgavetype
     }

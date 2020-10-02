@@ -37,7 +37,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             )).asUpdate)
     }
 
-    fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) = using(sessionOf(dataSource)) {
+    internal fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) = using(sessionOf(dataSource)) {
         @Language("PostgreSQL")
         val statement = "UPDATE vedtak SET fom=:fom, tom=:tom, speil_snapshot_ref=:speil_snapshot_ref WHERE id=:vedtak_ref"
         it.run(queryOf(statement, mapOf(
@@ -110,22 +110,20 @@ internal class VedtakDao(private val dataSource: DataSource) {
         }
 
     internal fun finnWarnings(vedtaksperiodeId: UUID): List<String> = sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf(
-                "SELECT * FROM warning where vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ? LIMIT 1)",
-                vedtaksperiodeId
-            ).map { it.string("melding") }.asList
-        )
+        val vedtakRef = requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
+        @Language("PostgreSQL")
+        val statement = "SELECT * FROM warning where vedtak_ref = ?"
+        session.run(queryOf(statement, vedtakRef).map { it.string("melding") }.asList)
     }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? =
         sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ? LIMIT 1)",
-                    vedtaksperiodeId
-                ).map { enumValueOf<Saksbehandleroppgavetype>(it.string("type")) }.asSingle
-            )
+            val vedtakRef = requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
+            @Language("PostgreSQL")
+            val statement = "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = ?"
+            session.run(queryOf(statement, vedtakRef).map {
+                enumValueOf<Saksbehandleroppgavetype>(it.string("type"))
+            }.asSingle)
         }
 
     internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) {

@@ -6,7 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.command.nyny.CommandContext
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -44,7 +45,7 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `feature toggle på og ikke automatiserbar gir ikke-automatiserbar behandling`() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
-        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(false)
+        every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = false)
@@ -54,7 +55,7 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `feature toggle av og ikke automatiserbar gir ikke-automatiserbar behandling`() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
-        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(false)
+        every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(false)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = false)
@@ -64,7 +65,7 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `feature toggle på og automatiserbar gir automatiserbar behandling`() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
-        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(true)
+        every { automatisering.godkjentForAutomatisertBehandling(any()) }.returns(true)
         assertTrue(command.execute(context))
         verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
         assertLagre(automatisert = true)

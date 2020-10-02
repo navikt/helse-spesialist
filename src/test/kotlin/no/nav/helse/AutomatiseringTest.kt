@@ -21,38 +21,37 @@ internal class AutomatiseringTest {
     }
     private val automatisering = Automatisering(vedtakDaoMock, risikovurderingDaoMock, mockk(relaxed = true))
 
-    companion object {
-        private val eventId = UUID.randomUUID()
+    private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
     }
 
     @Test
     fun `vedtaksperiode uten warnings, med type forlengelse og ok risikovurdering er automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(eventId) }.returns(emptyList())
-        every { vedtakDaoMock.finnVedtaksperiodetype(eventId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
-        assertTrue(automatisering.godkjentForAutomatisertBehandling(eventId, vedtaksperiodeId))
+        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) }.returns(emptyList())
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
+        assertTrue(automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId))
     }
 
     @Test
     fun `vedtaksperiode med warnings og med type forlengelse er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(eventId) }.returns(listOf("8.4 - Uenig i diagnose"))
-        every { vedtakDaoMock.finnVedtaksperiodetype(eventId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(eventId, vedtaksperiodeId))
+        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) }.returns(listOf("8.4 - Uenig i diagnose"))
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
+        assertFalse(automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId))
     }
 
     @Test
     fun `vedtaksperiode uten warnings og med type forskjellig fra forlengelse er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(eventId) }.returns(emptyList())
-        every { vedtakDaoMock.finnVedtaksperiodetype(eventId) }.returns(Saksbehandleroppgavetype.OVERGANG_FRA_IT)
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(eventId, vedtaksperiodeId))
+        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) }.returns(emptyList())
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) }.returns(Saksbehandleroppgavetype.OVERGANG_FRA_IT)
+        assertFalse(automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId))
     }
 
     @Test
     fun `vedtaksperiode uten warnings, med type forlengelse og ikke ok risikovurdering er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(eventId) }.returns(emptyList())
-        every { vedtakDaoMock.finnVedtaksperiodetype(eventId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
+        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) }.returns(emptyList())
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) }.returns(Saksbehandleroppgavetype.FORLENGELSE)
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) }.returns(risikovurderingDto(listOf("8-4 ikke fin")))
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(eventId, vedtaksperiodeId))
+        assertFalse(automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId))
     }
 
     private fun risikovurderingDto(arbeidsuførhetsvurdering: List<String> = emptyList()) = RisikovurderingDto(

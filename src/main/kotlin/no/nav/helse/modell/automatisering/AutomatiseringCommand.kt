@@ -23,7 +23,7 @@ internal class AutomatiseringCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val kanAutomatiseres = miljøstyrtFeatureToggle.risikovurdering()
-            && automatisering.godkjentForAutomatisertBehandling(hendelseId, vedtaksperiodeId)
+            && automatisering.godkjentForAutomatisertBehandling(vedtaksperiodeId)
 
         if (kanAutomatiseres) {
             val behov = JsonMessage(godkjenningsbehovJson, MessageProblems(godkjenningsbehovJson))
