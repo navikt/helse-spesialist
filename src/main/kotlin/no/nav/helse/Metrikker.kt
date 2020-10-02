@@ -15,6 +15,9 @@ internal val overstyringsteller = Counter.build("overstyringer", "Teller antall 
 internal val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
     .register()
 
+internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
+    .register()
+
 internal fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
     val result: T
     val start = System.nanoTime()

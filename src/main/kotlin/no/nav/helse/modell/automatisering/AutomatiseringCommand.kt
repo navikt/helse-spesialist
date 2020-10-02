@@ -1,5 +1,6 @@
 package no.nav.helse.modell.automatisering
 
+import no.nav.helse.automatiseringsteller
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
@@ -36,6 +37,7 @@ internal class AutomatiseringCommand(
                 )
             )
             context.publiser(behov.toJson())
+            automatiseringsteller.inc()
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
         }
 
