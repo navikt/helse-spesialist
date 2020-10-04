@@ -2,7 +2,6 @@ package no.nav.helse.mediator.kafka
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
-import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -10,6 +9,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
+import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
@@ -323,12 +323,12 @@ internal class HendelseMediator(
     }
 
     private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
-        if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
+        if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
         return utfør(hendelse, messageContext)
     }
 
     private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         return utfør(hendelse, messageContext)
     }
 
