@@ -1,0 +1,2 @@
+ALTER TABLE vedtaksperiode_hendelse DROP CONSTRAINT vedtaksperiode_hendelse_hendelse_ref_fkey;
+ALTER TABLE vedtaksperiode_hendelse ADD CONSTRAINT vedtaksperiode_hendelse_hendelse_ref_fkey FOREIGN KEY(hendelse_ref) REFERENCES hendelse(id) ON DELETE CASCADE;
