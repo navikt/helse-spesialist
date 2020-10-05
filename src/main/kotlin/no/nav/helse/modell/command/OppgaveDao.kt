@@ -8,7 +8,6 @@ import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
@@ -159,23 +158,19 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
         @Language("PostgreSQL")
         val query = """
-        SELECT *,
-            (SELECT json_agg(DISTINCT melding) meldinger FROM warning WHERE vedtak_ref = o.vedtak_ref),
-            sot.type AS saksbehandleroppgavetype,
-            o.id AS oppgave_id
+        SELECT o.id as oppgave_id, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+               pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, e.id AS enhet_id, e.navn AS enhet_navn
         FROM oppgave o
         INNER JOIN vedtak v ON o.vedtak_ref = v.id
         INNER JOIN person p ON v.person_ref = p.id
         INNER JOIN person_info pi ON p.info_ref = pi.id
-        LEFT JOIN (SELECT navn AS enhet_navn, id AS enhet_id FROM enhet) e ON p.enhet_ref = enhet_id
-        LEFT JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
+        LEFT JOIN warning w ON w.vedtak_ref = v.id
+        LEFT JOIN enhet e ON p.enhet_ref = e.id
+        LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
         LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
         LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
         WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-        ORDER BY
-            CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
-            CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
-            opprettet DESC
+        GROUP BY o.id, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, e.id, e.navn
         LIMIT 500;
 """
         return this.run(
@@ -203,7 +198,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         ),
         aktørId = it.long("aktor_id").toString(),
         fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
-        antallVarsler = objectMapper.readTree(it.stringOrNull("meldinger") ?: "[]").count(),
+        antallVarsler = it.int("antall_varsler"),
         type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) },
         boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn"))
     )
