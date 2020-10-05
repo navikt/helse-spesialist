@@ -93,9 +93,9 @@ internal class VedtaksperiodeMediator(
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
-                        risikovurdering?.let { vedtaksperiode.put(
+                        risikovurdering?.let { vedtaksperiode.set<ObjectNode>(
                             "risikovurdering",
-                            objectMapper.writeValueAsString(it.speilDto())
+                            objectMapper.convertValue(it.speilDto(), ObjectNode::class.java)
                         )}
                     }
                 }
