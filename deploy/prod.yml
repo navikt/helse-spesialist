@@ -8,8 +8,6 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
-  strategy:
-    type: Recreate
   liveness:
     path: isalive
     initialDelay: 5
@@ -24,8 +22,8 @@ spec:
       cpu: 50m
       memory: 512Mi
   replicas:
-    min: 2
-    max: 6
+    min: 1
+    max: 1
     cpuThresholdPercentage: 90
   ingresses:
     - https://spesialist.prod-fss.nais.io
