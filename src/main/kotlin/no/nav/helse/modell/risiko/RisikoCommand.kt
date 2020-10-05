@@ -32,6 +32,7 @@ internal class RisikoCommand(
     override fun resume(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.risikovurdering()) return true
         val løsning = context.get<RisikovurderingLøsning>() ?: return false
+        logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         return true
     }
