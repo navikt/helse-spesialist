@@ -8,6 +8,7 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,6 +65,7 @@ internal class OppdaterPersonCommandTest {
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
         assertEquals(listOf("HentEnhet"), context.behov().keys.toList())
+        println(JsonMessage.newMessage(context.behov()).toJson())
     }
 
     @Test
@@ -81,6 +83,7 @@ internal class OppdaterPersonCommandTest {
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
         assertEquals(listOf("HentInfotrygdutbetalinger"), context.behov().keys.toList())
+        assertTrue(context.behov().values.any { it["historikkFom"] != null && it["historikkTom"] != null})
     }
 
     @Test

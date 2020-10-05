@@ -24,7 +24,8 @@ internal class OppdaterPersonCommand(
     private abstract class OppdaterCommand(
         private val fødselsnummer: String,
         private val personDao: PersonDao,
-        private val behov: String
+        private val behov: String,
+        private val parametere: Map<String, Any> = emptyMap()
     ) : Command {
         override fun execute(context: CommandContext): Boolean {
             if (erOppdatert(personDao, fødselsnummer)) return ignorer()
@@ -46,7 +47,7 @@ internal class OppdaterPersonCommand(
 
         protected fun trengerMerInformasjon(context: CommandContext): Boolean {
             log.info("trenger oppdatert $behov")
-            context.behov(behov)
+            context.behov(behov, parametere)
             return false
         }
     }
@@ -79,7 +80,16 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private class OppdaterInfotrygdutbetalingerCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao, "HentInfotrygdutbetalinger") {
+    private class OppdaterInfotrygdutbetalingerCommand(fødselsnummer: String, personDao: PersonDao) :
+        OppdaterCommand(
+            fødselsnummer = fødselsnummer,
+            personDao = personDao,
+            behov = "HentInfotrygdutbetalinger",
+            parametere = mapOf(
+                "historikkFom" to LocalDate.now().minusYears(3),
+                "historikkTom" to LocalDate.now()
+            )
+        ) {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
             val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(1)
