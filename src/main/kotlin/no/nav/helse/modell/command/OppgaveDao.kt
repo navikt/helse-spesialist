@@ -170,7 +170,11 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
         LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
         WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-        GROUP BY o.id, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, e.id, e.navn
+        GROUP BY o.id, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, e.id, e.navn, t.saksbehandler_ref
+        ORDER BY
+            CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
+            CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
+            opprettet DESC
         LIMIT 500;
 """
         return this.run(
