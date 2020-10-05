@@ -32,7 +32,7 @@ internal class AutomatiseringCommand(
             behov["@løsning"] = mapOf(
                 "Godkjenning" to mapOf(
                     "godkjent" to true,
-                    "saksbehandlerIdent" to "SYSTEM",
+                    "saksbehandlerIdent" to "Automatisk behandlet",
                     "automatiskBehandling" to true,
                     "godkjenttidspunkt" to LocalDateTime.now()
                 )

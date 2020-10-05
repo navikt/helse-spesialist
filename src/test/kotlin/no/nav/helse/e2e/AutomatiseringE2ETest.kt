@@ -196,7 +196,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             Assertions.assertTrue(it.path("godkjent").isBoolean)
             Assertions.assertTrue(it.path("godkjent").booleanValue())
             Assertions.assertTrue(it.path("automatiskBehandling").booleanValue())
-            Assertions.assertEquals("SYSTEM", it.path("saksbehandlerIdent").textValue())
+            Assertions.assertEquals("Automatisk behandlet", it.path("saksbehandlerIdent").textValue())
             Assertions.assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
         }
     }
