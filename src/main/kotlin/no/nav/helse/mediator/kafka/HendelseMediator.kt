@@ -258,7 +258,7 @@ internal class HendelseMediator(
 
     private fun løsninger(hendelseId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {
-            val hendelse = hendelseDao.finn(hendelseId)
+            val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk)
             val commandContext = commandContextDao.finnSuspendert(contextId)
             if (hendelse == null || commandContext == null) {
                 log.error("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")

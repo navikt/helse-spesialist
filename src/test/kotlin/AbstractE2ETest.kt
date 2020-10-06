@@ -80,8 +80,10 @@ internal abstract class AbstractE2ETest {
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
 
     protected val testRapid = TestRapid()
+
     private val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, AKTØR)
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
@@ -92,25 +94,23 @@ internal abstract class AbstractE2ETest {
     }
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
-
     private val hendelsefabrikk = Hendelsefabrikk(
         personDao = personDao,
-            arbeidsgiverDao = ArbeidsgiverDao(dataSource),
-            vedtakDao = vedtakDao,
-            oppgaveDao = oppgaveDao,
-            commandContextDao = commandContextDao,
-            snapshotDao = SnapshotDao(dataSource),
-            reservasjonDao = ReservasjonDao(dataSource),
-            saksbehandlerDao = SaksbehandlerDao(dataSource),
-            overstyringDao = OverstyringDao(dataSource),
-            risikovurderingDao = risikovurderingDao,
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            speilSnapshotRestClient = restClient,
-            oppgaveMediator = oppgaveMediator,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-            automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao)
+        arbeidsgiverDao = ArbeidsgiverDao(dataSource),
+        vedtakDao = vedtakDao,
+        oppgaveDao = oppgaveDao,
+        commandContextDao = commandContextDao,
+        snapshotDao = SnapshotDao(dataSource),
+        reservasjonDao = ReservasjonDao(dataSource),
+        saksbehandlerDao = SaksbehandlerDao(dataSource),
+        overstyringDao = OverstyringDao(dataSource),
+        risikovurderingDao = risikovurderingDao,
+        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+        speilSnapshotRestClient = restClient,
+        oppgaveMediator = oppgaveMediator,
+        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+        automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao)
     )
-    private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
         oppgaveDao = oppgaveDao,

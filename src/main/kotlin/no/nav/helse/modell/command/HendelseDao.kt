@@ -12,7 +12,7 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-internal class HendelseDao(private val dataSource: DataSource, private val hendelsefabrikk: IHendelsefabrikk) {
+internal class HendelseDao(private val dataSource: DataSource) {
     internal fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) { session ->
             session.transaction { transactionalSession ->
@@ -68,14 +68,13 @@ internal class HendelseDao(private val dataSource: DataSource, private val hende
         )
     }
 
-    internal fun finn(id: UUID): Hendelse? =
-        using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
-                fraHendelsetype(enumValueOf(row.string("type")), row.string("data"))
-            }.asSingle)
-        }
+    internal fun finn(id: UUID, hendelsefabrikk: IHendelsefabrikk) = using(sessionOf(dataSource)) { session ->
+        session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
+            fraHendelsetype(enumValueOf(row.string("type")), row.string("data"), hendelsefabrikk)
+        }.asSingle)
+    }
 
-    private fun fraHendelsetype(hendelsetype: Hendelsetype, json: String): Hendelse? =
+    private fun fraHendelsetype(hendelsetype: Hendelsetype, json: String, hendelsefabrikk: IHendelsefabrikk): Hendelse? =
         when (hendelsetype) {
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.nyNyVedtaksperiodeEndret(json)
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.nyNyVedtaksperiodeForkastet(json)

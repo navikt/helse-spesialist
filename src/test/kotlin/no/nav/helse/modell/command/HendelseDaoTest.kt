@@ -27,7 +27,6 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private lateinit var hendelsefabrikk: IHendelsefabrikk
     private lateinit var vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage
-    private lateinit var hendelseDao: HendelseDao
 
     @BeforeAll
     fun setup() {
@@ -48,7 +47,6 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             miljøstyrtFeatureToggle = mockk(relaxed = true),
             automatisering = mockk(relaxed = true)
         )
-        hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
     }
 
     @BeforeEach
@@ -64,7 +62,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagrer og finner hendelser`() {
         hendelseDao.opprett(vedtaksperiodeForkastetMessage)
-        val actual = hendelseDao.finn(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        val actual = hendelseDao.finn(HENDELSE_ID, hendelsefabrikk) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
 
         assertNull(finnKobling())
 

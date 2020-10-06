@@ -96,7 +96,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
+
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
 
     private val hendelsefabrikk = Hendelsefabrikk(
@@ -121,8 +124,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             digitalKontaktinformasjonDao
         )
     )
-
-    private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {

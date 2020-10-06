@@ -13,6 +13,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -100,6 +101,7 @@ internal abstract class DatabaseIntegrationTest {
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
     internal val overstyringDao = OverstyringDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(dataSource)
+    internal val hendelseDao = HendelseDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
     internal val automatiseringDao = AutomatiseringDao(dataSource)
     internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
