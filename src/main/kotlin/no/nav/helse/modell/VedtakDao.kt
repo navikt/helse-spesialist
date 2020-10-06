@@ -2,9 +2,7 @@ package no.nav.helse.modell
 
 import kotliquery.*
 import no.nav.helse.modell.person.Kjønn
-import no.nav.helse.modell.vedtak.PersoninfoDto
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.VedtakDto
+import no.nav.helse.modell.vedtak.*
 import no.nav.helse.vedtaksperiode.VedtaksperiodeDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -76,7 +74,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, hendelseId, vedtakRef).asUpdate)
     }
 
-    internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<String>) = using(sessionOf(dataSource)) { session ->
+    internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<WarningDto>) = using(sessionOf(dataSource)) { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
         @Language("PostgreSQL")
         val statement = "DELETE FROM warning WHERE vedtak_ref=?"
@@ -84,15 +82,23 @@ internal class VedtakDao(private val dataSource: DataSource) {
         meldinger.forEach { melding -> session.insertWarning(vedtakRef, melding) }
     }
 
-    internal fun leggTilWarning(vedtaksperiodeId: UUID, melding: String) = using(sessionOf(dataSource)) { session ->
+    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<WarningDto>) = using(sessionOf(dataSource)) { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-        session.insertWarning(vedtakRef, melding)
+        @Language("PostgreSQL")
+        val statement = "DELETE FROM warning WHERE vedtak_ref=? AND kilde='Spleis'::warning_kilde"
+        session.run(queryOf(statement, vedtakRef).asExecute)
+        warnings.forEach { warning -> session.insertWarning(vedtakRef, warning) }
     }
 
-    private fun Session.insertWarning(vedtakRef: Long, melding: String): Int {
+    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: WarningDto) = using(sessionOf(dataSource)) { session ->
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        session.insertWarning(vedtakRef, warning)
+    }
+
+    private fun Session.insertWarning(vedtakRef: Long, warning: WarningDto): Int {
         @Language("PostgreSQL")
-        val statement = "INSERT INTO warning (melding, vedtak_ref) VALUES (?, ?)"
-        return this.run(queryOf(statement, melding, vedtakRef).asUpdate)
+        val statement = "INSERT INTO warning (melding, kilde, vedtak_ref) VALUES (?, CAST(? as warning_kilde), ?)"
+        return this.run(queryOf(statement, warning.melding, warning.kilde.name, vedtakRef).asUpdate)
     }
 
     internal fun finnVedtakId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
@@ -117,11 +123,11 @@ internal class VedtakDao(private val dataSource: DataSource) {
             it.run(queryOf(statement, type.name, vedtakRef).asUpdate)
         }
 
-    internal fun finnWarnings(vedtaksperiodeId: UUID): List<String> = sessionOf(dataSource).use { session ->
+    internal fun finnWarnings(vedtaksperiodeId: UUID): List<WarningDto> = sessionOf(dataSource).use { session ->
         val vedtakRef = requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
-        session.run(queryOf(statement, vedtakRef).map { it.string("melding") }.asList)
+        session.run(queryOf(statement, vedtakRef).map { WarningDto( melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
     }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? =

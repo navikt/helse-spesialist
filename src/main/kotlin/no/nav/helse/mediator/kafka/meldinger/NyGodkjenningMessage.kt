@@ -19,6 +19,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.tildeling.ReservasjonDao
@@ -35,7 +36,7 @@ internal class NyGodkjenningMessage(
     private val vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    warnings: List<String>,
+    warnings: List<WarningDto>,
     periodetype: Saksbehandleroppgavetype? = null,
     private val json: String,
     personDao: PersonDao,

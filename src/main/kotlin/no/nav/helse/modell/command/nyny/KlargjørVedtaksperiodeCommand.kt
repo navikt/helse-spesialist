@@ -5,6 +5,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import java.time.LocalDate
 import java.util.*
@@ -17,7 +18,7 @@ internal class KlargjørVedtaksperiodeCommand(
     vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    warnings: List<String>,
+    warnings: List<WarningDto>,
     vedtaksperiodetype: Saksbehandleroppgavetype?,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,

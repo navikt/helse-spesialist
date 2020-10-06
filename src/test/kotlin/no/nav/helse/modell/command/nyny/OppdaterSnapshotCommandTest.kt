@@ -1,14 +1,13 @@
 package no.nav.helse.modell.command.nyny
 
-import io.mockk.clearMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.snapshot
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -18,13 +17,14 @@ internal class OppdaterSnapshotCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private const val FNR = "fnr"
-        private const val SNAPSHOT = "json"
+        private val SNAPSHOT = snapshot(VEDTAKSPERIODE)
         private const val VEDTAK_REF = 1L
     }
 
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private var captureWarnings = CapturingSlot<List<WarningDto>>()
     private val context = CommandContext(UUID.randomUUID())
 
     private val command = OppdaterSnapshotCommand(restClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
@@ -45,11 +45,21 @@ internal class OppdaterSnapshotCommandTest {
     @Test
     fun `lagrer snapshot`() {
         okTest { assertTrue(command.execute(context)) }
+        verify(exactly = 1) { vedtakDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, capture(captureWarnings)) }
     }
 
     @Test
     fun `resume henter snapshot`() {
         okTest { assertTrue(command.resume(context)) }
+    }
+
+    @Test
+    fun `resume oppdaterer warnings`() {
+        okTest { assertTrue(command.resume(context)) }
+        verify(exactly = 1) { vedtakDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, capture(captureWarnings)) }
+        assertEquals(1, captureWarnings.captured.size)
+        assertEquals("Brukeren har flere inntekter de siste tre måneder.", captureWarnings.captured[0].melding)
+        assertEquals(WarningKilde.Spleis, captureWarnings.captured[0].kilde)
     }
 
     @Test

@@ -1,11 +1,12 @@
 package no.nav.helse.modell.command.nyny
 
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.vedtak.WarningDto
 import java.util.*
 
 internal class PersisterAdvarslerCommand(
     private val vedtaksperiodeId: UUID,
-    private val warnings: List<String>,
+    private val warnings: List<WarningDto>,
     private val vedtakDao: VedtakDao
 ) : Command {
 

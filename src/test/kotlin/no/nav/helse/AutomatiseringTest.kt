@@ -11,6 +11,8 @@ import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -51,7 +53,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med warnings og med type forlengelse er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf("8.4 - Uenig i diagnose")
+        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(WarningDto("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))

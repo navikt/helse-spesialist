@@ -20,6 +20,8 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -72,7 +74,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            warnings = warnings,
+            warnings = warnings.map { WarningDto(it, WarningKilde.Spleis) },
             periodetype = periodetype,
             json = json,
             personDao = personDao,

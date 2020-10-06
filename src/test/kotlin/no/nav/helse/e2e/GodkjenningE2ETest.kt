@@ -4,6 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.Oppgavestatus
+import no.nav.helse.snapshot
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
@@ -17,8 +18,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val OPPGAVEID = 1L
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
-        private const val SNAPSHOTV2 = """{"version": "this_is_version_2"}"""
+        private val SNAPSHOTV1 = snapshot(VEDTAKSPERIODE_ID)
+        private val SNAPSHOTV2 = snapshot(VEDTAKSPERIODE_ID)
     }
 
     @Test

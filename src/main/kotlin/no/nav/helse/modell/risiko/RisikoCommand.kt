@@ -6,6 +6,8 @@ import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.WarningKilde
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -37,7 +39,7 @@ internal class RisikoCommand(
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {
-            vedtakDao.leggTilWarning(vedtaksperiodeId, "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes")
+            vedtakDao.leggTilWarning(vedtaksperiodeId, WarningDto("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes", WarningKilde.Spesialist))
         }
         return true
     }
