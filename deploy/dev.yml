@@ -73,4 +73,4 @@ spec:
     - name: RISK_FEATURE_TOGGLE
       value: "true"
     - name: AUTOMATISERING_FEATURE_TOGGLE
-      value: "false"
+      value: "true"
