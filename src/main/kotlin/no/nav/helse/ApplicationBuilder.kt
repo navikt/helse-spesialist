@@ -15,10 +15,15 @@ import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
+import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -28,6 +33,7 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.tildeling.TildelingMediator
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
@@ -83,19 +89,41 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
     private val personDao = PersonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val overstyringDao = OverstyringDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
-    private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)
-    private val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
+
+    private val hendelsefabrikk = Hendelsefabrikk(
+        personDao = personDao,
+        arbeidsgiverDao = ArbeidsgiverDao(dataSource),
+        vedtakDao = vedtakDao,
+        commandContextDao = commandContextDao,
+        snapshotDao = SnapshotDao(dataSource),
+        oppgaveDao = oppgaveDao,
+        reservasjonDao = ReservasjonDao(dataSource),
+        saksbehandlerDao = saksbehandlerDao,
+        overstyringDao = OverstyringDao(dataSource),
+        risikovurderingDao = risikovurderingDao,
+        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+        speilSnapshotRestClient = speilSnapshotRestClient,
+        oppgaveMediator = oppgaveMediator,
+        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+        automatisering = Automatisering(
+            vedtakDao,
+            risikovurderingDao,
+            AutomatiseringDao(dataSource),
+            digitalKontaktinformasjonDao
+        )
+    )
+
+    private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CallId) {
@@ -131,11 +159,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     oppgaveApi(oppgaveMediator)
                     vedtaksperiodeApi(
                         hendelseMediator = hendelseMediator,
-                        vedtaksperiodeMediator = vedtaksperiodeMediator
+                        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
                     )
                 }
                 authenticate("saksbehandler-direkte") {
-                    tildelingApi(tildelingMediator)
+                    tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))
                     direkteOppgaveApi(oppgaveMediator)
                     annulleringApi(hendelseMediator)
                 }
@@ -147,20 +175,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         rapidsConnection.register(this)
         hendelseMediator = HendelseMediator(
             rapidsConnection = rapidsConnection,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            dataSource = dataSource,
             oppgaveDao = oppgaveDao,
             personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
-            overstyringDao = overstyringDao,
-            saksbehandlerDao = saksbehandlerDao,
             vedtakDao = vedtakDao,
-            tildelingDao = tildelingDao,
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            oppgaveMediator = oppgaveMediator,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-            risikovurderingDao = risikovurderingDao
+            commandContextDao = commandContextDao,
+            hendelseDao = hendelseDao,
+            hendelsefabrikk = hendelsefabrikk,
+            oppgaveMediator = oppgaveMediator
         )
     }
 

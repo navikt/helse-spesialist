@@ -49,9 +49,9 @@ internal class OverstyringMessageTest {
         vedtakDao = mockk(),
         commandContextDao = mockk(),
         snapshotDao = mockk(),
-        speilSnapshotRestClient = mockk(),
-        oppgaveMediator = mockk(),
         oppgaveDao = mockk(),
+        oppgaveMediator = mockk(),
+        speilSnapshotRestClient = mockk(),
         digitalKontaktinformasjonDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)

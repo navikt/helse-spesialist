@@ -5,80 +5,39 @@ import no.nav.helse.annulleringsteller
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
-import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.tildeling.ReservasjonDao
-import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import javax.sql.DataSource
 
 internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
-    speilSnapshotRestClient: SpeilSnapshotRestClient,
-    dataSource: DataSource,
-    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
-    private val personDao: PersonDao = PersonDao(dataSource),
-    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
-    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
-    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
-    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource),
-    private val oppgaveMediator: OppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao),
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val oppgaveDao: OppgaveDao,
+    private val vedtakDao: VedtakDao,
+    private val personDao: PersonDao,
+    private val commandContextDao: CommandContextDao,
+    private val hendelseDao: HendelseDao,
+    private val oppgaveMediator: OppgaveMediator,
+    private val hendelsefabrikk: Hendelsefabrikk
 ) : IHendelseMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
-
-    private val automatisering = Automatisering(vedtakDao, risikovurderingDao, AutomatiseringDao(dataSource), digitalKontaktinformasjonDao)
-    private val hendelsefabrikk = Hendelsefabrikk(
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao,
-        commandContextDao = commandContextDao,
-        snapshotDao = snapshotDao,
-        oppgaveDao = oppgaveDao,
-        reservasjonDao = reservasjonDao,
-        saksbehandlerDao = saksbehandlerDao,
-        overstyringDao = overstyringDao,
-        risikovurderingDao = risikovurderingDao,
-        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-        speilSnapshotRestClient = speilSnapshotRestClient,
-        oppgaveMediator = oppgaveMediator,
-        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-        automatisering = automatisering
-    )
-    private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
 
     private var shutdown = false
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)

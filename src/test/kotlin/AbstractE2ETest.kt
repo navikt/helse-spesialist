@@ -13,14 +13,31 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.api.GodkjenningDTO
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.HendelseMediator
+import no.nav.helse.mediator.kafka.Hendelsefabrikk
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.command.HendelseDao
+import no.nav.helse.modell.command.OppgaveDao
+import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.tildeling.ReservasjonDao
+import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions
@@ -35,17 +52,14 @@ internal abstract class AbstractE2ETest {
     protected companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val AKTØR = "999999999"
-
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-
         private val postgresPath = createTempDir()
         private val embeddedPostgres = EmbeddedPostgres.builder()
             .setOverrideWorkingDirectory(postgresPath)
             .setDataDirectory(postgresPath.resolve("datadir"))
             .start()
-
         private val hikariConfig = HikariConfig().apply {
             this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres").also(::println)
             maximumPoolSize = 5
@@ -55,20 +69,57 @@ internal abstract class AbstractE2ETest {
             maxLifetime = 30001
         }
         internal val dataSource = HikariDataSource(hikariConfig)
+
     }
 
+    private val oppgaveDao = OppgaveDao(dataSource)
+    private val personDao = PersonDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
+    private val commandContextDao = CommandContextDao(dataSource)
+    private val tildelingDao = TildelingDao(dataSource)
+    private val risikovurderingDao = RisikovurderingDao(dataSource)
+    private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    private val automatiseringDao = AutomatiseringDao(dataSource)
+
     protected val testRapid = TestRapid()
-    protected val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, AKTØR)
+    private val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, AKTØR)
+
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+
     protected val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
         every { automatisering() }.returns(false)
     }
-    protected val hendelseMediator = HendelseMediator(
+
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+
+    private val hendelsefabrikk = Hendelsefabrikk(
+        personDao = personDao,
+            arbeidsgiverDao = ArbeidsgiverDao(dataSource),
+            vedtakDao = vedtakDao,
+            oppgaveDao = oppgaveDao,
+            commandContextDao = commandContextDao,
+            snapshotDao = SnapshotDao(dataSource),
+            reservasjonDao = ReservasjonDao(dataSource),
+            saksbehandlerDao = SaksbehandlerDao(dataSource),
+            overstyringDao = OverstyringDao(dataSource),
+            risikovurderingDao = risikovurderingDao,
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+            speilSnapshotRestClient = restClient,
+            oppgaveMediator = oppgaveMediator,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+            automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao)
+    )
+    private val hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
+    private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
-        speilSnapshotRestClient = restClient,
-        dataSource = dataSource,
-        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+        oppgaveDao = oppgaveDao,
+        vedtakDao = vedtakDao,
+        personDao = personDao,
+        commandContextDao = commandContextDao,
+        hendelseDao = hendelseDao,
+        hendelsefabrikk = hendelsefabrikk,
+        oppgaveMediator = oppgaveMediator
     )
     protected val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
 

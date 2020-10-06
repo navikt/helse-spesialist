@@ -19,16 +19,7 @@ internal class HendelseMediatorTest {
         mockk(),
         mockk(),
         mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        MiljøstyrtFeatureToggle(emptyMap())
+        mockk()
     )
 
     @Test

@@ -44,14 +44,14 @@ internal class NyVedtaksperiodeForkastetMessageTest {
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             risikovurderingDao = risikovurderingDao,
-            speilSnapshotRestClient = restClient,
             personDao = mockk(),
             arbeidsgiverDao = mockk(),
             reservasjonDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
-            oppgaveMediator = mockk(),
             digitalKontaktinformasjonDao = mockk(),
+            oppgaveMediator = mockk(),
+            speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),
             automatisering = mockk(relaxed = true)
         )

@@ -27,8 +27,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private lateinit var hendelsefabrikk: IHendelsefabrikk
     private lateinit var vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage
-
-    private lateinit var dao: HendelseDao
+    private lateinit var hendelseDao: HendelseDao
 
     @BeforeAll
     fun setup() {
@@ -39,17 +38,17 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             oppgaveDao = oppgaveDao,
-            speilSnapshotRestClient = restClient,
             reservasjonDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
-            oppgaveMediator = mockk(),
             risikovurderingDao = mockk(),
             digitalKontaktinformasjonDao = mockk(),
+            oppgaveMediator = mockk(),
+            speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),
             automatisering = mockk(relaxed = true)
         )
-        dao = HendelseDao(dataSource, hendelsefabrikk)
+        hendelseDao = HendelseDao(dataSource, hendelsefabrikk)
     }
 
     @BeforeEach
@@ -64,8 +63,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer og finner hendelser`() {
-        dao.opprett(vedtaksperiodeForkastetMessage)
-        val actual = dao.finn(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        hendelseDao.opprett(vedtaksperiodeForkastetMessage)
+        val actual = hendelseDao.finn(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
 
         assertNull(finnKobling())
 
@@ -79,7 +78,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        dao.opprett(vedtaksperiodeForkastetMessage)
+        hendelseDao.opprett(vedtaksperiodeForkastetMessage)
 
         assertEquals(vedtakId, finnKobling())
     }
@@ -88,7 +87,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     fun `finner fødselsnummer ved hjelp av hendelseId`() {
         nyPerson()
         godkjenningsbehov(HENDELSE_ID)
-        assertEquals(FNR, dao.finnFødselsnummer(HENDELSE_ID))
+        assertEquals(FNR, hendelseDao.finnFødselsnummer(HENDELSE_ID))
     }
 
     private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = using(sessionOf(dataSource)) { session ->

@@ -1,6 +1,9 @@
 package no.nav.helse.modell.command
 
-import kotliquery.*
+import kotliquery.TransactionalSession
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
@@ -9,10 +12,7 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-internal class HendelseDao(
-    private val dataSource: DataSource,
-    private val hendelsefabrikk: IHendelsefabrikk
-) {
+internal class HendelseDao(private val dataSource: DataSource, private val hendelsefabrikk: IHendelsefabrikk) {
     internal fun opprett(hendelse: Hendelse) {
         using(sessionOf(dataSource)) { session ->
             session.transaction { transactionalSession ->
