@@ -1,8 +1,11 @@
 package no.nav.helse.modell.command.nyny
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -39,6 +42,8 @@ internal class OppdaterSnapshotCommand(
         log.info("oppdaterer snapshot for $vedtaksperiodeId")
         return speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer).let {
             snapshotDao.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, it) != 0
+            val warnings = objectMapper.readValue<PersonFraSpleisDto>(it).arbeidsgivere[0].vedtaksperioder[0].findPath("aktivitetslogg")
+            vedtakDao.oppdaterWarnings()
         }
     }
 }
