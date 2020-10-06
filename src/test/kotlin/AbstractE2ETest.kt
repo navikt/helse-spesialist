@@ -351,6 +351,19 @@ internal abstract class AbstractE2ETest {
         })
     }
 
+    protected fun assertWarning(forventet: String, vedtaksperiodeId: UUID) {
+        assertEquals(forventet, using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId
+                    )
+                ).map { it.string("melding") }.asList
+            )
+        }.first())
+    }
+
     protected fun TestRapid.RapidInspector.meldinger() =
         (0 until size).map { index -> message(index) }
 

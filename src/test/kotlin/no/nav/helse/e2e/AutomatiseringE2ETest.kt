@@ -156,6 +156,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+        assertWarning("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes", VEDTAKSPERIODE_ID)
     }
 
     @Test

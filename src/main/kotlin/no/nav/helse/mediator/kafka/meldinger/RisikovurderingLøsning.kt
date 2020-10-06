@@ -34,6 +34,8 @@ internal class RisikovurderingLøsning(
         )
     }
 
+    internal fun medførerWarning() = ufullstendig || arbeidsuførhetvurdering.isNotEmpty()
+
     internal class V2River(
         rapidsConnection: RapidsConnection,
         private val hendelseMediator: HendelseMediator

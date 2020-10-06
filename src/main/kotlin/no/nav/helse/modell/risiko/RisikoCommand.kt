@@ -3,6 +3,7 @@ package no.nav.helse.modell.risiko
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ internal class RisikoCommand(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
+    private val vedtakDao: VedtakDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : Command {
 
@@ -34,6 +36,9 @@ internal class RisikoCommand(
         val løsning = context.get<RisikovurderingLøsning>() ?: return false
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
+        if (løsning.medførerWarning()) {
+            vedtakDao.leggTilWarning(vedtaksperiodeId, "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes")
+        }
         return true
     }
 }

@@ -57,8 +57,10 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         val testwarnings= listOf("Warning A", "Warning B")
+        val testwarning = "Warning C"
         vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
-        assertEquals(testwarnings, vedtakDao.finnWarnings(VEDTAKSPERIODE))
+        vedtakDao.leggTilWarning(VEDTAKSPERIODE, testwarning)
+        assertEquals(testwarnings + listOf(testwarning), vedtakDao.finnWarnings(VEDTAKSPERIODE))
     }
 
     @Test

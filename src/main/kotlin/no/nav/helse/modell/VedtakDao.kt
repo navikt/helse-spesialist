@@ -84,6 +84,11 @@ internal class VedtakDao(private val dataSource: DataSource) {
         meldinger.forEach { melding -> session.insertWarning(vedtakRef, melding) }
     }
 
+    internal fun leggTilWarning(vedtaksperiodeId: UUID, melding: String) = using(sessionOf(dataSource)) { session ->
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        session.insertWarning(vedtakRef, melding)
+    }
+
     private fun Session.insertWarning(vedtakRef: Long, melding: String): Int {
         @Language("PostgreSQL")
         val statement = "INSERT INTO warning (melding, vedtak_ref) VALUES (?, ?)"

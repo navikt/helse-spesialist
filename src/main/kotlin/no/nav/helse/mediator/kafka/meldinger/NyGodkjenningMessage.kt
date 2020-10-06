@@ -73,6 +73,7 @@ internal class NyGodkjenningMessage(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
+            vedtakDao = vedtakDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
         AutomatiseringCommand(
