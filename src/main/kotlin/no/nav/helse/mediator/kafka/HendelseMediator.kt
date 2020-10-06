@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.kafka
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.Oppgavestatus
 import no.nav.helse.annulleringsteller
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
@@ -82,7 +83,7 @@ internal class HendelseMediator(
                 put("godkjenttidspunkt", LocalDateTime.now())
                 godkjenningDTO.årsak?.let { put("årsak", it) }
                 godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
-                godkjenningDTO.kommentar?.let<String, Unit> { put("kommentar", it) }
+                godkjenningDTO.kommentar?.let{ put("kommentar", it) }
             }).also {
             sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
@@ -93,6 +94,7 @@ internal class HendelseMediator(
             keyValue("hendelseId", hendelseId)
         )
         rapidsConnection.publish(godkjenningMessage.toJson())
+        oppgaveMediator.oppdater(hendelseId, contextId, godkjenningDTO.oppgavereferanse, Oppgavestatus.AvventerSystem, godkjenningDTO.saksbehandlerIdent, oid)
     }
 
     override fun vedtaksperiodeEndret(

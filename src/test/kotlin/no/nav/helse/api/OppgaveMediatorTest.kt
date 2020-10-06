@@ -61,8 +61,8 @@ internal class OppgaveMediatorTest {
         mediator.oppgave(oppgave1, null)
         mediator.oppgave(oppgave2, null)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, VEDTAKREF) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, VEDTAKREF) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN1, VEDTAKREF) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN2, VEDTAKREF) }
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertOppgaveevent(1, "oppgave_opprettet")
@@ -97,8 +97,8 @@ internal class OppgaveMediatorTest {
         testRapid.reset()
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         assertEquals(0, testRapid.inspektør.size)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN1, any()) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN2, any()) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN1, any()) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN2, any()) }
     }
 
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {
@@ -106,7 +106,6 @@ internal class OppgaveMediatorTest {
             assertEquals(navn, it.path("@event_name").asText())
             assertEquals(HENDELSE_ID, UUID.fromString(it.path("hendelseId").asText()))
             assertEquals(COMMAND_CONTEXT_ID, UUID.fromString(it.path("contextId").asText()))
-            assertEquals(VEDTAKSPERIODE_ID, UUID.fromString(it.path("vedtaksperiodeId").asText()))
             assertEquals(status, enumValueOf<Oppgavestatus>(it.path("status").asText()))
             assertTrue(it.hasNonNull("oppgaveId"))
             assertBlock(it)

@@ -52,19 +52,17 @@ internal class OppgaveMediator(
     ): Long {
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
         return oppgaveDao.opprettOppgave(
-            hendelseId,
             contextId,
             navn,
             vedtakRef
         ).also { oppgaveId ->
-            køMelding("oppgave_opprettet", hendelseId, contextId, vedtaksperiodeId, oppgaveId, AvventerSaksbehandler)
+            køMelding("oppgave_opprettet", hendelseId, contextId, oppgaveId, AvventerSaksbehandler)
         }
     }
 
     internal fun oppdater(
         hendelseId: UUID,
         contextId: UUID,
-        vedtaksperiodeId: UUID,
         oppgaveId: Long,
         status: Oppgavestatus,
         ferdigstiltAvIdent: String?,
@@ -75,7 +73,6 @@ internal class OppgaveMediator(
             "oppgave_oppdatert",
             hendelseId,
             contextId,
-            vedtaksperiodeId,
             oppgaveId,
             status,
             ferdigstiltAvIdent,
@@ -87,7 +84,6 @@ internal class OppgaveMediator(
         eventNavn: String,
         hendelseId: UUID,
         contextId: UUID,
-        vedtaksperiodeId: UUID,
         oppgaveId: Long,
         status: Oppgavestatus,
         ferdigstiltAvIdent: String? = null,
@@ -100,7 +96,6 @@ internal class OppgaveMediator(
                 "@opprettet" to LocalDateTime.now(),
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
-                "vedtaksperiodeId" to vedtaksperiodeId,
                 "oppgaveId" to oppgaveId,
                 "status" to status.name
             ).apply {

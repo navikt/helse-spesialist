@@ -192,7 +192,6 @@ internal abstract class DatabaseIntegrationTest {
         vedtakId: Long? = null
     ) {
         oppgaveId = oppgaveDao.opprettOppgave(
-            hendelseId,
             contextId,
             OPPGAVETYPE,
             vedtakId

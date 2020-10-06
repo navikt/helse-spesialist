@@ -46,7 +46,7 @@ internal class OppgaveTest {
     fun `oppretter ny oppgave`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
         oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(HENDELSE_ID, COMMAND_CONTEXT_ID, OPPGAVENAVN, VEDTAKREF) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN, VEDTAKREF) }
     }
 
     @Test

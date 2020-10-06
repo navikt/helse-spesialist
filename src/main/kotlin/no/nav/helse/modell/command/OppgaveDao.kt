@@ -39,12 +39,11 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         }
 
     internal fun opprettOppgave(
-        eventId: UUID,
         commandContextId: UUID,
         oppgavetype: String,
         vedtakRef: Long?
     ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertOppgave(eventId, oppgavetype, AvventerSaksbehandler, null, null, vedtakRef, commandContextId)
+        it.insertOppgave(oppgavetype, AvventerSaksbehandler, null, null, vedtakRef, commandContextId)
     }) { "Kunne ikke opprette oppgave" }
 
     internal fun updateOppgave(
@@ -117,8 +116,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-    fun Session.insertOppgave(
-        eventId: UUID,
+    private fun Session.insertOppgave(
         oppgavetype: String,
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String?,
@@ -155,6 +153,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
+
+
     fun Session.findSaksbehandlerOppgaver(): List<SaksbehandleroppgaveDto> {
         @Language("PostgreSQL")
         val query = """
@@ -184,8 +184,6 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-
-
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
         oppgavereferanse = it.long("oppgave_id"),
         saksbehandlerepost = it.stringOrNull("epost"),
@@ -206,6 +204,5 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         type = it.stringOrNull("saksbehandleroppgavetype")?.let { type -> Saksbehandleroppgavetype.valueOf(type) },
         boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn"))
     )
-
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }
