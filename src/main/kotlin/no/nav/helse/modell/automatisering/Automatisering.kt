@@ -24,17 +24,18 @@ internal class Automatisering(
         val støttetOppgavetype =
             vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) == Saksbehandleroppgavetype.FORLENGELSE
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer) ?: false
-        val resultat = okRisikovurdering && ingenWarnings && støttetOppgavetype && erDigital
-        logg.info(
-            "Vedtaksperiode: {} vurderes som {} for automatisering [okRisikovurdering: {}, ingenWarnings: {}, støttetOppgavetype: {}, erDigital: {}]",
-            vedtaksperiodeId.toString(),
-            if (resultat) { "ok" } else { "ikke ok" },
-            okRisikovurdering,
-            ingenWarnings,
-            støttetOppgavetype,
-            erDigital
-        )
-        return okRisikovurdering && ingenWarnings && støttetOppgavetype && erDigital
+        return (okRisikovurdering && ingenWarnings && støttetOppgavetype && erDigital)
+            .also { okForAutomatisering ->
+                logg.info(
+                    "Vedtaksperiode: {} vurderes som {} for automatisering [okRisikovurdering: {}, ingenWarnings: {}, støttetOppgavetype: {}, erDigital: {}]",
+                    vedtaksperiodeId.toString(),
+                    if (okForAutomatisering) "ok" else "ikke ok",
+                    okRisikovurdering,
+                    ingenWarnings,
+                    støttetOppgavetype,
+                    erDigital
+                )
+            }
     }
 
     fun lagre(bleAutomatisert: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID) {
