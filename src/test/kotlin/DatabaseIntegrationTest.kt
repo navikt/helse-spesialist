@@ -130,15 +130,17 @@ internal abstract class DatabaseIntegrationTest {
 
     protected fun godkjenningsbehov(
         hendelseId: UUID,
-        fødselsnummer: String = FNR
+        fødselsnummer: String = FNR,
+        json: String = "{}"
     ) {
-        lagreHendelse(hendelseId, fødselsnummer, "GODKJENNING")
+        lagreHendelse(hendelseId, fødselsnummer, "GODKJENNING", json)
     }
 
     private fun lagreHendelse(
         hendelseId: UUID,
         fødselsnummer: String = FNR,
-        type: String
+        type: String,
+        json: String = "{}"
     ) {
         using(sessionOf(dataSource)) {
             it.run(
@@ -146,7 +148,7 @@ internal abstract class DatabaseIntegrationTest {
                     "INSERT INTO hendelse(id, fodselsnummer, data, type) VALUES(?, ?, ?::json, ?)",
                     hendelseId,
                     fødselsnummer.toLong(),
-                    "{}",
+                    json,
                     type
                 ).asExecute
             )

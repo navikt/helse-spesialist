@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
+import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
@@ -35,11 +36,15 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnJson(hendelseId: UUID): String {
+    internal fun finnUtbetalingsgodkjenningbehov(hendelseId: UUID): UtbetalingsgodkjenningMessage {
+        return UtbetalingsgodkjenningMessage(finnJson(hendelseId, GODKJENNING))
+    }
+
+    private fun finnJson(hendelseId: UUID, hendelsetype: Hendelsetype): String {
         return requireNotNull(using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
-            val statement = """SELECT data FROM hendelse WHERE id = ?"""
-            session.run(queryOf(statement, hendelseId).map { it.string("data") }.asSingle)
+            val statement = """SELECT data FROM hendelse WHERE id = ? AND type = ?"""
+            session.run(queryOf(statement, hendelseId, hendelsetype.name).map { it.string("data") }.asSingle)
         })
     }
 
