@@ -2,12 +2,10 @@ package no.nav.helse.modell.automatisering
 
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
+import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 internal class AutomatiseringCommand(
@@ -28,15 +26,8 @@ internal class AutomatiseringCommand(
             && automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId)
 
         if (kanAutomatiseres) {
-            val behov = JsonMessage(godkjenningsbehovJson, MessageProblems(godkjenningsbehovJson))
-            behov["@løsning"] = mapOf(
-                "Godkjenning" to mapOf(
-                    "godkjent" to true,
-                    "saksbehandlerIdent" to "Automatisk behandlet",
-                    "automatiskBehandling" to true,
-                    "godkjenttidspunkt" to LocalDateTime.now()
-                )
-            )
+            val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
+            behov.løsAutomatisk()
             context.publiser(behov.toJson())
             automatiseringsteller.inc()
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")

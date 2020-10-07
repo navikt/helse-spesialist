@@ -40,8 +40,7 @@ import no.nav.helse.tildeling.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VedtaksperiodeMediator
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -290,10 +289,10 @@ internal abstract class AbstractE2ETest {
 
     protected fun assertGodkjenningsbehovLøsning(godkjent: Boolean, saksbehandlerIdent: String) {
         assertLøsning("Godkjenning") {
-            Assertions.assertTrue(it.path("godkjent").isBoolean)
+            assertTrue(it.path("godkjent").isBoolean)
             assertEquals(godkjent, it.path("godkjent").booleanValue())
             assertEquals(saksbehandlerIdent, it.path("saksbehandlerIdent").textValue())
-            Assertions.assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
+            assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
         }
     }
 
@@ -302,11 +301,11 @@ internal abstract class AbstractE2ETest {
     }
 
     protected fun assertBehov(vararg behov: String) {
-        Assertions.assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
+        assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
     protected fun assertIkkeBehov(vararg behov: String) {
-        Assertions.assertFalse(testRapid.inspektør.behov().containsAll(behov.toList()))
+        assertFalse(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
     protected fun assertTilstand(hendelseId: UUID, vararg tilstand: String) {

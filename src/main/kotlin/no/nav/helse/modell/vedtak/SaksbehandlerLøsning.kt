@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtak
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.kafka.meldinger.IHendelseMediator
 import no.nav.helse.modell.Oppgave
+import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -19,18 +20,9 @@ internal class SaksbehandlerLøsning(
     private val kommentar: String?,
     private val oppgaveId: Long
 ) {
-    fun ferdigstillOppgave(oppgave: Oppgave, behov: JsonMessage) {
+    fun ferdigstillOppgave(oppgave: Oppgave, behov: UtbetalingsgodkjenningMessage) {
         oppgave.ferdigstill(oppgaveId, saksbehandlerIdent, oid)
-        behov["@løsning"] = mapOf(
-            "Godkjenning" to mapOf(
-                "godkjent" to godkjent,
-                "saksbehandlerIdent" to saksbehandlerIdent,
-                "godkjenttidspunkt" to godkjenttidspunkt,
-                "automatiskBehandling" to false,
-                "årsak" to årsak,
-                "begrunnelser" to begrunnelser,
-                "kommentar" to kommentar
-            ))
+        behov.løs(godkjent, saksbehandlerIdent, godkjenttidspunkt, årsak, begrunnelser, kommentar)
     }
 
     internal class SaksbehandlerLøsningRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {

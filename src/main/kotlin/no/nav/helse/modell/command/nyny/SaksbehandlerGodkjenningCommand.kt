@@ -1,11 +1,10 @@
 package no.nav.helse.modell.command.nyny
 
-import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.modell.Oppgave
+import no.nav.helse.modell.UtbetalingsgodkjenningMessage
+import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.tildeling.ReservasjonDao
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -42,7 +41,7 @@ internal class SaksbehandlerGodkjenningCommand(
     private fun behandle(context: CommandContext): Boolean {
         if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
 
-        val behov = JsonMessage(godkjenningsbehovJson, MessageProblems(godkjenningsbehovJson))
+        val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         val løsning = context.get<SaksbehandlerLøsning>() ?: return false
         logg.info("Ferdigstiller saksbehandleroppgave")
         løsning.ferdigstillOppgave(oppgave, behov)
