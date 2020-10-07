@@ -66,6 +66,7 @@ internal class DigitalKontaktinformasjonLøsning(
             hendelseMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
+                behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = digitalKontaktinformasjon,
                 context = context
             )

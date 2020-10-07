@@ -175,13 +175,13 @@ internal abstract class AbstractE2ETest {
         )
     }
 
-    protected fun sendPersoninfoløsning(hendelseId: UUID, orgnr: String, vedtaksperiodeId: UUID) =
+    protected fun sendPersoninfoløsning(hendelseId: UUID, orgnr: String, vedtaksperiodeId: UUID, contextId: UUID = testRapid.inspektør.contextId()) =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagPersoninfoløsning(
                     id,
                     hendelseId,
-                    testRapid.inspektør.contextId(),
+                    contextId,
                     vedtaksperiodeId,
                     orgnr
                 )

@@ -34,14 +34,11 @@ internal class ÅpneGosysOppgaverLøsning(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireKey("@id")
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("ÅpneOppgaver"))
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.demandKey("contextId")
-                    it.demandKey("hendelseId")
-                    it.demandKey("fødselsnummer")
+                    it.requireKey("@id", "contextId", "hendelseId", "fødselsnummer")
                     it.requireKey("@løsning.ÅpneOppgaver.antall")
                     it.requireKey("@løsning.ÅpneOppgaver.oppslagFeilet")
                 }
@@ -68,6 +65,7 @@ internal class ÅpneGosysOppgaverLøsning(
             hendelseMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
+                behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = åpneGosysOppgaver,
                 context = context
             )

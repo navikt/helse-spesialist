@@ -33,7 +33,7 @@ internal class SaksbehandlerLøsning(
                 .apply {
                     validate {
                         it.demandValue("@event_name", "saksbehandler_løsning")
-                        it.requireKey("oppgaveId", "contextId", "hendelseId")
+                        it.requireKey("@id", "oppgaveId", "contextId", "hendelseId")
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
                         it.interestedIn("årsak", "begrunnelser", "kommentar")
@@ -48,7 +48,7 @@ internal class SaksbehandlerLøsning(
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, SaksbehandlerLøsning(
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), SaksbehandlerLøsning(
                 packet["godkjent"].asBoolean(),
                 packet["saksbehandlerident"].asText(),
                 UUID.fromString(packet["saksbehandleroid"].asText()),

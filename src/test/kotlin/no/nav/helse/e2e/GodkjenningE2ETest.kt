@@ -38,6 +38,14 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `ignorerer behov uten tilhørende command`() {
+        val hendelseId = UUID.randomUUID()
+        val contextId = UUID.randomUUID()
+        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID, contextId)
+        assertIkkeHendelse(hendelseId)
+    }
+
+    @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)

@@ -31,6 +31,6 @@ internal class SaksbehandlerLøsningRiverTest {
     @Test
     fun `leser saksbehandlerløsning`() {
         testRapid.sendTestMessage(testmeldingfabrikk.lagSaksbehandlerløsning(hendelseId = HENDELSE, contextId = CONTEXT))
-        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any<SaksbehandlerLøsning>(), any()) }
+        verify(exactly = 1) { mediator.løsning(HENDELSE, CONTEXT, any(), any<SaksbehandlerLøsning>(), any()) }
     }
 }

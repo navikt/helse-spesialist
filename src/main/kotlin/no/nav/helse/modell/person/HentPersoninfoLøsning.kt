@@ -36,7 +36,7 @@ internal class HentPersoninfoLøsning(
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
                     it.demandAll("@behov", listOf("HentPersoninfo"))
-                    it.requireKey("contextId", "hendelseId")
+                    it.requireKey("@id", "contextId", "hendelseId")
                     it.requireKey("@løsning.HentPersoninfo.fornavn", "@løsning.HentPersoninfo.etternavn",
                         "@løsning.HentPersoninfo.fødselsdato", "@løsning.HentPersoninfo.kjønn")
                     it.interestedIn("@løsning.HentPersoninfo.mellomnavn")
@@ -56,7 +56,7 @@ internal class HentPersoninfoLøsning(
             val etternavn = packet["@løsning.HentPersoninfo.etternavn"].asText()
             val fødselsdato = packet["@løsning.HentPersoninfo.fødselsdato"].asLocalDate()
             val kjønn = Kjønn.valueOf(packet["@løsning.HentPersoninfo.kjønn"].textValue())
-            mediator.løsning(hendelseId, contextId, HentPersoninfoLøsning(
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentPersoninfoLøsning(
                 fornavn,
                 mellomnavn,
                 etternavn,

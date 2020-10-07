@@ -37,7 +37,7 @@ internal class ArbeidsgiverLøsning(private val navn: String) {
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, ArbeidsgiverLøsning(packet["@løsning.HentArbeidsgiverNavn"].asText()), context)
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), ArbeidsgiverLøsning(packet["@løsning.HentArbeidsgiverNavn"].asText()), context)
         }
     }
 }

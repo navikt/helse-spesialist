@@ -39,7 +39,7 @@ internal class HentEnhetLøsning(private val enhetNr: String) {
                         it.demandValue("@event_name", "behov")
                         it.demandValue("@final", true)
                         it.demandAll("@behov", listOf("HentEnhet"))
-                        it.requireKey("contextId", "hendelseId", "@løsning.HentEnhet")
+                        it.requireKey("@id", "contextId", "hendelseId", "@løsning.HentEnhet")
                     }
                 }.register(this)
         }
@@ -51,7 +51,7 @@ internal class HentEnhetLøsning(private val enhetNr: String) {
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, HentEnhetLøsning(packet["@løsning.HentEnhet"].asText()), context)
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentEnhetLøsning(packet["@løsning.HentEnhet"].asText()), context)
         }
     }
 }

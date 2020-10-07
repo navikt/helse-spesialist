@@ -6,6 +6,7 @@ import no.nav.helse.annulleringsteller
 import no.nav.helse.api.*
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import no.nav.helse.modell.command.HendelseDao
@@ -33,7 +34,7 @@ internal class HendelseMediator(
     private val commandContextDao: CommandContextDao,
     private val hendelseDao: HendelseDao,
     private val oppgaveMediator: OppgaveMediator,
-    private val hendelsefabrikk: Hendelsefabrikk
+    private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -64,8 +65,14 @@ internal class HendelseMediator(
     private var løsninger: Løsninger? = null
 
     // samler opp løsninger
-    override fun løsning(hendelseId: UUID, contextId: UUID, løsning: Any, context: RapidsConnection.MessageContext) {
-        løsninger(hendelseId, contextId)?.add(hendelseId, contextId, løsning)
+    override fun løsning(hendelseId: UUID, contextId: UUID, behovId: UUID, løsning: Any, context: RapidsConnection.MessageContext) {
+        withMDC(mapOf(
+            "behovId" to "$behovId"
+        )) {
+            løsninger(hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
+                ?: log.warn("mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
+                    "eller fordi hendelsen $hendelseId er ukjent")
+        }
     }
 
     internal fun håndter(godkjenningDTO: GodkjenningDTO, epost: String, oid: UUID) {
@@ -84,7 +91,7 @@ internal class HendelseMediator(
                 put("godkjenttidspunkt", LocalDateTime.now())
                 godkjenningDTO.årsak?.let { put("årsak", it) }
                 godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
-                godkjenningDTO.kommentar?.let{ put("kommentar", it) }
+                godkjenningDTO.kommentar?.let { put("kommentar", it) }
             }).also {
             sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
@@ -95,7 +102,14 @@ internal class HendelseMediator(
             keyValue("hendelseId", hendelseId)
         )
         rapidsConnection.publish(godkjenningMessage.toJson())
-        oppgaveMediator.oppdater(hendelseId, contextId, godkjenningDTO.oppgavereferanse, Oppgavestatus.AvventerSystem, godkjenningDTO.saksbehandlerIdent, oid)
+        oppgaveMediator.oppdater(
+            hendelseId,
+            contextId,
+            godkjenningDTO.oppgavereferanse,
+            Oppgavestatus.AvventerSystem,
+            godkjenningDTO.saksbehandlerIdent,
+            oid
+        )
     }
 
     override fun vedtaksperiodeEndret(
@@ -105,7 +119,11 @@ internal class HendelseMediator(
         fødselsnummer: String,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(vedtaksperiodeId, hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()), context)
+        utfør(
+            vedtaksperiodeId,
+            hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
+            context
+        )
     }
 
     override fun vedtaksperiodeForkastet(
@@ -314,7 +332,12 @@ internal class HendelseMediator(
                 behovMediator.håndter(hendelse, context, contextId)
                 oppgaveMediator.lagreOppgaver(hendelse, messageContext, contextId)
             } catch (err: Exception) {
-                log.warn("Feil ved kjøring av ${hendelse::class.simpleName}: contextId={}, message={}", contextId, err.message, err)
+                log.warn(
+                    "Feil ved kjøring av ${hendelse::class.simpleName}: contextId={}, message={}",
+                    contextId,
+                    err.message,
+                    err
+                )
                 hendelse.undo(context)
                 throw err
             } finally {

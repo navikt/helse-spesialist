@@ -91,6 +91,7 @@ internal class RisikovurderingLøsning(
             hendelseMediator.løsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
+                behovId = UUID.fromString(packet["@id"].asText()),
                 løsning = risikovurdering,
                 context = context
             )
