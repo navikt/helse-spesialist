@@ -35,6 +35,14 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun finnJson(hendelseId: UUID): String {
+        return requireNotNull(using(sessionOf(dataSource)) { session ->
+            @Language("PostgreSQL")
+            val statement = """SELECT data FROM hendelse WHERE id = ?"""
+            session.run(queryOf(statement, hendelseId).map { it.string("data") }.asSingle)
+        })
+    }
+
     private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"

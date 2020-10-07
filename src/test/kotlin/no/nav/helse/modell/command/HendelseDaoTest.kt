@@ -71,6 +71,13 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner json`() {
+        hendelseDao.opprett(vedtaksperiodeForkastetMessage)
+        val actual = hendelseDao.finnJson(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        assertEquals(vedtaksperiodeForkastetMessage.toJson(), actual)
+    }
+
+    @Test
     fun `lagrer hendelser inkludert kobling til vedtak`() {
         opprettPerson()
         opprettArbeidsgiver()
