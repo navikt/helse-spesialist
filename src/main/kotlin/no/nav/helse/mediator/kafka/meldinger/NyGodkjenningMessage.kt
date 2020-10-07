@@ -73,6 +73,7 @@ internal class NyGodkjenningMessage(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
         ),
         ÅpneGosysOppgaverCommand(
+            aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao
         ),
         RisikoCommand(

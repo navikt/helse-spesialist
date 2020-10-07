@@ -17,10 +17,11 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     private companion object {
         private const val FNR = "12345678911"
+        private const val AKTØR_ID = "1234567891112"
     }
 
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(dao)
+    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao)
     private lateinit var context: CommandContext
 
     @BeforeEach

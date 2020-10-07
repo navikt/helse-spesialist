@@ -6,6 +6,7 @@ import no.nav.helse.modell.command.nyny.CommandContext
 import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverCommand(
+    private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
 ) : Command {
 
@@ -15,7 +16,9 @@ internal class ÅpneGosysOppgaverCommand(
 
     override fun execute(context: CommandContext): Boolean {
         logg.info("Trenger oppgaveinformasjon fra Gosys")
-        context.behov("ÅpneOppgaver")
+        context.behov("ÅpneOppgaver", mapOf(
+            "aktørId" to aktørId
+        ))
         return false
     }
 
