@@ -50,6 +50,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = hendelseId,
             erDigital = true
         )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = hendelseId
+        )
         assertSaksbehandlerOppgaveOpprettet(hendelseId)
         sendOverstyrteDager(ORGNR, SAKSBEHANDLER_EPOST, listOf(
             OverstyringDagDto(
@@ -71,6 +74,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId2,
             erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = hendelseId2
         )
         val oppgave = oppgaveDao.finnOppgaver().find { it.fødselsnummer == FØDSELSNUMMER }
         assertNotNull(oppgave)
@@ -122,6 +128,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId2,
             erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = hendelseId2
         )
 
         // TODO: bør ikke koble seg på daoer i E2E

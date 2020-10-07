@@ -270,6 +270,30 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             )
         )
 
+    fun lagÅpneGosysOppgaverløsning(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        antall: Int = 0,
+        oppslagFeilet: Boolean = false
+    ): String =
+        nyHendelse(
+            id,
+            "behov", mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("ÅpneOppgaver"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "@løsning" to mapOf(
+                    "ÅpneOppgaver" to mapOf(
+                        "antall" to antall,
+                        "oppslagFeilet" to oppslagFeilet
+                    )
+                )
+            )
+        )
+
     fun lagRisikovurderingløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),

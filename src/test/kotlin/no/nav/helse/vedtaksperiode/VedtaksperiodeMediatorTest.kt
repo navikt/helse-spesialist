@@ -48,6 +48,9 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID

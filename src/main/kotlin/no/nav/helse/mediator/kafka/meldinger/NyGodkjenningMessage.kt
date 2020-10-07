@@ -14,6 +14,8 @@ import no.nav.helse.modell.command.nyny.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -43,6 +45,7 @@ internal class NyGodkjenningMessage(
     risikovurderingDao: RisikovurderingDao,
     reservasjonDao: ReservasjonDao,
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
+    åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
@@ -68,6 +71,9 @@ internal class NyGodkjenningMessage(
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
+        ),
+        ÅpneGosysOppgaverCommand(
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao
         ),
         RisikoCommand(
             organisasjonsnummer = organisasjonsnummer,

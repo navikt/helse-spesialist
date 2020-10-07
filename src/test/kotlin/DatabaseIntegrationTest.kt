@@ -17,6 +17,7 @@ import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
@@ -105,6 +106,7 @@ internal abstract class DatabaseIntegrationTest {
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
     internal val automatiseringDao = AutomatiseringDao(dataSource)
     internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
 
     @BeforeEach
     internal fun resetDatabase() {

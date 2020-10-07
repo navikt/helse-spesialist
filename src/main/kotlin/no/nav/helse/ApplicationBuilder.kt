@@ -26,6 +26,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -96,6 +97,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -114,6 +116,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         overstyringDao = OverstyringDao(dataSource),
         risikovurderingDao = risikovurderingDao,
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
@@ -121,7 +124,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             vedtakDao,
             risikovurderingDao,
             AutomatiseringDao(dataSource),
-            digitalKontaktinformasjonDao
+            digitalKontaktinformasjonDao,
+            åpneGosysOppgaverDao
         )
     )
 

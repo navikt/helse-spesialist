@@ -53,6 +53,7 @@ internal class OverstyringMessageTest {
         oppgaveMediator = mockk(),
         speilSnapshotRestClient = mockk(),
         digitalKontaktinformasjonDao = mockk(),
+        åpneGosysOppgaverDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)
     )

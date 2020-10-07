@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.slf4j.LoggerFactory
@@ -11,7 +12,8 @@ internal class Automatisering(
     private val vedtakDao: VedtakDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val automatiseringDao: AutomatiseringDao,
-    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao
+    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
+    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
 ) {
     companion object {
         private val logg = LoggerFactory.getLogger(Automatisering::class.java)
@@ -24,16 +26,18 @@ internal class Automatisering(
         val støttetOppgavetype =
             vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) == Saksbehandleroppgavetype.FORLENGELSE
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer) ?: false
-        return (okRisikovurdering && ingenWarnings && støttetOppgavetype && erDigital)
+        val harÅpneGosysOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)?.let { it > 0 } ?: true
+        return (okRisikovurdering && ingenWarnings && støttetOppgavetype && erDigital && !harÅpneGosysOppgaver)
             .also { okForAutomatisering ->
                 logg.info(
-                    "Vedtaksperiode: {} vurderes som {} for automatisering [okRisikovurdering: {}, ingenWarnings: {}, støttetOppgavetype: {}, erDigital: {}]",
+                    "Vedtaksperiode: {} vurderes som {} for automatisering [okRisikovurdering: {}, ingenWarnings: {}, støttetOppgavetype: {}, erDigital: {}, harÅpneGosysoppgaver: {}]",
                     vedtaksperiodeId.toString(),
                     if (okForAutomatisering) "ok" else "ikke ok",
                     okRisikovurdering,
                     ingenWarnings,
                     støttetOppgavetype,
-                    erDigital
+                    erDigital,
+                    harÅpneGosysOppgaver
                 )
             }
     }

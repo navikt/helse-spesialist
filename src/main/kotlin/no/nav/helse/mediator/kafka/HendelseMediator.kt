@@ -56,6 +56,7 @@ internal class HendelseMediator(
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
             OverstyringMessage.OverstyringRiver(it, this)
             DigitalKontaktinformasjonLøsning.DigitalKontaktinformasjonRiver(it, this)
+            ÅpneGosysOppgaverLøsning.ÅpneGosysOppgaverRiver(it, this)
             RisikovurderingLøsning.V2River(it, this)
         }
     }

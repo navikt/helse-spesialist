@@ -46,8 +46,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
@@ -61,9 +64,12 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(true, SAKSBEHANDLERIDENT)
     }
@@ -77,9 +83,12 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovLøsning(false, SAKSBEHANDLERIDENT)
     }

@@ -63,6 +63,7 @@ internal class NyGodkjenningMessageTest {
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
         digitalKontaktinformasjonDao = mockk(relaxed = true),
+        åpneGosysOppgaverDao = mockk(relaxed = true),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)
     )
@@ -105,9 +106,12 @@ internal class NyGodkjenningMessageTest {
         assertFalse(godkjenningMessage.execute(context))
 
         context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
-
         assertFalse(godkjenningMessage.resume(context))
-        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
+
+        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
+        assertFalse(godkjenningMessage.resume(context))
+
+        assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.nyOppgave(any()) }
     }
 
@@ -125,9 +129,12 @@ internal class NyGodkjenningMessageTest {
         assertFalse(godkjenningMessage.execute(context))
 
         context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
-
         assertFalse(godkjenningMessage.resume(context))
-        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
+
+        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
+        assertFalse(godkjenningMessage.resume(context))
+
+        assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.tildel(any(), reservasjon.first, reservasjon.second) }
     }
 
@@ -157,9 +164,12 @@ internal class NyGodkjenningMessageTest {
         assertFalse(godkjenningMessage.execute(context))
 
         context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+        assertFalse(godkjenningMessage.resume(context))
 
+        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
-        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
+
+        assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
 
         context.meldinger().also { meldinger ->
             assertEquals(1, meldinger.size)

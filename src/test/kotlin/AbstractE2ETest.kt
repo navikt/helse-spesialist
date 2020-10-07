@@ -27,6 +27,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -78,6 +79,7 @@ internal abstract class AbstractE2ETest {
     private val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
 
@@ -105,10 +107,11 @@ internal abstract class AbstractE2ETest {
         overstyringDao = OverstyringDao(dataSource),
         risikovurderingDao = risikovurderingDao,
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-        automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao)
+        automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao, åpneGosysOppgaverDao)
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -208,6 +211,24 @@ internal abstract class AbstractE2ETest {
                     godkjenningsmeldingId,
                     testRapid.inspektør.contextId(),
                     erDigital
+                )
+            )
+        }
+    }
+
+    protected fun sendÅpneGosysOppgaverløsning(
+        godkjenningsmeldingId: UUID,
+        antall: Int = 0,
+        oppslagFeilet: Boolean = false
+    ) {
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagÅpneGosysOppgaverløsning(
+                    id,
+                    godkjenningsmeldingId,
+                    testRapid.inspektør.contextId(),
+                    antall,
+                    oppslagFeilet
                 )
             )
         }
