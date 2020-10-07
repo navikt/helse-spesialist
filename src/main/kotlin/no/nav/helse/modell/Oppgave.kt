@@ -13,6 +13,7 @@ internal class Oppgave private constructor(
     private var id: Long? = null
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
+    private var tildeling: Pair<UUID, LocalDateTime>? = null
 
     constructor(id: Long, navn: String, status: Oppgavestatus, vedtaksperiodeId: UUID) : this(navn, status, vedtaksperiodeId) {
         this.id = id
@@ -30,11 +31,16 @@ internal class Oppgave private constructor(
     }
 
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
-        id?.also {
+        val oppgaveId = id?.also {
             oppgaveMediator.oppdater(hendelseId, contextId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: run {
-            id = oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn)
+        } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn).also { id = it }
+        tildeling?.also {
+            oppgaveMediator.tildel(oppgaveId, it)
         }
+    }
+
+    internal fun tildel(saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+        tildeling = saksbehandleroid to gyldigTil
     }
 
     internal fun tildel(oppgaveMediator: OppgaveMediator, reservasjon: Pair<UUID, LocalDateTime>) {

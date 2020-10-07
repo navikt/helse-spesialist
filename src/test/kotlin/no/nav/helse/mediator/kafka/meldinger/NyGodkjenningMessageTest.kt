@@ -108,7 +108,7 @@ internal class NyGodkjenningMessageTest {
 
         assertFalse(godkjenningMessage.resume(context))
         assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
-        verify(exactly = 1) { oppgaveMediator.oppgave(any(), any()) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(any()) }
     }
 
     @Test
@@ -128,7 +128,7 @@ internal class NyGodkjenningMessageTest {
 
         assertFalse(godkjenningMessage.resume(context))
         assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
-        verify(exactly = 1) { oppgaveMediator.oppgave(any(), reservasjon) }
+        verify(exactly = 1) { oppgaveMediator.tildel(any(), reservasjon.first, reservasjon.second) }
     }
 
     @Test

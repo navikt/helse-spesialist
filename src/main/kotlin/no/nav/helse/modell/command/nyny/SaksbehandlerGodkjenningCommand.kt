@@ -29,8 +29,10 @@ internal class SaksbehandlerGodkjenningCommand(
         if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
 
         logg.info("Oppretter saksbehandleroppgave")
-        val reservasjon = reservasjonDao.hentReservasjonFor(fødselsnummer)
-        oppgaveMediator.oppgave(oppgave, reservasjon)
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { reservasjon ->
+            oppgaveMediator.tildel(oppgave, reservasjon.first, reservasjon.second)
+        } ?: oppgaveMediator.nyOppgave(oppgave)
+
         return behandle(context)
     }
 
@@ -44,8 +46,7 @@ internal class SaksbehandlerGodkjenningCommand(
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         val løsning = context.get<SaksbehandlerLøsning>() ?: return false
         logg.info("Ferdigstiller saksbehandleroppgave")
-        løsning.ferdigstillOppgave(oppgave, behov)
-        oppgaveMediator.oppgave(oppgave)
+        løsning.ferdigstillOppgave(oppgaveMediator, oppgave, behov)
         context.publiser(behov.toJson())
         return true
     }

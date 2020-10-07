@@ -58,8 +58,8 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer oppgaver`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VedtakDto(VEDTAKREF, 2L)
-        mediator.oppgave(oppgave1, null)
-        mediator.oppgave(oppgave2, null)
+        mediator.nyOppgave(oppgave1)
+        mediator.nyOppgave(oppgave2)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN1, VEDTAKREF) }
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN2, VEDTAKREF) }
@@ -71,15 +71,14 @@ internal class OppgaveMediatorTest {
     @Test
     fun `lagrer tildeling`() {
         val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
-        mediator.oppgave(oppgave1, reservasjon)
+        mediator.tildel(oppgave1, reservasjon.first, reservasjon.second)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), reservasjon.first, reservasjon.second) }
     }
 
     @Test
     fun `oppdaterer oppgave`() {
-        oppgave1.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        mediator.oppgave(oppgave1, null)
+        mediator.ferdigstill(oppgave1, OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
@@ -91,8 +90,8 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer ikke dobbelt`() {
-        mediator.oppgave(oppgave1, null)
-        mediator.oppgave(oppgave2, null)
+        mediator.nyOppgave(oppgave1)
+        mediator.nyOppgave(oppgave2)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         testRapid.reset()
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)

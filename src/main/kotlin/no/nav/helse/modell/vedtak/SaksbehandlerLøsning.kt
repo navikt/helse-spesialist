@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.meldinger.IHendelseMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -20,8 +21,8 @@ internal class SaksbehandlerLøsning(
     private val kommentar: String?,
     private val oppgaveId: Long
 ) {
-    fun ferdigstillOppgave(oppgave: Oppgave, behov: UtbetalingsgodkjenningMessage) {
-        oppgave.ferdigstill(oppgaveId, saksbehandlerIdent, oid)
+    fun ferdigstillOppgave(mediator: OppgaveMediator, oppgave: Oppgave, behov: UtbetalingsgodkjenningMessage) {
+        mediator.ferdigstill(oppgave, oppgaveId, saksbehandlerIdent, oid)
         behov.løs(godkjent, saksbehandlerIdent, godkjenttidspunkt, årsak, begrunnelser, kommentar)
     }
 

@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtak
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import org.junit.jupiter.api.Test
@@ -19,14 +20,15 @@ internal class SaksbehandlerLøsningTest {
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
     }
 
-    private val oppgave = mockk<Oppgave>(relaxed = true)
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private val oppgave = Oppgave.avventerSaksbehandler("et navn", UUID.randomUUID())
 
     @Test
     fun `ferdigstiller oppgave`() {
         val godkjenningløsning = mockk<UtbetalingsgodkjenningMessage>(relaxed = true)
         val saksbehandlerLøsning = SaksbehandlerLøsning(GODKJENT, IDENT, SAKSBEHANDLER_OID, SAKSBEHANDLER_EPOST, GODKJENTTIDSPUNKT, null, null, null, OPPGAVE_ID)
-        saksbehandlerLøsning.ferdigstillOppgave(oppgave, godkjenningløsning)
-        verify(exactly = 1) { oppgave.ferdigstill(OPPGAVE_ID, IDENT, SAKSBEHANDLER_OID) }
+        saksbehandlerLøsning.ferdigstillOppgave(oppgaveMediator, oppgave, godkjenningløsning)
+        verify(exactly = 1) { oppgaveMediator.ferdigstill(oppgave, OPPGAVE_ID, IDENT, SAKSBEHANDLER_OID) }
         verify(exactly = 1) { godkjenningløsning.løs(true, IDENT, GODKJENTTIDSPUNKT, null, null, null) }
     }
 }

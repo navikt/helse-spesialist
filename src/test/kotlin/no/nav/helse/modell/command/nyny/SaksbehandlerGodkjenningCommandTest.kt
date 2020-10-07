@@ -1,12 +1,9 @@
 package no.nav.helse.modell.command.nyny
 
 import io.mockk.*
-import no.nav.helse.modell.automatisering.Automatisering
-import io.mockk.*
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.modell.Oppgave
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.*
@@ -19,7 +16,7 @@ import kotlin.random.Random.Default.nextLong
 internal class SaksbehandlerGodkjenningCommandTest {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val FNR = "12345678910"
+        private const val FNR = "12345678910"
         private const val JSON = "{}"
         private const val SAKSBEHANDLER = "Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
@@ -56,7 +53,7 @@ internal class SaksbehandlerGodkjenningCommandTest {
     fun `oppretter oppgave`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         assertFalse(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.oppgave(forventetOppgave, null) }
+        verify(exactly = 1) { oppgaveMediator.nyOppgave(forventetOppgave) }
     }
 
     @Test
@@ -64,7 +61,7 @@ internal class SaksbehandlerGodkjenningCommandTest {
         val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
         every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
         assertFalse(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.oppgave(forventetOppgave, reservasjon) }
+        verify(exactly = 1) { oppgaveMediator.tildel(forventetOppgave, reservasjon.first, reservasjon.second) }
     }
 
     @Test
@@ -87,9 +84,8 @@ internal class SaksbehandlerGodkjenningCommandTest {
         assertEquals(1, context.meldinger().size)
 
         verify(ordering = Ordering.SEQUENCE) {
-            oppgaveMediator.oppgave(eq(forventetOppgave), null)
-            forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
-            oppgaveMediator.oppgave(eq(forventetOppgave), null)
+            oppgaveMediator.nyOppgave(forventetOppgave)
+            oppgaveMediator.ferdigstill(forventetOppgave, OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
         }
     }
 
@@ -102,14 +98,13 @@ internal class SaksbehandlerGodkjenningCommandTest {
         assertTrue(command.execute(context))
 
         verify(ordering = Ordering.SEQUENCE) {
-            oppgaveMediator.oppgave(eq(forventetOppgave), reservasjon)
-            forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
-            oppgaveMediator.oppgave(eq(forventetOppgave), null)
+            oppgaveMediator.tildel(forventetOppgave, reservasjon.first, reservasjon.second)
+            oppgaveMediator.ferdigstill(forventetOppgave, OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
         }
     }
 
     @Test
-    fun resume() {
+    fun `ferdigstiller oppgave ved svar fra saksbehandler`() {
         context.add(
             SaksbehandlerLøsning(
                 true,
@@ -125,8 +120,6 @@ internal class SaksbehandlerGodkjenningCommandTest {
         )
         assertTrue(command.resume(context))
         assertEquals(1, context.meldinger().size)
-
-        forventetOppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID)
-        verify(exactly = 1) { oppgaveMediator.oppgave(eq(forventetOppgave), null) }
+        verify(exactly = 1) { oppgaveMediator.ferdigstill(forventetOppgave, OPPGAVE_ID, SAKSBEHANDLER, SAKSBEHANDLER_OID) }
     }
 }

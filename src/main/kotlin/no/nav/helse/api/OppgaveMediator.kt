@@ -17,25 +17,31 @@ internal class OppgaveMediator(
     private val vedtakDao: VedtakDao,
     private val tildelingDao: TildelingDao
 ) {
-
-    private val oppgaver = mutableMapOf<Oppgave, Pair<UUID, LocalDateTime>?>()
+    private val oppgaver = mutableSetOf<Oppgave>()
     private val meldinger = mutableListOf<String>()
 
     internal fun hentOppgaver() = oppgaveDao.finnOppgaver()
 
     internal fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 
-    internal fun oppgave(oppgave: Oppgave, reservasjon: Pair<UUID, LocalDateTime>? = null) {
-        oppgaver[oppgave] = reservasjon
+    internal fun nyOppgave(oppgave: Oppgave) {
+        oppgaver.add(oppgave)
+    }
+
+    internal fun tildel(oppgave: Oppgave, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+        oppgave.tildel(saksbehandleroid, gyldigTil)
+        nyOppgave(oppgave)
+    }
+
+    internal fun ferdigstill(oppgave: Oppgave, oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
+        oppgave.ferdigstill(oppgaveId, saksbehandlerIdent, oid)
+        nyOppgave(oppgave)
     }
 
     internal fun lagreOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
         oppgaver
-            .onEach { (oppgave, reservasjon) ->
+            .onEach { oppgave ->
                 oppgave.lagre(this, hendelse.id, contextId)
-                reservasjon?.let {
-                    oppgave.tildel(this, reservasjon)
-                }
             }.clear()
         meldinger.onEach { messageContext.send(it) }.clear()
     }
