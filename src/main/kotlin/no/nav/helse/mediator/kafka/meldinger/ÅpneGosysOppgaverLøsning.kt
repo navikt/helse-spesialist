@@ -39,7 +39,7 @@ internal class ÅpneGosysOppgaverLøsning(
                     it.demandAll("@behov", listOf("ÅpneOppgaver"))
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.requireKey("@id", "contextId", "hendelseId", "fødselsnummer")
-                    it.requireKey("@løsning.ÅpneOppgaver.antall")
+                    it.require("@løsning.ÅpneOppgaver.antall") {}
                     it.requireKey("@løsning.ÅpneOppgaver.oppslagFeilet")
                 }
             }.register(this)
