@@ -39,6 +39,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val testhendelsefabrikk =
         Hendelsefabrikk(
+            hendelseDao = mockk(),
             vedtakDao = vedtakDao,
             oppgaveDao = oppgaveDao,
             commandContextDao = commandContextDao,

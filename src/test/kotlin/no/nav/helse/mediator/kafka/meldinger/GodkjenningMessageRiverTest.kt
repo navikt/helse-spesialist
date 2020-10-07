@@ -34,6 +34,6 @@ internal class GodkjenningMessageRiverTest {
     @Test
     fun `leser Godkjenningbehov`() {
         testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, organisasjonsnummer = ORGNR, periodeFom = FOM, periodeTom = TOM))
-        verify(exactly = 1) { mediator.godkjenning(any(), HENDELSE, FNR, AKTØR, ORGNR, FOM, TOM, VEDTAKSPERIODE, emptyList(), Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, any()) }
+        verify(exactly = 1) { mediator.godkjenningsbehov(any(), HENDELSE, FNR, AKTØR, ORGNR, FOM, TOM, VEDTAKSPERIODE, emptyList(), Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, any()) }
     }
 }

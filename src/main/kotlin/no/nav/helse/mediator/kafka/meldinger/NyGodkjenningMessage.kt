@@ -11,11 +11,11 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.command.nyny.*
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -142,7 +142,7 @@ internal class NyGodkjenningMessage(
                 keyValue("hendelseId", hendelseId),
                 keyValue("hendelse", packet.toJson())
             )
-            mediator.godkjenning(
+            mediator.godkjenningsbehov(
                 message = packet,
                 id = hendelseId,
                 fødselsnummer = packet["fødselsnummer"].asText(),

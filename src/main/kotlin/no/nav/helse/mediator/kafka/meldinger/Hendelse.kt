@@ -5,6 +5,7 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal interface Hendelse : Command {
@@ -33,9 +34,27 @@ internal interface IHendelseMediator {
         context: RapidsConnection.MessageContext
     )
 
+    fun saksbehandlerløsning(
+        message: JsonMessage,
+        id: UUID,
+        godkjenningsbehovhendelseId: UUID,
+        contextId: UUID,
+        fødselsnummer: String,
+        godkjent: Boolean,
+        saksbehandlerident: String,
+        saksbehandleroid: UUID,
+        saksbehandlerepost: String,
+        godkjenttidspunkt: LocalDateTime,
+        årsak: String?,
+        begrunnelser: List<String>?,
+        kommentar: String?,
+        oppgaveId: Long,
+        context: RapidsConnection.MessageContext
+    )
+
     fun løsning(hendelseId: UUID, contextId: UUID, behovId: UUID, løsning: Any, context: RapidsConnection.MessageContext)
 
-    fun godkjenning(
+    fun godkjenningsbehov(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,

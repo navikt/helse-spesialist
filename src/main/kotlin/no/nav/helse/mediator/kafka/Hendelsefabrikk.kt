@@ -2,7 +2,6 @@ package no.nav.helse.mediator.kafka
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.api.OppgaveMediator
 import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -10,6 +9,8 @@ import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.command.HendelseDao
 import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -21,12 +22,15 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.tildeling.ReservasjonDao
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class Hendelsefabrikk(
+    private val hendelseDao: HendelseDao,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
@@ -99,6 +103,60 @@ internal class Hendelsefabrikk(
             warnings = jsonNode.path("warnings").path("aktiviteter").map(JsonNode::asText),
             periodetype = jsonNode.path("periodetype").takeUnless(JsonNode::isMissingOrNull)
                 ?.let { Saksbehandleroppgavetype.valueOf(it.asText()) },
+            json = json
+        )
+    }
+
+    override fun saksbehandlerløsning(
+        id: UUID,
+        godkjenningsbehovhendelseId: UUID,
+        contextId: UUID,
+        fødselsnummer: String,
+        godkjent: Boolean,
+        saksbehandlerident: String,
+        oid: UUID,
+        epostadresse: String,
+        godkjenttidspunkt: LocalDateTime,
+        årsak: String?,
+        begrunnelser: List<String>?,
+        kommentar: String?,
+        oppgaveId: Long,
+        json: String
+    ) = SaksbehandlerløsningMessage(
+        id = id,
+        fødselsnummer = fødselsnummer,
+        json = json,
+        godkjent = godkjent,
+        saksbehandlerIdent = saksbehandlerident,
+        oid = oid,
+        epostadresse = epostadresse,
+        godkjenttidspunkt = godkjenttidspunkt,
+        årsak = årsak,
+        begrunnelser = begrunnelser,
+        kommentar = kommentar,
+        oppgaveId = oppgaveId,
+        godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
+        hendelseDao = hendelseDao,
+        oppgaveMediator = oppgaveMediator,
+        oppgaveDao = oppgaveDao
+    )
+
+    override fun saksbehandlerløsning(json: String): SaksbehandlerløsningMessage {
+        val jsonNode = mapper.readTree(json)
+        return saksbehandlerløsning(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),
+            contextId = UUID.fromString(jsonNode["contextId"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            godkjent = jsonNode["godkjent"].asBoolean(),
+            saksbehandlerident = jsonNode["saksbehandlerident"].asText(),
+            oid = UUID.fromString(jsonNode["saksbehandleroid"].asText()),
+            epostadresse = jsonNode["saksbehandlerepost"].asText(),
+            godkjenttidspunkt = jsonNode["godkjenttidspunkt"].asLocalDateTime(),
+            årsak = jsonNode["årsak"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+            begrunnelser = jsonNode["begrunnelser"].takeUnless(JsonNode::isMissingOrNull)?.map(JsonNode::asText),
+            kommentar = jsonNode["kommentar"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+            oppgaveId = jsonNode["oppgaveId"].asLong(),
             json = json
         )
     }

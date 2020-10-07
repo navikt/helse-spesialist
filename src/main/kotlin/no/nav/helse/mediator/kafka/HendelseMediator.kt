@@ -140,7 +140,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun godkjenning(
+    override fun godkjenningsbehov(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -167,6 +167,41 @@ internal class HendelseMediator(
                 message.toJson()
             ), context
         )
+    }
+
+    override fun saksbehandlerløsning(
+        message: JsonMessage,
+        id: UUID,
+        godkjenningsbehovhendelseId: UUID,
+        contextId: UUID,
+        fødselsnummer: String,
+        godkjent: Boolean,
+        saksbehandlerident: String,
+        saksbehandleroid: UUID,
+        saksbehandlerepost: String,
+        godkjenttidspunkt: LocalDateTime,
+        årsak: String?,
+        begrunnelser: List<String>?,
+        kommentar: String?,
+        oppgaveId: Long,
+        context: RapidsConnection.MessageContext
+    ) {
+        utfør(fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
+            id,
+            godkjenningsbehovhendelseId,
+            contextId,
+            fødselsnummer,
+            godkjent,
+            saksbehandlerident,
+            saksbehandleroid,
+            saksbehandlerepost,
+            godkjenttidspunkt,
+            årsak,
+            begrunnelser,
+            kommentar,
+            oppgaveId,
+            message.toJson()
+        ), context)
     }
 
     override fun overstyring(

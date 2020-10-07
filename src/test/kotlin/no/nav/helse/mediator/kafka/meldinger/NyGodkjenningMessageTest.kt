@@ -50,6 +50,7 @@ internal class NyGodkjenningMessageTest {
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
+        hendelseDao = mockk(),
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
         vedtakDao = vedtakDao,

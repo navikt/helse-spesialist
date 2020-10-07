@@ -4,6 +4,7 @@ import no.nav.helse.mediator.kafka.meldinger.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal interface IHendelsefabrikk {
@@ -22,6 +23,24 @@ internal interface IHendelsefabrikk {
         json: String
     ): NyVedtaksperiodeForkastetMessage
     fun nyNyVedtaksperiodeForkastet(json: String): NyVedtaksperiodeForkastetMessage
+
+    fun saksbehandlerløsning(
+        id: UUID,
+        godkjenningsbehovhendelseId: UUID,
+        contextId: UUID,
+        fødselsnummer: String,
+        godkjent: Boolean,
+        saksbehandlerident: String,
+        oid: UUID,
+        epostadresse: String,
+        godkjenttidspunkt: LocalDateTime,
+        årsak: String?,
+        begrunnelser: List<String>?,
+        kommentar: String?,
+        oppgaveId: Long,
+        json: String
+    ): SaksbehandlerløsningMessage
+    fun saksbehandlerløsning(json: String): SaksbehandlerløsningMessage
 
     fun nyGodkjenning(
         id: UUID,

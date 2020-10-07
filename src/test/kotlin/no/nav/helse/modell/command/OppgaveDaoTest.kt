@@ -79,6 +79,13 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner vedtaksperiodeId`() {
+        nyPerson()
+        val actual = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
+        assertEquals(VEDTAKSPERIODE, actual)
+    }
+
+    @Test
     fun `finner oppgaver med tildeling`() {
         nyPerson()
         assertEquals(null, oppgaveDao.finnOppgaver().first().saksbehandlerepost)

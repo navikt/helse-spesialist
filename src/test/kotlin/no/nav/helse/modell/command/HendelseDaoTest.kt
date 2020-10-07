@@ -31,6 +31,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @BeforeAll
     fun setup() {
         hendelsefabrikk = Hendelsefabrikk(
+            hendelseDao = hendelseDao,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,

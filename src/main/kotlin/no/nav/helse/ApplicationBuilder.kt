@@ -105,6 +105,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
 
     private val hendelsefabrikk = Hendelsefabrikk(
+        hendelseDao = hendelseDao,
         personDao = personDao,
         arbeidsgiverDao = ArbeidsgiverDao(dataSource),
         vedtakDao = vedtakDao,

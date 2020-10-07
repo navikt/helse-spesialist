@@ -233,6 +233,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
     ) =
         nyHendelse(
             id, "saksbehandler_løsning", mutableMapOf<String, Any>(
+                "fødselsnummer" to fødselsnummer,
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
                 "oppgaveId" to oppgaveId,

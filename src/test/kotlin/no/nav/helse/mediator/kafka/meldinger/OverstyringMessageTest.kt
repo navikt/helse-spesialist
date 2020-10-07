@@ -40,6 +40,7 @@ internal class OverstyringMessageTest {
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
+        hendelseDao = mockk(),
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,

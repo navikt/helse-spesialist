@@ -96,6 +96,7 @@ internal abstract class AbstractE2ETest {
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
     private val hendelsefabrikk = Hendelsefabrikk(
+        hendelseDao = hendelseDao,
         personDao = personDao,
         arbeidsgiverDao = ArbeidsgiverDao(dataSource),
         vedtakDao = vedtakDao,

@@ -58,6 +58,17 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             }.asSingle)
     }
 
+    internal fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT v.vedtaksperiode_id
+            FROM vedtak v
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = ?
+        """
+        session.run(queryOf(statement, oppgaveId).map { row -> UUID.fromString(row.string("vedtaksperiode_id")) }.asSingle)
+    })
+
     internal fun opprettOppgave(
         commandContextId: UUID,
         oppgavetype: String,
