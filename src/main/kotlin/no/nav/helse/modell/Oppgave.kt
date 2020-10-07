@@ -14,6 +14,10 @@ internal class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
 
+    constructor(id: Long, navn: String, status: Oppgavestatus, vedtaksperiodeId: UUID) : this(navn, status, vedtaksperiodeId) {
+        this.id = id
+    }
+
     internal companion object {
         fun avventerSaksbehandler(navn: String, vedtaksperiodeId: UUID) = Oppgave(navn, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
     }

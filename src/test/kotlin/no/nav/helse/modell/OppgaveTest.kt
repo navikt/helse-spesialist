@@ -66,6 +66,15 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `gjenoppretter oppgave`() {
+        val oppgave1 = Oppgave(OPPGAVE_ID, OPPGAVENAVN, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave2 = Oppgave(OPPGAVE_ID, OPPGAVENAVN, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave3 = Oppgave(OPPGAVE_ID, OPPGAVENAVN, Oppgavestatus.AvventerSystem, VEDTAKSPERIODE_ID)
+        assertEquals(oppgave1, oppgave2)
+        assertEquals(oppgave1, oppgave3)
+    }
+
+    @Test
     fun equals() {
         val oppgave1 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)
         val oppgave2 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)

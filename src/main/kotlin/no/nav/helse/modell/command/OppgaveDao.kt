@@ -3,6 +3,7 @@ package no.nav.helse.modell.command
 import kotliquery.*
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.Oppgavestatus.*
+import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
@@ -37,6 +38,25 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                     .map { it.long("oppgaveId") }.asSingle
             )
         }
+
+    internal fun finn(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT o.type, o.status, v.vedtaksperiode_id
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            WHERE o.id = ?
+        """
+        session.run(queryOf(statement, oppgaveId)
+            .map { row ->
+                Oppgave(
+                    id = oppgaveId,
+                    navn = row.string("type"),
+                    status = enumValueOf(row.string("status")),
+                    vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
+                )
+            }.asSingle)
+    }
 
     internal fun opprettOppgave(
         commandContextId: UUID,

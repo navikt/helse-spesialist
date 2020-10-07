@@ -8,6 +8,7 @@ import no.nav.helse.Oppgavestatus
 import no.nav.helse.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.Oppgavestatus.Ferdigstilt
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.command.nyny.TestHendelse
 import org.junit.jupiter.api.Assertions.*
@@ -68,6 +69,13 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
         assertEquals(oppgaveId, oppgave.oppgavereferanse)
+    }
+
+    @Test
+    fun `finner oppgave`() {
+        nyPerson()
+        val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
+        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE), oppgave)
     }
 
     @Test
