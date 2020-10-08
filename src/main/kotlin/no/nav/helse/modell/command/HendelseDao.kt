@@ -94,6 +94,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             GODKJENNING -> hendelsefabrikk.nyGodkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyring(json)
             TILBAKERULLING -> hendelsefabrikk.tilbakerulling(json)
+            SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -102,10 +103,11 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is NyGodkjenningMessage -> GODKJENNING
         is OverstyringMessage -> OVERSTYRING
         is NyTilbakerullingMessage -> TILBAKERULLING
+        is SaksbehandlerløsningMessage -> SAKSBEHANDLERLØSNING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING, TILBAKERULLING
+        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING, TILBAKERULLING, SAKSBEHANDLERLØSNING
     }
 }

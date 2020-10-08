@@ -1,7 +1,5 @@
 package no.nav.helse.mediator.kafka.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
@@ -16,7 +14,6 @@ import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.command.nyny.CommandContext
 import no.nav.helse.modell.person.*
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.tildeling.ReservasjonDao
@@ -35,7 +32,6 @@ internal class NyGodkjenningMessageTest {
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
         private const val HENDELSE_JSON = """{ "this_key_should_exist": "this_value_should_exist" }"""
-        private const val SAKSBEHANDLER = "Sak Saksen"
         private val objectMapper = jacksonObjectMapper()
     }
 
@@ -110,7 +106,7 @@ internal class NyGodkjenningMessageTest {
         assertFalse(godkjenningMessage.resume(context))
 
         context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
-        assertFalse(godkjenningMessage.resume(context))
+        assertTrue(godkjenningMessage.resume(context))
 
         assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.nyOppgave(any()) }
@@ -133,88 +129,13 @@ internal class NyGodkjenningMessageTest {
         assertFalse(godkjenningMessage.resume(context))
 
         context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
-        assertFalse(godkjenningMessage.resume(context))
+        assertTrue(godkjenningMessage.resume(context))
 
         assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.tildel(any(), reservasjon.first, reservasjon.second) }
     }
 
-    @Test
-    fun `løser godkjenningsbehov`() {
-        val godkjenttidspunkt = LocalDateTime.now()
-        every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
-        every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
-        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
-        context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
-        context.add(HentEnhetLøsning("3101"))
-        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
-        context.add(
-            SaksbehandlerLøsning(
-                godkjent = true,
-                saksbehandlerIdent = SAKSBEHANDLER,
-                oid = UUID.randomUUID(),
-                epostadresse = "saksbehandler@nav.no",
-                godkjenttidspunkt = godkjenttidspunkt,
-                årsak = null,
-                begrunnelser = emptyList(),
-                kommentar = null,
-                oppgaveId = 1L
-            )
-        )
-
-        assertFalse(godkjenningMessage.execute(context))
-
-        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
-        assertFalse(godkjenningMessage.resume(context))
-
-        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
-        assertTrue(godkjenningMessage.resume(context))
-
-        assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
-
-        context.meldinger().also { meldinger ->
-            assertEquals(1, meldinger.size)
-            assertJsonEquals(HENDELSE_JSON, meldinger.first())
-            objectMapper.readTree(meldinger.first()).also { json ->
-                val løsning = json.path("@løsning").path("Godkjenning")
-                assertTrue(løsning.path("godkjent").booleanValue())
-                assertEquals(SAKSBEHANDLER, løsning.path("saksbehandlerIdent").textValue())
-                assertEquals(godkjenttidspunkt, LocalDateTime.parse(løsning.path("godkjenttidspunkt").textValue()))
-                assertTrue(løsning.path("årsak").isNull)
-                assertTrue(løsning.path("kommentar").isNull)
-                assertTrue(løsning.path("begrunnelser").isArray)
-            }
-        }
-    }
-
     private fun personFinnesIkke() {
         every { personDao.findPersonByFødselsnummer(FNR) } returns null
-    }
-
-    private fun assertJsonEquals(expected: String, actual: String) {
-        val expectedJson = objectMapper.readTree(expected)
-        val actualJson = objectMapper.readTree(actual)
-        assertJsonEquals(expectedJson, actualJson)
-    }
-
-    private fun assertJsonEquals(field: String, expected: JsonNode, actual: JsonNode) {
-        assertEquals(
-            expected.nodeType,
-            actual.nodeType
-        ) { "Field <$field> was not of expected value. Expected <${expected.nodeType}> got <${actual.nodeType}>" }
-        when (expected.nodeType) {
-            JsonNodeType.OBJECT -> assertJsonEquals(expected, actual)
-            else -> assertEquals(
-                expected,
-                actual
-            ) { "Field <$field> was not of expected value. Expected <${expected}> got <${actual}>" }
-        }
-    }
-
-    private fun assertJsonEquals(expected: JsonNode, actual: JsonNode) {
-        expected.fieldNames().forEach { field ->
-            assertTrue(actual.has(field)) { "Expected field <$field> to exist" }
-            assertJsonEquals(field, expected.path(field), actual.path(field))
-        }
     }
 }

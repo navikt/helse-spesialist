@@ -16,7 +16,6 @@ import no.nav.helse.modell.person.HentEnhetLøsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
 import no.nav.helse.modell.person.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.SaksbehandlerLøsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -51,7 +50,7 @@ internal class HendelseMediator(
             HentPersoninfoLøsning.PersoninfoRiver(it, this)
             HentEnhetLøsning.HentEnhetRiver(it, this)
             HentInfotrygdutbetalingerLøsning.InfotrygdutbetalingerRiver(it, this)
-            SaksbehandlerLøsning.SaksbehandlerLøsningRiver(it, this)
+            SaksbehandlerløsningMessage.SaksbehandlerløsningRiver(it, this)
             ArbeidsgiverLøsning.ArbeidsgiverRiver(it, this)
             NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
             NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
