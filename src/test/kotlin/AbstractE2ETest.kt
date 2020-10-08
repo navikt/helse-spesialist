@@ -259,7 +259,7 @@ internal abstract class AbstractE2ETest {
         saksbehandlerEpost: String,
         saksbehandlerOid: UUID,
         godkjent: Boolean
-    ) = nyHendelseId().also { id ->
+    ): UUID {
         hendelseMediator.håndter(
             GodkjenningDTO(
                 oppgaveId,
@@ -270,7 +270,9 @@ internal abstract class AbstractE2ETest {
                 null
             ), saksbehandlerEpost, saksbehandlerOid
         )
-        testRapid.sendTestMessage(testRapid.inspektør.siste("saksbehandler_løsning").toString())
+        val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
+        testRapid.sendTestMessage(løsning.toString())
+        return UUID.fromString(løsning.path("@id").asText())
     }
 
     protected fun assertHendelse(hendelseId: UUID) {
