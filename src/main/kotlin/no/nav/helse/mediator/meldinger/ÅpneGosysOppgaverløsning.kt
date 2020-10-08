@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-internal class ÅpneGosysOppgaverLøsning(
+internal class ÅpneGosysOppgaverløsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     private val antall: Int?,
@@ -55,7 +55,7 @@ internal class ÅpneGosysOppgaverLøsning(
             val antall = packet["@løsning.ÅpneOppgaver.antall"].takeUnless { it.isMissingOrNull() }?.asInt()
             val oppslagFeilet = packet["@løsning.ÅpneOppgaver.oppslagFeilet"].asBoolean()
 
-            val åpneGosysOppgaver = ÅpneGosysOppgaverLøsning(
+            val åpneGosysOppgaver = ÅpneGosysOppgaverløsning(
                 opprettet = opprettet,
                 fødselsnummer = fødselsnummer,
                 antall = antall,

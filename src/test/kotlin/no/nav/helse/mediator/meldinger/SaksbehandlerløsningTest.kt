@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SaksbehandlerløsningMessageTest {
+internal class SaksbehandlerløsningTest {
 
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()

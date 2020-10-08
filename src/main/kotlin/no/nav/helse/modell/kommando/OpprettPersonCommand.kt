@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.meldinger.HentEnhetLøsning
-import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -32,9 +32,9 @@ internal class OpprettPersonCommand(
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        val enhet = context.get<HentEnhetLøsning>() ?: return trengerMerInformasjon(context)
-        val personinfo = context.get<HentPersoninfoLøsning>() ?: return trengerMerInformasjon(context)
-        val infotrygdutbetalinger = context.get<HentInfotrygdutbetalingerLøsning>() ?: return trengerMerInformasjon(context)
+        val enhet = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
+        val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
+        val infotrygdutbetalinger = context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
         return opprettPerson(enhet, personinfo, infotrygdutbetalinger)
     }
 
@@ -51,7 +51,7 @@ internal class OpprettPersonCommand(
         return false
     }
 
-    private fun opprettPerson(enhet: HentEnhetLøsning, personinfo: HentPersoninfoLøsning, infotrygdutbetalinger: HentInfotrygdutbetalingerLøsning): Boolean {
+    private fun opprettPerson(enhet: HentEnhetløsning, personinfo: HentPersoninfoløsning, infotrygdutbetalinger: HentInfotrygdutbetalingerløsning): Boolean {
         log.info("Oppretter person")
         val navnId = personinfo.lagre(personDao)
         val infotrygdutbetalingerId = infotrygdutbetalinger.lagre(personDao)

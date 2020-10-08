@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-internal class NyGodkjenningMessageTest {
+internal class GodkjenningsbehovTest {
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -64,7 +64,7 @@ internal class NyGodkjenningMessageTest {
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)
     )
-    private val godkjenningMessage = hendelsefabrikk.nyGodkjenning(
+    private val godkjenningMessage = hendelsefabrikk.godkjenning(
         id = HENDELSE_ID,
         fødselsnummer = FNR,
         aktørId = AKTØR,
@@ -96,16 +96,16 @@ internal class NyGodkjenningMessageTest {
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
-        context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
-        context.add(HentEnhetLøsning("3101"))
-        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
+        context.add(HentPersoninfoløsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
+        context.add(HentEnhetløsning("3101"))
+        context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
 
         assertFalse(godkjenningMessage.execute(context))
 
-        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+        context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertFalse(godkjenningMessage.resume(context))
 
-        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
 
         assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
@@ -119,16 +119,16 @@ internal class NyGodkjenningMessageTest {
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
         every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
-        context.add(HentPersoninfoLøsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
-        context.add(HentEnhetLøsning("3101"))
-        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
+        context.add(HentPersoninfoløsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
+        context.add(HentEnhetløsning("3101"))
+        context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
 
         assertFalse(godkjenningMessage.execute(context))
 
-        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+        context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertFalse(godkjenningMessage.resume(context))
 
-        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
 
         assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())

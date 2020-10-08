@@ -10,7 +10,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class HentInfotrygdutbetalingerLøsning(private val utbetalinger: JsonNode) {
+internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonNode) {
 
     internal fun lagre(personDao: PersonDao) =
         personDao.insertInfotrygdutbetalinger(utbetalinger)
@@ -45,7 +45,7 @@ internal class HentInfotrygdutbetalingerLøsning(private val utbetalinger: JsonN
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentInfotrygdutbetalingerLøsning(packet["@løsning.HentInfotrygdutbetalinger"]), context)
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]), context)
         }
     }
 }

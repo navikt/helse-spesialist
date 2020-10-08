@@ -64,10 +64,8 @@ FROM saksbehandler
 WHERE oid = ?
     """
         return this.run(queryOf(finnSaksbehandlerQuery, oid).map { saksbehandlerRow ->
-            val oid = saksbehandlerRow.string("oid")
-
             SaksbehandlerDto(
-                oid = UUID.fromString(oid),
+                oid = oid,
                 navn = saksbehandlerRow.string("navn"),
                 epost = saksbehandlerRow.string("epost")
             )

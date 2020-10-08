@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
-internal class HentPersoninfoLøsning(
+internal class HentPersoninfoløsning(
     private val fornavn: String,
     private val mellomnavn: String?,
     private val etternavn: String,
@@ -57,7 +57,7 @@ internal class HentPersoninfoLøsning(
             val etternavn = packet["@løsning.HentPersoninfo.etternavn"].asText()
             val fødselsdato = packet["@løsning.HentPersoninfo.fødselsdato"].asLocalDate()
             val kjønn = Kjønn.valueOf(packet["@løsning.HentPersoninfo.kjønn"].textValue())
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentPersoninfoLøsning(
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentPersoninfoløsning(
                 fornavn,
                 mellomnavn,
                 etternavn,

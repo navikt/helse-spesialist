@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class OverstyringMessageTest {
+internal class OverstyringTest {
     companion object {
         private val ID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()

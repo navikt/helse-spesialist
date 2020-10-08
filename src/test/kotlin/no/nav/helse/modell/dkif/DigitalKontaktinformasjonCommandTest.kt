@@ -3,7 +3,7 @@ package no.nav.helse.modell.dkif
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonLøsning
+import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ internal class DigitalKontaktinformasjonCommandTest {
 
     @Test
     fun `Lagrer løsning ved resume`() {
-        context.add(DigitalKontaktinformasjonLøsning(LocalDateTime.now(), FNR, true))
+        context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
     }

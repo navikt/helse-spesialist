@@ -6,7 +6,7 @@ import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class HentPersoninfoLøsningTest {
+internal class HentPersoninfoløsningTest {
     private companion object {
         private const val FNR = "123456789011"
         private const val FORNAVN = "KARI"
@@ -20,14 +20,14 @@ internal class HentPersoninfoLøsningTest {
 
     @Test
     fun `lagre personinfo`() {
-        val info = HentPersoninfoLøsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
+        val info = HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         info.lagre(dao)
         verify(exactly = 1) { dao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN) }
     }
 
     @Test
     fun `oppdater personinfo`() {
-        val info = HentPersoninfoLøsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
+        val info = HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         info.oppdater(dao, FNR)
         verify(exactly = 1) { dao.updatePersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN) }
     }

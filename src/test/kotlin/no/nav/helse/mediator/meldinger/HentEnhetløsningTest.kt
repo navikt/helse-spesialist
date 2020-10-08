@@ -5,7 +5,7 @@ import io.mockk.verify
 import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Test
 
-internal class HentEnhetLøsningTest {
+internal class HentEnhetløsningTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val AKTØR = "4321098765432"
@@ -19,14 +19,14 @@ internal class HentEnhetLøsningTest {
 
     @Test
     fun `lagre person`() {
-        val enhet = HentEnhetLøsning(ENHET_OSLO)
+        val enhet = HentEnhetløsning(ENHET_OSLO)
         enhet.lagrePerson(dao, FNR, AKTØR, NAVN_REF, INFOTRYGDUTBETALINGER_REF)
         verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, NAVN_REF, ENHET_OSLO.toInt(), INFOTRYGDUTBETALINGER_REF) }
     }
 
     @Test
     fun `oppdatere enhet`() {
-        val enhet = HentEnhetLøsning(ENHET_SVALBARD)
+        val enhet = HentEnhetløsning(ENHET_SVALBARD)
         enhet.oppdater(dao, FNR)
         verify(exactly = 1) { dao.updateEnhet(FNR, ENHET_SVALBARD.toInt()) }
     }

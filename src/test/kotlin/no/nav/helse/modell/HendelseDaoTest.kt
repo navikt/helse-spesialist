@@ -6,8 +6,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.meldinger.NyVedtaksperiodeForkastetMessage
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -25,7 +25,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private lateinit var hendelsefabrikk: IHendelsefabrikk
-    private lateinit var vedtaksperiodeForkastetMessage: NyVedtaksperiodeForkastetMessage
+    private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
 
     @BeforeAll
     fun setup() {
@@ -52,7 +52,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setupEach() {
-        vedtaksperiodeForkastetMessage = hendelsefabrikk.nyNyVedtaksperiodeForkastet(
+        vedtaksperiodeForkastet = hendelsefabrikk.vedtaksperiodeForkastet(
             testmeldingfabrikk.lagVedtaksperiodeForkastet(
                 HENDELSE_ID,
                 VEDTAKSPERIODE
@@ -62,7 +62,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer og finner hendelser`() {
-        hendelseDao.opprett(vedtaksperiodeForkastetMessage)
+        hendelseDao.opprett(vedtaksperiodeForkastet)
         val actual = hendelseDao.finn(HENDELSE_ID, hendelsefabrikk) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
 
         assertNull(finnKobling())
@@ -86,7 +86,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        hendelseDao.opprett(vedtaksperiodeForkastetMessage)
+        hendelseDao.opprett(vedtaksperiodeForkastet)
 
         assertEquals(vedtakId, finnKobling())
     }

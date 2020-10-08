@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class GodkjenningMessageRiverTest {
+internal class GodkjenningsbehovRiverTest {
     private companion object {
         private val HENDELSE = UUID.randomUUID()
         private val VEDTAKSPERIODE = UUID.randomUUID()
@@ -23,7 +23,7 @@ internal class GodkjenningMessageRiverTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
-        NyGodkjenningMessage.GodkjenningMessageRiver(this, mediator)
+        Godkjenningsbehov.GodkjenningsbehovRiver(this, mediator)
     }
 
     @BeforeEach

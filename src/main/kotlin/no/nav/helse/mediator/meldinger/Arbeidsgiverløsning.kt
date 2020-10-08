@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class ArbeidsgiverLøsning(private val navn: String) {
+internal class Arbeidsgiverløsning(private val navn: String) {
     internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) =
         arbeidsgiverDao.updateNavn(orgnummer, navn)
 
@@ -38,7 +38,7 @@ internal class ArbeidsgiverLøsning(private val navn: String) {
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), ArbeidsgiverLøsning(packet["@løsning.HentArbeidsgiverNavn"].asText()), context)
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), Arbeidsgiverløsning(packet["@løsning.HentArbeidsgiverNavn"].asText()), context)
         }
     }
 }

@@ -87,21 +87,21 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     private fun fraHendelsetype(hendelsetype: Hendelsetype, json: String, hendelsefabrikk: IHendelsefabrikk): Hendelse? =
         when (hendelsetype) {
-            VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.nyNyVedtaksperiodeEndret(json)
-            VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.nyNyVedtaksperiodeForkastet(json)
-            GODKJENNING -> hendelsefabrikk.nyGodkjenning(json)
+            VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.vedtaksperiodeEndret(json)
+            VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
+            GODKJENNING -> hendelsefabrikk.godkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyring(json)
             TILBAKERULLING -> hendelsefabrikk.tilbakerulling(json)
             SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
-        is NyVedtaksperiodeEndretMessage -> VEDTAKSPERIODE_ENDRET
-        is NyVedtaksperiodeForkastetMessage -> VEDTAKSPERIODE_FORKASTET
-        is NyGodkjenningMessage -> GODKJENNING
-        is OverstyringMessage -> OVERSTYRING
-        is NyTilbakerullingMessage -> TILBAKERULLING
-        is SaksbehandlerløsningMessage -> SAKSBEHANDLERLØSNING
+        is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
+        is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
+        is Godkjenningsbehov -> GODKJENNING
+        is Overstyring -> OVERSTYRING
+        is Tilbakerulling -> TILBAKERULLING
+        is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 

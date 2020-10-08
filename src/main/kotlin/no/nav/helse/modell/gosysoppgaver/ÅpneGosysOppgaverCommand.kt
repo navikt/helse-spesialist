@@ -1,6 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverLøsning
+import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ internal class ÅpneGosysOppgaverCommand(
     }
 
     override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<ÅpneGosysOppgaverLøsning>() ?: return false
+        val løsning = context.get<ÅpneGosysOppgaverløsning>() ?: return false
         løsning.lagre(åpneGosysOppgaverDao)
         return true
     }

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
-internal class NyGodkjenningMessage(
+internal class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
     aktørId: String,
@@ -109,7 +109,7 @@ internal class NyGodkjenningMessage(
     override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun toJson() = json
 
-    internal class GodkjenningMessageRiver(
+    internal class GodkjenningsbehovRiver(
         rapidsConnection: RapidsConnection,
         private val mediator: HendelseMediator
     ) : River.PacketListener {

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.meldinger.HentEnhetLøsning
-import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -59,7 +59,7 @@ internal class OppdaterPersonCommand(
         }
 
         override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {
-            val personinfo = context.get<HentPersoninfoLøsning>() ?: return trengerMerInformasjon(context)
+            val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppdaterer personinfo")
             personinfo.oppdater(personDao, fødselsnummer)
             return true
@@ -73,7 +73,7 @@ internal class OppdaterPersonCommand(
         }
 
         override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {
-            val enhet = context.get<HentEnhetLøsning>() ?: return trengerMerInformasjon(context)
+            val enhet = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppdaterer enhetsnr")
             enhet.oppdater(personDao, fødselsnummer)
             return true
@@ -96,7 +96,7 @@ internal class OppdaterPersonCommand(
         }
 
         override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {
-            val utbetalinger = context.get<HentInfotrygdutbetalingerLøsning>() ?: return trengerMerInformasjon(context)
+            val utbetalinger = context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppdaterer utbetalinger fra Infotrygd")
             utbetalinger.oppdater(personDao, fødselsnummer)
             return true

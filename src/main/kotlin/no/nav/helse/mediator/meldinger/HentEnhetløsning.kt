@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class HentEnhetLøsning(private val enhetNr: String) {
+internal class HentEnhetløsning(private val enhetNr: String) {
 
     internal fun lagrePerson(
         personDao: PersonDao,
@@ -53,7 +53,7 @@ internal class HentEnhetLøsning(private val enhetNr: String) {
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentEnhetLøsning(packet["@løsning.HentEnhet"].asText()), context)
+            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentEnhetløsning(packet["@løsning.HentEnhet"].asText()), context)
         }
     }
 }

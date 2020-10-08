@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class NyTilbakerullingMessageTest {
+internal class TilbakerullingTest {
 
-    private lateinit var nyTilbakerullingMessage: NyTilbakerullingMessage
+    private lateinit var tilbakerulling: Tilbakerulling
     private lateinit var context: CommandContext
     private val CONTEXTID = UUID.randomUUID()
     private val vedtaksperiodeIder = listOf(UUID.randomUUID(), UUID.randomUUID())
@@ -24,7 +24,7 @@ internal class NyTilbakerullingMessageTest {
 
     @BeforeEach
     fun setupEach() {
-        nyTilbakerullingMessage = NyTilbakerullingMessage(
+        tilbakerulling = Tilbakerulling(
             UUID.randomUUID(),
             FNR,
             "{}",
@@ -39,7 +39,7 @@ internal class NyTilbakerullingMessageTest {
 
     @Test
     fun `Sletter alt relatert til vedtaksperioder`() {
-        nyTilbakerullingMessage.execute(context)
+        tilbakerulling.execute(context)
 
         verify(ordering = Ordering.SEQUENCE) {
             oppgaveDao.invaliderOppgaver(FNR)

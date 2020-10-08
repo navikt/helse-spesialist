@@ -3,7 +3,7 @@ package no.nav.helse.modell.gosysoppgaver
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverLøsning
+import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,7 +44,7 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer løsning ved resume`() {
-        context.add(ÅpneGosysOppgaverLøsning(LocalDateTime.now(), FNR, 0, false))
+        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
     }

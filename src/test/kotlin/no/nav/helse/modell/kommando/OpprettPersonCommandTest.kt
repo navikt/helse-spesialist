@@ -5,9 +5,9 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.HentEnhetLøsning
-import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Assertions.*
@@ -50,9 +50,9 @@ internal class OpprettPersonCommandTest {
     @Test
     fun `oppretter person`() {
         personFinnesIkke()
-        context.add(HentPersoninfoLøsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN))
-        context.add(HentEnhetLøsning(ENHET_OSLO))
-        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
+        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN))
+        context.add(HentEnhetløsning(ENHET_OSLO))
+        context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
         verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, any(), any(), any()) }
@@ -68,7 +68,7 @@ internal class OpprettPersonCommandTest {
     @Test
     fun `kan ikke opprette person med bare personinfo`() {
         personFinnesIkke()
-        context.add(HentPersoninfoLøsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Kvinne))
+        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Kvinne))
         assertFalse(command.execute(context))
         assertHarBehov()
     }
@@ -76,7 +76,7 @@ internal class OpprettPersonCommandTest {
     @Test
     fun `kan ikke opprette person med bare enhet`() {
         personFinnesIkke()
-        context.add(HentEnhetLøsning(ENHET_OSLO))
+        context.add(HentEnhetløsning(ENHET_OSLO))
         assertFalse(command.execute(context))
         assertHarBehov()
     }
@@ -84,7 +84,7 @@ internal class OpprettPersonCommandTest {
     @Test
     fun `kan ikke opprette person med bare infotrygdutbetalinger`() {
         personFinnesIkke()
-        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
+        context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertFalse(command.execute(context))
         assertHarBehov()
     }

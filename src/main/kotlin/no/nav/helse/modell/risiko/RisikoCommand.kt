@@ -2,7 +2,7 @@ package no.nav.helse.modell.risiko
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.meldinger.RisikovurderingLøsning
+import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -35,7 +35,7 @@ internal class RisikoCommand(
 
     override fun resume(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.risikovurdering()) return true
-        val løsning = context.get<RisikovurderingLøsning>() ?: return false
+        val løsning = context.get<Risikovurderingløsning>() ?: return false
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {

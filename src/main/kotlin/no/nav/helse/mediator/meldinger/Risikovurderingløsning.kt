@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-internal class RisikovurderingLøsning(
+internal class Risikovurderingløsning(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val opprettet: LocalDateTime,
@@ -77,7 +77,7 @@ internal class RisikovurderingLøsning(
             val faresignaler = løsning["begrunnelser"].map { it.asText() }
             val arbeidsuførhetvurdering = løsning["begrunnelserSomAleneKreverManuellBehandling"].map { it.asText() }
 
-            val risikovurdering = RisikovurderingLøsning(
+            val risikovurdering = Risikovurderingløsning(
                 hendelseId = hendelseId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 opprettet = opprettet,

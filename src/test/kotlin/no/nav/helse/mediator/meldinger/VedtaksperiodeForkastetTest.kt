@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class NyVedtaksperiodeForkastetMessageTest {
+internal class VedtaksperiodeForkastetTest {
 
     private companion object {
         private val HENDELSE = UUID.randomUUID()
@@ -59,7 +59,7 @@ internal class NyVedtaksperiodeForkastetMessageTest {
             automatisering = mockk(relaxed = true)
         )
     private val context = CommandContext(CONTEXT)
-    private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.nyNyVedtaksperiodeForkastet(
+    private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.vedtaksperiodeForkastet(
         testmeldingfabrikk.lagVedtaksperiodeForkastet(
             HENDELSE,
             VEDTAKSPERIODE

@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Test
 
-internal class HentInfotrygdutbetalingerLøsningTest {
+internal class HentInfotrygdutbetalingerløsningTest {
     private companion object {
         private const val FNR = "12345678911"
         private val objectMapper = jacksonObjectMapper()
@@ -18,7 +18,7 @@ internal class HentInfotrygdutbetalingerLøsningTest {
     @Test
     fun `lagre infotrygdutbetalinger`() {
         val json = objectMapper.createObjectNode()
-        val utbetalinger = HentInfotrygdutbetalingerLøsning(json)
+        val utbetalinger = HentInfotrygdutbetalingerløsning(json)
         utbetalinger.lagre(dao)
         verify(exactly = 1) { dao.insertInfotrygdutbetalinger(json) }
     }
@@ -27,7 +27,7 @@ internal class HentInfotrygdutbetalingerLøsningTest {
     fun `oppdater infotrygdutbetalinger til person`() {
         every { dao.findInfotrygdutbetalinger(FNR) } returns "{}"
         val json = objectMapper.createObjectNode()
-        val utbetalinger = HentInfotrygdutbetalingerLøsning(json)
+        val utbetalinger = HentInfotrygdutbetalingerløsning(json)
         utbetalinger.oppdater(dao, FNR)
         verify(exactly = 1) { dao.updateInfotrygdutbetalinger(FNR, json) }
     }
@@ -38,7 +38,7 @@ internal class HentInfotrygdutbetalingerLøsningTest {
         every { dao.findInfotrygdutbetalinger(FNR) } returns null
         every { dao.insertInfotrygdutbetalinger(any()) } returns utbetalingerRefId
         val json = objectMapper.createObjectNode()
-        val utbetalinger = HentInfotrygdutbetalingerLøsning(json)
+        val utbetalinger = HentInfotrygdutbetalingerløsning(json)
         utbetalinger.oppdater(dao, FNR)
         verify(exactly = 1) { dao.insertInfotrygdutbetalinger(json) }
         verify(exactly = 1) { dao.updateInfotrygdutbetalingerRef(FNR, utbetalingerRefId) }

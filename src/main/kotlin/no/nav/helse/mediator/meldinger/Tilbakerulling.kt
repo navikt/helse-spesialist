@@ -1,13 +1,15 @@
 package no.nav.helse.mediator.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.kommando.AvbrytForPersonCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.kommando.SlettVedtakCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -16,55 +18,59 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class NyVedtaksperiodeEndretMessage(
+internal class Tilbakerulling(
     override val id: UUID,
-    private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val json: String,
-    vedtakDao: VedtakDao,
-    snapshotDao: SnapshotDao,
-    speilSnapshotRestClient: SpeilSnapshotRestClient
+    vedtaksperiodeIder: List<UUID>,
+    commandContextDao: CommandContextDao,
+    oppgaveDao: OppgaveDao,
+    vedtakDao: VedtakDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
+        AvbrytForPersonCommand(fødselsnummer, oppgaveDao, commandContextDao),
+        SlettVedtakCommand(vedtaksperiodeIder, vedtakDao)
     )
 
     override fun fødselsnummer() = fødselsnummer
-    override fun vedtaksperiodeId() = vedtaksperiodeId
     override fun toJson() = json
 
-    internal class VedtaksperiodeEndretRiver(
+    internal class TilbakerullingRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : River.PacketListener {
-
         private val log = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.demandValue("@event_name", "vedtaksperiode_endret")
-                    it.requireKey("vedtaksperiodeId")
-                    it.requireKey("fødselsnummer")
-                    it.requireKey("@id")
+                    it.demandValue("@event_name", "person_rullet_tilbake")
+                    it.require("@id", ::uuid)
+                    it.requireKey("fødselsnummer", "vedtaksperioderSlettet")
                 }
             }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-            sikkerLogg.error("Forstod ikke vedtaksperiode_endret:\n${problems.toExtendedReport()}")
+            sikkerLogg.error("Forstod ikke person_rullet_tilbake:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-            val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
             log.info(
-                "Mottok vedtaksperiode endret {}, {}",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                "Mottok person_rullet_tilbake {}",
                 keyValue("eventId", id)
             )
-            mediator.vedtaksperiodeEndret(packet, id, vedtaksperiodeId, packet["fødselsnummer"].asText(), context)
+            mediator.tilbakerulling(
+                packet,
+                id,
+                packet["fødselsnummer"].asText(),
+                packet["vedtaksperioderSlettet"].map { UUID.fromString(it.asText()) },
+                context
+            )
         }
     }
 }
+
+private fun uuid(jsonNode: JsonNode): UUID = UUID.fromString(jsonNode.asText())

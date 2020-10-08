@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SaksbehandlerløsningMessage(
+internal class Saksbehandlerløsning(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,

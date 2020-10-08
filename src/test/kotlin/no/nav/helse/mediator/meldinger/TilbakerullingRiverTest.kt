@@ -16,7 +16,7 @@ internal class TilbakerullingRiverTest {
     private val meldingsfabrikk = Testmeldingfabrikk(FNR, "aktørid")
 
     init {
-        NyTilbakerullingMessage.TilbakerullingRiver(testRapid, mediator)
+        Tilbakerulling.TilbakerullingRiver(testRapid, mediator)
     }
 
     @Test

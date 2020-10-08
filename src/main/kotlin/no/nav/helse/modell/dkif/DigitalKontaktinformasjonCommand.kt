@@ -1,6 +1,6 @@
 package no.nav.helse.modell.dkif
 
-import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonLøsning
+import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ internal class DigitalKontaktinformasjonCommand(
     }
 
     override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<DigitalKontaktinformasjonLøsning>() ?: return false
+        val løsning = context.get<DigitalKontaktinformasjonløsning>() ?: return false
         løsning.lagre(digitalKontaktinformasjonDao)
         return true
     }

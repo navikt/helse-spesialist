@@ -4,9 +4,9 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.HentEnhetLøsning
-import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions.*
@@ -53,7 +53,7 @@ internal class OppdaterPersonCommandTest {
     @Test
     fun `oppdatere personinfo`() {
         utdatertPersoninfo()
-        val løsning = mockk<HentPersoninfoLøsning>(relaxed = true)
+        val løsning = mockk<HentPersoninfoløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
@@ -71,7 +71,7 @@ internal class OppdaterPersonCommandTest {
     @Test
     fun `oppdatere enhet`() {
         utdatertEnhet()
-        val løsning = mockk<HentEnhetLøsning>(relaxed = true)
+        val løsning = mockk<HentEnhetløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
@@ -89,7 +89,7 @@ internal class OppdaterPersonCommandTest {
     @Test
     fun `oppdatere infotrygdutbetalinger`() {
         utdatertUtbetalinger()
-        val løsning = mockk<HentInfotrygdutbetalingerLøsning>(relaxed = true)
+        val løsning = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(løsning)
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
@@ -98,9 +98,9 @@ internal class OppdaterPersonCommandTest {
     @Test
     fun `oppdatere alt`() {
         altUtdatert()
-        val personinfo = mockk<HentPersoninfoLøsning>(relaxed = true)
-        val enhet = mockk<HentEnhetLøsning>(relaxed = true)
-        val utbetalinger = mockk<HentInfotrygdutbetalingerLøsning>(relaxed = true)
+        val personinfo = mockk<HentPersoninfoløsning>(relaxed = true)
+        val enhet = mockk<HentEnhetløsning>(relaxed = true)
+        val utbetalinger = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(personinfo)
         context.add(enhet)
         context.add(utbetalinger)

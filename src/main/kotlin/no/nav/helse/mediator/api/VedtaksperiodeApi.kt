@@ -83,7 +83,7 @@ internal fun Route.vedtaksperiodeApi(
     }
 
     post("/api/overstyr/dager") {
-        val overstyring = call.receive<Overstyring>()
+        val overstyring = call.receive<OverstyringDTO>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>())
         val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
@@ -145,14 +145,14 @@ data class GodkjenningDTO(
 }
 
 @JsonIgnoreProperties
-class Overstyring(
+class OverstyringDTO(
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
-    val dager: List<Overstyringdag>
+    val dager: List<OverstyringdagDTO>
 ) {
-    class Overstyringdag(
+    class OverstyringdagDTO(
         val dato: LocalDate,
         val type: String,
         val grad: Int?

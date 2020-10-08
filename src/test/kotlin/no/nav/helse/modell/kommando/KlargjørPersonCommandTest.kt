@@ -5,9 +5,9 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.HentEnhetLøsning
-import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Assertions.*
@@ -43,9 +43,9 @@ internal class KlargjørPersonCommandTest {
     @Test
     fun `oppretter person`() {
         personFinnesIkke()
-        context.add(HentPersoninfoLøsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN))
-        context.add(HentEnhetLøsning(ENHET_OSLO))
-        context.add(HentInfotrygdutbetalingerLøsning(objectMapper.createObjectNode()))
+        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN))
+        context.add(HentEnhetløsning(ENHET_OSLO))
+        context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
         verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, any(), any(), any()) }
@@ -79,9 +79,9 @@ internal class KlargjørPersonCommandTest {
     fun `oppdaterer utdatert person`() {
         personFinnes()
         altUtdatert()
-        val personinfo = mockk<HentPersoninfoLøsning>(relaxed = true)
-        val enhet = mockk<HentEnhetLøsning>(relaxed = true)
-        val utbetalinger = mockk<HentInfotrygdutbetalingerLøsning>(relaxed = true)
+        val personinfo = mockk<HentPersoninfoløsning>(relaxed = true)
+        val enhet = mockk<HentEnhetløsning>(relaxed = true)
+        val utbetalinger = mockk<HentInfotrygdutbetalingerløsning>(relaxed = true)
         context.add(personinfo)
         context.add(enhet)
         context.add(utbetalinger)

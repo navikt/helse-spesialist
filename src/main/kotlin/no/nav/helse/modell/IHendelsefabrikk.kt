@@ -8,21 +8,21 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal interface IHendelsefabrikk {
-    fun nyNyVedtaksperiodeEndret(
+    fun vedtaksperiodeEndret(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         json: String
-    ): NyVedtaksperiodeEndretMessage
-    fun nyNyVedtaksperiodeEndret(json: String): NyVedtaksperiodeEndretMessage
+    ): VedtaksperiodeEndret
+    fun vedtaksperiodeEndret(json: String): VedtaksperiodeEndret
 
-    fun nyNyVedtaksperiodeForkastet(
+    fun vedtaksperiodeForkastet(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         json: String
-    ): NyVedtaksperiodeForkastetMessage
-    fun nyNyVedtaksperiodeForkastet(json: String): NyVedtaksperiodeForkastetMessage
+    ): VedtaksperiodeForkastet
+    fun vedtaksperiodeForkastet(json: String): VedtaksperiodeForkastet
 
     fun saksbehandlerløsning(
         id: UUID,
@@ -39,10 +39,10 @@ internal interface IHendelsefabrikk {
         kommentar: String?,
         oppgaveId: Long,
         json: String
-    ): SaksbehandlerløsningMessage
-    fun saksbehandlerløsning(json: String): SaksbehandlerløsningMessage
+    ): Saksbehandlerløsning
+    fun saksbehandlerløsning(json: String): Saksbehandlerløsning
 
-    fun nyGodkjenning(
+    fun godkjenning(
         id: UUID,
         fødselsnummer: String,
         aktørId: String,
@@ -53,8 +53,8 @@ internal interface IHendelsefabrikk {
         warnings: List<String>,
         periodetype: Saksbehandleroppgavetype,
         json: String
-    ): NyGodkjenningMessage
-    fun nyGodkjenning(json: String): NyGodkjenningMessage
+    ): Godkjenningsbehov
+    fun godkjenning(json: String): Godkjenningsbehov
 
     fun overstyring(
         id: UUID,
@@ -66,14 +66,14 @@ internal interface IHendelsefabrikk {
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
         json: String
-    ): OverstyringMessage
-    fun overstyring(json: String): OverstyringMessage
+    ): Overstyring
+    fun overstyring(json: String): Overstyring
 
     fun tilbakerulling(
         id: UUID,
         fødselsnummer: String,
         vedtaksperiodeIder: List<UUID>,
         json: String
-    ): NyTilbakerullingMessage
-    fun tilbakerulling(json: String): NyTilbakerullingMessage
+    ): Tilbakerulling
+    fun tilbakerulling(json: String): Tilbakerulling
 }

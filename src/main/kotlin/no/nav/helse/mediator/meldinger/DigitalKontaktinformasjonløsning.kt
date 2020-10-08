@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-internal class DigitalKontaktinformasjonLøsning(
+internal class DigitalKontaktinformasjonløsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     private val erDigital: Boolean
@@ -57,7 +57,7 @@ internal class DigitalKontaktinformasjonLøsning(
 
             val erDigital = packet["@løsning.DigitalKontaktinformasjon.erDigital"].asBoolean()
 
-            val digitalKontaktinformasjon = DigitalKontaktinformasjonLøsning(
+            val digitalKontaktinformasjon = DigitalKontaktinformasjonløsning(
                 opprettet = opprettet,
                 fødselsnummer = fødselsnummer,
                 erDigital = erDigital

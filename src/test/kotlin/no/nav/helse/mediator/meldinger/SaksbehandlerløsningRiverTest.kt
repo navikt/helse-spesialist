@@ -19,7 +19,7 @@ internal class SaksbehandlerløsningRiverTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val mediator = mockk<IHendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
-        SaksbehandlerløsningMessage.SaksbehandlerløsningRiver(this, mediator)
+        Saksbehandlerløsning.SaksbehandlerløsningRiver(this, mediator)
     }
 
     @BeforeEach

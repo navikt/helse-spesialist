@@ -36,19 +36,19 @@ internal class HendelseMediator(
 
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
-            NyGodkjenningMessage.GodkjenningMessageRiver(it, this)
-            NyTilbakerullingMessage.TilbakerullingRiver(it, this)
-            HentPersoninfoLøsning.PersoninfoRiver(it, this)
-            HentEnhetLøsning.HentEnhetRiver(it, this)
-            HentInfotrygdutbetalingerLøsning.InfotrygdutbetalingerRiver(it, this)
-            SaksbehandlerløsningMessage.SaksbehandlerløsningRiver(it, this)
-            ArbeidsgiverLøsning.ArbeidsgiverRiver(it, this)
-            NyVedtaksperiodeForkastetMessage.VedtaksperiodeForkastetRiver(it, this)
-            NyVedtaksperiodeEndretMessage.VedtaksperiodeEndretRiver(it, this)
-            OverstyringMessage.OverstyringRiver(it, this)
-            DigitalKontaktinformasjonLøsning.DigitalKontaktinformasjonRiver(it, this)
-            ÅpneGosysOppgaverLøsning.ÅpneGosysOppgaverRiver(it, this)
-            RisikovurderingLøsning.V2River(it, this)
+            Godkjenningsbehov.GodkjenningsbehovRiver(it, this)
+            Tilbakerulling.TilbakerullingRiver(it, this)
+            HentPersoninfoløsning.PersoninfoRiver(it, this)
+            HentEnhetløsning.HentEnhetRiver(it, this)
+            HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
+            Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
+            Arbeidsgiverløsning.ArbeidsgiverRiver(it, this)
+            VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
+            VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
+            Overstyring.OverstyringRiver(it, this)
+            DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
+            ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
+            Risikovurderingløsning.V2River(it, this)
         }
     }
 
@@ -111,7 +111,7 @@ internal class HendelseMediator(
     ) {
         utfør(
             vedtaksperiodeId,
-            hendelsefabrikk.nyNyVedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
+            hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
             context
         )
     }
@@ -125,7 +125,7 @@ internal class HendelseMediator(
     ) {
         utfør(
             vedtaksperiodeId,
-            hendelsefabrikk.nyNyVedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
+            hendelsefabrikk.vedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
             context
         )
     }
@@ -144,7 +144,7 @@ internal class HendelseMediator(
         context: RapidsConnection.MessageContext
     ) {
         utfør(
-            hendelsefabrikk.nyGodkjenning(
+            hendelsefabrikk.godkjenning(
                 id,
                 fødselsnummer,
                 aktørId,

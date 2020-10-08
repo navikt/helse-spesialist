@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.meldinger.ArbeidsgiverLøsning
+import no.nav.helse.mediator.meldinger.Arbeidsgiverløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import java.time.LocalDate
 
@@ -22,7 +22,7 @@ internal class OppdaterArbeidsgiverCommand(private val orgnummer: String, privat
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        val løsning = context.get<ArbeidsgiverLøsning>() ?: return trengerMerInformasjon(context)
+        val løsning = context.get<Arbeidsgiverløsning>() ?: return trengerMerInformasjon(context)
         løsning.oppdater(arbeidsgiverDao, orgnummer)
         return true
     }
