@@ -13,16 +13,10 @@ internal class PersisterVedtaksperiodetypeCommandTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
 
     @Test
-    fun `Legger til vedtaksperiodetype dersom denne er satt på hendelse`() {
-        PersisterVedtaksperiodetypeCommand(HENDELSE_ID, Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, vedtakDao)
+    fun `Legger til vedtaksperiodetype`() {
+        val type = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+        PersisterVedtaksperiodetypeCommand(HENDELSE_ID, type, vedtakDao)
             .execute(CommandContext(UUID.randomUUID()))
-        verify(exactly = 1) { vedtakDao.leggTilVedtaksperiodetype(HENDELSE_ID, any()) }
-    }
-
-    @Test
-    fun `Legger ikke til vedtaksperiodetype når denne ikke er satt på hendelse`() {
-        PersisterVedtaksperiodetypeCommand(HENDELSE_ID, null, vedtakDao)
-            .execute(CommandContext(UUID.randomUUID()))
-        verify(exactly = 0) { vedtakDao.leggTilVedtaksperiodetype(HENDELSE_ID, any()) }
+        verify(exactly = 1) { vedtakDao.leggTilVedtaksperiodetype(HENDELSE_ID, type) }
     }
 }

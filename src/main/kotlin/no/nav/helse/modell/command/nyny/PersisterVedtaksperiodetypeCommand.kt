@@ -6,14 +6,12 @@ import java.util.*
 
 internal class PersisterVedtaksperiodetypeCommand(
     private val vedtaksperiodeId: UUID,
-    private val vedtaksperiodetype: Saksbehandleroppgavetype?,
+    private val vedtaksperiodetype: Saksbehandleroppgavetype,
     private val vedtakDao: VedtakDao
 ) :
     Command {
     override fun execute(context: CommandContext): Boolean {
-        vedtaksperiodetype?.let { type ->
-            vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type)
-        }
+        vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, vedtaksperiodetype)
         return true
     }
 }

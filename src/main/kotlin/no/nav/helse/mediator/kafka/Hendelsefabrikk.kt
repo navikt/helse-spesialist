@@ -63,7 +63,7 @@ internal class Hendelsefabrikk(
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         warnings: List<String>,
-        periodetype: Saksbehandleroppgavetype?,
+        periodetype: Saksbehandleroppgavetype,
         json: String
     ): NyGodkjenningMessage {
         return NyGodkjenningMessage(
@@ -103,8 +103,7 @@ internal class Hendelsefabrikk(
             periodeTom = LocalDate.parse(jsonNode.path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             warnings = jsonNode.path("warnings").path("aktiviteter").map(JsonNode::asText),
-            periodetype = jsonNode.path("periodetype").takeUnless(JsonNode::isMissingOrNull)
-                ?.let { Saksbehandleroppgavetype.valueOf(it.asText()) },
+            periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("periodetype").asText()),
             json = json
         )
     }

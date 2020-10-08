@@ -19,7 +19,7 @@ internal class KlargjørVedtaksperiodeCommand(
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     warnings: List<WarningDto>,
-    vedtaksperiodetype: Saksbehandleroppgavetype?,
+    vedtaksperiodetype: Saksbehandleroppgavetype,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     snapshotDao: SnapshotDao,

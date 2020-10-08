@@ -149,7 +149,7 @@ internal class HendelseMediator(
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         warnings: List<String>,
-        periodetype: Saksbehandleroppgavetype?,
+        periodetype: Saksbehandleroppgavetype,
         context: RapidsConnection.MessageContext
     ) {
         utfør(

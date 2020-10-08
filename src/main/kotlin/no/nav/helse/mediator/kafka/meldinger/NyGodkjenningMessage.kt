@@ -21,7 +21,10 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import no.nav.helse.tildeling.ReservasjonDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,7 +40,7 @@ internal class NyGodkjenningMessage(
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     warnings: List<WarningDto>,
-    periodetype: Saksbehandleroppgavetype? = null,
+    periodetype: Saksbehandleroppgavetype,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -121,9 +124,7 @@ internal class NyGodkjenningMessage(
                     it.rejectKey("@løsning")
                     it.requireKey(
                         "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
-                        "periodeTom", "warnings"
-                    )
-                    it.interestedIn("periodetype")
+                        "periodeTom", "warnings", "periodetype")
                 }
             }.register(this)
         }
@@ -153,8 +154,7 @@ internal class NyGodkjenningMessage(
                 periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
                 warnings = packet["warnings"].toWarnings(),
-                periodetype = packet["periodetype"].takeUnless(JsonNode::isMissingOrNull)
-                    ?.let { Saksbehandleroppgavetype.valueOf(it.asText()) },
+                periodetype = Saksbehandleroppgavetype.valueOf(packet["periodetype"].asText()),
                 context = context
             )
         }

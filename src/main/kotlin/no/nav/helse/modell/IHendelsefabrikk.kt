@@ -51,7 +51,7 @@ internal interface IHendelsefabrikk {
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         warnings: List<String>,
-        periodetype: Saksbehandleroppgavetype?,
+        periodetype: Saksbehandleroppgavetype,
         json: String
     ): NyGodkjenningMessage
     fun nyGodkjenning(json: String): NyGodkjenningMessage
