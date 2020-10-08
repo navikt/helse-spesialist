@@ -8,14 +8,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.UtbetalingsgodkjenningMessage
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.command.HendelseDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.ReservasjonDao

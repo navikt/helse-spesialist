@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonLøsning
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

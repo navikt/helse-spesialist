@@ -3,11 +3,11 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.command.HendelseDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.FerdigstillOppgaveCommand
-import no.nav.helse.modell.command.nyny.MacroCommand
-import no.nav.helse.modell.command.nyny.UtbetalingsgodkjenningCommand
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.OppgaveDao
+import no.nav.helse.modell.kommando.FerdigstillOppgaveCommand
+import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime

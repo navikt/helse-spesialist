@@ -7,7 +7,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.*
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.CommandContext
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource

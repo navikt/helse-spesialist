@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import org.junit.jupiter.api.Assertions.assertEquals

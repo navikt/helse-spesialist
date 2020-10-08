@@ -4,9 +4,9 @@ import io.mockk.Ordering
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*

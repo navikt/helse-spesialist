@@ -1,7 +1,7 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger

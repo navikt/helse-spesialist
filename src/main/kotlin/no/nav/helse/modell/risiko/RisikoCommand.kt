@@ -4,8 +4,8 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.meldinger.RisikovurderingLøsning
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.slf4j.LoggerFactory

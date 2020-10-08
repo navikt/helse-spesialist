@@ -18,14 +18,10 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.mediator.api.*
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.modell.command.HendelseDao
-import no.nav.helse.modell.command.OppgaveDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao

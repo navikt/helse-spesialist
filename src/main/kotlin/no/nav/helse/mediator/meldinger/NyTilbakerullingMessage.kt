@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.AvbrytForPersonCommand
-import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.command.nyny.MacroCommand
-import no.nav.helse.modell.command.nyny.SlettVedtakCommand
+import no.nav.helse.modell.kommando.AvbrytForPersonCommand
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.SlettVedtakCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection

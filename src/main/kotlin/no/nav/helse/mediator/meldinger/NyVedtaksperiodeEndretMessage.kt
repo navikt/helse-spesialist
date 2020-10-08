@@ -4,9 +4,9 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.command.nyny.MacroCommand
-import no.nav.helse.modell.command.nyny.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems

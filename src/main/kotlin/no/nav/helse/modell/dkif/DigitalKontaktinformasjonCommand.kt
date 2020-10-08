@@ -1,8 +1,8 @@
 package no.nav.helse.modell.dkif
 
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonLøsning
-import no.nav.helse.modell.command.nyny.Command
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
 
 internal class DigitalKontaktinformasjonCommand(

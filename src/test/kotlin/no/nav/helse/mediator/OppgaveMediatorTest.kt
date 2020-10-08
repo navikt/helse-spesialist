@@ -6,10 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.Oppgave
+import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.TestHendelse
+import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.RapidsConnection

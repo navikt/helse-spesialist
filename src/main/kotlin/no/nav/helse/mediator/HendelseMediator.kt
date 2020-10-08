@@ -4,13 +4,8 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.IHendelsefabrikk
-import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.HendelseDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.*
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.overstyringsteller

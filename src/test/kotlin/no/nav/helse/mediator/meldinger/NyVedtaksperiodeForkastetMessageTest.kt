@@ -6,10 +6,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.command.OppgaveDao
-import no.nav.helse.modell.command.nyny.CommandContext
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient

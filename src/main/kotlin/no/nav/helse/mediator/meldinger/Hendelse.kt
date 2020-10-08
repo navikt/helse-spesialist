@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.modell.command.nyny.Command
+import no.nav.helse.modell.kommando.Command
 import java.util.*
 
 internal interface Hendelse : Command {
