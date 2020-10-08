@@ -306,12 +306,19 @@ internal abstract class AbstractE2ETest {
         }
     }
 
-    protected fun assertGodkjenningsbehovLøsning(godkjent: Boolean, saksbehandlerIdent: String) {
+    protected fun assertGodkjenningsbehovløsning(godkjent: Boolean, saksbehandlerIdent: String, block: (JsonNode) -> Unit = {}) {
         assertLøsning("Godkjenning") {
             assertTrue(it.path("godkjent").isBoolean)
             assertEquals(godkjent, it.path("godkjent").booleanValue())
             assertEquals(saksbehandlerIdent, it.path("saksbehandlerIdent").textValue())
             assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
+            block(it)
+        }
+    }
+
+    protected fun assertAutomatisertLøsning() {
+        assertGodkjenningsbehovløsning(true, "Automatisk behandlet") {
+            assertTrue(it.path("automatiskBehandling").booleanValue())
         }
     }
 

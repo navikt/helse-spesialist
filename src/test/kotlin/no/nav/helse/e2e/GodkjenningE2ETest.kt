@@ -79,7 +79,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(true, SAKSBEHANDLERIDENT)
+        assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(false, SAKSBEHANDLERIDENT)
+        assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
     }
 
     @Test

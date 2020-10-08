@@ -4,8 +4,10 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.rapids_rivers.asLocalDateTime
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -94,7 +96,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 
     @Test
@@ -130,7 +132,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 
     @Test
@@ -167,7 +169,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
         assertWarning("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes", VEDTAKSPERIODE_ID)
     }
 
@@ -204,7 +206,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 
     @Test
@@ -242,16 +244,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovLøsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
-    }
-
-    private fun assertAutomatisertLøsning() {
-        assertLøsning("Godkjenning") {
-            Assertions.assertTrue(it.path("godkjent").isBoolean)
-            Assertions.assertTrue(it.path("godkjent").booleanValue())
-            Assertions.assertTrue(it.path("automatiskBehandling").booleanValue())
-            Assertions.assertEquals("Automatisk behandlet", it.path("saksbehandlerIdent").textValue())
-            Assertions.assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
-        }
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 }
