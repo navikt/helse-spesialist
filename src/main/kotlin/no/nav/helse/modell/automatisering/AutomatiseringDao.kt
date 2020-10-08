@@ -7,18 +7,28 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-class AutomatiseringDao(val dataSource: DataSource) {
-    fun lagre(automatisert: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID) {
+internal class AutomatiseringDao(val dataSource: DataSource) {
+    internal fun lagre(automatisert: Boolean, problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID) {
         sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert) VALUES (?, ?, ?) ON CONFLICT (vedtaksperiode_ref, hendelse_ref) DO UPDATE SET automatisert = ?;",
-                    finnVedtaksperiode(vedtaksperiodeId),
-                    hendelseId,
-                    automatisert,
-                    automatisert
-                ).asUpdate
-            )
+            session.transaction { transactionalSession ->
+                transactionalSession.run(
+                    queryOf(
+                        "INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert) VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)",
+                        vedtaksperiodeId,
+                        hendelseId,
+                        automatisert
+                    ).asUpdate
+                )
+
+                problems.forEach { problem ->
+                    transactionalSession.run(
+                        queryOf(
+                            "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)",
+                            vedtaksperiodeId, hendelseId, problem
+                        ).asUpdate
+                    )
+                }
+            }
         }
     }
 
@@ -40,11 +50,18 @@ class AutomatiseringDao(val dataSource: DataSource) {
                     query,
                     vedtaksperiodeRef,
                     hendelseId
-                ).map {
+                ).map { row ->
                     AutomatiseringDto(
-                        automatisert = it.boolean("automatisert"),
-                        vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-                        hendelseId = UUID.fromString(it.string("hendelse_id"))
+                        automatisert = row.boolean("automatisert"),
+                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                        hendelseId = UUID.fromString(row.string("hendelse_id")),
+                        problemer = session.run(
+                            queryOf(
+                                "SELECT * FROM automatisering_problem WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?",
+                                vedtaksperiodeRef,
+                                hendelseId
+                            ).map { it.string("problem") }.asList
+                        )
                     )
                 }.asSingle
             )
@@ -60,4 +77,9 @@ class AutomatiseringDao(val dataSource: DataSource) {
     }
 }
 
-data class AutomatiseringDto(val automatisert: Boolean, val vedtaksperiodeId: UUID, val hendelseId: UUID)
+data class AutomatiseringDto(
+    val automatisert: Boolean,
+    val vedtaksperiodeId: UUID,
+    val hendelseId: UUID,
+    val problemer: List<String>
+)

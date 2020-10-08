@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -13,6 +14,7 @@ import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -26,6 +28,7 @@ internal class AutomatiseringTest {
     }
     private val digitalKontaktinformasjonDaoMock = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
+    private val miljøstyrtFeatureToggleMock = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
 
     private val automatisering =
         Automatisering(
@@ -33,7 +36,8 @@ internal class AutomatiseringTest {
             risikovurderingDaoMock,
             mockk(relaxed = true),
             digitalKontaktinformasjonDaoMock,
-            åpneGosysOppgaverDaoMock
+            åpneGosysOppgaverDaoMock,
+            miljøstyrtFeatureToggleMock
         )
 
     companion object {
@@ -41,71 +45,81 @@ internal class AutomatiseringTest {
         private val vedtaksperiodeId = UUID.randomUUID()
     }
 
-    @Test
-    fun `vedtaksperiode uten warnings, med type forlengelse og ok risikovurdering er automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
-        assertTrue(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode med warnings og med type forlengelse er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(WarningDto("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode uten warnings og med type forskjellig fra forlengelse er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.OVERGANG_FRA_IT
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode uten warnings, med type forlengelse og ikke ok risikovurdering er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto(listOf("8-4 ikke fin")))
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode uten warnings, med type forlengelse, ok risikovurdering og ikke digital er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns false
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode uten warnings, med type forlengelse, ok risikovurdering og ukjent dkif-status er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns null
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode uten warnings, med type forlengelse, ok risikovurdering, er digital og har åpne oppgaver er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
-        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
-        assertFalse(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
-    }
-
-    @Test
-    fun `vedtaksperiode uten warnings, med type forlengelse, ok risikovurdering, er digital og har ikke åpne oppgaver er automatiserbar`() {
+    @BeforeEach
+    fun setupDefaultTilHappyCase() {
+        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) } returns risikovurderingDto()
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto())
         every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
-        assertTrue(automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId))
+        every { miljøstyrtFeatureToggleMock.automatisering() } returns true
+        every { miljøstyrtFeatureToggleMock.risikovurdering() } returns true
+    }
+
+    @Test
+    fun `vedtaksperiode som oppfyller krav er automatiserbar`() {
+        assertTrue(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med warnings er ikke automatiserbar`() {
+        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(WarningDto("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med type forskjellig fra forlengelse er ikke automatiserbar`() {
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.OVERGANG_FRA_IT
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto(listOf("8-4 ikke fin")))
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode hvor bruker ikke er digital er ikke automatiserbar`() {
+        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns false
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med ukjent dkif-status er ikke automatiserbar`() {
+        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns null
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med åpne oppgaver er ikke automatiserbar`() {
+        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
+        every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns null
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med risikofeaturetoggle av er ikke automatiserbar`() {
+        every { miljøstyrtFeatureToggleMock.risikovurdering() } returns false
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med automatiseringsfeaturetoggle av er ikke automatiserbar`() {
+        every { miljøstyrtFeatureToggleMock.automatisering() } returns false
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
     }
 
     private fun risikovurderingDto(arbeidsuførhetsvurdering: List<String> = emptyList()) = RisikovurderingDto(

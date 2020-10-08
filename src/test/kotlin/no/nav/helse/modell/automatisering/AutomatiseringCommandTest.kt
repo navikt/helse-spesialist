@@ -21,10 +21,9 @@ internal class AutomatiseringCommandTest {
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     private val command =
-        AutomatiseringCommand(fødselsnummer, vedtaksperiodeId, hendelseId, automatisering, miljøstyrtFeatureToggle, "{}")
-    private var captureBleAutomatisert = CapturingSlot<Boolean>()
+        AutomatiseringCommand(fødselsnummer, vedtaksperiodeId, hendelseId, automatisering, "{}")
+    private var captureVurdering = CapturingSlot<Automatisering.Automatiseringsvurdering>()
     private var captureVedtaksperiodeId = CapturingSlot<UUID>()
     private var captureHendelseId = CapturingSlot<UUID>()
 
@@ -33,55 +32,28 @@ internal class AutomatiseringCommandTest {
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
     }
-
-    @AfterEach
-    fun tearDown() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
-    }
-
+    
     @Test
-    fun `feature toggle av gir ikke-automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
+    fun `ikke automatiserbar gir ikke-automatiserbar behandling`() {
+        every { automatisering.vurder(any(), any()) } returns Automatisering.Automatiseringsvurdering(mutableListOf("Problem"))
         assertTrue(command.execute(context))
-        verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
-        assertLagre(automatisert = false)
+        verify { automatisering.lagre(capture(captureVurdering), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
+        assertAutomatisert(automatisert = false)
         assertTrue(context.meldinger().isEmpty())
     }
 
     @Test
-    fun `feature toggle på og ikke automatiserbar gir ikke-automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
-        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(false)
+    fun `automatiserbar gir automatiserbar behandling`() {
+        every { automatisering.vurder(any(), any()) } returns Automatisering.Automatiseringsvurdering(mutableListOf())
         assertTrue(command.execute(context))
-        verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
-        assertLagre(automatisert = false)
-        assertTrue(context.meldinger().isEmpty())
-    }
-
-    @Test
-    fun `feature toggle av og ikke automatiserbar gir ikke-automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
-        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(false)
-        assertTrue(command.execute(context))
-        verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
-        assertLagre(automatisert = false)
-        assertTrue(context.meldinger().isEmpty())
-    }
-
-    @Test
-    fun `feature toggle på og automatiserbar gir automatiserbar behandling`() {
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
-        every { automatisering.godkjentForAutomatisertBehandling(any(), any()) }.returns(true)
-        assertTrue(command.execute(context))
-        verify { automatisering.lagre(capture(captureBleAutomatisert), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
-        assertLagre(automatisert = true)
+        verify { automatisering.lagre(capture(captureVurdering), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
+        assertAutomatisert(automatisert = true)
         assertEquals(1, context.meldinger().size)
     }
 
-    fun assertLagre(automatisert: Boolean) {
-        assertEquals(automatisert, captureBleAutomatisert.captured)
+    private fun assertAutomatisert(automatisert: Boolean) {
+        assertEquals(automatisert, captureVurdering.captured.erAutomatiserbar())
         assertEquals(vedtaksperiodeId, captureVedtaksperiodeId.captured)
         assertEquals(hendelseId, captureHendelseId.captured)
     }

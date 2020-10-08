@@ -1,6 +1,7 @@
 package no.nav.helse.modell.risiko
 
 import no.nav.helse.modell.vedtaksperiode.RisikovurderingForSpeilDto
+import no.nav.helse.modell.automatisering.AutomatiseringValidering
 import java.time.LocalDateTime
 import java.util.*
 
@@ -11,7 +12,7 @@ class Risikovurdering private constructor(
     faresignaler: List<String>,
     private val arbeidsuførhetvurdering: List<String>,
     private val ufullstendig: Boolean
-) {
+) : AutomatiseringValidering {
     companion object {
         fun restore(
             risikovurderingDto: RisikovurderingDto
@@ -25,8 +26,10 @@ class Risikovurdering private constructor(
         )
     }
 
-    fun kanBehandlesAutomatisk() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
     fun speilDto() = RisikovurderingForSpeilDto(arbeidsuførhetvurdering, ufullstendig)
+
+    override fun valider() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
+    override fun error() = "Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er ikke oppfylt"
 }
 
 class RisikovurderingDto(

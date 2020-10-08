@@ -92,7 +92,6 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = id,
             automatisering = automatisering,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             godkjenningsbehovJson = json
         ),
         OpprettSaksbehandleroppgaveCommand(

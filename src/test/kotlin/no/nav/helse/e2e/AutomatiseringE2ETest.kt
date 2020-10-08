@@ -4,13 +4,9 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -22,16 +18,10 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
     }
 
-    @BeforeAll
+    @BeforeEach
     fun setup() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
         every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
-    }
-
-    @AfterAll
-    fun tearDown() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
     }
 
     @Test
@@ -228,7 +218,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = false
+            erDigital = true
         )
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -247,6 +237,82 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjent = true
         )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(løsningId, "NY", "FERDIG")
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+    }
+
+    @Test
+    fun `fatter ikke automatisk vedtak ved avskrudd toggle`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { miljøstyrtFeatureToggle.automatisering() } returns false
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            periodetype = Saksbehandleroppgavetype.FORLENGELSE
+        )
+        sendPersoninfoløsning(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            hendelseId = godkjenningsmeldingId
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            antall = 0,
+            oppslagFeilet = false
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        val løsningId = sendSaksbehandlerløsning(
+            oppgaveId = OPPGAVEID,
+            saksbehandlerIdent = SAKSBEHANDLERIDENT,
+            saksbehandlerEpost = SAKSBEHANDLEREPOST,
+            saksbehandlerOid = SAKSBEHANDLEROID,
+            godkjent = true
+        )
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(løsningId, "NY", "FERDIG")
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
+    }
+
+    @Test
+    fun `fatter ikke automatisk vedtak ved avskrudd risktoggle`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { miljøstyrtFeatureToggle.risikovurdering() } returns false
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            periodetype = Saksbehandleroppgavetype.FORLENGELSE
+        )
+        sendPersoninfoløsning(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            hendelseId = godkjenningsmeldingId
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            antall = 0,
+            oppslagFeilet = false
+        )
+        val løsningId = sendSaksbehandlerløsning(
+            oppgaveId = OPPGAVEID,
+            saksbehandlerIdent = SAKSBEHANDLERIDENT,
+            saksbehandlerEpost = SAKSBEHANDLEREPOST,
+            saksbehandlerOid = SAKSBEHANDLEROID,
+            godkjent = true
+        )
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)

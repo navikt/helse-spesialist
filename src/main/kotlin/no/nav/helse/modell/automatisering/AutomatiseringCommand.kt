@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.automatiseringsteller
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -13,7 +12,6 @@ internal class AutomatiseringCommand(
     private val vedtaksperiodeId: UUID,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val godkjenningsbehovJson: String
 ) : Command {
 
@@ -22,10 +20,9 @@ internal class AutomatiseringCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val kanAutomatiseres = miljøstyrtFeatureToggle.risikovurdering() && miljøstyrtFeatureToggle.automatisering()
-            && automatisering.godkjentForAutomatisertBehandling(fødselsnummer, vedtaksperiodeId)
+        val vurdering = automatisering.vurder(fødselsnummer, vedtaksperiodeId)
 
-        if (kanAutomatiseres) {
+        if (vurdering.erAutomatiserbar()) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             behov.løsAutomatisk()
             context.publiser(behov.toJson())
@@ -33,7 +30,7 @@ internal class AutomatiseringCommand(
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
         }
 
-        automatisering.lagre(kanAutomatiseres, vedtaksperiodeId, hendelseId)
+        automatisering.lagre(vurdering, vedtaksperiodeId, hendelseId)
         return true
     }
 }

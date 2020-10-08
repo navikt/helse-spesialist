@@ -107,7 +107,7 @@ internal abstract class AbstractE2ETest {
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-        automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao, åpneGosysOppgaverDao)
+        automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao, åpneGosysOppgaverDao, miljøstyrtFeatureToggle)
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
