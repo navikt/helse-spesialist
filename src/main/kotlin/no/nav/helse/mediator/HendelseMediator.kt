@@ -349,7 +349,7 @@ internal class HendelseMediator(
         contextId: UUID,
         messageContext: RapidsConnection.MessageContext
     ) {
-        withMDC(mapOf("context_id" to "$contextId", "hendelse_id" to "${hendelse.id}")) {
+        withMDC(mapOf("context_id" to "$contextId", "hendelse_id" to "${hendelse.id}", "vedtaksperiode_id" to "${hendelse.vedtaksperiodeId() ?: "N/A"}")) {
             try {
                 log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
