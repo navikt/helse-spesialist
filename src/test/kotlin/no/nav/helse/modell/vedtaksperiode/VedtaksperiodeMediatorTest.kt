@@ -64,6 +64,48 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertTrue(risikovurdering["arbeidsuførhetvurdering"].isEmpty)
     }
 
+    @Test
+    fun `Warnings mappes til speil (som "varsler")`() {
+        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            begrunnelser = listOf("8-4 ikke oppfylt")
+        )
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        val varsler = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("varsler")
+
+        assertEquals(1, varsler.size())
+    }
+
+    @Test
+    fun `Ingen warnings mappes til speil som tom liste`() {
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        val varsler = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("varsler")
+
+        assertTrue(varsler.isEmpty)
+    }
+
     private val SNAPSHOTV1 = """
         {
             "aktørId": "$AKTØR",

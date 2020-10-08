@@ -1,6 +1,8 @@
 package no.nav.helse.mediator.api
 
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.OppgaveDao
@@ -91,6 +93,7 @@ internal class VedtaksperiodeMediator(
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
                         val risikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
+                        val varsler = vedtakDao.finnWarnings(vedtaksperiodeId).map { it.melding }
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
@@ -98,6 +101,7 @@ internal class VedtaksperiodeMediator(
                             "risikovurdering",
                             objectMapper.convertValue(it.speilDto(), ObjectNode::class.java)
                         )}
+                        vedtaksperiode.set<ArrayNode>("varsler", objectMapper.convertValue<ArrayNode>(varsler))
                     }
                 }
             }
