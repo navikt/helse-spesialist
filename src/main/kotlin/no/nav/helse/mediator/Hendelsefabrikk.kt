@@ -96,7 +96,7 @@ internal class Hendelsefabrikk(
             periodeFom = LocalDate.parse(jsonNode.path("periodeFom").asText()),
             periodeTom = LocalDate.parse(jsonNode.path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            warnings = jsonNode.path("warnings").path("aktiviteter").map(JsonNode::asText),
+            warnings = jsonNode.path("warnings").path("aktiviteter").map { it["melding"].asText() },
             periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("periodetype").asText()),
             json = json
         )
