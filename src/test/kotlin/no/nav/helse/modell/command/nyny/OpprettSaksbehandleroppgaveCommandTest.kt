@@ -4,10 +4,10 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

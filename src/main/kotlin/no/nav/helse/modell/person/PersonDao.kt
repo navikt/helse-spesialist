@@ -5,6 +5,7 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language

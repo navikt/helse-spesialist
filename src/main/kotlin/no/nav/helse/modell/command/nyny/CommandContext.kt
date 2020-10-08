@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
-import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
 import java.util.*
 

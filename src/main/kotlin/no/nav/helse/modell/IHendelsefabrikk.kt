@@ -1,6 +1,6 @@
 package no.nav.helse.modell
 
-import no.nav.helse.mediator.kafka.meldinger.*
+import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.time.LocalDate

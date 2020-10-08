@@ -4,7 +4,7 @@ import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.meldinger.*
+import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.command.HendelseDao.Hendelsetype.*

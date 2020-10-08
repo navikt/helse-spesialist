@@ -3,7 +3,7 @@ package no.nav.helse.modell.gosysoppgaver
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.kafka.meldinger.ÅpneGosysOppgaverLøsning
+import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverLøsning
 import no.nav.helse.modell.command.nyny.CommandContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

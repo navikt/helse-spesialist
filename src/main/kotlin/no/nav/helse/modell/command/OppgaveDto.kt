@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command
 
-import no.nav.helse.Oppgavestatus
+import no.nav.helse.modell.Oppgavestatus
 import java.time.LocalDateTime
 import java.util.*
 

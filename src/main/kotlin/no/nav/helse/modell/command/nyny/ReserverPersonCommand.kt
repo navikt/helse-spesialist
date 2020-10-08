@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
-import no.nav.helse.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*

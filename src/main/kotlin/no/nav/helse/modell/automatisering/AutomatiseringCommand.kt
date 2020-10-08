@@ -1,7 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.automatiseringsteller
-import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext

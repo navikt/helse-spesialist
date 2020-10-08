@@ -5,9 +5,9 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.Hendelsefabrikk
-import no.nav.helse.mediator.kafka.meldinger.NyVedtaksperiodeForkastetMessage
-import no.nav.helse.mediator.kafka.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.meldinger.NyVedtaksperiodeForkastetMessage
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertEquals

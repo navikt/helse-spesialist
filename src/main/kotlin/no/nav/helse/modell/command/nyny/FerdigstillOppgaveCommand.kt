@@ -1,6 +1,6 @@
 package no.nav.helse.modell.command.nyny
 
-import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.command.OppgaveDao
 import org.slf4j.LoggerFactory
 import java.util.*

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.command.nyny
 
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetLøsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

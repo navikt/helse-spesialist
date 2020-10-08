@@ -1,8 +1,8 @@
 package no.nav.helse.modell.risiko
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.kafka.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.kafka.meldinger.RisikovurderingLøsning
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.meldinger.RisikovurderingLøsning
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext

@@ -1,10 +1,10 @@
 package no.nav.helse.modell.command
 
 import kotliquery.*
-import no.nav.helse.Oppgavestatus
-import no.nav.helse.Oppgavestatus.*
+import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.Oppgave
-import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.dkif
 
-import no.nav.helse.mediator.kafka.meldinger.DigitalKontaktinformasjonLøsning
+import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonLøsning
 import no.nav.helse.modell.command.nyny.Command
 import no.nav.helse.modell.command.nyny.CommandContext
 import org.slf4j.LoggerFactory

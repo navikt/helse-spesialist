@@ -7,8 +7,9 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.Oppgavestatus
+import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -19,12 +20,11 @@ import no.nav.helse.modell.command.nyny.TestHendelse
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.person.Kjønn
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
-import no.nav.helse.tildeling.ReservasjonDao
-import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.TildelingDao
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance

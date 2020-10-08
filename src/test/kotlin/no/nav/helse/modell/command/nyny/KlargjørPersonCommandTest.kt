@@ -5,7 +5,11 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.modell.person.*
+import no.nav.helse.mediator.meldinger.HentEnhetLøsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.Kjønn
+import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

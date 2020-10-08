@@ -2,7 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.Oppgavestatus
+import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

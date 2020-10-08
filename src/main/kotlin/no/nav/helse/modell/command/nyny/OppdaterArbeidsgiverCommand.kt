@@ -1,7 +1,7 @@
 package no.nav.helse.modell.command.nyny
 
+import no.nav.helse.mediator.meldinger.ArbeidsgiverLøsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverLøsning
 import java.time.LocalDate
 
 internal class OppdaterArbeidsgiverCommand(private val orgnummer: String, private val arbeidsgiverDao: ArbeidsgiverDao) : Command {

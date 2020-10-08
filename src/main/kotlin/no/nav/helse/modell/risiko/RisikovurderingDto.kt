@@ -1,6 +1,6 @@
 package no.nav.helse.modell.risiko
 
-import no.nav.helse.vedtaksperiode.RisikovurderingForSpeilDto
+import no.nav.helse.modell.vedtaksperiode.RisikovurderingForSpeilDto
 import java.time.LocalDateTime
 import java.util.*
 

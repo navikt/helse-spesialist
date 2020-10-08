@@ -2,7 +2,7 @@ package no.nav.helse.modell.command.nyny
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

@@ -1,9 +1,9 @@
 package no.nav.helse.modell
 
 import kotliquery.*
-import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtak.*
-import no.nav.helse.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*

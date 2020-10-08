@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import io.mockk.verify
-import no.nav.helse.Oppgavestatus
+import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.snapshot
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

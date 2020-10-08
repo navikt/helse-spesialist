@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtak
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.helse.modell.person.Kjønn
+import no.nav.helse.mediator.meldinger.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

@@ -1,7 +1,6 @@
 package no.nav.helse.modell
 
-import no.nav.helse.Oppgavestatus
-import no.nav.helse.api.OppgaveMediator
+import no.nav.helse.mediator.OppgaveMediator
 import java.time.LocalDateTime
 import java.util.*
 

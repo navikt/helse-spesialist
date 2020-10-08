@@ -4,9 +4,9 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.modell.person.HentEnhetLøsning
-import no.nav.helse.modell.person.HentInfotrygdutbetalingerLøsning
-import no.nav.helse.modell.person.HentPersoninfoLøsning
+import no.nav.helse.mediator.meldinger.HentEnhetLøsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerLøsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoLøsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions.*

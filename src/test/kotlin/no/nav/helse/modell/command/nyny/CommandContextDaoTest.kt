@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.kafka.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.Hendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
