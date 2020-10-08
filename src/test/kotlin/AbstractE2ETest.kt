@@ -270,10 +270,7 @@ internal abstract class AbstractE2ETest {
                 null
             ), saksbehandlerEpost, saksbehandlerOid
         )
-        testRapid.sendTestMessage(
-            testRapid.inspektør.meldinger().last { it.path("@event_name").asText() == "saksbehandler_løsning" }
-                .toString()
-        )
+        testRapid.sendTestMessage(testRapid.inspektør.siste("saksbehandler_løsning").toString())
     }
 
     protected fun assertHendelse(hendelseId: UUID) {
@@ -390,6 +387,9 @@ internal abstract class AbstractE2ETest {
 
     protected fun TestRapid.RapidInspector.hendelser(type: String) =
         meldinger().filter { it.path("@event_name").asText() == type }
+
+    private fun TestRapid.RapidInspector.siste(type: String) =
+        hendelser("saksbehandler_løsning").last()
 
     protected fun TestRapid.RapidInspector.behov() =
         hendelser("behov")
