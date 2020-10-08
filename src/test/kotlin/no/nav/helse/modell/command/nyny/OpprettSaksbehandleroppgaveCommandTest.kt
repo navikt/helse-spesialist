@@ -14,11 +14,10 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-internal class SaksbehandlerGodkjenningCommandTest {
+internal class OpprettSaksbehandleroppgaveCommandTest {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val FNR = "12345678910"
-        private const val JSON = "{}"
         private val hendelseId = UUID.randomUUID()
     }
 
@@ -26,10 +25,9 @@ internal class SaksbehandlerGodkjenningCommandTest {
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private lateinit var context: CommandContext
-    private val command = SaksbehandlerGodkjenningCommand(
+    private val command = OpprettSaksbehandleroppgaveCommand(
         FNR,
         VEDTAKSPERIODE_ID,
-        JSON,
         reservasjonDao,
         oppgaveMediator,
         automatisering,
@@ -41,7 +39,7 @@ internal class SaksbehandlerGodkjenningCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         forventetOppgave =
-            Oppgave.avventerSaksbehandler(SaksbehandlerGodkjenningCommand::class.java.simpleName, VEDTAKSPERIODE_ID)
+            Oppgave.avventerSaksbehandler(OpprettSaksbehandleroppgaveCommand::class.java.simpleName, VEDTAKSPERIODE_ID)
         clearMocks(oppgaveMediator)
     }
 

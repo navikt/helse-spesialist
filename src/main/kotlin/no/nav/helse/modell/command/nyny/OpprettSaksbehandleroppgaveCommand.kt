@@ -7,10 +7,9 @@ import no.nav.helse.tildeling.ReservasjonDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class SaksbehandlerGodkjenningCommand(
+internal class OpprettSaksbehandleroppgaveCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val godkjenningsbehovJson: String,
     private val reservasjonDao: ReservasjonDao,
     private val oppgaveMediator: OppgaveMediator,
     private val automatisering: Automatisering,
@@ -18,7 +17,7 @@ internal class SaksbehandlerGodkjenningCommand(
 ) : Command {
 
     private companion object {
-        private val logg = LoggerFactory.getLogger(SaksbehandlerGodkjenningCommand::class.java)
+        private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgaveCommand::class.java)
     }
 
     private val oppgave = Oppgave.avventerSaksbehandler(this::class.java.simpleName, vedtaksperiodeId)

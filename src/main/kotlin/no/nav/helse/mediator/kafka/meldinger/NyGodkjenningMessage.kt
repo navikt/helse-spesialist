@@ -95,10 +95,9 @@ internal class NyGodkjenningMessage(
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             godkjenningsbehovJson = json
         ),
-        SaksbehandlerGodkjenningCommand(
+        OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            godkjenningsbehovJson = json,
             reservasjonDao = reservasjonDao,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
