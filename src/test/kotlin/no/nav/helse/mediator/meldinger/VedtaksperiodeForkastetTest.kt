@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.e2e.GodkjenningE2ETest
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.OppgaveDao
@@ -28,13 +27,11 @@ internal class VedtaksperiodeForkastetTest {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
-        private const val AKTØR_ID = "aktørid"
-        private const val ORGNR = "999999999"
-        private val SNAPSHOT = snapshot(AKTØR_ID, FNR, ORGNR, VEDTAKSPERIODE)
+        private val SNAPSHOT = snapshot(VEDTAKSPERIODE)
         private val vedtak = VedtakDto(1, 2)
     }
 
-    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR_ID)
+    private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)

@@ -25,36 +25,26 @@ internal class VedtakDao(private val dataSource: DataSource) {
             INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref)
             VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :speil_snapshot_ref)
         """
-        it.run(
-            queryOf(
-                statement, mapOf(
-                    "vedtaksperiode_id" to vedtaksperiodeId,
-                    "fom" to fom,
-                    "tom" to tom,
-                    "person_ref" to personRef,
-                    "arbeidsgiver_ref" to arbeidsgiverRef,
-                    "speil_snapshot_ref" to speilSnapshotRef
-                )
-            ).asUpdate
-        )
+            it.run(queryOf(statement, mapOf(
+                "vedtaksperiode_id" to vedtaksperiodeId,
+                "fom" to fom,
+                "tom" to tom,
+                "person_ref" to personRef,
+                "arbeidsgiver_ref" to arbeidsgiverRef,
+                "speil_snapshot_ref" to speilSnapshotRef
+            )).asUpdate)
     }
 
-    internal fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) =
-        using(sessionOf(dataSource)) {
-            @Language("PostgreSQL")
-            val statement =
-                "UPDATE vedtak SET fom=:fom, tom=:tom, speil_snapshot_ref=:speil_snapshot_ref WHERE id=:vedtak_ref"
-            it.run(
-                queryOf(
-                    statement, mapOf(
-                        "vedtak_ref" to vedtakRef,
-                        "fom" to fom,
-                        "tom" to tom,
-                        "speil_snapshot_ref" to speilSnapshotRef
-                    )
-                ).asUpdate
-            )
-        }
+    internal fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) = using(sessionOf(dataSource)) {
+        @Language("PostgreSQL")
+        val statement = "UPDATE vedtak SET fom=:fom, tom=:tom, speil_snapshot_ref=:speil_snapshot_ref WHERE id=:vedtak_ref"
+        it.run(queryOf(statement, mapOf(
+            "vedtak_ref" to vedtakRef,
+            "fom" to fom,
+            "tom" to tom,
+            "speil_snapshot_ref" to speilSnapshotRef
+        )).asUpdate)
+    }
 
     private fun Session.findVedtak(vedtaksperiodeId: UUID): VedtakDto? {
         @Language("PostgreSQL")
@@ -69,7 +59,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
         val vedtakRef = requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
-
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_ref, hendelse_ref) VALUES (?, ?)
@@ -78,34 +67,28 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, vedtakRef, hendelseId).asUpdate)
     }
 
-    internal fun fjernKobling(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+    internal fun fjernKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        @Language("PostgreSQL")
+        val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_ref = ?"
+        session.run(queryOf(statement, hendelseId, vedtakRef).asUpdate)
+    }
 
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_ref = ?"
-            session.run(queryOf(statement, hendelseId, vedtakRef).asUpdate)
-        }
+    internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<WarningDto>) = using(sessionOf(dataSource)) { session ->
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        @Language("PostgreSQL")
+        val statement = "DELETE FROM warning WHERE vedtak_ref=?"
+        session.run(queryOf(statement, vedtakRef).asExecute)
+        meldinger.forEach { melding -> session.insertWarning(vedtakRef, melding) }
+    }
 
-    internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<WarningDto>) =
-        using(sessionOf(dataSource)) { session ->
-            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM warning WHERE vedtak_ref=?"
-            session.run(queryOf(statement, vedtakRef).asExecute)
-            meldinger.forEach { melding -> session.insertWarning(vedtakRef, melding) }
-        }
-
-    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<WarningDto>) =
-        using(sessionOf(dataSource)) { session ->
-            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-
-            @Language("PostgreSQL")
-            val statement = "DELETE FROM warning WHERE vedtak_ref=? AND kilde='Spleis'::warning_kilde"
-            session.run(queryOf(statement, vedtakRef).asExecute)
-            warnings.forEach { warning -> session.insertWarning(vedtakRef, warning) }
-        }
+    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<WarningDto>) = using(sessionOf(dataSource)) { session ->
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        @Language("PostgreSQL")
+        val statement = "DELETE FROM warning WHERE vedtak_ref=? AND kilde='Spleis'::warning_kilde"
+        session.run(queryOf(statement, vedtakRef).asExecute)
+        warnings.forEach { warning -> session.insertWarning(vedtakRef, warning) }
+    }
 
     internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: WarningDto) = using(sessionOf(dataSource)) { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
@@ -135,7 +118,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype) =
         using(sessionOf(dataSource)) {
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-
             @Language("PostgreSQL")
             val statement = "INSERT INTO saksbehandleroppgavetype (type, vedtak_ref) VALUES (?, ?)"
             it.run(queryOf(statement, type.name, vedtakRef).asUpdate)
@@ -143,46 +125,14 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun finnWarnings(vedtaksperiodeId: UUID): List<WarningDto> = sessionOf(dataSource).use { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
-
-        val warnings = session.finn_warnings(vedtakRef)
-
-        if (warnings.any { it.melding == "" }) {
-            session.patch_warnings(vedtakRef)
-            return session.finn_warnings(vedtakRef)
-        }
-
-        return warnings
-    }
-
-    private fun Session.patch_warnings(vedtakRef: Long) {
-        @Language("PostgreSQL")
-        val statement = """
-            DELETE FROM warning WHERE vedtak_ref = :vedtak_ref AND kilde='Spleis'::warning_kilde;
-            INSERT INTO warning (melding, vedtak_ref, kilde)
-                SELECT aktiviteter ->> 'melding' as melding, :vedtak_ref as vedtak_ref, 'Spleis'
-                FROM hendelse h, json_array_elements(h.data -> 'warnings' -> 'aktiviteter') aktiviteter,
-                    vedtaksperiode_hendelse vh
-                WHERE vh.hendelse_ref = h.id
-        """
-        this.run(queryOf(statement, mapOf("vedtak_ref" to vedtakRef)).asExecute)
-    }
-
-    private fun Session.finn_warnings(vedtakRef: Long): List<WarningDto> {
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
-        return this.run(queryOf(statement, vedtakRef).map {
-            WarningDto(
-                melding = it.string("melding"),
-                kilde = WarningKilde.valueOf(it.string("kilde"))
-            )
-        }.asList)
+        session.run(queryOf(statement, vedtakRef).map { WarningDto( melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
     }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? =
         sessionOf(dataSource).use { session ->
-            val vedtakRef =
-                requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
-
+            val vedtakRef = requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
             @Language("PostgreSQL")
             val statement = "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = ?"
             session.run(queryOf(statement, vedtakRef).map {
@@ -260,6 +210,5 @@ internal class VedtakDao(private val dataSource: DataSource) {
         speilSnapshotRef = row.int("speil_snapshot_ref"),
         infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
     )
-
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

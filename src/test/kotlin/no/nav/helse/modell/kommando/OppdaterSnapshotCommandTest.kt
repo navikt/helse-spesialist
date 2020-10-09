@@ -1,7 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import io.mockk.*
-import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastetTest
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.vedtak.WarningDto
@@ -18,9 +17,7 @@ internal class OppdaterSnapshotCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private const val FNR = "fnr"
-        private const val AKTØR_ID = "aktørid"
-        private const val ORGNR = "999999999"
-        private val SNAPSHOT = snapshot(AKTØR_ID, FNR, ORGNR, VEDTAKSPERIODE)
+        private val SNAPSHOT = snapshot(VEDTAKSPERIODE)
         private const val VEDTAK_REF = 1L
     }
 

@@ -4,7 +4,6 @@ import AbstractE2ETest
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.snapshot
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -19,20 +18,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val OPPGAVEID = 1L
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private val SNAPSHOTV1 = snapshot(
-            AKTØR,
-            UNG_PERSON_FNR_2018,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
-        )
-        private val SNAPSHOTV2 = snapshot(
-            AKTØR,
-            UNG_PERSON_FNR_2018,
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            Saksbehandleroppgavetype.FORLENGELSE
-        )
+        private val SNAPSHOTV1 = snapshot(VEDTAKSPERIODE_ID)
+        private val SNAPSHOTV2 = snapshot(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -89,8 +76,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        val løsningId =
-            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -110,8 +96,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        val løsningId =
-            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
+        val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(løsningId, "NY", "FERDIG")

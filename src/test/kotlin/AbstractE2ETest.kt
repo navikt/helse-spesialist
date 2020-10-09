@@ -69,7 +69,7 @@ internal abstract class AbstractE2ETest {
 
     private val oppgaveDao = OppgaveDao(dataSource)
     private val personDao = PersonDao(dataSource)
-    protected val vedtakDao = VedtakDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
