@@ -78,7 +78,9 @@ internal class Godkjenningsbehov(
         ),
         ÅpneGosysOppgaverCommand(
             aktørId = aktørId,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            vedtakDao = vedtakDao,
+            vedtaksperiodeId = vedtaksperiodeId
         ),
         RisikoCommand(
             organisasjonsnummer = organisasjonsnummer,

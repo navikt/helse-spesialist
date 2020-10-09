@@ -1,13 +1,17 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
+import java.util.*
 
 internal class ÅpneGosysOppgaverCommand(
     private val aktørId: String,
-    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
+    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    private val vedtakDao: VedtakDao,
+    private val vedtaksperiodeId: UUID
 ) : Command {
 
     private companion object {
@@ -16,15 +20,18 @@ internal class ÅpneGosysOppgaverCommand(
 
     override fun execute(context: CommandContext): Boolean {
         logg.info("Trenger oppgaveinformasjon fra Gosys")
-        context.behov("ÅpneOppgaver", mapOf(
-            "aktørId" to aktørId
-        ))
+        context.behov(
+            "ÅpneOppgaver", mapOf(
+                "aktørId" to aktørId
+            )
+        )
         return false
     }
 
     override fun resume(context: CommandContext): Boolean {
         val løsning = context.get<ÅpneGosysOppgaverløsning>() ?: return false
         løsning.lagre(åpneGosysOppgaverDao)
+        løsning.evaluer(vedtakDao, vedtaksperiodeId)
         return true
     }
 }
