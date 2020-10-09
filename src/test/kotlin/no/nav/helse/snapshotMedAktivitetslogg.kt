@@ -1,27 +1,34 @@
 package no.nav.helse
 
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.util.*
 
-fun snapshot(vedtaksperiodeId: UUID) = """
+fun snapshot(
+    aktørId: String,
+    fnr: String,
+    orgnr: String,
+    vedtaksperiodeId: UUID,
+    periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+) = """
             {
-  "aktørId": "aktørId",
-  "fødselsnummer": "fnr",
+  "aktørId": "$aktørId",
+  "fødselsnummer": "$fnr",
   "arbeidsgivere": [
     {
-      "organisasjonsnummer": "orgnr",
+      "organisasjonsnummer": "$orgnr",
       "id": "71ebda8a-4f65-7754-b3ca-bf243b85315d",
       "vedtaksperioder": [
         {
-          "id": "${vedtaksperiodeId}",
+          "id": "$vedtaksperiodeId",
           "aktivitetslogg": [
             {
-              "vedtaksperiodeId": "${vedtaksperiodeId}",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
               "alvorlighetsgrad": "W",
               "melding": "Brukeren har flere inntekter de siste tre måneder.",
               "tidsstempel": "2020-07-25 23:51:26.031"
             },
             {
-              "vedtaksperiodeId": "${vedtaksperiodeId}",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
               "alvorlighetsgrad": "I",
               "melding": "Infomelding.",
               "tidsstempel": "2020-07-25 23:51:26.032"
@@ -47,7 +54,7 @@ fun snapshot(vedtaksperiodeId: UUID) = """
             }
           ],
           "forlengelseFraInfotrygd": "NEI",
-          "periodetype": "FØRSTEGANGSBEHANDLING"
+          "periodetype": "${periodetype.name}"
         }
       ]
     }
