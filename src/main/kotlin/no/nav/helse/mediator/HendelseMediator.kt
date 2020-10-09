@@ -60,7 +60,7 @@ internal class HendelseMediator(
             "behovId" to "$behovId"
         )) {
             løsninger(hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
-                ?: log.warn("mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
+                ?: log.info("mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
                     "eller fordi hendelsen $hendelseId er ukjent")
         }
     }
@@ -305,7 +305,7 @@ internal class HendelseMediator(
             val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk)
             val commandContext = commandContextDao.finnSuspendert(contextId)
             if (hendelse == null || commandContext == null) {
-                log.error("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")
+                log.info("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")
                 return null
             }
             Løsninger(hendelse, contextId, commandContext).also { løsninger = it }
