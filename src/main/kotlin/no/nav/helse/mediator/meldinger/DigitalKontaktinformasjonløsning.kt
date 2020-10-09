@@ -1,8 +1,11 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDto
+import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -24,6 +27,18 @@ internal class DigitalKontaktinformasjonløsning(
                 opprettet = opprettet
             )
         )
+    }
+
+    internal fun evaluer(vedtakDao: VedtakDao, vedtaksperiodeId: UUID) {
+        if (!erDigital) {
+            vedtakDao.leggTilWarning(
+                vedtaksperiodeId,
+                WarningDto(
+                    "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
+                    WarningKilde.Spesialist
+                )
+            )
+        }
     }
 
     internal class DigitalKontaktinformasjonRiver(

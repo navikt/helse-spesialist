@@ -42,7 +42,6 @@ internal class ÅpneGosysOppgaverløsning(
                 WarningDto("Det finnes åpne oppgaver på sykepenger i Gosys", WarningKilde.Spesialist)
             )
         }
-
     }
 
     internal class ÅpneGosysOppgaverRiver(

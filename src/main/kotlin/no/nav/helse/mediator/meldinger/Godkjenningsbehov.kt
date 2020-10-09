@@ -74,7 +74,9 @@ internal class Godkjenningsbehov(
             vedtakDao
         ),
         DigitalKontaktinformasjonCommand(
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+            vedtakDao = vedtakDao,
+            vedtaksperiodeId = vedtaksperiodeId
         ),
         ÅpneGosysOppgaverCommand(
             aktørId = aktørId,
