@@ -157,7 +157,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
     private fun Session.patch_warnings(vedtakRef: Long) {
         @Language("PostgreSQL")
         val statement = """
-            DELETE FROM warning WHERE vedtak_ref = :vedtak_ref;
+            DELETE FROM warning WHERE vedtak_ref = :vedtak_ref AND kilde='Spleis'::warning_kilde;
             INSERT INTO warning (melding, vedtak_ref, kilde)
                 SELECT aktiviteter ->> 'melding' as melding, :vedtak_ref as vedtak_ref, 'Spleis'
                 FROM hendelse h, json_array_elements(h.data -> 'warnings' -> 'aktiviteter') aktiviteter,

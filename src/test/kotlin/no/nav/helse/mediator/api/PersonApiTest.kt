@@ -38,7 +38,7 @@ internal class PersonApiTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
+    fun `Patcher tomme warnings`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
