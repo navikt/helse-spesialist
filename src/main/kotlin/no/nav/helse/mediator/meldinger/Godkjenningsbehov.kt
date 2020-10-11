@@ -7,6 +7,7 @@ import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
@@ -45,6 +46,7 @@ internal class Godkjenningsbehov(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
+    warningDao: WarningDao,
     snapshotDao: SnapshotDao,
     risikovurderingDao: RisikovurderingDao,
     reservasjonDao: ReservasjonDao,
@@ -71,24 +73,25 @@ internal class Godkjenningsbehov(
             personDao,
             arbeidsgiverDao,
             snapshotDao,
-            vedtakDao
+            vedtakDao,
+            warningDao
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            vedtakDao = vedtakDao,
+            warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId
         ),
         ÅpneGosysOppgaverCommand(
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            vedtakDao = vedtakDao,
+            warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId
         ),
         RisikoCommand(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
-            vedtakDao = vedtakDao,
+            warningDao = warningDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
         AutomatiseringCommand(

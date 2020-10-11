@@ -6,10 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.OppgaveDao
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
@@ -38,6 +35,7 @@ internal class GodkjenningsbehovTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
@@ -50,6 +48,7 @@ internal class GodkjenningsbehovTest {
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
         vedtakDao = vedtakDao,
+        warningDao = warningDao,
         commandContextDao = commandContextDao,
         snapshotDao = snapshotDao,
         oppgaveDao = oppgaveDao,

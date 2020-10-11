@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.vedtak.WarningDto
@@ -28,16 +28,16 @@ internal class ÅpneGosysOppgaverløsning(
         )
     }
 
-    internal fun evaluer(vedtakDao: VedtakDao, vedtaksperiodeId: UUID) {
+    internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
         if (oppslagFeilet) {
-            vedtakDao.leggTilWarning(
+            warningDao.leggTilWarning(
                 vedtaksperiodeId,
                 WarningDto("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", WarningKilde.Spesialist)
             )
         }
 
         antall?.takeIf { it > 0 }?.also {
-            vedtakDao.leggTilWarning(
+            warningDao.leggTilWarning(
                 vedtaksperiodeId,
                 WarningDto("Det finnes åpne oppgaver på sykepenger i Gosys", WarningKilde.Spesialist)
             )

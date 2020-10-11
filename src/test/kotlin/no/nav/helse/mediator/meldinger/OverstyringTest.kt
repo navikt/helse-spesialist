@@ -48,6 +48,7 @@ internal class OverstyringTest {
         personDao = mockk(),
         arbeidsgiverDao = mockk(),
         vedtakDao = mockk(),
+        warningDao = mockk(),
         commandContextDao = mockk(),
         snapshotDao = mockk(),
         oppgaveDao = mockk(),

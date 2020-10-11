@@ -88,12 +88,18 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val personDao = PersonDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
+    private val warningDao = WarningDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
+    private val reservasjonDao = ReservasjonDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
+    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+
     private val hendelseDao = HendelseDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -103,14 +109,15 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
         personDao = personDao,
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource),
+        arbeidsgiverDao = arbeidsgiverDao,
         vedtakDao = vedtakDao,
+        warningDao = warningDao,
         commandContextDao = commandContextDao,
-        snapshotDao = SnapshotDao(dataSource),
+        snapshotDao = snapshotDao,
         oppgaveDao = oppgaveDao,
-        reservasjonDao = ReservasjonDao(dataSource),
+        reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
-        overstyringDao = OverstyringDao(dataSource),
+        overstyringDao = overstyringDao,
         risikovurderingDao = risikovurderingDao,
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
@@ -119,6 +126,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = Automatisering(
             vedtakDao,
+            warningDao,
             risikovurderingDao,
             AutomatiseringDao(dataSource),
             digitalKontaktinformasjonDao,
@@ -162,7 +170,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     oppgaveApi(oppgaveMediator)
                     vedtaksperiodeApi(
                         hendelseMediator = hendelseMediator,
-                        vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+                        vedtaksperiodeMediator = VedtaksperiodeMediator(
+                            vedtakDao = vedtakDao,
+                            warningDao = warningDao,
+                            personDao = personDao,
+                            arbeidsgiverDao = arbeidsgiverDao,
+                            snapshotDao = snapshotDao,
+                            overstyringDao = overstyringDao,
+                            oppgaveDao = oppgaveDao,
+                            tildelingDao = tildelingDao,
+                            risikovurderingDao = risikovurderingDao
+                        )
                     )
                 }
                 authenticate("saksbehandler-direkte") {

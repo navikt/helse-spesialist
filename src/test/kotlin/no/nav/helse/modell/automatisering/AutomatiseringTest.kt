@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.risiko.Risikovurdering
@@ -22,6 +23,7 @@ import java.util.*
 internal class AutomatiseringTest {
 
     private val vedtakDaoMock = mockk<VedtakDao>()
+    private val warningDaoMock = mockk<WarningDao>()
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
         every { hentRisikovurderingDto(vedtaksperiodeId) } returns risikovurderingDto()
         every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto())
@@ -33,6 +35,7 @@ internal class AutomatiseringTest {
     private val automatisering =
         Automatisering(
             vedtakDaoMock,
+            warningDaoMock,
             risikovurderingDaoMock,
             mockk(relaxed = true),
             digitalKontaktinformasjonDaoMock,
@@ -49,7 +52,7 @@ internal class AutomatiseringTest {
     fun setupDefaultTilHappyCase() {
         every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) } returns risikovurderingDto()
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto())
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
+        every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
@@ -64,7 +67,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(WarningDto("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
+        every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(WarningDto("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
         assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
     }
 

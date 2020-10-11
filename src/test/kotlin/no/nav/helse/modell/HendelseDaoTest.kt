@@ -34,6 +34,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            warningDao = warningDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             oppgaveDao = oppgaveDao,

@@ -5,10 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.OppgaveDao
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.VedtakDto
@@ -34,6 +31,7 @@ internal class VedtaksperiodeForkastetTest {
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
@@ -42,6 +40,7 @@ internal class VedtaksperiodeForkastetTest {
         Hendelsefabrikk(
             hendelseDao = mockk(),
             vedtakDao = vedtakDao,
+            warningDao = warningDao,
             oppgaveDao = oppgaveDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,

@@ -8,6 +8,7 @@ import no.nav.helse.measureAsHistogram
 import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -18,18 +19,17 @@ import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
 import java.util.*
-import javax.sql.DataSource
 
 internal class VedtaksperiodeMediator(
-    private val dataSource: DataSource,
-    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val personDao: PersonDao = PersonDao(dataSource),
-    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
-    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource)
+    private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao,
+    private val personDao: PersonDao,
+    private val arbeidsgiverDao: ArbeidsgiverDao,
+    private val snapshotDao: SnapshotDao,
+    private val overstyringDao: OverstyringDao,
+    private val oppgaveDao: OppgaveDao,
+    private val tildelingDao: TildelingDao,
+    private val risikovurderingDao: RisikovurderingDao
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
@@ -94,7 +94,7 @@ internal class VedtaksperiodeMediator(
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
                         val risikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
-                        val varsler = WarningDto.meldinger(vedtakDao.finnWarnings(vedtaksperiodeId))
+                        val varsler = WarningDto.meldinger(warningDao.finnWarnings(vedtaksperiodeId))
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())

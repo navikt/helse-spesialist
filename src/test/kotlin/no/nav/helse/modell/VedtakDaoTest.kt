@@ -5,8 +5,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.WarningDto
-import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -54,43 +52,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `lagrer og leser warnings`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val testwarnings= listOf(WarningDto("Warning A", WarningKilde.Spleis), WarningDto("Warning B", WarningKilde.Spleis))
-        val testwarning = WarningDto("Warning C", WarningKilde.Spesialist)
-        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
-        vedtakDao.leggTilWarning(VEDTAKSPERIODE, testwarning)
-        assertWarnings(testwarnings + listOf(testwarning), vedtakDao.finnWarnings(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `sletter ikke gamle warnings`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val testwarnings1= listOf(WarningDto("Warning A", WarningKilde.Spleis), WarningDto("Warning B", WarningKilde.Spleis))
-        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
-        val testwarnings2= listOf(WarningDto("Warning C", WarningKilde.Spleis), WarningDto("Warning D", WarningKilde.Spleis))
-        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings2)
-        assertWarnings(testwarnings1 + testwarnings2, vedtakDao.finnWarnings(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `sletter gamle spleis-warnings og legger til nye`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val spesialistWarning = WarningDto("Warning B", WarningKilde.Spesialist)
-        val testwarnings1= listOf(WarningDto("Warning A", WarningKilde.Spleis), spesialistWarning)
-        vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
-        val testwarnings2= listOf(WarningDto("Warning C", WarningKilde.Spleis), WarningDto("Warning D", WarningKilde.Spleis))
-        vedtakDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, testwarnings2)
-        assertWarnings((listOf(spesialistWarning) + testwarnings2), vedtakDao.finnWarnings(VEDTAKSPERIODE))
-    }
-
-    @Test
     fun `lagrer og leser vedtaksperiodetype hvis den er satt`() {
         opprettPerson()
         opprettArbeidsgiver()
@@ -129,11 +90,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(NY_VEDTAKSPERIODE)
         vedtakDao.fjernVedtaksperioder(listOf(VEDTAKSPERIODE, NY_VEDTAKSPERIODE))
         assertEquals(0, vedtak().size)
-    }
-
-    private fun assertWarnings(expected: List<WarningDto>, result: List<WarningDto>) {
-        assertEquals(expected.size, result.size)
-        assertEquals(expected, result)
     }
 
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {

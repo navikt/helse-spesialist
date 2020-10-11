@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -26,11 +27,12 @@ internal class OppdaterSnapshotCommandTest {
     }
 
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
-    private val command = OppdaterSnapshotCommand(restClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
+    private val command = OppdaterSnapshotCommand(restClient, vedtakDao, warningDao, snapshotDao, VEDTAKSPERIODE, FNR)
 
     @BeforeEach
     fun setup() {
@@ -48,7 +50,7 @@ internal class OppdaterSnapshotCommandTest {
     @Test
     fun `lagrer snapshot`() {
         okTest { assertTrue(command.execute(context)) }
-        verify(exactly = 1) { vedtakDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, any()) }
+        verify(exactly = 1) { warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, any()) }
     }
 
     @Test
@@ -63,7 +65,7 @@ internal class OppdaterSnapshotCommandTest {
             kilde = WarningKilde.Spleis
         )
         okTest { assertTrue(command.resume(context)) }
-        verify(exactly = 1) { vedtakDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, listOf(forventetWarning)) }
+        verify(exactly = 1) { warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, listOf(forventetWarning)) }
     }
 
     @Test

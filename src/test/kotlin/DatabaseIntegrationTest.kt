@@ -92,6 +92,7 @@ internal abstract class DatabaseIntegrationTest {
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
+    internal val warningDao = WarningDao(dataSource)
     internal val commandContextDao = CommandContextDao(dataSource)
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)

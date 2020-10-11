@@ -1,18 +1,18 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.WarningDto
 import java.util.*
 
 internal class PersisterAdvarslerCommand(
     private val vedtaksperiodeId: UUID,
     private val warnings: List<WarningDto>,
-    private val vedtakDao: VedtakDao
+    private val warningDao: WarningDao
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
-        vedtakDao.fjernWarnings(vedtaksperiodeId)
-        vedtakDao.leggTilWarnings(vedtaksperiodeId, warnings)
+        warningDao.fjernWarnings(vedtaksperiodeId)
+        warningDao.leggTilWarnings(vedtaksperiodeId, warnings)
         return true
     }
 }

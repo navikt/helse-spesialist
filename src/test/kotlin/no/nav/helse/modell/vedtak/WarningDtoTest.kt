@@ -3,44 +3,42 @@ package no.nav.helse.modell.vedtak
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class WarningDtoTest {
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val VEDTAK_REF = 1L
     }
 
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        clearMocks(vedtakDao)
+        clearMocks(warningDao)
     }
 
     @Test
     fun `lagrer ikke tom melding`() {
-        WarningDto("", WarningKilde.Spleis).lagre(vedtakDao, VEDTAK_REF)
-        verify(exactly = 0) { vedtakDao.leggTilWarning(VEDTAK_REF, any(), any()) }
+        WarningDto("", WarningKilde.Spleis).lagre(warningDao, VEDTAK_REF)
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAK_REF, any(), any()) }
     }
 
     @Test
     fun `lagrer ikke blank melding`() {
-        WarningDto("     ", WarningKilde.Spleis).lagre(vedtakDao, VEDTAK_REF)
-        verify(exactly = 0) { vedtakDao.leggTilWarning(VEDTAK_REF, any(), any()) }
+        WarningDto("     ", WarningKilde.Spleis).lagre(warningDao, VEDTAK_REF)
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAK_REF, any(), any()) }
     }
 
     @Test
     fun `lagrer melding`() {
         val melding = "Warning"
         val kilde = WarningKilde.Spleis
-        WarningDto(melding, kilde).lagre(vedtakDao, VEDTAK_REF)
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAK_REF, melding, kilde) }
+        WarningDto(melding, kilde).lagre(warningDao, VEDTAK_REF)
+        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAK_REF, melding, kilde) }
     }
 
     @Test

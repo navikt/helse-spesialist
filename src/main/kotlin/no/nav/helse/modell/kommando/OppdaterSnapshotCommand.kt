@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
@@ -16,6 +17,7 @@ import java.util.*
 internal class OppdaterSnapshotCommand(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao,
     private val snapshotDao: SnapshotDao,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String
@@ -50,7 +52,7 @@ internal class OppdaterSnapshotCommand(
             if (oppdatertSnapshot) {
                 log.info("oppdaterer warnings for $vedtaksperiodeId")
                 val warnings = warnings(it)
-                vedtakDao.oppdaterSpleisWarnings(
+                warningDao.oppdaterSpleisWarnings(
                     vedtaksperiodeId,
                     warnings.map { w -> WarningDto(w.melding, WarningKilde.Spleis) })
             }

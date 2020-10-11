@@ -43,6 +43,7 @@ internal class SaksbehandlerløsningTest {
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
@@ -55,6 +56,7 @@ internal class SaksbehandlerløsningTest {
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
         vedtakDao = vedtakDao,
+        warningDao = warningDao,
         commandContextDao = commandContextDao,
         snapshotDao = snapshotDao,
         oppgaveDao = oppgaveDao,

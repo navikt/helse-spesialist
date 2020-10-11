@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -25,8 +25,8 @@ internal class ÅpneGosysOppgaverCommandTest {
     }
 
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, vedtakDao, VEDTAKPERIODE_ID)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
+    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, VEDTAKPERIODE_ID)
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -59,7 +59,7 @@ internal class ÅpneGosysOppgaverCommandTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        verify(exactly = 0) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, any()) }
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, any()) }
     }
 
     @Test
@@ -71,7 +71,7 @@ internal class ÅpneGosysOppgaverCommandTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
+        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
     }
 
     @Test
@@ -83,6 +83,6 @@ internal class ÅpneGosysOppgaverCommandTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
+        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
     }
 }

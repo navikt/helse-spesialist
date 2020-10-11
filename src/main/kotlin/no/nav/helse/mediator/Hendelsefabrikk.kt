@@ -30,6 +30,7 @@ internal class Hendelsefabrikk(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao,
     private val oppgaveDao: OppgaveDao,
     private val commandContextDao: CommandContextDao,
     private val snapshotDao: SnapshotDao,
@@ -74,6 +75,7 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            warningDao = warningDao,
             snapshotDao = snapshotDao,
             risikovurderingDao = risikovurderingDao,
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -244,6 +246,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             json = json,
             vedtakDao = vedtakDao,
+            warningDao = warningDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestClient = speilSnapshotRestClient
         )
@@ -272,6 +275,7 @@ internal class Hendelsefabrikk(
             json = json,
             commandContextDao = commandContextDao,
             vedtakDao = vedtakDao,
+            warningDao = warningDao,
             oppgaveDao = oppgaveDao,
             snapshotDao = snapshotDao,
             speilSnapshotRestClient = speilSnapshotRestClient

@@ -3,7 +3,7 @@ package no.nav.helse.modell.risiko
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.WarningDto
@@ -15,7 +15,7 @@ internal class RisikoCommand(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
-    private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : Command {
 
@@ -39,7 +39,7 @@ internal class RisikoCommand(
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {
-            vedtakDao.leggTilWarning(vedtaksperiodeId, WarningDto("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes", WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, WarningDto("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes", WarningKilde.Spesialist))
         }
         return true
     }

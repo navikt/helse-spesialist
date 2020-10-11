@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -10,6 +11,7 @@ import java.util.*
 
 internal class Automatisering(
     private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val automatiseringDao: AutomatiseringDao,
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
@@ -19,7 +21,7 @@ internal class Automatisering(
     fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): Automatiseringsvurdering {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val warnings = vedtakDao.finnWarnings(vedtaksperiodeId)
+        val warnings = warningDao.finnWarnings(vedtaksperiodeId)
         val oppgavetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId)
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)

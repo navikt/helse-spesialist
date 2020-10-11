@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -23,7 +24,8 @@ internal class KlargjørVedtaksperiodeCommand(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     snapshotDao: SnapshotDao,
-    vedtakDao: VedtakDao
+    vedtakDao: VedtakDao,
+    warningDao: WarningDao
 ) : MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettVedtakCommand(
@@ -38,7 +40,7 @@ internal class KlargjørVedtaksperiodeCommand(
             snapshotDao,
             vedtakDao
         ),
-        PersisterAdvarslerCommand(vedtaksperiodeId, warnings, vedtakDao),
+        PersisterAdvarslerCommand(vedtaksperiodeId, warnings, warningDao),
         PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, vedtakDao),
         OpprettKoblingTilHendelseCommand(hendelseId, vedtaksperiodeId, vedtakDao)
     )

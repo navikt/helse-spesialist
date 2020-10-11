@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -24,9 +24,9 @@ internal class DigitalKontaktinformasjonCommandTest {
     }
 
     private val dao = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
-    private val vedtakDao = mockk<VedtakDao>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
 
-    private val command = DigitalKontaktinformasjonCommand(dao, vedtakDao, VEDTAKSPERIODE_ID)
+    private val command = DigitalKontaktinformasjonCommand(dao, warningDao, VEDTAKSPERIODE_ID)
     private lateinit var context: CommandContext
 
 
@@ -60,7 +60,7 @@ internal class DigitalKontaktinformasjonCommandTest {
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
-        verify(exactly = 0) { vedtakDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
     }
 
     @Test
@@ -72,6 +72,6 @@ internal class DigitalKontaktinformasjonCommandTest {
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKSPERIODE_ID, forventetWarning) }
+        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, forventetWarning) }
     }
 }

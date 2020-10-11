@@ -1,7 +1,7 @@
 package no.nav.helse.modell.dkif
 
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
@@ -9,7 +9,7 @@ import java.util.*
 
 internal class DigitalKontaktinformasjonCommand(
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
-    private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao,
     private val vedtaksperiodeId: UUID
 ) : Command {
 
@@ -26,7 +26,7 @@ internal class DigitalKontaktinformasjonCommand(
     override fun resume(context: CommandContext): Boolean {
         val løsning = context.get<DigitalKontaktinformasjonløsning>() ?: return false
         løsning.lagre(digitalKontaktinformasjonDao)
-        løsning.evaluer(vedtakDao, vedtaksperiodeId)
+        løsning.evaluer(warningDao, vedtaksperiodeId)
         return true
     }
 }

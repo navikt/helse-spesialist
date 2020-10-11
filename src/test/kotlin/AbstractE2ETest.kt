@@ -70,6 +70,7 @@ internal abstract class AbstractE2ETest {
     private val oppgaveDao = OppgaveDao(dataSource)
     private val personDao = PersonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
+    private val warningDao = WarningDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
@@ -77,6 +78,9 @@ internal abstract class AbstractE2ETest {
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
+    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
 
     protected val testRapid = TestRapid()
 
@@ -95,6 +99,7 @@ internal abstract class AbstractE2ETest {
         personDao = personDao,
         arbeidsgiverDao = ArbeidsgiverDao(dataSource),
         vedtakDao = vedtakDao,
+        warningDao = warningDao,
         oppgaveDao = oppgaveDao,
         commandContextDao = commandContextDao,
         snapshotDao = SnapshotDao(dataSource),
@@ -107,7 +112,7 @@ internal abstract class AbstractE2ETest {
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-        automatisering = Automatisering(vedtakDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao, åpneGosysOppgaverDao, miljøstyrtFeatureToggle)
+        automatisering = Automatisering(vedtakDao, warningDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao, åpneGosysOppgaverDao, miljøstyrtFeatureToggle)
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -119,7 +124,17 @@ internal abstract class AbstractE2ETest {
         hendelsefabrikk = hendelsefabrikk,
         oppgaveMediator = oppgaveMediator
     )
-    protected val vedtaksperiodeMediator = VedtaksperiodeMediator(dataSource)
+    protected val vedtaksperiodeMediator = VedtaksperiodeMediator(
+        vedtakDao = vedtakDao,
+        warningDao = warningDao,
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        snapshotDao = snapshotDao,
+        overstyringDao = overstyringDao,
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        risikovurderingDao = risikovurderingDao
+    )
 
     @BeforeEach
     internal fun resetDatabase() {
