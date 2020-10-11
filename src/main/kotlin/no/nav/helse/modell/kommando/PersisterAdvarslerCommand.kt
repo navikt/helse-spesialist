@@ -11,6 +11,7 @@ internal class PersisterAdvarslerCommand(
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
+        vedtakDao.fjernWarnings(vedtaksperiodeId)
         vedtakDao.leggTilWarnings(vedtaksperiodeId, warnings)
         return true
     }

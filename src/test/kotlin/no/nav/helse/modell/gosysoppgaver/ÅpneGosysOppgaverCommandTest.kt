@@ -1,6 +1,5 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -29,7 +28,6 @@ internal class ÅpneGosysOppgaverCommandTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, vedtakDao, VEDTAKPERIODE_ID)
     private lateinit var context: CommandContext
-    private var captureWarningDto = CapturingSlot<WarningDto>()
 
     @BeforeEach
     fun setup() {
@@ -66,21 +64,25 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
+        val forventetWarning = WarningDto(
+            melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
+            kilde = WarningKilde.Spesialist
+        )
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, capture(captureWarningDto)) }
-        assertEquals("Det finnes åpne oppgaver på sykepenger i Gosys", captureWarningDto.captured.melding)
-        assertEquals(WarningKilde.Spesialist, captureWarningDto.captured.kilde)
+        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
     }
 
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
+        val forventetWarning = WarningDto(
+            melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
+            kilde = WarningKilde.Spesialist
+        )
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, capture(captureWarningDto)) }
-        assertEquals("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", captureWarningDto.captured.melding)
-        assertEquals(WarningKilde.Spesialist, captureWarningDto.captured.kilde)
+        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
     }
 }

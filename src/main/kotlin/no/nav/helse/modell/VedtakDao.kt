@@ -74,12 +74,18 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, hendelseId, vedtakRef).asUpdate)
     }
 
-    internal fun leggTilWarnings(vedtaksperiodeId: UUID, meldinger: List<WarningDto>) = using(sessionOf(dataSource)) { session ->
-        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-        @Language("PostgreSQL")
-        val statement = "DELETE FROM warning WHERE vedtak_ref=?"
-        session.run(queryOf(statement, vedtakRef).asExecute)
-        meldinger.forEach { melding -> session.insertWarning(vedtakRef, melding) }
+    internal fun leggTilWarnings(vedtaksperiodeId: UUID, warnings: List<WarningDto>) {
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
+        WarningDto.lagre(this, warnings, vedtakRef)
+    }
+
+    internal fun fjernWarnings(vedtaksperiodeId: UUID) {
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
+        using(sessionOf(dataSource)) { session ->
+            @Language("PostgreSQL")
+            val statement = "DELETE FROM warning WHERE vedtak_ref=?"
+            session.run(queryOf(statement, vedtakRef).asExecute)
+        }
     }
 
     internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<WarningDto>) = using(sessionOf(dataSource)) { session ->
@@ -87,18 +93,18 @@ internal class VedtakDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = "DELETE FROM warning WHERE vedtak_ref=? AND kilde='Spleis'::warning_kilde"
         session.run(queryOf(statement, vedtakRef).asExecute)
-        warnings.forEach { warning -> session.insertWarning(vedtakRef, warning) }
+        warnings.forEach { warning -> warning.lagre(this, vedtakRef) }
     }
 
-    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: WarningDto) = using(sessionOf(dataSource)) { session ->
-        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-        session.insertWarning(vedtakRef, warning)
+    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: WarningDto) {
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
+        warning.lagre(this, vedtakRef)
     }
 
-    private fun Session.insertWarning(vedtakRef: Long, warning: WarningDto): Int {
+    internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = "INSERT INTO warning (melding, kilde, vedtak_ref) VALUES (?, CAST(? as warning_kilde), ?)"
-        return this.run(queryOf(statement, warning.melding, warning.kilde.name, vedtakRef).asUpdate)
+        session.run(queryOf(statement, melding, kilde.name, vedtakRef).asUpdate)
     }
 
     internal fun finnVedtakId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->

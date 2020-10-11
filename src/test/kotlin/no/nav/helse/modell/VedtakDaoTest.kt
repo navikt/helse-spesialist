@@ -66,7 +66,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `sletter gamle warnings`() {
+    fun `sletter ikke gamle warnings`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
@@ -74,7 +74,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
         val testwarnings2= listOf(WarningDto("Warning C", WarningKilde.Spleis), WarningDto("Warning D", WarningKilde.Spleis))
         vedtakDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings2)
-        assertWarnings(testwarnings2, vedtakDao.finnWarnings(VEDTAKSPERIODE))
+        assertWarnings(testwarnings1 + testwarnings2, vedtakDao.finnWarnings(VEDTAKSPERIODE))
     }
 
     @Test
@@ -133,8 +133,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     private fun assertWarnings(expected: List<WarningDto>, result: List<WarningDto>) {
         assertEquals(expected.size, result.size)
-        result.forEachIndexed { index, warning -> assertEquals(expected[index].melding, (warning.melding))
-        assertEquals(expected[index].kilde, warning.kilde)}
+        assertEquals(expected, result)
     }
 
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {

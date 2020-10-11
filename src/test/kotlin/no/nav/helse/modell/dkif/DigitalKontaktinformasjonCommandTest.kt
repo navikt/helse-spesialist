@@ -1,6 +1,5 @@
 package no.nav.helse.modell.dkif
 
-import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
@@ -29,7 +28,6 @@ internal class DigitalKontaktinformasjonCommandTest {
 
     private val command = DigitalKontaktinformasjonCommand(dao, vedtakDao, VEDTAKSPERIODE_ID)
     private lateinit var context: CommandContext
-    private var captureWarningDto = CapturingSlot<WarningDto>()
 
 
     @BeforeEach
@@ -67,14 +65,13 @@ internal class DigitalKontaktinformasjonCommandTest {
 
     @Test
     fun `Lagrer warning ved analog person`() {
+        val forventetWarning = WarningDto(
+            melding = "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
+            kilde = WarningKilde.Spesialist
+        )
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
-        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKSPERIODE_ID, capture(captureWarningDto)) }
-        assertEquals(
-            "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
-            captureWarningDto.captured.melding
-        )
-        assertEquals(WarningKilde.Spesialist, captureWarningDto.captured.kilde)
+        verify(exactly = 1) { vedtakDao.leggTilWarning(VEDTAKSPERIODE_ID, forventetWarning) }
     }
 }
