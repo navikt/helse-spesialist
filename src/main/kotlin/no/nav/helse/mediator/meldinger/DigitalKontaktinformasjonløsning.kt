@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.warningteller
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -31,13 +32,16 @@ internal class DigitalKontaktinformasjonløsning(
 
     internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
         if (erDigital) return
+        val melding =
+            "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform"
         warningDao.leggTilWarning(
             vedtaksperiodeId,
             WarningDto(
-                "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
+                melding,
                 WarningKilde.Spesialist
             )
         )
+        warningteller.labels("WARN", melding).inc()
     }
 
     internal class DigitalKontaktinformasjonRiver(

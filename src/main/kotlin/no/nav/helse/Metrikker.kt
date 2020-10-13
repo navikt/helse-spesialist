@@ -18,6 +18,10 @@ internal val annulleringsteller = Counter.build("annulleringer", "Teller antall 
 internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
     .register()
 
+internal val warningteller =  Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
+    .labelNames("alvorlighetsgrad", "melding")
+    .register()
+
 internal fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
     val result: T
     val start = System.nanoTime()

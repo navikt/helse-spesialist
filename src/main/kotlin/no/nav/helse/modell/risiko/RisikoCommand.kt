@@ -8,6 +8,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.warningteller
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -39,7 +40,9 @@ internal class RisikoCommand(
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {
-            warningDao.leggTilWarning(vedtaksperiodeId, WarningDto("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes", WarningKilde.Spesialist))
+            val melding = "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes"
+            warningDao.leggTilWarning(vedtaksperiodeId, WarningDto(melding, WarningKilde.Spesialist))
+            warningteller.labels("WARN", melding).inc()
         }
         return true
     }
