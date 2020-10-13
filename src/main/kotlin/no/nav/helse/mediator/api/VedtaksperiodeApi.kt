@@ -8,6 +8,8 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import java.time.LocalDate
 import java.util.*
@@ -17,8 +19,10 @@ internal fun Route.vedtaksperiodeApi(
     hendelseMediator: HendelseMediator
 ) {
     get("/api/person/{vedtaksperiodeId}") {
-        val speilSnapshot = vedtaksperiodeMediator
-            .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!))
+        val speilSnapshot = withContext(Dispatchers.IO) {
+            vedtaksperiodeMediator
+                .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!))
+        }
         if (speilSnapshot == null) {
             call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
             return@get
@@ -30,8 +34,10 @@ internal fun Route.vedtaksperiodeApi(
             call.respond(status = HttpStatusCode.BadRequest, message = "AktørId må være numerisk")
             return@get
         }
-        val speilSnapshot = vedtaksperiodeMediator
-            .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!)
+        val speilSnapshot = withContext(Dispatchers.IO) {
+            vedtaksperiodeMediator
+                .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!)
+        }
         if (speilSnapshot == null) {
             call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
             return@get
@@ -43,8 +49,10 @@ internal fun Route.vedtaksperiodeApi(
             call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")
             return@get
         }
-        val speilSnapshot = vedtaksperiodeMediator
-            .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!)
+        val speilSnapshot = withContext(Dispatchers.IO) {
+            vedtaksperiodeMediator
+                .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!)
+        }
         if (speilSnapshot == null) {
             call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
             return@get
@@ -70,7 +78,9 @@ internal fun Route.vedtaksperiodeApi(
             UUID.fromString(it.getClaim("oid").asString()) to it.getClaim("preferred_username").asString()
         }
 
-        if (!vedtaksperiodeMediator.harAktivOppgave(godkjenning.oppgavereferanse)) {
+        val harAktivOppgave =
+            withContext(Dispatchers.IO) { vedtaksperiodeMediator.harAktivOppgave(godkjenning.oppgavereferanse) }
+        if (!harAktivOppgave) {
             call.respondText(
                 "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
                 status = HttpStatusCode.Conflict
@@ -78,7 +88,7 @@ internal fun Route.vedtaksperiodeApi(
             return@post
         }
 
-        hendelseMediator.håndter(godkjenning, epostadresse, oid)
+        withContext(Dispatchers.IO) { hendelseMediator.håndter(godkjenning, epostadresse, oid) }
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
 
@@ -106,7 +116,7 @@ internal fun Route.vedtaksperiodeApi(
                 )
             }
         )
-        hendelseMediator.håndter(message)
+        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }
