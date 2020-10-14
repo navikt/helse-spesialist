@@ -262,14 +262,14 @@ internal class HendelseMediator(
 
         val annulleringMessage = annulleringDto.run {
             JsonMessage.newMessage(
-                standardfelter("annuller", fødselsnummer).apply {
+                standardfelter("annullering", fødselsnummer).apply {
                     putAll(
                         mapOf(
                             "organisasjonsnummer" to organisasjonsnummer,
                             "aktørId" to aktørId,
                             "saksbehandler" to saksbehandlerOid,
                             "saksbehandlerEpost" to epostadresse,
-                            "dager" to dager
+                            "fagsystemId" to fagsystemId
                         )
                     )
                 }

@@ -11,7 +11,6 @@ import no.nav.helse.mediator.HendelseMediator
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertTrue
 
@@ -44,15 +43,7 @@ class AnnulleringApiTest : AbstractApiTest() {
                     "aktørId" to "en-aktørid",
                     "fødselsnummer" to "et-fødselsnummer",
                     "organisasjonsnummer" to "et-organisasjonsnummer",
-                    "dager" to listOf<LocalDate>(
-                        LocalDate.of(2020, 1, 1),
-                        LocalDate.of(2020, 1, 2),
-                        LocalDate.of(2020, 1, 3),
-                        LocalDate.of(2020, 1, 4),
-                        LocalDate.of(2020, 1, 5),
-                        LocalDate.of(2020, 1, 6),
-                        LocalDate.of(2020, 1, 7)
-                    )
+                    "fagsystemId" to "en-fagsystem-id"
                 )
                 authentication(SAKSBEHANDLER_OID)
             }

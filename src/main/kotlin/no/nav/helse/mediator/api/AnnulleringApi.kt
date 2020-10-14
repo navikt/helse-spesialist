@@ -9,7 +9,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.mediator.HendelseMediator
-import java.time.LocalDate
 import java.util.*
 
 internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
@@ -30,5 +29,5 @@ data class AnnulleringDto(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
-    val dager: List<LocalDate>
+    val fagsystemId: String
 )
