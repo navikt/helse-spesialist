@@ -53,6 +53,34 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `fatter automatisk vedtak ved infotrygdforlengelse`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            periodetype = Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE
+        )
+        sendPersoninfoløsning(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            hendelseId = godkjenningsmeldingId
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertAutomatisertLøsning()
+    }
+
+    @Test
     fun `fatter ikke automatisk vedtak ved warnings`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(

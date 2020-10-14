@@ -18,6 +18,11 @@ internal class Automatisering(
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) {
+    private val automatiserbareOppgavetyper = listOf(
+        Saksbehandleroppgavetype.FORLENGELSE,
+        Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE
+    )
+
     fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): Automatiseringsvurdering {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
@@ -29,7 +34,7 @@ internal class Automatisering(
         return valider(
             risikovurdering,
             validering("Har varsler") { warnings.isEmpty() },
-            validering("Behandlingen kan ikke automatiseres") { oppgavetype == Saksbehandleroppgavetype.FORLENGELSE },
+            validering("Behandlingen kan ikke automatiseres") { oppgavetype in automatiserbareOppgavetyper },
             validering("Bruker er reservert eller mangler oppdatert samtykke i DKIF") { erDigital ?: false },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") { antallÅpneGosysoppgaver?.let { it == 0 } ?: false },
             validering("Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er skrudd av") { miljøstyrtFeatureToggle.risikovurdering() },
