@@ -40,6 +40,6 @@ internal class UtbetalingsgodkjenningCommandTest {
         every { dao.finnUtbetalingsgodkjenningbehov(GODKJENNINGSBEHOV_ID) } returns behov
         assertTrue(command.execute(commandContext))
         assertEquals(1, commandContext.meldinger().size)
-        verify(exactly = 1) { behov.løs(GODKJENT, IDENT, TIDSPUNKT, null, null, null) }
+        verify(exactly = 1) { behov.løs(GODKJENT, IDENT, EPOST, TIDSPUNKT, null, null, null) }
     }
 }

@@ -24,7 +24,7 @@ internal class UtbetalingsgodkjenningCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val behov = hendelseDao.finnUtbetalingsgodkjenningbehov(godkjenningsbehovhendelseId)
-        behov.løs(godkjent, saksbehandlerIdent, godkjenttidspunkt, årsak, begrunnelser, kommentar)
+        behov.løs(godkjent, saksbehandlerIdent, epostadresse, godkjenttidspunkt, årsak, begrunnelser, kommentar)
         log.info("sender svar på godkjenningsbehov")
         context.publiser(behov.toJson())
         return true
