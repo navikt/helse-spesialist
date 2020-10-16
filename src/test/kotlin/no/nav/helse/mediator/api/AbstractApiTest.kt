@@ -59,6 +59,10 @@ abstract class AbstractApiTest {
 
     protected fun setupServer(block: Route.() -> Unit) {
         server = embeddedServer(Netty, port = httpPort) {
+            install(CORS) {
+                header(HttpHeaders.AccessControlAllowOrigin)
+                host("speil.nais.adeo.no", listOf("https"))
+            }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
             val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)

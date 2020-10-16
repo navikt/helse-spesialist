@@ -137,6 +137,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
+            install(CORS) {
+                header(HttpHeaders.AccessControlAllowOrigin)
+                host("speil.nais.adeo.no", listOf("https"))
+            }
             install(CallId) {
                 generate {
                     UUID.randomUUID().toString()
