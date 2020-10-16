@@ -68,7 +68,7 @@ internal class OppdaterSnapshotCommand(
                 .flatMap { it.findValues("aktivitetslogg") }
                 .flatten()
                 .map { objectMapper.convertValue<Warning>(it) }
-                .filter { UUID.fromString(it.vedtaksperiodeId) == vedtaksperiodeId && it.alvorlighetsgrad == "W" }
+                .filter { it.alvorlighetsgrad == "W" }
         } catch (e: JsonParseException) {
             throw RuntimeException("Feilet ved instansiering av speil-snapshot", e)
         }
