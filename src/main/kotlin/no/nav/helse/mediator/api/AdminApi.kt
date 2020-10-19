@@ -32,6 +32,7 @@ internal fun Application.adminApi(mediator: HendelseMediator) {
                     request.forEach {  node ->
                         mediator.sendMeldingPåTopic(node)
                     }
+                    call.respond(HttpStatusCode.Created)
                 }
             }
         }
