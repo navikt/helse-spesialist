@@ -15,8 +15,8 @@ import java.util.*
 
 private val secureLog = LoggerFactory.getLogger("tjenestekall")
 
-internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
-    post("/api/tildeling/{oppgavereferanse}") {
+internal fun Route.tildelingV1Api(tildelingMediator: TildelingMediator) {
+    post("/api/v1/tildeling/{oppgavereferanse}") {
         val ref = UUID.randomUUID()
         try {
             modellfeilForRest {
@@ -48,7 +48,7 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
         }
     }
 
-    delete("/api/tildeling/{oppgavereferanse}") {
+    delete("/api/v1/tildeling/{oppgavereferanse}") {
         val oppgaveId =
             requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
         secureLog.info("Sletter tildeling for oppgave med oppgaveid $oppgaveId")
@@ -56,4 +56,40 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
 
         call.respond(HttpStatusCode.OK)
     }
+
+    post("/api/v1/dummytildeling/{oppgavereferanse}") {
+        modellfeilForRest {
+            val oppgaveId =
+                requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+            secureLog.info("Dummy-post-tildeler oppgave med oppgaveid $oppgaveId")
+            val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+            val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+            val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+            val navn = accessToken.payload.getClaim("name").asString()
+
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+
+    get("/api/v1/dummytildeling/{oppgavereferanse}") {
+        modellfeilForRest {
+            val oppgaveId =
+                requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+            secureLog.info("Dummy-get-tildeler oppgave med oppgaveid $oppgaveId")
+            val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+            val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+            val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+            val navn = accessToken.payload.getClaim("name").asString()
+
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+
+    delete("/api/v1/dummytildeling/{oppgavereferanse}") {
+        val oppgaveId =
+            requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+        secureLog.info("Dummy-sletter tildeling for oppgave med oppgaveid $oppgaveId")
+        call.respond(HttpStatusCode.OK)
+    }
+
 }

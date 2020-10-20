@@ -186,9 +186,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             risikovurderingDao = risikovurderingDao
                         )
                     )
+                    tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))
                 }
                 authenticate("saksbehandler-direkte") {
-                    tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))
+                    tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao))
                     direkteOppgaveApi(oppgaveMediator)
                     annulleringApi(hendelseMediator)
                 }

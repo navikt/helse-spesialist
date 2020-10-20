@@ -22,7 +22,7 @@ import kotlin.random.Random.Default.nextLong
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TildelingApiTest : AbstractApiTest() {
+class TildelingV1ApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
@@ -32,7 +32,7 @@ class TildelingApiTest : AbstractApiTest() {
     fun `kan tildele en oppgave til seg selv`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.post<HttpResponse>("/api/v1/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -58,7 +58,7 @@ class TildelingApiTest : AbstractApiTest() {
         )
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.post<HttpResponse>("/api/v1/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -76,7 +76,7 @@ class TildelingApiTest : AbstractApiTest() {
     fun setupTildeling() {
         tildelingMediator = mockk(relaxed = true)
         setupServer {
-            tildelingApi(tildelingMediator)
+            tildelingV1Api(tildelingMediator)
         }
     }
 
