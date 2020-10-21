@@ -4,9 +4,8 @@ import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +21,14 @@ internal class AutomatiseringCommandTest {
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val command =
-        AutomatiseringCommand(fødselsnummer, vedtaksperiodeId, hendelseId, automatisering, "{}")
+        AutomatiseringCommand(
+            fødselsnummer,
+            vedtaksperiodeId,
+            hendelseId,
+            automatisering,
+            "{}",
+            GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true))
+        )
     private var captureVurdering = CapturingSlot<Automatisering.Automatiseringsvurdering>()
     private var captureVedtaksperiodeId = CapturingSlot<UUID>()
     private var captureHendelseId = CapturingSlot<UUID>()
@@ -33,12 +39,23 @@ internal class AutomatiseringCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
     }
-    
+
     @Test
     fun `ikke automatiserbar gir ikke-automatiserbar behandling`() {
-        every { automatisering.vurder(any(), any()) } returns Automatisering.Automatiseringsvurdering(mutableListOf("Problem"))
+        every {
+            automatisering.vurder(
+                any(),
+                any()
+            )
+        } returns Automatisering.Automatiseringsvurdering(mutableListOf("Problem"))
         assertTrue(command.execute(context))
-        verify { automatisering.lagre(capture(captureVurdering), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
+        verify {
+            automatisering.lagre(
+                capture(captureVurdering),
+                capture(captureVedtaksperiodeId),
+                capture(captureHendelseId)
+            )
+        }
         assertAutomatisert(automatisert = false)
         assertTrue(context.meldinger().isEmpty())
     }
@@ -47,7 +64,13 @@ internal class AutomatiseringCommandTest {
     fun `automatiserbar gir automatiserbar behandling`() {
         every { automatisering.vurder(any(), any()) } returns Automatisering.Automatiseringsvurdering(mutableListOf())
         assertTrue(command.execute(context))
-        verify { automatisering.lagre(capture(captureVurdering), capture(captureVedtaksperiodeId), capture(captureHendelseId)) }
+        verify {
+            automatisering.lagre(
+                capture(captureVurdering),
+                capture(captureVedtaksperiodeId),
+                capture(captureHendelseId)
+            )
+        }
         assertAutomatisert(automatisert = true)
         assertEquals(1, context.meldinger().size)
     }

@@ -56,7 +56,8 @@ internal class VedtaksperiodeForkastetTest {
             oppgaveMediator = mockk(),
             speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),
-            automatisering = mockk(relaxed = true)
+            automatisering = mockk(relaxed = true),
+            godkjenningMediator = mockk(relaxed = true)
         )
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.vedtaksperiodeForkastet(

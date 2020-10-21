@@ -44,6 +44,7 @@ internal class Hendelsefabrikk(
     private val egenAnsattDao: EgenAnsattDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val oppgaveMediator: OppgaveMediator,
+    private val godkjenningMediator: GodkjenningMediator,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val automatisering: Automatisering
 ) : IHendelsefabrikk {
@@ -87,7 +88,8 @@ internal class Hendelsefabrikk(
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-            automatisering = automatisering
+            automatisering = automatisering,
+            godkjenningMediator = godkjenningMediator
         )
     }
 

@@ -58,7 +58,8 @@ internal class OverstyringTest {
         digitalKontaktinformasjonDao = mockk(),
         åpneGosysOppgaverDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
-        automatisering = mockk(relaxed = true)
+        automatisering = mockk(relaxed = true),
+        godkjenningMediator = mockk(relaxed = true)
     )
 
     private val overstyringMessage = hendelsefabrikk.overstyring(

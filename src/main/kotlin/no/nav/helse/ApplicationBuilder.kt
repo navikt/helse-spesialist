@@ -13,6 +13,8 @@ import io.ktor.jackson.*
 import io.ktor.request.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.mediator.*
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
@@ -105,6 +107,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val egenAnsattDao = EgenAnsattDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+    private val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
 
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
 
@@ -126,6 +129,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         egenAnsattDao = egenAnsattDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
         oppgaveMediator = oppgaveMediator,
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = Automatisering(
             vedtakDao,

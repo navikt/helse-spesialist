@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
@@ -58,7 +59,8 @@ internal class Godkjenningsbehov(
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
-    automatisering: Automatisering
+    automatisering: Automatisering,
+    godkjenningMediator: GodkjenningMediator
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         KlargjørPersonCommand(fødselsnummer, aktørId, personDao),
@@ -108,7 +110,8 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = id,
             automatisering = automatisering,
-            godkjenningsbehovJson = json
+            godkjenningsbehovJson = json,
+            godkjenningMediator = godkjenningMediator
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,

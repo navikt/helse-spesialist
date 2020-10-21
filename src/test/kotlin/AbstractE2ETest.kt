@@ -11,10 +11,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -124,7 +121,8 @@ internal abstract class AbstractE2ETest {
             digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao,
             miljøstyrtFeatureToggle
-        )
+        ),
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,

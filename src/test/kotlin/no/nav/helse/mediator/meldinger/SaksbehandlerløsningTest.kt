@@ -70,7 +70,8 @@ internal class SaksbehandlerløsningTest {
         åpneGosysOppgaverDao = mockk(relaxed = true),
         egenAnsattDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
-        automatisering = mockk(relaxed = true)
+        automatisering = mockk(relaxed = true),
+        godkjenningMediator = mockk(relaxed = true)
     )
 
     private val godkjenningsbehov = UtbetalingsgodkjenningMessage(GODKJENNINGSBEHOV_JSON)

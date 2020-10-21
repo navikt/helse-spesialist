@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import java.time.LocalDateTime
 
 internal class UtbetalingsgodkjenningMessage(private val json: String) {
@@ -69,8 +70,11 @@ internal class UtbetalingsgodkjenningMessage(private val json: String) {
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
                 "kommentar" to kommentar
-            ))
+            )
+        )
     }
 
     internal fun toJson() = behov.toJson()
+    internal fun løsning() = behov["@løsning"].takeUnless { it.isMissingOrNull() }
+        ?: throw RuntimeException("Forsøkte å hente ut løsning før den er satt")
 }

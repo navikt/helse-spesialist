@@ -48,7 +48,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             oppgaveMediator = mockk(),
             speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),
-            automatisering = mockk(relaxed = true)
+            automatisering = mockk(relaxed = true),
+            godkjenningMediator = mockk(relaxed = true)
         )
     }
 

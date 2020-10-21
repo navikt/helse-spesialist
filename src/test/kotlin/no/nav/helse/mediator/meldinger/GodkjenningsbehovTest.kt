@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
@@ -64,7 +65,8 @@ internal class GodkjenningsbehovTest {
         digitalKontaktinformasjonDao = mockk(relaxed = true),
         åpneGosysOppgaverDao = mockk(relaxed = true),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
-        automatisering = mockk(relaxed = true)
+        automatisering = mockk(relaxed = true),
+        godkjenningMediator = mockk(relaxed = true)
     )
     private val godkjenningMessage = hendelsefabrikk.godkjenning(
         id = HENDELSE_ID,
