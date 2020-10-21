@@ -24,7 +24,7 @@ internal class AutomatiseringCommand(
 
         if (vurdering.erAutomatiserbar()) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
-            behov.løsAutomatisk()
+            behov.godkjennAutomatisk()
             context.publiser(behov.toJson())
             automatiseringsteller.inc()
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")

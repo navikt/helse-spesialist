@@ -7,8 +7,25 @@ import java.time.LocalDateTime
 internal class UtbetalingsgodkjenningMessage(private val json: String) {
     private val behov = JsonMessage(json, MessageProblems(json))
 
-    internal fun løsAutomatisk() {
-        løs(true, true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), null, null, null)
+    internal fun godkjennAutomatisk() {
+        løsAutomatisk(true)
+    }
+
+    internal fun avvisAutomatisk() {
+        løsAutomatisk(false)
+    }
+
+    private fun løsAutomatisk(godkjent: Boolean) {
+        løs(
+            automatisk = true,
+            godkjent = godkjent,
+            saksbehandlerIdent = "Automatisk behandlet",
+            saksbehandlerEpost = "tbd@nav.no",
+            godkjenttidspunkt = LocalDateTime.now(),
+            årsak = null,
+            begrunnelser = null,
+            kommentar = null
+        )
     }
 
     internal fun løs(

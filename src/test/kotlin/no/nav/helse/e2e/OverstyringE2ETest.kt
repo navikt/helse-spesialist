@@ -39,6 +39,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId,
             erDigital = true
@@ -64,6 +65,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
+        sendEgenAnsattløsning(hendelseId2, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId2,
             erDigital = true
@@ -98,6 +100,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId,
             erDigital = true
@@ -118,6 +121,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
+        sendEgenAnsattløsning(hendelseId2, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId2,
             erDigital = true

@@ -13,6 +13,8 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.egenAnsatt.EgenAnsattCommand
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.*
@@ -52,6 +54,7 @@ internal class Godkjenningsbehov(
     reservasjonDao: ReservasjonDao,
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    egenAnsattDao: EgenAnsattDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
@@ -75,6 +78,12 @@ internal class Godkjenningsbehov(
             snapshotDao,
             vedtakDao,
             warningDao
+        ),
+        EgenAnsattCommand(
+            egenAnsattDao = egenAnsattDao,
+            godkjenningsbehovJson = json,
+            vedtaksperiodeId = vedtaksperiodeId,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -107,6 +116,7 @@ internal class Godkjenningsbehov(
             reservasjonDao = reservasjonDao,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
+            egenAnsattDao = egenAnsattDao,
             hendelseId = id
         )
     )

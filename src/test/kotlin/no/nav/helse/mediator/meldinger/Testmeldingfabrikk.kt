@@ -271,6 +271,25 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             )
         )
 
+    fun lagEgenAnsattløsning(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        erEgenAnsatt: Boolean = false
+    ): String = nyHendelse(
+        id,
+        "behov", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "@final" to true,
+            "@behov" to listOf("EgenAnsatt"),
+            "contextId" to contextId,
+            "hendelseId" to hendelseId,
+            "@løsning" to mapOf(
+                "EgenAnsatt" to erEgenAnsatt
+            )
+        )
+    )
+
     fun lagÅpneGosysOppgaverløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),

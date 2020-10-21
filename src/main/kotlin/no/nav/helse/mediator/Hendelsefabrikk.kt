@@ -7,6 +7,7 @@ import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -40,6 +41,7 @@ internal class Hendelsefabrikk(
     private val risikovurderingDao: RisikovurderingDao,
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    private val egenAnsattDao: EgenAnsattDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val oppgaveMediator: OppgaveMediator,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
@@ -81,6 +83,7 @@ internal class Hendelsefabrikk(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             reservasjonDao = reservasjonDao,
+            egenAnsattDao = egenAnsattDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,

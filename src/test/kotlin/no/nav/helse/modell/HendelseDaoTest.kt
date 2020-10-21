@@ -44,6 +44,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             risikovurderingDao = mockk(),
             digitalKontaktinformasjonDao = mockk(),
             åpneGosysOppgaverDao = mockk(),
+            egenAnsattDao = mockk(),
             oppgaveMediator = mockk(),
             speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),

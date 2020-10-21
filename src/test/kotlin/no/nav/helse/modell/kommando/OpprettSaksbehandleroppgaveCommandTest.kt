@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -23,15 +24,17 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
 
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val automatisering = mockk<Automatisering>(relaxed = true)
+    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private lateinit var context: CommandContext
     private val command = OpprettSaksbehandleroppgaveCommand(
-        FNR,
-        VEDTAKSPERIODE_ID,
-        reservasjonDao,
-        oppgaveMediator,
-        automatisering,
-        hendelseId
+        fødselsnummer = FNR,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        reservasjonDao = reservasjonDao,
+        oppgaveMediator = oppgaveMediator,
+        automatisering = automatisering,
+        egenAnsattDao = egenAnsattDao,
+        hendelseId = hendelseId
     )
     private lateinit var forventetOppgave: Oppgave
 

@@ -68,6 +68,7 @@ internal class SaksbehandlerløsningTest {
         overstyringDao = mockk(),
         digitalKontaktinformasjonDao = mockk(relaxed = true),
         åpneGosysOppgaverDao = mockk(relaxed = true),
+        egenAnsattDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true)
     )

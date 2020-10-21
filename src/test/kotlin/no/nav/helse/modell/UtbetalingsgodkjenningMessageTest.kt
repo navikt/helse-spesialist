@@ -30,7 +30,7 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @Test
     fun `automatisk behandlet`() {
-        utbetalingMessage.løsAutomatisk()
+        utbetalingMessage.godkjennAutomatisk()
         assertGodkjent(true, "Automatisk behandlet", "tbd@nav.no")
     }
 

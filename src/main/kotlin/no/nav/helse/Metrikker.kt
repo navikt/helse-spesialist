@@ -18,7 +18,11 @@ internal val annulleringsteller = Counter.build("annulleringer", "Teller antall 
 internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
     .register()
 
-internal val warningteller =  Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
+internal val avvistPåGrunnAvEgenAnsattTeller =
+    Counter.build("avvist_egen_ansatt", "Teller antall avvisninger på grunn av egen ansatt")
+        .register()
+
+internal val warningteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
     .labelNames("alvorlighetsgrad", "melding")
     .register()
 

@@ -23,6 +23,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -81,6 +82,7 @@ internal abstract class AbstractE2ETest {
     private val overstyringDao = OverstyringDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val egenAnsattDao = EgenAnsattDao(dataSource)
 
     protected val testRapid = TestRapid()
 
@@ -91,6 +93,7 @@ internal abstract class AbstractE2ETest {
     protected val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
         every { automatisering() }.returns(false)
+        every { egenAnsatt() }.returns(true)
     }
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -109,10 +112,19 @@ internal abstract class AbstractE2ETest {
         risikovurderingDao = risikovurderingDao,
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+        egenAnsattDao = egenAnsattDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-        automatisering = Automatisering(vedtakDao, warningDao, risikovurderingDao, automatiseringDao, digitalKontaktinformasjonDao, åpneGosysOppgaverDao, miljøstyrtFeatureToggle)
+        automatisering = Automatisering(
+            vedtakDao,
+            warningDao,
+            risikovurderingDao,
+            automatiseringDao,
+            digitalKontaktinformasjonDao,
+            åpneGosysOppgaverDao,
+            miljøstyrtFeatureToggle
+        )
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -186,7 +198,12 @@ internal abstract class AbstractE2ETest {
         )
     }
 
-    protected fun sendPersoninfoløsning(hendelseId: UUID, orgnr: String, vedtaksperiodeId: UUID, contextId: UUID = testRapid.inspektør.contextId()) =
+    protected fun sendPersoninfoløsning(
+        hendelseId: UUID,
+        orgnr: String,
+        vedtaksperiodeId: UUID,
+        contextId: UUID = testRapid.inspektør.contextId()
+    ) =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagPersoninfoløsning(
@@ -263,6 +280,22 @@ internal abstract class AbstractE2ETest {
         }
     }
 
+    protected fun sendEgenAnsattløsning(
+        godkjenningsmeldingId: UUID,
+        erEgenAnsatt: Boolean
+    ) {
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagEgenAnsattløsning(
+                    id,
+                    godkjenningsmeldingId,
+                    testRapid.inspektør.contextId(),
+                    erEgenAnsatt
+                )
+            )
+        }
+    }
+
     protected fun sendSaksbehandlerløsning(
         oppgaveId: Long,
         saksbehandlerIdent: String,
@@ -271,14 +304,16 @@ internal abstract class AbstractE2ETest {
         godkjent: Boolean
     ): UUID {
         hendelseMediator.håndter(
-            GodkjenningDTO(
+            godkjenningDTO = GodkjenningDTO(
                 oppgaveId,
                 godkjent,
                 saksbehandlerIdent,
                 if (godkjent) null else "årsak",
                 null,
                 null
-            ), saksbehandlerEpost, saksbehandlerOid
+            ),
+            epost = saksbehandlerEpost,
+            oid = saksbehandlerOid
         )
         val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
         testRapid.sendTestMessage(løsning.toString())
@@ -318,7 +353,11 @@ internal abstract class AbstractE2ETest {
         }
     }
 
-    protected fun assertGodkjenningsbehovløsning(godkjent: Boolean, saksbehandlerIdent: String, block: (JsonNode) -> Unit = {}) {
+    protected fun assertGodkjenningsbehovløsning(
+        godkjent: Boolean,
+        saksbehandlerIdent: String,
+        block: (JsonNode) -> Unit = {}
+    ) {
         assertLøsning("Godkjenning") {
             assertTrue(it.path("godkjent").isBoolean)
             assertEquals(godkjent, it.path("godkjent").booleanValue())
@@ -373,6 +412,10 @@ internal abstract class AbstractE2ETest {
         assertEquals(status.toList(), oppgaver[indeks].second.map {
             Oppgavestatus.valueOf(it.path("status").asText())
         })
+    }
+
+    protected fun assertIngenOppgave() {
+        assertEquals(0, testRapid.inspektør.hendelser("oppgave_opprettet").size)
     }
 
     protected fun assertSnapshot(forventet: String, vedtaksperiodeId: UUID) {

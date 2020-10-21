@@ -8,6 +8,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -43,6 +44,7 @@ internal class GodkjenningsbehovTest {
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = mockk(),
         personDao = personDao,
@@ -56,6 +58,7 @@ internal class GodkjenningsbehovTest {
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         reservasjonDao = reservasjonDao,
+        egenAnsattDao = egenAnsattDao,
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
         digitalKontaktinformasjonDao = mockk(relaxed = true),
@@ -95,11 +98,14 @@ internal class GodkjenningsbehovTest {
         every { personDao.findPersonByFødselsnummer(FNR) } returnsMany listOf(null, 1)
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returnsMany listOf(1)
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { egenAnsattDao.erEgenAnsatt(FNR) } returns false
         context.add(HentPersoninfoløsning("Kari", null, "Nordmann", LocalDate.EPOCH, Kjønn.Kvinne))
         context.add(HentEnhetløsning("3101"))
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
-
         assertFalse(godkjenningMessage.execute(context))
+
+        context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
+        assertFalse(godkjenningMessage.resume(context))
 
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertFalse(godkjenningMessage.resume(context))
@@ -123,6 +129,9 @@ internal class GodkjenningsbehovTest {
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
 
         assertFalse(godkjenningMessage.execute(context))
+
+        context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
+        assertFalse(godkjenningMessage.resume(context))
 
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertFalse(godkjenningMessage.resume(context))

@@ -52,6 +52,7 @@ internal class VedtaksperiodeForkastetTest {
             overstyringDao = mockk(),
             digitalKontaktinformasjonDao = mockk(),
             åpneGosysOppgaverDao = mockk(),
+            egenAnsattDao = mockk(),
             oppgaveMediator = mockk(),
             speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),

@@ -47,6 +47,7 @@ internal class HendelseMediator(
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
             Overstyring.OverstyringRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
+            EgenAnsattløsning.EgenAnsattRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
         }

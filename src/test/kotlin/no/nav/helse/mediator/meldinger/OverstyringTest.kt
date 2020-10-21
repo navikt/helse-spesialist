@@ -52,6 +52,7 @@ internal class OverstyringTest {
         commandContextDao = mockk(),
         snapshotDao = mockk(),
         oppgaveDao = mockk(),
+        egenAnsattDao = mockk(),
         oppgaveMediator = mockk(),
         speilSnapshotRestClient = mockk(),
         digitalKontaktinformasjonDao = mockk(),
