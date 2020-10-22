@@ -56,4 +56,18 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
 
         call.respond(HttpStatusCode.OK)
     }
+
+    post("/api/dummytildeling/{oppgavereferanse}") {
+        modellfeilForRest {
+            val oppgaveId =
+                requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+            secureLog.info("Dummy-post-tildeler oppgave med oppgaveid $oppgaveId")
+            val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+            val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+            val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+            val navn = accessToken.payload.getClaim("name").asString()
+
+            call.respond(HttpStatusCode.OK)
+        }
+    }
 }
