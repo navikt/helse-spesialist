@@ -294,7 +294,7 @@ internal class HendelseMediator(
         løsninger = null
     }
 
-    private fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf(
+    private fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf<String, Any>(
         "@event_name" to hendelsetype,
         "@opprettet" to LocalDateTime.now(),
         "@id" to UUID.randomUUID(),
