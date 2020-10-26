@@ -90,7 +90,6 @@ internal abstract class AbstractE2ETest {
     protected val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
         every { automatisering() }.returns(false)
-        every { egenAnsatt() }.returns(true)
     }
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)

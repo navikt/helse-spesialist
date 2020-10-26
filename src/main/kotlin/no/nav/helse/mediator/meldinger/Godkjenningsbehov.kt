@@ -84,8 +84,7 @@ internal class Godkjenningsbehov(
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
             godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            vedtaksperiodeId = vedtaksperiodeId
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,

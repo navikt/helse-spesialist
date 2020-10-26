@@ -22,11 +22,7 @@ internal class EgenAnsattCommandTest {
 
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
 
-    private val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
-        every { egenAnsatt() }.returns(true)
-    }
-
-    private val command = EgenAnsattCommand(dao, "{}", VEDTAKSPERIODE_ID, miljøstyrtFeatureToggle)
+    private val command = EgenAnsattCommand(dao, "{}", VEDTAKSPERIODE_ID)
     private lateinit var context: CommandContext
 
 

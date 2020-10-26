@@ -75,5 +75,3 @@ spec:
       value: "true"
     - name: AUTOMATISERING_FEATURE_TOGGLE
       value: "true"
-    - name: EGEN_ANSATT_FEATURE_TOGGLE
-      value: "true"

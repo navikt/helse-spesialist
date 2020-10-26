@@ -12,8 +12,7 @@ import java.util.*
 internal class EgenAnsattCommand(
     private val egenAnsattDao: EgenAnsattDao,
     private val godkjenningsbehovJson: String,
-    private val vedtaksperiodeId: UUID,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val vedtaksperiodeId: UUID
 ) : Command {
 
     private companion object {
@@ -21,16 +20,12 @@ internal class EgenAnsattCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.egenAnsatt()) return true
-
         logg.info("Trenger informasjon om egen ansatt")
         context.behov("EgenAnsatt")
         return false
     }
 
     override fun resume(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.egenAnsatt()) return true
-
         val løsning = context.get<EgenAnsattløsning>() ?: return false
         val erEgenAnsatt = løsning.evaluer()
 

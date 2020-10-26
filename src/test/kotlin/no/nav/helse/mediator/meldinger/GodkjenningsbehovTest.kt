@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
@@ -115,7 +114,7 @@ internal class GodkjenningsbehovTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
 
-        assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
+        assertEquals(listOf("EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.nyOppgave(any()) }
     }
 
@@ -141,7 +140,7 @@ internal class GodkjenningsbehovTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
 
-        assertEquals(listOf("DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
+        assertEquals(listOf("EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.tildel(any(), reservasjon.first, reservasjon.second) }
     }
 
