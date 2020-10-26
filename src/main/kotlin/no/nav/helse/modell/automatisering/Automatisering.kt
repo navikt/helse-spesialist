@@ -4,6 +4,7 @@ import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -16,6 +17,7 @@ internal class Automatisering(
     private val automatiseringDao: AutomatiseringDao,
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
+    private val egenAnsattDao: EgenAnsattDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) {
     private val automatiserbareOppgavetyper = listOf(
@@ -29,6 +31,7 @@ internal class Automatisering(
         val warnings = warningDao.finnWarnings(vedtaksperiodeId)
         val oppgavetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId)
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
+        val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
 
         return valider(
@@ -38,6 +41,7 @@ internal class Automatisering(
             validering("Bruker er reservert eller mangler oppdatert samtykke i DKIF") { erDigital ?: false },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") { antallÅpneGosysoppgaver?.let { it == 0 } ?: false },
             validering("Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er skrudd av") { miljøstyrtFeatureToggle.risikovurdering() },
+            validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Automatisering er skrudd av") { miljøstyrtFeatureToggle.automatisering() }
         )
     }

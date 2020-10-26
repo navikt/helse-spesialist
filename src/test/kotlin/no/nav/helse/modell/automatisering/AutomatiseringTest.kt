@@ -6,6 +6,7 @@ import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -30,17 +31,19 @@ internal class AutomatiseringTest {
     }
     private val digitalKontaktinformasjonDaoMock = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
+    private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val miljøstyrtFeatureToggleMock = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
 
     private val automatisering =
         Automatisering(
-            vedtakDaoMock,
-            warningDaoMock,
-            risikovurderingDaoMock,
-            mockk(relaxed = true),
-            digitalKontaktinformasjonDaoMock,
-            åpneGosysOppgaverDaoMock,
-            miljøstyrtFeatureToggleMock
+            vedtakDao = vedtakDaoMock,
+            warningDao = warningDaoMock,
+            risikovurderingDao = risikovurderingDaoMock,
+            automatiseringDao = mockk(relaxed = true),
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDaoMock,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
+            egenAnsattDao = egenAnsattDao,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock
         )
 
     companion object {
@@ -56,6 +59,7 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
+        every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { miljøstyrtFeatureToggleMock.automatisering() } returns true
         every { miljøstyrtFeatureToggleMock.risikovurdering() } returns true
     }
@@ -110,6 +114,12 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns null
+        assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
+    }
+
+    @Test
+    fun `vedtaksperiode med egen ansatt er ikke automatiserbar`() {
+        every { egenAnsattDao.erEgenAnsatt(any()) } returns true
         assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
     }
 

@@ -36,7 +36,7 @@ internal class EgenAnsattCommand(
 
         if (erEgenAnsatt) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
-            behov.avvisAutomatisk()
+            behov.avvisAutomatisk(listOf("Egen ansatt"))
             context.publiser(behov.toJson())
             avvistPåGrunnAvEgenAnsattTeller.inc()
             logg.info("Automatisk avvisning for vedtaksperiode $vedtaksperiodeId")

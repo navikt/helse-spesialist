@@ -132,13 +132,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = Automatisering(
-            vedtakDao,
-            warningDao,
-            risikovurderingDao,
-            AutomatiseringDao(dataSource),
-            digitalKontaktinformasjonDao,
-            åpneGosysOppgaverDao,
-            miljøstyrtFeatureToggle
+            vedtakDao = vedtakDao,
+            warningDao = warningDao,
+            risikovurderingDao = risikovurderingDao,
+            automatiseringDao = AutomatiseringDao(dataSource),
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            egenAnsattDao = egenAnsattDao,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         )
     )
 

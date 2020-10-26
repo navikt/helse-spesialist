@@ -5,18 +5,18 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import java.time.LocalDateTime
 
-internal class UtbetalingsgodkjenningMessage(private val json: String) {
+internal class UtbetalingsgodkjenningMessage(json: String) {
     private val behov = JsonMessage(json, MessageProblems(json))
 
     internal fun godkjennAutomatisk() {
         løsAutomatisk(true)
     }
 
-    internal fun avvisAutomatisk() {
-        løsAutomatisk(false)
+    internal fun avvisAutomatisk(begrunnelser: List<String>?) {
+        løsAutomatisk(false, begrunnelser)
     }
 
-    private fun løsAutomatisk(godkjent: Boolean) {
+    private fun løsAutomatisk(godkjent: Boolean, begrunnelser: List<String>? = null) {
         løs(
             automatisk = true,
             godkjent = godkjent,
@@ -24,7 +24,7 @@ internal class UtbetalingsgodkjenningMessage(private val json: String) {
             saksbehandlerEpost = "tbd@nav.no",
             godkjenttidspunkt = LocalDateTime.now(),
             årsak = null,
-            begrunnelser = null,
+            begrunnelser = begrunnelser,
             kommentar = null
         )
     }

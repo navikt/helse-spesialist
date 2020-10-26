@@ -114,13 +114,14 @@ internal abstract class AbstractE2ETest {
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = Automatisering(
-            vedtakDao,
-            warningDao,
-            risikovurderingDao,
-            automatiseringDao,
-            digitalKontaktinformasjonDao,
-            åpneGosysOppgaverDao,
-            miljøstyrtFeatureToggle
+            vedtakDao = vedtakDao,
+            warningDao = warningDao,
+            risikovurderingDao = risikovurderingDao,
+            automatiseringDao = automatiseringDao,
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            egenAnsattDao = egenAnsattDao,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
     )
