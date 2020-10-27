@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -54,7 +54,7 @@ internal class OppdaterSnapshotCommand(
                 val warnings = warnings(it)
                 warningDao.oppdaterSpleisWarnings(
                     vedtaksperiodeId,
-                    warnings.map { w -> WarningDto(w.melding, WarningKilde.Spleis) })
+                    warnings.map { w -> Warning(w.melding, WarningKilde.Spleis) })
             }
             oppdatertSnapshot
         }
@@ -67,13 +67,13 @@ internal class OppdaterSnapshotCommand(
                 .filter { UUID.fromString(it["id"].asText()) == vedtaksperiodeId }
                 .flatMap { it.findValues("aktivitetslogg") }
                 .flatten()
-                .map { objectMapper.convertValue<Warning>(it) }
+                .map { objectMapper.convertValue<WarningFraSpleis>(it) }
                 .filter { it.alvorlighetsgrad == "W" }
         } catch (e: JsonParseException) {
             throw RuntimeException("Feilet ved instansiering av speil-snapshot", e)
         }
 
-    class Warning(
+    class WarningFraSpleis(
         val alvorlighetsgrad: String,
         val vedtaksperiodeId: String,
         val melding: String

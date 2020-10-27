@@ -7,6 +7,9 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     private companion object {
@@ -64,6 +67,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertAutomatisertLøsning()
+        val vedtaksperiodeGodkjentEvent = assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
+        assertTrue(vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean())
     }
 
     @Test

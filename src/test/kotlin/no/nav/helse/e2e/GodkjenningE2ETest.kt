@@ -1,14 +1,20 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshot
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GodkjenningE2ETest : AbstractE2ETest() {
@@ -89,6 +95,46 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
+        assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
+    }
+
+    @Test
+    fun `slår sammen warnings fra spleis og spesialist i utgående event`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, warnings = listOf("En Warning"))
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId, 1
+        )
+        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+
+        val vedtaksperiodeGodkjentEvent = testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull()
+        assertNotNull(vedtaksperiodeGodkjentEvent)
+        assertEquals(UNG_PERSON_FNR_2018, vedtaksperiodeGodkjentEvent["fødselsnummer"].asText())
+        assertTrue(vedtaksperiodeGodkjentEvent.hasNonNull("@opprettet"))
+        assertEquals(2, vedtaksperiodeGodkjentEvent["warnings"].size())
+        assertEquals(WarningKilde.Spleis.name, vedtaksperiodeGodkjentEvent["warnings"][0]["kilde"].asText())
+        assertEquals(WarningKilde.Spesialist.name, vedtaksperiodeGodkjentEvent["warnings"][1]["kilde"].asText())
+        assertFalse(vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean())
+        assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent)
+    }
+
+    private fun assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent: JsonNode) {
+        assertEquals(VEDTAKSPERIODE_ID, UUID.fromString(vedtaksperiodeGodkjentEvent["vedtaksperiodeId"].asText()))
+        assertEquals(
+            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING.name,
+            vedtaksperiodeGodkjentEvent["periodetype"].asText()
+        )
+        assertEquals(SAKSBEHANDLERIDENT, vedtaksperiodeGodkjentEvent["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLEREPOST, vedtaksperiodeGodkjentEvent["saksbehandlerEpost"].asText())
     }
 
     @Test

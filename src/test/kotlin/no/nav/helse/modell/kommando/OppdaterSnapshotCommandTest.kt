@@ -7,7 +7,7 @@ import io.mockk.verify
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.snapshot
@@ -60,7 +60,7 @@ internal class OppdaterSnapshotCommandTest {
 
     @Test
     fun `resume oppdaterer warnings`() {
-        val forventetWarning = WarningDto(
+        val forventetWarning = Warning(
             melding = "Brukeren har flere inntekter de siste tre måneder.",
             kilde = WarningKilde.Spleis
         )

@@ -12,7 +12,7 @@ import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -71,7 +71,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
-        every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(WarningDto("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
+        every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(Warning("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
         assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
     }
 

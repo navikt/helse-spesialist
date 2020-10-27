@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,7 +65,7 @@ internal class DigitalKontaktinformasjonCommandTest {
 
     @Test
     fun `Lagrer warning ved analog person`() {
-        val forventetWarning = WarningDto(
+        val forventetWarning = Warning(
             melding = "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
             kilde = WarningKilde.Spesialist
         )

@@ -6,11 +6,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.assertNotNull
 
 internal class AutomatiseringCommandTest {
     private companion object {
@@ -26,7 +28,7 @@ internal class AutomatiseringCommandTest {
             vedtaksperiodeId,
             hendelseId,
             automatisering,
-            "{}",
+            """{ "@event_name": "behov" }""",
             GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true))
         )
     private var captureVurdering = CapturingSlot<Automatisering.Automatiseringsvurdering>()
@@ -72,7 +74,11 @@ internal class AutomatiseringCommandTest {
             )
         }
         assertAutomatisert(automatisert = true)
-        assertEquals(1, context.meldinger().size)
+        val løsning = assertNotNull(context.meldinger()
+            .map(objectMapper::readTree)
+            .filter { it["@event_name"].asText() == "behov" }
+            .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })
+        assertTrue(løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue())
     }
 
     private fun assertAutomatisert(automatisert: Boolean) {

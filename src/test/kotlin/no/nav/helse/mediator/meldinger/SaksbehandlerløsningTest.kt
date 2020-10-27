@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.test.assertNotNull
 
 internal class SaksbehandlerløsningTest {
 
@@ -34,7 +36,7 @@ internal class SaksbehandlerløsningTest {
         private const val FNR = "12020052345"
         private const val IDENT = "Z999999"
         private const val HENDELSE_JSON = """{ "this_key_should_exist": "this_value_should_exist" }"""
-        private const val GODKJENNINGSBEHOV_JSON = """{ "foo": "bar" }"""
+        private const val GODKJENNINGSBEHOV_JSON = """{ "@event_name": "behov" }"""
         private const val SAKSBEHANDLER = "Sak Saksen"
         private val objectMapper = jacksonObjectMapper()
     }
@@ -71,7 +73,7 @@ internal class SaksbehandlerløsningTest {
         egenAnsattDao = mockk(),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
-        godkjenningMediator = mockk(relaxed = true)
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
     )
 
     private val godkjenningsbehov = UtbetalingsgodkjenningMessage(GODKJENNINGSBEHOV_JSON)
@@ -119,25 +121,25 @@ internal class SaksbehandlerløsningTest {
 
     private fun assertLøsning(godkjent: Boolean) {
         context.meldinger().also { meldinger ->
-            assertEquals(1, meldinger.size)
-            assertJsonEquals(GODKJENNINGSBEHOV_JSON, meldinger.first())
-            objectMapper.readTree(meldinger.first()).also { json ->
-                val løsning = json.path("@løsning").path("Godkjenning")
-                assertTrue(løsning.path("godkjent").isBoolean)
-                assertEquals(godkjent, løsning.path("godkjent").booleanValue())
-                assertEquals(IDENT, løsning.path("saksbehandlerIdent").textValue())
-                assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(løsning.path("godkjenttidspunkt").textValue()))
-                assertTrue(løsning.path("årsak").isNull)
-                assertTrue(løsning.path("kommentar").isNull)
-                assertTrue(løsning.path("begrunnelser").isNull)
-            }
+            val løsning = assertNotNull(meldinger
+                .map(objectMapper::readTree)
+                .filter { it["@event_name"].asText() == "behov" }
+                .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })
+            assertJsonEquals(GODKJENNINGSBEHOV_JSON, løsning)
+            val godkjenning = løsning.path("@løsning").path("Godkjenning")
+            assertTrue(godkjenning.path("godkjent").isBoolean)
+            assertEquals(godkjent, godkjenning.path("godkjent").booleanValue())
+            assertEquals(IDENT, godkjenning.path("saksbehandlerIdent").textValue())
+            assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(godkjenning.path("godkjenttidspunkt").textValue()))
+            assertTrue(godkjenning.path("årsak").isNull)
+            assertTrue(godkjenning.path("kommentar").isNull)
+            assertTrue(godkjenning.path("begrunnelser").isNull)
         }
     }
 
-    private fun assertJsonEquals(expected: String, actual: String) {
+    private fun assertJsonEquals(expected: String, actual: JsonNode) {
         val expectedJson = objectMapper.readTree(expected)
-        val actualJson = objectMapper.readTree(actual)
-        assertJsonEquals(expectedJson, actualJson)
+        assertJsonEquals(expectedJson, actual)
     }
 
     private fun assertJsonEquals(field: String, expected: JsonNode, actual: JsonNode) {

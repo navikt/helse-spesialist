@@ -6,7 +6,7 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.warningteller
 import org.slf4j.LoggerFactory
@@ -41,7 +41,7 @@ internal class RisikoCommand(
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {
             val melding = "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes"
-            warningDao.leggTilWarning(vedtaksperiodeId, WarningDto(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
         return true

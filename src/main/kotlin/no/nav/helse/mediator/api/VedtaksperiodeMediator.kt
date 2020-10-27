@@ -14,7 +14,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingDao
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
@@ -94,7 +94,7 @@ internal class VedtaksperiodeMediator(
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
                         val risikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
-                        val varsler = WarningDto.meldinger(warningDao.finnWarnings(vedtaksperiodeId))
+                        val varsler = Warning.meldinger(warningDao.finnWarnings(vedtaksperiodeId))
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())

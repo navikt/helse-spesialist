@@ -24,7 +24,7 @@ import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -43,7 +43,7 @@ internal class Godkjenningsbehov(
     private val vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    warnings: List<WarningDto>,
+    warnings: List<Warning>,
     periodetype: Saksbehandleroppgavetype,
     private val json: String,
     personDao: PersonDao,

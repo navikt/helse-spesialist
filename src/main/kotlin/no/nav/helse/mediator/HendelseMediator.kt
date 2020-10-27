@@ -294,13 +294,6 @@ internal class HendelseMediator(
         løsninger = null
     }
 
-    private fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf<String, Any>(
-        "@event_name" to hendelsetype,
-        "@opprettet" to LocalDateTime.now(),
-        "@id" to UUID.randomUUID(),
-        "fødselsnummer" to fødselsnummer
-    )
-
     private fun løsninger(hendelseId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {
             val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk)
@@ -393,3 +386,10 @@ internal class HendelseMediator(
         }
     }
 }
+
+internal fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf<String, Any>(
+    "@event_name" to hendelsetype,
+    "@opprettet" to LocalDateTime.now(),
+    "@id" to UUID.randomUUID(),
+    "fødselsnummer" to fødselsnummer
+)

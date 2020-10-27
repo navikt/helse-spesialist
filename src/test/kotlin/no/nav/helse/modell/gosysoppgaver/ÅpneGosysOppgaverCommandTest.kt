@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,7 +64,7 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
-        val forventetWarning = WarningDto(
+        val forventetWarning = Warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist
         )
@@ -76,7 +76,7 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
-        val forventetWarning = WarningDto(
+        val forventetWarning = Warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist
         )

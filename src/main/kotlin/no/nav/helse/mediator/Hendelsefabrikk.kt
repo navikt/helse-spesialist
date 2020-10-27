@@ -16,7 +16,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -72,7 +72,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            warnings = warnings.map { WarningDto(it, WarningKilde.Spleis) },
+            warnings = warnings.map { Warning(it, WarningKilde.Spleis) },
             periodetype = periodetype,
             json = json,
             personDao = personDao,
@@ -140,7 +140,8 @@ internal class Hendelsefabrikk(
         godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
         hendelseDao = hendelseDao,
         oppgaveMediator = oppgaveMediator,
-        oppgaveDao = oppgaveDao
+        oppgaveDao = oppgaveDao,
+        godkjenningMediator = godkjenningMediator
     )
 
     override fun saksbehandlerløsning(json: String): Saksbehandlerløsning {

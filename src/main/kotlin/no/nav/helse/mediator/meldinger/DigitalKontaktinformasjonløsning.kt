@@ -4,7 +4,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDto
-import no.nav.helse.modell.vedtak.WarningDto
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -36,7 +36,7 @@ internal class DigitalKontaktinformasjonløsning(
             "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform"
         warningDao.leggTilWarning(
             vedtaksperiodeId,
-            WarningDto(
+            Warning(
                 melding,
                 WarningKilde.Spesialist
             )
