@@ -1,8 +1,8 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
-import no.nav.helse.modell.egenAnsatt.EgenAnsattDto
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River

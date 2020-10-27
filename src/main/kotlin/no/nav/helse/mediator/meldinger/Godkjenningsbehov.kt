@@ -14,8 +14,8 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
-import no.nav.helse.modell.egenAnsatt.EgenAnsattCommand
-import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
+import no.nav.helse.modell.egenansatt.EgenAnsattCommand
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.*

@@ -8,7 +8,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.egenAnsatt.EgenAnsattDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao

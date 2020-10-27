@@ -1,7 +1,6 @@
-package no.nav.helse.modell.egenAnsatt
+package no.nav.helse.modell.egenansatt
 
 import no.nav.helse.avvistPåGrunnAvEgenAnsattTeller
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.meldinger.EgenAnsattløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command

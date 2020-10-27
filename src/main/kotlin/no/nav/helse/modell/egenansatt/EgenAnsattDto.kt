@@ -1,4 +1,4 @@
-package no.nav.helse.modell.egenAnsatt
+package no.nav.helse.modell.egenansatt
 
 import java.time.LocalDateTime
 

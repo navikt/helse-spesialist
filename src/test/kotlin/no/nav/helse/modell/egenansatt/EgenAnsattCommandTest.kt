@@ -1,10 +1,8 @@
-package no.nav.helse.modell.egenAnsatt
+package no.nav.helse.modell.egenansatt
 
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.meldinger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.objectMapper
