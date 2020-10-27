@@ -13,17 +13,17 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
     }
 
     internal fun avvisAutomatisk(begrunnelser: List<String>?) {
-        løsAutomatisk(false, begrunnelser)
+        løsAutomatisk(false, "Automatisk avvist", begrunnelser)
     }
 
-    private fun løsAutomatisk(godkjent: Boolean, begrunnelser: List<String>? = null) {
+    private fun løsAutomatisk(godkjent: Boolean, årsak: String? = null, begrunnelser: List<String>? = null) {
         løs(
             automatisk = true,
             godkjent = godkjent,
             saksbehandlerIdent = "Automatisk behandlet",
             saksbehandlerEpost = "tbd@nav.no",
             godkjenttidspunkt = LocalDateTime.now(),
-            årsak = null,
+            årsak = årsak,
             begrunnelser = begrunnelser,
             kommentar = null
         )
