@@ -3,23 +3,19 @@ package no.nav.helse.mediator.api
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.auth.jwt.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.mediator.HendelseMediator
-import java.util.*
+import no.nav.helse.mediator.api.modell.Saksbehandler
 
 internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
     post("/api/annullering") {
         val annullering = call.receive<AnnulleringDto>()
-        val oid = requireNotNull(call.principal<JWTPrincipal>())
-            .payload.getClaim("oid").asString().let { UUID.fromString(it) }
-        val epostadresse = requireNotNull(call.principal<JWTPrincipal>())
-            .payload.getClaim("preferred_username").asString()
+        val saksbehandler = Saksbehandler.fraToken(requireNotNull(call.principal()))
 
-        hendelseMediator.håndter(annulleringDto = annullering, saksbehandlerOid = oid, epostadresse = epostadresse)
+        hendelseMediator.håndter(annullering, saksbehandler)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }
@@ -31,3 +27,5 @@ data class AnnulleringDto(
     val organisasjonsnummer: String,
     val fagsystemId: String
 )
+
+

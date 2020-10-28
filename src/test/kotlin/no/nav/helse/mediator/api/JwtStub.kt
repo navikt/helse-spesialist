@@ -33,12 +33,14 @@ internal class JwtStub {
         epostadresse: String,
         clientId: String,
         issuer: String,
-        navn: String = "navn"
+        navn: String = "navn",
+    navIdent: String = "X999999"
     ) = JWT.create()
         .withArrayClaim("groups", groups)
         .withClaim("oid", oid)
         .withClaim("preferred_username", epostadresse)
         .withClaim("name", navn)
+        .withClaim("NAVident", navIdent)
         .withAudience(clientId)
         .withKeyId("randomString")
         .withIssuer(issuer)

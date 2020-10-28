@@ -3,6 +3,7 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
+import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.kommando.CommandContext
@@ -258,7 +259,7 @@ internal class HendelseMediator(
         rapidsConnection.publish(tilbakerulling.toJson())
     }
 
-    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandlerOid: UUID, epostadresse: String) {
+    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
         annulleringsteller.inc()
 
         val annulleringMessage = annulleringDto.run {
@@ -268,8 +269,7 @@ internal class HendelseMediator(
                         mapOf(
                             "organisasjonsnummer" to organisasjonsnummer,
                             "aktørId" to aktørId,
-                            "saksbehandler" to saksbehandlerOid,
-                            "saksbehandlerEpost" to epostadresse,
+                            "saksbehandler" to saksbehandler.json(),
                             "fagsystemId" to fagsystemId
                         )
                     )

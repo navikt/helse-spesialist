@@ -50,7 +50,7 @@ class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            hendelseMediator.håndter(any(), SAKSBEHANDLER_OID, epostadresse)
+            hendelseMediator.håndter(any(), any())
         }
     }
 

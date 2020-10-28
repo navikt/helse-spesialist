@@ -2,9 +2,11 @@ package no.nav.helse.mediator
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.TilbakerullingDTO
 import no.nav.helse.mediator.api.TilbakerullingMedSlettingDTO
+import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,14 +37,16 @@ internal class HendelseMediatorTest {
         val saksbehandlerIdent = "saksbehandler"
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertEquals("saksbehandler_løsning", testRapid.inspektør.field(0, "@event_name").asText())
-        verify(exactly = 1) { oppgaveMediator.oppdater(
-            any(),
-            any(),
-            oppgavereferanse,
-            Oppgavestatus.AvventerSystem,
-            saksbehandlerIdent,
-            oid
-        ) }
+        verify(exactly = 1) {
+            oppgaveMediator.oppdater(
+                any(),
+                any(),
+                oppgavereferanse,
+                Oppgavestatus.AvventerSystem,
+                saksbehandlerIdent,
+                oid
+            )
+        }
     }
 
     @Test
@@ -60,5 +64,24 @@ internal class HendelseMediatorTest {
         assertEquals("rollback_person_delete", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals("FNR", testRapid.inspektør.field(0, "fødselsnummer").asText())
         assertEquals("AKTØRID", testRapid.inspektør.field(0, "aktørId").asText())
+    }
+
+    @Test
+    fun `publiserer annullering på rapid`() {
+        val oid = UUID.randomUUID()
+        val navn = "Siri Saksbehandler"
+        mediator.håndter(
+            annulleringDto = AnnulleringDto(
+                aktørId = "X999999",
+                fødselsnummer = "12345612345",
+                organisasjonsnummer = "12",
+                fagsystemId = "foo"
+            ), Saksbehandler("siri.saksbehandler@nav.no", oid, "X999999", navn)
+        )
+        assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())
+        assertEquals("siri.saksbehandler@nav.no", testRapid.inspektør.field(0, "saksbehandler")["epostaddresse"].asText())
+        assertEquals("X999999", testRapid.inspektør.field(0, "saksbehandler")["ident"].asText())
+        assertEquals(oid.toString(), testRapid.inspektør.field(0, "saksbehandler")["oid"].asText())
+        assertEquals(navn, testRapid.inspektør.field(0, "saksbehandler")["navn"].asText())
     }
 }
