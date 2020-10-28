@@ -36,7 +36,7 @@ class AnnulleringApiTest : AbstractApiTest() {
     @Test
     fun annulleringOk() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/v1/annullering") {
+            client.post<HttpResponse>("/api/annullering") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = mapOf(

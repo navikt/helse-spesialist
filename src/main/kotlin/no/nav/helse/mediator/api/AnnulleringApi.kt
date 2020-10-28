@@ -12,7 +12,7 @@ import no.nav.helse.mediator.HendelseMediator
 import java.util.*
 
 internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
-    post("/api/v1/annullering") {
+    post("/api/annullering") {
         val annullering = call.receive<AnnulleringDto>()
         val oid = requireNotNull(call.principal<JWTPrincipal>())
             .payload.getClaim("oid").asString().let { UUID.fromString(it) }
