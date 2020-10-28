@@ -6,10 +6,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 class Risikovurdering private constructor(
-    vedtaksperiodeId: UUID,
-    opprettet: LocalDateTime,
-    samletScore: Double,
-    faresignaler: List<String>,
     private val arbeidsuførhetvurdering: List<String>,
     private val ufullstendig: Boolean
 ) : AutomatiseringValidering {
@@ -17,10 +13,6 @@ class Risikovurdering private constructor(
         fun restore(
             risikovurderingDto: RisikovurderingDto
         ) = Risikovurdering(
-            vedtaksperiodeId = risikovurderingDto.vedtaksperiodeId,
-            opprettet = risikovurderingDto.opprettet,
-            samletScore = risikovurderingDto.samletScore,
-            faresignaler = risikovurderingDto.faresignaler,
             arbeidsuførhetvurdering = risikovurderingDto.arbeidsuførhetvurdering,
             ufullstendig = risikovurderingDto.ufullstendig
         )
