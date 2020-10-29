@@ -43,7 +43,8 @@ class AnnulleringApiTest : AbstractApiTest() {
                     "aktørId" to "en-aktørid",
                     "fødselsnummer" to "et-fødselsnummer",
                     "organisasjonsnummer" to "et-organisasjonsnummer",
-                    "fagsystemId" to "en-fagsystem-id"
+                    "fagsystemId" to "en-fagsystem-id",
+                    "saksbehandlerIdent" to "Z999999"
                 )
                 authentication(SAKSBEHANDLER_OID)
             }

@@ -13,7 +13,7 @@ import no.nav.helse.mediator.api.modell.Saksbehandler
 internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
     post("/api/annullering") {
         val annullering = call.receive<AnnulleringDto>()
-        val saksbehandler = Saksbehandler.fraToken(requireNotNull(call.principal()))
+        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()), annullering.saksbehandlerIdent)
 
         hendelseMediator.håndter(annullering, saksbehandler)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
@@ -25,7 +25,8 @@ data class AnnulleringDto(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
-    val fagsystemId: String
+    val fagsystemId: String,
+    val saksbehandlerIdent: String
 )
 
 

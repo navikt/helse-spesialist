@@ -75,7 +75,8 @@ internal class HendelseMediatorTest {
                 aktørId = "X999999",
                 fødselsnummer = "12345612345",
                 organisasjonsnummer = "12",
-                fagsystemId = "foo"
+                fagsystemId = "foo",
+                saksbehandlerIdent = "X999999"
             ), Saksbehandler("siri.saksbehandler@nav.no", oid, "X999999", navn)
         )
         assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())

@@ -19,6 +19,13 @@ internal class Saksbehandler(
                 navn = jwtPrincipal.payload.getClaim("name").asString(),
             )
         }
+
+        fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal, ident: String) = Saksbehandler(
+            oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
+            epostadresse = jwtPrincipal.payload.getClaim("preferred_username").asString(),
+            ident = ident,
+            navn = jwtPrincipal.payload.getClaim("name").asString(),
+        )
     }
 
     internal fun json() = mapOf(
