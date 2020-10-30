@@ -129,6 +129,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
     )
 
     internal fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { it.findVedtakByFnr(fnr) }
+    internal fun findSpeilSnapshotRefs(fnr: String) = using(sessionOf(dataSource)) {
+        @Language("PostgreSQL")
+        val query = """
+           SELECT v.speil_snapshot_ref FROM vedtak v join person p on v.person_ref = p.id WHERE p.fodselsnummer = :fnr
+        """
+        it.run(queryOf(query, mapOf("fnr" to fnr.toLong())).map { it.long("speil_snapshot_ref") }.asList)
+    }
 
     private fun Session.findVedtakByFnr(fnr: String) = this.run(
         queryOf(

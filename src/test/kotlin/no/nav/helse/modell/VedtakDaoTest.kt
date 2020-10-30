@@ -92,6 +92,14 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, vedtak().size)
     }
 
+    @Test
+    fun `finn speil snapshot refs`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        assertEquals(1, vedtakDao.findSpeilSnapshotRefs(FNR).size)
+    }
+
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {
         it.run(
             queryOf("SELECT vedtaksperiode_ref FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
