@@ -22,7 +22,8 @@ internal class Automatisering(
 ) {
     private val automatiserbareOppgavetyper = listOf(
         Saksbehandleroppgavetype.FORLENGELSE,
-        Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE
+        Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE,
+        Saksbehandleroppgavetype.OVERGANG_FRA_IT
     )
 
     fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): Automatiseringsvurdering {

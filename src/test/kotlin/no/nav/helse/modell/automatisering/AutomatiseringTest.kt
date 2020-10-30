@@ -76,8 +76,8 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `vedtaksperiode med type forskjellig fra forlengelse er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.OVERGANG_FRA_IT
+    fun `vedtaksperiode med type førstegangsbehandling er ikke automatiserbar`() {
+        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
         assertFalse(automatisering.vurder(fødselsnummer, vedtaksperiodeId).erAutomatiserbar())
     }
 
