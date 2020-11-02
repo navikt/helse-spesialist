@@ -93,11 +93,17 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finn speil snapshot refs`() {
+    fun `insert speil snapshot`() {
+        val newJson = """{ "id": 3}"""
+        val nyVedtaksperiode = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        assertEquals(1, vedtakDao.findSpeilSnapshotRefs(FNR).size)
+        opprettVedtaksperiode(nyVedtaksperiode)
+        vedtakDao.oppdaterSnapshot(FNR, newJson)
+        val vedtak = vedtak()
+        assertTrue(vedtak.all {  snapshotDao.findSpeilSnapshot(it.snapshotRef) == newJson },
+            "Alle snapshots på person skal matche den nye jsonen")
     }
 
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {
@@ -127,7 +133,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         private val tom: LocalDate,
         private val personRef: Int,
         private val arbeidsgiverRef: Int,
-        private val snapshotRef: Int
+        internal val snapshotRef: Int
     ) {
         fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Int, forventetArbeidsgiverRef: Int, forventetSnapshotRef: Int) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)

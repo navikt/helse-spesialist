@@ -51,6 +51,7 @@ internal class HendelseMediator(
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
+            UtbetalingAnnullert.River(it, this)
         }
     }
 
@@ -213,6 +214,13 @@ internal class HendelseMediator(
         context: RapidsConnection.MessageContext
     ) {
         utfør(hendelsefabrikk.tilbakerulling(message.toJson()), context)
+    }
+
+    override fun utbetalingAnnullert(
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    ) {
+        utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
     }
 
     fun håndter(overstyringMessage: OverstyringRestDto) {

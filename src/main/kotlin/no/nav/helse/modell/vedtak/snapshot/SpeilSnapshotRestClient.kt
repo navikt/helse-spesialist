@@ -9,7 +9,7 @@ import io.ktor.http.ContentType
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AccessTokenClient
 
-internal class SpeilSnapshotRestClient(
+class SpeilSnapshotRestClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
     private val spleisClientId: String

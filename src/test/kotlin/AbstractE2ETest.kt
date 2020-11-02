@@ -41,7 +41,7 @@ import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal abstract class AbstractE2ETest {
+abstract class AbstractE2ETest {
     protected companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val AKTØR = "999999999"
@@ -87,7 +87,7 @@ internal abstract class AbstractE2ETest {
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
-    protected val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
+    internal val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
         every { automatisering() }.returns(false)
     }
@@ -134,7 +134,7 @@ internal abstract class AbstractE2ETest {
         hendelsefabrikk = hendelsefabrikk,
         oppgaveMediator = oppgaveMediator
     )
-    protected val vedtaksperiodeMediator = VedtaksperiodeMediator(
+    internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
         vedtakDao = vedtakDao,
         warningDao = warningDao,
         personDao = personDao,

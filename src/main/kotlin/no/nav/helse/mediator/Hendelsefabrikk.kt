@@ -297,4 +297,15 @@ internal class Hendelsefabrikk(
             json = json
         )
     }
+
+    override fun utbetalingAnnullert(json: String): UtbetalingAnnullert {
+        val jsonNode = mapper.readTree(json)
+        return UtbetalingAnnullert(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            json = json,
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            vedtakDao = vedtakDao
+        )
+    }
 }

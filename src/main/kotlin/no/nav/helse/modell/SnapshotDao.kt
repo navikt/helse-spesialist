@@ -11,13 +11,13 @@ import javax.sql.DataSource
 internal class SnapshotDao(private val dataSource: DataSource) {
 
     fun insertSpeilSnapshot(personBlob: String) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertSpeilSnapshot(personBlob)
+        it.insertSpeilSnapshot(personBlob).toInt()
     }
 
     fun oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId: UUID, snapshot: String) =
         sessionOf(dataSource).use { it.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, snapshot) }
 
-    private fun Session.insertSpeilSnapshot(personBlob: String): Int {
+    private fun Session.insertSpeilSnapshot(personBlob: String): Long {
         @Language("PostgreSQL")
         val statement = "INSERT INTO speil_snapshot(data) VALUES(CAST(:personBlob as json));"
         return requireNotNull(
@@ -26,7 +26,7 @@ internal class SnapshotDao(private val dataSource: DataSource) {
                     statement,
                     mapOf("personBlob" to personBlob)
                 ).asUpdateAndReturnGeneratedKey
-            )?.toInt()
+            )
         )
     }
 

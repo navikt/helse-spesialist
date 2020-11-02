@@ -66,4 +66,9 @@ internal interface IHendelseMediator {
         vedtaksperiodeIder: List<UUID>,
         context: RapidsConnection.MessageContext
     )
+
+    fun utbetalingAnnullert(
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    )
 }
