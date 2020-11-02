@@ -22,6 +22,10 @@ internal val avvistPåGrunnAvEgenAnsattTeller =
     Counter.build("avvist_egen_ansatt", "Teller antall avvisninger på grunn av egen ansatt")
         .register()
 
+internal val avvistPåGrunnAvUtlandTeller =
+    Counter.build("avvist_utland", "Teller antall avvisninger på grunn av tilhørighet til utlandsenhet")
+        .register()
+
 internal val warningteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
     .labelNames("alvorlighetsgrad", "melding")
     .register()

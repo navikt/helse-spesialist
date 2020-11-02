@@ -89,7 +89,8 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr"
+        organisasjonsnummer: String = "orgnr",
+        enhet: String = "0301"
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -116,7 +117,7 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                             "organisasjonsnummer" to organisasjonsnummer
                         )
                     ),
-                    "HentEnhet" to "0301",
+                    "HentEnhet" to enhet,
                     "HentPersoninfo" to mapOf(
                         "fornavn" to "Kari",
                         "mellomnavn" to "",

@@ -21,6 +21,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val ORGNR = "222222222"
+        private const val ENHET_UTLAND = "2101"
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val OPPGAVEID = 1L
@@ -199,6 +200,32 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendEgenAnsattløsning(godkjenningsmeldingId, true)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertVedtak(VEDTAKSPERIODE_ID)
+        assertIngenOppgave()
+        assertFalse(
+            testRapid.inspektør.meldinger().first()
+                .path("@løsning")
+                .path("Godkjenning")
+                .path("godkjent")
+                .booleanValue()
+        )
+    }
+
+    @Test
+    fun `oppretter ikke oppgave om bruker tilhører utlandsenhet`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID, enhet = ENHET_UTLAND)
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true

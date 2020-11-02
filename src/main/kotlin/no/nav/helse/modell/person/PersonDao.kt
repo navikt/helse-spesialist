@@ -5,6 +5,7 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.objectMapper
@@ -219,6 +220,9 @@ internal class PersonDao(private val dataSource: DataSource) {
                 }.asSingle
             )
         )
+
+    internal fun tilhørerUtlandsenhet(fødselsnummer: String)
+        = erEnhetUtland(findEnhet(fødselsnummer).id)
 
     private fun Session.findEnhetSistOppdatert(fødselsnummer: String) = requireNotNull(
         this.run(

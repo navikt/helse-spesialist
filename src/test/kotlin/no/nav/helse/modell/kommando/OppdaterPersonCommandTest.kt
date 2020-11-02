@@ -21,7 +21,7 @@ internal class OppdaterPersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = OppdaterPersonCommand(FNR, dao)
+    private val command = OppdaterPersonCommand(FNR, dao, """{"@event_name": "behov"}""", UUID.randomUUID())
     private lateinit var context: CommandContext
 
     @BeforeEach

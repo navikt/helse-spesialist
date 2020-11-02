@@ -1,15 +1,20 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.avvistPåGrunnAvUtlandTeller
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.util.*
 
 internal class OppdaterPersonCommand(
     fødselsnummer: String,
-    personDao: PersonDao
+    personDao: PersonDao,
+    godkjenningsbehovJson: String,
+    vedtaksperiodeId: UUID
 ) : MacroCommand() {
     private companion object {
         private val log = LoggerFactory.getLogger(OppdaterPersonCommand::class.java)
@@ -17,7 +22,7 @@ internal class OppdaterPersonCommand(
 
     override val commands: List<Command> = listOf(
         OppdaterPersoninfoCommand(fødselsnummer, personDao),
-        OppdaterEnhetCommand(fødselsnummer, personDao),
+        OppdaterEnhetCommand(fødselsnummer, personDao, godkjenningsbehovJson, vedtaksperiodeId),
         OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao)
     )
 
@@ -66,7 +71,7 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private class OppdaterEnhetCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao, "HentEnhet") {
+    private class OppdaterEnhetCommand(fødselsnummer: String, personDao: PersonDao, private val godkjenningsbehovJson: String, private val vedtaksperiodeId: UUID) : OppdaterCommand(fødselsnummer, personDao, "HentEnhet") {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
             val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(5)
@@ -75,6 +80,13 @@ internal class OppdaterPersonCommand(
         override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {
             val enhet = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppdaterer enhetsnr")
+            if (enhet.tilhørerUtlandEnhet()) {
+                val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
+                behov.avvisAutomatisk(listOf("Utland"))
+                context.publiser(behov.toJson())
+                avvistPåGrunnAvUtlandTeller.inc()
+                log.info("Automatisk avvisning for vedtaksperiode $vedtaksperiodeId")
+            }
             enhet.oppdater(personDao, fødselsnummer)
             return true
         }

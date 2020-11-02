@@ -63,7 +63,7 @@ internal class Godkjenningsbehov(
     godkjenningMediator: GodkjenningMediator
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        KlargjørPersonCommand(fødselsnummer, aktørId, personDao),
+        KlargjørPersonCommand(fødselsnummer, aktørId, personDao, json, vedtaksperiodeId),
         KlargjørArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
         KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient,
@@ -119,7 +119,8 @@ internal class Godkjenningsbehov(
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             egenAnsattDao = egenAnsattDao,
-            hendelseId = id
+            hendelseId = id,
+            personDao = personDao
         )
     )
 

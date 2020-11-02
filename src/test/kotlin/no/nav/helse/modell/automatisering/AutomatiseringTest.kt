@@ -8,6 +8,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
@@ -33,6 +34,7 @@ internal class AutomatiseringTest {
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val miljøstyrtFeatureToggleMock = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
+    private val personDaoMock = mockk<PersonDao>(relaxed = true)
 
     private val automatisering =
         Automatisering(
@@ -43,7 +45,8 @@ internal class AutomatiseringTest {
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             egenAnsattDao = egenAnsattDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock,
+            personDao = personDaoMock
         )
 
     companion object {

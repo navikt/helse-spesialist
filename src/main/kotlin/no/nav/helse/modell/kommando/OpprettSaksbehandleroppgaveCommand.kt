@@ -4,6 +4,7 @@ import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -15,7 +16,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val oppgaveMediator: OppgaveMediator,
     private val automatisering: Automatisering,
     private val hendelseId: UUID,
-    egenAnsattDao: EgenAnsattDao
+    private val egenAnsattDao: EgenAnsattDao,
+    private val personDao: PersonDao
 ) : Command {
 
     private companion object {
@@ -27,6 +29,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     override fun execute(context: CommandContext): Boolean {
         if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
         if (erEgenAnsatt) return true
+        if (tilhørerUtlandsenhet) return true
 
         logg.info("Oppretter saksbehandleroppgave")
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { reservasjon ->
@@ -36,5 +39,6 @@ internal class OpprettSaksbehandleroppgaveCommand(
         return true
     }
 
-    private val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
+    private val erEgenAnsatt get() = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
+    private val tilhørerUtlandsenhet get() = personDao.tilhørerUtlandsenhet(fødselsnummer)
 }

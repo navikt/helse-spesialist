@@ -138,7 +138,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+            personDao = personDao
         )
     )
 

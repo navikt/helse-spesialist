@@ -11,6 +11,11 @@ import java.util.*
 
 internal class HentEnhetløsning(private val enhetNr: String) {
 
+    companion object {
+        private const val ENHET_UTLAND = "2101"
+        internal fun erEnhetUtland(enhet: String) = enhet == ENHET_UTLAND
+    }
+
     internal fun lagrePerson(
         personDao: PersonDao,
         fødselsnummer: String,
@@ -25,6 +30,8 @@ internal class HentEnhetløsning(private val enhetNr: String) {
             enhetId = enhetNr.toInt(),
             infotrygdutbetalingerId = infotrygdutbetalingerId
         )
+
+    internal fun tilhørerUtlandEnhet() = erEnhetUtland(enhetNr)
 
     fun oppdater(personDao: PersonDao, fødselsnummer: String) =
         personDao.updateEnhet(fødselsnummer, enhetNr.toInt())

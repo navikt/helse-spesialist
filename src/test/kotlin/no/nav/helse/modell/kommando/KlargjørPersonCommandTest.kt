@@ -5,15 +5,14 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.HentEnhetløsning
-import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
-import no.nav.helse.mediator.meldinger.Kjønn
+import no.nav.helse.mediator.meldinger.*
+import no.nav.helse.modell.egenansatt.EgenAnsattCommandTest
 import no.nav.helse.modell.person.PersonDao
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class KlargjørPersonCommandTest {
@@ -24,6 +23,7 @@ internal class KlargjørPersonCommandTest {
         private const val MELLOMNAVN = "Mellomnavn"
         private const val ETTERNAVN = "Nordmann"
         private const val ENHET_OSLO = "0301"
+        private const val ENHET_UTLAND = "2101"
         private val FØDSELSDATO = LocalDate.EPOCH
         private val KJØNN = Kjønn.Kvinne
 
@@ -31,7 +31,7 @@ internal class KlargjørPersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = KlargjørPersonCommand(FNR, AKTØR, dao)
+    private val command = KlargjørPersonCommand(FNR, AKTØR, dao, """{"@event_name": "behov"}""", UUID.randomUUID())
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -96,6 +96,60 @@ internal class KlargjørPersonCommandTest {
         personFinnes()
         altOppdatert()
         assertTrue(command.execute(context))
+    }
+
+    @Test
+    fun `sender løsning på godkjenning hvis bruker er utdatert og er tilknyttet utlandsenhet`() {
+        personFinnes()
+        altUtdatert()
+        context.add(HentEnhetløsning(ENHET_UTLAND))
+        context.add(mockk<HentPersoninfoløsning>(relaxed = true))
+        context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
+        assertTrue(command.execute(context))
+        assertEquals(1, context.meldinger().size)
+        assertFalse(
+            no.nav.helse.objectMapper.readTree(context.meldinger().first())
+                .path("@løsning")
+                .path("Godkjenning")
+                .path("godkjent")
+                .booleanValue()
+        )
+    }
+
+    @Test
+    fun `sender ikke løsning på godkjenning hvis bruker er utdatert og ikke er tilknyttet utlandsenhet`() {
+        personFinnes()
+        altUtdatert()
+        context.add(HentEnhetløsning(ENHET_OSLO))
+        context.add(mockk<HentPersoninfoløsning>(relaxed = true))
+        context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
+        assertTrue(command.execute(context))
+        assertEquals(0, context.meldinger().size)
+    }
+
+    @Test
+    fun `sender løsning på godkjenning hvis bruker er tilknyttet utlandsenhet`() {
+        context.add(HentEnhetløsning(ENHET_UTLAND))
+        context.add(mockk<HentPersoninfoløsning>(relaxed = true))
+        context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
+        assertTrue(command.execute(context))
+        assertEquals(1, context.meldinger().size)
+        assertFalse(
+            no.nav.helse.objectMapper.readTree(context.meldinger().first())
+                .path("@løsning")
+                .path("Godkjenning")
+                .path("godkjent")
+                .booleanValue()
+        )
+    }
+
+    @Test
+    fun `sender ikke løsning på godkjenning hvis bruker ikke er tilknyttet utlandsenhet`() {
+        context.add(HentEnhetløsning(ENHET_OSLO))
+        context.add(mockk<HentPersoninfoløsning>(relaxed = true))
+        context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
+        assertTrue(command.execute(context))
+        assertEquals(0, context.meldinger().size)
     }
 
     private fun assertHarBehov(forventetBehov: List<String>) {

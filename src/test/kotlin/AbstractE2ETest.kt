@@ -120,7 +120,8 @@ abstract class AbstractE2ETest {
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+            personDao = personDao
         ),
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
     )
@@ -200,7 +201,8 @@ abstract class AbstractE2ETest {
         hendelseId: UUID,
         orgnr: String,
         vedtaksperiodeId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId()
+        contextId: UUID = testRapid.inspektør.contextId(),
+        enhet: String = "0301"
     ) =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -209,7 +211,8 @@ abstract class AbstractE2ETest {
                     hendelseId,
                     contextId,
                     vedtaksperiodeId,
-                    orgnr
+                    orgnr,
+                    enhet
                 )
             )
         }

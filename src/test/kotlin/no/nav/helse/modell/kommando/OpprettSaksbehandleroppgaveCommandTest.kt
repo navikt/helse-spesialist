@@ -8,6 +8,7 @@ import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -26,6 +27,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
     private lateinit var context: CommandContext
     private val command = OpprettSaksbehandleroppgaveCommand(
         fødselsnummer = FNR,
@@ -34,7 +36,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         oppgaveMediator = oppgaveMediator,
         automatisering = automatisering,
         egenAnsattDao = egenAnsattDao,
-        hendelseId = hendelseId
+        hendelseId = hendelseId,
+        personDao = personDao
     )
     private lateinit var forventetOppgave: Oppgave
 
