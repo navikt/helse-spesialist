@@ -39,7 +39,7 @@ internal class FerdigstillOppgaveCommandTest {
         every { dao.finn(OPPGAVE_ID) } returns oppgave
         assertTrue(command.execute(commandContext))
         verify(exactly = 1) { dao.finn(OPPGAVE_ID) }
-        verify(exactly = 1) { mediator.ferdigstill(oppgave, OPPGAVE_ID, IDENT, OID) }
+        verify(exactly = 1) { mediator.ferdigstill(oppgave, IDENT, OID) }
     }
 
     @Test

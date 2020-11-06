@@ -3,7 +3,11 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.modell.*
+import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -25,12 +29,12 @@ internal class VedtaksperiodeForkastet(
     commandContextDao: CommandContextDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
-    oppgaveDao: OppgaveDao,
     snapshotDao: SnapshotDao,
+    oppgaveMediator: OppgaveMediator,
     speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        AvbrytCommand(vedtaksperiodeId, oppgaveDao, commandContextDao),
+        AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
         OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     )
 

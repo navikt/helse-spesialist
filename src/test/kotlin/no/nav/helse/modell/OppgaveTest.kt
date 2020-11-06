@@ -49,7 +49,8 @@ internal class OppgaveTest {
 
     @Test
     fun `oppdater oppgave`() {
-        oppgave.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVENAVN, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
     }
@@ -73,7 +74,16 @@ internal class OppgaveTest {
     }
 
     @Test
+    fun `Setter oppgavestatus til INVALIDERT når oppgaven avbrytes`() {
+        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVENAVN, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        oppgave.avbryt()
+        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
+    }
+
+    @Test
     fun equals() {
+        val gjenopptattOppgave = Oppgave(1L, OPPGAVENAVN,Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         val oppgave1 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)
         val oppgave2 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, VEDTAKSPERIODE_ID)
         val oppgave3 = Oppgave.avventerSaksbehandler(OPPGAVENAVN, UUID.randomUUID())
@@ -85,13 +95,13 @@ internal class OppgaveTest {
         assertNotEquals(oppgave1, oppgave4)
         assertNotEquals(oppgave1.hashCode(), oppgave4.hashCode())
 
-        oppgave1.ferdigstill(OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        assertNotEquals(oppgave1.hashCode(), oppgave2.hashCode())
-        assertNotEquals(oppgave1, oppgave2)
-        assertNotEquals(oppgave1, oppgave3)
-        assertNotEquals(oppgave1, oppgave4)
+        gjenopptattOppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+        assertNotEquals(gjenopptattOppgave.hashCode(), oppgave2.hashCode())
+        assertNotEquals(gjenopptattOppgave, oppgave2)
+        assertNotEquals(gjenopptattOppgave, oppgave3)
+        assertNotEquals(gjenopptattOppgave, oppgave4)
 
-        oppgave2.ferdigstill(OPPGAVE_ID, "ANNEN_SAKSBEHANDLER", UUID.randomUUID())
+        oppgave2.ferdigstill("ANNEN_SAKSBEHANDLER", UUID.randomUUID())
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }

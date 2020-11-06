@@ -73,9 +73,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
                         SELECT DISTINCT ON (context_id) *
                         FROM command_context
                         WHERE hendelse_id in (
-                            SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_ref = (
-                                SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiodeId
-                            )
+                            SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId
                         )
                         AND context_id != :contextId
                         ORDER BY context_id, id DESC

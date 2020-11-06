@@ -13,7 +13,6 @@ import java.util.*
 
 internal class KlargjørVedtaksperiodeCommand(
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    hendelseId: UUID,
     fødselsnummer: String,
     organisasjonsnummer: String,
     vedtaksperiodeId: UUID,
@@ -41,7 +40,6 @@ internal class KlargjørVedtaksperiodeCommand(
             vedtakDao
         ),
         PersisterAdvarslerCommand(vedtaksperiodeId, warnings, warningDao),
-        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, vedtakDao),
-        OpprettKoblingTilHendelseCommand(hendelseId, vedtaksperiodeId, vedtakDao)
+        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, vedtakDao)
     )
 }

@@ -16,5 +16,4 @@ internal class OpprettKoblingTilHendelseCommand(
     override fun undo(context: CommandContext) {
         vedtakDao.fjernKobling(vedtaksperiodeId, hendelseId)
     }
-
 }

@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.OppgaveDao
+import no.nav.helse.mediator.OppgaveMediator
 import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class AvbrytOppgaveCommand(
     private val vedtaksperiodeId: UUID,
-    private val oppgaveDao: OppgaveDao
+    private val oppgaveMediator: OppgaveMediator
 ) : Command {
 
     private companion object {
@@ -15,7 +15,7 @@ internal class AvbrytOppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         log.info("invaliderer alle oppgaver relatert til vedtaksperiodeId=$vedtaksperiodeId")
-        oppgaveDao.invaliderOppgaver(vedtaksperiodeId)
+        oppgaveMediator.avbrytOppgaver(vedtaksperiodeId)
         return true
     }
 

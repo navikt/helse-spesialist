@@ -78,7 +78,8 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        mediator.ferdigstill(oppgave1, OPPGAVE_ID, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
+        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVENAVN1, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        mediator.ferdigstill(oppgave, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
@@ -98,6 +99,17 @@ internal class OppgaveMediatorTest {
         assertEquals(0, testRapid.inspektør.size)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN1, any()) }
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVENAVN2, any()) }
+    }
+
+    @Test
+    fun `avbryter oppgaver`() {
+        val oppgave1 = Oppgave(1L, OPPGAVENAVN1, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave2 = Oppgave(2L, OPPGAVENAVN2, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        every { oppgaveDao.finn(VEDTAKSPERIODE_ID) } returns listOf(oppgave1, oppgave2)
+        mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)
+        mediator.lagreOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
+        verify(exactly = 1) { oppgaveDao.finn(VEDTAKSPERIODE_ID) }
+        verify(exactly = 2) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
     }
 
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {

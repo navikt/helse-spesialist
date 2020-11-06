@@ -245,4 +245,38 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 .booleanValue()
         )
     }
+
+    @Test
+    fun `invaliderer oppgaver og contexter hvis godkjenningsbehov kommer inn på nytt`() {
+        val hendelseId1 = håndterGodkjenningsbehov()
+        val hendelseId2 = håndterGodkjenningsbehov()
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
+        assertOppgave(1, Oppgavestatus.AvventerSaksbehandler)
+        assertTilstand(hendelseId1, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+    }
+
+    @Test
+    fun `invaliderer oppgaver og contexter hvis godkjenningsbehov kommer inn på nytt 2`() {
+        val hendelseId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val hendelseId2 = håndterGodkjenningsbehov()
+        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
+        assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+    }
+
+    private fun håndterGodkjenningsbehov(): UUID {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        return godkjenningsmeldingId
+    }
 }

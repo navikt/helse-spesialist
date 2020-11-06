@@ -33,8 +33,13 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    internal fun ferdigstill(oppgave: Oppgave, oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
-        oppgave.ferdigstill(oppgaveId, saksbehandlerIdent, oid)
+    internal fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
+        oppgave.ferdigstill(saksbehandlerIdent, oid)
+        nyOppgave(oppgave)
+    }
+
+    private fun avbryt(oppgave: Oppgave) {
+        oppgave.avbryt()
         nyOppgave(oppgave)
     }
 
@@ -44,6 +49,10 @@ internal class OppgaveMediator(
                 oppgave.lagre(this, hendelse.id, contextId)
             }.clear()
         meldinger.onEach { messageContext.send(it) }.clear()
+    }
+
+    internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
+        oppgaveDao.finn(vedtaksperiodeId).forEach(::avbryt)
     }
 
     internal fun tildel(oppgaveId: Long, reservasjon: Pair<UUID, LocalDateTime>) {

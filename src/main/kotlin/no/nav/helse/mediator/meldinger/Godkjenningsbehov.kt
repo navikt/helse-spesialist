@@ -6,6 +6,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -51,6 +52,7 @@ internal class Godkjenningsbehov(
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
     snapshotDao: SnapshotDao,
+    commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
     reservasjonDao: ReservasjonDao,
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
@@ -63,11 +65,12 @@ internal class Godkjenningsbehov(
     godkjenningMediator: GodkjenningMediator
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
+        OpprettKoblingTilHendelseCommand(id, vedtaksperiodeId, vedtakDao),
+        AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
         KlargjørPersonCommand(fødselsnummer, aktørId, personDao, json, vedtaksperiodeId),
         KlargjørArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
         KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient,
-            id,
             fødselsnummer,
             organisasjonsnummer,
             vedtaksperiodeId,

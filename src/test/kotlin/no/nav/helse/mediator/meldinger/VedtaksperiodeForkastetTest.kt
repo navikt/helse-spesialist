@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -36,6 +37,7 @@ internal class VedtaksperiodeForkastetTest {
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val testhendelsefabrikk =
         Hendelsefabrikk(
             hendelseDao = mockk(),
@@ -53,7 +55,7 @@ internal class VedtaksperiodeForkastetTest {
             digitalKontaktinformasjonDao = mockk(),
             åpneGosysOppgaverDao = mockk(),
             egenAnsattDao = mockk(),
-            oppgaveMediator = mockk(),
+            oppgaveMediator = oppgaveMediator,
             speilSnapshotRestClient = restClient,
             miljøstyrtFeatureToggle = mockk(relaxed = true),
             automatisering = mockk(relaxed = true),

@@ -20,7 +20,7 @@ internal class FerdigstillOppgaveCommand(
     override fun execute(context: CommandContext): Boolean {
         val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId)) { "Finner ikke oppgave $oppgaveId" }
         log.info("Ferdigstiller saksbehandleroppgave")
-        oppgaveMediator.ferdigstill(oppgave, oppgaveId, saksbehandlerIdent, oid)
+        oppgaveMediator.ferdigstill(oppgave, saksbehandlerIdent, oid)
         return true
     }
 }

@@ -22,8 +22,7 @@ internal class Oppgave private constructor(
         fun avventerSaksbehandler(navn: String, vedtaksperiodeId: UUID) = Oppgave(navn, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
     }
 
-    internal fun ferdigstill(id: Long, ident: String, oid: UUID) {
-        this.id = id
+    internal fun ferdigstill(ident: String, oid: UUID) {
         status = Oppgavestatus.Ferdigstilt
         ferdigstiltAvIdent = ident
         ferdigstiltAvOid = oid
@@ -36,6 +35,10 @@ internal class Oppgave private constructor(
         tildeling?.also {
             oppgaveMediator.tildel(oppgaveId, it)
         }
+    }
+
+    internal fun avbryt() {
+        status = Oppgavestatus.Invalidert
     }
 
     internal fun tildel(saksbehandleroid: UUID, gyldigTil: LocalDateTime) {

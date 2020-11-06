@@ -66,7 +66,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         godkjenningsbehov(HENDELSE_ID)
         nyPerson()
         vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
-        assertEquals(vedtakId, finnKobling(HENDELSE_ID))
+        assertEquals(VEDTAKSPERIODE, finnKobling(HENDELSE_ID))
     }
 
     @Test
@@ -74,7 +74,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         godkjenningsbehov(HENDELSE_ID)
         nyPerson()
         vedtakDao.opprettKobling(VEDTAKSPERIODE, HENDELSE_ID)
-        assertEquals(vedtakId, finnKobling(HENDELSE_ID))
+        assertEquals(VEDTAKSPERIODE, finnKobling(HENDELSE_ID))
 
         vedtakDao.fjernKobling(VEDTAKSPERIODE, HENDELSE_ID)
 
@@ -108,9 +108,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {
         it.run(
-            queryOf("SELECT vedtaksperiode_ref FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                .map { it.long(1)
-            }.asSingle
+            queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
+                .map { UUID.fromString(it.string(1)) }.asSingle
         )
     }
 

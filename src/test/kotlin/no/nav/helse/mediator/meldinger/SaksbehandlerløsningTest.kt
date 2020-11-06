@@ -107,7 +107,7 @@ internal class SaksbehandlerløsningTest {
         val saksbehandlerløsning = saksbehandlerløsning(true)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(true)
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(any(), OPPGAVE_ID, IDENT, OID) }
+        verify(exactly = 1) { oppgaveMediator.ferdigstill(any(), IDENT, OID) }
     }
 
     @Test
@@ -116,7 +116,7 @@ internal class SaksbehandlerløsningTest {
         val saksbehandlerløsning = saksbehandlerløsning(false)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(false)
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(any(), OPPGAVE_ID, IDENT, OID) }
+        verify(exactly = 1) { oppgaveMediator.ferdigstill(any(), IDENT, OID) }
     }
 
     private fun assertLøsning(godkjent: Boolean) {

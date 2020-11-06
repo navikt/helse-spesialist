@@ -143,6 +143,22 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, oppgaveDao.invaliderOppgaver(vedtaksperiodeId))
     }
 
+    @Test
+    fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
+        nyPerson()
+        opprettOppgave(vedtakId = vedtakId)
+        val oppgaver = oppgaveDao.finn(VEDTAKSPERIODE)
+        assertEquals(2, oppgaver.size)
+    }
+
+    @Test
+    fun `finner ikke oppgaver knyttet til andre vedtaksperiodeider`() {
+        nyPerson()
+        opprettVedtaksperiode(UUID.randomUUID())
+        opprettOppgave(vedtakId = vedtakId)
+        assertEquals(1, oppgaveDao.finn(VEDTAKSPERIODE).size)
+    }
+
     private fun statusForOppgave(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT status FROM oppgave WHERE id = ?", oppgaveId).map {
                 enumValueOf<Oppgavestatus>(it.string(1))

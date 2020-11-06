@@ -77,6 +77,7 @@ internal class Hendelsefabrikk(
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
+            commandContextDao = commandContextDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             snapshotDao = snapshotDao,
@@ -282,9 +283,9 @@ internal class Hendelsefabrikk(
             commandContextDao = commandContextDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
-            oppgaveDao = oppgaveDao,
             snapshotDao = snapshotDao,
-            speilSnapshotRestClient = speilSnapshotRestClient
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            oppgaveMediator = oppgaveMediator
         )
     }
 

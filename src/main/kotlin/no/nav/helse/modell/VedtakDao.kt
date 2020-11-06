@@ -70,23 +70,19 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
-        val vedtakRef = requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
-
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_ref, hendelse_ref) VALUES (?, ?)
+            INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES (?, ?)
             ON CONFLICT DO NOTHING
         """
-        session.run(queryOf(statement, vedtakRef, hendelseId).asUpdate)
+        session.run(queryOf(statement, vedtaksperiodeId, hendelseId).asUpdate)
     }
 
     internal fun fjernKobling(vedtaksperiodeId: UUID, hendelseId: UUID) =
         using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
-            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
-
             @Language("PostgreSQL")
-            val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_ref = ?"
-            session.run(queryOf(statement, hendelseId, vedtakRef).asUpdate)
+            val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_id = ?"
+            session.run(queryOf(statement, hendelseId, vedtaksperiodeId).asUpdate)
         }
 
     internal fun finnVedtakId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->

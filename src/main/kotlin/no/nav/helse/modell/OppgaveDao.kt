@@ -59,6 +59,27 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
+    internal fun finn(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT o.id, o.type, o.status
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            WHERE v.vedtaksperiode_id = ?
+        """
+        session.run(
+            queryOf(statement, vedtaksperiodeId)
+                .map { row ->
+                    Oppgave(
+                        id = row.long("id"),
+                        navn = row.string("type"),
+                        status = enumValueOf(row.string("status")),
+                        vedtaksperiodeId = vedtaksperiodeId
+                    )
+                }.asList
+        )
+    }
+
     internal fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
