@@ -84,6 +84,13 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         assertTilstand(contextId2, "NY", "AVBRUTT")
     }
 
+    @Test
+    fun `avbryter ikke noe når det ikke finnes eksisterende contexter`() {
+        val contextId = UUID.randomUUID()
+        commandContextDao.avbryt(UUID.randomUUID(), contextId)
+        assertContextRad(false, contextId)
+    }
+
     private fun ny(hendelse: Hendelse = HENDELSE1) = UUID.randomUUID().also { uuid ->
         CommandContext(uuid).opprett(commandContextDao, hendelse)
     }
@@ -119,6 +126,17 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         }.also {
             assertEquals(expectedTilstand.toList(), it)
         }
+    }
+
+    private fun assertContextRad(finnes: Boolean, contextId: UUID) {
+        val count = using(sessionOf(dataSource)) {
+            it.run(
+                queryOf("SELECT COUNT(1) FROM command_context WHERE context_id = ?",
+                contextId
+                ).map { it.int(1) }.asSingle
+            )!!
+        }
+        assertEquals(finnes, count > 0)
     }
 
 

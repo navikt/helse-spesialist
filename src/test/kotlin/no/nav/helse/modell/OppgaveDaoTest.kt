@@ -137,6 +137,12 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(Ferdigstilt, statusForOppgave(oppgaveId))
     }
 
+    @Test
+    fun `Invaliderer ikke oppgave dersom vedtaksperiode ikke finnes`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        assertEquals(0, oppgaveDao.invaliderOppgaver(vedtaksperiodeId))
+    }
+
     private fun statusForOppgave(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
             session.run(queryOf("SELECT status FROM oppgave WHERE id = ?", oppgaveId).map {
                 enumValueOf<Oppgavestatus>(it.string(1))
