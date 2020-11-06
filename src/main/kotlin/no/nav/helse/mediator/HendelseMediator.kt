@@ -75,7 +75,6 @@ internal class HendelseMediator(
         val godkjenningMessage = JsonMessage.newMessage(
             standardfelter("saksbehandler_løsning", fødselsnummer).apply {
                 put("oppgaveId", godkjenningDTO.oppgavereferanse)
-                put("contextId", contextId)
                 put("hendelseId", hendelseId)
                 put("godkjent", godkjenningDTO.godkjent)
                 put("saksbehandlerident", godkjenningDTO.saksbehandlerIdent)
@@ -91,18 +90,12 @@ internal class HendelseMediator(
         log.info(
             "Publiserer saksbehandler-løsning for {}. {}. {}",
             keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
-            keyValue("contextId", contextId),
             keyValue("hendelseId", hendelseId)
         )
         rapidsConnection.publish(godkjenningMessage.toJson())
-        oppgaveMediator.oppdater(
-            hendelseId,
-            contextId,
-            godkjenningDTO.oppgavereferanse,
-            Oppgavestatus.AvventerSystem,
-            godkjenningDTO.saksbehandlerIdent,
-            oid
-        )
+
+        oppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
+        oppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
     }
 
     override fun vedtaksperiodeEndret(
@@ -166,7 +159,6 @@ internal class HendelseMediator(
         message: JsonMessage,
         id: UUID,
         godkjenningsbehovhendelseId: UUID,
-        contextId: UUID,
         fødselsnummer: String,
         godkjent: Boolean,
         saksbehandlerident: String,
@@ -182,7 +174,6 @@ internal class HendelseMediator(
         utfør(fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
             id,
             godkjenningsbehovhendelseId,
-            contextId,
             fødselsnummer,
             godkjent,
             saksbehandlerident,

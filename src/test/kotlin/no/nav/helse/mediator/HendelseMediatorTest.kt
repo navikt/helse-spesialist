@@ -7,7 +7,7 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.TilbakerullingDTO
 import no.nav.helse.mediator.api.TilbakerullingMedSlettingDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -38,14 +38,10 @@ internal class HendelseMediatorTest {
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertEquals("saksbehandler_løsning", testRapid.inspektør.field(0, "@event_name").asText())
         verify(exactly = 1) {
-            oppgaveMediator.oppdater(
-                any(),
-                any(),
-                oppgavereferanse,
-                Oppgavestatus.AvventerSystem,
-                saksbehandlerIdent,
-                oid
-            )
+            oppgaveMediator.avventerSystem(oppgavereferanse, saksbehandlerIdent, oid)
+        }
+        verify(exactly = 1) {
+            oppgaveMediator.lagreOppgaver(any<RapidsConnection>(), any(), any())
         }
     }
 

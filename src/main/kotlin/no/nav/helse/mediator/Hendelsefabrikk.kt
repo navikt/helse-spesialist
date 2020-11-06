@@ -113,7 +113,6 @@ internal class Hendelsefabrikk(
     override fun saksbehandlerløsning(
         id: UUID,
         godkjenningsbehovhendelseId: UUID,
-        contextId: UUID,
         fødselsnummer: String,
         godkjent: Boolean,
         saksbehandlerident: String,
@@ -150,7 +149,6 @@ internal class Hendelsefabrikk(
         return saksbehandlerløsning(
             id = UUID.fromString(jsonNode["@id"].asText()),
             godkjenningsbehovhendelseId = UUID.fromString(jsonNode["hendelseId"].asText()),
-            contextId = UUID.fromString(jsonNode["contextId"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             godkjent = jsonNode["godkjent"].asBoolean(),
             saksbehandlerident = jsonNode["saksbehandlerident"].asText(),

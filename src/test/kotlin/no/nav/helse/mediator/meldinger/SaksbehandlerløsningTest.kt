@@ -80,7 +80,6 @@ internal class SaksbehandlerløsningTest {
     private fun saksbehandlerløsning(godkjent: Boolean) = hendelsefabrikk.saksbehandlerløsning(
         id = HENDELSE_ID,
         godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
-        contextId = CONTEXT_ID,
         fødselsnummer = FNR,
         godkjent = godkjent,
         saksbehandlerident = IDENT,

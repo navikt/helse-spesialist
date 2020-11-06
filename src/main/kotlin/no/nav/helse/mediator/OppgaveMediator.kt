@@ -43,12 +43,17 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
+    private fun avventerSystem(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
+        oppgave.avventerSystem(saksbehandlerIdent, oid)
+        nyOppgave(oppgave)
+    }
+
     internal fun lagreOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
-        oppgaver
-            .onEach { oppgave ->
-                oppgave.lagre(this, hendelse.id, contextId)
-            }.clear()
-        meldinger.onEach { messageContext.send(it) }.clear()
+        lagreOppgaver(hendelse.id, contextId) { messageContext.send(it) }
+    }
+
+    internal fun lagreOppgaver(rapidsConnection: RapidsConnection, hendelseId: UUID, contextId: UUID) {
+        lagreOppgaver(hendelseId, contextId) { rapidsConnection.publish(it) }
     }
 
     internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
@@ -57,6 +62,11 @@ internal class OppgaveMediator(
 
     internal fun tildel(oppgaveId: Long, reservasjon: Pair<UUID, LocalDateTime>) {
         tildelingDao.opprettTildeling(oppgaveId, reservasjon.first, reservasjon.second)
+    }
+
+    internal fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
+        val oppgave = oppgaveDao.finn(oppgaveId) ?: return
+        avventerSystem(oppgave, saksbehandlerIdent, oid)
     }
 
     internal fun opprett(
@@ -93,6 +103,14 @@ internal class OppgaveMediator(
             ferdigstiltAvIdent,
             ferdigstiltAvOid
         )
+    }
+
+    private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit) {
+        oppgaver
+            .onEach { oppgave ->
+                oppgave.lagre(this, hendelseId, contextId)
+            }.clear()
+        meldinger.onEach { publisher(it) }.clear()
     }
 
     private fun køMelding(

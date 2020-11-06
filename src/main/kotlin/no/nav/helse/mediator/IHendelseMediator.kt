@@ -28,7 +28,6 @@ internal interface IHendelseMediator {
         message: JsonMessage,
         id: UUID,
         godkjenningsbehovhendelseId: UUID,
-        contextId: UUID,
         fødselsnummer: String,
         godkjent: Boolean,
         saksbehandlerident: String,

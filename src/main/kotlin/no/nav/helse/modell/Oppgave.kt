@@ -28,6 +28,12 @@ internal class Oppgave private constructor(
         ferdigstiltAvOid = oid
     }
 
+    internal fun avventerSystem(ident: String, oid: UUID) {
+        status = Oppgavestatus.AvventerSystem
+        ferdigstiltAvIdent = ident
+        ferdigstiltAvOid = oid
+    }
+
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
         val oppgaveId = id?.also {
             oppgaveMediator.oppdater(hendelseId, contextId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)

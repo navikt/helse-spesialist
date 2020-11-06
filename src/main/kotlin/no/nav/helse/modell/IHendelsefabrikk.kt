@@ -27,7 +27,6 @@ internal interface IHendelsefabrikk {
     fun saksbehandlerløsning(
         id: UUID,
         godkjenningsbehovhendelseId: UUID,
-        contextId: UUID,
         fødselsnummer: String,
         godkjent: Boolean,
         saksbehandlerident: String,

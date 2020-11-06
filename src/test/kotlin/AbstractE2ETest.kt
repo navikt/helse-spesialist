@@ -316,6 +316,7 @@ abstract class AbstractE2ETest {
             epost = saksbehandlerEpost,
             oid = saksbehandlerOid
         )
+        assertEquals("AvventerSystem", testRapid.inspektør.siste("oppgave_oppdatert").path("status").asText())
         val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
         testRapid.sendTestMessage(løsning.toString())
         return UUID.fromString(løsning.path("@id").asText())
@@ -452,7 +453,7 @@ abstract class AbstractE2ETest {
         meldinger().filter { it.path("@event_name").asText() == type }
 
     private fun TestRapid.RapidInspector.siste(type: String) =
-        hendelser("saksbehandler_løsning").last()
+        hendelser(type).last()
 
     protected fun TestRapid.RapidInspector.behov() =
         hendelser("behov")

@@ -30,6 +30,21 @@ internal class SaksbehandlerløsningRiverTest {
     @Test
     fun `leser saksbehandlerløsning`() {
         testRapid.sendTestMessage(testmeldingfabrikk.lagSaksbehandlerløsning(id = ID, hendelseId = GODKJENNINGSBEHOV_ID, contextId = CONTEXT))
-        verify(exactly = 1) { mediator.saksbehandlerløsning(any(), ID, GODKJENNINGSBEHOV_ID, CONTEXT, FNR, true, any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.saksbehandlerløsning(
+            any(),
+            ID,
+            GODKJENNINGSBEHOV_ID,
+            FNR,
+            true,
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        ) }
     }
 }
