@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
-import no.nav.helse.modell.Oppgavestatus.*
+import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
@@ -80,6 +80,28 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
+    internal fun finn(fødselsnummer: String) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT o.id, o.type, o.status, v.vedtaksperiode_id
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            INNER JOIN person p on v.person_ref = p.id
+            WHERE p.fodselsnummer = ?
+        """
+        session.run(
+            queryOf(statement, fødselsnummer)
+                .map { row ->
+                    Oppgave(
+                        id = row.long("id"),
+                        navn = row.string("type"),
+                        status = enumValueOf(row.string("status")),
+                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
+                    )
+                }.asList
+        )
+    }
+
     internal fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
@@ -150,36 +172,6 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             """
         session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
-
-    internal fun invaliderOppgaver(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE oppgave SET status = ?::oppgavestatus, oppdatert=now()
-            WHERE vedtak_ref in (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
-            AND status != ?::oppgavestatus
-        """
-        session.run(queryOf(query, Invalidert.name, vedtaksperiodeId, Ferdigstilt.name).asUpdate)
-    }
-
-    internal fun invaliderOppgaver(fødselsnummer: String) = using(sessionOf(dataSource)) { session ->
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE oppgave SET status = :nyStatus::oppgavestatus, oppdatert=now()
-            WHERE vedtak_ref in (SELECT id FROM vedtak WHERE person_ref = (
-                SELECT id FROM person WHERE fodselsnummer = :fodselsnummer
-            ))
-            AND status != :ignorertStatus::oppgavestatus
-        """
-        session.run(
-            queryOf(
-                query, mapOf(
-                    "nyStatus" to Invalidert.name,
-                    "fodselsnummer" to fødselsnummer.toLong(),
-                    "ignorertStatus" to Ferdigstilt.name
-                )
-            ).asUpdate
-        )
-    }
 
     private fun Session.insertOppgave(
         oppgavetype: String,

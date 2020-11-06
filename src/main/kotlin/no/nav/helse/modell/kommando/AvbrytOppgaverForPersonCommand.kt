@@ -1,14 +1,14 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.OppgaveDao
+import no.nav.helse.mediator.OppgaveMediator
 
 internal class AvbrytOppgaverForPersonCommand(
     private val fødselsnummer: String,
-    private val oppgaveDao: OppgaveDao
+    private val oppgaveMediator: OppgaveMediator,
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
-        oppgaveDao.invaliderOppgaver(fødselsnummer)
+        oppgaveMediator.avbrytOppgaver(fødselsnummer)
         return true
     }
 

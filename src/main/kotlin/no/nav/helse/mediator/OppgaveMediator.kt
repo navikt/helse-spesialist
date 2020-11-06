@@ -56,6 +56,10 @@ internal class OppgaveMediator(
         lagreOppgaver(hendelseId, contextId) { rapidsConnection.publish(it) }
     }
 
+    internal fun avbrytOppgaver(fødselsnummer: String) {
+        oppgaveDao.finn(fødselsnummer).forEach(::avbryt)
+    }
+
     internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finn(vedtaksperiodeId).forEach(::avbryt)
     }

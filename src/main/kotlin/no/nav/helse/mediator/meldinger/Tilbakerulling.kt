@@ -3,8 +3,8 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.AvbrytForPersonCommand
 import no.nav.helse.modell.kommando.Command
@@ -24,11 +24,11 @@ internal class Tilbakerulling(
     private val json: String,
     vedtaksperiodeIder: List<UUID>,
     commandContextDao: CommandContextDao,
-    oppgaveDao: OppgaveDao,
+    oppgaveMediator: OppgaveMediator,
     vedtakDao: VedtakDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        AvbrytForPersonCommand(fødselsnummer, oppgaveDao, commandContextDao),
+        AvbrytForPersonCommand(fødselsnummer, oppgaveMediator, commandContextDao),
         SlettVedtakCommand(vedtaksperiodeIder, vedtakDao)
     )
 

@@ -215,7 +215,7 @@ internal class Hendelsefabrikk(
             json = json,
             vedtaksperiodeIder = vedtaksperiodeIder,
             commandContextDao = commandContextDao,
-            oppgaveDao = oppgaveDao,
+            oppgaveMediator = oppgaveMediator,
             vedtakDao = vedtakDao
         )
     }

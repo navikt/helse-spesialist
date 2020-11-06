@@ -1,16 +1,16 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.OppgaveDao
 
 internal class AvbrytForPersonCommand(
     fødselsnummer: String,
-    oppgaveDao: OppgaveDao,
+    oppgaveMediator: OppgaveMediator,
     commandContextDao: CommandContextDao
 ) : MacroCommand() {
 
     override val commands: List<Command> = listOf(
-        AvbrytOppgaverForPersonCommand(fødselsnummer, oppgaveDao),
+        AvbrytOppgaverForPersonCommand(fødselsnummer, oppgaveMediator),
         AvbrytContexterForPersonCommand(fødselsnummer, commandContextDao)
     )
 }

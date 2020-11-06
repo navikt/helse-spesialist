@@ -119,31 +119,6 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `kan invalidere oppgaver`() {
-        nyPerson()
-        opprettOppgave(vedtakId = vedtakId)
-        assertFalse(oppgaveDao.finnOppgaver().isEmpty())
-
-        oppgaveDao.invaliderOppgaver(VEDTAKSPERIODE)
-        assertTrue(oppgaveDao.finnOppgaver().isEmpty())
-    }
-
-    @Test
-    fun `invaliderer ikke ferdigstilte oppgaver`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
-
-        oppgaveDao.invaliderOppgaver(VEDTAKSPERIODE)
-        assertEquals(Ferdigstilt, statusForOppgave(oppgaveId))
-    }
-
-    @Test
-    fun `Invaliderer ikke oppgave dersom vedtaksperiode ikke finnes`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        assertEquals(0, oppgaveDao.invaliderOppgaver(vedtaksperiodeId))
-    }
-
-    @Test
     fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
         nyPerson()
         opprettOppgave(vedtakId = vedtakId)
