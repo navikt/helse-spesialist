@@ -53,7 +53,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     fun `oppretter oppgave`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(forventetOppgave) }
+        verify(exactly = 1) { oppgaveMediator.opprett(forventetOppgave) }
     }
 
     @Test
@@ -61,6 +61,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
         every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.tildel(forventetOppgave, reservasjon.first, reservasjon.second) }
+        verify(exactly = 1) { oppgaveMediator.opprettOgTildel(forventetOppgave, reservasjon.first, reservasjon.second) }
     }
 }

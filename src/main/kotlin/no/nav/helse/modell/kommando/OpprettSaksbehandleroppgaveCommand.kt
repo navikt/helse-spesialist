@@ -33,8 +33,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
         logg.info("Oppretter saksbehandleroppgave")
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { reservasjon ->
-            oppgaveMediator.tildel(oppgave, reservasjon.first, reservasjon.second)
-        } ?: oppgaveMediator.nyOppgave(oppgave)
+            oppgaveMediator.opprettOgTildel(oppgave, reservasjon.first, reservasjon.second)
+        } ?: oppgaveMediator.opprett(oppgave)
 
         return true
     }

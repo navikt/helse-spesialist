@@ -115,7 +115,7 @@ internal class GodkjenningsbehovTest {
         assertTrue(godkjenningMessage.resume(context))
 
         assertEquals(listOf("EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
-        verify(exactly = 1) { oppgaveMediator.nyOppgave(any()) }
+        verify(exactly = 1) { oppgaveMediator.opprett(any()) }
     }
 
     @Test
@@ -141,7 +141,7 @@ internal class GodkjenningsbehovTest {
         assertTrue(godkjenningMessage.resume(context))
 
         assertEquals(listOf("EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
-        verify(exactly = 1) { oppgaveMediator.tildel(any(), reservasjon.first, reservasjon.second) }
+        verify(exactly = 1) { oppgaveMediator.opprettOgTildel(any(), reservasjon.first, reservasjon.second) }
     }
 
     private fun personFinnesIkke() {

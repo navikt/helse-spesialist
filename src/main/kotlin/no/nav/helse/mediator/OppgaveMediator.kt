@@ -24,13 +24,17 @@ internal class OppgaveMediator(
 
     internal fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 
-    internal fun nyOppgave(oppgave: Oppgave) {
+    internal fun opprett(oppgave: Oppgave) {
+        nyOppgave(oppgave)
+    }
+
+    private fun nyOppgave(oppgave: Oppgave) {
         oppgaver.add(oppgave)
     }
 
-    internal fun tildel(oppgave: Oppgave, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+    internal fun opprettOgTildel(oppgave: Oppgave, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
         oppgave.tildel(saksbehandleroid, gyldigTil)
-        nyOppgave(oppgave)
+        opprett(oppgave)
     }
 
     internal fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
@@ -78,7 +82,9 @@ internal class OppgaveMediator(
         contextId: UUID,
         vedtaksperiodeId: UUID,
         navn: String
-    ): Long {
+    ): Long? {
+        if (oppgaveDao.harAktivOppgave(vedtaksperiodeId)) return null
+
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
         return oppgaveDao.opprettOppgave(
             contextId,

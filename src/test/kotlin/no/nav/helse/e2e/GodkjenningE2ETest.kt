@@ -4,7 +4,7 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
-import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshot
@@ -23,6 +23,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         private const val ORGNR = "222222222"
         private const val ENHET_UTLAND = "2101"
         private const val SAKSBEHANDLERIDENT = "Z999999"
+        private const val AUTOMATISK_BEHANDLET = "Automatisk behandlet"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private const val OPPGAVEID = 1L
         private val SAKSBEHANDLEROID = UUID.randomUUID()
@@ -69,7 +70,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
+        assertOppgave(0, AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
 
@@ -94,7 +95,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
         assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
     }
@@ -159,7 +160,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
     }
 
@@ -211,13 +212,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertVedtak(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
-        assertFalse(
-            testRapid.inspektør.meldinger().first()
-                .path("@løsning")
-                .path("Godkjenning")
-                .path("godkjent")
-                .booleanValue()
-        )
+        assertGodkjenningsbehovløsning(false, AUTOMATISK_BEHANDLET)
     }
 
     @Test
@@ -237,30 +232,37 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertVedtak(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
-        assertFalse(
-            testRapid.inspektør.meldinger().first()
-                .path("@løsning")
-                .path("Godkjenning")
-                .path("godkjent")
-                .booleanValue()
-        )
+        assertGodkjenningsbehovløsning(false, AUTOMATISK_BEHANDLET)
     }
 
     @Test
-    fun `invaliderer oppgaver og contexter hvis godkjenningsbehov kommer inn på nytt`() {
+    fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er avventende`() {
         val hendelseId1 = håndterGodkjenningsbehov()
         val hendelseId2 = håndterGodkjenningsbehov()
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
-        assertOppgave(1, Oppgavestatus.AvventerSaksbehandler)
+        assertOppgaver(1)
+        assertOppgave(0, AvventerSaksbehandler)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
     }
 
     @Test
-    fun `invaliderer oppgaver og contexter hvis godkjenningsbehov kommer inn på nytt 2`() {
+    fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
+        val hendelseId1 = håndterGodkjenningsbehov()
+        val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        val hendelseId2 = håndterGodkjenningsbehov()
+        assertTilstand(hendelseId1, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(løsningId, "NY", "FERDIG")
+        assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertOppgaver(1)
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
+    }
+
+    @Test
+    fun `avbryter suspendert kommando når godkjenningsbehov kommer inn på nytt`() {
         val hendelseId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         val hendelseId2 = håndterGodkjenningsbehov()
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
+        assertOppgaver(1)
+        assertOppgave(0, AvventerSaksbehandler)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
         assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
     }

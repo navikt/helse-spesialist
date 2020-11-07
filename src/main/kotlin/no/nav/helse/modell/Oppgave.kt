@@ -37,7 +37,7 @@ internal class Oppgave private constructor(
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
         val oppgaveId = id?.also {
             oppgaveMediator.oppdater(hendelseId, contextId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn).also { id = it }
+        } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, navn).also { id = it } ?: return
         tildeling?.also {
             oppgaveMediator.tildel(oppgaveId, it)
         }

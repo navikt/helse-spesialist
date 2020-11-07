@@ -66,7 +66,7 @@ internal class Godkjenningsbehov(
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettKoblingTilHendelseCommand(id, vedtaksperiodeId, vedtakDao),
-        AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
+        AvbrytContextCommand(vedtaksperiodeId, commandContextDao),
         KlargjørPersonCommand(fødselsnummer, aktørId, personDao, json, vedtaksperiodeId),
         KlargjørArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao),
         KlargjørVedtaksperiodeCommand(

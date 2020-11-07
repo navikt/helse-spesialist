@@ -400,20 +400,35 @@ abstract class AbstractE2ETest {
         }
     }
 
-    protected fun assertOppgave(indeks: Int, vararg status: Oppgavestatus) {
-        val oppgaver = mutableListOf<Pair<Long, MutableList<JsonNode>>>()
-        testRapid.inspektør.hendelser("oppgave_opprettet")
-            .forEach { oppgaver.add(it.path("oppgaveId").asLong() to mutableListOf(it)) }
-        testRapid.inspektør.hendelser("oppgave_oppdatert")
-            .forEach { oppgave ->
-                val id = oppgave.path("oppgaveId").asLong()
-                oppgaver.firstOrNull { id == it.first }
-                    ?.second?.add(oppgave)
-            }
+    protected fun assertOppgaver(antall: Int) {
+        val oppgaver = testRapid.inspektør.oppgaver()
+        assertEquals(antall, oppgaver.size)
+    }
 
-        assertEquals(status.toList(), oppgaver[indeks].second.map {
-            Oppgavestatus.valueOf(it.path("status").asText())
-        })
+    protected fun assertOppgave(indeks: Int, vararg status: Oppgavestatus) {
+        val oppgaver = testRapid.inspektør.oppgaver()
+        assertEquals(status.toList(), oppgaver[indeks])
+    }
+
+    private fun TestRapid.RapidInspector.oppgaver(): Map<Int, List<Oppgavestatus>> {
+        val oppgaveindekser = mutableListOf<Long>()
+        val oppgaver = mutableMapOf<Int, MutableList<JsonNode>>()
+        hendelser("oppgave_opprettet")
+            .forEach {
+                oppgaveindekser.add(it.path("oppgaveId").asLong())
+                oppgaver[oppgaveindekser.size - 1] = mutableListOf(it)
+            }
+        hendelser("oppgave_oppdatert")
+            .forEach { oppgave ->
+                val indeks = oppgaveindekser.indexOf(oppgave.path("oppgaveId").asLong())
+                oppgaver[indeks]?.add(oppgave)
+            }
+        return oppgaver
+            .mapValues { (_, oppgaver) ->
+                oppgaver.map { oppgave ->
+                    Oppgavestatus.valueOf(oppgave.path("status").asText())
+                }
+            }
     }
 
     protected fun assertIngenOppgave() {
