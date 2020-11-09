@@ -141,11 +141,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
     )
 
     internal fun oppdaterSnapshot(fødselsnummer: String, snapshot: String) {
-        sessionOf(dataSource, returnGeneratedKey = true).transaction { session ->
-            val sisteReferanse = insertSpeilSnapshot(session, snapshot)
-            val referanser = findSpeilSnapshotRefs(fødselsnummer)
-            oppdaterSnapshotRef(session, fødselsnummer, sisteReferanse)
-            referanser.forEach { ref -> slett(session, ref)}
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.transaction { tx ->
+                val sisteReferanse = insertSpeilSnapshot(tx, snapshot)
+                val referanser = findSpeilSnapshotRefs(fødselsnummer)
+                oppdaterSnapshotRef(tx, fødselsnummer, sisteReferanse)
+                referanser.forEach { ref -> slett(tx, ref) }
+            }
         }
     }
 
