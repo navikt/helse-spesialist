@@ -123,12 +123,13 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         val vedtakId = opprettVedtaksperiode()
-        opprettOppgave(vedtakId = vedtakId)
-        val oppgave1id = oppgaveId;
-        opprettOppgave(vedtakId = vedtakId)
 
-        oppgaveDao.updateOppgave(oppgave1id, AvventerSaksbehandler, null, null)
-        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
+        opprettOppgave(vedtakId = vedtakId)
+        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
+
+        opprettOppgave(vedtakId = vedtakId)
+        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
+
         assertTrue(oppgaveDao.harAktivOppgave(VEDTAKSPERIODE))
     }
 

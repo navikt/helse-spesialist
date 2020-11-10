@@ -129,8 +129,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun updateOppgave(
         oppgaveId: Long,
         oppgavestatus: Oppgavestatus,
-        ferdigstiltAv: String?,
-        oid: UUID?
+        ferdigstiltAv: String? = null,
+        oid: UUID? = null
     ) = using(sessionOf(dataSource)) {
         it.run(
             queryOf(
