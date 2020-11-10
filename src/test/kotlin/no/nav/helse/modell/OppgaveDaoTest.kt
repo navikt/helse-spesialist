@@ -119,6 +119,20 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        val vedtakId = opprettVedtaksperiode()
+        opprettOppgave(vedtakId = vedtakId)
+        val oppgave1id = oppgaveId;
+        opprettOppgave(vedtakId = vedtakId)
+
+        oppgaveDao.updateOppgave(oppgave1id, AvventerSaksbehandler, null, null)
+        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
+        assertTrue(oppgaveDao.harAktivOppgave(VEDTAKSPERIODE))
+    }
+
+    @Test
     fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
         nyPerson()
         opprettOppgave(vedtakId = vedtakId)
