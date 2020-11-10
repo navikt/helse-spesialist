@@ -69,7 +69,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Warnings mappes til speil (som "varsler")`() {
+    fun `Warnings mappes til speil som varsler`() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
