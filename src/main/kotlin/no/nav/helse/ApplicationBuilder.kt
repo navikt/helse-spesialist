@@ -216,7 +216,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             commandContextDao = commandContextDao,
             hendelseDao = hendelseDao,
             hendelsefabrikk = hendelsefabrikk,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            tildelingDao = tildelingDao
         )
     }
 

@@ -133,7 +133,8 @@ abstract class AbstractE2ETest {
         commandContextDao = commandContextDao,
         hendelseDao = hendelseDao,
         hendelsefabrikk = hendelsefabrikk,
-        oppgaveMediator = oppgaveMediator
+        oppgaveMediator = oppgaveMediator,
+        tildelingDao = tildelingDao,
     )
     internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
         vedtakDao = vedtakDao,

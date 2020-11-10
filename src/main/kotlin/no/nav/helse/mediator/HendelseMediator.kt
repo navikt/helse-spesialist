@@ -8,6 +8,7 @@ import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,6 +25,7 @@ internal class HendelseMediator(
     private val personDao: PersonDao,
     private val commandContextDao: CommandContextDao,
     private val hendelseDao: HendelseDao,
+    private val tildelingDao: TildelingDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {
@@ -94,8 +96,9 @@ internal class HendelseMediator(
         )
         rapidsConnection.publish(godkjenningMessage.toJson())
 
-        oppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
-        oppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
+        val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+        internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
+        internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
     }
 
     override fun vedtaksperiodeEndret(

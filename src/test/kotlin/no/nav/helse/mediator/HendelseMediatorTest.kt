@@ -25,6 +25,7 @@ internal class HendelseMediatorTest {
         mockk(relaxed = true),
         mockk(relaxed = true),
         mockk(relaxed = true),
+        mockk(relaxed = true),
         oppgaveMediator,
         mockk(relaxed = true)
     )
@@ -37,12 +38,6 @@ internal class HendelseMediatorTest {
         val saksbehandlerIdent = "saksbehandler"
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertEquals("saksbehandler_løsning", testRapid.inspektør.field(0, "@event_name").asText())
-        verify(exactly = 1) {
-            oppgaveMediator.avventerSystem(oppgavereferanse, saksbehandlerIdent, oid)
-        }
-        verify(exactly = 1) {
-            oppgaveMediator.lagreOppgaver(any<RapidsConnection>(), any(), any())
-        }
     }
 
     @Test
