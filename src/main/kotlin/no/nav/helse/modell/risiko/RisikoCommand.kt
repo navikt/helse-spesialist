@@ -40,7 +40,7 @@ internal class RisikoCommand(
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {
-            val melding = "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes"
+            val melding = "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
