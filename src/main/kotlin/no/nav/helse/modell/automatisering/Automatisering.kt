@@ -28,7 +28,15 @@ internal class Automatisering(
         Saksbehandleroppgavetype.OVERGANG_FRA_IT
     )
 
-    fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): Automatiseringsvurdering {
+    internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId)
+
+        val erAutomatiserbar = problemer.isEmpty()
+        if (erAutomatiserbar) onAutomatiserbar()
+        automatiseringDao.lagre(erAutomatiserbar, problemer, vedtaksperiodeId, hendelseId)
+    }
+
+    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
         val warnings = warningDao.finnWarnings(vedtaksperiodeId)
@@ -51,20 +59,15 @@ internal class Automatisering(
         )
     }
 
-    fun lagre(vurdering: Automatiseringsvurdering, vedtaksperiodeId: UUID, hendelseId: UUID) {
-        vurdering.lagre(vedtaksperiodeId, hendelseId, automatiseringDao)
-    }
-
-    fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
+    internal fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
         automatiseringDao.hentAutomatisering(vedtaksperiodeId, hendelseId)?.automatisert ?: false
 
-    private fun valider(vararg valideringer: AutomatiseringValidering): Automatiseringsvurdering {
+    private fun valider(vararg valideringer: AutomatiseringValidering): MutableList<String> {
         val validations = valideringer.toList()
         val problems = mutableListOf<String>()
 
-        validations
-            .forEach { if (!it.valider()) problems.add(it.error()) }
-        return Automatiseringsvurdering(problems)
+        validations.forEach { if (!it.valider()) problems.add(it.error()) }
+        return problems
     }
 
     private fun validering(error: String, validering: () -> Boolean) =
@@ -73,12 +76,6 @@ internal class Automatisering(
             override fun error() = error
         }
 
-    class Automatiseringsvurdering(private val problems: MutableList<String>) {
-        fun erAutomatiserbar() = problems.isEmpty()
-        fun lagre(vedtaksperiodeId: UUID, hendelseId: UUID, automatiseringDao: AutomatiseringDao) {
-            automatiseringDao.lagre(erAutomatiserbar(), problems.toList(), vedtaksperiodeId, hendelseId)
-        }
-    }
 }
 
 interface AutomatiseringValidering {

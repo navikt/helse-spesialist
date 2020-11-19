@@ -21,15 +21,12 @@ internal class AutomatiseringCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val vurdering = automatisering.vurder(fødselsnummer, vedtaksperiodeId)
-
-        if (vurdering.erAutomatiserbar()) {
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer)
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
         }
 
-        automatisering.lagre(vurdering, vedtaksperiodeId, hendelseId)
         return true
     }
 }

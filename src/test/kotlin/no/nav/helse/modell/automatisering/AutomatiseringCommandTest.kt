@@ -1,13 +1,11 @@
 package no.nav.helse.modell.automatisering
 
-import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.objectMapper
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,9 +29,6 @@ internal class AutomatiseringCommandTest {
             """{ "@event_name": "behov" }""",
             GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true))
         )
-    private var captureVurdering = CapturingSlot<Automatisering.Automatiseringsvurdering>()
-    private var captureVedtaksperiodeId = CapturingSlot<UUID>()
-    private var captureHendelseId = CapturingSlot<UUID>()
 
     private lateinit var context: CommandContext
 
@@ -43,47 +38,29 @@ internal class AutomatiseringCommandTest {
     }
 
     @Test
-    fun `ikke automatiserbar gir ikke-automatiserbar behandling`() {
-        every {
-            automatisering.vurder(
-                any(),
-                any()
-            )
-        } returns Automatisering.Automatiseringsvurdering(mutableListOf("Problem"))
+    fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.lagre(
-                capture(captureVurdering),
-                capture(captureVedtaksperiodeId),
-                capture(captureHendelseId)
-            )
+            automatisering.utfør(any(), any(), any(), any())
         }
-        assertAutomatisert(automatisert = false)
-        assertTrue(context.meldinger().isEmpty())
     }
 
+
     @Test
-    fun `automatiserbar gir automatiserbar behandling`() {
-        every { automatisering.vurder(any(), any()) } returns Automatisering.Automatiseringsvurdering(mutableListOf())
-        assertTrue(command.execute(context))
-        verify {
-            automatisering.lagre(
-                capture(captureVurdering),
-                capture(captureVedtaksperiodeId),
-                capture(captureHendelseId)
-            )
+    fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
+        every {
+            automatisering.utfør(any(), any(), any(), captureLambda())
+        } answers {
+            arg<() -> Unit>(3).invoke()
         }
-        assertAutomatisert(automatisert = true)
+
+        assertTrue(command.execute(context))
+
         val løsning = assertNotNull(context.meldinger()
             .map(objectMapper::readTree)
             .filter { it["@event_name"].asText() == "behov" }
             .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })
-        assertTrue(løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue())
-    }
 
-    private fun assertAutomatisert(automatisert: Boolean) {
-        assertEquals(automatisert, captureVurdering.captured.erAutomatiserbar())
-        assertEquals(vedtaksperiodeId, captureVedtaksperiodeId.captured)
-        assertEquals(hendelseId, captureHendelseId.captured)
+        assertTrue(løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue())
     }
 }
