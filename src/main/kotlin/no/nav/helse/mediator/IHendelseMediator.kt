@@ -41,7 +41,13 @@ internal interface IHendelseMediator {
         context: RapidsConnection.MessageContext
     )
 
-    fun løsning(hendelseId: UUID, contextId: UUID, behovId: UUID, løsning: Any, context: RapidsConnection.MessageContext)
+    fun løsning(
+        hendelseId: UUID,
+        contextId: UUID,
+        behovId: UUID,
+        løsning: Any,
+        context: RapidsConnection.MessageContext
+    )
 
     fun godkjenningsbehov(
         message: JsonMessage,
@@ -67,6 +73,11 @@ internal interface IHendelseMediator {
     )
 
     fun utbetalingAnnullert(
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    )
+
+    fun oppdaterPersonsnapshot(
         message: JsonMessage,
         context: RapidsConnection.MessageContext
     )

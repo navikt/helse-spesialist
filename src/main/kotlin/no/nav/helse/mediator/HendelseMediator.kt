@@ -54,19 +54,30 @@ internal class HendelseMediator(
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
             UtbetalingAnnullert.River(it, this)
+            OppdaterPersonsnapshot.River(it, this)
         }
     }
 
     private var løsninger: Løsninger? = null
 
     // samler opp løsninger
-    override fun løsning(hendelseId: UUID, contextId: UUID, behovId: UUID, løsning: Any, context: RapidsConnection.MessageContext) {
-        withMDC(mapOf(
-            "behovId" to "$behovId"
-        )) {
+    override fun løsning(
+        hendelseId: UUID,
+        contextId: UUID,
+        behovId: UUID,
+        løsning: Any,
+        context: RapidsConnection.MessageContext
+    ) {
+        withMDC(
+            mapOf(
+                "behovId" to "$behovId"
+            )
+        ) {
             løsninger(hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
-                ?: log.info("mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
-                    "eller fordi hendelsen $hendelseId er ukjent")
+                ?: log.info(
+                    "mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
+                        "eller fordi hendelsen $hendelseId er ukjent"
+                )
         }
     }
 
@@ -174,21 +185,23 @@ internal class HendelseMediator(
         oppgaveId: Long,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
-            id,
-            godkjenningsbehovhendelseId,
-            fødselsnummer,
-            godkjent,
-            saksbehandlerident,
-            saksbehandleroid,
-            saksbehandlerepost,
-            godkjenttidspunkt,
-            årsak,
-            begrunnelser,
-            kommentar,
-            oppgaveId,
-            message.toJson()
-        ), context)
+        utfør(
+            fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
+                id,
+                godkjenningsbehovhendelseId,
+                fødselsnummer,
+                godkjent,
+                saksbehandlerident,
+                saksbehandleroid,
+                saksbehandlerepost,
+                godkjenttidspunkt,
+                årsak,
+                begrunnelser,
+                kommentar,
+                oppgaveId,
+                message.toJson()
+            ), context
+        )
     }
 
     override fun overstyring(
@@ -215,6 +228,10 @@ internal class HendelseMediator(
         context: RapidsConnection.MessageContext
     ) {
         utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
+    }
+
+    override fun oppdaterPersonsnapshot(message: JsonMessage, context: RapidsConnection.MessageContext) {
+        utfør(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
     }
 
     fun håndter(overstyringMessage: OverstyringRestDto) {
@@ -288,6 +305,15 @@ internal class HendelseMediator(
         })
     }
 
+    fun håndter(oppdaterPersonsnapshotDto: OppdaterPersonsnapshotDto) {
+        rapidsConnection.publish(
+            JsonMessage.newMessage(
+                standardfelter("oppdater_personsnapshot", oppdaterPersonsnapshotDto.fødselsnummer)
+            ).toJson()
+        )
+        sikkerLogg.info("Publiserte event for å be om siste versjon av person: ${oppdaterPersonsnapshotDto.fødselsnummer}")
+    }
+
     fun shutdown() {
         shutdown = true
     }
@@ -345,7 +371,13 @@ internal class HendelseMediator(
         contextId: UUID,
         messageContext: RapidsConnection.MessageContext
     ) {
-        withMDC(mapOf("context_id" to "$contextId", "hendelse_id" to "${hendelse.id}", "vedtaksperiode_id" to "${hendelse.vedtaksperiodeId() ?: "N/A"}")) {
+        withMDC(
+            mapOf(
+                "context_id" to "$contextId",
+                "hendelse_id" to "${hendelse.id}",
+                "vedtaksperiode_id" to "${hendelse.vedtaksperiodeId() ?: "N/A"}"
+            )
+        ) {
             try {
                 log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")

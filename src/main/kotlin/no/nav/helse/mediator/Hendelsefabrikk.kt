@@ -307,4 +307,15 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao
         )
     }
+
+    override fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot {
+        val jsonNode = mapper.readTree(json)
+        return OppdaterPersonsnapshot(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            json = json,
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            vedtakDao = vedtakDao
+        )
+    }
 }

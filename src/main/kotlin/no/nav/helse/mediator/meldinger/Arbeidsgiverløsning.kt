@@ -13,8 +13,9 @@ internal class Arbeidsgiverløsning(private val navn: String) {
     internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) =
         arbeidsgiverDao.updateNavn(orgnummer, navn)
 
-    internal class ArbeidsgiverRiver(rapidsConnection: RapidsConnection,
-                                     private val mediator: IHendelseMediator
+    internal class ArbeidsgiverRiver(
+        rapidsConnection: RapidsConnection,
+        private val mediator: IHendelseMediator
     ) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -38,7 +39,13 @@ internal class Arbeidsgiverløsning(private val navn: String) {
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), Arbeidsgiverløsning(packet["@løsning.HentArbeidsgiverNavn"].asText()), context)
+            mediator.løsning(
+                hendelseId,
+                contextId,
+                UUID.fromString(packet["@id"].asText()),
+                Arbeidsgiverløsning(packet["@løsning.HentArbeidsgiverNavn"].asText()),
+                context
+            )
         }
     }
 }

@@ -119,7 +119,18 @@ internal fun Route.vedtaksperiodeApi(
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
+
+    post("/api/person/oppdater") {
+        val personoppdateringDto = call.receive<OppdaterPersonsnapshotDto>()
+        hendelseMediator.håndter(personoppdateringDto)
+        call.respond(HttpStatusCode.OK)
+    }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class OppdaterPersonsnapshotDto(
+    val fødselsnummer: String
+)
 
 data class OverstyringRestDto(
     val saksbehandlerEpost: String,
