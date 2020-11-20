@@ -61,8 +61,8 @@ internal class Automatisering(
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Automatisering er skrudd av") { miljøstyrtFeatureToggle.automatisering() }
-        ).also {
-            return if (it.isEmpty() && stikkprøveVelger()) it + "Saken er plukket ut til manuell saksbehandling"
+        ).let {
+            if (it.isEmpty() && stikkprøveVelger()) it + "Saken er plukket ut til manuell saksbehandling"
             else it
         }
     }
@@ -70,11 +70,10 @@ internal class Automatisering(
     internal fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
         automatiseringDao.hentAutomatisering(vedtaksperiodeId, hendelseId)?.automatisert ?: false
 
-    private fun valider(vararg valideringer: AutomatiseringValidering): List<String> {
-        return valideringer.toList()
-            .filterNot { it.valider() }
-            .map { it.error() }
-    }
+    private fun valider(vararg valideringer: AutomatiseringValidering) =
+        valideringer.toList()
+            .filterNot(AutomatiseringValidering::valider)
+            .map(AutomatiseringValidering::error)
 
     private fun validering(error: String, validering: () -> Boolean) =
         object : AutomatiseringValidering {
