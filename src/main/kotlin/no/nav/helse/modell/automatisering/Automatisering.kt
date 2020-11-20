@@ -20,7 +20,8 @@ internal class Automatisering(
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
-    private val personDao: PersonDao
+    private val personDao: PersonDao,
+    private val stikkprøveVelger: StikkprøveVelger
 ) {
     private val automatiserbareOppgavetyper = listOf(
         Saksbehandleroppgavetype.FORLENGELSE,
@@ -31,14 +32,16 @@ internal class Automatisering(
     internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId)
 
-        val erAutomatiserbar = problemer.isEmpty()
-        if (erAutomatiserbar) onAutomatiserbar()
-        automatiseringDao.lagre(erAutomatiserbar, problemer, vedtaksperiodeId, hendelseId)
+        problemer.isEmpty().let { skalAutomatiskGodkjennes ->
+            if (skalAutomatiskGodkjennes) onAutomatiserbar()
+            automatiseringDao.lagre(skalAutomatiskGodkjennes, problemer, vedtaksperiodeId, hendelseId)
+        }
     }
 
     private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): List<String> {
         val risikovurdering =
-            risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
+            risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
+                ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
         val warnings = warningDao.finnWarnings(vedtaksperiodeId)
         val oppgavetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId)
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
@@ -51,23 +54,26 @@ internal class Automatisering(
             validering("Har varsler") { warnings.isEmpty() },
             validering("Behandlingen kan ikke automatiseres") { oppgavetype in automatiserbareOppgavetyper },
             validering("Bruker er reservert eller mangler oppdatert samtykke i DKIF") { erDigital ?: false },
-            validering("Det finnes åpne oppgaver på sykepenger i Gosys") { antallÅpneGosysoppgaver?.let { it == 0 } ?: false },
+            validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
+                antallÅpneGosysoppgaver?.let { it == 0 } ?: false
+            },
             validering("Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er skrudd av") { miljøstyrtFeatureToggle.risikovurdering() },
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Automatisering er skrudd av") { miljøstyrtFeatureToggle.automatisering() }
-        )
+        ).also {
+            return if (it.isEmpty() && stikkprøveVelger()) it + "Saken er plukket ut til manuell saksbehandling"
+            else it
+        }
     }
 
     internal fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
         automatiseringDao.hentAutomatisering(vedtaksperiodeId, hendelseId)?.automatisert ?: false
 
-    private fun valider(vararg valideringer: AutomatiseringValidering): MutableList<String> {
-        val validations = valideringer.toList()
-        val problems = mutableListOf<String>()
-
-        validations.forEach { if (!it.valider()) problems.add(it.error()) }
-        return problems
+    private fun valider(vararg valideringer: AutomatiseringValidering): List<String> {
+        return valideringer.toList()
+            .filterNot { it.valider() }
+            .map { it.error() }
     }
 
     private fun validering(error: String, validering: () -> Boolean) =
@@ -77,6 +83,8 @@ internal class Automatisering(
         }
 
 }
+
+typealias StikkprøveVelger = () -> Boolean
 
 interface AutomatiseringValidering {
     fun valider(): Boolean

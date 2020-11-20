@@ -36,6 +36,7 @@ internal class AutomatiseringTest {
     private val miljøstyrtFeatureToggleMock = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
+    private val stikkprøveMock = mockk<StikkprøveVelger>()
 
     private val automatisering =
         Automatisering(
@@ -47,7 +48,8 @@ internal class AutomatiseringTest {
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock,
-            personDao = personDaoMock
+            personDao = personDaoMock,
+            stikkprøveMock
         )
 
     companion object {
@@ -66,6 +68,7 @@ internal class AutomatiseringTest {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { miljøstyrtFeatureToggleMock.automatisering() } returns true
         every { miljøstyrtFeatureToggleMock.risikovurdering() } returns true
+        every { stikkprøveMock() } returns false
     }
 
     @Test
@@ -152,6 +155,21 @@ internal class AutomatiseringTest {
     fun `vedtaksperiode med automatiseringsfeaturetoggle av er ikke automatiserbar`() {
         every { miljøstyrtFeatureToggleMock.automatisering() } returns false
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+    }
+
+    @Test
+    fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
+        every { stikkprøveMock() } returns true
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+    }
+
+    @Test
+    fun `Tar ikke stikkprøve av ikke-automatiserbar periode`() {
+        every { miljøstyrtFeatureToggleMock.automatisering() } returns false
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { }
+        verify(exactly = 0) {
+            stikkprøveMock()
+        }
     }
 
     private fun risikovurderingDto(arbeidsuførhetsvurdering: List<String> = emptyList()) = RisikovurderingDto(

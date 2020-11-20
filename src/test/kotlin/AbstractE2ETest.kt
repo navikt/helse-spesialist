@@ -122,7 +122,7 @@ abstract class AbstractE2ETest {
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             personDao = personDao
-        ),
+        ) { false },
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
     )
     private val hendelseMediator = HendelseMediator(
