@@ -72,6 +72,20 @@ class TildelingApiTest : AbstractApiTest() {
         assertEquals("en annen saksbehandler", feilDto.kontekst["tildeltTil"])
     }
 
+    @Test
+    fun `manglende oppgavereferanse gir Bad Request`() {
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/tildeling/null") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = objectMapper.createObjectNode()
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+
+        assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
+    }
+
     @BeforeAll
     fun setupTildeling() {
         tildelingMediator = mockk(relaxed = true)

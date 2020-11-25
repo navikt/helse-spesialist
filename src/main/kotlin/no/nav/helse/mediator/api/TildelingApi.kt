@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.modell.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.tildeling.TildelingMediator
 import org.slf4j.LoggerFactory
+import java.lang.Long.parseLong
 import java.util.*
 
 private val secureLog = LoggerFactory.getLogger("tjenestekall")
@@ -20,8 +21,13 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
         val ref = UUID.randomUUID()
         try {
             modellfeilForRest {
-                val oppgaveId =
-                    requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+                val oppgaveId = try {
+                    parseLong(call.parameters["oppgavereferanse"])
+                } catch (e: NumberFormatException) {
+                    call.respond(HttpStatusCode.BadRequest, "Requesten må inneholde en gyldig oppgaveId")
+                    return@post
+                }
+
                 secureLog.info("Tildeler oppgave med oppgaveid $oppgaveId (ref: $ref)")
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
                 val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
@@ -36,7 +42,6 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
                         navn
                     )
                 }
-
                 call.respond(HttpStatusCode.OK)
             }
         } catch (e: Throwable) {
