@@ -58,7 +58,8 @@ internal class UtbetalingEndret(
         private val mediator: IHendelseMediator
     ) : PacketListener {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        private val gyldigeStatuser = listOf("GODKJENT", "SENDT", "OVERFØRT", "UTBETALING_FEILET", "UTBETALT", "ANNULLERT")
+        private val godkjenteStatuser = listOf("GODKJENT", "SENDT", "OVERFØRT", "UTBETALING_FEILET", "UTBETALT", "ANNULLERT")
+        private val gyldigeStatuser = listOf("IKKE_UTBETALT", "IKKE_GODKJENT", "GODKJENT_UTEN_UTBETALING") + godkjenteStatuser
 
         init {
             River(rapidsConnection).apply {
@@ -68,7 +69,7 @@ internal class UtbetalingEndret(
                         "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId"
                     )
                     it.requireAny("type", listOf("UTBETALING", "ANNULLERING", "ETTERUTBETALING"))
-                    it.requireAny("gjeldendeStatus", listOf("IKKE_UTBETALT", "IKKE_GODKJENT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALING_FEILET", "UTBETALT", "ANNULLERT"))
+                    it.requireAny("gjeldendeStatus", gyldigeStatuser)
                     it.require("@opprettet", JsonNode::asLocalDateTime)
                 }
             }.register(this)
@@ -80,7 +81,7 @@ internal class UtbetalingEndret(
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
             val status = packet["gjeldendeStatus"].asText()
-            if (status !in gyldigeStatuser) return
+            if (status !in godkjenteStatuser) return
 
             val id = UUID.fromString(packet["utbetalingId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
