@@ -20,13 +20,26 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
         personFagsystemId: String,
         json: String
     ) {
+        opprettUtbetalingId(utbetalingId)
+        opprettOppdrag(arbeidsgiverFagsystemId)
+        opprettOppdrag(personFagsystemId)
+
         @Language("PostgreSQL")
         val statement = """
-                INSERT INTO utbetaling (utbetaling_id, person_ref, arbeidsgiver_ref, type,
-                    status, opprettet, arbeidsgiver_fagsystem_id, person_fagsystem_id, data)
-                VALUES (:utbetalingId, (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
-                    (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer), CAST(:type as utbetaling_type),
-                    CAST(:status as utbetaling_status), :opprettet, :arbeidsgiverFagsystemId, :personFagsystemId, CAST(:json as json))
+                INSERT INTO utbetaling (
+                    utbetaling_id_ref, person_ref, arbeidsgiver_ref, type,
+                    status, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, data
+                ) VALUES (
+                    (SELECT id FROM utbetaling_id WHERE utbetaling_id = :utbetalingId),
+                    (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                    (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
+                    CAST(:type as utbetaling_type),
+                    CAST(:status as utbetaling_status),
+                    :opprettet,
+                    (SELECT id FROM oppdrag WHERE fagsystem_id = :arbeidsgiverFagsystemId),
+                    (SELECT id FROM oppdrag WHERE fagsystem_id = :personFagsystemId),
+                    CAST(:json as json)
+                )
         """
         using(sessionOf(dataSource)) {
             it.run(queryOf(statement, mapOf(
@@ -39,6 +52,26 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
                 "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
                 "personFagsystemId" to personFagsystemId,
                 "json" to json
+            )).asExecute)
+        }
+    }
+
+    private fun opprettOppdrag(fagsystemId: String) {
+        @Language("PostgreSQL")
+        val statement = """INSERT INTO oppdrag (fagsystem_id) VALUES (:fagsystemId) ON CONFLICT DO NOTHING"""
+        using(sessionOf(dataSource)) {
+            it.run(queryOf(statement, mapOf(
+                "fagsystemId" to fagsystemId
+            )).asExecute)
+        }
+    }
+
+    private fun opprettUtbetalingId(utbetalingId: UUID) {
+        @Language("PostgreSQL")
+        val statement = """INSERT INTO utbetaling_id (utbetaling_id) VALUES (:utbetalingId) ON CONFLICT DO NOTHING"""
+        using(sessionOf(dataSource)) {
+            it.run(queryOf(statement, mapOf(
+                "utbetalingId" to utbetalingId
             )).asExecute)
         }
     }

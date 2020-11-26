@@ -38,13 +38,16 @@ class UtbetalingE2ETest : AbstractE2ETest() {
             FROM utbetaling u
             INNER JOIN person p ON (p.id = u.person_ref)
             INNER JOIN arbeidsgiver a ON (a.id = u.arbeidsgiver_ref)
+            INNER JOIN utbetaling_id uid ON (uid.id = u.utbetaling_id_ref)
+            INNER JOIN oppdrag o1 ON (o1.id = u.arbeidsgiver_fagsystem_id_ref)
+            INNER JOIN oppdrag o2 ON (o2.id = u.person_fagsystem_id_ref)
             WHERE p.fodselsnummer = :fodselsnummer AND a.orgnummer = :orgnummer
             """
         return using(sessionOf(dataSource)) {
             it.run(queryOf(statement, mapOf(
                 "fodselsnummer" to UNG_PERSON_FNR_2018.toLong(),
                 "orgnummer" to ORGNR.toLong()
-            )).map { it.string("utbetaling_id") }.asList)
+            )).map { it.string("utbetaling_id_ref") }.asList)
         }
     }
 
