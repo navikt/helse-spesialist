@@ -15,6 +15,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -46,7 +47,8 @@ internal class Hendelsefabrikk(
     private val oppgaveMediator: OppgaveMediator,
     private val godkjenningMediator: GodkjenningMediator,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
-    private val automatisering: Automatisering
+    private val automatisering: Automatisering,
+    private val utbetalingDao: UtbetalingDao
 ) : IHendelsefabrikk {
     private companion object {
         private val mapper = jacksonObjectMapper()
@@ -305,6 +307,23 @@ internal class Hendelsefabrikk(
             json = json,
             speilSnapshotRestClient = speilSnapshotRestClient,
             vedtakDao = vedtakDao
+        )
+    }
+
+    override fun utbetalingEndret(json: String): UtbetalingEndret {
+        val jsonNode = mapper.readTree(json)
+        return UtbetalingEndret(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
+            utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
+            type = jsonNode.path("type").asText(),
+            status = jsonNode.path("gjeldendeStatus").asText(),
+            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
+            arbeidsgiverFagsystemId = jsonNode.path("arbeidsgiverOppdrag").path("fagsystemId").asText(),
+            personFagsystemId = jsonNode.path("personOppdrag").path("fagsystemId").asText(),
+            json = json,
+            utbetalingDao = utbetalingDao
         )
     }
 

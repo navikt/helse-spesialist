@@ -76,5 +76,6 @@ internal interface IHendelsefabrikk {
     ): Tilbakerulling
     fun tilbakerulling(json: String): Tilbakerulling
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
+    fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json:String): OppdaterPersonsnapshot
 }

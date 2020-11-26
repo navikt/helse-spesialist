@@ -13,6 +13,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.*
@@ -45,6 +46,7 @@ internal class GodkjenningsbehovTest {
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
+    private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = mockk(),
         personDao = personDao,
@@ -65,6 +67,7 @@ internal class GodkjenningsbehovTest {
         åpneGosysOppgaverDao = mockk(relaxed = true),
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
+        utbetalingDao = utbetalingDao,
         godkjenningMediator = mockk(relaxed = true)
     )
     private val godkjenningMessage = hendelsefabrikk.godkjenning(

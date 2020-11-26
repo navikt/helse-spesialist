@@ -72,6 +72,13 @@ internal interface IHendelseMediator {
         context: RapidsConnection.MessageContext
     )
 
+    fun utbetalingEndret(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    )
+
     fun utbetalingAnnullert(
         message: JsonMessage,
         context: RapidsConnection.MessageContext

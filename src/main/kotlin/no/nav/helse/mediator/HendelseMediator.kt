@@ -55,6 +55,7 @@ internal class HendelseMediator(
             Risikovurderingløsning.V2River(it, this)
             UtbetalingAnnullert.River(it, this)
             OppdaterPersonsnapshot.River(it, this)
+            UtbetalingEndret.River(it, this)
         }
     }
 
@@ -228,6 +229,15 @@ internal class HendelseMediator(
         context: RapidsConnection.MessageContext
     ) {
         utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
+    }
+
+    override fun utbetalingEndret(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    ) {
+        utfør(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
     }
 
     override fun oppdaterPersonsnapshot(message: JsonMessage, context: RapidsConnection.MessageContext) {

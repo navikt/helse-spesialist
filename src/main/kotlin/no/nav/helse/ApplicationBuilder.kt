@@ -29,6 +29,7 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -100,6 +101,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val utbetalingDao = UtbetalingDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
 
@@ -137,7 +139,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             personDao = personDao,
             stikkprøveVelger = stikkprøveVelger
-        )
+        ),
+        utbetalingDao = utbetalingDao
     )
 
     private val rapidsConnection =

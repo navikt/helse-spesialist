@@ -29,6 +29,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -80,6 +81,7 @@ abstract class AbstractE2ETest {
     private val snapshotDao = SnapshotDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val utbetalingDao = UtbetalingDao(dataSource)
 
     protected val testRapid = TestRapid()
 
@@ -123,6 +125,7 @@ abstract class AbstractE2ETest {
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             personDao = personDao
         ) { false },
+        utbetalingDao = utbetalingDao,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
     )
     private val hendelseMediator = HendelseMediator(
