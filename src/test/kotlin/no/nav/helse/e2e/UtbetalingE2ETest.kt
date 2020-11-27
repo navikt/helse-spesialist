@@ -69,7 +69,7 @@ class UtbetalingE2ETest : AbstractE2ETest() {
       "fagområde": "SPREF",
       "endringskode": "NY",
       "fagsystemId": "$arbeidsgiverFagsystemId",
-      "sisteArbeidsgiverdag": "${LocalDate.now()}",
+      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
       "linjer": [
         {
           "fom": "${LocalDate.now()}",

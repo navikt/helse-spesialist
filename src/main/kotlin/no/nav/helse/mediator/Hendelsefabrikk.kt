@@ -332,7 +332,10 @@ internal class Hendelsefabrikk(
         fagområde = jsonNode.path("fagområde").asText(),
         mottaker = jsonNode.path("mottaker").asText(),
         endringskode = jsonNode.path("endringskode").asText(),
-        sisteArbeidsgiverdag = jsonNode.path("sisteArbeidsgiverdag").takeIf(JsonNode::isTextual)?.asLocalDate(),
+        sisteArbeidsgiverdag = jsonNode.path("sisteArbeidsgiverdag")
+            .takeIf(JsonNode::isTextual)
+            ?.asLocalDate()
+            ?.takeUnless { it == LocalDate.MIN },
         linjer = jsonNode.path("linjer").map { linje ->
             UtbetalingEndret.Oppdrag.Utbetalingslinje(
                 endringskode = linje.path("endringskode").asText(),
