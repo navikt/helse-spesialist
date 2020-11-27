@@ -1,6 +1,16 @@
 alter table oppdrag
 alter column sisteArbeidsgiverdag type varchar(32);
 
+drop type oppdrag_type;
+create TYPE oppdrag_type AS
+(
+    "fagsystemId"             varchar(32),
+    mottaker             varchar(32),
+    fagområde           oppdrag_fagområde,
+    endringskode         oppdrag_endringskode,
+    "sisteArbeidsgiverdag" varchar(32)
+);
+
 insert into oppdrag (id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag)
 select distinct on (u.arbeidsgiver_fagsystem_id_ref) u.arbeidsgiver_fagsystem_id_ref as id,
      r."fagsystemId",r.mottaker,r.fagområde,r.endringskode,r."sisteArbeidsgiverdag"
