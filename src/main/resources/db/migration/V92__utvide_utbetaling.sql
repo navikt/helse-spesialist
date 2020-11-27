@@ -1,4 +1,4 @@
-ALTER TABLE utbetaling_id
+/*ALTER TABLE utbetaling_id
     ADD COLUMN person_ref                    INT REFERENCES person (id),
     ADD COLUMN arbeidsgiver_ref              INT REFERENCES arbeidsgiver (id),
     ADD COLUMN arbeidsgiver_fagsystem_id_ref BIGINT REFERENCES oppdrag (id),
@@ -34,3 +34,4 @@ alter table utbetaling_id
     alter column type set not null,
     alter column opprettet set not null
 ;
+*/
