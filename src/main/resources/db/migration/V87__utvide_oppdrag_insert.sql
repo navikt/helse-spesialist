@@ -1,3 +1,6 @@
+alter table oppdrag
+alter column sisteArbeidsgiverdag type varchar(32);
+
 insert into oppdrag (id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag)
 select distinct on (u.arbeidsgiver_fagsystem_id_ref) u.arbeidsgiver_fagsystem_id_ref as id,
      r."fagsystemId",r.mottaker,r.fagområde,r.endringskode,r."sisteArbeidsgiverdag"
@@ -21,3 +24,8 @@ on conflict(id) do update
         endringskode         = EXCLUDED.endringskode,
         sisteArbeidsgiverdag = EXCLUDED.sisteArbeidsgiverdag
 ;
+
+update oppdrag set sisteArbeidsgiverdag = NULL WHERE sisteArbeidsgiverdag = '-999999999-01-01';
+
+alter table oppdrag
+    alter column sisteArbeidsgiverdag type date;
