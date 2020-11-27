@@ -26,6 +26,3 @@ on conflict(id) do update
 ;
 
 update oppdrag set sisteArbeidsgiverdag = NULL WHERE sisteArbeidsgiverdag = '-999999999-01-01';
-
-alter table oppdrag
-    alter column sisteArbeidsgiverdag type date;
