@@ -8,6 +8,7 @@ import kotliquery.using
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
@@ -36,11 +37,11 @@ class UtbetalingE2ETest : AbstractE2ETest() {
         val statement = """
             SELECT u.*
             FROM utbetaling u
-            INNER JOIN person p ON (p.id = u.person_ref)
-            INNER JOIN arbeidsgiver a ON (a.id = u.arbeidsgiver_ref)
-            INNER JOIN utbetaling_id uid ON (uid.id = u.utbetaling_id_ref)
-            INNER JOIN oppdrag o1 ON (o1.id = u.arbeidsgiver_fagsystem_id_ref)
-            INNER JOIN oppdrag o2 ON (o2.id = u.person_fagsystem_id_ref)
+            INNER JOIN utbetaling_id ui ON (ui.id = u.utbetaling_id_ref)
+            INNER JOIN person p ON (p.id = ui.person_ref)
+            INNER JOIN arbeidsgiver a ON (a.id = ui.arbeidsgiver_ref)
+            INNER JOIN oppdrag o1 ON (o1.id = ui.arbeidsgiver_fagsystem_id_ref)
+            INNER JOIN oppdrag o2 ON (o2.id = ui.person_fagsystem_id_ref)
             WHERE p.fodselsnummer = :fodselsnummer AND a.orgnummer = :orgnummer
             """
         return using(sessionOf(dataSource)) {
@@ -64,10 +65,48 @@ class UtbetalingE2ETest : AbstractE2ETest() {
     "gjeldendeStatus": "$status",
     "organisasjonsnummer": "$ORGNR",
     "arbeidsgiverOppdrag": {
-      "fagsystemId": "$arbeidsgiverFagsystemId"
+      "mottaker": "$ORGNR",
+      "fagområde": "SPREF",
+      "endringskode": "NY",
+      "fagsystemId": "$arbeidsgiverFagsystemId",
+      "sisteArbeidsgiverdag": "${LocalDate.now()}",
+      "linjer": [
+        {
+          "fom": "${LocalDate.now()}",
+          "tom": "${LocalDate.now()}",
+          "dagsats": 2000,
+          "lønn": 2000,
+          "grad": 100.00,
+          "refFagsystemId": "asdfg",
+          "delytelseId": 2,
+          "refDelytelseId": 1,
+          "datoStatusFom": "${LocalDate.now()}",
+          "endringskode": "NY",
+          "klassekode": "SPREFAG-IOP",
+          "statuskode": "OPPH"
+        },
+        {
+          "fom": "${LocalDate.now()}",
+          "tom": "${LocalDate.now()}",
+          "dagsats": 2000,
+          "lønn": 2000,
+          "grad": 100.00,
+          "refFagsystemId": null,
+          "delytelseId": 3,
+          "refDelytelseId": null,
+          "datoStatusFom": null,
+          "endringskode": "NY",
+          "klassekode": "SPREFAG-IOP",
+          "statuskode": null
+        }
+      ]
     },
     "personOppdrag": {
-      "fagsystemId": "$personFagsystemId"
+      "mottaker": "$UNG_PERSON_FNR_2018",
+      "fagområde": "SP",
+      "endringskode": "NY",
+      "fagsystemId": "$personFagsystemId",
+      "linjer": []
     }
 }"""
 

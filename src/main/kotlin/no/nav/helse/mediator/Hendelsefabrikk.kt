@@ -320,12 +320,36 @@ internal class Hendelsefabrikk(
             type = jsonNode.path("type").asText(),
             status = jsonNode.path("gjeldendeStatus").asText(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
-            arbeidsgiverFagsystemId = jsonNode.path("arbeidsgiverOppdrag").path("fagsystemId").asText(),
-            personFagsystemId = jsonNode.path("personOppdrag").path("fagsystemId").asText(),
+            arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag")),
+            personOppdrag = tilOppdrag(jsonNode.path("personOppdrag")),
             json = json,
             utbetalingDao = utbetalingDao
         )
     }
+
+    private fun tilOppdrag(jsonNode: JsonNode) = UtbetalingEndret.Oppdrag(
+        fagsystemId = jsonNode.path("fagsystemId").asText(),
+        fagområde = jsonNode.path("fagområde").asText(),
+        mottaker = jsonNode.path("mottaker").asText(),
+        endringskode = jsonNode.path("endringskode").asText(),
+        sisteArbeidsgiverdag = jsonNode.path("sisteArbeidsgiverdag").takeIf(JsonNode::isTextual)?.asLocalDate(),
+        linjer = jsonNode.path("linjer").map { linje ->
+            UtbetalingEndret.Oppdrag.Utbetalingslinje(
+                endringskode = linje.path("endringskode").asText(),
+                klassekode = linje.path("klassekode").asText(),
+                statuskode = linje.path("statuskode").takeIf(JsonNode::isTextual)?.asText(),
+                datoStatusFom = linje.path("datoStatusFom").takeIf(JsonNode::isTextual)?.asLocalDate(),
+                fom = linje.path("fom").asLocalDate(),
+                tom = linje.path("tom").asLocalDate(),
+                dagsats = linje.path("dagsats").asInt(),
+                lønn = linje.path("lønn").asInt(),
+                grad = linje.path("grad").asDouble(),
+                delytelseId = linje.path("delytelseId").asInt(),
+                refDelytelseId = linje.path("refDelytelseId").takeIf(JsonNode::isInt)?.asInt(),
+                refFagsystemId = linje.path("refFagsystemId").takeIf(JsonNode::isTextual)?.asText()
+            )
+        }
+    )
 
     override fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot {
         val jsonNode = mapper.readTree(json)

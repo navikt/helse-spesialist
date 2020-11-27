@@ -9,6 +9,7 @@ import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,11 +21,60 @@ internal class UtbetalingEndret(
     private val type: String,
     private val status: String,
     private val opprettet: LocalDateTime,
-    private val arbeidsgiverFagsystemId: String,
-    private val personFagsystemId: String,
+    private val arbeidsgiverOppdrag: Oppdrag,
+    private val personOppdrag: Oppdrag,
     private val json: String,
     private val utbetalingDao: UtbetalingDao
 ) : Hendelse {
+    internal class Oppdrag(
+        private val fagsystemId: String,
+        private val mottaker: String,
+        private val fagområde: String,
+        private val endringskode: String,
+        private val sisteArbeidsgiverdag: LocalDate?,
+        private val linjer: List<Utbetalingslinje>
+    ) {
+        internal fun lagre(utbetalingDao: UtbetalingDao) =
+            utbetalingDao.nyttOppdrag(fagsystemId, mottaker, fagområde, endringskode, sisteArbeidsgiverdag)?.also {
+                lagreLinjer(utbetalingDao, it)
+            }
+
+        private fun lagreLinjer(utbetalingDao: UtbetalingDao, oppdragId: Long) {
+            linjer.forEach { it.lagre(utbetalingDao, oppdragId) }
+        }
+
+        internal class Utbetalingslinje(
+            private val endringskode: String,
+            private val klassekode: String,
+            private val statuskode: String?,
+            private val datoStatusFom: LocalDate?,
+            private val fom: LocalDate,
+            private val tom: LocalDate,
+            private val dagsats: Int,
+            private val lønn: Int,
+            private val grad: Double,
+            private val delytelseId: Int,
+            private val refDelytelseId: Int?,
+            private val refFagsystemId: String?
+        ) {
+            internal fun lagre(utbetalingDao: UtbetalingDao, oppdragId: Long) {
+                utbetalingDao.nyLinje(oppdragId, endringskode, klassekode, statuskode, datoStatusFom, fom, tom, dagsats, lønn, grad, delytelseId, refDelytelseId, refFagsystemId)
+            }
+        }
+    }
+
+    internal fun lagre(utbetalingDao: UtbetalingDao) {
+        val utbetalingIdRef = utbetalingDao.finnUtbetalingIdRef(utbetalingId)
+            ?: run {
+                val arbeidsgiverFagsystemIdRef = requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao))  { "Forventet arbeidsgiver fagsystemId ref" }
+                val personFagsystemIdRef = requireNotNull(personOppdrag.lagre(utbetalingDao)) { "Forventet person fagsystemId ref" }
+
+                utbetalingDao.opprettUtbetalingId(utbetalingId, fødselsnummer, orgnummer, type, opprettet, arbeidsgiverFagsystemIdRef, personFagsystemIdRef)
+            }
+
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
+    }
+
     private companion object {
         private val log = LoggerFactory.getLogger(UtbetalingEndret::class.java)
     }
@@ -35,17 +85,7 @@ internal class UtbetalingEndret(
 
     override fun execute(context: CommandContext): Boolean {
         log.info("lagrer utbetaling $utbetalingId med status $status")
-        utbetalingDao.lagre(
-            utbetalingId,
-            fødselsnummer,
-            orgnummer,
-            type,
-            status,
-            opprettet,
-            arbeidsgiverFagsystemId,
-            personFagsystemId,
-            json
-        )
+        lagre(utbetalingDao)
         return true
     }
 
