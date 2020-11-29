@@ -39,22 +39,24 @@ internal class HendelseMediator(
 
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
-            Godkjenningsbehov.GodkjenningsbehovRiver(it, this)
-            Tilbakerulling.TilbakerullingRiver(it, this)
-            HentPersoninfoløsning.PersoninfoRiver(it, this)
-            HentEnhetløsning.HentEnhetRiver(it, this)
-            HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
-            Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
-            Arbeidsgiverløsning.ArbeidsgiverRiver(it, this)
-            VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
-            VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
-            Overstyring.OverstyringRiver(it, this)
-            DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
-            EgenAnsattløsning.EgenAnsattRiver(it, this)
-            ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
-            Risikovurderingløsning.V2River(it, this)
-            UtbetalingAnnullert.River(it, this)
-            OppdaterPersonsnapshot.River(it, this)
+            if (System.getenv("BARE_UTBETALINGER") != "true") {
+                Godkjenningsbehov.GodkjenningsbehovRiver(it, this)
+                Tilbakerulling.TilbakerullingRiver(it, this)
+                HentPersoninfoløsning.PersoninfoRiver(it, this)
+                HentEnhetløsning.HentEnhetRiver(it, this)
+                HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
+                Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
+                Arbeidsgiverløsning.ArbeidsgiverRiver(it, this)
+                VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
+                VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
+                Overstyring.OverstyringRiver(it, this)
+                DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
+                EgenAnsattløsning.EgenAnsattRiver(it, this)
+                ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
+                Risikovurderingløsning.V2River(it, this)
+                UtbetalingAnnullert.River(it, this)
+                OppdaterPersonsnapshot.River(it, this)
+            }
             UtbetalingEndret.River(it, this)
         }
     }
