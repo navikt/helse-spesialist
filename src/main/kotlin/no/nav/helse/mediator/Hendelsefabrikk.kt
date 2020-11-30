@@ -103,11 +103,11 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             aktørId = jsonNode.path("aktørId").asText(),
             organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-            periodeFom = LocalDate.parse(jsonNode.path("periodeFom").asText()),
-            periodeTom = LocalDate.parse(jsonNode.path("periodeTom").asText()),
+            periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
+            periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            warnings = jsonNode.path("warnings").path("aktiviteter").map { it["melding"].asText() },
-            periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("periodetype").asText()),
+            warnings = jsonNode.path("Godkjenning").path("warnings").path("aktiviteter").map { it["melding"].asText() },
+            periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
             json = json
         )
     }

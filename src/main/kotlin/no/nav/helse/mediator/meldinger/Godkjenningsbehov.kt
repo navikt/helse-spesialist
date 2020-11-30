@@ -144,8 +144,9 @@ internal class Godkjenningsbehov(
                     it.demandAll("@behov", listOf("Godkjenning"))
                     it.rejectKey("@løsning")
                     it.requireKey(
-                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "periodeFom",
-                        "periodeTom", "warnings", "periodetype")
+                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId")
+                    it.requireKey("Godkjenning.periodeFom", "Godkjenning.periodeTom",
+                        "Godkjenning.warnings", "Godkjenning.periodetype")
                 }
             }.register(this)
         }
@@ -171,11 +172,11 @@ internal class Godkjenningsbehov(
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 aktørId = packet["aktørId"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
-                periodeFom = LocalDate.parse(packet["periodeFom"].asText()),
-                periodeTom = LocalDate.parse(packet["periodeTom"].asText()),
+                periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
+                periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-                warnings = packet["warnings"].toWarnings(),
-                periodetype = Saksbehandleroppgavetype.valueOf(packet["periodetype"].asText()),
+                warnings = packet["Godkjenning.warnings"].toWarnings(),
+                periodetype = Saksbehandleroppgavetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 context = context
             )
         }

@@ -74,13 +74,15 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "periodeFom" to "$periodeFom",
-                "periodeTom" to "$periodeTom",
-                "warnings" to mapOf(
-                    "aktiviteter" to warnings.map { mapOf("melding" to it) },
-                    "kontekster" to emptyList<Any>()
-                ),
-                "periodetype" to periodetype.name
+                "Godkjenning" to mapOf(
+                    "periodeFom" to "$periodeFom",
+                    "periodeTom" to "$periodeTom",
+                    "warnings" to mapOf(
+                        "aktiviteter" to warnings.map { mapOf("melding" to it) },
+                        "kontekster" to emptyList<Any>()
+                    ),
+                    "periodetype" to periodetype.name
+                )
             )
         )
 
