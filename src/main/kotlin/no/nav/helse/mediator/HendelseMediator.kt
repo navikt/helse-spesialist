@@ -315,17 +315,18 @@ internal class HendelseMediator(
             )
         }
 
-        rapidsConnection.publish(annulleringMessage.toJson().also {
+        rapidsConnection.publish(annulleringDto.fødselsnummer, annulleringMessage.toJson()).also {
             sikkerLogg.info(
                 "sender annullering for {}, {}\n\t$it",
                 keyValue("fødselsnummer", annulleringDto.fødselsnummer),
                 keyValue("organisasjonsnummer", annulleringDto.organisasjonsnummer)
             )
-        })
+        }
     }
 
     fun håndter(oppdaterPersonsnapshotDto: OppdaterPersonsnapshotDto) {
         rapidsConnection.publish(
+            oppdaterPersonsnapshotDto.fødselsnummer,
             JsonMessage.newMessage(
                 standardfelter("oppdater_personsnapshot", oppdaterPersonsnapshotDto.fødselsnummer)
             ).toJson()
