@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.api
 
-import com.fasterxml.jackson.databind.node.ArrayNode
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -24,13 +23,6 @@ internal fun Application.adminApi(mediator: HendelseMediator) {
                     val rollback = call.receive<Array<TilbakerullingMedSlettingDTO>>()
                     rollback.forEach {
                         mediator.håndter(it)
-                    }
-                    call.respond(HttpStatusCode.OK)
-                }
-                post("/send") {
-                    val request = call.receive<ArrayNode>()
-                    request.forEach {  node ->
-                        mediator.sendMeldingPåTopic(node)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
