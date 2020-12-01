@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
@@ -10,6 +11,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.objectMapper
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -111,6 +113,13 @@ internal class HendelseMediator(
         val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
+    }
+
+    internal fun sendMeldingPåTopic(melding: JsonNode) {
+        val fnr = melding["fødselsnummer"].asText()
+        val rawJson = objectMapper.writeValueAsString(melding)
+        sikkerLogg.info("Manuell publisering av melding for fnr=${fnr}, melding=${rawJson}")
+        rapidsConnection.publish(fnr, rawJson)
     }
 
     override fun vedtaksperiodeEndret(
