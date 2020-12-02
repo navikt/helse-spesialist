@@ -99,7 +99,7 @@ internal class UtbetalingEndret(
     ) : PacketListener {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
         private val godkjenteStatuser = listOf("GODKJENT", "SENDT", "OVERFØRT", "UTBETALING_FEILET", "UTBETALT", "ANNULLERT")
-        private val gyldigeStatuser = listOf("IKKE_UTBETALT", "IKKE_GODKJENT", "GODKJENT_UTEN_UTBETALING") + godkjenteStatuser
+        private val gyldigeStatuser = listOf("IKKE_UTBETALT", "FORKASTET", "IKKE_GODKJENT", "GODKJENT_UTEN_UTBETALING") + godkjenteStatuser
 
         init {
             River(rapidsConnection).apply {
