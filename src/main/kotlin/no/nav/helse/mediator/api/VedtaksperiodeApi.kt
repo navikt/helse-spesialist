@@ -78,9 +78,9 @@ internal fun Route.vedtaksperiodeApi(
             UUID.fromString(it.getClaim("oid").asString()) to it.getClaim("preferred_username").asString()
         }
 
-        val harAktivOppgave =
-            withContext(Dispatchers.IO) { vedtaksperiodeMediator.harAktivOppgave(godkjenning.oppgavereferanse) }
-        if (!harAktivOppgave) {
+        val erAktivOppgave =
+            withContext(Dispatchers.IO) { vedtaksperiodeMediator.erAktivOppgave(godkjenning.oppgavereferanse) }
+        if (!erAktivOppgave) {
             call.respondText(
                 "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
                 status = HttpStatusCode.Conflict

@@ -270,7 +270,7 @@ internal class HendelseMediator(
             sikkerLogg.info("Publiserer overstyring:\n${it.toJson()}")
         }
 
-        rapidsConnection.publish(overstyring.toJson())
+        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
     internal fun håndter(tilbakerullingMedSlettingDTO: TilbakerullingMedSlettingDTO) {

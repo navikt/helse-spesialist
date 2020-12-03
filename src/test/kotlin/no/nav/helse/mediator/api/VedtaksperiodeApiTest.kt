@@ -39,7 +39,7 @@ internal class VedtaksperiodeApiTest {
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
-        every { vedtaksperiodeMediator.harAktivOppgave(any()) } returns true
+        every { vedtaksperiodeMediator.erAktivOppgave(any()) } returns true
 
         val response = runBlocking {
             client.post<HttpResponse>("/api/vedtak") {
@@ -53,7 +53,7 @@ internal class VedtaksperiodeApiTest {
 
     @Test
     fun `en vedtaksperiode kan kun godkjennes en gang`() {
-        every { vedtaksperiodeMediator.harAktivOppgave(any()) } returns false
+        every { vedtaksperiodeMediator.erAktivOppgave(any()) } returns false
 
         val response = runBlocking {
             client.post<HttpResponse>("/api/vedtak") {

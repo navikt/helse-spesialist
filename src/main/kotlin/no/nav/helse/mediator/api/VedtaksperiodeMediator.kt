@@ -124,5 +124,5 @@ internal class VedtaksperiodeMediator(
             )
         }
 
-    fun harAktivOppgave(oppgaveId: Long) = oppgaveDao.harAktivOppgave(oppgaveId)
+    fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.erAktivOppgave(oppgaveId)
 }

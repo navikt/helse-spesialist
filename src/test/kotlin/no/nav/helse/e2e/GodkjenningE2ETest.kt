@@ -246,15 +246,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
+    fun `oppretter ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         val hendelseId1 = håndterGodkjenningsbehov()
         val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         val hendelseId2 = håndterGodkjenningsbehov()
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
         assertTilstand(løsningId, "NY", "FERDIG")
         assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
-        assertOppgaver(1)
+        assertOppgaver(2)
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
+        assertOppgave(1, AvventerSaksbehandler)
     }
 
     @Test

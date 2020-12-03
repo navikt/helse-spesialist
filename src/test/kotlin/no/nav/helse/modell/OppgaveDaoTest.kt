@@ -112,10 +112,10 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `sjekker om det fins aktiv oppgave`() {
         opprettOppgave()
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
-        assertTrue(oppgaveDao.harAktivOppgave(oppgaveId))
+        assertTrue(oppgaveDao.erAktivOppgave(oppgaveId))
 
         oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, null, null)
-        assertFalse(oppgaveDao.harAktivOppgave(oppgaveId))
+        assertFalse(oppgaveDao.erAktivOppgave(oppgaveId))
     }
 
     @Test

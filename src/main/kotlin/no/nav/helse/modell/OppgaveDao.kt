@@ -165,20 +165,15 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         val query = """
                 SELECT COUNT(1) AS oppgave_count FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
-                WHERE v.vedtaksperiode_id = ? AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
+                WHERE v.vedtaksperiode_id = ? AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
             """
         session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
     }) > 0
 
-    internal fun harAktivOppgave(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    internal fun erAktivOppgave(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM oppgave
-                    WHERE id=?
-                      AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Invalidert'::oppgavestatus)
-                )
+                SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=? AND status IN('AvventerSaksbehandler'::oppgavestatus) )
             """
         session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
