@@ -7,7 +7,6 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -120,56 +119,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             warnings = listOf("WARNING"),
             periodetype = Saksbehandleroppgavetype.FORLENGELSE
-        )
-        sendPersoninfoløsning(
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            hendelseId = godkjenningsmeldingId
-        )
-        sendEgenAnsattløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = false
-        )
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        val løsningId = sendSaksbehandlerløsning(
-            oppgaveId = OPPGAVEID,
-            saksbehandlerIdent = SAKSBEHANDLERIDENT,
-            saksbehandlerEpost = SAKSBEHANDLEREPOST,
-            saksbehandlerOid = SAKSBEHANDLEROID,
-            godkjent = true
-        )
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
-    }
-
-    @Test
-    fun `fatter ikke automatisk vedtak for førstegangsbehandling`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

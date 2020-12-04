@@ -40,7 +40,6 @@ internal class AutomatiseringTest {
 
     private val automatisering =
         Automatisering(
-            vedtakDao = vedtakDaoMock,
             warningDao = warningDaoMock,
             risikovurderingDao = risikovurderingDaoMock,
             automatiseringDao = automatiseringDaoMock,
@@ -49,7 +48,7 @@ internal class AutomatiseringTest {
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock,
             personDao = personDaoMock,
-            stikkprøveMock
+            stikkprøveVelger = stikkprøveMock
         )
 
     companion object {
@@ -92,12 +91,6 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(Warning("8.4 - Uenig i diagnose", WarningKilde.Spesialist))
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
-    }
-
-    @Test
-    fun `vedtaksperiode med type førstegangsbehandling er ikke automatiserbar`() {
-        every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
 
