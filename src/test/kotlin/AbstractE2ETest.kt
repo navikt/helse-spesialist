@@ -115,7 +115,6 @@ abstract class AbstractE2ETest {
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = Automatisering(
-            vedtakDao = vedtakDao,
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
             automatiseringDao = automatiseringDao,
