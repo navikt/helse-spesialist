@@ -55,12 +55,11 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `henter den siste saksbehandlereposten for tildeling med fødselsnummer`() {
-        val nyHendelseId = UUID.randomUUID()
         val nySaksbehandlerepost = "ny.saksbehandler@nav.no"
         nyPerson()
         tildelTilSaksbehandler()
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID())
-        opprettOppgave(hendelseId = nyHendelseId, vedtakId = vedtakId)
+        opprettOppgave(vedtakId = vedtakId)
         tildelTilSaksbehandler(
             oppgaveId = oppgaveId,
             oid = UUID.randomUUID(),
@@ -74,7 +73,6 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `utgått tildeling blir ikke tatt med i snapshot`() {
         val saksbehandlerOid = UUID.randomUUID()
-        val oppgavereferanse = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerEpost = "${UUID.randomUUID()}@nav.no"
         opprettPerson()

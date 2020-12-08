@@ -85,7 +85,7 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) {
             fail("Denne skal ikke kalles når perioden blir automatisk behandlet")
         }
-        verify { automatiseringDaoMock.lagre(false, any(), any(), any())}
+        verify { automatiseringDaoMock.lagre(false, any(), any(), any()) }
     }
 
     @Test

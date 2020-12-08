@@ -27,10 +27,12 @@ internal class RisikoCommand(
     override fun execute(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.risikovurdering()) return true
         logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
-        context.behov("Risikovurdering", mapOf(
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "organisasjonsnummer" to organisasjonsnummer
-        ))
+        context.behov(
+            "Risikovurdering", mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "organisasjonsnummer" to organisasjonsnummer
+            )
+        )
         return false
     }
 
@@ -40,7 +42,8 @@ internal class RisikoCommand(
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)
         if (løsning.medførerWarning()) {
-            val melding = "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
+            val melding =
+                "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }

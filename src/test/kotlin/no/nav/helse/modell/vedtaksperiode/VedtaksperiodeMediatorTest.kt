@@ -33,6 +33,11 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     fun `manglende risikovurdering mappes ikke til speil`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
         assertTrue(
@@ -45,6 +50,11 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -73,6 +83,13 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -100,6 +117,11 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     fun `Ingen warnings mappes til speil som tom liste`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true

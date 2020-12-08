@@ -29,7 +29,6 @@ internal class SaksbehandlerløsningTest {
     private companion object {
         private val HENDELSE_ID = UUID.randomUUID()
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
-        private val CONTEXT_ID = UUID.randomUUID()
         private val OID = UUID.randomUUID()
         private val GODKJENTTIDSPUNKT = LocalDateTime.now()
         private const val OPPGAVE_ID = 1L
@@ -37,7 +36,6 @@ internal class SaksbehandlerløsningTest {
         private const val IDENT = "Z999999"
         private const val HENDELSE_JSON = """{ "this_key_should_exist": "this_value_should_exist" }"""
         private const val GODKJENNINGSBEHOV_JSON = """{ "@event_name": "behov" }"""
-        private const val SAKSBEHANDLER = "Sak Saksen"
         private val objectMapper = jacksonObjectMapper()
     }
 

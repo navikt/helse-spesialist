@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -47,6 +48,7 @@ internal class GodkjenningsbehovTest {
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
+    private val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = mockk(),
         personDao = personDao,
@@ -65,7 +67,7 @@ internal class GodkjenningsbehovTest {
         overstyringDao = mockk(),
         digitalKontaktinformasjonDao = mockk(relaxed = true),
         åpneGosysOppgaverDao = mockk(relaxed = true),
-        miljøstyrtFeatureToggle = mockk(relaxed = true),
+        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = mockk(relaxed = true),
         utbetalingDao = utbetalingDao,
         godkjenningMediator = mockk(relaxed = true)
@@ -87,6 +89,7 @@ internal class GodkjenningsbehovTest {
 
     @BeforeEach
     fun setup() {
+        every { miljøstyrtFeatureToggle.arbeidsgiverinformasjon() } returns true
         context = CommandContext(UUID.randomUUID())
     }
 
@@ -108,6 +111,9 @@ internal class GodkjenningsbehovTest {
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertFalse(godkjenningMessage.execute(context))
 
+        context.add(Arbeidsgiverløsning("Hva som helst", "Kan også være hva som helst"))
+        assertFalse(godkjenningMessage.resume(context))
+
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
         assertFalse(godkjenningMessage.resume(context))
 
@@ -117,7 +123,7 @@ internal class GodkjenningsbehovTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
 
-        assertEquals(listOf("EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
+        assertEquals(listOf("Arbeidsgiverinformasjon", "EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.opprett(any()) }
     }
 
@@ -134,6 +140,9 @@ internal class GodkjenningsbehovTest {
 
         assertFalse(godkjenningMessage.execute(context))
 
+        context.add(Arbeidsgiverløsning("Hva som helst", "Kan også være hva som helst"))
+        assertFalse(godkjenningMessage.resume(context))
+
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
         assertFalse(godkjenningMessage.resume(context))
 
@@ -143,7 +152,7 @@ internal class GodkjenningsbehovTest {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(godkjenningMessage.resume(context))
 
-        assertEquals(listOf("EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
+        assertEquals(listOf("Arbeidsgiverinformasjon", "EgenAnsatt", "DigitalKontaktinformasjon", "ÅpneOppgaver"), context.behov().keys.toList())
         verify(exactly = 1) { oppgaveMediator.opprettOgTildel(any(), reservasjon.first, reservasjon.second) }
     }
 

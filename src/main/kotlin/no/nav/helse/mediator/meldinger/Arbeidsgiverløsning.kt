@@ -9,15 +9,22 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class Arbeidsgiverløsning(private val navn: String) {
-    internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) =
+internal class Arbeidsgiverløsning(private val navn: String, private val bransjer: String) {
+    internal fun opprett(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
+        arbeidsgiverDao.insertArbeidsgiver(orgnummer, navn, bransjer)
+    }
+
+    internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
         arbeidsgiverDao.updateNavn(orgnummer, navn)
+        arbeidsgiverDao.updateBransjer(orgnummer, bransjer)
+    }
 
     internal class ArbeidsgiverRiver(
         rapidsConnection: RapidsConnection,
         private val mediator: IHendelseMediator
     ) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+        private val behov = "Arbeidsgiverinformasjon"
 
         init {
             River(rapidsConnection)
@@ -25,15 +32,15 @@ internal class Arbeidsgiverløsning(private val navn: String) {
                     validate {
                         it.demandValue("@event_name", "behov")
                         it.demandValue("@final", true)
-                        it.demandAll("@behov", listOf("HentArbeidsgiverNavn"))
-                        it.requireKey("contextId", "hendelseId")
-                        it.requireKey("@løsning.HentArbeidsgiverNavn")
+                        it.demandAll("@behov", listOf(behov))
+                        it.requireKey("contextId", "hendelseId", "@id")
+                        it.requireKey("@løsning.$behov")
                     }
                 }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
-            sikkerLog.error("forstod ikke HentArbeidsgiverNavn:\n${problems.toExtendedReport()}")
+            sikkerLog.error("forstod ikke $behov:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
@@ -43,7 +50,10 @@ internal class Arbeidsgiverløsning(private val navn: String) {
                 hendelseId,
                 contextId,
                 UUID.fromString(packet["@id"].asText()),
-                Arbeidsgiverløsning(packet["@løsning.HentArbeidsgiverNavn"].asText()),
+                Arbeidsgiverløsning(
+                    packet["@løsning.$behov"].path("navn").asText(),
+                    packet["@løsning.$behov"].path("bransjer").asText()
+                ),
                 context
             )
         }

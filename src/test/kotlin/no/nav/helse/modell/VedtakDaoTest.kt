@@ -109,19 +109,19 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {
         it.run(
             queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                .map { UUID.fromString(it.string(1)) }.asSingle
+                .map { row -> UUID.fromString(row.string(1)) }.asSingle
         )
     }
 
     private fun vedtak() = using(sessionOf(dataSource)) {
-        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref FROM vedtak").map {
+        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref FROM vedtak").map { row ->
             Vedtak(
-                UUID.fromString(it.string("vedtaksperiode_id")),
-                it.localDate("fom"),
-                it.localDate("tom"),
-                it.int("person_ref"),
-                it.int("arbeidsgiver_ref"),
-                it.int("speil_snapshot_ref")
+                UUID.fromString(row.string("vedtaksperiode_id")),
+                row.localDate("fom"),
+                row.localDate("tom"),
+                row.int("person_ref"),
+                row.long("arbeidsgiver_ref"),
+                row.int("speil_snapshot_ref")
             )
         }.asList)
     }
@@ -131,10 +131,10 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         private val fom: LocalDate,
         private val tom: LocalDate,
         private val personRef: Int,
-        private val arbeidsgiverRef: Int,
-        internal val snapshotRef: Int
+        private val arbeidsgiverRef: Long,
+        val snapshotRef: Int
     ) {
-        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Int, forventetArbeidsgiverRef: Int, forventetSnapshotRef: Int) {
+        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Int, forventetArbeidsgiverRef: Long, forventetSnapshotRef: Int) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetFom, fom)
             assertEquals(forventetTom, tom)

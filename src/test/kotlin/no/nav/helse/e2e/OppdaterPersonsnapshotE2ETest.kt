@@ -12,11 +12,11 @@ import kotlin.test.assertEquals
 
 class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     val ORGNR = "987654321"
-    val vedtaksperiodeId1 = UUID.randomUUID()
-    val vedtaksperiodeId2 = UUID.randomUUID()
-    val snapshotV1 = """{"arbeidsgivere":[{"perioder":[{"id":"$vedtaksperiodeId1"}]}]}"""
-    val snapshotV2 = """{"arbeidsgivere":[{"perioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
-    val snapshotFinal = """{"arbeidsgivere":[{"something": "value", "perioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
+    private val vedtaksperiodeId1: UUID = UUID.randomUUID()
+    private val vedtaksperiodeId2: UUID = UUID.randomUUID()
+    private val snapshotV1 = """{"arbeidsgivere":[{"perioder":[{"id":"$vedtaksperiodeId1"}]}]}"""
+    private val snapshotV2 = """{"arbeidsgivere":[{"perioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
+    private val snapshotFinal = """{"arbeidsgivere":[{"something": "value", "perioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
     private val snapshotDao = SnapshotDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
 
@@ -55,6 +55,11 @@ class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = godkjenningsmeldingId
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = vedtaksperiodeId
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,

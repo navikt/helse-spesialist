@@ -48,7 +48,7 @@ class UtbetalingE2ETest : AbstractE2ETest() {
             it.run(queryOf(statement, mapOf(
                 "fodselsnummer" to UNG_PERSON_FNR_2018.toLong(),
                 "orgnummer" to ORGNR.toLong()
-            )).map { it.string("utbetaling_id_ref") }.asList)
+            )).map { row -> row.string("utbetaling_id_ref") }.asList)
         }
     }
 
@@ -124,6 +124,11 @@ class UtbetalingE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = godkjenningsmeldingId
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,

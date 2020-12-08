@@ -92,6 +92,7 @@ abstract class AbstractE2ETest {
     internal val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
         every { risikovurdering() }.returns(false)
         every { automatisering() }.returns(false)
+        every { arbeidsgiverinformasjon() }.returns(true)
     }
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -171,11 +172,11 @@ abstract class AbstractE2ETest {
 
     private fun nyHendelseId() = UUID.randomUUID()
 
-    protected fun sendVedtaksperiodeForkastet(orgnr: String, vedtaksperiodeId: UUID) = nyHendelseId().also { id ->
+    protected fun sendVedtaksperiodeForkastet(orgnr: String, vedtaksperiodeId: UUID): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
     }
 
-    protected fun sendVedtaksperiodeEndret(orgnr: String, vedtaksperiodeId: UUID) = nyHendelseId().also { id ->
+    protected fun sendVedtaksperiodeEndret(orgnr: String, vedtaksperiodeId: UUID): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, vedtaksperiodeId, orgnr))
     }
 
@@ -186,7 +187,7 @@ abstract class AbstractE2ETest {
         periodeTom: LocalDate = LocalDate.now(),
         warnings: List<String> = emptyList(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
-    ) = nyHendelseId().also { id ->
+    ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
                 id,
@@ -200,13 +201,35 @@ abstract class AbstractE2ETest {
         )
     }
 
+    protected fun sendArbeidsgiverinformasjonløsning(
+        hendelseId: UUID,
+        orgnr: String,
+        vedtaksperiodeId: UUID,
+        contextId: UUID = testRapid.inspektør.contextId(),
+        navn: String = "En arbeidsgiver",
+        bransjer: String = "En eller flere bransjer"
+    ): UUID =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    organisasjonsnummer = orgnr,
+                    navn = navn,
+                    bransjer = bransjer
+                )
+            )
+        }
+
     protected fun sendPersoninfoløsning(
         hendelseId: UUID,
         orgnr: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
         enhet: String = "0301"
-    ) =
+    ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagPersoninfoløsning(
@@ -220,7 +243,7 @@ abstract class AbstractE2ETest {
             )
         }
 
-    protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>) =
+    protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyring(
@@ -327,13 +350,13 @@ abstract class AbstractE2ETest {
 
     protected fun assertHendelse(hendelseId: UUID) {
         assertEquals(1, using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
+            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
         })
     }
 
     protected fun assertIkkeHendelse(hendelseId: UUID) {
         assertEquals(0, using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { it.int(1) }.asSingle)
+            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
         })
     }
 
@@ -378,16 +401,12 @@ abstract class AbstractE2ETest {
         }
     }
 
-    protected fun assertLøsning(behov: String, assertBlock: (JsonNode) -> Unit) {
+    private fun assertLøsning(behov: String, assertBlock: (JsonNode) -> Unit) {
         testRapid.inspektør.løsning(behov).also(assertBlock)
     }
 
     protected fun assertBehov(vararg behov: String) {
         assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
-    }
-
-    protected fun assertIkkeBehov(vararg behov: String) {
-        assertFalse(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
     protected fun assertTilstand(hendelseId: UUID, vararg tilstand: String) {
@@ -446,7 +465,7 @@ abstract class AbstractE2ETest {
                     mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId
                     )
-                ).map { it.string("data") }.asSingle
+                ).map { row -> row.string("data") }.asSingle
             )
         })
     }
@@ -459,7 +478,7 @@ abstract class AbstractE2ETest {
                     mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId
                     )
-                ).map { it.string("melding") }.asList
+                ).map { row -> row.string("melding") }.asList
             )
         }.first())
     }
@@ -478,13 +497,13 @@ abstract class AbstractE2ETest {
             .filterNot { it.hasNonNull("@løsning") }
             .flatMap { it.path("@behov").map(JsonNode::asText) }
 
-    protected fun TestRapid.RapidInspector.løsning(behov: String) =
+    protected fun TestRapid.RapidInspector.løsning(behov: String): JsonNode =
         hendelser("behov")
             .filter { it.hasNonNull("@løsning") }
             .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
             .path("@løsning").path(behov)
 
-    protected fun TestRapid.RapidInspector.contextId() =
+    protected fun TestRapid.RapidInspector.contextId(): UUID =
         hendelser("behov")
             .last { it.hasNonNull("contextId") }
             .path("contextId")
@@ -497,7 +516,7 @@ abstract class AbstractE2ETest {
             .path("oppgaveId")
             .asLong()
 
-    protected fun TestRapid.RapidInspector.contextId(hendelseId: UUID) =
+    protected fun TestRapid.RapidInspector.contextId(hendelseId: UUID): UUID =
         hendelser("behov")
             .last { it.hasNonNull("contextId") && it.path("hendelseId").asText() == hendelseId.toString() }
             .path("contextId")

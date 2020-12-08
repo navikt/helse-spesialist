@@ -86,6 +86,33 @@ class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørI
             )
         )
 
+    fun lagArbeidsgiverinformasjonløsning(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String = "orgnr",
+        navn: String,
+        bransjer: String
+    ) = nyHendelse(
+        id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("Arbeidsgiverinformasjon"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "Arbeidsgiverinformasjon" to mapOf(
+                    "navn" to navn,
+                    "bransjer" to bransjer
+                )
+            )
+        )
+    )
+
     fun lagPersoninfoløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),

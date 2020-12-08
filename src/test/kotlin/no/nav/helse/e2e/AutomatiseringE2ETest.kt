@@ -40,6 +40,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -63,10 +70,12 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertAutomatisertLøsning()
-        val vedtaksperiodeGodkjentEvent = assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
+        val vedtaksperiodeGodkjentEvent =
+            assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
         assertTrue(vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean())
     }
 
@@ -83,6 +92,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -101,6 +117,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -124,6 +141,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -155,6 +179,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -173,6 +198,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -206,12 +238,16 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
-        assertWarning("Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden.", VEDTAKSPERIODE_ID)
+        assertWarning(
+            "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden.",
+            VEDTAKSPERIODE_ID
+        )
     }
 
     @Test
@@ -226,6 +262,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -257,6 +300,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -276,6 +320,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -309,6 +360,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -329,6 +381,14 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
+        )
+
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -362,6 +422,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -383,6 +444,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -403,7 +471,16 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)

@@ -9,14 +9,22 @@ internal class ArbeidsgiverløsningTest {
     private companion object {
         private const val ORGNR = "123456789"
         private const val NAVN = "Bedrift AS"
+        private const val BRANSJER = "Spaghettikoding"
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
 
     @Test
     fun `oppdatere navn`() {
-        val arbeidsgiver = Arbeidsgiverløsning(NAVN)
+        val arbeidsgiver = Arbeidsgiverløsning(NAVN, BRANSJER)
         arbeidsgiver.oppdater(dao, ORGNR)
         verify(exactly = 1) { dao.updateNavn(ORGNR, NAVN) }
+    }
+
+    @Test
+    fun `oppdatere bransje`() {
+        val arbeidsgiver = Arbeidsgiverløsning(NAVN, BRANSJER)
+        arbeidsgiver.oppdater(dao, ORGNR)
+        verify(exactly = 1) { dao.updateBransjer(ORGNR, BRANSJER) }
     }
 }

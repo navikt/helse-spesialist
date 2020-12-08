@@ -60,6 +60,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -69,7 +74,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertOppgave(0, AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
@@ -79,6 +93,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -93,7 +112,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
@@ -105,6 +133,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, warnings = listOf("En Warning"))
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -144,6 +177,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -158,7 +196,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
@@ -169,8 +216,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returnsMany listOf(SNAPSHOTV1, SNAPSHOTV2)
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOTV2, VEDTAKSPERIODE_ID)
         verify(exactly = 2) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
@@ -188,11 +240,18 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = hendelseId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
 
-        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
-        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
     }
 
     @Test
@@ -200,6 +259,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(godkjenningsmeldingId, true)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -209,7 +275,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertVedtak(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
         assertGodkjenningsbehovløsning(false, AUTOMATISK_BEHANDLET)
@@ -220,6 +295,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID, enhet = ENHET_UTLAND)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -229,7 +311,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         assertSnapshot(SNAPSHOTV1, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertVedtak(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
         assertGodkjenningsbehovløsning(false, AUTOMATISK_BEHANDLET)
@@ -241,18 +332,55 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val hendelseId2 = håndterGodkjenningsbehov()
         assertOppgaver(1)
         assertOppgave(0, AvventerSaksbehandler)
-        assertTilstand(hendelseId1, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
-        assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            hendelseId1,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+        assertTilstand(
+            hendelseId2,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
     }
 
     @Test
     fun `oppretter ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         val hendelseId1 = håndterGodkjenningsbehov()
-        val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        val løsningId =
+            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         val hendelseId2 = håndterGodkjenningsbehov()
-        assertTilstand(hendelseId1, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            hendelseId1,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            hendelseId2,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         assertOppgaver(2)
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertOppgave(1, AvventerSaksbehandler)
@@ -265,13 +393,29 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertOppgaver(1)
         assertOppgave(0, AvventerSaksbehandler)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
-        assertTilstand(hendelseId2, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "FERDIG")
+        assertTilstand(
+            hendelseId2,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
     }
 
     private fun håndterGodkjenningsbehov(): UUID {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,

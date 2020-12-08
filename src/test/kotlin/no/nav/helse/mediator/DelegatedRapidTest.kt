@@ -12,9 +12,11 @@ import org.junit.jupiter.api.Test
 
 internal class DelegatedRapidTest : River.PacketListener {
     private val testRapid = TestRapid()
-    private val delegatedRapid = DelegatedRapid(testRapid, ::beforeRiver, ::afterRiver, ::errorHandler).apply {
-        River(this)
-            .register(this@DelegatedRapidTest)
+    init {
+        DelegatedRapid(testRapid, ::beforeRiver, ::afterRiver, ::errorHandler).apply {
+            River(this)
+                .register(this@DelegatedRapidTest)
+        }
     }
 
     private var error = false

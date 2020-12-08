@@ -26,6 +26,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SNAPSHOTV1 = "{}"
     }
+
     private val overstyringDao = OverstyringDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
 
@@ -39,6 +40,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = hendelseId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId,
@@ -48,13 +54,15 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = hendelseId
         )
         assertSaksbehandlerOppgaveOpprettet(hendelseId)
-        sendOverstyrteDager(ORGNR, SAKSBEHANDLER_EPOST, listOf(
-            OverstyringDagDto(
-                dato = LocalDate.of(2018, 1, 20),
-                type = Dagtype.Feriedag,
-                grad = null
+        sendOverstyrteDager(
+            ORGNR, SAKSBEHANDLER_EPOST, listOf(
+                OverstyringDagDto(
+                    dato = LocalDate.of(2018, 1, 20),
+                    type = Dagtype.Feriedag,
+                    grad = null
+                )
             )
-        ))
+        )
 
         assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
         assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
@@ -100,6 +108,13 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = hendelseId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            navn = "En Arbeidsgiver",
+            bransjer = "En eller flere bransjer"
+        )
         sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId,
@@ -142,7 +157,10 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
         val saksbehandlerOppgaver = oppgaveDao.finnOppgaver()
-        assertEquals(1, saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size)
+        assertEquals(
+            1,
+            saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size
+        )
         assertTrue(saksbehandlerOppgaver.any { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
     }
 }

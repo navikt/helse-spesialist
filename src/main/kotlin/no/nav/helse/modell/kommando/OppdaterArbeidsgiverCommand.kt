@@ -1,23 +1,31 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.meldinger.Arbeidsgiverløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import java.time.LocalDate
 
-internal class OppdaterArbeidsgiverCommand(private val orgnummer: String, private val arbeidsgiverDao: ArbeidsgiverDao) : Command {
+internal class OppdaterArbeidsgiverCommand(
+    private val orgnummer: String,
+    private val arbeidsgiverDao: ArbeidsgiverDao,
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (erOppdatert()) return true
-        return true
-        // TODO: Faktisk hente arbeidsgiver info
-        // return behandle(context)
+        if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon() || (navnErOppdatert() && bransjerErOppdatert())) return true
+        return behandle(context)
     }
 
     override fun resume(context: CommandContext): Boolean {
         return behandle(context)
     }
 
-    private fun erOppdatert(): Boolean {
+    private fun navnErOppdatert(): Boolean {
         val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer)
+        return sistOppdatert > LocalDate.now().minusDays(14)
+    }
+
+    private fun bransjerErOppdatert(): Boolean {
+        val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer)
         return sistOppdatert > LocalDate.now().minusDays(14)
     }
 
@@ -28,9 +36,7 @@ internal class OppdaterArbeidsgiverCommand(private val orgnummer: String, privat
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov("HentArbeidsgiver", mapOf(
-            "organisasjonsnummer" to orgnummer
-        ))
+        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnummer))
         return false
     }
 }

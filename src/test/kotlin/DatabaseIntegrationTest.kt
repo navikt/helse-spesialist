@@ -43,6 +43,7 @@ internal abstract class DatabaseIntegrationTest {
 
         internal const val ORGNUMMER = "123456789"
         internal const val ORGNAVN = "NAVN AS"
+        internal const val BRANSJER = "EN BRANSJE"
 
         internal const val FNR = "02345678911"
         internal const val AKTØR = "4321098765432"
@@ -79,7 +80,7 @@ internal abstract class DatabaseIntegrationTest {
 
     internal var personId: Int = -1
         private set
-    internal var arbeidsgiverId: Int = -1
+    internal var arbeidsgiverId: Long = -1
         private set
     internal var snapshotId: Int = -1
         private set
@@ -170,8 +171,12 @@ internal abstract class DatabaseIntegrationTest {
         return Persondata(personId, personinfoId, enhetId, infotrygdutbetalingerId)
     }
 
-    protected fun opprettArbeidsgiver(organisasjonsnummer: String = ORGNUMMER, navn: String = ORGNAVN): Int {
-        return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn)!!.also { arbeidsgiverId = it }
+    protected fun opprettArbeidsgiver(
+        organisasjonsnummer: String = ORGNUMMER,
+        navn: String = ORGNAVN,
+        bransjer: String = BRANSJER
+    ): Long {
+        return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
     }
 
     protected fun opprettSnapshot(personBlob: String = "{}") {
@@ -191,7 +196,6 @@ internal abstract class DatabaseIntegrationTest {
     }
 
     protected fun opprettOppgave(
-        hendelseId: UUID = HENDELSE_ID,
         contextId: UUID = UUID.randomUUID(),
         vedtakId: Long? = null
     ) {

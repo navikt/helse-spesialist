@@ -1,11 +1,15 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.meldinger.Arbeidsgiverløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 
 internal class OpprettArbeidsgiverCommand(
     private val orgnummer: String,
-    private val arbeidsgiverDao: ArbeidsgiverDao) : Command {
+    private val arbeidsgiverDao: ArbeidsgiverDao,
+    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettArbeidsgiverCommand::class.java)
     }
@@ -25,17 +29,19 @@ internal class OpprettArbeidsgiverCommand(
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        // TODO: Faktisk hente arbeidsgiver info
-        //val arbeidsgiver = context.get<Arbeidsgiverløsning>() ?: trengerMerInformasjon(context)
-        log.info("oppretter arbeidsgiver")
-        arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent")
+        if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon()) {
+            log.info("oppretter arbeidsgiver")
+            arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent", "Ukjent")
+        } else {
+            val arbeidsgiver = context.get<Arbeidsgiverløsning>() ?: return trengerMerInformasjon(context)
+            log.info("oppretter arbeidsgiver")
+            arbeidsgiver.opprett(arbeidsgiverDao, orgnummer)
+        }
         return true
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov("HentArbeidsgiver", mapOf(
-            "organisasjonsnummer" to orgnummer
-        ))
+        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnummer))
         return false
     }
 }

@@ -18,7 +18,6 @@ import java.util.*
 internal class OverstyringTest {
     companion object {
         private val ID = UUID.randomUUID()
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
         private val OID = UUID.randomUUID()
         private const val NAVN = "Saks Behandler"

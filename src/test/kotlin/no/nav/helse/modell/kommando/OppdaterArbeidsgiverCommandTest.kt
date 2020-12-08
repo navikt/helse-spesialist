@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -18,9 +19,10 @@ internal class OppdaterArbeidsgiverCommandTest {
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
+    private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(mapOf("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE" to "true"))
 
     private lateinit var context: CommandContext
-    private val command = OppdaterArbeidsgiverCommand(ORGNR, dao)
+    private val command = OppdaterArbeidsgiverCommand(ORGNR, dao, miljøstyrtFeatureToggle)
 
     @BeforeEach
     fun setup() {
@@ -31,15 +33,17 @@ internal class OppdaterArbeidsgiverCommandTest {
     @Test
     fun `oppdaterer ikke når informasjonen er ny`() {
         every { dao.findNavnSistOppdatert(ORGNR) } returns LocalDate.now()
+        every { dao.findBransjerSistOppdatert(ORGNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
         verify(exactly = 0) { dao.updateNavn(any(), any()) }
     }
 
     @Test
-    fun `oppdaterer ikke når informasjonen er gammel`() {
+    fun `sender behov om oppdatering når informasjonen er gammel`() {
         every { dao.findNavnSistOppdatert(ORGNR) } returns LocalDate.now().minusYears(1)
-        assertTrue(command.execute(context))
-        assertFalse(context.harBehov())
+        every { dao.findBransjerSistOppdatert(ORGNR) } returns LocalDate.now().minusYears(1)
+        assertFalse(command.execute(context))
+        assertTrue(context.harBehov())
         verify(exactly = 0) { dao.updateNavn(any(), any()) }
     }
 }

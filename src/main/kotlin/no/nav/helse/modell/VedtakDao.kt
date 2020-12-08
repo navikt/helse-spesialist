@@ -19,7 +19,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         fom: LocalDate,
         tom: LocalDate,
         personRef: Int,
-        arbeidsgiverRef: Int,
+        arbeidsgiverRef: Long,
         speilSnapshotRef: Int
     ) = using(sessionOf(dataSource)) {
         @Language("PostgreSQL")
