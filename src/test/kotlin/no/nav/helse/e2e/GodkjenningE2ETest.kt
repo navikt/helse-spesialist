@@ -8,6 +8,7 @@ import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshot
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
@@ -327,34 +328,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er avventende`() {
-        val hendelseId1 = håndterGodkjenningsbehov()
-        val hendelseId2 = håndterGodkjenningsbehov()
-        assertOppgaver(1)
-        assertOppgave(0, AvventerSaksbehandler)
-        assertTilstand(
-            hendelseId1,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertTilstand(
-            hendelseId2,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-    }
-
-    @Test
     fun `oppretter ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         val hendelseId1 = håndterGodkjenningsbehov()
         val løsningId =
@@ -425,5 +398,35 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         return godkjenningsmeldingId
+    }
+
+    @Test
+    fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
+        håndterGodkjenningsbehov()
+        assertOppgaver(1)
+
+        testRapid.reset()
+        sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        assertTrue(testRapid.inspektør.behov().isEmpty())
+    }
+
+    @Test
+    fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
+        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
+        val hendelseId = håndterGodkjenningsbehov()
+        sendRisikovurderingløsning(hendelseId, VEDTAKSPERIODE_ID)
+        assertOppgaver(0)
+        assertAutomatisertLøsning()
+
+        testRapid.reset()
+        sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        assertTrue(testRapid.inspektør.behov().isEmpty())
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
     }
 }

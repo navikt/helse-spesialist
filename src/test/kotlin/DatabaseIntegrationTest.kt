@@ -156,6 +156,10 @@ internal abstract class DatabaseIntegrationTest {
         }
     }
 
+    protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
+        automatiseringDao.lagre(automatisert, if (automatisert) emptyList() else listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID)
+    }
+
     protected fun nyPerson() {
         opprettPerson()
         opprettArbeidsgiver()

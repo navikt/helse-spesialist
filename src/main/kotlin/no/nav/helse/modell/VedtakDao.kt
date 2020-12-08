@@ -170,7 +170,19 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.execute(queryOf(query, mapOf("ref" to ref)))
     }
 
+    internal fun erAutomatiskGodkjent(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query =
+        """
+            SELECT automatisert FROM automatisering WHERE vedtaksperiode_ref = (
+                SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId
+            )
+        """
+        session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { it.boolean("automatisert") }.asSingle)
+    } ?: false
+
     internal fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { it.findVedtakByFnr(fnr) }
+
     private fun findSpeilSnapshotRefs(fnr: String) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
@@ -243,6 +255,5 @@ internal class VedtakDao(private val dataSource: DataSource) {
         speilSnapshotRef = row.int("speil_snapshot_ref"),
         infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
     )
-
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

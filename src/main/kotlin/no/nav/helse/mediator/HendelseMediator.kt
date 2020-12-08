@@ -163,6 +163,10 @@ internal class HendelseMediator(
         periodetype: Saksbehandleroppgavetype,
         context: RapidsConnection.MessageContext
     ) {
+        if (oppgaveDao.harAktivOppgave(vedtaksperiodeId) || vedtakDao.erAutomatiskGodkjent(vedtaksperiodeId)) {
+            sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId har enten aktiv oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
+            return
+        }
         utfør(
             hendelsefabrikk.godkjenning(
                 id,

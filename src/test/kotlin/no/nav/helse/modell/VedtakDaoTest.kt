@@ -106,6 +106,28 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             "Alle snapshots på person skal matche den nye jsonen")
     }
 
+    @Test
+    fun `ikke automatisk godkjent dersom det ikke finnes innslag i db`() {
+        nyPerson()
+        assertFalse(vedtakDao.erAutomatiskGodkjent(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `ikke automatisk godkjent dersom innslag i db sier false`() {
+        godkjenningsbehov(HENDELSE_ID)
+        nyPerson()
+        nyttAutomatiseringsinnslag(false)
+        assertFalse(vedtakDao.erAutomatiskGodkjent(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `automatisk godkjent dersom innslag i db sier true`() {
+        godkjenningsbehov(HENDELSE_ID)
+        nyPerson()
+        nyttAutomatiseringsinnslag(true)
+        assertTrue(vedtakDao.erAutomatiskGodkjent(VEDTAKSPERIODE))
+    }
+
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {
         it.run(
             queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
