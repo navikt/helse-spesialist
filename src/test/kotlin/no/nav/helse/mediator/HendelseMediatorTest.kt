@@ -1,13 +1,11 @@
 package no.nav.helse.mediator
 
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.TilbakerullingDTO
 import no.nav.helse.mediator.api.TilbakerullingMedSlettingDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

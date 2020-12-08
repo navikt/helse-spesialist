@@ -70,7 +70,8 @@ internal class GodkjenningsbehovTest {
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
         automatisering = mockk(relaxed = true),
         utbetalingDao = utbetalingDao,
-        godkjenningMediator = mockk(relaxed = true)
+        godkjenningMediator = mockk(relaxed = true),
+        opptegnelseDao = mockk(relaxed = true)
     )
     private val godkjenningMessage = hendelsefabrikk.godkjenning(
         id = HENDELSE_ID,

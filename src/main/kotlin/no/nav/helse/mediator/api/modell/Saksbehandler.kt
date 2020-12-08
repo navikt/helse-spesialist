@@ -1,12 +1,11 @@
 package no.nav.helse.mediator.api.modell
 
 import io.ktor.auth.jwt.*
-import no.nav.helse.objectMapper
 import java.util.*
 
 internal class Saksbehandler(
     private val epostadresse: String,
-    private val oid: UUID,
+    val oid: UUID,
     private val ident: String,
     private val navn: String
 ) {

@@ -8,12 +8,12 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.e2e.UtbetalingE2ETest
 import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
+import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -64,10 +64,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
+    protected val opptegnelseDao = OpptegnelseDao(dataSource)
 
     protected val testRapid = TestRapid()
 
-    private val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, AKTØR)
+    protected val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, AKTØR)
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
@@ -108,7 +109,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personDao = personDao
         ) { false },
         utbetalingDao = utbetalingDao,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao)
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
+        opptegnelseDao = opptegnelseDao
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -119,7 +121,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelseDao = hendelseDao,
         hendelsefabrikk = hendelsefabrikk,
         oppgaveMediator = oppgaveMediator,
-        tildelingDao = tildelingDao,
+        tildelingDao = tildelingDao
     )
     internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
         vedtakDao = vedtakDao,

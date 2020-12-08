@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
+import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -102,6 +103,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
+    private val opptegnelseDao = OpptegnelseDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
 
@@ -139,7 +141,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             personDao = personDao,
             stikkprøveVelger = stikkprøveVelger
         ),
-        utbetalingDao = utbetalingDao
+        utbetalingDao = utbetalingDao,
+        opptegnelseDao = opptegnelseDao
     )
 
     private val rapidsConnection =
@@ -196,6 +199,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     )
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))
                     annulleringApi(hendelseMediator)
+                    abonnementApi(AbonnementMediator(opptegnelseDao))
                 }
                 authenticate("saksbehandler-direkte") {
                     tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao))

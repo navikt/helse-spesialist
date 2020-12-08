@@ -54,7 +54,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            hendelseMediator.håndter(any(), any())
+            hendelseMediator.håndter(any<AnnulleringDto>(), any())
         }
     }
 

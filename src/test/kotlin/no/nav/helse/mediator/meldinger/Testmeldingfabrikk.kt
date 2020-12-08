@@ -397,6 +397,79 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagOppdragLinje(
+        endringskode: String = "endringskode",
+        klassekode: String = "klassekode",
+        statuskode: String = "statuskode",
+        datoStatusFom: LocalDate = LocalDate.now(),
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
+        dagsats: Int = 111,
+        lønn: Int = 111,
+        grad: Double = 0.11,
+        delytelseId: Int = 11,
+        refDelytelseId: Int = 11,
+        refFagsystemId: String = "refFagsystemId",
+    ) =
+        mapOf<String, Any>(
+            "endringskode" to endringskode,
+            "klassekode" to klassekode,
+            "statuskode" to statuskode,
+            "datoStatusFom" to datoStatusFom,
+            "fom" to fom,
+            "tom" to tom,
+            "dagsats" to dagsats,
+            "lønn" to lønn,
+            "grad" to grad,
+            "delytelseId" to delytelseId,
+            "refDelytelseId" to refDelytelseId,
+            "refFagsystemId" to refFagsystemId,
+        )
+
+
+    fun lagOppdrag(
+        fagsystemId: String = "fagsystemId",
+        fagområde: String = "SPREF",
+        mottaker: String = "mottaker",
+        endringskode: String = "ENDR",
+        sisteArbeidsgiverdag: LocalDate = LocalDate.now(),
+        linjer: List<Map<String, Any>> = listOf()
+    ) =
+        mapOf(
+            "fagsystemId" to fagsystemId,
+            "fagområde" to fagområde,
+            "mottaker" to mottaker,
+            "endringskode" to endringskode,
+            "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
+            "linjer" to linjer,
+        )
+
+
+    fun lagUtbelingEndret(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String = "12020052345",
+        orgnummer: String = "123456789",
+        utbetalingId: UUID = UUID.randomUUID(),
+        type: String = "UTBETALING", // [UTBETALING, ANNULLERING, ETTERUTBETALING]
+        status: String = "UTBETALT", // [IKKE_UTBETALT, FORKASTET, IKKE_GODKJENT, GODKJENT_UTEN_UTBETALING, GODKJENT, SENDT, OVERFØRT, UTBETALING_FEILET, UTBETALT, ANNULLERT]
+        forrigeStatus: String = "IKKE_UTBETALT",
+        opprettet: LocalDateTime = LocalDateTime.now(),
+        arbeidsgiverOppdrag: Map<String, Any> = lagOppdrag(),
+        personOppdrag: Map<String, Any> = lagOppdrag(),
+    ) = nyHendelse(
+        id, "utbetaling_endret", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to orgnummer,
+            "utbetalingId" to utbetalingId,
+            "type" to type,
+            "gjeldendeStatus" to status,
+            "forrigeStatus" to forrigeStatus,
+            "@opprettet" to opprettet,
+            "arbeidsgiverOppdrag" to arbeidsgiverOppdrag,
+            "personOppdrag" to personOppdrag,
+        )
+    )
+
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 

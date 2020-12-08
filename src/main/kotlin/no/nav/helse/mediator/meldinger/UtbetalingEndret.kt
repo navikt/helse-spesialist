@@ -3,6 +3,9 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.modell.abonnement.OpptegnelseType
+import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.abonnement.UtbetalingPayload
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.*
@@ -24,7 +27,8 @@ internal class UtbetalingEndret(
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
     private val json: String,
-    private val utbetalingDao: UtbetalingDao
+    private val utbetalingDao: UtbetalingDao,
+    private val opptegnelseDao: OpptegnelseDao
 ) : Hendelse {
     internal class Oppdrag(
         private val fagsystemId: String,
@@ -63,7 +67,7 @@ internal class UtbetalingEndret(
         }
     }
 
-    internal fun lagre(utbetalingDao: UtbetalingDao) {
+    private fun lagre() {
         val utbetalingIdRef = utbetalingDao.finnUtbetalingIdRef(utbetalingId)
             ?: run {
                 val arbeidsgiverFagsystemIdRef = requireNotNull(arbeidsgiverOppdrag.lagre(utbetalingDao))  { "Forventet arbeidsgiver fagsystemId ref" }
@@ -73,6 +77,10 @@ internal class UtbetalingEndret(
             }
 
         utbetalingDao.nyUtbetalingStatus(utbetalingIdRef, status, opprettet, json)
+    }
+
+    private fun lagOpptegnelse() {
+        opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), OpptegnelseType.UTBETALING_ANNULLERING_FEILET)
     }
 
     private companion object {
@@ -85,7 +93,8 @@ internal class UtbetalingEndret(
 
     override fun execute(context: CommandContext): Boolean {
         log.info("lagrer utbetaling $utbetalingId med status $status")
-        lagre(utbetalingDao)
+        lagre()
+        lagOpptegnelse()
         return true
     }
 
