@@ -42,15 +42,13 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
     }
 
     internal fun findBransjerSistOppdatert(orgnummer: String) = sessionOf(dataSource).use { session ->
-        requireNotNull(
-            session.run(
-                queryOf(
-                    "SELECT oppdatert FROM arbeidsgiver_bransjer WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);",
-                    mapOf("orgnummer" to orgnummer.toLong())
-                ).map {
-                    it.localDate("oppdatert")
-                }.asSingle
-            )
+        session.run(
+            queryOf(
+                "SELECT oppdatert FROM arbeidsgiver_bransjer WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);",
+                mapOf("orgnummer" to orgnummer.toLong())
+            ).map {
+                it.localDate("oppdatert")
+            }.asSingle
         )
     }
 

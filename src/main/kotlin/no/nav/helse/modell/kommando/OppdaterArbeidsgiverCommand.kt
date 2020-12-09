@@ -25,7 +25,7 @@ internal class OppdaterArbeidsgiverCommand(
     }
 
     private fun bransjerErOppdatert(): Boolean {
-        val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer)
+        val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return false
         return sistOppdatert > LocalDate.now().minusDays(14)
     }
 
