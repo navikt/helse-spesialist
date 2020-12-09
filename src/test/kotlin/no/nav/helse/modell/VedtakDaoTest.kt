@@ -141,7 +141,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                 UUID.fromString(row.string("vedtaksperiode_id")),
                 row.localDate("fom"),
                 row.localDate("tom"),
-                row.int("person_ref"),
+                row.long("person_ref"),
                 row.long("arbeidsgiver_ref"),
                 row.int("speil_snapshot_ref")
             )
@@ -152,11 +152,11 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         private val vedtaksperiodeId: UUID,
         private val fom: LocalDate,
         private val tom: LocalDate,
-        private val personRef: Int,
+        private val personRef: Long,
         private val arbeidsgiverRef: Long,
         val snapshotRef: Int
     ) {
-        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Int, forventetArbeidsgiverRef: Long, forventetSnapshotRef: Int) {
+        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Long, forventetArbeidsgiverRef: Long, forventetSnapshotRef: Int) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetFom, fom)
             assertEquals(forventetTom, tom)

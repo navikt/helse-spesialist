@@ -20,8 +20,8 @@ internal class HentEnhetløsning(private val enhetNr: String) {
         personDao: PersonDao,
         fødselsnummer: String,
         aktørId: String,
-        navnId: Int,
-        infotrygdutbetalingerId: Int
+        navnId: Long,
+        infotrygdutbetalingerId: Long
     ) =
         personDao.insertPerson(
             fødselsnummer = fødselsnummer,

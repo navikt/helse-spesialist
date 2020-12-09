@@ -58,7 +58,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         internal const val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
     }
 
-    internal var personId: Int = -1
+    internal var personId: Long = -1
         private set
     internal var arbeidsgiverId: Long = -1
         private set
@@ -140,7 +140,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)!!
-        return Persondata(personId, personinfoId, enhetId, infotrygdutbetalingerId)
+        return Persondata(
+            personId = personId,
+            personinfoId = personinfoId,
+            enhetId = enhetId,
+            infotrygdutbetalingerId = infotrygdutbetalingerId
+        )
     }
 
     protected fun opprettSaksbehandler(
@@ -187,9 +192,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected data class Persondata(
-        val personId: Int,
-        val personinfoId: Int,
-        val infotrygdutbetalingerId: Int,
-        val enhetId: Int
+        val personId: Long,
+        val personinfoId: Long,
+        val enhetId: Int,
+        val infotrygdutbetalingerId: Long
     )
 }

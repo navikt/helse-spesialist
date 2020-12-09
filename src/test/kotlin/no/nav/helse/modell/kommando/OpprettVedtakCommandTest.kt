@@ -55,8 +55,8 @@ internal class OpprettVedtakCommandTest {
         verify(exactly = 1) { vedtakDao.oppdater(VEDTAK_REF, FOM, TOM, snapshotRef) }
     }
 
-    private fun personFinnes(): Triple<Int, Long, Int> {
-        val personRef = 1
+    private fun personFinnes(): Triple<Long, Long, Int> {
+        val personRef = 1L
         val arbeidsgiverRef = 2L
         val snapshotRef = 3
         every { personDao.findPersonByFødselsnummer(FNR) } returns personRef

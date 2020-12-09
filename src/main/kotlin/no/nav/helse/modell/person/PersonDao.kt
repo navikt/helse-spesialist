@@ -1,10 +1,8 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtak.EnhetDto
@@ -14,14 +12,27 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 internal class PersonDao(private val dataSource: DataSource) {
-    internal fun findPersonByFødselsnummer(fødselsnummer: String) = using(sessionOf(dataSource)) {
-        it.findPersonByFødselsnummer(fødselsnummer)
+    internal fun findPersonByFødselsnummer(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT id FROM person WHERE fodselsnummer=?;"
+        session.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row -> row.long("id") }
+                .asSingle
+        )
     }
 
-    internal fun findPersoninfoSistOppdatert(fødselsnummer: String) =
-        using(sessionOf(dataSource)) {
-            it.findPersoninfoSistOppdatert(fødselsnummer)
-        }
+    internal fun findPersoninfoSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;"
+        requireNotNull(
+            session.run(
+                queryOf(query, fødselsnummer.toLong())
+                    .map { row -> row.sqlDate("personinfo_oppdatert").toLocalDate() }
+                    .asSingle
+            )
+        )
+    }
 
     internal fun insertPersoninfo(
         fornavn: String,
@@ -29,9 +40,28 @@ internal class PersonDao(private val dataSource: DataSource) {
         etternavn: String,
         fødselsdato: LocalDate,
         kjønn: Kjønn
-    ) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn)
+            VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn));
+        """
+        requireNotNull(
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "fornavn" to fornavn,
+                        "mellomnavn" to mellomnavn,
+                        "etternavn" to etternavn,
+                        "fodselsdato" to fødselsdato,
+                        "kjonn" to kjønn.name
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
+        )
     }
+
     internal fun updatePersoninfo(
         fødselsnummer: String,
         fornavn: String,
@@ -39,230 +69,181 @@ internal class PersonDao(private val dataSource: DataSource) {
         etternavn: String,
         fødselsdato: LocalDate,
         kjønn: Kjønn
-    ) = using(sessionOf(dataSource)) {
-        it.updatePersoninfo(fødselsnummer, fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val personinfoQuery = """
+            UPDATE person_info SET fornavn=:fornavn, mellomnavn=:mellomnavn, etternavn=:etternavn, fodselsdato=:fodselsdato, kjonn=CAST(:kjonn as person_kjonn)
+            WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=:fodselsnummer);
+        """
+        session.run(
+            queryOf(
+                personinfoQuery,
+                mapOf(
+                    "fornavn" to fornavn,
+                    "mellomnavn" to mellomnavn,
+                    "etternavn" to etternavn,
+                    "fodselsdato" to fødselsdato,
+                    "kjonn" to kjønn.name,
+                    "fodselsnummer" to fødselsnummer.toLong()
+                )
+            ).asUpdate
+        )
+
+        @Language("PostgreSQL")
+        val personQuery = "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;"
+        session.run(
+            queryOf(
+                personQuery,
+                fødselsnummer.toLong()
+            ).asUpdate
+        )
     }
 
-    internal fun findEnhetSistOppdatert(fødselsnummer: String) = using(sessionOf(dataSource)) {
-        it.findEnhetSistOppdatert(fødselsnummer)
+    internal fun findEnhetSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
+        requireNotNull(
+            session.run(
+                queryOf(query, fødselsnummer.toLong()).map { row ->
+                    row.sqlDate("enhet_ref_oppdatert").toLocalDate()
+                }.asSingle
+            )
+        )
     }
 
-    internal fun updateEnhet(fødselsnummer: String, enhetNr: Int) = using(sessionOf(dataSource)) {
-        it.updateEnhet(fødselsnummer, enhetNr)
+    internal fun updateEnhet(fødselsnummer: String, enhetNr: Int) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query =
+            "UPDATE person SET enhet_ref=:enhetNr, enhet_ref_oppdatert=now() WHERE fodselsnummer=:fodselsnummer;"
+        session.run(
+            queryOf(
+                query,
+                mapOf(
+                    "enhetNr" to enhetNr,
+                    "fodselsnummer" to fødselsnummer.toLong()
+                )
+            ).asUpdate
+        )
     }
 
-    internal fun findInfotrygdutbetalinger(fødselsnummer: String) = using(sessionOf(dataSource)) {
-        it.findInfotrygdutbetalinger(fødselsnummer)
+    internal fun findInfotrygdutbetalinger(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT data FROM infotrygdutbetalinger
+            WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);
+        """
+        session.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row -> row.string("data") }
+                .asSingle
+        )
     }
 
-    internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) = using(sessionOf(dataSource)) {
-        it.findITUtbetalingsperioderSistOppdatert(fødselsnummer)
+    internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;"
+        requireNotNull(
+            session.run(
+                queryOf(query, fødselsnummer.toLong())
+                    .map { row -> row.sqlDate("infotrygdutbetalinger_oppdatert").toLocalDate() }
+                    .asSingle
+            )
+        )
     }
 
     internal fun insertInfotrygdutbetalinger(data: JsonNode) =
-        using(sessionOf(dataSource, returnGeneratedKey = true)) {
-            it.insertInfotrygdutbetalinger(data)
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val query = "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));"
+            requireNotNull(
+                session.run(
+                    queryOf(query, objectMapper.writeValueAsString(data)).asUpdateAndReturnGeneratedKey
+                )
+            )
         }
 
-    internal fun updateInfotrygdutbetalinger(fødselsnummer: String, data: JsonNode) = using(sessionOf(dataSource)) {
-        it.updateInfotrygdutbetalinger(fødselsnummer, data)
-    }
+    internal fun updateInfotrygdutbetalinger(fødselsnummer: String, data: JsonNode) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val infotrygdQuery = """
+                UPDATE infotrygdutbetalinger SET data=CAST(? as json)
+                WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);
+            """
+            session.run(
+                queryOf(
+                    infotrygdQuery,
+                    mapOf(
+                        "data" to objectMapper.writeValueAsString(data),
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
+                ).asUpdate
+            )
 
-    internal fun updateInfotrygdutbetalingerRef(fødselsnummer: String, ref: Int) = using(sessionOf(dataSource)) {
-        it.updateInfotrygdutbetalingerRef(fødselsnummer, ref)
-    }
+            @Language("PostgreSQL")
+            val personQuery = "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;"
+            session.run(queryOf(personQuery, fødselsnummer.toLong()).asUpdate)
+        }
+
+    internal fun updateInfotrygdutbetalingerRef(fødselsnummer: String, ref: Long) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+                UPDATE person SET infotrygdutbetalinger_ref=:ref, infotrygdutbetalinger_oppdatert=now()
+                WHERE fodselsnummer=:fodselsnummer;
+            """
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "ref" to ref,
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
+                ).asUpdate
+            )
+        }
 
     internal fun insertPerson(
         fødselsnummer: String,
         aktørId: String,
-        navnId: Int,
+        navnId: Long,
         enhetId: Int,
-        infotrygdutbetalingerId: Int
-    ) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertPerson(fødselsnummer, aktørId, navnId, enhetId, infotrygdutbetalingerId)
-    }
-
-    private fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = this.run(
-        queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer.toLong())
-            .map { it.int("id") }
-            .asSingle
-    )
-
-    private fun Session.findInfotrygdutbetalinger(fødselsnummer: String): String? =
-        this.run(
-            queryOf(
-                "SELECT data FROM infotrygdutbetalinger WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
-                fødselsnummer.toLong()
-            ).map { it.string("data") }.asSingle
-        )
-
-
-    private fun Session.insertPersoninfo(
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn
-    ): Int =
-        requireNotNull(
-            this.run(
-                queryOf(
-                    """
-                    INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn)
-                    VALUES(?, ?, ?, ?, CAST(? as person_kjonn));
-                """,
-                    fornavn,
-                    mellomnavn,
-                    etternavn,
-                    fødselsdato,
-                    kjønn.name
-                ).asUpdateAndReturnGeneratedKey
-            )?.toInt()
-        )
-
-    private fun Session.insertPerson(
-        fødselsnummer: String,
-        aktørId: String,
-        navnId: Int,
-        enhetId: Int,
-        infotrygdutbetalingerId: Int
-    ) =
-        this.run(
-            queryOf(
-                "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?);",
-                fødselsnummer.toLong(),
-                aktørId.toLong(),
-                navnId,
-                enhetId,
-                infotrygdutbetalingerId
-            ).asUpdateAndReturnGeneratedKey
-        )?.toInt()
-
-    private fun Session.insertInfotrygdutbetalinger(data: JsonNode): Int =
-        requireNotNull(
-            this.run(
-                queryOf(
-                    "INSERT INTO infotrygdutbetalinger(data) VALUES(CAST(? as json));",
-                    objectMapper.writeValueAsString(data)
-                ).asUpdateAndReturnGeneratedKey
-            )
-                ?.toInt()
-        )
-
-    private fun Session.updatePersoninfo(
-        fødselsnummer: String,
-        fornavn: String,
-        mellomnavn: String?,
-        etternavn: String,
-        fødselsdato: LocalDate,
-        kjønn: Kjønn
-    ): Int {
+        infotrygdutbetalingerId: Long
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
-        val query =
-            """
-            UPDATE person_info SET fornavn=?, mellomnavn=?, etternavn=?, fodselsdato=?, kjonn=CAST(? as person_kjonn)
-            WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=?);
+        val query = """
+            INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
+            VALUES(:fodselsnummer, :aktorId, :navnId, :enhetId, :infotrygdutbetalingerId);
         """
-        run(
+        session.run(
             queryOf(
                 query,
-                fornavn, mellomnavn, etternavn, fødselsdato, kjønn.name, fødselsnummer.toLong()
-            ).asUpdate
-        )
-        return run(
-            queryOf(
-                "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;",
-                fødselsnummer.toLong()
-            ).asUpdate
-        )
-    }
-
-    private fun Session.updateEnhet(fødselsnummer: String, enhetNr: Int) = this.run(
-        queryOf(
-            "UPDATE person SET enhet_ref=?, enhet_ref_oppdatert=now() WHERE fodselsnummer=?;",
-            enhetNr,
-            fødselsnummer.toLong()
-        ).asUpdate
-    )
-
-    private fun Session.updateInfotrygdutbetalinger(fødselsnummer: String, data: JsonNode): Int {
-        run(
-            queryOf(
-                "UPDATE infotrygdutbetalinger SET data=CAST(? as json) WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);",
-                objectMapper.writeValueAsString(data), fødselsnummer.toLong()
-            ).asUpdate
-        )
-        return run(
-            queryOf(
-                "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
-                fødselsnummer.toLong()
-            ).asUpdate
-        )
-    }
-
-    private fun Session.updateInfotrygdutbetalingerRef(fødselsnummer: String, ref: Int) =
-        this.run(
-            queryOf(
-                "UPDATE person SET infotrygdutbetalinger_ref=?, infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;",
-                ref,
-                fødselsnummer.toLong()
-            ).asUpdate
-        )
-
-    private fun Session.findPersoninfoSistOppdatert(fødselsnummer: String) =
-        requireNotNull(
-            this.run(
-                queryOf(
-                    "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;",
-                    fødselsnummer.toLong()
-                ).map {
-                    it.sqlDate("personinfo_oppdatert").toLocalDate()
-                }.asSingle
-            )
-        )
-
-    internal fun tilhørerUtlandsenhet(fødselsnummer: String)
-        = erEnhetUtland(findEnhet(fødselsnummer).id)
-
-    private fun Session.findEnhetSistOppdatert(fødselsnummer: String) = requireNotNull(
-        this.run(
-            queryOf(
-                "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;",
-                fødselsnummer.toLong()
-            ).map {
-                it.sqlDate("enhet_ref_oppdatert").toLocalDate()
-            }.asSingle
-        )
-    )
-
-    internal fun findEnhet(fødselsnummer: String) = using(sessionOf(dataSource)) { it.findEnhet(fødselsnummer) }
-
-    private fun Session.findEnhet(fødselsnummer: String): EnhetDto = requireNotNull(
-        this.run(
-            queryOf(
-                "SELECT id, navn from enhet WHERE id=(SELECT enhet_ref FROM person where fodselsnummer =?);",
-                fødselsnummer.toLong()
-            ).map {
-                EnhetDto(
-                    it.string("id"),
-                    it.string("navn")
+                mapOf(
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "aktorId" to aktørId.toLong(),
+                    "navnId" to navnId,
+                    "enhetId" to enhetId,
+                    "infotrygdutbetalingerId" to infotrygdutbetalingerId
                 )
-            }.asSingle
+            ).asUpdateAndReturnGeneratedKey
         )
-    )
+    }
 
-    private fun Session.findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) =
+    internal fun tilhørerUtlandsenhet(fødselsnummer: String) = erEnhetUtland(findEnhet(fødselsnummer).id)
+
+    internal fun findEnhet(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT id, navn from enhet WHERE id=(SELECT enhet_ref FROM person where fodselsnummer =?);"
         requireNotNull(
-            this.run(
-                queryOf(
-                    "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;",
-                    fødselsnummer.toLong()
-                ).map {
-                    it.sqlDate("infotrygdutbetalinger_oppdatert").toLocalDate()
-                }.asSingle
+            session.run(
+                queryOf(query, fødselsnummer.toLong())
+                    .map { row -> EnhetDto(
+                        row.string("id"),
+                        row.string("navn")
+                    )}
+                    .asSingle
             )
         )
-
+    }
 }
 
 internal fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

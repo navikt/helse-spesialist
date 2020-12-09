@@ -3,9 +3,7 @@ package no.nav.helse.modell.person
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -71,51 +69,75 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         person().first().assertInfotrygdUtbetalingerRef(id)
     }
 
-    private fun assertPersoninfo(forventetNavn: String, forventetMellomnavn: String?, forventetEtternavn: String?, forventetFødselsdato: LocalDate, forventetKjønn: Kjønn) {
+    private fun assertPersoninfo(
+        forventetNavn: String,
+        forventetMellomnavn: String?,
+        forventetEtternavn: String?,
+        forventetFødselsdato: LocalDate,
+        forventetKjønn: Kjønn
+    ) {
         val personinfo = personinfo()
         assertEquals(1, personinfo.size)
-        personinfo.first().assertEquals(forventetNavn, forventetMellomnavn, forventetEtternavn, forventetFødselsdato, forventetKjønn)
+        personinfo.first()
+            .assertEquals(forventetNavn, forventetMellomnavn, forventetEtternavn, forventetFødselsdato, forventetKjønn)
     }
 
     private fun infotrygdUtbetalinger() =
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT data FROM infotrygdutbetalinger").map { it.string("data") }.asList)
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf("SELECT data FROM infotrygdutbetalinger")
+                    .map { row -> row.string("data") }
+                    .asList
+            )
         }
 
-    private fun person() =
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person").map {
-                Person(
-                    it.long("fodselsnummer").toFødselsnummer(),
-                    it.long("aktor_id").toString(),
-                    it.int("info_ref"),
-                    it.int("enhet_ref"),
-                    it.int("infotrygdutbetalinger_ref")
-                )
-            }.asList)
-        }
+    private fun person() = sessionOf(dataSource).use { session ->
+        session.run(
+            queryOf("SELECT fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref FROM person")
+                .map { row ->
+                    Person(
+                        row.long("fodselsnummer").toFødselsnummer(),
+                        row.long("aktor_id").toString(),
+                        row.long("info_ref"),
+                        row.int("enhet_ref"),
+                        row.long("infotrygdutbetalinger_ref")
+                    )
+                }
+                .asList
+        )
+    }
 
     private fun personinfo() =
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT fornavn, mellomnavn, etternavn, fodselsdato, kjonn FROM person_info").map {
-                Personinfo(
-                    it.string("fornavn"),
-                    it.stringOrNull("mellomnavn"),
-                    it.string("etternavn"),
-                    it.localDate("fodselsdato"),
-                    enumValueOf(it.string("kjonn"))
-                )
-            }.asList)
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf("SELECT fornavn, mellomnavn, etternavn, fodselsdato, kjonn FROM person_info")
+                    .map { row ->
+                        Personinfo(
+                            row.string("fornavn"),
+                            row.stringOrNull("mellomnavn"),
+                            row.string("etternavn"),
+                            row.localDate("fodselsdato"),
+                            enumValueOf(row.string("kjonn"))
+                        )
+                    }
+                    .asList
+            )
         }
 
     private class Person(
         private val fødselsnummer: String,
         private val aktørId: String,
-        private val infoRef: Int,
+        private val infoRef: Long,
         private val enhetRef: Int,
-        private val infotrygdutbetalingerRef: Int
+        private val infotrygdutbetalingerRef: Long
     ) {
-        fun assertEquals(forventetFødselsnummer: String, forventetAktørId: String, forventetInfoRef: Int, forventetEnhetRef: Int, forventetInfotrygdutbetalingerRef: Int) {
+        fun assertEquals(
+            forventetFødselsnummer: String,
+            forventetAktørId: String,
+            forventetInfoRef: Long,
+            forventetEnhetRef: Int,
+            forventetInfotrygdutbetalingerRef: Long
+        ) {
             assertEquals(forventetFødselsnummer, fødselsnummer)
             assertEquals(forventetAktørId, aktørId)
             assertEquals(forventetInfoRef, infoRef)
@@ -126,24 +148,31 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         fun assertEnhet(forventetEnhet: Int) {
             assertEquals(forventetEnhet, enhetRef)
         }
-        fun assertInfotrygdUtbetalingerRef(forventetInfotrygdutbetalingerRef: Int) {
+
+        fun assertInfotrygdUtbetalingerRef(forventetInfotrygdutbetalingerRef: Long) {
             assertEquals(forventetInfotrygdutbetalingerRef, infotrygdutbetalingerRef)
         }
     }
 
-    protected class Personinfo(
+    private class Personinfo(
         private val fornavn: String,
         private val mellomnavn: String?,
         private val etternavn: String,
         private val fødselsdato: LocalDate,
         private val kjønn: Kjønn
     ) {
-        fun assertEquals(forventetNavn: String, forventetMellomnavn: String?, forventetEtternavn: String?, forventetFødselsdato: LocalDate, forventetKjønn: Kjønn) {
-            Assertions.assertEquals(forventetNavn, fornavn)
-            Assertions.assertEquals(forventetMellomnavn, mellomnavn)
-            Assertions.assertEquals(forventetEtternavn, etternavn)
-            Assertions.assertEquals(forventetFødselsdato, fødselsdato)
-            Assertions.assertEquals(forventetKjønn, kjønn)
+        fun assertEquals(
+            forventetNavn: String,
+            forventetMellomnavn: String?,
+            forventetEtternavn: String?,
+            forventetFødselsdato: LocalDate,
+            forventetKjønn: Kjønn
+        ) {
+            assertEquals(forventetNavn, fornavn)
+            assertEquals(forventetMellomnavn, mellomnavn)
+            assertEquals(forventetEtternavn, etternavn)
+            assertEquals(forventetFødselsdato, fødselsdato)
+            assertEquals(forventetKjønn, kjønn)
         }
     }
 }

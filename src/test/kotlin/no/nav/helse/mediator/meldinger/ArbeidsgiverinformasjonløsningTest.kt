@@ -5,7 +5,7 @@ import io.mockk.verify
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.junit.jupiter.api.Test
 
-internal class ArbeidsgiverløsningTest {
+internal class ArbeidsgiverinformasjonløsningTest {
     private companion object {
         private const val ORGNR = "123456789"
         private const val NAVN = "Bedrift AS"
@@ -16,14 +16,14 @@ internal class ArbeidsgiverløsningTest {
 
     @Test
     fun `oppdatere navn`() {
-        val arbeidsgiver = Arbeidsgiverløsning(NAVN, BRANSJER)
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(NAVN, BRANSJER)
         arbeidsgiver.oppdater(dao, ORGNR)
         verify(exactly = 1) { dao.updateNavn(ORGNR, NAVN) }
     }
 
     @Test
     fun `oppdatere bransje`() {
-        val arbeidsgiver = Arbeidsgiverløsning(NAVN, BRANSJER)
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(NAVN, BRANSJER)
         arbeidsgiver.oppdater(dao, ORGNR)
         verify(exactly = 1) { dao.updateBransjer(ORGNR, BRANSJER) }
     }

@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.meldinger.Arbeidsgiverløsning
+import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -37,7 +37,7 @@ internal class KlargjørArbeidsgiverCommandTest {
     @Test
     fun `opprett arbeidsgiver`() {
         arbeidsgiverFinnesIkke()
-        context.add(Arbeidsgiverløsning(NAVN, BRANSJER))
+        context.add(Arbeidsgiverinformasjonløsning(NAVN, BRANSJER))
         assertTrue(command.execute(context))
         verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
     }

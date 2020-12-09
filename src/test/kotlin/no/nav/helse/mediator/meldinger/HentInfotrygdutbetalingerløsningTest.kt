@@ -34,7 +34,7 @@ internal class HentInfotrygdutbetalingerløsningTest {
 
     @Test
     fun `lagre ny infotrygdutbetalinger når person ikke har fra før`() {
-        val utbetalingerRefId = 1
+        val utbetalingerRefId = 1L
         every { dao.findInfotrygdutbetalinger(FNR) } returns null
         every { dao.insertInfotrygdutbetalinger(any()) } returns utbetalingerRefId
         val json = objectMapper.createObjectNode()

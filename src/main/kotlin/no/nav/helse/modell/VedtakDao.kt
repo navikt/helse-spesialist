@@ -18,7 +18,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
-        personRef: Int,
+        personRef: Long,
         arbeidsgiverRef: Long,
         speilSnapshotRef: Int
     ) = using(sessionOf(dataSource)) {

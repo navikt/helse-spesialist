@@ -12,7 +12,7 @@ import java.util.*
 
 internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonNode) {
 
-    internal fun lagre(personDao: PersonDao) =
+    internal fun lagre(personDao: PersonDao): Long =
         personDao.insertInfotrygdutbetalinger(utbetalinger)
 
     fun oppdater(personDao: PersonDao, fødselsnummer: String) {

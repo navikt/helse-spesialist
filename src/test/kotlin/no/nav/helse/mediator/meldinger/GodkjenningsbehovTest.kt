@@ -112,7 +112,7 @@ internal class GodkjenningsbehovTest {
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertFalse(godkjenningMessage.execute(context))
 
-        context.add(Arbeidsgiverløsning("Hva som helst", "Kan også være hva som helst"))
+        context.add(Arbeidsgiverinformasjonløsning("Hva som helst", "Kan også være hva som helst"))
         assertFalse(godkjenningMessage.resume(context))
 
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
@@ -141,7 +141,7 @@ internal class GodkjenningsbehovTest {
 
         assertFalse(godkjenningMessage.execute(context))
 
-        context.add(Arbeidsgiverløsning("Hva som helst", "Kan også være hva som helst"))
+        context.add(Arbeidsgiverinformasjonløsning("Hva som helst", "Kan også være hva som helst"))
         assertFalse(godkjenningMessage.resume(context))
 
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))

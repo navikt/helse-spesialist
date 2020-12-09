@@ -16,7 +16,7 @@ internal class HentPersoninfoløsning(
     private val kjønn: Kjønn
 ) {
 
-    internal fun lagre(personDao: PersonDao) =
+    internal fun lagre(personDao: PersonDao): Long =
         personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
 
     internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
