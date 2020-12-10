@@ -8,6 +8,7 @@ import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import java.util.*
+import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
@@ -35,28 +36,37 @@ abstract class AbstractDatabaseTest {
                 .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
                 .load()
                 .migrate()
+
+            createTruncateFunction(dataSource)
         }
     }
 
     @BeforeEach
     internal fun resetDatabase() {
         using(sessionOf(dataSource)) {
-            @Language("PostgreSQL")
-            val query = """
-                do
-                ${'$'}${'$'}
-                declare
-                  truncate_stmt text;
-                begin
-                  select 'truncate ' || string_agg(format('%I.%I', schemaname, tablename), ',')
-                    into truncate_stmt
-                  from pg_tables
-                  where tablename not in ('enhet','flyway_schema_history') and schemaname in ('public');
-                  execute truncate_stmt;
-                end;
-                ${'$'}${'$'}
-            """
-            it.run(queryOf(query).asExecute)
+            it.run(queryOf("SELECT truncate_tables()").asExecute)
         }
+    }
+}
+
+internal fun createTruncateFunction(dataSource: DataSource) {
+    using(sessionOf(dataSource)) {
+        @Language("PostgreSQL")
+        val query = """
+            CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$
+            DECLARE
+            truncate_statement text;
+            BEGIN
+                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' CASCADE'
+                    INTO truncate_statement
+                FROM pg_tables
+                WHERE schemaname='public'
+                AND tablename not in ('enhet', 'flyway_schema_history');
+
+                EXECUTE truncate_statement;
+            END;
+            $$ LANGUAGE plpgsql;
+        """
+        it.run(queryOf(query).asExecute)
     }
 }
