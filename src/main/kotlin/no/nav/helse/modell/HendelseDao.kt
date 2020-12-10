@@ -17,7 +17,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     opprettHendelse(hendelse)
-
                     hendelse.vedtaksperiodeId()?.let { opprettKobling(it, hendelse.id) }
                 }
             }
@@ -69,6 +68,15 @@ internal class HendelseDao(private val dataSource: DataSource) {
                 hendelseId
             ).asUpdate
         )
+    }
+
+    internal fun harKoblingTil(vedtaksperiodeId: UUID): Boolean {
+        return using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    "SELECT 1 FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id=?", vedtaksperiodeId
+                ).map { it.boolean(1) }.asSingle)
+        } ?: false
     }
 
     internal fun finn(id: UUID, hendelsefabrikk: IHendelsefabrikk) = using(sessionOf(dataSource)) { session ->

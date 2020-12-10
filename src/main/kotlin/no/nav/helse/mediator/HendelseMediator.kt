@@ -374,7 +374,7 @@ internal class HendelseMediator(
     }
 
     private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
-        if (vedtakDao.finnVedtakId(vedtaksperiodeId) == null) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
+        if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
         return utfør(hendelse, messageContext)
     }
 

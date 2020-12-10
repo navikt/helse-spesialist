@@ -237,6 +237,15 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `vedtaksperiode forkastet når det finnes en hendelse`() {
+        val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
+        assertHendelse(hendelseId)
+        assertIkkeVedtak(VEDTAKSPERIODE_ID)
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "AVBRUTT")
+    }
+
+    @Test
     fun `gjør ingen ting om man får tilbake løsning på en avbrutt command context`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
