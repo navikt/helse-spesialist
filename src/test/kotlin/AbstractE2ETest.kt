@@ -2,9 +2,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -34,38 +31,20 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.flywaydb.core.Flyway
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractE2ETest {
+abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val AKTØR = "999999999"
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-        private val postgresPath = createTempDir()
-        private val embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath)
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-        private val hikariConfig = HikariConfig().apply {
-            this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres").also(::println)
-            maximumPoolSize = 5
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        }
-        internal val dataSource = HikariDataSource(hikariConfig)
-
     }
 
     private val oppgaveDao = OppgaveDao(dataSource)
@@ -152,43 +131,6 @@ abstract class AbstractE2ETest {
         tildelingDao = tildelingDao,
         risikovurderingDao = risikovurderingDao
     )
-
-    @BeforeAll
-    internal fun configFlyway() {
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
-            .load()
-            .migrate()
-
-        using(sessionOf(dataSource)) {
-            @Language("PostgreSQL")
-            val query = """
-            CREATE OR REPLACE FUNCTION truncate_tables()
-              RETURNS void AS
-            ${'$'}func${'$'}
-            BEGIN
-               EXECUTE (SELECT 'TRUNCATE TABLE '
-                   || string_agg(quote_ident(schemaname) || '.' || quote_ident(tablename), ', ')
-                   || ' CASCADE'
-               FROM   pg_tables
-               WHERE  schemaname = 'public'
-               AND    tablename not in ('enhet', 'flyway_schema_history')
-               );
-            END
-            ${'$'}func${'$'} LANGUAGE plpgsql;
-            """
-            it.run(queryOf(query).asExecute)
-        }
-    }
-
-    @BeforeEach
-    internal fun resetDatabase() {
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
-        }
-    }
 
     @BeforeEach
     internal fun resetTestSetup() {

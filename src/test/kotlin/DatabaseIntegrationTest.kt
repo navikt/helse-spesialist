@@ -1,9 +1,6 @@
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -21,17 +18,13 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
-import org.flywaydb.core.Flyway
-import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal abstract class DatabaseIntegrationTest {
+internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -62,22 +55,6 @@ internal abstract class DatabaseIntegrationTest {
         internal val SAKSBEHANDLER_OID = UUID.randomUUID()
 
         internal const val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
-
-        private val postgresPath = createTempDir()
-        private val embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath)
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
-
-        private val hikariConfig = HikariConfig().apply {
-            this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres").also(::println)
-            maximumPoolSize = 5
-            minimumIdle = 1
-            idleTimeout = 10001
-            connectionTimeout = 1000
-            maxLifetime = 30001
-        }
-        internal val dataSource = HikariDataSource(hikariConfig)
     }
 
     internal var personId: Int = -1
@@ -108,43 +85,6 @@ internal abstract class DatabaseIntegrationTest {
     protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
-
-    @BeforeAll
-    internal fun configFlyway() {
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
-            .load()
-            .migrate()
-
-        using(sessionOf(dataSource)) {
-            @Language("PostgreSQL")
-            val query = """
-            CREATE OR REPLACE FUNCTION truncate_tables()
-              RETURNS void AS
-            ${'$'}func${'$'}
-            BEGIN
-               EXECUTE (SELECT 'TRUNCATE TABLE '
-                   || string_agg(quote_ident(schemaname) || '.' || quote_ident(tablename), ', ')
-                   || ' CASCADE'
-               FROM   pg_tables
-               WHERE  schemaname = 'public'
-               AND    tablename not in ('enhet', 'flyway_schema_history')
-               );
-            END
-            ${'$'}func${'$'} LANGUAGE plpgsql;
-            """
-            it.run(queryOf(query).asExecute)
-        }
-    }
-
-    @AfterEach
-    internal fun resetDatabase() {
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
-        }
-    }
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
