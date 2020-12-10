@@ -109,6 +109,7 @@ internal class UtbetalingEndret(
                         "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId"
                     )
                     it.requireAny("type", listOf("UTBETALING", "ANNULLERING", "ETTERUTBETALING"))
+                    it.requireAny("forrigeStatus", gyldigeStatuser)
                     it.requireAny("gjeldendeStatus", gyldigeStatuser)
                     it.require("@opprettet", JsonNode::asLocalDateTime)
                 }
@@ -120,9 +121,9 @@ internal class UtbetalingEndret(
         }
 
         override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+            val forrigeStatus = packet["forrigeStatus"].asText()
             val status = packet["gjeldendeStatus"].asText()
-            if (status !in godkjenteStatuser) return
-
+            if (status !in godkjenteStatuser && forrigeStatus !in godkjenteStatuser) return
             val id = UUID.fromString(packet["utbetalingId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
             val orgnummer = packet["organisasjonsnummer"].asText()

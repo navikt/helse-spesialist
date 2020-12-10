@@ -32,6 +32,15 @@ class UtbetalingE2ETest : AbstractE2ETest() {
         assertEquals(3, utbetalinger().size)
     }
 
+    @Test
+    fun `utbetaling forkastet`() {
+        vedtaksperiode()
+        sendUtbetalingEndret("UTBETALING", "FORKASTET", "IKKE_UTBETALT")
+        assertEquals(0, utbetalinger().size)
+        sendUtbetalingEndret("UTBETALING", "FORKASTET", "GODKJENT")
+        assertEquals(1, utbetalinger().size)
+    }
+
     private fun utbetalinger(): List<String> {
         @Language("PostgreSQL")
         val statement = """
@@ -52,7 +61,7 @@ class UtbetalingE2ETest : AbstractE2ETest() {
         }
     }
 
-    private fun sendUtbetalingEndret(type: String, status: String) {
+    private fun sendUtbetalingEndret(type: String, status: String, forrigeStatus: String = status) {
         @Language("JSON")
         val json = """
 {
@@ -62,6 +71,7 @@ class UtbetalingE2ETest : AbstractE2ETest() {
     "utbetalingId": "${UUID.randomUUID()}",
     "fødselsnummer": "$UNG_PERSON_FNR_2018",
     "type": "$type",
+    "forrigeStatus": "$forrigeStatus",
     "gjeldendeStatus": "$status",
     "organisasjonsnummer": "$ORGNR",
     "arbeidsgiverOppdrag": {
