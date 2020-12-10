@@ -16,10 +16,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         private const val ORGNR = "222222222"
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
-        private const val OPPGAVEID = 1L
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
     }
+
+    private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @BeforeEach
     fun setup() {

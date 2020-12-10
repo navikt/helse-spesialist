@@ -22,7 +22,9 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.BeforeEach
+import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -89,35 +91,59 @@ internal abstract class DatabaseIntegrationTest {
     internal var oppgaveId: Long = -1
         private set
 
-    internal val personDao = PersonDao(dataSource)
-    internal val oppgaveDao = OppgaveDao(dataSource)
-    internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    internal val snapshotDao = SnapshotDao(dataSource)
-    internal val vedtakDao = VedtakDao(dataSource)
-    internal val warningDao = WarningDao(dataSource)
-    internal val commandContextDao = CommandContextDao(dataSource)
-    internal val tildelingDao = TildelingDao(dataSource)
-    internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    internal val overstyringDao = OverstyringDao(dataSource)
-    internal val reservasjonDao = ReservasjonDao(dataSource)
-    internal val hendelseDao = HendelseDao(dataSource)
-    internal val risikovurderingDao = RisikovurderingDao(dataSource)
-    internal val automatiseringDao = AutomatiseringDao(dataSource)
-    internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
-    internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    internal val egenAnsattDao = EgenAnsattDao(dataSource)
+    protected val personDao = PersonDao(dataSource)
+    protected val oppgaveDao = OppgaveDao(dataSource)
+    protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    protected val snapshotDao = SnapshotDao(dataSource)
+    protected val vedtakDao = VedtakDao(dataSource)
+    protected val warningDao = WarningDao(dataSource)
+    protected val commandContextDao = CommandContextDao(dataSource)
+    protected val tildelingDao = TildelingDao(dataSource)
+    protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    protected val overstyringDao = OverstyringDao(dataSource)
+    protected val reservasjonDao = ReservasjonDao(dataSource)
+    protected val hendelseDao = HendelseDao(dataSource)
+    protected val risikovurderingDao = RisikovurderingDao(dataSource)
+    protected val automatiseringDao = AutomatiseringDao(dataSource)
+    protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
+    protected val egenAnsattDao = EgenAnsattDao(dataSource)
 
-    @BeforeEach
-    internal fun resetDatabase() {
+    @BeforeAll
+    internal fun configFlyway() {
         Flyway
             .configure()
             .dataSource(dataSource)
             .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
             .load()
-            .also {
-                it.clean()
-                it.migrate()
-            }
+            .migrate()
+
+        using(sessionOf(dataSource)) {
+            @Language("PostgreSQL")
+            val query = """
+            CREATE OR REPLACE FUNCTION truncate_tables()
+              RETURNS void AS
+            ${'$'}func${'$'}
+            BEGIN
+               EXECUTE (SELECT 'TRUNCATE TABLE '
+                   || string_agg(quote_ident(schemaname) || '.' || quote_ident(tablename), ', ')
+                   || ' CASCADE'
+               FROM   pg_tables
+               WHERE  schemaname = 'public'
+               AND    tablename not in ('enhet', 'flyway_schema_history')
+               );
+            END
+            ${'$'}func${'$'} LANGUAGE plpgsql;
+            """
+            it.run(queryOf(query).asExecute)
+        }
+    }
+
+    @AfterEach
+    internal fun resetDatabase() {
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        }
     }
 
     internal fun testhendelse(

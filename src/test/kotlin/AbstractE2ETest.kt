@@ -35,7 +35,9 @@ import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -151,17 +153,41 @@ abstract class AbstractE2ETest {
         risikovurderingDao = risikovurderingDao
     )
 
-    @BeforeEach
-    internal fun resetDatabase() {
+    @BeforeAll
+    internal fun configFlyway() {
         Flyway
             .configure()
             .dataSource(dataSource)
             .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
             .load()
-            .also {
-                it.clean()
-                it.migrate()
-            }
+            .migrate()
+
+        using(sessionOf(dataSource)) {
+            @Language("PostgreSQL")
+            val query = """
+            CREATE OR REPLACE FUNCTION truncate_tables()
+              RETURNS void AS
+            ${'$'}func${'$'}
+            BEGIN
+               EXECUTE (SELECT 'TRUNCATE TABLE '
+                   || string_agg(quote_ident(schemaname) || '.' || quote_ident(tablename), ', ')
+                   || ' CASCADE'
+               FROM   pg_tables
+               WHERE  schemaname = 'public'
+               AND    tablename not in ('enhet', 'flyway_schema_history')
+               );
+            END
+            ${'$'}func${'$'} LANGUAGE plpgsql;
+            """
+            it.run(queryOf(query).asExecute)
+        }
+    }
+
+    @BeforeEach
+    internal fun resetDatabase() {
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        }
     }
 
     @BeforeEach

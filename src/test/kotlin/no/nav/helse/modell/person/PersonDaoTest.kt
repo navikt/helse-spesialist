@@ -66,10 +66,9 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `oppdaterer infotrygdutbetalingerRef`() {
         opprettPerson()
-        personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
-        val infotrygdUtbetalingerRef = "2".toInt()
-        personDao.updateInfotrygdutbetalingerRef(FNR, infotrygdUtbetalingerRef)
-        person().first().assertInfotrygdUtbetalingerRef(infotrygdUtbetalingerRef)
+        val id = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
+        personDao.updateInfotrygdutbetalingerRef(FNR, id)
+        person().first().assertInfotrygdUtbetalingerRef(id)
     }
 
     private fun assertPersoninfo(forventetNavn: String, forventetMellomnavn: String?, forventetEtternavn: String?, forventetFødselsdato: LocalDate, forventetKjønn: Kjønn) {

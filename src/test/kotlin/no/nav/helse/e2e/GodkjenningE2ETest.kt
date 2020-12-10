@@ -10,14 +10,12 @@ import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshot
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
@@ -26,11 +24,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val AUTOMATISK_BEHANDLET = "Automatisk behandlet"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
-        private const val OPPGAVEID = 1L
+
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private val SNAPSHOTV1 = snapshot(VEDTAKSPERIODE_ID)
         private val SNAPSHOTV2 = snapshot(VEDTAKSPERIODE_ID)
     }
+
+    private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
@@ -161,16 +161,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertEquals(WarningKilde.Spesialist.name, vedtaksperiodeGodkjentEvent["warnings"][1]["kilde"].asText())
         assertFalse(vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean())
         assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent)
-    }
-
-    private fun assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent: JsonNode) {
-        assertEquals(VEDTAKSPERIODE_ID, UUID.fromString(vedtaksperiodeGodkjentEvent["vedtaksperiodeId"].asText()))
-        assertEquals(
-            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING.name,
-            vedtaksperiodeGodkjentEvent["periodetype"].asText()
-        )
-        assertEquals(SAKSBEHANDLERIDENT, vedtaksperiodeGodkjentEvent["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLEREPOST, vedtaksperiodeGodkjentEvent["saksbehandlerEpost"].asText())
     }
 
     @Test
@@ -431,6 +421,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         testRapid.reset()
         sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         assertTrue(testRapid.inspektør.behov().isEmpty())
+    }
+
+    private fun assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent: JsonNode) {
+        assertEquals(VEDTAKSPERIODE_ID, UUID.fromString(vedtaksperiodeGodkjentEvent["vedtaksperiodeId"].asText()))
+        assertEquals(
+            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING.name,
+            vedtaksperiodeGodkjentEvent["periodetype"].asText()
+        )
+        assertEquals(SAKSBEHANDLERIDENT, vedtaksperiodeGodkjentEvent["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLEREPOST, vedtaksperiodeGodkjentEvent["saksbehandlerEpost"].asText())
     }
 
     @BeforeEach
