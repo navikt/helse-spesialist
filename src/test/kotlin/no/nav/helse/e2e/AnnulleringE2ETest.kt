@@ -2,8 +2,6 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -17,8 +15,6 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
     private val snapshotV1 = """{"arbeidsgivere":[{"perioder":[{"id":"$vedtaksperiodeId1"}]}]}"""
     private val snapshotV2 = """{"arbeidsgivere":[{"perioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
     private val snapshotFinal = """{"arbeidsgivere":[{"something": "value", "perioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
-    private val snapshotDao = SnapshotDao(dataSource)
-    private val vedtakDao = VedtakDao(dataSource)
 
     @Test
     fun `utbetaling annullert oppdaterer alle snapshots på personen`() {

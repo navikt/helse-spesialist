@@ -2,10 +2,8 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import org.junit.jupiter.api.Test
@@ -24,9 +22,6 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SNAPSHOTV1 = "{}"
     }
-
-    private val overstyringDao = OverstyringDao(dataSource)
-    private val oppgaveDao = OppgaveDao(dataSource)
 
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
