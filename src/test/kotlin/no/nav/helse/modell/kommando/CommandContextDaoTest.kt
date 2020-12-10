@@ -7,12 +7,10 @@ import kotliquery.using
 import no.nav.helse.mediator.meldinger.Hendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 
     private companion object {

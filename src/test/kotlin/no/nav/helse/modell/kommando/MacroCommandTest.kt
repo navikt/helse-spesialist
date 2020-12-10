@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
-class MacroCommandTest {
+internal class MacroCommandTest {
     private val constants: MutableList<String> = mutableListOf()
     private var executeCount: Int = 0
     private var resumeCount: Int = 0

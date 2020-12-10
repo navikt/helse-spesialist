@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 
-class UtbetalingE2ETest : AbstractE2ETest() {
+internal class UtbetalingE2ETest : AbstractE2ETest() {
     private companion object {
         private const val ORGNR = "987654321"
         private const val arbeidsgiverFagsystemId = "ASDJ12IA312KLS"

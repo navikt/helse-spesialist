@@ -25,7 +25,7 @@ import java.net.ServerSocket
 import kotlin.test.assertEquals
 
 @TestInstance(Lifecycle.PER_CLASS)
-class OppgaveApiTest {
+internal class OppgaveApiTest {
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
 

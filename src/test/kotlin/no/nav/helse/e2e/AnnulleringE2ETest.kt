@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
-class AnnulleringE2ETest : AbstractE2ETest() {
+internal class AnnulleringE2ETest : AbstractE2ETest() {
     val ORGNR = "987654321"
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
     private val vedtaksperiodeId2: UUID = UUID.randomUUID()

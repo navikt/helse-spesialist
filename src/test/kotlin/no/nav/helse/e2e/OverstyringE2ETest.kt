@@ -9,14 +9,12 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OverstyringE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()

@@ -33,12 +33,10 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractE2ETest : AbstractDatabaseTest() {
+internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val AKTØR = "999999999"

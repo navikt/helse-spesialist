@@ -17,12 +17,15 @@ import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
 import kotlin.random.Random.Default.nextLong
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TildelingApiTest : AbstractApiTest() {
+@TestInstance(PER_CLASS)
+internal class TildelingApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 

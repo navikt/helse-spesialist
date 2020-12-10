@@ -7,13 +7,11 @@ import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TildelingMediatorTest {
+internal class TildelingMediatorTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao)

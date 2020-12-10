@@ -11,10 +11,13 @@ import no.nav.helse.mediator.HendelseMediator
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
 import kotlin.test.assertTrue
 
-class AnnulleringApiTest : AbstractApiTest() {
+@TestInstance(PER_CLASS)
+internal class AnnulleringApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 

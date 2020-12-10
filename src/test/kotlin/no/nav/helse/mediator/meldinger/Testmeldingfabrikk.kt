@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.random.Random.Default.nextLong
 
-class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
+internal class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
     companion object {
         const val OSLO = "0301"
     }
