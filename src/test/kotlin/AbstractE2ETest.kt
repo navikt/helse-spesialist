@@ -13,6 +13,7 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -64,6 +65,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
+    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
@@ -74,9 +76,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
     internal val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
-        every { risikovurdering() }.returns(false)
-        every { automatisering() }.returns(false)
-        every { arbeidsgiverinformasjon() }.returns(true)
+        every { risikovurdering() } returns false
+        every { automatisering() } returns false
+        every { arbeidsgiverinformasjon() } returns true
+        every { arbeidsforhold() } returns false
     }
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -96,6 +99,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
+        arbeidsforholdDao = arbeidsforholdDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,

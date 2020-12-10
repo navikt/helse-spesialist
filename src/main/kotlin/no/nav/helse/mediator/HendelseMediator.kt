@@ -47,7 +47,7 @@ internal class HendelseMediator(
             HentEnhetløsning.HentEnhetRiver(it, this)
             HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
             Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
-            Arbeidsgiverløsning.ArbeidsgiverRiver(it, this)
+            Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(it, this)
             VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
             Overstyring.OverstyringRiver(it, this)

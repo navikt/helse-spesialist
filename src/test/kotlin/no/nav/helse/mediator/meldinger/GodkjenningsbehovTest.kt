@@ -71,6 +71,8 @@ internal class GodkjenningsbehovTest {
         automatisering = mockk(relaxed = true),
         utbetalingDao = utbetalingDao,
         godkjenningMediator = mockk(relaxed = true),
+        arbeidsforholdDao = mockk(relaxed = true),
+        godkjenningMediator = mockk(relaxed = true),
         opptegnelseDao = mockk(relaxed = true)
     )
     private val godkjenningMessage = hendelsefabrikk.godkjenning(

@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -103,6 +104,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
+    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
@@ -126,6 +128,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
+        arbeidsforholdDao = arbeidsforholdDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),

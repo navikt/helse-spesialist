@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class Arbeidsgiverløsning(private val navn: String, private val bransjer: String) {
+internal class Arbeidsgiverinformasjonløsning(private val navn: String, private val bransjer: String) {
     internal fun opprett(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
         arbeidsgiverDao.insertArbeidsgiver(orgnummer, navn, bransjer)
     }
@@ -50,7 +50,7 @@ internal class Arbeidsgiverløsning(private val navn: String, private val bransj
                 hendelseId,
                 contextId,
                 UUID.fromString(packet["@id"].asText()),
-                Arbeidsgiverløsning(
+                Arbeidsgiverinformasjonløsning(
                     packet["@løsning.$behov"].path("navn").asText(),
                     packet["@løsning.$behov"].path("bransjer").asText()
                 ),

@@ -208,7 +208,7 @@ internal class PersonDao(private val dataSource: DataSource) {
         navnId: Long,
         enhetId: Int,
         infotrygdutbetalingerId: Long
-    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
@@ -226,7 +226,7 @@ internal class PersonDao(private val dataSource: DataSource) {
                 )
             ).asUpdateAndReturnGeneratedKey
         )
-    }
+    })
 
     internal fun tilhørerUtlandsenhet(fødselsnummer: String) = erEnhetUtland(findEnhet(fødselsnummer).id)
 

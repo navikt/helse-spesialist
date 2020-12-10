@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Kjønn
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
@@ -52,11 +51,11 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         val personRef = personDao.insertPerson(
             FNR,
             "4321098765432", personinfoRef, "0301".toInt(), utbetalingerRef
-        ) ?: fail { "Kunne ikke opprette person" }
+        )
 
         saksbehandlerDao.persisterSaksbehandler(SAKSBEHANDLER_OID, "Sara Saksbehandler", "sara.saksbehandler@nav.no")
 
-        return personRef.toLong()
+        return personRef
     }
 
 }

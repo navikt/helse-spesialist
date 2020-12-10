@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.meldinger.Arbeidsgiverløsning
+import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 
@@ -33,7 +33,7 @@ internal class OpprettArbeidsgiverCommand(
             log.info("oppretter arbeidsgiver")
             arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent", "Ukjent")
         } else {
-            val arbeidsgiver = context.get<Arbeidsgiverløsning>() ?: return trengerMerInformasjon(context)
+            val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppretter arbeidsgiver")
             arbeidsgiver.opprett(arbeidsgiverDao, orgnummer)
         }

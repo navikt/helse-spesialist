@@ -63,8 +63,8 @@ internal class OpprettPersonCommand(
         context: CommandContext
     ): Boolean {
         logg.info("Oppretter person")
-        val navnId = personinfo.lagre(personDao)
-        val infotrygdutbetalingerId = infotrygdutbetalinger.lagre(personDao)
+        val navnId: Long = personinfo.lagre(personDao)
+        val infotrygdutbetalingerId: Long = infotrygdutbetalinger.lagre(personDao)
 
         if (enhet.tilhørerUtlandEnhet()) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)

@@ -10,6 +10,8 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
+import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
@@ -58,6 +60,7 @@ internal class Godkjenningsbehov(
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     egenAnsattDao: EgenAnsattDao,
+    arbeidsforholdDao: ArbeidsforholdDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
@@ -65,12 +68,31 @@ internal class Godkjenningsbehov(
     godkjenningMediator: GodkjenningMediator
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OpprettKoblingTilHendelseCommand(id, vedtaksperiodeId, vedtakDao),
-        AvbrytContextCommand(vedtaksperiodeId, commandContextDao),
-        KlargjørPersonCommand(fødselsnummer, aktørId, personDao, json, vedtaksperiodeId),
+        OpprettKoblingTilHendelseCommand(
+            hendelseId = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            vedtakDao = vedtakDao
+        ),
+        AvbrytContextCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            commandContextDao = commandContextDao
+        ),
+        KlargjørPersonCommand(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            personDao = personDao,
+            godkjenningsbehovJson = json,
+            vedtaksperiodeId = vedtaksperiodeId
+        ),
         KlargjørArbeidsgiverCommand(
             organisasjonsnummer = organisasjonsnummer,
             arbeidsgiverDao = arbeidsgiverDao,
+            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+        ),
+        KlargjørArbeidsforholdCommand(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            arbeidsforholdDao = arbeidsforholdDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
         KlargjørVedtaksperiodeCommand(
@@ -148,9 +170,12 @@ internal class Godkjenningsbehov(
                     it.demandAll("@behov", listOf("Godkjenning"))
                     it.rejectKey("@løsning")
                     it.requireKey(
-                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId")
-                    it.requireKey("Godkjenning.periodeFom", "Godkjenning.periodeTom",
-                        "Godkjenning.warnings", "Godkjenning.periodetype")
+                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId"
+                    )
+                    it.requireKey(
+                        "Godkjenning.periodeFom", "Godkjenning.periodeTom",
+                        "Godkjenning.warnings", "Godkjenning.periodetype"
+                    )
                 }
             }.register(this)
         }

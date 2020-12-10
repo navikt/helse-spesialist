@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -50,6 +51,8 @@ internal class Hendelsefabrikk(
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val automatisering: Automatisering,
     private val utbetalingDao: UtbetalingDao,
+    private val arbeidsforholdDao: ArbeidsforholdDao
+    private val utbetalingDao: UtbetalingDao,
     private val opptegnelseDao: OpptegnelseDao
 ) : IHendelsefabrikk {
     private companion object {
@@ -90,6 +93,7 @@ internal class Hendelsefabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             reservasjonDao = reservasjonDao,
             egenAnsattDao = egenAnsattDao,
+            arbeidsforholdDao = arbeidsforholdDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
-import no.nav.helse.mediator.meldinger.Arbeidsgiverløsning
+import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import java.time.LocalDate
 
@@ -30,7 +30,7 @@ internal class OppdaterArbeidsgiverCommand(
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        val løsning = context.get<Arbeidsgiverløsning>() ?: return trengerMerInformasjon(context)
+        val løsning = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
         løsning.oppdater(arbeidsgiverDao, orgnummer)
         return true
     }
