@@ -188,7 +188,7 @@ ORDER BY ui.id, u.id DESC
         }
     }
 
-    fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
+    private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
         @Language("PostgreSQL")
         val query = """SELECT * FROM utbetalingslinje WHERE id=:oppdrag_id;"""
 

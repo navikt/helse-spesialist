@@ -64,7 +64,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
         warnings: List<String> = emptyList(),
-        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
+        fødselsnummer: String = this.fødselsnummer,
+        aktørId: String = this.aktørId
     ) =
         nyHendelse(
             id, "behov",

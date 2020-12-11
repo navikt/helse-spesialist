@@ -8,8 +8,6 @@ import kotliquery.using
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -17,7 +15,6 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     private companion object {
         private const val ORGNR = "987654321"
         private const val arbeidsgiverFagsystemId = "ASDJ12IA312KLS"
-        private const val personFagsystemId = "LKJHGFXD256"
 
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
@@ -26,18 +23,18 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     @Test
     fun `utbetaling endret`() {
         vedtaksperiode()
-        sendUtbetalingEndret("UTBETALING", "GODKJENT")
-        sendUtbetalingEndret("ETTERUTBETALING", "OVERFØRT")
-        sendUtbetalingEndret("ANNULLERING", "ANNULLERT")
+        sendUtbetalingEndret("UTBETALING", "GODKJENT", ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("ETTERUTBETALING", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("ANNULLERING", "ANNULLERT", ORGNR, arbeidsgiverFagsystemId)
         assertEquals(3, utbetalinger().size)
     }
 
     @Test
     fun `utbetaling forkastet`() {
         vedtaksperiode()
-        sendUtbetalingEndret("UTBETALING", "FORKASTET", "IKKE_UTBETALT")
+        sendUtbetalingEndret("UTBETALING", "FORKASTET", ORGNR, arbeidsgiverFagsystemId, forrigeStatus = "IKKE_UTBETALT")
         assertEquals(0, utbetalinger().size)
-        sendUtbetalingEndret("UTBETALING", "FORKASTET", "GODKJENT")
+        sendUtbetalingEndret("UTBETALING", "FORKASTET", ORGNR, arbeidsgiverFagsystemId, forrigeStatus = "GODKJENT")
         assertEquals(1, utbetalinger().size)
     }
 
@@ -59,68 +56,6 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 "orgnummer" to ORGNR.toLong()
             )).map { row -> row.string("utbetaling_id_ref") }.asList)
         }
-    }
-
-    private fun sendUtbetalingEndret(type: String, status: String, forrigeStatus: String = status) {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "utbetaling_endret",
-    "@id": "${UUID.randomUUID()}",
-    "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "${UUID.randomUUID()}",
-    "fødselsnummer": "$UNG_PERSON_FNR_2018",
-    "type": "$type",
-    "forrigeStatus": "$forrigeStatus",
-    "gjeldendeStatus": "$status",
-    "organisasjonsnummer": "$ORGNR",
-    "arbeidsgiverOppdrag": {
-      "mottaker": "$ORGNR",
-      "fagområde": "SPREF",
-      "endringskode": "NY",
-      "fagsystemId": "$arbeidsgiverFagsystemId",
-      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
-      "linjer": [
-        {
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": "asdfg",
-          "delytelseId": 2,
-          "refDelytelseId": 1,
-          "datoStatusFom": "${LocalDate.now()}",
-          "endringskode": "NY",
-          "klassekode": "SPREFAG-IOP",
-          "statuskode": "OPPH"
-        },
-        {
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": null,
-          "delytelseId": 3,
-          "refDelytelseId": null,
-          "datoStatusFom": null,
-          "endringskode": "NY",
-          "klassekode": "SPREFAG-IOP",
-          "statuskode": null
-        }
-      ]
-    },
-    "personOppdrag": {
-      "mottaker": "$UNG_PERSON_FNR_2018",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "fagsystemId": "$personFagsystemId",
-      "linjer": []
-    }
-}"""
-
-        testRapid.sendTestMessage(json)
     }
 
     fun vedtaksperiode(vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID, snapshot: String = SNAPSHOTV1) {

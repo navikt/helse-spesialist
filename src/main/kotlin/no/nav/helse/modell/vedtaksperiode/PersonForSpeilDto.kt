@@ -10,6 +10,7 @@ import java.util.*
 
 
 data class PersonForSpeilDto(
+    val utbetalinger: List<UtbetalingForSpeilDto>,
     val aktørId: String,
     val fødselsnummer: String,
     val personinfo: PersoninfoDto,
@@ -44,4 +45,19 @@ data class OverstyringDagForSpeilDto(
 data class RisikovurderingForSpeilDto(
     val arbeidsuførhetvurdering: List<String>,
     val ufullstendig: Boolean
+)
+
+data class UtbetalingForSpeilDto(
+    val status: String,
+    val arbeidsgiverOppdrag: OppdragForSpeilDto
+)
+
+data class OppdragForSpeilDto(
+    val fagsystemId: String,
+    val utbetalingslinjer: List<UtbetalingslinjeForSpeilDto>
+)
+
+data class UtbetalingslinjeForSpeilDto(
+    val fom: LocalDate,
+    val tom: LocalDate
 )

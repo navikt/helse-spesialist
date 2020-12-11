@@ -14,6 +14,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.*
@@ -29,7 +30,8 @@ internal class VedtaksperiodeMediator(
     private val overstyringDao: OverstyringDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
-    private val risikovurderingDao: RisikovurderingDao
+    private val risikovurderingDao: RisikovurderingDao,
+    private val utbetalingDao: UtbetalingDao
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
@@ -57,6 +59,21 @@ internal class VedtaksperiodeMediator(
             val speilSnapshot = measureAsHistogram("byggSpeilSnapshot_findSpeilSnapshot") {
                 requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
                     .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
+            }
+            val utbetalinger = measureAsHistogram("byggSpeilSnapshot_findUtbetaling") {
+                utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
+                    UtbetalingForSpeilDto(
+                        status = utbetaling.status,
+                        arbeidsgiverOppdrag = OppdragForSpeilDto(
+                            fagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId,
+                            utbetalingslinjer = utbetaling.arbeidsgiverOppdrag.linjer.map { linje ->
+                                UtbetalingslinjeForSpeilDto(
+                                    fom = linje.fom,
+                                    tom = linje.tom
+                                )
+                            })
+                    )
+                }
             }
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
                 val arbeidsgivernavn =
@@ -120,7 +137,8 @@ internal class VedtaksperiodeMediator(
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,
-                saksbehandlerepost = saksbehandlerepost
+                saksbehandlerepost = saksbehandlerepost,
+                utbetalinger = utbetalinger
             )
         }
 

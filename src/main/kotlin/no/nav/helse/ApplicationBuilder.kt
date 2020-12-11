@@ -190,7 +190,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             overstyringDao = overstyringDao,
                             oppgaveDao = oppgaveDao,
                             tildelingDao = tildelingDao,
-                            risikovurderingDao = risikovurderingDao
+                            risikovurderingDao = risikovurderingDao,
+                            utbetalingDao = utbetalingDao,
                         )
                     )
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))

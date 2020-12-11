@@ -8,6 +8,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.e2e.UtbetalingE2ETest
 import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
@@ -31,9 +32,11 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
@@ -127,7 +130,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         overstyringDao = overstyringDao,
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
-        risikovurderingDao = risikovurderingDao
+        risikovurderingDao = risikovurderingDao,
+        utbetalingDao = utbetalingDao
     )
 
     @BeforeEach
@@ -152,17 +156,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
         warnings: List<String> = emptyList(),
-        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
+        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        aktørId: String = AKTØR
     ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
-                id,
-                vedtaksperiodeId,
-                orgnr,
-                periodeFom,
-                periodeTom,
-                warnings,
-                periodetype
+                id = id,
+                vedtaksperiodeId = vedtaksperiodeId,
+                organisasjonsnummer = orgnr,
+                periodeFom = periodeFom,
+                periodeTom = periodeTom,
+                warnings = warnings,
+                periodetype = periodetype,
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId
             )
         )
     }
@@ -312,6 +320,76 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
         testRapid.sendTestMessage(løsning.toString())
         return UUID.fromString(løsning.path("@id").asText())
+    }
+
+    protected fun sendUtbetalingEndret(
+        type: String,
+        status: String,
+        orgnr: String,
+        arbeidsgiverFagsystemId: String,
+        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
+        forrigeStatus: String = status,
+        fødselsnummer: String = UNG_PERSON_FNR_2018
+    ) {
+        @Language("JSON")
+        val json = """
+{
+    "@event_name": "utbetaling_endret",
+    "@id": "${UUID.randomUUID()}",
+    "@opprettet": "${LocalDateTime.now()}",
+    "utbetalingId": "${UUID.randomUUID()}",
+    "fødselsnummer": "$fødselsnummer",
+    "type": "$type",
+    "forrigeStatus": "$forrigeStatus",
+    "gjeldendeStatus": "$status",
+    "organisasjonsnummer": "$orgnr",
+    "arbeidsgiverOppdrag": {
+      "mottaker": "$orgnr",
+      "fagområde": "SPREF",
+      "endringskode": "NY",
+      "fagsystemId": "${arbeidsgiverFagsystemId}",
+      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
+      "linjer": [
+        {
+          "fom": "${LocalDate.now()}",
+          "tom": "${LocalDate.now()}",
+          "dagsats": 2000,
+          "lønn": 2000,
+          "grad": 100.00,
+          "refFagsystemId": "asdfg",
+          "delytelseId": 2,
+          "refDelytelseId": 1,
+          "datoStatusFom": "${LocalDate.now()}",
+          "endringskode": "NY",
+          "klassekode": "SPREFAG-IOP",
+          "statuskode": "OPPH"
+        },
+        {
+          "fom": "${LocalDate.now()}",
+          "tom": "${LocalDate.now()}",
+          "dagsats": 2000,
+          "lønn": 2000,
+          "grad": 100.00,
+          "refFagsystemId": null,
+          "delytelseId": 3,
+          "refDelytelseId": null,
+          "datoStatusFom": null,
+          "endringskode": "NY",
+          "klassekode": "SPREFAG-IOP",
+          "statuskode": null
+        }
+      ]
+    },
+    "personOppdrag": {
+      "mottaker": "$UNG_PERSON_FNR_2018",
+      "fagområde": "SP",
+      "endringskode": "NY",
+      "fagsystemId": "$personFagsystemId",
+      "linjer": []
+    }
+}"""
+
+        testRapid.sendTestMessage(json)
     }
 
     protected fun assertHendelse(hendelseId: UUID) {
