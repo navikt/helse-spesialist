@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -33,12 +34,16 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
                 VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json))
         """
         using(sessionOf(dataSource)) {
-            it.run(queryOf(statement, mapOf(
-                "utbetalingIdRef" to utbetalingIdRef,
-                "status" to status,
-                "opprettet" to opprettet,
-                "json" to json
-            )).asExecute)
+            it.run(
+                queryOf(
+                    statement, mapOf(
+                        "utbetalingIdRef" to utbetalingIdRef,
+                        "status" to status,
+                        "opprettet" to opprettet,
+                        "json" to json
+                    )
+                ).asExecute
+            )
         }
     }
 
@@ -67,15 +72,21 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
                 ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
         """
         return using(sessionOf(dataSource, returnGeneratedKey = true)) {
-            requireNotNull(it.run(queryOf(statement, mapOf(
-                "utbetalingId" to utbetalingId,
-                "fodselsnummer" to fødselsnummer.toLong(),
-                "orgnummer" to orgnummer.toLong(),
-                "type" to type,
-                "opprettet" to opprettet,
-                "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,
-                "personFagsystemIdRef" to personFagsystemIdRef
-            )).asUpdateAndReturnGeneratedKey)) { "Kunne ikke opprette utbetaling" }
+            requireNotNull(
+                it.run(
+                    queryOf(
+                        statement, mapOf(
+                            "utbetalingId" to utbetalingId,
+                            "fodselsnummer" to fødselsnummer.toLong(),
+                            "orgnummer" to orgnummer.toLong(),
+                            "type" to type,
+                            "opprettet" to opprettet,
+                            "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,
+                            "personFagsystemIdRef" to personFagsystemIdRef
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            ) { "Kunne ikke opprette utbetaling" }
         }
     }
 
@@ -92,13 +103,17 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
             VALUES (:fagsystemId, :mottaker, CAST(:fagomrade as oppdrag_fagområde), CAST(:endringskode as oppdrag_endringskode), :sisteArbeidsgiverdag)
         """
         return using(sessionOf(dataSource, returnGeneratedKey = true)) {
-            it.run(queryOf(statement, mapOf(
-                "fagsystemId" to fagsystemId,
-                "mottaker" to mottaker,
-                "fagomrade" to fagområde,
-                "endringskode" to endringskode,
-                "sisteArbeidsgiverdag" to sisteArbeidsgiverdag
-            )).asUpdateAndReturnGeneratedKey)
+            it.run(
+                queryOf(
+                    statement, mapOf(
+                        "fagsystemId" to fagsystemId,
+                        "mottaker" to mottaker,
+                        "fagomrade" to fagområde,
+                        "endringskode" to endringskode,
+                        "sisteArbeidsgiverdag" to sisteArbeidsgiverdag
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
         }
     }
 
@@ -124,22 +139,81 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
             CAST(:statuskode as oppdrag_statuskode), :datoStatusFom, :fom, :tom, :dagsats, :lonn, :grad)
         """
         return using(sessionOf(dataSource)) {
-            it.run(queryOf(statement, mapOf(
-                "oppdragIdRef" to oppdragId,
-                "delytelseId" to delytelseId,
-                "refDelytelseId" to refDelytelseId,
-                "refFagsystemId" to refFagsystemId,
-                "endringskode" to endringskode,
-                "klassekode" to klassekode,
-                "statuskode" to statuskode,
-                "datoStatusFom" to datoStatusFom,
-                "fom" to fom,
-                "tom" to tom,
-                "dagsats" to dagsats,
-                "lonn" to lønn,
-                "grad" to grad
-            )).asExecute)
+            it.run(
+                queryOf(
+                    statement, mapOf(
+                        "oppdragIdRef" to oppdragId,
+                        "delytelseId" to delytelseId,
+                        "refDelytelseId" to refDelytelseId,
+                        "refFagsystemId" to refFagsystemId,
+                        "endringskode" to endringskode,
+                        "klassekode" to klassekode,
+                        "statuskode" to statuskode,
+                        "datoStatusFom" to datoStatusFom,
+                        "fom" to fom,
+                        "tom" to tom,
+                        "dagsats" to dagsats,
+                        "lonn" to lønn,
+                        "grad" to grad
+                    )
+                ).asExecute
+            )
         }
     }
 
+    fun findUtbetalinger(fødselsnummer: String): List<UtbetalingDto> {
+        @Language("PostgreSQL")
+        val query = """
+SELECT DISTINCT ON (ui.id) o.id as oppdrag_id, *
+FROM utbetaling_id ui
+         JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
+         JOIN oppdrag o ON ui.arbeidsgiver_fagsystem_id_ref = o.id
+         JOIN person p on ui.person_ref = p.id
+         WHERE fodselsnummer = :fodselsnummer
+ORDER BY ui.id, u.id DESC
+        """.trimIndent()
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
+                .map { row ->
+                    UtbetalingDto(
+                        status = row.string("status"),
+                        arbeidsgiverOppdrag = UtbetalingDto.OppdragDto(
+                            fagsystemId = row.string("fagsystem_id"),
+                            linjer = findUtbetalingslinjer(session, row.long("oppdrag_id"))
+                        )
+                    )
+                }
+                .asList)
+        }
+    }
+
+    fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
+        @Language("PostgreSQL")
+        val query = """SELECT * FROM utbetalingslinje WHERE id=:oppdrag_id;"""
+
+        return session.run(queryOf(query, mapOf("oppdrag_id" to oppdragId))
+            .map { row ->
+                UtbetalingDto.OppdragDto.UtbetalingLinje(
+                    fom = row.localDate("fom"),
+                    tom = row.localDate("tom")
+                )
+            }
+            .asList)
+    }
+
+    data class UtbetalingDto(
+        val status: String,
+        val arbeidsgiverOppdrag: OppdragDto
+    ) {
+        data class OppdragDto(
+            val fagsystemId: String,
+            val linjer: List<UtbetalingLinje>
+        ) {
+            data class UtbetalingLinje(
+                val fom: LocalDate,
+                val tom: LocalDate
+            )
+        }
+    }
 }

@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -68,23 +68,23 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal var oppgaveId: Long = -1
         private set
 
-    protected val personDao = PersonDao(dataSource)
-    protected val oppgaveDao = OppgaveDao(dataSource)
-    protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    protected val snapshotDao = SnapshotDao(dataSource)
-    protected val vedtakDao = VedtakDao(dataSource)
-    protected val warningDao = WarningDao(dataSource)
-    protected val commandContextDao = CommandContextDao(dataSource)
-    protected val tildelingDao = TildelingDao(dataSource)
-    protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    protected val overstyringDao = OverstyringDao(dataSource)
-    protected val reservasjonDao = ReservasjonDao(dataSource)
-    protected val hendelseDao = HendelseDao(dataSource)
-    protected val risikovurderingDao = RisikovurderingDao(dataSource)
-    protected val automatiseringDao = AutomatiseringDao(dataSource)
-    protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
-    protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    protected val egenAnsattDao = EgenAnsattDao(dataSource)
+    internal val personDao = PersonDao(dataSource)
+    internal val oppgaveDao = OppgaveDao(dataSource)
+    internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    internal val snapshotDao = SnapshotDao(dataSource)
+    internal val vedtakDao = VedtakDao(dataSource)
+    internal val warningDao = WarningDao(dataSource)
+    internal val commandContextDao = CommandContextDao(dataSource)
+    internal val tildelingDao = TildelingDao(dataSource)
+    internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    internal val overstyringDao = OverstyringDao(dataSource)
+    internal val reservasjonDao = ReservasjonDao(dataSource)
+    internal val hendelseDao = HendelseDao(dataSource)
+    internal val risikovurderingDao = RisikovurderingDao(dataSource)
+    internal val automatiseringDao = AutomatiseringDao(dataSource)
+    internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
+    internal val egenAnsattDao = EgenAnsattDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import java.util.*
 import javax.sql.DataSource
 
-internal abstract class AbstractDatabaseTest {
+abstract class AbstractDatabaseTest {
 
     companion object {
         private val postgresPath = createTempDir()
