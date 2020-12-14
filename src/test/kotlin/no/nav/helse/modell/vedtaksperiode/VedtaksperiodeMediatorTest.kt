@@ -167,7 +167,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertEquals("OVERFØRT", utbetaling2.status)
         assertEquals(utbetaling1.arbeidsgiverOppdrag, utbetaling2.arbeidsgiverOppdrag)
         assertEquals(utbetaling2.arbeidsgiverOppdrag.fagsystemId, arbeidsgiverFagsystemId)
-        assertEquals(1, utbetaling2.arbeidsgiverOppdrag.utbetalingslinjer.size)
+        assertEquals(2, utbetaling2.arbeidsgiverOppdrag.utbetalingslinjer.size)
     }
 
     @Test

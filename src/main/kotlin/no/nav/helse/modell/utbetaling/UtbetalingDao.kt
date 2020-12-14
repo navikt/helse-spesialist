@@ -190,7 +190,7 @@ ORDER BY ui.id, u.id DESC
 
     private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
         @Language("PostgreSQL")
-        val query = """SELECT * FROM utbetalingslinje WHERE id=:oppdrag_id;"""
+        val query = """SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"""
 
         return session.run(queryOf(query, mapOf("oppdrag_id" to oppdragId))
             .map { row ->
