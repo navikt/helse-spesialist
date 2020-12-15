@@ -398,9 +398,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagOppdragLinje(
-        endringskode: String = "endringskode",
-        klassekode: String = "klassekode",
-        statuskode: String = "statuskode",
+        endringskode: String = "NY", //NY, UENDR, ENDR
+        klassekode: String = "SPREFAG-IOP",
+        statuskode: String = "OPPH",
         datoStatusFom: LocalDate = LocalDate.now(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
@@ -433,7 +433,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         mottaker: String = "mottaker",
         endringskode: String = "ENDR",
         sisteArbeidsgiverdag: LocalDate = LocalDate.now(),
-        linjer: List<Map<String, Any>> = listOf()
+        linjer: List<Map<String, Any>> = listOf(lagOppdragLinje())
     ) =
         mapOf(
             "fagsystemId" to fagsystemId,

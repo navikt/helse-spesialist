@@ -43,7 +43,6 @@ private class AbonnementE2ETest : AbstractE2ETest() {
 
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbelingEndret())
 
-        val alle = opptegnelseDao.alleOpptegnelser()
         val SISTE_SEKVENSID = 0
         val oppdateringer =
             AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
@@ -55,7 +54,6 @@ private class AbonnementE2ETest : AbstractE2ETest() {
                     }.call.receive<List<OpptegnelseDto>>()
                 }
 
-        // opptegnelseDao.finnOpptegnelser(AKTØR.toLong())
         assertEquals(1, oppdateringer.size)
     }
 

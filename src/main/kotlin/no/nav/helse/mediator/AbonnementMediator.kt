@@ -5,9 +5,6 @@ import no.nav.helse.modell.abonnement.OpptegnelseDto
 import java.util.*
 
 internal class AbonnementMediator(private val opptegnelseDao: OpptegnelseDao) {
-
-    internal fun finnAbonnement(saksbehandlerIdent: UUID) = opptegnelseDao.finnAbonnement(saksbehandlerIdent)
-
     internal fun opprettAbonnement(
         saksbehandlerIdent: UUID,
         person_id: Long

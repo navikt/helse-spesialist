@@ -25,16 +25,18 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractApiTest {
 
-    private lateinit var server: TestServer
+    private lateinit var server: TestServerRuntime
     protected lateinit var client: HttpClient
 
-    protected fun setupServer(block: Route.() -> Unit) {
-        server = TestServer( build=block ).also { it.start() }
+    protected fun setupServer(λ: Route.() -> Unit) {
+        server = TestServer(λ = λ).start()
         client = server.restClient()
     }
 
     @AfterAll
-    protected fun tearDown() { server.stop() }
+    protected fun tearDown() {
+        server.close()
+    }
 
     companion object {
         private const val requiredGroup = "required_group"
@@ -61,53 +63,58 @@ abstract class AbstractApiTest {
 
     class TestServer(
         private val httpPort: Int = ServerSocket(0).use { it.localPort },
-        private val build: Route.() -> Unit
+        private val λ: Route.() -> Unit,
     ) {
-        private var server: NettyApplicationEngine? = null
-
-        fun start() {
-            server = createAuthenticatedServer(httpPort, this.build)
-            server?.start(wait = false)
+        fun start(): TestServerRuntime {
+            return TestServerRuntime(λ, httpPort)
         }
-        fun stop() { server?.stop(1000, 1000) }
 
-        fun <T> withAuthenticatedServer(test: suspend (HttpClient) -> T): T {
+        fun <T> withAuthenticatedServer(λ: suspend (HttpClient) -> T): T {
             return runBlocking {
-                var localServer: NettyApplicationEngine? = null;
-                try {
-                    localServer = createAuthenticatedServer(httpPort, build)
-                    localServer.start(wait = false)
-
-                    test(restClient())
-                } finally {
-                    localServer?.stop(1000, 1000)
-                }
+                start().use { λ(it.restClient()) }
             }
         }
+    }
 
-        private fun createAuthenticatedServer(httpPort: Int, build: Route.() -> Unit): NettyApplicationEngine {
-            return embeddedServer(Netty, port = httpPort) {
-                install(ContentNegotiation) {
-                    register(
-                        ContentType.Application.Json,
-                        JacksonConverter(objectMapper)
-                    )
+    class TestServerRuntime(
+        build: Route.() -> Unit,
+        private val httpPort: Int
+    ) : AutoCloseable {
+        private val server = createEmbeddedServer(build, httpPort)
+
+        companion object {
+            private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int) =
+                embeddedServer(Netty, port = httpPort) {
+                    install(ContentNegotiation) {
+                        register(
+                            ContentType.Application.Json,
+                            JacksonConverter(objectMapper)
+                        )
+                    }
+                    val oidcDiscovery =
+                        OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
+                    val azureConfig =
+                        AzureAdAppConfig(
+                            clientId = UUID.randomUUID().toString(),
+                            speilClientId = clientId,
+                            requiredGroup = requiredGroup
+                        )
+                    val jwkProvider = jwtStub.getJwkProviderMock()
+                    azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
+                    routing {
+                        authenticate("saksbehandler-direkte", build = build)
+                    }
                 }
-                val oidcDiscovery =
-                    OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
-                val azureConfig =
-                    AzureAdAppConfig(
-                        clientId = UUID.randomUUID().toString(),
-                        speilClientId = clientId,
-                        requiredGroup = requiredGroup
-                    )
-                val jwkProvider = jwtStub.getJwkProviderMock()
-                azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
-                routing {
-                    authenticate("saksbehandler-direkte", build = build)
-                }
-            }
         }
+
+        init {
+            server.start(wait = false)
+        }
+
+        override fun close() {
+            server.stop(1000, 1000)
+        }
+
 
         fun restClient(): HttpClient {
             return HttpClient {
