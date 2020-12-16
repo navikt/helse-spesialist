@@ -327,6 +327,74 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
+    fun `arbeidsforhold togglet på`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns true
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+    }
+
+    @Test
+    fun `arbeidsforhold togglet av`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns false
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+    }
+
+    @Test
     fun `oppretter ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         val hendelseId1 = håndterGodkjenningsbehov()
         val løsningId =
@@ -435,7 +503,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @BeforeEach
     fun beforeEach() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(false)
+        every { miljøstyrtFeatureToggle.risikovurdering() } returns false
+        every { miljøstyrtFeatureToggle.automatisering() } returns false
+        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns false
     }
 }

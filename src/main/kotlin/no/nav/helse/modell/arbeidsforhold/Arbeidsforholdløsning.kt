@@ -10,10 +10,9 @@ internal class Arbeidsforholdløsning(
     private val startdato: LocalDate,
     private val sluttdato: LocalDate?,
     private val stillingstittel: String,
-    private val stillingsprosent: Int,
-    private val organisasjonsnummer: String
+    private val stillingsprosent: Int
 ) {
-    internal fun lagre(arbeidsforholdDao: ArbeidsforholdDao, fødselsnummer: String): Long =
+    internal fun opprett(arbeidsforholdDao: ArbeidsforholdDao, fødselsnummer: String, organisasjonsnummer: String): Long =
         arbeidsforholdDao.insertArbeidsforhold(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -23,7 +22,7 @@ internal class Arbeidsforholdløsning(
             stillingsprosent = stillingsprosent
         )
 
-    internal fun oppdater(personDao: ArbeidsforholdDao, fødselsnummer: String) {
+    internal fun oppdater(personDao: ArbeidsforholdDao, fødselsnummer: String, organisasjonsnummer: String) {
         personDao.oppdaterArbeidsforhold(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -39,7 +38,7 @@ internal class Arbeidsforholdløsning(
         private val mediator: IHendelseMediator
     ) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-        private val behov = "Arbeidsgiverinformasjon"
+        private val behov = "Arbeidsforhold"
 
         init {
             River(rapidsConnection)
@@ -52,10 +51,9 @@ internal class Arbeidsforholdløsning(
                             "contextId",
                             "hendelseId",
                             "@id",
-                            "@løsning.$behov",
-                            "@løsning.$behov.sluttdato"
+                            "@løsning.$behov"
                         )
-                        message.require("@løsning.$behov.organisasjonsnummer") { it.asText() }
+                        message.interestedIn("@løsning.$behov.sluttdato") { it.asLocalDate() }
                         message.require("@løsning.$behov.startdato") { it.asLocalDate() }
                         message.require("@løsning.$behov.stillingstittel") { it.asInt() }
                         message.require("@løsning.$behov.stillingsprosent") { it.asText() }
@@ -74,17 +72,16 @@ internal class Arbeidsforholdløsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
-                løsning = packet.toArbeidsgiverløsning(),
+                løsning = packet.toArbeidsforholdløsning(),
                 context = context
             )
         }
 
-        private fun JsonMessage.toArbeidsgiverløsning() = Arbeidsforholdløsning(
+        private fun JsonMessage.toArbeidsforholdløsning() = Arbeidsforholdløsning(
             this["@løsning.$behov"].path("startdato").asLocalDate(),
             this["@løsning.$behov"].path("sluttdato").asOptionalLocalDate(),
             this["@løsning.$behov"].path("stillingstittel").asText(),
-            this["@løsning.$behov"].path("stillingsprosent").asInt(),
-            this["@løsning.$behov"].path("organisasjonsnummer").asText(),
+            this["@løsning.$behov"].path("stillingsprosent").asInt()
         )
     }
 }

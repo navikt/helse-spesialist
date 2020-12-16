@@ -39,7 +39,7 @@ internal class OppdaterArbeidsforholdCommand(
 
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<Arbeidsforholdløsning>() ?: return trengerMerInformasjon(context)
-        løsning.oppdater(arbeidsforholdDao, organisasjonsnummer)
+        løsning.oppdater(arbeidsforholdDao, fødselsnummer, organisasjonsnummer)
         return true
     }
 

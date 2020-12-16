@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.*
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -71,6 +72,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal val personDao = PersonDao(dataSource)
     internal val oppgaveDao = OppgaveDao(dataSource)
+    internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
@@ -139,7 +141,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val personinfoId = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
         val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
-        personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)!!
+        personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
         return Persondata(
             personId = personId,
             personinfoId = personinfoId,

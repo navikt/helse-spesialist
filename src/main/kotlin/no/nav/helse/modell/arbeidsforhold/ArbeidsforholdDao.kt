@@ -14,7 +14,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         sluttdato: LocalDate?,
         stillingstittel: String,
         stillingsprosent: Int
-    ): Long = sessionOf(dataSource).use { session ->
+    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
@@ -30,7 +30,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                     query,
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer,
+                        "organisasjonsnummer" to organisasjonsnummer.toLong(),
                         "startdato" to startdato,
                         "sluttdato" to sluttdato,
                         "stillingstittel" to stillingstittel,
@@ -44,7 +44,11 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
     fun findArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String): ArbeidsforholdDto? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
-            val query = ""
+            val query = """
+                SELECT * FROM arbeidsforhold
+                WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer)
+                    AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+            """
             session.run(
                 queryOf(
                     query,
@@ -72,7 +76,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         sluttdato: LocalDate?,
         stillingstittel: String,
         stillingsprosent: Int
-    ) = sessionOf(dataSource).use { session ->
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             UPDATE arbeidsforhold

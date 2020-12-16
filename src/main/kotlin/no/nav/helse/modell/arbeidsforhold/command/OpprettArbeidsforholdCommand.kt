@@ -35,7 +35,7 @@ internal class OpprettArbeidsforholdCommand(
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        context.get<Arbeidsforholdløsning>()?.lagre(arbeidsforholdDao, fødselsnummer) ?: return trengerMerInformasjon(
+        context.get<Arbeidsforholdløsning>()?.opprett(arbeidsforholdDao, fødselsnummer, organisasjonsnummer) ?: return trengerMerInformasjon(
             context
         )
         return true

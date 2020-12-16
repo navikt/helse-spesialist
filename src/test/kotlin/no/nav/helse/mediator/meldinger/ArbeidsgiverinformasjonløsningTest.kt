@@ -2,7 +2,10 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverinformasjonløsningTest {
@@ -10,9 +13,36 @@ internal class ArbeidsgiverinformasjonløsningTest {
         private const val ORGNR = "123456789"
         private const val NAVN = "Bedrift AS"
         private const val BRANSJER = "Spaghettikoding"
+        private const val FØDSELSNUMMER = "12345678910"
+        private const val AKTØRID = "123456789"
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
+    private val mediator = mockk<IHendelseMediator>(relaxed = true)
+    private val rapid = TestRapid()
+    private val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØRID)
+
+    init {
+        Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(rapid, mediator)
+    }
+
+    @BeforeEach
+    internal fun resetTestSetup() {
+        rapid.reset()
+    }
+
+    @Test
+    fun `mottar arbeidsgiverløsning`() {
+        rapid.sendTestMessage(meldingsfabrikk.lagArbeidsgiverinformasjonløsning(navn = NAVN, bransjer = BRANSJER))
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsgiverinformasjonløsning>(), any()) }
+    }
+
+    @Test
+    fun `oppretter løsning`() {
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(NAVN, BRANSJER)
+        arbeidsgiver.opprett(dao, ORGNR)
+        verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
+    }
 
     @Test
     fun `oppdatere navn`() {

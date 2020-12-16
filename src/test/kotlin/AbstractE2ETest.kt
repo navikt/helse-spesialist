@@ -204,6 +204,32 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
 
+    protected fun sendArbeidsforholdløsning(
+        hendelseId: UUID,
+        orgnr: String,
+        vedtaksperiodeId: UUID,
+        contextId: UUID = testRapid.inspektør.contextId(),
+        stillingstittel: String = "en-stillingstittel",
+        stillingsprosent: Int = 100,
+        startdato: LocalDate = LocalDate.now(),
+        sluttdato: LocalDate? = null
+    ): UUID =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagArbeidsforholdløsning(
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    organisasjonsnummer = orgnr,
+                    stillingstittel = stillingstittel,
+                    stillingsprosent = stillingsprosent,
+                    startdato = startdato,
+                    sluttdato = sluttdato
+                )
+            )
+        }
+
     protected fun sendPersoninfoløsning(
         hendelseId: UUID,
         orgnr: String,

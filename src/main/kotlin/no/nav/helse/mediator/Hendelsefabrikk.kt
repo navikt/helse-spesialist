@@ -50,8 +50,7 @@ internal class Hendelsefabrikk(
     private val godkjenningMediator: GodkjenningMediator,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val automatisering: Automatisering,
-    private val utbetalingDao: UtbetalingDao,
-    private val arbeidsforholdDao: ArbeidsforholdDao
+    private val arbeidsforholdDao: ArbeidsforholdDao,
     private val utbetalingDao: UtbetalingDao,
     private val opptegnelseDao: OpptegnelseDao
 ) : IHendelsefabrikk {

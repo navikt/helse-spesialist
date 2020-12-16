@@ -7,6 +7,7 @@ import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
+import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.tildeling.TildelingDao
@@ -48,6 +49,7 @@ internal class HendelseMediator(
             HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
             Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)
             Arbeidsgiverinformasjonløsning.ArbeidsgiverRiver(it, this)
+            Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
             Overstyring.OverstyringRiver(it, this)

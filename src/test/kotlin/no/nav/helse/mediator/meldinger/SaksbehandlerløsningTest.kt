@@ -72,8 +72,7 @@ internal class SaksbehandlerløsningTest {
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
-        arbeidsforholdDao = mockk(relaxed = true)
+        arbeidsforholdDao = mockk(relaxed = true),
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         opptegnelseDao = mockk(relaxed = true)
     )

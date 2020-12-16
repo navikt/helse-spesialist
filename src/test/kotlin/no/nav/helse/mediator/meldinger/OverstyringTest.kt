@@ -59,8 +59,7 @@ internal class OverstyringTest {
         miljøstyrtFeatureToggle = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),
-        godkjenningMediator = mockk(relaxed = true),
-        arbeidsforholdDao = mockk(relaxed = true)
+        arbeidsforholdDao = mockk(relaxed = true),
         godkjenningMediator = mockk(relaxed = true),
         opptegnelseDao = mockk(relaxed = true)
     )
