@@ -166,8 +166,8 @@ internal class PersonDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val infotrygdQuery = """
-                UPDATE infotrygdutbetalinger SET data=CAST(? as json)
-                WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?);
+                UPDATE infotrygdutbetalinger SET data=CAST(:data as json)
+                WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=:fodselsnummer);
             """
             session.run(
                 queryOf(
