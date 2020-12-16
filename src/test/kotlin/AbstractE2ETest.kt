@@ -65,6 +65,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
+    protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     protected val testRapid = TestRapid()
 
@@ -89,7 +90,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         commandContextDao = commandContextDao,
         snapshotDao = SnapshotDao(dataSource),
         reservasjonDao = ReservasjonDao(dataSource),
-        saksbehandlerDao = SaksbehandlerDao(dataSource),
+        saksbehandlerDao = saksbehandlerDao,
         overstyringDao = OverstyringDao(dataSource),
         risikovurderingDao = risikovurderingDao,
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,

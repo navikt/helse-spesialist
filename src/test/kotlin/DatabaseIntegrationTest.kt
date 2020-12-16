@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.*
+import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -85,6 +86,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(dataSource)
+    internal val opptegnelseDao = OpptegnelseDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -139,6 +141,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)!!
         return Persondata(personId, personinfoId, enhetId, infotrygdutbetalingerId)
+    }
+
+    protected fun opprettSaksbehandler(
+        saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
+        navn: String = "SAKSBEHANDLER SAKSBEHANDLERSEN",
+        epost: String = "epost@nav.no"
+    ) {
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOID, navn, epost)
     }
 
     protected fun opprettArbeidsgiver(

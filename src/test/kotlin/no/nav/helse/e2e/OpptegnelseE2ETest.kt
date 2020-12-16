@@ -18,13 +18,14 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-private class AbonnementE2ETest : AbstractE2ETest() {
+private class OpptegnelseE2ETest : AbstractE2ETest() {
     private val SAKSBEHANDLER_ID = UUID.randomUUID()
 
     @Test
     fun `Ved abonnering får du et nytt abonnement`() {
         setupPerson()
         setupArbeidsgiver()
+        setupSaksbehandler()
 
         val respons =
             AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
@@ -41,7 +42,10 @@ private class AbonnementE2ETest : AbstractE2ETest() {
         val abonnementer = opptegnelseDao.finnAbonnement(SAKSBEHANDLER_ID)
         assertEquals(1, abonnementer.size)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbelingEndret())
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbelingEndret(
+            type = "ANNULLERING",
+            status = "UTBETALING_FEILET"
+        ))
 
         val SISTE_SEKVENSID = 0
         val oppdateringer =
@@ -55,10 +59,6 @@ private class AbonnementE2ETest : AbstractE2ETest() {
                 }
 
         assertEquals(1, oppdateringer.size)
-    }
-
-    @Test
-    fun `saksoppdatering blir bare sendt en gang, blir slettet når klient rapporterer at event er sett`() {
     }
 
     private fun setupPerson() {
@@ -88,6 +88,14 @@ private class AbonnementE2ETest : AbstractE2ETest() {
             "123456789",
             "Bedrift AS",
             "BEDRIFTSGREIER OG STÆSJ"
+        )
+    }
+
+    private fun setupSaksbehandler() {
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_ID,
+            "Saksbehandler Saksbehandlersen",
+            "saksbehandler@nav.no"
         )
     }
 }

@@ -14,7 +14,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT o.saksbehandler_id, p.aktor_id, o.siste_sekvensnummer
-            FROM abonnement_for_oppdatering o
+            FROM abonnement_for_opptegnelse o
             JOIN person p ON o.person_id = p.id
             WHERE o.saksbehandler_id = ?;
         """
@@ -33,7 +33,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
     internal fun opprettAbonnement(saksbehandlerId: UUID, aktørId: Long) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO abonnement_for_oppdatering
+            INSERT INTO abonnement_for_opptegnelse
             VALUES (?, (SELECT id FROM person WHERE aktor_id = ?));
         """
         session.run(queryOf(statement, saksbehandlerId, aktørId).asUpdate)
@@ -43,8 +43,8 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
             val statement = """
-            INSERT INTO opptegning (person_id, payload, type)
-            VALUES ((SELECT id from person where fodselsnummer = ?), ?::jsonb, ?);
+            INSERT INTO opptegnelse (person_id, payload, type)
+            VALUES ((SELECT id FROM person WHERE fodselsnummer=?), ?::jsonb, ?);
         """
             session.run(queryOf(statement, fødselsnummer.toLong(), payload.toJson(), type.toString()).asUpdate)
         }
@@ -52,7 +52,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
     internal fun alleOpptegnelser() = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT * FROM opptegning
+            SELECT * FROM opptegnelse;
         """
         return@using session.run(queryOf(statement).map { row ->
             OpptegnelseDto(
@@ -68,13 +68,12 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT o.sekvensnummer, p.aktor_id, o.payload, o.type
-            FROM opptegning o
+            FROM opptegnelse o
             JOIN person p ON o.person_id = p.id
-            JOIN abonnement_for_oppdatering a ON a.person_id = o.person_id
+            JOIN abonnement_for_opptegnelse a ON a.person_id = o.person_id
 
-            WHERE a.saksbehandler_id = ?
-            AND o.SEKVENSNUMMER > a.siste_sekvensnummer
-            ;
+            WHERE a.saksbehandler_id=?
+            AND o.SEKVENSNUMMER > a.siste_sekvensnummer;
         """
         session.run(
             queryOf(statement, saksbehandlerIdent)
@@ -93,9 +92,10 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
             val statement = """
-            UPDATE abonnement_for_oppdatering SET siste_sekvensnummer=?
-            WHERE saksbehandler_id = ?;
-        """
+                UPDATE abonnement_for_opptegnelse
+                SET siste_sekvensnummer=?
+                WHERE saksbehandler_id=?;
+            """
             session.run(queryOf(statement, sisteSekvensId, saksbehandlerIdent).asUpdate)
         }
 }

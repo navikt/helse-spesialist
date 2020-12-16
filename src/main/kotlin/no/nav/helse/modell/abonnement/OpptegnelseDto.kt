@@ -11,14 +11,15 @@ data class OpptegnelseDto(
 
 enum class OpptegnelseType {
     UTBETALING_ANNULLERING_FEILET,
-    ANNULLERING_FEILET,
-    ANNULLERING_OK
+    UTBETALING_ANNULLERING_OK
 }
 
 sealed class PayloadToSpeil {
     abstract fun toJson(): String
 }
 
-data class UtbetalingPayload(val utbetalingId: UUID): PayloadToSpeil() {
-    override fun toJson() = """{ "utbetalingId": "$utbetalingId" }"""
+data class UtbetalingPayload(private val utbetalingId: UUID): PayloadToSpeil() {
+    override fun toJson() = """
+        { "utbetalingId": "$utbetalingId" }
+    """.trimIndent()
 }

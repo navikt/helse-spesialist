@@ -3,8 +3,8 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.modell.abonnement.OpptegnelseType
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.abonnement.OpptegnelseType
 import no.nav.helse.modell.abonnement.UtbetalingPayload
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -80,7 +80,15 @@ internal class UtbetalingEndret(
     }
 
     private fun lagOpptegnelse() {
-        opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), OpptegnelseType.UTBETALING_ANNULLERING_FEILET)
+        if (type == "ANNULLERING") {
+            val opptegnelseType: OpptegnelseType = when (status) {
+                "UTBETALING_FEILET" -> { OpptegnelseType.UTBETALING_ANNULLERING_FEILET }
+                "ANNULERT" -> { OpptegnelseType.UTBETALING_ANNULLERING_OK }
+                else -> return
+            }
+
+            opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), opptegnelseType)
+        }
     }
 
     private companion object {

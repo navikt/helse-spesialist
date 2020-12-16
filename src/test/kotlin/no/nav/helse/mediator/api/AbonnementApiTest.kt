@@ -46,12 +46,12 @@ class AbonnementApiTest : AbstractApiTest() {
         val oppdatering1 = OpptegnelseDto(
             aktørId=11,
             sekvensnummer = 0,
-            type=OpptegnelseType.ANNULLERING_FEILET,
+            type=OpptegnelseType.UTBETALING_ANNULLERING_FEILET,
             payload = """{ "test": "1" }""")
         val oppdatering2 = OpptegnelseDto(
             aktørId=12,
             sekvensnummer = 1,
-            type=OpptegnelseType.ANNULLERING_OK,
+            type=OpptegnelseType.UTBETALING_ANNULLERING_OK,
             payload = """{ "test": "2" }""")
         val expected = listOf(oppdatering1, oppdatering2)
 

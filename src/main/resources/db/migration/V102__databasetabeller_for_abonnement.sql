@@ -1,12 +1,12 @@
-CREATE TABLE abonnement_for_oppdatering
+CREATE TABLE abonnement_for_opptegnelse
 (
-    saksbehandler_id         UUID NOT NULL, -- REFERENCES saksbehandler(oid),
+    saksbehandler_id         UUID NOT NULL REFERENCES saksbehandler(oid),
     person_id                bigint NOT NULL REFERENCES person(id),
     siste_sekvensnummer      integer,
     primary key(saksbehandler_id, person_id)
 );
 
-CREATE TABLE opptegning
+CREATE TABLE opptegnelse
 (
     person_id                bigint NOT NULL REFERENCES person(id),
     sekvensnummer            SERIAL,
@@ -14,4 +14,3 @@ CREATE TABLE opptegning
     type                     varchar(64),
     primary key(person_id, sekvensnummer)
 );
-

@@ -398,7 +398,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagOppdragLinje(
-        endringskode: String = "NY", //NY, UENDR, ENDR
+        endringskode: String = "NY", // [NY, UENDR, ENDR]
         klassekode: String = "SPREFAG-IOP",
         statuskode: String = "OPPH",
         datoStatusFom: LocalDate = LocalDate.now(),
