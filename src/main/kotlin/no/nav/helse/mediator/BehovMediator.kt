@@ -33,7 +33,6 @@ internal class BehovMediator(
     private fun packet(hendelse: Hendelse, context: CommandContext, contextId: UUID) = standardfelter(hendelse).apply {
         this["@behov"] = context.behov().keys.toList()
         this["contextId"] = contextId
-        this["vedtaksperiodeId"] = UUID.randomUUID() // TODO: Behovappene bruker bare "vedtaksperiodeId" til logging
         this["hendelseId"] = hendelse.id
         this["spleisBehovId"] = hendelse.id // only for BC because the need apps requires updating to use "hendelseId"
         putAll(context.behov())
