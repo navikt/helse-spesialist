@@ -17,6 +17,7 @@ import java.util.*
 
 internal class KlargjørArbeidsforholdCommandTest {
     private companion object {
+        const val AKTØR_ID = "00000123123123"
         const val FØDSELSNUMMER = "12345678910"
         const val ORGANISASJONSNUMMER = "987654321"
         const val PERSONID = 1L
@@ -32,6 +33,7 @@ internal class KlargjørArbeidsforholdCommandTest {
 
     private lateinit var context: CommandContext
     private val command = KlargjørArbeidsforholdCommand(
+        aktørId = AKTØR_ID,
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         arbeidsforholdDao = arbeidsforholdDao,

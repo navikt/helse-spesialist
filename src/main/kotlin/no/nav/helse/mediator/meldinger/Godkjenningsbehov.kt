@@ -90,6 +90,7 @@ internal class Godkjenningsbehov(
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
         KlargjørArbeidsforholdCommand(
+            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             arbeidsforholdDao = arbeidsforholdDao,

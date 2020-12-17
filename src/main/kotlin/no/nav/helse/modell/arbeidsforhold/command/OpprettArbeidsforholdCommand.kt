@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 internal class OpprettArbeidsforholdCommand(
+    private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
     private val organisasjonsnummer: String,
@@ -45,7 +46,8 @@ internal class OpprettArbeidsforholdCommand(
         logg.info("Trenger mer informasjon for å opprette arbeidsforhold")
         context.behov(
             "Arbeidsforhold", mapOf(
-                "organisasjonnummer" to organisasjonsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
                 "fom" to LocalDate.now().minusYears(3),
                 "tom" to LocalDate.now()
             )

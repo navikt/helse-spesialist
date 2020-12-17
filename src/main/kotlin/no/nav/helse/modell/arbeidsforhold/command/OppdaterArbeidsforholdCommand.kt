@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 internal class OppdaterArbeidsforholdCommand(
+    private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
@@ -47,6 +48,7 @@ internal class OppdaterArbeidsforholdCommand(
         logg.info("Trenger mer informasjon for å oppdatere arbeidsforhold")
         context.behov(
             "Arbeidsforhold", mapOf(
+                "aktørId" to aktørId,
                 "organisasjonnummer" to organisasjonsnummer,
                 "fom" to LocalDate.now().minusYears(3),
                 "tom" to LocalDate.now()
