@@ -27,38 +27,40 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         setupArbeidsgiver()
         setupSaksbehandler()
 
-        val respons =
-            AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
-                .withAuthenticatedServer {
-                    it.post<HttpResponse>("/api/abonner/$AKTØR") {
+        AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
+            .withAuthenticatedServer { server ->
+                val respons =
+                    server.post<HttpResponse>("/api/abonner/$AKTØR") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
                     }
-                }
 
-        assertEquals(HttpStatusCode.OK, respons.status)
 
-        val abonnementer = opptegnelseDao.finnAbonnement(SAKSBEHANDLER_ID)
-        assertEquals(1, abonnementer.size)
+                assertEquals(HttpStatusCode.OK, respons.status)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbelingEndret(
-            type = "ANNULLERING",
-            status = "UTBETALING_FEILET"
-        ))
+                val abonnementer = opptegnelseDao.finnAbonnement(SAKSBEHANDLER_ID)
+                assertEquals(1, abonnementer.size)
 
-        val SISTE_SEKVENSID = 0
-        val oppdateringer =
-            AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
-                .withAuthenticatedServer {
-                    it.get<HttpResponse>("/api/oppdatering/${SISTE_SEKVENSID}") {
-                        contentType(ContentType.Application.Json)
-                        accept(ContentType.Application.Json)
-                        authentication(SAKSBEHANDLER_ID)
-                    }.call.receive<List<OpptegnelseDto>>()
-                }
+                testRapid.sendTestMessage(
+                    meldingsfabrikk.lagUtbelingEndret(
+                        type = "ANNULLERING",
+                        status = "UTBETALING_FEILET"
+                    )
+                )
 
-        assertEquals(1, oppdateringer.size)
+                val SISTE_SEKVENSID = 0
+                val oppdateringer =
+                    server
+                        .get<HttpResponse>("/api/oppdatering/${SISTE_SEKVENSID}") {
+                            contentType(ContentType.Application.Json)
+                            accept(ContentType.Application.Json)
+                            authentication(SAKSBEHANDLER_ID)
+                        }.call.receive<List<OpptegnelseDto>>()
+
+
+                assertEquals(1, oppdateringer.size)
+            }
     }
 
     private fun setupPerson() {
