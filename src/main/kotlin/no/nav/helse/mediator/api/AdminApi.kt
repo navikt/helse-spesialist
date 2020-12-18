@@ -11,29 +11,33 @@ import no.nav.helse.mediator.HendelseMediator
 
 internal fun Application.adminApi(mediator: HendelseMediator) {
     routing {
-        authenticate("admin") {
-            route("/admin") {
-                post("/rollback") {
-                    val rollback = call.receive<Array<TilbakerullingDTO>>()
-                    rollback.forEach {
-                        mediator.håndter(it)
-                    }
-                    call.respond(HttpStatusCode.OK)
+        adminRoute(mediator)
+    }
+}
+
+internal fun Route.adminRoute(mediator: HendelseMediator) {
+    authenticate("admin") {
+        route("/admin") {
+            post("/rollback") {
+                val rollback = call.receive<Array<TilbakerullingDTO>>()
+                rollback.forEach {
+                    mediator.håndter(it)
                 }
-                post("/rollback_delete") {
-                    val rollback = call.receive<Array<TilbakerullingMedSlettingDTO>>()
-                    rollback.forEach {
-                        mediator.håndter(it)
-                    }
-                    call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK)
+            }
+            post("/rollback_delete") {
+                val rollback = call.receive<Array<TilbakerullingMedSlettingDTO>>()
+                rollback.forEach {
+                    mediator.håndter(it)
                 }
-                post("/send") {
-                    val request = call.receive<ArrayNode>()
-                    request.forEach {  node ->
-                        mediator.sendMeldingPåTopic(node)
-                    }
-                    call.respond(HttpStatusCode.OK)
+                call.respond(HttpStatusCode.OK)
+            }
+            post("/send") {
+                val request = call.receive<ArrayNode>()
+                request.forEach { node ->
+                    mediator.sendMeldingPåTopic(node)
                 }
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

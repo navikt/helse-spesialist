@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.AbonnementMediator
+import no.nav.helse.mediator.api.ApiTestUtil.Companion.authentication
 import no.nav.helse.modell.abonnement.OpptegnelseDto
 import no.nav.helse.modell.abonnement.OpptegnelseType
 import org.junit.jupiter.api.BeforeAll

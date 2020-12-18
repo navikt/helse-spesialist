@@ -6,8 +6,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.helse.mediator.AbonnementMediator
-import no.nav.helse.mediator.api.AbstractApiTest
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.mediator.api.ApiTestUtil.Companion.authentication
+import no.nav.helse.mediator.api.ApiTestUtil
 import no.nav.helse.mediator.api.abonnementApi
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.abonnement.OpptegnelseDto
@@ -27,7 +27,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         setupArbeidsgiver()
         setupSaksbehandler()
 
-        AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
+        ApiTestUtil.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
             .withAuthenticatedServer { server ->
                 val respons =
                     server.post<HttpResponse>("/api/abonner/$AKTØR") {
