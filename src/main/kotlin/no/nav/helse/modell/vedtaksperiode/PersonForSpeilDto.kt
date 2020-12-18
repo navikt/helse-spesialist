@@ -48,11 +48,13 @@ data class RisikovurderingForSpeilDto(
 )
 
 data class UtbetalingForSpeilDto(
+    val type: String,
     val status: String,
     val arbeidsgiverOppdrag: OppdragForSpeilDto
 )
 
 data class OppdragForSpeilDto(
+    val organisasjonsnummer: String,
     val fagsystemId: String,
     val utbetalingslinjer: List<UtbetalingslinjeForSpeilDto>
 )

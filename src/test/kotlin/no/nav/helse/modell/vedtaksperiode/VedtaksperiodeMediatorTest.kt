@@ -165,8 +165,10 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
         val utbetaling2 = speilSnapshot2.utbetalinger.first()
         assertEquals("OVERFØRT", utbetaling2.status)
+        assertEquals("UTBETALING", utbetaling2.type)
         assertEquals(utbetaling1.arbeidsgiverOppdrag, utbetaling2.arbeidsgiverOppdrag)
         assertEquals(utbetaling2.arbeidsgiverOppdrag.fagsystemId, arbeidsgiverFagsystemId)
+        assertEquals(ORGNR, utbetaling2.arbeidsgiverOppdrag.organisasjonsnummer)
         assertEquals(2, utbetaling2.arbeidsgiverOppdrag.utbetalingslinjer.size)
     }
 

@@ -63,8 +63,10 @@ internal class VedtaksperiodeMediator(
             val utbetalinger = measureAsHistogram("byggSpeilSnapshot_findUtbetaling") {
                 utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
                     UtbetalingForSpeilDto(
+                        type = utbetaling.type,
                         status = utbetaling.status,
                         arbeidsgiverOppdrag = OppdragForSpeilDto(
+                            organisasjonsnummer = utbetaling.arbeidsgiverOppdrag.organisasjonsnummer,
                             fagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId,
                             utbetalingslinjer = utbetaling.arbeidsgiverOppdrag.linjer.map { linje ->
                                 UtbetalingslinjeForSpeilDto(

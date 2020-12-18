@@ -169,6 +169,7 @@ FROM utbetaling_id ui
          JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
          JOIN oppdrag o ON ui.arbeidsgiver_fagsystem_id_ref = o.id
          JOIN person p on ui.person_ref = p.id
+         JOIN arbeidsgiver a on ui.arbeidsgiver_ref = a.id
          WHERE fodselsnummer = :fodselsnummer
 ORDER BY ui.id, u.id DESC
         """.trimIndent()
@@ -177,8 +178,10 @@ ORDER BY ui.id, u.id DESC
             session.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
                 .map { row ->
                     UtbetalingDto(
+                        type = row.string("type"),
                         status = row.string("status"),
                         arbeidsgiverOppdrag = UtbetalingDto.OppdragDto(
+                            organisasjonsnummer = row.string("orgnummer"),
                             fagsystemId = row.string("fagsystem_id"),
                             linjer = findUtbetalingslinjer(session, row.long("oppdrag_id"))
                         )
@@ -203,10 +206,12 @@ ORDER BY ui.id, u.id DESC
     }
 
     data class UtbetalingDto(
+        val type: String,
         val status: String,
         val arbeidsgiverOppdrag: OppdragDto
     ) {
         data class OppdragDto(
+            val organisasjonsnummer: String,
             val fagsystemId: String,
             val linjer: List<UtbetalingLinje>
         ) {

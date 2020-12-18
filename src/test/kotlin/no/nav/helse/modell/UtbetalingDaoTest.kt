@@ -33,7 +33,9 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val utbetaling = utbetalinger.first()
 
         assertEquals("UTBETALT", utbetaling.status)
+        assertEquals("UTBETALING", utbetaling.type)
         assertEquals(fagsystemId, utbetaling.arbeidsgiverOppdrag.fagsystemId)
+        assertEquals(ORGNUMMER, utbetaling.arbeidsgiverOppdrag.organisasjonsnummer)
         assertEquals(1, utbetaling.arbeidsgiverOppdrag.linjer.size)
     }
 
