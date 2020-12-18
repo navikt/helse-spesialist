@@ -136,11 +136,13 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
             "@løsning" to mapOf(
-                "Arbeidsforhold" to mapOf(
-                    "stillingstittel" to stillingstittel,
-                    "stillingsprosent" to stillingsprosent,
-                    "startdato" to startdato,
-                    "sluttdato" to sluttdato
+                "Arbeidsforhold" to listOf(
+                    mapOf(
+                        "stillingstittel" to stillingstittel,
+                        "stillingsprosent" to stillingsprosent,
+                        "startdato" to startdato,
+                        "sluttdato" to sluttdato
+                    )
                 )
             )
         )

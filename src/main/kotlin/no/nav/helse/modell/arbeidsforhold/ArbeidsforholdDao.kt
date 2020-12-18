@@ -41,7 +41,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         )
     }
 
-    fun findArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String): ArbeidsforholdDto? =
+    fun findArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String): List<ArbeidsforholdDto> =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
@@ -65,7 +65,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                         stillingsprosent = row.int("stillingsprosent"),
                         stillingstittel = row.string("stillingstittel")
                     )
-                }.asSingle
+                }.asList
             )
         }
 

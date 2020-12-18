@@ -28,7 +28,7 @@ internal class OpprettArbeidsforholdCommand(
     override fun resume(context: CommandContext) = behandle(context)
 
     private fun arbeidsforholdOpprettet() =
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer) != null
+        arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer).isNotEmpty()
 
     private fun ignorer(): Boolean {
         logg.info(if (miljøstyrtFeatureToggle.arbeidsforhold()) "Arbeidsforhold togglet av" else "Arbeidsforhold finnes fra før")

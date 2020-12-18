@@ -49,7 +49,16 @@ internal class ArbeidsforholdløsningTest {
 
     @Test
     fun `oppretter løsning`() {
-        val arbeidsforhold = Arbeidsforholdløsning(STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        val arbeidsforhold = Arbeidsforholdløsning(
+            listOf(
+                Arbeidsforholdløsning.Løsning(
+                    STARTDATO,
+                    SLUTTDATO,
+                    STILLINGSTITTEL,
+                    STILLINGSPROSENT
+                )
+            )
+        )
         arbeidsforhold.opprett(dao, FØDSELSNUMMER, ORGNR)
         verify(exactly = 1) {
             dao.insertArbeidsforhold(
@@ -65,7 +74,16 @@ internal class ArbeidsforholdløsningTest {
 
     @Test
     fun `oppdaterer løsning`() {
-        val arbeidsforhold = Arbeidsforholdløsning(STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        val arbeidsforhold = Arbeidsforholdløsning(
+            listOf(
+                Arbeidsforholdløsning.Løsning(
+                    STARTDATO,
+                    SLUTTDATO,
+                    STILLINGSTITTEL,
+                    STILLINGSPROSENT
+                )
+            )
+        )
         arbeidsforhold.oppdater(dao, FØDSELSNUMMER, ORGNR)
         verify(exactly = 1) {
             dao.oppdaterArbeidsforhold(

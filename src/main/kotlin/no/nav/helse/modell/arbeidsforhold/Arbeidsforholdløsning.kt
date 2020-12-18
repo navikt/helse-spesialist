@@ -1,5 +1,6 @@
 package no.nav.helse.modell.arbeidsforhold
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
@@ -7,30 +8,43 @@ import java.time.LocalDate
 import java.util.*
 
 internal class Arbeidsforholdløsning(
-    private val startdato: LocalDate,
-    private val sluttdato: LocalDate?,
-    private val stillingstittel: String,
-    private val stillingsprosent: Int
+    private val løsninger: List<Løsning>
 ) {
-    internal fun opprett(arbeidsforholdDao: ArbeidsforholdDao, fødselsnummer: String, organisasjonsnummer: String): Long =
-        arbeidsforholdDao.insertArbeidsforhold(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            startdato = startdato,
-            sluttdato = sluttdato,
-            stillingstittel = stillingstittel,
-            stillingsprosent = stillingsprosent
-        )
+
+    data class Løsning(
+        val startdato: LocalDate,
+        val sluttdato: LocalDate?,
+        val stillingstittel: String,
+        val stillingsprosent: Int
+    )
+
+    internal fun opprett(
+        arbeidsforholdDao: ArbeidsforholdDao,
+        fødselsnummer: String,
+        organisasjonsnummer: String
+    ) =
+        løsninger.forEach {
+            arbeidsforholdDao.insertArbeidsforhold(
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                startdato = it.startdato,
+                sluttdato = it.sluttdato,
+                stillingstittel = it.stillingstittel,
+                stillingsprosent = it.stillingsprosent
+            )
+        }
 
     internal fun oppdater(personDao: ArbeidsforholdDao, fødselsnummer: String, organisasjonsnummer: String) {
-        personDao.oppdaterArbeidsforhold(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            startdato = startdato,
-            sluttdato = sluttdato,
-            stillingstittel = stillingstittel,
-            stillingsprosent = stillingsprosent
-        )
+        løsninger.forEach {
+            personDao.oppdaterArbeidsforhold(
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                startdato = it.startdato,
+                sluttdato = it.sluttdato,
+                stillingstittel = it.stillingstittel,
+                stillingsprosent = it.stillingsprosent
+            )
+        }
     }
 
     internal class ArbeidsforholdRiver(
@@ -53,10 +67,6 @@ internal class Arbeidsforholdløsning(
                             "@id",
                             "@løsning.$behov"
                         )
-                        message.interestedIn("@løsning.$behov.sluttdato") { it.asLocalDate() }
-                        message.require("@løsning.$behov.startdato") { it.asLocalDate() }
-                        message.require("@løsning.$behov.stillingstittel") { it.asInt() }
-                        message.require("@løsning.$behov.stillingsprosent") { it.asText() }
                     }
                 }.register(this)
         }
@@ -72,16 +82,20 @@ internal class Arbeidsforholdløsning(
                 hendelseId = hendelseId,
                 contextId = contextId,
                 behovId = UUID.fromString(packet["@id"].asText()),
-                løsning = packet.toArbeidsforholdløsning(),
+                løsning = packet.toArbeidsforholdløsninger(),
                 context = context
             )
         }
 
-        private fun JsonMessage.toArbeidsforholdløsning() = Arbeidsforholdløsning(
-            this["@løsning.$behov"].path("startdato").asLocalDate(),
-            this["@løsning.$behov"].path("sluttdato").asOptionalLocalDate(),
-            this["@løsning.$behov"].path("stillingstittel").asText(),
-            this["@løsning.$behov"].path("stillingsprosent").asInt()
+        private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning =
+            Arbeidsforholdløsning(this["@løsning.$behov"].map { it.toArbeidsforholdløsning() })
+
+        private fun JsonNode.toArbeidsforholdløsning(): Løsning = Løsning(
+            this["startdato"].asLocalDate(),
+            this["sluttdato"].asOptionalLocalDate(),
+            this["stillingstittel"].asText(),
+            this["stillingsprosent"].asInt()
         )
+
     }
 }

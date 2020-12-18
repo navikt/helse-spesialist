@@ -9,7 +9,8 @@ import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -52,7 +53,18 @@ internal class KlargjørArbeidsforholdCommandTest {
         arbeidsforholdFinnesIkke()
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
-        context.add(Arbeidsforholdløsning(STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT))
+        context.add(
+            Arbeidsforholdløsning(
+                listOf(
+                    Arbeidsforholdløsning.Løsning(
+                        STARTDATO,
+                        SLUTTDATO,
+                        STILLINGSTITTEL,
+                        STILLINGSPROSENT
+                    )
+                )
+            )
+        )
         assertTrue(command.resume(context))
         verify(exactly = 1) {
             arbeidsforholdDao.insertArbeidsforhold(
@@ -71,7 +83,18 @@ internal class KlargjørArbeidsforholdCommandTest {
         arbeidsforholdErUtdatert()
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
-        context.add(Arbeidsforholdløsning(STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT))
+        context.add(
+            Arbeidsforholdløsning(
+                listOf(
+                    Arbeidsforholdløsning.Løsning(
+                        STARTDATO,
+                        SLUTTDATO,
+                        STILLINGSTITTEL,
+                        STILLINGSPROSENT
+                    )
+                )
+            )
+        )
         assertTrue(command.resume(context))
         verify(exactly = 1) {
             arbeidsforholdDao.oppdaterArbeidsforhold(
@@ -111,7 +134,16 @@ internal class KlargjørArbeidsforholdCommandTest {
     private fun arbeidsforholdFinnes() {
         every {
             arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER)
-        } returns ArbeidsforholdDto(PERSONID, ARBEIDSGIVERID, STARTDATO, SLUTTDATO, STILLINGSPROSENT, STILLINGSTITTEL)
+        } returns listOf(
+            ArbeidsforholdDto(
+                PERSONID,
+                ARBEIDSGIVERID,
+                STARTDATO,
+                SLUTTDATO,
+                STILLINGSPROSENT,
+                STILLINGSTITTEL
+            )
+        )
         every {
             arbeidsforholdDao.findArbeidsforholdSistOppdatert(
                 FØDSELSNUMMER,
@@ -123,7 +155,16 @@ internal class KlargjørArbeidsforholdCommandTest {
     private fun arbeidsforholdErUtdatert() {
         every {
             arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER)
-        } returns ArbeidsforholdDto(PERSONID, ARBEIDSGIVERID, STARTDATO, SLUTTDATO, STILLINGSPROSENT, STILLINGSTITTEL)
+        } returns listOf(
+            ArbeidsforholdDto(
+                PERSONID,
+                ARBEIDSGIVERID,
+                STARTDATO,
+                SLUTTDATO,
+                STILLINGSPROSENT,
+                STILLINGSTITTEL
+            )
+        )
         every {
             arbeidsforholdDao.findArbeidsforholdSistOppdatert(
                 FØDSELSNUMMER,
@@ -133,6 +174,6 @@ internal class KlargjørArbeidsforholdCommandTest {
     }
 
     private fun arbeidsforholdFinnesIkke() {
-        every { arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER) } returns null
+        every { arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER) } returns emptyList()
     }
 }

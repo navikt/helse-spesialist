@@ -20,7 +20,7 @@ internal class ArbeidsforholdDaoTest: DatabaseIntegrationTest() {
         opprettPerson(FØDSELSNUMMER)
         opprettArbeidsgiver(ORGANISASJONSNUMMER)
         arbeidsforholdDao.insertArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
-        arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER).also {
+        arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER).first().also {
             assertEquals(STILLINGSPROSENT, it?.stillingsprosent)
             assertEquals(STILLINGSTITTEL, it?.stillingstittel)
             assertEquals(STARTDATO, it?.startdato)
@@ -38,7 +38,7 @@ internal class ArbeidsforholdDaoTest: DatabaseIntegrationTest() {
         opprettArbeidsgiver(ORGANISASJONSNUMMER)
         arbeidsforholdDao.insertArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
         arbeidsforholdDao.oppdaterArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, nyStartdato, nySluttdato, nyStillingstittel, nyStillingsprosent)
-        arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER).also {
+        arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER).first().also {
             assertEquals(nyStillingsprosent, it?.stillingsprosent)
             assertEquals(nyStillingstittel, it?.stillingstittel)
             assertEquals(nyStartdato, it?.startdato)
@@ -61,11 +61,11 @@ internal class ArbeidsforholdDaoTest: DatabaseIntegrationTest() {
         arbeidsforholdDao.insertArbeidsforhold(fødselsnummer2, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, stillingstittel2, STILLINGSPROSENT)
         arbeidsforholdDao.insertArbeidsforhold(fødselsnummer3, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, stillingstittel3, STILLINGSPROSENT)
 
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer2, ORGANISASJONSNUMMER).also {
+        arbeidsforholdDao.findArbeidsforhold(fødselsnummer2, ORGANISASJONSNUMMER).first().also {
             assertEquals(stillingstittel2, it?.stillingstittel)
         }
 
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer3, ORGANISASJONSNUMMER).also {
+        arbeidsforholdDao.findArbeidsforhold(fødselsnummer3, ORGANISASJONSNUMMER).first().also {
             assertEquals(stillingstittel3, it?.stillingstittel)
         }
     }
