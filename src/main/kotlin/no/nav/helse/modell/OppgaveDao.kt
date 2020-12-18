@@ -51,7 +51,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 .map { row ->
                     Oppgave(
                         id = oppgaveId,
-                        navn = row.string("type"),
+                        type = row.string("type"),
                         status = enumValueOf(row.string("status")),
                         vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
                     )
@@ -72,7 +72,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 .map { row ->
                     Oppgave(
                         id = row.long("id"),
-                        navn = row.string("type"),
+                        type = row.string("type"),
                         status = enumValueOf(row.string("status")),
                         vedtaksperiodeId = vedtaksperiodeId
                     )
@@ -94,7 +94,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 .map { row ->
                     Oppgave(
                         id = row.long("id"),
-                        navn = row.string("type"),
+                        type = row.string("type"),
                         status = enumValueOf(row.string("status")),
                         vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
                     )
