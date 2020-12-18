@@ -1,7 +1,7 @@
 package no.nav.helse.modell.risiko
 
-import no.nav.helse.modell.vedtaksperiode.RisikovurderingForSpeilDto
 import no.nav.helse.modell.automatisering.AutomatiseringValidering
+import no.nav.helse.modell.vedtaksperiode.RisikovurderingForSpeilDto
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,7 +20,7 @@ class Risikovurdering private constructor(
 
     fun speilDto() = RisikovurderingForSpeilDto(arbeidsuførhetvurdering, ufullstendig)
 
-    override fun valider() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
+    override fun erAautomatiserbar() = arbeidsuførhetvurdering.isEmpty() && !ufullstendig
     override fun error() = "Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er ikke oppfylt"
 }
 

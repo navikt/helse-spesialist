@@ -19,21 +19,21 @@ internal class RisikovurderingTest {
     fun `Fullstending vurdering kan behandles automatisk`() {
         every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto())
         val risikovurdering = requireNotNull(risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
-        assertTrue(risikovurdering.valider())
+        assertTrue(risikovurdering.erAautomatiserbar())
     }
 
     @Test
     fun `Ufullstendig vurdering kan ikke behandles automatisk`() {
         every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto(ufullstendig = true))
         val risikovurdering = requireNotNull(risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
-        assertFalse(risikovurdering.valider())
+        assertFalse(risikovurdering.erAautomatiserbar())
     }
 
     @Test
     fun `Fullstending vurdering med 8-4 feil kan ikke behandles automatisk`() {
         every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto(arbeidsuførhetsvurdering = listOf("8-4 feil")))
         val risikovurdering = requireNotNull(risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
-        assertFalse(risikovurdering.valider())
+        assertFalse(risikovurdering.erAautomatiserbar())
     }
 
     private fun risikovurderingDto(arbeidsuførhetsvurdering: List<String> = emptyList(), ufullstendig: Boolean = false) = RisikovurderingDto(

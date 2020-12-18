@@ -16,11 +16,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
+import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -110,7 +111,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
 
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
-    private val stikkprøveVelger = { false }
+    private val plukkTilManuell: PlukkTilManuell = { false }
 
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
@@ -142,7 +143,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             personDao = personDao,
-            stikkprøveVelger = stikkprøveVelger
+            plukkTilManuell = plukkTilManuell
         ),
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao

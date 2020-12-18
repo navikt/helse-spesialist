@@ -36,7 +36,7 @@ internal class AutomatiseringTest {
     private val miljøstyrtFeatureToggleMock = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
-    private val stikkprøveMock = mockk<StikkprøveVelger>()
+    private val plukkTilManuellMock = mockk<PlukkTilManuell>()
 
     private val automatisering =
         Automatisering(
@@ -48,7 +48,7 @@ internal class AutomatiseringTest {
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock,
             personDao = personDaoMock,
-            stikkprøveVelger = stikkprøveMock
+            plukkTilManuell = plukkTilManuellMock
         )
 
     companion object {
@@ -67,7 +67,7 @@ internal class AutomatiseringTest {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         every { miljøstyrtFeatureToggleMock.automatisering() } returns true
         every { miljøstyrtFeatureToggleMock.risikovurdering() } returns true
-        every { stikkprøveMock() } returns false
+        every { plukkTilManuellMock() } returns false
     }
 
     @Test
@@ -152,7 +152,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
-        every { stikkprøveMock() } returns true
+        every { plukkTilManuellMock() } returns true
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
 
@@ -161,7 +161,7 @@ internal class AutomatiseringTest {
         every { miljøstyrtFeatureToggleMock.automatisering() } returns false
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { }
         verify(exactly = 0) {
-            stikkprøveMock()
+            plukkTilManuellMock()
         }
     }
 

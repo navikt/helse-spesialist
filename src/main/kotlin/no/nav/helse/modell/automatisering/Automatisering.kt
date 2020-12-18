@@ -18,17 +18,21 @@ internal class Automatisering(
     private val egenAnsattDao: EgenAnsattDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val personDao: PersonDao,
-    private val stikkprøveVelger: StikkprøveVelger
+    private val plukkTilManuell: PlukkTilManuell
 ) {
 
     internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId).sjekkForStikkprøve()
 
         problemer.isEmpty().let { skalAutomatiskGodkjennes ->
             if (skalAutomatiskGodkjennes) onAutomatiserbar()
             automatiseringDao.lagre(skalAutomatiskGodkjennes, problemer, vedtaksperiodeId, hendelseId)
         }
     }
+
+    private fun List<String>.sjekkForStikkprøve() =
+        if (isEmpty() && plukkTilManuell()) this + "Plukket ut til manuell saksbehandling"
+        else this
 
     private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): List<String> {
         val risikovurdering =
@@ -51,10 +55,7 @@ internal class Automatisering(
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Automatisering er skrudd av") { miljøstyrtFeatureToggle.automatisering() }
-        ).let {
-            if (it.isEmpty() && stikkprøveVelger()) it + "Saken er plukket ut til manuell saksbehandling"
-            else it
-        }
+        )
     }
 
     internal fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
@@ -62,21 +63,21 @@ internal class Automatisering(
 
     private fun valider(vararg valideringer: AutomatiseringValidering) =
         valideringer.toList()
-            .filterNot(AutomatiseringValidering::valider)
+            .filterNot(AutomatiseringValidering::erAautomatiserbar)
             .map(AutomatiseringValidering::error)
 
-    private fun validering(error: String, validering: () -> Boolean) =
+    private fun validering(error: String, automatiserbar: () -> Boolean) =
         object : AutomatiseringValidering {
-            override fun valider() = validering()
+            override fun erAautomatiserbar() = automatiserbar()
             override fun error() = error
         }
 
 }
 
-typealias StikkprøveVelger = () -> Boolean
+internal typealias PlukkTilManuell = () -> Boolean
 
-interface AutomatiseringValidering {
-    fun valider(): Boolean
+internal interface AutomatiseringValidering {
+    fun erAautomatiserbar(): Boolean
     fun error(): String
 }
 
