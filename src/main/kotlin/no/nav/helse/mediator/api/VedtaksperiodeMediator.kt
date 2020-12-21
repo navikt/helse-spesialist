@@ -9,6 +9,7 @@ import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -31,7 +32,8 @@ internal class VedtaksperiodeMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val risikovurderingDao: RisikovurderingDao,
-    private val utbetalingDao: UtbetalingDao
+    private val utbetalingDao: UtbetalingDao,
+    private val arbeidsforholdDao: ArbeidsforholdDao
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
@@ -104,7 +106,8 @@ internal class VedtaksperiodeMediator(
                     navn = arbeidsgivernavn,
                     id = it.id,
                     overstyringer = overstyringer,
-                    vedtaksperioder = it.vedtaksperioder
+                    vedtaksperioder = it.vedtaksperioder,
+                    bransjer = arbeidsgiverDto.bransjer
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {
@@ -117,10 +120,12 @@ internal class VedtaksperiodeMediator(
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
-                        risikovurdering?.let { vedtaksperiode.set<ObjectNode>(
-                            "risikovurdering",
-                            objectMapper.convertValue(it.speilDto(), ObjectNode::class.java)
-                        )}
+                        risikovurdering?.let {
+                            vedtaksperiode.set<ObjectNode>(
+                                "risikovurdering",
+                                objectMapper.convertValue(it.speilDto(), ObjectNode::class.java)
+                            )
+                        }
                         vedtaksperiode.set<ArrayNode>("varsler", objectMapper.convertValue<ArrayNode>(varsler))
                     }
                 }
@@ -132,6 +137,22 @@ internal class VedtaksperiodeMediator(
 
             val saksbehandlerepost = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
 
+            val arbeidsforhold = arbeidsgivere
+                .map { arbeidsgiver ->
+                    arbeidsforholdDao
+                        .findArbeidsforhold(vedtak.fødselsnummer, arbeidsgiver.organisasjonsnummer)
+                        .map { arbeidsforhold ->
+                            ArbeidsforholdForSpeilDto(
+                                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                                stillingstittel = arbeidsforhold.stillingstittel,
+                                stillingsprosent = arbeidsforhold.stillingsprosent,
+                                startdato = arbeidsforhold.startdato,
+                                sluttdato = arbeidsforhold.sluttdato
+                            )
+                        }
+                }
+                .flatten()
+
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,
                 fødselsnummer = speilSnapshot.fødselsnummer,
@@ -140,7 +161,8 @@ internal class VedtaksperiodeMediator(
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,
                 saksbehandlerepost = saksbehandlerepost,
-                utbetalinger = utbetalinger
+                utbetalinger = utbetalinger,
+                arbeidsforhold = arbeidsforhold
             )
         }
 

@@ -1,8 +1,11 @@
 package no.nav.helse.modell.arbeidsgiver
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.objectMapper
+import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
@@ -53,14 +56,19 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
     }
 
     internal fun findArbeidsgiver(arbeidsgiverId: Int) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT an.navn, a.orgnummer, ab.bransjer FROM arbeidsgiver AS a
+                JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id
+                JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
+            WHERE a.id=?;
+        """
         session.run(
-            queryOf(
-                "SELECT an.navn, a.orgnummer FROM arbeidsgiver AS a JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id WHERE a.id=?;",
-                arbeidsgiverId
-            ).map {
+            queryOf(query, arbeidsgiverId).map { row ->
                 ArbeidsgiverDto(
-                    organisasjonsnummer = it.string("orgnummer"),
-                    navn = it.string("navn")
+                    organisasjonsnummer = row.string("orgnummer"),
+                    navn = row.string("navn"),
+                    bransjer = row.stringOrNull("bransjer")?.let { objectMapper.readValue(it) } ?: emptyList()
                 )
             }.asSingle
         )

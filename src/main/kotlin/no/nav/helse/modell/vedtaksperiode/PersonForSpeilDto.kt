@@ -17,7 +17,16 @@ data class PersonForSpeilDto(
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto,
-    val saksbehandlerepost: String?
+    val saksbehandlerepost: String?,
+    val arbeidsforhold: List<ArbeidsforholdForSpeilDto>
+)
+
+data class ArbeidsforholdForSpeilDto(
+    val organisasjonsnummer: String,
+    val stillingstittel: String,
+    val stillingsprosent: Int,
+    val startdato: LocalDate,
+    val sluttdato: LocalDate?
 )
 
 data class ArbeidsgiverForSpeilDto(
@@ -25,7 +34,8 @@ data class ArbeidsgiverForSpeilDto(
     val navn: String,
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
-    val overstyringer: List<OverstyringForSpeilDto>
+    val overstyringer: List<OverstyringForSpeilDto>,
+    val bransjer: List<String>
 )
 
 data class OverstyringForSpeilDto(

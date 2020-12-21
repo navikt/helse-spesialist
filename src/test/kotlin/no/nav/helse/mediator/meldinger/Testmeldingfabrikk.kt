@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -121,10 +122,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
-        stillingstittel: String,
-        stillingsprosent: Int,
-        startdato: LocalDate,
-        sluttdato: LocalDate?
+        løsning: List<Arbeidsforholdløsning.Løsning>
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -135,16 +133,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
-            "@løsning" to mapOf(
-                "Arbeidsforhold" to listOf(
-                    mapOf(
-                        "stillingstittel" to stillingstittel,
-                        "stillingsprosent" to stillingsprosent,
-                        "startdato" to startdato,
-                        "sluttdato" to sluttdato
-                    )
-                )
-            )
+            "@løsning" to mapOf("Arbeidsforhold" to løsning)
         )
     )
 

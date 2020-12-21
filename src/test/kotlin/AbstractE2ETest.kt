@@ -15,6 +15,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -54,17 +55,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val vedtakDao = VedtakDao(dataSource)
     protected val warningDao = WarningDao(dataSource)
     protected val commandContextDao = CommandContextDao(dataSource)
-    protected val tildelingDao = TildelingDao(dataSource)
+    private val tildelingDao = TildelingDao(dataSource)
     protected val risikovurderingDao = RisikovurderingDao(dataSource)
     protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    protected val automatiseringDao = AutomatiseringDao(dataSource)
-    protected val hendelseDao = HendelseDao(dataSource)
+    private val automatiseringDao = AutomatiseringDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
     protected val snapshotDao = SnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
-    protected val utbetalingDao = UtbetalingDao(dataSource)
+    private val utbetalingDao = UtbetalingDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -138,7 +139,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         risikovurderingDao = risikovurderingDao,
-        utbetalingDao = utbetalingDao
+        utbetalingDao = utbetalingDao,
+        arbeidsforholdDao = arbeidsforholdDao
     )
 
     @BeforeEach
@@ -188,7 +190,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
         navn: String = "En arbeidsgiver",
-        bransjer: String = "En eller flere bransjer"
+        bransjer: String = """["En bransje", "En annen bransje"]"""
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -209,10 +211,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         orgnr: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
-        stillingstittel: String = "en-stillingstittel",
-        stillingsprosent: Int = 100,
-        startdato: LocalDate = LocalDate.now(),
-        sluttdato: LocalDate? = null
+        løsning: List<Arbeidsforholdløsning.Løsning> = listOf(
+            Arbeidsforholdløsning.Løsning(
+                stillingstittel = "en-stillingstittel",
+                stillingsprosent = 100,
+                startdato = LocalDate.now(),
+                sluttdato = null
+            )
+        )
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -222,10 +228,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     contextId = contextId,
                     vedtaksperiodeId = vedtaksperiodeId,
                     organisasjonsnummer = orgnr,
-                    stillingstittel = stillingstittel,
-                    stillingsprosent = stillingsprosent,
-                    startdato = startdato,
-                    sluttdato = sluttdato
+                    løsning
                 )
             )
         }
@@ -380,7 +383,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
       "mottaker": "$orgnr",
       "fagområde": "SPREF",
       "endringskode": "NY",
-      "fagsystemId": "${arbeidsgiverFagsystemId}",
+      "fagsystemId": "$arbeidsgiverFagsystemId",
       "sisteArbeidsgiverdag": "${LocalDate.MIN}",
       "linjer": [
         {

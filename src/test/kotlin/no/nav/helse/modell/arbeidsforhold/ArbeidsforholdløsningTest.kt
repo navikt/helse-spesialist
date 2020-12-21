@@ -38,10 +38,14 @@ internal class ArbeidsforholdløsningTest {
     fun `mottar arbeidsgiverløsning`() {
         rapid.sendTestMessage(
             meldingsfabrikk.lagArbeidsforholdløsning(
-                stillingstittel = STILLINGSTITTEL,
-                stillingsprosent = STILLINGSPROSENT,
-                startdato = STARTDATO,
-                sluttdato = SLUTTDATO
+                løsning = listOf(
+                    Arbeidsforholdløsning.Løsning(
+                        stillingstittel = STILLINGSTITTEL,
+                        stillingsprosent = STILLINGSPROSENT,
+                        startdato = STARTDATO,
+                        sluttdato = SLUTTDATO
+                    )
+                )
             )
         )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }

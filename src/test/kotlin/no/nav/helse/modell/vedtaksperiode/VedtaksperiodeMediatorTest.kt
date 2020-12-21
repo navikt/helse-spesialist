@@ -1,13 +1,16 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import AbstractE2ETest
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
+import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -88,8 +91,6 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            navn = "En Arbeidsgiver",
-            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -210,6 +211,98 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertEquals(1, speilSnapshot1.utbetalinger.size)
         val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(fødselsnummer2))
         assertEquals(0, speilSnapshot2.utbetalinger.size)
+    }
+
+    @Test
+    fun `mapper arbeidsforhold`() {
+        val arbeidsforholdløsning = listOf(
+            Arbeidsforholdløsning.Løsning(
+                stillingstittel = "Sykepleier",
+                stillingsprosent = 100,
+                startdato = LocalDate.now().minusYears(2),
+                sluttdato = LocalDate.now().minusYears(1)
+            ),
+            Arbeidsforholdløsning.Løsning(
+                stillingstittel = "Avdelingsleder",
+                stillingsprosent = 100,
+                startdato = LocalDate.now().minusYears(1),
+                sluttdato = null
+            )
+        )
+
+        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns true
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            løsning = arbeidsforholdløsning
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        arbeidsforholdløsning[0].also {
+            assertEquals(it.stillingstittel, speilSnapshot.arbeidsforhold[0].stillingstittel)
+            assertEquals(it.stillingsprosent, speilSnapshot.arbeidsforhold[0].stillingsprosent)
+            assertEquals(it.startdato, speilSnapshot.arbeidsforhold[0].startdato)
+            assertEquals(it.sluttdato, speilSnapshot.arbeidsforhold[0].sluttdato)
+        }
+
+        arbeidsforholdløsning[1].also {
+            assertEquals(it.stillingstittel, speilSnapshot.arbeidsforhold[1].stillingstittel)
+            assertEquals(it.stillingsprosent, speilSnapshot.arbeidsforhold[1].stillingsprosent)
+            assertEquals(it.startdato, speilSnapshot.arbeidsforhold[1].startdato)
+            assertEquals(it.sluttdato, speilSnapshot.arbeidsforhold[1].sluttdato)
+        }
+    }
+
+    @Test
+    fun `mapper bransjer for arbeidsgiver`() {
+        every { miljøstyrtFeatureToggle.arbeidsgiverinformasjon() } returns true
+        val bransjer = """["En bransje", "En annen bransje"]"""
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            bransjer = bransjer
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        assertEquals(objectMapper.readValue<List<String>>(bransjer), speilSnapshot.arbeidsgivere.first().bransjer)
     }
 
     private val SNAPSHOTV1 = """
