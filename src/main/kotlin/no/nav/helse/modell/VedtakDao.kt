@@ -251,7 +251,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             fødselsdato = row.localDateOrNull("fodselsdato"),
             kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf)
         ),
-        arbeidsgiverRef = row.int("arbeidsgiver_ref"),
+        arbeidsgiverRef = row.long("arbeidsgiver_ref"),
         speilSnapshotRef = row.int("speil_snapshot_ref"),
         infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
     )

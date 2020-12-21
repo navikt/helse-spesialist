@@ -45,9 +45,12 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
     }
 
     internal fun findBransjerSistOppdatert(orgnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement =
+            "SELECT oppdatert FROM arbeidsgiver_bransjer WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);"
         session.run(
             queryOf(
-                "SELECT oppdatert FROM arbeidsgiver_bransjer WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);",
+                statement,
                 mapOf("orgnummer" to orgnummer.toLong())
             ).map {
                 it.localDate("oppdatert")
@@ -55,12 +58,12 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findArbeidsgiver(arbeidsgiverId: Int) = sessionOf(dataSource).use { session ->
+    internal fun findArbeidsgiver(arbeidsgiverId: Long) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT an.navn, a.orgnummer, ab.bransjer FROM arbeidsgiver AS a
                 JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id
-                JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
+                LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
             WHERE a.id=?;
         """
         session.run(
@@ -86,9 +89,16 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
     }
 
     internal fun updateBransjer(orgnummer: String, bransjer: String) = sessionOf(dataSource).use {
+        @Language("PostgreSQL")
+        val statement = """
+            UPDATE arbeidsgiver_bransjer
+            SET bransjer=:bransjer, oppdatert=:oppdatert
+            WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);
+        """
+
         it.run(
             queryOf(
-                "UPDATE arbeidsgiver_bransjer SET bransjer=:bransjer, oppdatert=:oppdatert WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);",
+                statement,
                 mapOf(
                     "bransjer" to bransjer,
                     "oppdatert" to LocalDateTime.now(),
@@ -97,6 +107,31 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
             ).asUpdate
         )
     }
+
+    internal fun insertBransjer(orgnummer: String, bransjer: String): Int =
+        sessionOf(dataSource, returnGeneratedKey = true).use {
+            @Language("PostgreSQL")
+            val insertBransjeStatement =
+                "INSERT INTO arbeidsgiver_bransjer (bransjer, oppdatert) VALUES (?, now());"
+
+            @Language("PostgreSQL")
+            val updateBransjeRefStatement =
+                "UPDATE arbeidsgiver SET bransjer_ref=:bransje_ref WHERE orgnummer=:orgnummer;"
+
+            it.transaction { transaction ->
+                val bransjeRef =
+                    transaction.run(queryOf(insertBransjeStatement, bransjer).asUpdateAndReturnGeneratedKey)
+                transaction.run(
+                    queryOf(
+                        updateBransjeRefStatement,
+                        mapOf(
+                            "bransje_ref" to bransjeRef,
+                            "orgnummer" to orgnummer.toLong()
+                        )
+                    ).asUpdate
+                )
+            }
+        }
 }
 
 internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: String): Long? = this.run(

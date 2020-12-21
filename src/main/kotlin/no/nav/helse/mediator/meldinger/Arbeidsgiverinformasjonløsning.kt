@@ -16,7 +16,10 @@ internal class Arbeidsgiverinformasjonløsning(private val navn: String, private
 
     internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
         arbeidsgiverDao.updateNavn(orgnummer, navn)
-        arbeidsgiverDao.updateBransjer(orgnummer, bransjer)
+        if (arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) != null)
+            arbeidsgiverDao.updateBransjer(orgnummer, bransjer)
+        else
+            arbeidsgiverDao.insertBransjer(orgnummer, bransjer)
     }
 
     internal class ArbeidsgiverRiver(

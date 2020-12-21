@@ -1,50 +1,80 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import DatabaseIntegrationTest
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private companion object {
-        private const val ORGNR = "123456789"
-        private const val NAVN = "Bedrift AS"
-        private const val BRANSJER = "BEDRIFTSGREIER OG STÆSJ"
-    }
 
     @Test
     fun `opprette arbeidsgiver`() {
-        arbeidsgiverDao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER)
-        assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR))
-        assertEquals(LocalDate.now(), arbeidsgiverDao.findNavnSistOppdatert(ORGNR))
+        arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
+        assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNUMMER))
+        assertEquals(LocalDate.now(), arbeidsgiverDao.findNavnSistOppdatert(ORGNUMMER))
         assertEquals(1, arbeidsgiver().size)
         assertEquals(1, arbeidsgivernavn().size)
         assertEquals(1, bransjer().size)
-        assertEquals(ORGNR, arbeidsgiver().first().first)
-        assertEquals(NAVN, arbeidsgivernavn().first().second)
+        assertEquals(ORGNUMMER, arbeidsgiver().first().first)
+        assertEquals(ORGNAVN, arbeidsgivernavn().first().second)
         assertEquals(BRANSJER, bransjer().first().second)
     }
 
     @Test
     fun `oppdatere arbeidsgivernavn`() {
-        arbeidsgiverDao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER)
+        arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyttNavn = "Nærbutikken ASA"
-        arbeidsgiverDao.updateNavn(ORGNR, nyttNavn)
+        arbeidsgiverDao.updateNavn(ORGNUMMER, nyttNavn)
         assertEquals(1, arbeidsgivernavn().size)
         assertEquals(nyttNavn, arbeidsgivernavn().first().second)
     }
 
     @Test
     fun `oppdatere bransjer`() {
-        arbeidsgiverDao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER)
-        val nyBransje = "Ny bransje"
-        arbeidsgiverDao.updateBransjer(ORGNR, nyBransje)
+        arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
+        val nyBransje = """["Ny bransje"]"""
+        arbeidsgiverDao.updateBransjer(ORGNUMMER, nyBransje)
         assertEquals(1, bransjer().size)
         assertEquals(nyBransje, bransjer().first().second)
+    }
+
+    @Test
+    fun `insert bransjer`() {
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER))
+        fjernBransjerRef(arbeidsgiverRef)
+        val nyBransje = """["Ny bransje"]"""
+        arbeidsgiverDao.insertBransjer(ORGNUMMER, nyBransje)
+        assertEquals(2, bransjer().size)
+        assertEquals(nyBransje, bransjer()[1].second)
+    }
+
+    @Test
+    fun `kan hente arbeidsgivere uten bransje`() {
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER))
+        fjernBransjerRef(arbeidsgiverRef)
+        assertNotNull(arbeidsgiverDao.findArbeidsgiver(arbeidsgiverRef))
+    }
+
+    @Test
+    fun `kan hente arbeidsgivere`() {
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER))
+        val arbeidsgiver = arbeidsgiverDao.findArbeidsgiver(arbeidsgiverRef)
+        assertNotNull(arbeidsgiver)
+        assertEquals(ORGNUMMER, arbeidsgiver?.organisasjonsnummer)
+        assertEquals(ORGNAVN, arbeidsgiver?.navn)
+        assertEquals(objectMapper.readValue(BRANSJER), arbeidsgiver?.bransjer)
+    }
+
+    private fun fjernBransjerRef(arbeidsgiverRef: Long) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = "UPDATE arbeidsgiver SET bransjer_ref=NULL WHERE id=?"
+        session.run(queryOf(statement, arbeidsgiverRef).asUpdate)
     }
 
     private fun arbeidsgiver() =
