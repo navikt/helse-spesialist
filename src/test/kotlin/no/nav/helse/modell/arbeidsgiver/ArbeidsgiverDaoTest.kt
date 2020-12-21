@@ -62,6 +62,12 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `kan hente arbeidsgivere med blank bransje`() {
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, ""))
+        assertNotNull(arbeidsgiverDao.findArbeidsgiver(arbeidsgiverRef))
+    }
+
+    @Test
     fun `kan hente arbeidsgivere`() {
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER))
         val arbeidsgiver = arbeidsgiverDao.findArbeidsgiver(arbeidsgiverRef)

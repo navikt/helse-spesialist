@@ -71,7 +71,10 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
                 ArbeidsgiverDto(
                     organisasjonsnummer = row.string("orgnummer"),
                     navn = row.string("navn"),
-                    bransjer = row.stringOrNull("bransjer")?.let { objectMapper.readValue(it) } ?: emptyList()
+                    bransjer = row.stringOrNull("bransjer")
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { objectMapper.readValue(it) }
+                        ?: emptyList()
                 )
             }.asSingle
         )
