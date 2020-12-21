@@ -54,8 +54,12 @@ internal class Arbeidsgiverinformasjonløsning(private val navn: String, private
                 contextId,
                 UUID.fromString(packet["@id"].asText()),
                 Arbeidsgiverinformasjonløsning(
-                    packet["@løsning.$behov"].path("navn").asText(),
-                    packet["@løsning.$behov"].path("bransjer").asText()
+                    navn = packet["@løsning.$behov"].path("navn").asText(),
+                    bransjer = packet["@løsning.$behov"]
+                        .path("bransjer")
+                        .asText()
+                        .takeIf { it.isNotBlank() }
+                        ?: "[]"
                 ),
                 context
             )
