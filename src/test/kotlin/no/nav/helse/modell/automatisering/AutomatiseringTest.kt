@@ -75,7 +75,7 @@ internal class AutomatiseringTest {
         val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), onSuccessCallback)
 
-        verify { automatiseringDaoMock.lagre(true, any(), any(), any()) }
+        verify { automatiseringDaoMock.automatisert(any(), any()) }
         verify { onSuccessCallback() }
     }
 
@@ -85,7 +85,7 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) {
             fail("Denne skal ikke kalles når perioden blir automatisk behandlet")
         }
-        verify { automatiseringDaoMock.lagre(false, any(), any(), any()) }
+        verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any()) }
     }
 
     @Test

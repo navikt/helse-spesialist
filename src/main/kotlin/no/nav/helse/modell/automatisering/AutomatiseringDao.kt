@@ -8,15 +8,28 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class AutomatiseringDao(val dataSource: DataSource) {
-    internal fun lagre(automatisert: Boolean, problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID) {
+    internal fun manuellSaksbehandling(problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID) =
+        lagre(automatisert = false, stikkprøve = false, vedtaksperiodeId, hendelseId, problems)
+
+    internal fun automatisert(vedtaksperiodeId: UUID, hendelseId: UUID) =
+        lagre(automatisert = true, stikkprøve = false, vedtaksperiodeId, hendelseId)
+
+    internal fun stikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
+        lagre(automatisert = false, stikkprøve = true, vedtaksperiodeId, hendelseId)
+
+    private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList()) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run(
                     queryOf(
-                        "INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert) VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)",
+                        """
+                            INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve)
+                            VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?)
+                        """,
                         vedtaksperiodeId,
                         hendelseId,
-                        automatisert
+                        automatisert,
+                        stikkprøve
                     ).asUpdate
                 )
 
@@ -66,6 +79,21 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                 }.asSingle
             )
         }
+
+    fun plukketUtTilStikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                """
+                    SELECT a.stikkprøve FROM automatisering a
+                    WHERE vedtaksperiode_ref = ( SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = ? LIMIT 1)
+                    AND hendelse_ref = ?
+                """
+            session.run(
+                queryOf(query, vedtaksperiodeId, hendelseId)
+                    .map { it.boolean(1) }.asSingle
+            )
+        } ?: false
 
     private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
         session.run(

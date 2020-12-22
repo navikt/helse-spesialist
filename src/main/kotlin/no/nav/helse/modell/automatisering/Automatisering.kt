@@ -22,17 +22,21 @@ internal class Automatisering(
 ) {
 
     internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId).sjekkForStikkprøve()
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId)
 
-        problemer.isEmpty().let { skalAutomatiskGodkjennes ->
-            if (skalAutomatiskGodkjennes) onAutomatiserbar()
-            automatiseringDao.lagre(skalAutomatiskGodkjennes, problemer, vedtaksperiodeId, hendelseId)
+        when {
+            problemer.isNotEmpty() ->
+                automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId)
+            plukkTilManuell() -> {
+                automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId)
+                println(automatiseringDao.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId))
+            }
+            else -> {
+                onAutomatiserbar()
+                automatiseringDao.automatisert(vedtaksperiodeId, hendelseId)
+            }
         }
     }
-
-    private fun List<String>.sjekkForStikkprøve() =
-        if (isEmpty() && plukkTilManuell()) this + "Plukket ut til manuell saksbehandling"
-        else this
 
     private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): List<String> {
         val risikovurdering =

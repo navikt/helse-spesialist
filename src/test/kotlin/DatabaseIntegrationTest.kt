@@ -127,7 +127,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
-        automatiseringDao.lagre(automatisert, if (automatisert) emptyList() else listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID)
+        if (automatisert) automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID)
+        else automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID)
     }
 
     protected fun nyPerson() {
