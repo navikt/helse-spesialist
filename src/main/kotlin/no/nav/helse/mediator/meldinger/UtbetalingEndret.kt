@@ -83,7 +83,7 @@ internal class UtbetalingEndret(
         if (type == "ANNULLERING") {
             val opptegnelseType: OpptegnelseType = when (status) {
                 "UTBETALING_FEILET" -> { OpptegnelseType.UTBETALING_ANNULLERING_FEILET }
-                "ANNULERT" -> { OpptegnelseType.UTBETALING_ANNULLERING_OK }
+                "ANNULLERT" -> { OpptegnelseType.UTBETALING_ANNULLERING_OK }
                 else -> return
             }
 
