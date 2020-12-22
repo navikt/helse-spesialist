@@ -6,8 +6,8 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.*
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -35,7 +35,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal val VEDTAKSPERIODE = UUID.randomUUID()
 
-        internal const val OPPGAVETYPE = "EN OPPGAVE"
+        internal const val OPPGAVETYPE = "SØKNAD"
         internal val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
 
         internal const val ORGNUMMER = "123456789"

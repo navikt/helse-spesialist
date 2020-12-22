@@ -24,13 +24,12 @@ internal class OpprettSaksbehandleroppgaveCommand(
         private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgaveCommand::class.java)
     }
 
-    private val oppgave = Oppgave.avventerSaksbehandler(this::class.java.simpleName, vedtaksperiodeId)
-
     override fun execute(context: CommandContext): Boolean {
         if (automatisering.harBlittAutomatiskBehandlet(vedtaksperiodeId, hendelseId)) return true
         if (erEgenAnsatt) return true
         if (tilhørerUtlandsenhet) return true
 
+        val oppgave = Oppgave.søknad(vedtaksperiodeId)
         logg.info("Oppretter saksbehandleroppgave")
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { reservasjon ->
             oppgaveMediator.opprettOgTildel(oppgave, reservasjon.first, reservasjon.second)

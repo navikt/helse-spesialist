@@ -19,7 +19,9 @@ internal class Oppgave private constructor(
     }
 
     internal companion object {
-        fun avventerSaksbehandler(type: String, vedtaksperiodeId: UUID) = Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
+        fun søknad(vedtaksperiodeId: UUID) = oppgave("SØKNAD", vedtaksperiodeId)
+        fun stikkprøve(vedtaksperiodeId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId)
+        private fun oppgave(type: String, vedtaksperiodeId: UUID) = Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
     }
 
     internal fun ferdigstill(ident: String, oid: UUID) {

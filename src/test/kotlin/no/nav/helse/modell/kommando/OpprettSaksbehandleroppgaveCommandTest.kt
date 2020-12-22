@@ -45,7 +45,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         forventetOppgave =
-            Oppgave.avventerSaksbehandler(OpprettSaksbehandleroppgaveCommand::class.java.simpleName, VEDTAKSPERIODE_ID)
+            Oppgave.søknad(VEDTAKSPERIODE_ID)
         clearMocks(oppgaveMediator)
     }
 

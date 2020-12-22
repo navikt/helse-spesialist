@@ -33,7 +33,7 @@ internal class OppgaveTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
 
-    private val oppgave = Oppgave.avventerSaksbehandler(OPPGAVETYPE, VEDTAKSPERIODE_ID)
+    private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID)
 
     @BeforeEach
     fun setup() {
@@ -84,10 +84,10 @@ internal class OppgaveTest {
     @Test
     fun equals() {
         val gjenopptattOppgave = Oppgave(1L, OPPGAVETYPE,Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
-        val oppgave1 = Oppgave.avventerSaksbehandler(OPPGAVETYPE, VEDTAKSPERIODE_ID)
-        val oppgave2 = Oppgave.avventerSaksbehandler(OPPGAVETYPE, VEDTAKSPERIODE_ID)
-        val oppgave3 = Oppgave.avventerSaksbehandler(OPPGAVETYPE, UUID.randomUUID())
-        val oppgave4 = Oppgave.avventerSaksbehandler("EN_TYPE", VEDTAKSPERIODE_ID)
+        val oppgave1 = Oppgave.søknad(VEDTAKSPERIODE_ID)
+        val oppgave2 = Oppgave.søknad(VEDTAKSPERIODE_ID)
+        val oppgave3 = Oppgave.søknad(UUID.randomUUID())
+        val oppgave4 = Oppgave.stikkprøve(VEDTAKSPERIODE_ID)
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)

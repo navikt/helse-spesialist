@@ -190,7 +190,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             queryOf(
                 """
                 INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
-                VALUES (now(), ?, CAST(? as oppgavestatus), ?, ?, ?, ?);
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?);
             """,
                 oppgavetype,
                 oppgavestatus.name,

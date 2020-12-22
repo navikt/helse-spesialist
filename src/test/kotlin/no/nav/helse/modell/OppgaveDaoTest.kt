@@ -158,7 +158,7 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     private fun oppgave() =
         using(sessionOf(dataSource)) {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
-                Oppgave(
+                OppgaveAssertions(
                     oppdatert = it.localDate("oppdatert"),
                     type = it.string("type"),
                     status = enumValueOf(it.string("status")),
@@ -170,7 +170,7 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
             }.asList)
         }
 
-    private class Oppgave(
+    private class OppgaveAssertions(
         private val oppdatert: LocalDate,
         private val type: String,
         private val status: Oppgavestatus,
