@@ -16,7 +16,7 @@ internal class OpprettArbeidsgiverCommandTest {
     private companion object {
         private const val NAVN = "Et eller annet fint da"
         private const val ORGNR = "123456789"
-        private const val BRANSJER = "Spaghettikoding"
+        private val BRANSJER = listOf("Spaghettikoding")
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)

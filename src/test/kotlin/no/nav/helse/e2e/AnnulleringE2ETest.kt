@@ -61,7 +61,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             navn = "En Arbeidsgiver",
-            bransjer = "En eller flere bransjer"
+            bransjer = listOf("En eller flere bransjer")
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,

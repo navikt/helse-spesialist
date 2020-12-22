@@ -106,7 +106,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
-            bransjer = """["Bransje1","Bransje2"]"""
+            bransjer = listOf("Bransje1", "Bransje2")
         )
         sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(

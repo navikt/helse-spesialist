@@ -87,7 +87,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         arbeidsgiverDao.insertArbeidsgiver(
             "123456789",
             "Bedrift AS",
-            "BEDRIFTSGREIER OG STÆSJ"
+            listOf("BEDRIFTSGREIER OG STÆSJ")
         )
     }
 

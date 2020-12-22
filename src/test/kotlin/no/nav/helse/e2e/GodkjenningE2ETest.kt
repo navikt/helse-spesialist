@@ -245,7 +245,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
-            bransjer = "En eller flere bransjer"
+            bransjer = listOf("En eller flere bransjer")
         )
         sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
 
@@ -264,7 +264,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
-            bransjer = "En eller flere bransjer"
+            bransjer = listOf("En eller flere bransjer")
         )
         sendEgenAnsattløsning(godkjenningsmeldingId, true)
         sendDigitalKontaktinformasjonløsning(
@@ -300,7 +300,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
-            bransjer = "En eller flere bransjer"
+            bransjer = listOf("En eller flere bransjer")
         )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
@@ -453,8 +453,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            navn = "En Arbeidsgiver",
-            bransjer = "En eller flere bransjer"
         )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(

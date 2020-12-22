@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import AbstractE2ETest
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -275,7 +274,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     @Test
     fun `mapper bransjer for arbeidsgiver`() {
         every { miljøstyrtFeatureToggle.arbeidsgiverinformasjon() } returns true
-        val bransjer = """["En bransje", "En annen bransje"]"""
+        val bransjer = listOf("En bransje", "En annen bransje")
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -302,7 +301,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
-        assertEquals(objectMapper.readValue<List<String>>(bransjer), speilSnapshot.arbeidsgivere.first().bransjer)
+        assertEquals(bransjer, speilSnapshot.arbeidsgivere.first().bransjer)
     }
 
     private val SNAPSHOTV1 = """

@@ -18,7 +18,7 @@ internal class KlargjørArbeidsgiverCommandTest {
     private companion object {
         private const val ORGNR = "123456789"
         private const val NAVN = "Et arbeidsgivernavn"
-        private const val BRANSJER = "Spaghettikoding"
+        private val BRANSJER = listOf("Spaghettikoding")
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)

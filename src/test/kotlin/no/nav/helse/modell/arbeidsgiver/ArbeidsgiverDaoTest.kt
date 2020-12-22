@@ -1,7 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import DatabaseIntegrationTest
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -23,7 +22,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, bransjer().size)
         assertEquals(ORGNUMMER, arbeidsgiver().first().first)
         assertEquals(ORGNAVN, arbeidsgivernavn().first().second)
-        assertEquals(BRANSJER, bransjer().first().second)
+        assertEquals(objectMapper.writeValueAsString(BRANSJER), bransjer().first().second)
     }
 
     @Test
@@ -38,20 +37,20 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `oppdatere bransjer`() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
-        val nyBransje = """["Ny bransje"]"""
+        val nyBransje = listOf("Ny bransje")
         arbeidsgiverDao.updateBransjer(ORGNUMMER, nyBransje)
         assertEquals(1, bransjer().size)
-        assertEquals(nyBransje, bransjer().first().second)
+        assertEquals(objectMapper.writeValueAsString(nyBransje), bransjer().first().second)
     }
 
     @Test
     fun `insert bransjer`() {
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER))
         fjernBransjerRef(arbeidsgiverRef)
-        val nyBransje = """["Ny bransje"]"""
+        val nyBransje = listOf("Ny bransje")
         arbeidsgiverDao.insertBransjer(ORGNUMMER, nyBransje)
         assertEquals(2, bransjer().size)
-        assertEquals(nyBransje, bransjer()[1].second)
+        assertEquals(objectMapper.writeValueAsString(nyBransje), bransjer()[1].second)
     }
 
     @Test
@@ -63,7 +62,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan hente arbeidsgivere med blank bransje`() {
-        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, ""))
+        val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, listOf("")))
         assertNotNull(arbeidsgiverDao.findArbeidsgiver(arbeidsgiverRef))
     }
 
@@ -74,7 +73,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
         assertNotNull(arbeidsgiver)
         assertEquals(ORGNUMMER, arbeidsgiver?.organisasjonsnummer)
         assertEquals(ORGNAVN, arbeidsgiver?.navn)
-        assertEquals(objectMapper.readValue(BRANSJER), arbeidsgiver?.bransjer)
+        assertEquals(BRANSJER, arbeidsgiver?.bransjer)
     }
 
     private fun fjernBransjerRef(arbeidsgiverRef: Long) = sessionOf(dataSource).use { session ->

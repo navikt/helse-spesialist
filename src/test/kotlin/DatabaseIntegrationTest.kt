@@ -40,7 +40,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal const val ORGNUMMER = "123456789"
         internal const val ORGNAVN = "NAVN AS"
-        internal const val BRANSJER = """["EN BRANSJE"]"""
+        internal val BRANSJER = listOf("EN BRANSJE")
 
         internal const val FNR = "02345678911"
         internal const val AKTØR = "4321098765432"
@@ -161,7 +161,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGNUMMER,
         navn: String = ORGNAVN,
-        bransjer: String = BRANSJER
+        bransjer: List<String> = BRANSJER
     ): Long {
         return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
     }

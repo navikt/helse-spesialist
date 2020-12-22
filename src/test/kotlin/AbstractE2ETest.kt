@@ -190,7 +190,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
         navn: String = "En arbeidsgiver",
-        bransjer: String = """["En bransje", "En annen bransje"]"""
+        bransjer: List<String> = listOf("En bransje", "En annen bransje")
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(

@@ -12,7 +12,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
     private companion object {
         private const val ORGNR = "123456789"
         private const val NAVN = "Bedrift AS"
-        private const val BRANSJER = "Spaghettikoding"
+        private val BRANSJER = listOf("Spaghettikoding")
         private const val FØDSELSNUMMER = "12345678910"
         private const val AKTØRID = "123456789"
     }

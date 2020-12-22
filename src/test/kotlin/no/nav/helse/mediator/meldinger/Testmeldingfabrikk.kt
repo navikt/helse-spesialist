@@ -96,7 +96,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         navn: String,
-        bransjer: String
+        bransjer: List<String>
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,

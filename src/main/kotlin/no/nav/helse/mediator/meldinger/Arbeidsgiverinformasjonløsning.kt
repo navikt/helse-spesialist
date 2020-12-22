@@ -9,7 +9,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class Arbeidsgiverinformasjonløsning(private val navn: String, private val bransjer: String) {
+internal class Arbeidsgiverinformasjonløsning(private val navn: String, private val bransjer: List<String>) {
     internal fun opprett(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
         arbeidsgiverDao.insertArbeidsgiver(orgnummer, navn, bransjer)
     }
@@ -57,9 +57,7 @@ internal class Arbeidsgiverinformasjonløsning(private val navn: String, private
                     navn = packet["@løsning.$behov"].path("navn").asText(),
                     bransjer = packet["@løsning.$behov"]
                         .path("bransjer")
-                        .asText()
-                        .takeIf { it.isNotBlank() }
-                        ?: "[]"
+                        .map { it.asText() }
                 ),
                 context
             )

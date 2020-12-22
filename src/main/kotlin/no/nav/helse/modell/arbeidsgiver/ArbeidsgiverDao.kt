@@ -14,7 +14,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         it.findArbeidsgiverByOrgnummer(orgnummer)
     }
 
-    internal fun insertArbeidsgiver(orgnummer: String, navn: String, bransjer: String) =
+    internal fun insertArbeidsgiver(orgnummer: String, navn: String, bransjer: List<String>) =
         sessionOf(dataSource, returnGeneratedKey = true).use {
             val navnRef = requireNotNull(it.insertArbeidsgivernavn(navn))
             val bransjerRef = requireNotNull(it.insertBransjer(bransjer))
@@ -91,7 +91,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun updateBransjer(orgnummer: String, bransjer: String) = sessionOf(dataSource).use {
+    internal fun updateBransjer(orgnummer: String, bransjer: List<String>) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val statement = """
             UPDATE arbeidsgiver_bransjer
@@ -103,7 +103,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
             queryOf(
                 statement,
                 mapOf(
-                    "bransjer" to bransjer,
+                    "bransjer" to objectMapper.writeValueAsString(bransjer),
                     "oppdatert" to LocalDateTime.now(),
                     "orgnummer" to orgnummer.toLong()
                 )
@@ -111,7 +111,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun insertBransjer(orgnummer: String, bransjer: String): Int =
+    internal fun insertBransjer(orgnummer: String, bransjer: List<String>): Int =
         sessionOf(dataSource, returnGeneratedKey = true).use {
             @Language("PostgreSQL")
             val insertBransjeStatement =
@@ -123,7 +123,12 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
 
             it.transaction { transaction ->
                 val bransjeRef =
-                    transaction.run(queryOf(insertBransjeStatement, bransjer).asUpdateAndReturnGeneratedKey)
+                    transaction.run(
+                        queryOf(
+                            insertBransjeStatement,
+                            objectMapper.writeValueAsString(bransjer)
+                        ).asUpdateAndReturnGeneratedKey
+                    )
                 transaction.run(
                     queryOf(
                         updateBransjeRefStatement,
@@ -152,11 +157,11 @@ private fun Session.insertArbeidsgivernavn(navn: String): Long? = run(
         .asUpdateAndReturnGeneratedKey
 )
 
-private fun Session.insertBransjer(bransjer: String) = run(
+private fun Session.insertBransjer(bransjer: List<String>) = run(
     queryOf(
         "INSERT INTO arbeidsgiver_bransjer(bransjer, oppdatert) VALUES(:bransjer, :oppdatert);",
         mapOf(
-            "bransjer" to bransjer,
+            "bransjer" to objectMapper.writeValueAsString(bransjer),
             "oppdatert" to LocalDateTime.now()
         )
     )

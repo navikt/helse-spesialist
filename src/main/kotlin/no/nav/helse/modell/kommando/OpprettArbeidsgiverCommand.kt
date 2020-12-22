@@ -31,7 +31,7 @@ internal class OpprettArbeidsgiverCommand(
     private fun behandle(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon()) {
             log.info("oppretter arbeidsgiver")
-            arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent", "Ukjent")
+            arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent", emptyList())
         } else {
             val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
             log.info("oppretter arbeidsgiver")
