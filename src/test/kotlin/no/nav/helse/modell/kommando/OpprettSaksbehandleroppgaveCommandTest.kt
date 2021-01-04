@@ -39,13 +39,10 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         hendelseId = hendelseId,
         personDao = personDao
     )
-    private lateinit var forventetOppgave: Oppgave
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        forventetOppgave =
-            Oppgave.søknad(VEDTAKSPERIODE_ID)
         clearMocks(oppgaveMediator)
     }
 
@@ -53,7 +50,15 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     fun `oppretter oppgave`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(forventetOppgave) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.søknad(VEDTAKSPERIODE_ID)) }
+    }
+
+    @Test
+    fun `oppretter stikkprøve`() {
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.stikkprøve(VEDTAKSPERIODE_ID)) }
     }
 
     @Test
@@ -61,6 +66,10 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
         every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprettOgTildel(forventetOppgave, reservasjon.first, reservasjon.second) }
+        verify(exactly = 1) { oppgaveMediator.opprettOgTildel(
+            Oppgave.søknad(VEDTAKSPERIODE_ID),
+            reservasjon.first,
+            reservasjon.second
+        ) }
     }
 }

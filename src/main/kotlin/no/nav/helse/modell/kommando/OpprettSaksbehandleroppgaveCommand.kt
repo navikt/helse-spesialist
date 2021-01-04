@@ -29,7 +29,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (erEgenAnsatt) return true
         if (tilhørerUtlandsenhet) return true
 
-        val oppgave = Oppgave.søknad(vedtaksperiodeId)
+        val oppgave = if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) Oppgave.stikkprøve(vedtaksperiodeId) else Oppgave.søknad(vedtaksperiodeId)
         logg.info("Oppretter saksbehandleroppgave")
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { reservasjon ->
             oppgaveMediator.opprettOgTildel(oppgave, reservasjon.first, reservasjon.second)

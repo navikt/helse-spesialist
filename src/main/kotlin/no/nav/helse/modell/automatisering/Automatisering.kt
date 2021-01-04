@@ -76,6 +76,9 @@ internal class Automatisering(
             override fun error() = error
         }
 
+    fun erStikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
+        automatiseringDao.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
+
 }
 
 internal typealias PlukkTilManuell = () -> Boolean
