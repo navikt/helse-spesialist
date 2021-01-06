@@ -7,7 +7,7 @@ import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.AbonnementMediator
+import no.nav.helse.mediator.OpptegnelseMediator
 import no.nav.helse.modell.abonnement.OpptegnelseDto
 import no.nav.helse.modell.abonnement.OpptegnelseType
 import org.junit.jupiter.api.BeforeAll
@@ -16,23 +16,23 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class AbonnementApiTest : AbstractApiTest() {
+class OpptegnelseApiTest : AbstractApiTest() {
 
-    private val oppdateringMediator = mockk<AbonnementMediator>(relaxed = true)
+    private val opptegnelseMediator = mockk<OpptegnelseMediator>(relaxed = true)
     private val SAKSBEHANDLER_ID = UUID.randomUUID()
     private val AKTØR_ID = 12341234L
 
     @BeforeAll
     fun setupTildeling() {
         setupServer {
-            abonnementApi(oppdateringMediator)
+            opptegnelseApi(opptegnelseMediator)
         }
     }
 
     @Test
     fun oppdateringOk() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/abonner/$AKTØR_ID") {
+            client.post<HttpResponse>("/api/opptegnelse/abonner/$AKTØR_ID") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_ID)
@@ -55,10 +55,10 @@ class AbonnementApiTest : AbstractApiTest() {
             payload = """{ "test": "2" }""")
         val expected = listOf(oppdatering1, oppdatering2)
 
-        every { oppdateringMediator.hentOpptegnelser(any(), any()) } returns expected
+        every { opptegnelseMediator.hentAbonnerteOpptegnelser(any(), any()) } returns expected
 
         val response = runBlocking {
-            client.get<HttpResponse>("/api/oppdatering/123") {
+            client.get<HttpResponse>("/api/opptegnelse/hent/123") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_ID)

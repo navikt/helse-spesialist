@@ -73,7 +73,10 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
             JOIN abonnement_for_opptegnelse a ON a.person_id = o.person_id
 
             WHERE a.saksbehandler_id=?
-            AND o.SEKVENSNUMMER > a.siste_sekvensnummer;
+            AND (
+            a.siste_sekvensnummer IS NULL
+            OR o.SEKVENSNUMMER > a.siste_sekvensnummer
+            );
         """
         session.run(
             queryOf(statement, saksbehandlerIdent)

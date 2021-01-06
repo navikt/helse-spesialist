@@ -204,7 +204,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     )
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))
                     annulleringApi(hendelseMediator)
-                    abonnementApi(AbonnementMediator(opptegnelseDao))
+                    opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
                 }
                 authenticate("saksbehandler-direkte") {
                     tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao))

@@ -5,10 +5,10 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.helse.mediator.AbonnementMediator
+import no.nav.helse.mediator.OpptegnelseMediator
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
-import no.nav.helse.mediator.api.abonnementApi
+import no.nav.helse.mediator.api.opptegnelseApi
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.abonnement.OpptegnelseDto
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -28,9 +28,9 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         setupSaksbehandler()
 
         val respons =
-            AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseDao)) }
                 .withAuthenticatedServer {
-                    it.post<HttpResponse>("/api/abonner/$AKTØR") {
+                    it.post<HttpResponse>("/api/opptegnelse/abonner/$AKTØR") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
@@ -47,18 +47,29 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
             status = "UTBETALING_FEILET"
         ))
 
-        val SISTE_SEKVENSID = 0
-        val oppdateringer =
-            AbstractApiTest.TestServer { abonnementApi(AbonnementMediator(opptegnelseDao)) }
+        val opptegnelser =
+            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseDao)) }
                 .withAuthenticatedServer {
-                    it.get<HttpResponse>("/api/oppdatering/${SISTE_SEKVENSID}") {
+                    it.get<HttpResponse>("/api/opptegnelse/hent") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
                     }.call.receive<List<OpptegnelseDto>>()
                 }
 
-        assertEquals(1, oppdateringer.size)
+        assertEquals(1, opptegnelser.size)
+
+        val oppdateringer =
+            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseDao)) }
+                .withAuthenticatedServer {
+                    it.get<HttpResponse>("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
+                        contentType(ContentType.Application.Json)
+                        accept(ContentType.Application.Json)
+                        authentication(SAKSBEHANDLER_ID)
+                    }.call.receive<List<OpptegnelseDto>>()
+                }
+
+        assertEquals(0, oppdateringer.size)
     }
 
     private fun setupPerson() {
