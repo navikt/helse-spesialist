@@ -43,6 +43,7 @@ import java.net.ProxySelector
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
@@ -111,7 +112,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
 
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
-    private val plukkTilManuell: PlukkTilManuell = { false }
+    private val plukkTilManuell: PlukkTilManuell = if (miljøstyrtFeatureToggle.stikkprøver) {
+        { nextInt(300) == 1 }
+    } else {
+        { false }
+    }
 
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,

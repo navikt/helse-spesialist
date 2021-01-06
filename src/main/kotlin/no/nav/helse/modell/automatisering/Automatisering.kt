@@ -1,5 +1,6 @@
 package no.nav.helse.modell.automatisering
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -7,6 +8,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class Automatisering(
@@ -20,6 +22,7 @@ internal class Automatisering(
     private val personDao: PersonDao,
     private val plukkTilManuell: PlukkTilManuell
 ) {
+    private val logger = LoggerFactory.getLogger(Automatisering::class.java)
 
     internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId)
@@ -29,7 +32,7 @@ internal class Automatisering(
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId)
             plukkTilManuell() -> {
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId)
-                println(automatiseringDao.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId))
+                logger.info("Automatisk godkjenning av {} avbrutt, sendes til manuell behandling", keyValue("vedtaksperiodeId", vedtaksperiodeId))
             }
             else -> {
                 onAutomatiserbar()
