@@ -79,5 +79,5 @@ spec:
       value: "true"
     - name: ARBEIDSFORHOLD_FEATURE_TOGGLE
       value: "true"
-    - name: STIKKPRØVER_FEATURE_TOGGLE
+    - name: STIKKPROEVER_FEATURE_TOGGLE
       value: "true"
