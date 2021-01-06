@@ -22,7 +22,9 @@ internal class Automatisering(
     private val personDao: PersonDao,
     private val plukkTilManuell: PlukkTilManuell
 ) {
-    private val logger = LoggerFactory.getLogger(Automatisering::class.java)
+    private companion object {
+        private val logger = LoggerFactory.getLogger(Automatisering::class.java)
+    }
 
     internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId)
