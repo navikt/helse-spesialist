@@ -10,6 +10,7 @@ import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
@@ -29,6 +30,7 @@ internal class HendelseMediator(
     private val commandContextDao: CommandContextDao,
     private val hendelseDao: HendelseDao,
     private val tildelingDao: TildelingDao,
+    private val reservasjonDao: ReservasjonDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {
@@ -112,7 +114,7 @@ internal class HendelseMediator(
         )
         rapidsConnection.publish(godkjenningMessage.toJson())
 
-        val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+        val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
     }
@@ -409,7 +411,7 @@ internal class HendelseMediator(
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
                 else log.info("${hendelse::class.simpleName} er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
-                oppgaveMediator.lagreOppgaver(hendelse, messageContext, contextId)
+                oppgaveMediator.lagreOgTildelOppgaver(hendelse, messageContext, contextId)
             } catch (err: Exception) {
                 log.warn(
                     "Feil ved kjøring av ${hendelse::class.simpleName}: contextId={}, message={}",

@@ -5,13 +5,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.random.Random
 
@@ -31,7 +31,8 @@ internal class OppgaveTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>()
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+    private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
 
     private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID)
 
@@ -53,15 +54,6 @@ internal class OppgaveTest {
         oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
-    }
-
-    @Test
-    fun `tildeler oppgave`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
-        val (oid, gyldigTil) = Pair(UUID.randomUUID(), LocalDateTime.now())
-        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
-        oppgave.tildel(oppgaveMediator, (oid to gyldigTil))
-        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, gyldigTil) }
     }
 
     @Test

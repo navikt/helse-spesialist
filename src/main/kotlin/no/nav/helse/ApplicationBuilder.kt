@@ -109,7 +109,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
 
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
 
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val plukkTilManuell: PlukkTilManuell = if (miljøstyrtFeatureToggle.stikkprøver) {
@@ -229,9 +229,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             vedtakDao = vedtakDao,
             commandContextDao = commandContextDao,
             hendelseDao = hendelseDao,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
             hendelsefabrikk = hendelsefabrikk,
-            oppgaveMediator = oppgaveMediator,
-            tildelingDao = tildelingDao
+            oppgaveMediator = oppgaveMediator
         )
     }
 

@@ -6,6 +6,7 @@ import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -15,7 +16,8 @@ import java.util.*
 internal class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
     private val vedtakDao: VedtakDao,
-    private val tildelingDao: TildelingDao
+    private val tildelingDao: TildelingDao,
+    private val reservasjonDao: ReservasjonDao
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val meldinger = mutableListOf<String>()
@@ -28,13 +30,12 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    private fun nyOppgave(oppgave: Oppgave) {
-        oppgaver.add(oppgave)
+    internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
     }
 
-    internal fun opprettOgTildel(oppgave: Oppgave, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
-        oppgave.tildel(saksbehandleroid, gyldigTil)
-        opprett(oppgave)
+    private fun nyOppgave(oppgave: Oppgave) {
+        oppgaver.add(oppgave)
     }
 
     internal fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
@@ -52,12 +53,12 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    internal fun lagreOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
-        lagreOppgaver(hendelse.id, contextId) { messageContext.send(it) }
+    internal fun lagreOgTildelOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
+        lagreOppgaver(hendelse.id, contextId, { messageContext.send(it) }) { tildelOppgaver(hendelse.fødselsnummer()) }
     }
 
     internal fun lagreOppgaver(rapidsConnection: RapidsConnection, hendelseId: UUID, contextId: UUID) {
-        lagreOppgaver(hendelseId, contextId) { rapidsConnection.publish(it) }
+        lagreOppgaver(hendelseId, contextId, { rapidsConnection.publish(it) })
     }
 
     internal fun avbrytOppgaver(fødselsnummer: String) {
@@ -66,10 +67,6 @@ internal class OppgaveMediator(
 
     internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finn(vedtaksperiodeId).forEach(::avbryt)
-    }
-
-    internal fun tildel(oppgaveId: Long, reservasjon: Pair<UUID, LocalDateTime>) {
-        tildelingDao.opprettTildeling(oppgaveId, reservasjon.first, reservasjon.second)
     }
 
     internal fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
@@ -115,11 +112,16 @@ internal class OppgaveMediator(
         )
     }
 
-    private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit) {
-        oppgaver
-            .onEach { oppgave ->
-                oppgave.lagre(this, hendelseId, contextId)
-            }.clear()
+    private fun tildelOppgaver(fødselsnummer: String) {
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, gyldigTil) ->
+            oppgaver.forEach { it.tildel(this, oid, gyldigTil) }
+        }
+    }
+
+    private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit, doAlso: () -> Unit = {}) {
+        oppgaver.onEach { oppgave -> oppgave.lagre(this, hendelseId, contextId) }
+        doAlso()
+        oppgaver.clear()
         meldinger.onEach { publisher(it) }.clear()
     }
 

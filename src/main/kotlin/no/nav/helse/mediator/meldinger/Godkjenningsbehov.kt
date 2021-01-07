@@ -145,7 +145,6 @@ internal class Godkjenningsbehov(
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            reservasjonDao = reservasjonDao,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             egenAnsattDao = egenAnsattDao,

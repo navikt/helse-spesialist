@@ -13,7 +13,6 @@ import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
 
 internal class OpprettSaksbehandleroppgaveCommandTest {
@@ -32,7 +31,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val command = OpprettSaksbehandleroppgaveCommand(
         fødselsnummer = FNR,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        reservasjonDao = reservasjonDao,
         oppgaveMediator = oppgaveMediator,
         automatisering = automatisering,
         egenAnsattDao = egenAnsattDao,
@@ -59,17 +57,5 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.stikkprøve(VEDTAKSPERIODE_ID)) }
-    }
-
-    @Test
-    fun `oppretter oppgave med reservasjon`() {
-        val reservasjon = Pair(UUID.randomUUID(), LocalDateTime.now())
-        every { reservasjonDao.hentReservasjonFor(FNR) } returns reservasjon
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprettOgTildel(
-            Oppgave.søknad(VEDTAKSPERIODE_ID),
-            reservasjon.first,
-            reservasjon.second
-        ) }
     }
 }

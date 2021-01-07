@@ -17,15 +17,16 @@ internal class HendelseMediatorTest {
 
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val mediator = HendelseMediator(
-        testRapid,
-        mockk(relaxed = true),
-        mockk(relaxed = true),
-        mockk(relaxed = true),
-        mockk(relaxed = true),
-        mockk(relaxed = true),
-        mockk(relaxed = true),
-        oppgaveMediator,
-        mockk(relaxed = true)
+        rapidsConnection = testRapid,
+        oppgaveDao = mockk(relaxed = true),
+        vedtakDao = mockk(relaxed = true),
+        personDao = mockk(relaxed = true),
+        commandContextDao = mockk(relaxed = true),
+        hendelseDao = mockk(relaxed = true),
+        tildelingDao = mockk(relaxed = true),
+        reservasjonDao = mockk(relaxed = true),
+        oppgaveMediator = oppgaveMediator,
+        hendelsefabrikk = mockk(relaxed = true)
     )
 
     @Test

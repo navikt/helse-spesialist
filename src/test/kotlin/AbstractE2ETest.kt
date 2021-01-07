@@ -13,8 +13,8 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -69,6 +69,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    private val reservasjonDao = ReservasjonDao(dataSource)
 
     protected val testRapid = TestRapid()
 
@@ -82,8 +83,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         every { arbeidsgiverinformasjon() } returns true
         every { arbeidsforhold() } returns false
     }
-
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
         personDao = personDao,
@@ -93,7 +93,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveDao = oppgaveDao,
         commandContextDao = commandContextDao,
         snapshotDao = SnapshotDao(dataSource),
-        reservasjonDao = ReservasjonDao(dataSource),
+        reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = OverstyringDao(dataSource),
         risikovurderingDao = risikovurderingDao,
@@ -125,9 +125,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         personDao = personDao,
         commandContextDao = commandContextDao,
         hendelseDao = hendelseDao,
+        tildelingDao = tildelingDao,
+        reservasjonDao = reservasjonDao,
         hendelsefabrikk = hendelsefabrikk,
-        oppgaveMediator = oppgaveMediator,
-        tildelingDao = tildelingDao
+        oppgaveMediator = oppgaveMediator
     )
     internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
         vedtakDao = vedtakDao,

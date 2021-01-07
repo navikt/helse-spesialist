@@ -12,7 +12,6 @@ internal class Oppgave private constructor(
     private var id: Long? = null
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
-    private var tildeling: Pair<UUID, LocalDateTime>? = null
 
     constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID) : this(type, status, vedtaksperiodeId) {
         this.id = id
@@ -37,12 +36,9 @@ internal class Oppgave private constructor(
     }
 
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
-        val oppgaveId = id?.also {
+        id?.also {
             oppgaveMediator.oppdater(hendelseId, contextId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
         } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, type).also { id = it } ?: return
-        tildeling?.also {
-            oppgaveMediator.tildel(oppgaveId, it)
-        }
     }
 
     internal fun avbryt() {
@@ -50,12 +46,8 @@ internal class Oppgave private constructor(
         status = Oppgavestatus.Invalidert
     }
 
-    internal fun tildel(saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
-        tildeling = saksbehandleroid to gyldigTil
-    }
-
-    internal fun tildel(oppgaveMediator: OppgaveMediator, reservasjon: Pair<UUID, LocalDateTime>) {
-        oppgaveMediator.tildel(requireNotNull(id), reservasjon)
+    internal fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+        oppgaveMediator.tildel(requireNotNull(id), saksbehandleroid, gyldigTil)
     }
 
     override fun equals(other: Any?): Boolean {

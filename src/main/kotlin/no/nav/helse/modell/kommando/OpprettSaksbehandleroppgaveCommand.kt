@@ -5,14 +5,12 @@ import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class OpprettSaksbehandleroppgaveCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val reservasjonDao: ReservasjonDao,
     private val oppgaveMediator: OppgaveMediator,
     private val automatisering: Automatisering,
     private val hendelseId: UUID,
@@ -31,10 +29,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
         val oppgave = if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) Oppgave.stikkprøve(vedtaksperiodeId) else Oppgave.søknad(vedtaksperiodeId)
         logg.info("Oppretter saksbehandleroppgave")
-        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { reservasjon ->
-            oppgaveMediator.opprettOgTildel(oppgave, reservasjon.first, reservasjon.second)
-        } ?: oppgaveMediator.opprett(oppgave)
-
+        oppgaveMediator.opprett(oppgave)
         return true
     }
 
