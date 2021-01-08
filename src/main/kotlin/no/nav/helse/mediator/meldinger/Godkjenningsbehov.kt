@@ -25,7 +25,6 @@ import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -56,7 +55,6 @@ internal class Godkjenningsbehov(
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
-    reservasjonDao: ReservasjonDao,
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     egenAnsattDao: EgenAnsattDao,

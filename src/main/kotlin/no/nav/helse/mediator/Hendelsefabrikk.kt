@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -83,14 +83,13 @@ internal class Hendelsefabrikk(
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            commandContextDao = commandContextDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             snapshotDao = snapshotDao,
+            commandContextDao = commandContextDao,
             risikovurderingDao = risikovurderingDao,
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            reservasjonDao = reservasjonDao,
             egenAnsattDao = egenAnsattDao,
             arbeidsforholdDao = arbeidsforholdDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
