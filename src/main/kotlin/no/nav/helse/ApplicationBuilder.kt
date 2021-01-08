@@ -113,7 +113,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val plukkTilManuell: PlukkTilManuell = if (miljøstyrtFeatureToggle.stikkprøver) {
-        { nextInt(300) == 1 }
+        val divisor = requireNotNull(env["STIKKPROEVER_DIVISOR"]) { "STIKKPROEVER_DIVISOR må oppgis når stikkprøver er aktivert" }.toInt()
+        require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
+        ({ nextInt(divisor) == 0 })
     } else {
         { false }
     }
