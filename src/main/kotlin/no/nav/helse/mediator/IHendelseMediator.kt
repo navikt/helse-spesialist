@@ -88,4 +88,9 @@ internal interface IHendelseMediator {
         message: JsonMessage,
         context: RapidsConnection.MessageContext
     )
+
+    fun påminnelseOppgaveMakstid(
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    )
 }

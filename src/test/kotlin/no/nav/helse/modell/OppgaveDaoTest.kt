@@ -11,7 +11,11 @@ import no.nav.helse.modell.kommando.TestHendelse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.postgresql.util.PSQLException
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal class OppgaveDaoTest : DatabaseIntegrationTest() {
@@ -149,11 +153,69 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, oppgaveDao.finn(VEDTAKSPERIODE).size)
     }
 
+    @Test
+    fun `opprette makstid på 4 dager end of day for ny oppgave`() {
+        opprettOppgave()
+        oppgaveDao.opprettMakstid(oppgaveId)
+        assertEquals(
+            LocalDate
+                .now()
+                .plusDays(4)
+                .atTime(23, 59, 59),
+            oppgaveDao.finnMakstid(oppgaveId)
+        )
+        assertFalse(oppgaveMedMakstidErTildelt(oppgaveId))
+    }
+
+    @Test
+    fun `kan ikke opprette en oppgave_makstid flere ganger for samme oppgave`() {
+        opprettOppgave()
+        oppgaveDao.opprettMakstid(oppgaveId)
+        assertThrows<PSQLException>{ oppgaveDao.opprettMakstid(oppgaveId) }
+    }
+
+    @Test
+    fun `oppdaterer makstid i oppgave_makstid for en oppgave når den blir tildelt`() {
+        opprettOppgave()
+        oppgaveDao.opprettMakstid(oppgaveId)
+        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
+        assertEquals(
+            LocalDate
+                .now()
+                .plusDays(14)
+                .atTime(23, 59, 59),
+            oppgaveDao.finnMakstid(oppgaveId)
+        )
+        assertTrue(oppgaveMedMakstidErTildelt(oppgaveId))
+    }
+
+    @Test
+    fun `en oppgave får ikke ny makstid hvis den tildeles flere ganger, første makstid for oppgaven er gjeldende`() {
+        opprettOppgave()
+        oppgaveDao.opprettMakstid(oppgaveId)
+        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId, 14)
+        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId, 2)
+        assertEquals(
+            LocalDate
+                .now()
+                .plusDays(14)
+                .atTime(23, 59, 59),
+            oppgaveDao.finnMakstid(oppgaveId)
+        )
+    }
+
+    @Test
+    fun `henter fødselsnummeret til personen en oppgave gjelder for`(){
+        nyPerson()
+        val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+        assertEquals(fødselsnummer, FNR)
+    }
+
     private fun statusForOppgave(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
-            session.run(queryOf("SELECT status FROM oppgave WHERE id = ?", oppgaveId).map {
-                enumValueOf<Oppgavestatus>(it.string(1))
-            }.asSingle)
-        }
+        session.run(queryOf("SELECT status FROM oppgave WHERE id = ?", oppgaveId).map {
+            enumValueOf<Oppgavestatus>(it.string(1))
+        }.asSingle)
+    }
 
     private fun oppgave() =
         using(sessionOf(dataSource)) {
@@ -168,6 +230,13 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
                     commandContextId = it.stringOrNull("command_context_id")?.let(UUID::fromString)
                 )
             }.asList)
+        }
+
+    private fun oppgaveMedMakstidErTildelt(oppgaveId: Long): Boolean =
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("SELECT tildelt FROM oppgave_makstid WHERE oppgave_ref=?", oppgaveId).map {
+                it.boolean("tildelt")
+            }.asSingle) ?: false
         }
 
     private class OppgaveAssertions(

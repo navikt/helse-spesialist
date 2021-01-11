@@ -32,6 +32,7 @@ internal class OppgaveMediator(
 
     internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
         tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
+        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
     }
 
     private fun nyOppgave(oppgave: Oppgave) {
@@ -45,6 +46,11 @@ internal class OppgaveMediator(
 
     private fun avbryt(oppgave: Oppgave) {
         oppgave.avbryt()
+        nyOppgave(oppgave)
+    }
+
+    internal fun makstidOppnådd(oppgave: Oppgave) {
+        oppgave.makstidOppnådd()
         nyOppgave(oppgave)
     }
 
@@ -81,14 +87,16 @@ internal class OppgaveMediator(
         navn: String
     ): Long? {
         if (oppgaveDao.harAktivOppgave(vedtaksperiodeId)) return null
-
         val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
         return oppgaveDao.opprettOppgave(
             contextId,
             navn,
             vedtakRef
         ).also { oppgaveId ->
-            køMelding("oppgave_opprettet", hendelseId, contextId, oppgaveId, AvventerSaksbehandler)
+            val makstid = oppgaveDao.opprettMakstid(oppgaveId)
+            val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+
+            køMelding("oppgave_opprettet", hendelseId, contextId, oppgaveId, AvventerSaksbehandler, fødselsnummer, makstid)
         }
     }
 
@@ -101,14 +109,19 @@ internal class OppgaveMediator(
         ferdigstiltAvOid: UUID?
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
+        val makstid = oppgaveDao.finnMakstid(oppgaveId)
+        val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+
         køMelding(
             "oppgave_oppdatert",
             hendelseId,
             contextId,
             oppgaveId,
             status,
+            fødselsnummer,
+            makstid,
             ferdigstiltAvIdent,
-            ferdigstiltAvOid
+            ferdigstiltAvOid,
         )
     }
 
@@ -131,8 +144,10 @@ internal class OppgaveMediator(
         contextId: UUID,
         oppgaveId: Long,
         status: Oppgavestatus,
+        fødselsnummer: String,
+        makstid: LocalDateTime,
         ferdigstiltAvIdent: String? = null,
-        ferdigstiltAvOid: UUID? = null
+        ferdigstiltAvOid: UUID? = null,
     ) {
         meldinger.add(JsonMessage.newMessage(
             mutableMapOf(
@@ -142,7 +157,9 @@ internal class OppgaveMediator(
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
                 "oppgaveId" to oppgaveId,
-                "status" to status.name
+                "status" to status.name,
+                "fødselsnummer" to fødselsnummer,
+                "makstid" to makstid
             ).apply {
                 ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
                 ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }

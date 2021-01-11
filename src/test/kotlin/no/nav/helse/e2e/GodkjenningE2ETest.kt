@@ -8,13 +8,14 @@ import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshot
+import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
@@ -487,6 +488,32 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         testRapid.reset()
         sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         assertTrue(testRapid.inspektør.behov().isEmpty())
+    }
+
+    @Test
+    fun `løser godkjenningsbehov når makstid for oppgave oppnås`() {
+        håndterGodkjenningsbehov()
+        oppgaveDao.oppdaterMakstidVedTildeling(OPPGAVEID, -1)
+        sendPåminnelseOppgaveMakstid()
+
+        assertOppgave(0, AvventerSaksbehandler, MakstidOppnådd)
+        assertAutomatisertLøsning(godkjent = false) {
+            assertTrue(it.path("makstidOppnådd").booleanValue())
+        }
+        assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
+    }
+
+    private fun sendPåminnelseOppgaveMakstid() {
+        @Language("JSON")
+        val json = """
+{
+    "@event_name": "påminnelse_oppgave_makstid",
+    "@id": "${UUID.randomUUID()}",
+    "fødselsnummer": "$UNG_PERSON_FNR_2018",
+    "oppgaveId": "$OPPGAVEID"
+}"""
+
+        testRapid.sendTestMessage(json)
     }
 
     private fun assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent: JsonNode) {

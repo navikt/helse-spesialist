@@ -15,11 +15,12 @@ import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.random.Random.Default.nextLong
 
@@ -70,6 +71,7 @@ internal class OppgaveMediatorTest {
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertOppgaveevent(1, "oppgave_opprettet")
+        verify(exactly = 2) { oppgaveDao.opprettMakstid(any()) }
     }
 
     @Test
@@ -79,6 +81,7 @@ internal class OppgaveMediatorTest {
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, gyldigTil) }
+        verify(exactly = 1) { oppgaveDao.oppdaterMakstidVedTildeling(any()) }
     }
 
     @Test
@@ -128,6 +131,16 @@ internal class OppgaveMediatorTest {
         mediator.lagreOgTildelOppgaver(TESTHENDELSE, messageContext, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.finn(VEDTAKSPERIODE_ID) }
         verify(exactly = 2) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
+    }
+
+    @Test
+    fun `timer ut oppgaver som har oppnådd makstid`() {
+        val oppgave1 = Oppgave(1L, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        mediator.makstidOppnådd(oppgave1)
+        mediator.lagreOppgaver(testRapid, UUID.randomUUID(), COMMAND_CONTEXT_ID)
+        verify(exactly = 1) { oppgaveDao.updateOppgave(any(), Oppgavestatus.MakstidOppnådd, null, null) }
+        verify(exactly = 1) { oppgaveDao.finnMakstid(any()) }
+        verify(exactly = 1) { oppgaveDao.finnFødselsnummer(any()) }
     }
 
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {

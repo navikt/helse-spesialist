@@ -1,5 +1,6 @@
 package no.nav.helse.modell
 
+import io.ktor.util.*
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
@@ -8,6 +9,8 @@ import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.SaksbehandleroppgaveDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -32,8 +35,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                     CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
-                opprettet DESC
-            LIMIT 500;
+                opprettet ASC
+            LIMIT 1000;
     """
             session.run(
                 queryOf(query)
@@ -240,6 +243,49 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
+    private fun Session.opprettMakstid(oppgaveId: Long): LocalDateTime? {
+        @Language("PostgreSQL")
+        val statement = """
+                INSERT INTO oppgave_makstid(oppgave_ref)
+                VALUES (?)
+                RETURNING makstid
+            """
+        return this.run(
+            queryOf(statement, oppgaveId).map { it.localDateTime("makstid") }.asSingle
+        )
+    }
+
+    internal fun opprettMakstid(oppgaveId: Long): LocalDateTime {
+        return requireNotNull(using(sessionOf(dataSource)) { session ->
+            session.opprettMakstid(oppgaveId)
+        })
+    }
+
+    private fun oppdaterMakstid(oppgaveId: Long, makstidDager: Long) = sessionOf(dataSource).use { session ->
+        session.run(
+            queryOf(
+                "UPDATE oppgave_makstid SET tildelt=?, makstid=? WHERE oppgave_ref=? AND tildelt = false;",
+                true,
+                LocalDate.now().plusDays(makstidDager).atTime(23, 59, 59),
+                oppgaveId
+            ).asUpdate
+        )
+    }
+
+    internal fun oppdaterMakstidVedTildeling(oppgaveId: Long, makstidDager: Long = 14) {
+        oppdaterMakstid(oppgaveId, makstidDager)
+    }
+
+     internal fun finnMakstid(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        session.run(
+            queryOf(
+                "SELECT makstid FROM oppgave_makstid WHERE oppgave_ref = ?",
+                oppgaveId
+            ).map { it.localDateTime("makstid") }.asSingle
+        )
+    })
+
+
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
         oppgavereferanse = it.long("oppgave_id"),
         oppgavetype = it.string("oppgavetype"),
@@ -263,4 +309,21 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     )
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
+
+    internal fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val statement = """
+                SELECT fodselsnummer from person
+                INNER JOIN vedtak v on person.id = v.person_ref
+                INNER JOIN oppgave o on v.id = o.vedtak_ref
+                WHERE o.id = ?
+            """
+
+        session.run(
+            queryOf(
+                statement,
+                oppgaveId
+            ).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle
+        )
+    })
 }

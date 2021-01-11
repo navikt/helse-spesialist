@@ -4,5 +4,6 @@ enum class Oppgavestatus {
     AvventerSystem,
     AvventerSaksbehandler,
     Invalidert,
-    Ferdigstilt
+    Ferdigstilt,
+    MakstidOppnådd
 }

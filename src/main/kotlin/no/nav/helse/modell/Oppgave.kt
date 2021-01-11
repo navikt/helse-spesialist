@@ -35,6 +35,10 @@ internal class Oppgave private constructor(
         ferdigstiltAvOid = oid
     }
 
+    internal fun makstidOppnådd() {
+        status = Oppgavestatus.MakstidOppnådd
+    }
+
     internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
         id?.also {
             oppgaveMediator.oppdater(hendelseId, contextId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)

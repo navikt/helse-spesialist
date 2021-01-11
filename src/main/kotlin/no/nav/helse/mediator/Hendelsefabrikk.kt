@@ -369,4 +369,18 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao
         )
     }
+
+    override fun OppgaveMakstidPåminnelse(json: String): OppgaveMakstidPåminnelse {
+        val jsonNode = mapper.readTree(json)
+        return OppgaveMakstidPåminnelse(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            json = json,
+            oppgaveId = jsonNode["oppgaveId"].asLong(),
+            oppgaveDao = oppgaveDao,
+            hendelseDao = hendelseDao,
+            godkjenningMediator = godkjenningMediator,
+            oppgaveMediator = oppgaveMediator
+        )
+    }
 }

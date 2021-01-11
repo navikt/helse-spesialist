@@ -16,7 +16,11 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
         løsAutomatisk(false, "Automatisk avvist", begrunnelser)
     }
 
-    private fun løsAutomatisk(godkjent: Boolean, årsak: String? = null, begrunnelser: List<String>? = null) {
+    internal fun makstidOppnådd(begrunnelser: List<String>?) {
+        løsAutomatisk(false, "Automatisk avvist", begrunnelser, true)
+    }
+
+    private fun løsAutomatisk(godkjent: Boolean, årsak: String? = null, begrunnelser: List<String>? = null, makstidOppnådd: Boolean = false) {
         løs(
             automatisk = true,
             godkjent = godkjent,
@@ -25,7 +29,8 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
             godkjenttidspunkt = LocalDateTime.now(),
             årsak = årsak,
             begrunnelser = begrunnelser,
-            kommentar = null
+            kommentar = null,
+            makstidOppnådd = makstidOppnådd
         )
     }
 
@@ -46,7 +51,8 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
             godkjenttidspunkt,
             årsak,
             begrunnelser,
-            kommentar
+            kommentar,
+            false
         )
     }
 
@@ -58,7 +64,8 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
         godkjenttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
-        kommentar: String?
+        kommentar: String?,
+        makstidOppnådd: Boolean
     ) {
         behov["@løsning"] = mapOf(
             "Godkjenning" to mapOf(
@@ -69,7 +76,8 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
                 "automatiskBehandling" to automatisk,
                 "årsak" to årsak,
                 "begrunnelser" to begrunnelser,
-                "kommentar" to kommentar
+                "kommentar" to kommentar,
+                "makstidOppnådd" to makstidOppnådd
             )
         )
     }

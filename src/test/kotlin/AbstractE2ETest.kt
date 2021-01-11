@@ -476,9 +476,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertAutomatisertLøsning() {
-        assertGodkjenningsbehovløsning(true, "Automatisk behandlet") {
+    protected fun assertAutomatisertLøsning(godkjent: Boolean = true, block: (JsonNode) -> Unit = {}) {
+        assertGodkjenningsbehovløsning(godkjent, "Automatisk behandlet") {
             assertTrue(it.path("automatiskBehandling").booleanValue())
+            block(it)
         }
     }
 

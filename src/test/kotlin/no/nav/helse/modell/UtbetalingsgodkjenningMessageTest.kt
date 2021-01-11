@@ -46,6 +46,18 @@ internal class UtbetalingsgodkjenningMessageTest {
         assertIkkeGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
     }
 
+    @Test
+    fun makstidOppnådd() {
+        utbetalingMessage.makstidOppnådd(listOf("Makstid oppnådd"))
+
+        assertMessage { løsning ->
+            assertFalse(løsning.path("godkjent").booleanValue())
+            assertTrue(løsning.path("makstidOppnådd").booleanValue())
+            assertEquals("Automatisk avvist", løsning.path("årsak").asText())
+            assertEquals("Makstid oppnådd", løsning.path("begrunnelser")[0].asText())
+        }
+    }
+
     private fun assertGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null) {
         assertMessage { løsning ->
             assertTrue(løsning.path("godkjent").booleanValue())
@@ -53,10 +65,11 @@ internal class UtbetalingsgodkjenningMessageTest {
         }
     }
 
-    private fun assertIkkeGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null) {
+    private fun assertIkkeGodkjent(automatisk: Boolean, ident: String, epost: String, godkjenttidspunkt: LocalDateTime? = null, makstidOppnådd: Boolean = false) {
         assertMessage { løsning ->
             assertFalse(løsning.path("godkjent").booleanValue())
             assertLøsning(automatisk, ident, epost, godkjenttidspunkt)
+            assertEquals(makstidOppnådd, løsning.path("makstidOppnådd").booleanValue())
         }
     }
 
@@ -70,6 +83,7 @@ internal class UtbetalingsgodkjenningMessageTest {
             assertTrue(løsning.path("årsak").isMissingOrNull())
             assertTrue(løsning.path("begrunnelser").isMissingOrNull())
             assertTrue(løsning.path("kommentar").isMissingOrNull())
+            assertFalse(løsning.path("makstidOppnådd").booleanValue())
         }
     }
 
