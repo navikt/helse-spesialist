@@ -127,6 +127,13 @@ internal class HendelseMediator(
         rapidsConnection.publish(fnr, rawJson)
     }
 
+    internal fun oppdaterPersonsnapshotForSisteUkesAnnullerteOgForkastedeHendelser() {
+        val fodselsnummerListe = hendelseDao.finnSisteUkesAnnullerteOgForkastede()
+        log.info("Initierer oppdatering av personSnapshot for ${fodselsnummerListe.size} personer")
+        fodselsnummerListe.forEach { håndter(OppdaterPersonsnapshotDto(it)) }
+        log.info("Ferdig oppdatert personSnapshots")
+    }
+
     override fun vedtaksperiodeEndret(
         message: JsonMessage,
         id: UUID,

@@ -29,9 +29,13 @@ internal fun Application.adminApi(mediator: HendelseMediator) {
                 }
                 post("/send") {
                     val request = call.receive<ArrayNode>()
-                    request.forEach {  node ->
+                    request.forEach { node ->
                         mediator.sendMeldingPåTopic(node)
                     }
+                    call.respond(HttpStatusCode.OK)
+                }
+                post("/oppdater-personer") {
+                    mediator.oppdaterPersonsnapshotForSisteUkesAnnullerteOgForkastedeHendelser()
                     call.respond(HttpStatusCode.OK)
                 }
             }
