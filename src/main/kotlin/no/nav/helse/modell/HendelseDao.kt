@@ -101,7 +101,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
                 LIMIT 1)
             """
         return using(sessionOf(dataSource)) { session ->
-            session.run(queryOf(statement).map { it.string("fodselsnummer") }.asList)
+            session.run(queryOf(statement).map { it.long("fodselsnummer").toFødselsnummer() }.asList)
         }
     }
 
