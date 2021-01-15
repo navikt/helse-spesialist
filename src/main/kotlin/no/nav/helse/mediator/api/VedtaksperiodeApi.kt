@@ -65,7 +65,6 @@ internal fun Route.vedtaksperiodeApi(
             return@get
         }
     }
-
     get("/api/person/fnr/{fødselsnummer}/sist_oppdatert") {
         call.parameters["fødselsnummer"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")

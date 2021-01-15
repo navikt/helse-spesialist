@@ -20,8 +20,9 @@ internal fun Route.tildelingV1Api(tildelingMediator: TildelingMediator) {
         val ref = UUID.randomUUID()
         try {
             modellfeilForRest {
-                val oppgaveId =
-                    requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+                val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
+                    requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
+                }
                 secureLog.info("Tildeler oppgave med oppgaveid $oppgaveId (ref: $ref)")
                 val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
                 val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
@@ -49,8 +50,9 @@ internal fun Route.tildelingV1Api(tildelingMediator: TildelingMediator) {
     }
 
     delete("/api/v1/tildeling/{oppgavereferanse}") {
-        val oppgaveId =
-            requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+        val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
+            requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
+        }
         secureLog.info("Sletter tildeling for oppgave med oppgaveid $oppgaveId")
         withContext(Dispatchers.IO) { tildelingMediator.fjernTildeling(oppgaveId) }
 
@@ -59,8 +61,10 @@ internal fun Route.tildelingV1Api(tildelingMediator: TildelingMediator) {
 
     post("/api/v1/dummytildeling/{oppgavereferanse}") {
         modellfeilForRest {
-            val oppgaveId =
-                requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+            val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
+                requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
+            }
+
             secureLog.info("Dummy-post-tildeler oppgave med oppgaveid $oppgaveId")
 
             call.respond(HttpStatusCode.OK)
@@ -69,8 +73,9 @@ internal fun Route.tildelingV1Api(tildelingMediator: TildelingMediator) {
 
     get("/api/v1/dummytildeling/{oppgavereferanse}") {
         modellfeilForRest {
-            val oppgaveId =
-                requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+            val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
+                requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
+            }
             secureLog.info("Dummy-get-tildeler oppgave med oppgaveid $oppgaveId")
 
             call.respond(HttpStatusCode.OK)
@@ -78,8 +83,9 @@ internal fun Route.tildelingV1Api(tildelingMediator: TildelingMediator) {
     }
 
     delete("/api/v1/dummytildeling/{oppgavereferanse}") {
-        val oppgaveId =
-            requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter" }
+        val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
+            requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
+        }
         secureLog.info("Dummy-sletter tildeling for oppgave med oppgaveid $oppgaveId")
         call.respond(HttpStatusCode.OK)
     }
