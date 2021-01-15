@@ -54,9 +54,13 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
     }
 
     delete("/api/tildeling/{oppgavereferanse}") {
-        val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
-            requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
+        val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+        val navn = accessToken.payload.getClaim("name").asString().split(", ").let { tokens ->
+            "${tokens[1]} ${tokens[0]}"
         }
+
+        val oppgaveId =
+            requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter. Kallet ble gjort av $navn" }
         secureLog.info("Sletter tildeling for oppgave med oppgaveid $oppgaveId")
         withContext(Dispatchers.IO) { tildelingMediator.fjernTildeling(oppgaveId) }
 
