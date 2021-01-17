@@ -7,25 +7,51 @@ import kotliquery.using
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
+import org.postgresql.ds.PGSimpleDataSource
+import org.postgresql.util.PSQLException
 import java.util.*
 import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
     companion object {
-        private val postgresPath = createTempDir()
-        private val embeddedPostgres = EmbeddedPostgres.builder()
-            .setOverrideWorkingDirectory(postgresPath)
-            .setDataDirectory(postgresPath.resolve("datadir"))
-            .start()
 
         private val hikariConfig = HikariConfig().apply {
-            this.jdbcUrl = embeddedPostgres.getJdbcUrl("postgres", "postgres").also(::println)
+            jdbcUrl = this@Companion.getJdbcUrl()
             maximumPoolSize = 5
             minimumIdle = 1
-            idleTimeout = 10001
+            idleTimeout = 500001
             connectionTimeout = 1000
-            maxLifetime = 30001
+            maxLifetime = 600001
+        }
+
+        private fun getJdbcUrl(): String {
+            val urlStandaloneDatabase = "jdbc:postgresql://localhost:13337/postgres?user=postgres"
+
+            fun standaloneDataSourceIsRunning(): Boolean {
+                val dataSource = PGSimpleDataSource()
+                dataSource.setUrl(urlStandaloneDatabase)
+                return try {
+                    dataSource.connection
+                    true
+                } catch (e: PSQLException) {
+                    false
+                }
+            }
+
+            fun startEmbeddedPostgres(): EmbeddedPostgres {
+                val postgresPath = createTempDir()
+                return EmbeddedPostgres.builder()
+                    .setOverrideWorkingDirectory(postgresPath)
+                    .setDataDirectory(postgresPath.resolve("datadir"))
+                    .start()
+            }
+
+            return if (standaloneDataSourceIsRunning()) {
+                urlStandaloneDatabase
+            } else {
+                startEmbeddedPostgres().getJdbcUrl("postgres", "postgres")
+            }
         }
 
         internal val dataSource = HikariDataSource(hikariConfig)
