@@ -10,6 +10,7 @@ import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
@@ -21,6 +22,7 @@ internal class OppgaveMediator(
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val meldinger = mutableListOf<String>()
+    private val log = LoggerFactory.getLogger(this::class.java)
 
     internal fun hentOppgaver() = oppgaveDao.finnOppgaver()
 
@@ -132,6 +134,8 @@ internal class OppgaveMediator(
     }
 
     private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit, doAlso: () -> Unit = {}) {
+        if (oppgaver.size > 1) log.info("Oppgaveliste har ${oppgaver.size} oppgaver, hendelsesId: $hendelseId og contextId: $contextId")
+
         oppgaver.onEach { oppgave -> oppgave.lagre(this, hendelseId, contextId) }
         doAlso()
         oppgaver.clear()
