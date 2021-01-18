@@ -9,6 +9,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.postgresql.ds.PGSimpleDataSource
 import org.postgresql.util.PSQLException
+import java.io.File
 import java.util.*
 import javax.sql.DataSource
 
@@ -26,7 +27,7 @@ abstract class AbstractDatabaseTest {
         }
 
         private fun getJdbcUrl(): String {
-            val urlStandaloneDatabase = "jdbc:postgresql://localhost:13337/postgres?user=postgres"
+            val urlStandaloneDatabase = File(DATABASE_URL_FILE_PATH).readText()
 
             fun standaloneDataSourceIsRunning(): Boolean {
                 val dataSource = PGSimpleDataSource()
