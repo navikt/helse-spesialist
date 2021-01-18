@@ -27,11 +27,9 @@ abstract class AbstractDatabaseTest {
         }
 
         private fun getJdbcUrl(): String {
-            val urlStandaloneDatabase = File(DATABASE_URL_FILE_PATH).readText()
-
-            fun standaloneDataSourceIsRunning(): Boolean {
+            fun standaloneDataSourceIsRunning(url: String): Boolean {
                 val dataSource = PGSimpleDataSource()
-                dataSource.setUrl(urlStandaloneDatabase)
+                dataSource.setUrl(url)
                 return try {
                     dataSource.connection
                     true
@@ -48,7 +46,13 @@ abstract class AbstractDatabaseTest {
                     .start()
             }
 
-            return if (standaloneDataSourceIsRunning()) {
+            val urlStandaloneDatabase: String? = File(DATABASE_URL_FILE_PATH).let {
+                if (it.exists()) {
+                    it.readText()
+                } else null
+            }
+
+            return if (urlStandaloneDatabase != null && standaloneDataSourceIsRunning(urlStandaloneDatabase)) {
                 urlStandaloneDatabase
             } else {
                 startEmbeddedPostgres().getJdbcUrl("postgres", "postgres")
