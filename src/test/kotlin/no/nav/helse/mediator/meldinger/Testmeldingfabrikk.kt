@@ -492,6 +492,17 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagAvbrytSaksbehandling(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String = "12020052345",
+        vedtaksperiodeId: UUID
+    ) = nyHendelse(
+        id, "avbryt_saksbehandling", mapOf(
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "fødselsnummer" to fødselsnummer
+        )
+    )
+
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 

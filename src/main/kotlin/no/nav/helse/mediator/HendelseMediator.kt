@@ -63,6 +63,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             OppgaveMakstidPåminnelse.River(it, this)
+            AvbrytSaksbehandling.AvbrytSaksbehandlingRiver(it, this)
         }
     }
 
@@ -273,7 +274,11 @@ internal class HendelseMediator(
         message: JsonMessage,
         context: RapidsConnection.MessageContext
     ) {
-        utfør(hendelsefabrikk.OppgaveMakstidPåminnelse(message.toJson()), context)
+        utfør(hendelsefabrikk.oppgaveMakstidPåminnelse(message.toJson()), context)
+    }
+
+    override fun avbrytSaksbehandling(message: JsonMessage, context: RapidsConnection.MessageContext) {
+        utfør(hendelsefabrikk.avbrytSaksbehandling(message.toJson()), context)
     }
 
     fun håndter(overstyringMessage: OverstyringRestDto) {

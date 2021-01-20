@@ -93,4 +93,9 @@ internal interface IHendelseMediator {
         message: JsonMessage,
         context: RapidsConnection.MessageContext
     )
+
+    fun avbrytSaksbehandling(
+        message: JsonMessage,
+        context: RapidsConnection.MessageContext
+    )
 }

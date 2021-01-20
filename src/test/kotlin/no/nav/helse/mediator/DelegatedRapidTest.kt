@@ -48,10 +48,12 @@ internal class DelegatedRapidTest : River.PacketListener {
         order.add("PACKET")
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun afterRiver(message: String, context: RapidsConnection.MessageContext) {
         order.add("AFTER")
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun errorHandler(exception: Exception, message: String) {
         error = true
         order.add("ERROR")

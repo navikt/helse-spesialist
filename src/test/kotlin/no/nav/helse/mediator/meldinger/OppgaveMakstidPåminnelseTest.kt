@@ -47,7 +47,7 @@ internal class OppgaveMakstidPåminnelseTest {
         opptegnelseDao = mockk(relaxed = true)
     )
 
-    private val oppgaveMakstidPåminnelseMessage = hendelsefabrikk.OppgaveMakstidPåminnelse(
+    private val oppgaveMakstidPåminnelseMessage = hendelsefabrikk.oppgaveMakstidPåminnelse(
         json = JSON
     )
 

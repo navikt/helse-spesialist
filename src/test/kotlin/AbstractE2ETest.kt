@@ -300,6 +300,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
+    protected fun sendAvbrytSaksbehandling(fødselsnummer: String, vedtaksperiodeId: UUID) {
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagAvbrytSaksbehandling(id, fødselsnummer, vedtaksperiodeId)
+            )
+        }
+    }
+
     protected fun sendRisikovurderingløsning(
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,

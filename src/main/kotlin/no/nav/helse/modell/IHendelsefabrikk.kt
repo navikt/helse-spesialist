@@ -74,9 +74,11 @@ internal interface IHendelsefabrikk {
         vedtaksperiodeIder: List<UUID>,
         json: String
     ): Tilbakerulling
+
     fun tilbakerulling(json: String): Tilbakerulling
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
     fun utbetalingEndret(json: String): UtbetalingEndret
-    fun oppdaterPersonsnapshot(json:String): OppdaterPersonsnapshot
-    fun OppgaveMakstidPåminnelse(json: String): OppgaveMakstidPåminnelse
+    fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot
+    fun oppgaveMakstidPåminnelse(json: String): OppgaveMakstidPåminnelse
+    fun avbrytSaksbehandling(json: String): AvbrytSaksbehandling
 }
