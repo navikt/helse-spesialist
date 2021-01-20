@@ -1,10 +1,14 @@
 package no.nav.helse.modell.kommando
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -19,7 +23,8 @@ internal class OpprettVedtakCommand(
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val snapshotDao: SnapshotDao,
-    private val vedtakDao: VedtakDao
+    private val vedtakDao: VedtakDao,
+    private val warningDao: WarningDao
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettVedtakCommand::class.java)
@@ -32,7 +37,10 @@ internal class OpprettVedtakCommand(
 
     private fun oppdater(vedtakRef: Long): Boolean {
         log.info("Henter oppdatert snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer))
+        val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
+        val snapshotId = snapshotDao.insertSpeilSnapshot(snapshot)
+        oppdaterWarnings(snapshot)
+
         log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
         vedtakDao.oppdater(
             vedtakRef = vedtakRef,
@@ -45,8 +53,8 @@ internal class OpprettVedtakCommand(
 
     private fun opprett(): Boolean {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val speilSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
-        val snapshotId = snapshotDao.insertSpeilSnapshot(speilSnapshot)
+        val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
+        val snapshotId = snapshotDao.insertSpeilSnapshot(snapshot)
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer))
         log.info("Oppretter vedtak for vedtaksperiode: $vedtaksperiodeId for person=$personRef, arbeidsgiver=$arbeidsgiverRef")
@@ -58,7 +66,16 @@ internal class OpprettVedtakCommand(
             arbeidsgiverRef = arbeidsgiverRef,
             speilSnapshotRef = snapshotId
         )
+        oppdaterWarnings(snapshot)
         return true
+    }
+
+    private fun oppdaterWarnings(snapshot: String) {
+        warningDao.oppdaterSpleisWarnings(
+            vedtaksperiodeId, Warning.warnings(
+                vedtaksperiodeId, objectMapper.readValue(snapshot)
+            )
+        )
     }
 
 }

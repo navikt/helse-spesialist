@@ -10,7 +10,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.snapshot
+import no.nav.helse.snapshotMedWarning
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +22,7 @@ internal class OppdaterSnapshotCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private const val FNR = "fnr"
-        private val SNAPSHOT = snapshot(VEDTAKSPERIODE)
+        private val SNAPSHOT = snapshotMedWarning(VEDTAKSPERIODE)
         private const val VEDTAK_REF = 1L
     }
 

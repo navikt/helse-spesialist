@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.snapshot
+import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
@@ -12,7 +12,7 @@ internal class AvbrytSaksbehandlingE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val ORGNR = "222222222"
-        private val SNAPSHOTV1 = snapshot(VEDTAKSPERIODE_ID)
+        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
     }
 
     @Test

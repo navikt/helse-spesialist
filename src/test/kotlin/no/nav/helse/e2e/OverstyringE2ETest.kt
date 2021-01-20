@@ -6,6 +6,7 @@ import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
+import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -20,7 +21,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
-        private const val SNAPSHOTV1 = "{}"
+        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
     }
 
     @Test

@@ -58,7 +58,6 @@ internal interface IHendelseMediator {
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        warnings: List<String>,
         periodetype: Saksbehandleroppgavetype,
         context: RapidsConnection.MessageContext
     )

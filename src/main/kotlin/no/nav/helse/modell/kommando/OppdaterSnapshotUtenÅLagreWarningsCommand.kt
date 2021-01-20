@@ -4,14 +4,14 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.slf4j.LoggerFactory
 
-internal class OppdaterSnapshotV2Command(
+internal class OppdaterSnapshotUtenÅLagreWarningsCommand(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
     private val vedtakDao: VedtakDao,
     private val fødselsnummer: String
 ) : Command {
 
     private companion object {
-        private val log = LoggerFactory.getLogger(OppdaterSnapshotV2Command::class.java)
+        private val log = LoggerFactory.getLogger(OppdaterSnapshotUtenÅLagreWarningsCommand::class.java)
     }
 
     override fun execute(context: CommandContext): Boolean {
@@ -21,7 +21,7 @@ internal class OppdaterSnapshotV2Command(
     private fun oppdaterSnapshot(): Boolean {
         val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
         vedtakDao.oppdaterSnapshot(fødselsnummer, snapshot)
-        log.info("Oppdaterte snapshot på person: ${fødselsnummer.substring(4)}*******")
+        log.info("Oppdaterte snapshot på person: ${fødselsnummer.substring(0, 4)}*******")
         return true
     }
 }

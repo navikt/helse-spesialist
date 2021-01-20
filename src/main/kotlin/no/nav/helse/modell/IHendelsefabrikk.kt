@@ -49,7 +49,6 @@ internal interface IHendelsefabrikk {
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        warnings: List<String>,
         periodetype: Saksbehandleroppgavetype,
         json: String
     ): Godkjenningsbehov

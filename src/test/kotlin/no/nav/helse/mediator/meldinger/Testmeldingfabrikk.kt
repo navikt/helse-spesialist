@@ -64,7 +64,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         organisasjonsnummer: String = "orgnr",
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
-        warnings: List<String> = emptyList(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId
@@ -80,10 +79,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "Godkjenning" to mapOf(
                     "periodeFom" to "$periodeFom",
                     "periodeTom" to "$periodeTom",
-                    "warnings" to mapOf(
-                        "aktiviteter" to warnings.map { mapOf("melding" to it) },
-                        "kontekster" to emptyList<Any>()
-                    ),
                     "periodetype" to periodetype.name
                 )
             )

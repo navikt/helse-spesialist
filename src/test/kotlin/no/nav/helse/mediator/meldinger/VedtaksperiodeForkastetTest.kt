@@ -11,7 +11,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.snapshot
+import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +25,7 @@ internal class VedtaksperiodeForkastetTest {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
-        private val SNAPSHOT = snapshot(VEDTAKSPERIODE)
+        private val SNAPSHOT = snapshotUtenWarnings(VEDTAKSPERIODE)
         private val vedtak = VedtakDto(1, 2)
     }
 

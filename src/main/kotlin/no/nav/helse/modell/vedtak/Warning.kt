@@ -1,6 +1,8 @@
 package no.nav.helse.modell.vedtak
 
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
+import java.util.*
 
 internal class Warning(
     private val melding: String,
@@ -12,6 +14,15 @@ internal class Warning(
         fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) {
             warnings.forEach { it.lagre(warningDao, vedtakRef) }
         }
+
+        internal fun warnings(vedtaksperiodeId: UUID, snapshot: PersonFraSpleisDto) =
+            snapshot.arbeidsgivere
+                .flatMap { it.vedtaksperioder }
+                .filter { UUID.fromString(it["id"].asText()) == vedtaksperiodeId }
+                .flatMap { it.findValues("aktivitetslogg") }
+                .flatten()
+                .filter { it["alvorlighetsgrad"].asText() == "W" }
+                .map { Warning(it["melding"].asText(), WarningKilde.Spleis) }
     }
 
     internal fun lagre(warningDao: WarningDao, vedtakRef: Long) {

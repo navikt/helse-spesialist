@@ -165,7 +165,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
-        warnings: List<String> = emptyList(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         aktørId: String = AKTØR
@@ -177,7 +176,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 organisasjonsnummer = orgnr,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom,
-                warnings = warnings,
                 periodetype = periodetype,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId

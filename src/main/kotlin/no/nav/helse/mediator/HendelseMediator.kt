@@ -172,7 +172,6 @@ internal class HendelseMediator(
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        warnings: List<String>,
         periodetype: Saksbehandleroppgavetype,
         context: RapidsConnection.MessageContext
     ) {
@@ -189,7 +188,6 @@ internal class HendelseMediator(
                 periodeFom,
                 periodeTom,
                 vedtaksperiodeId,
-                warnings,
                 periodetype,
                 message.toJson()
             ), context

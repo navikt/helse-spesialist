@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -26,7 +25,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -45,7 +43,6 @@ internal class Godkjenningsbehov(
     private val vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    warnings: List<Warning>,
     periodetype: Saksbehandleroppgavetype,
     private val json: String,
     personDao: PersonDao,
@@ -101,7 +98,6 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            warnings = warnings,
             vedtaksperiodetype = periodetype,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
@@ -171,8 +167,9 @@ internal class Godkjenningsbehov(
                         "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId"
                     )
                     it.requireKey(
-                        "Godkjenning.periodeFom", "Godkjenning.periodeTom",
-                        "Godkjenning.warnings", "Godkjenning.periodetype"
+                        "Godkjenning.periodeFom",
+                        "Godkjenning.periodeTom",
+                        "Godkjenning.periodetype",
                     )
                 }
             }.register(this)
@@ -202,12 +199,9 @@ internal class Godkjenningsbehov(
                 periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
                 periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-                warnings = packet["Godkjenning.warnings"].toWarnings(),
                 periodetype = Saksbehandleroppgavetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 context = context
             )
         }
-
-        private fun JsonNode.toWarnings() = this["aktiviteter"].map { it["melding"].asText() }
     }
 }

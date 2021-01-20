@@ -19,8 +19,6 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -66,7 +64,6 @@ internal class Hendelsefabrikk(
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        warnings: List<String>,
         periodetype: Saksbehandleroppgavetype,
         json: String
     ): Godkjenningsbehov {
@@ -78,7 +75,6 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = vedtaksperiodeId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            warnings = warnings.map { Warning(it, WarningKilde.Spleis) },
             periodetype = periodetype,
             json = json,
             personDao = personDao,
@@ -110,7 +106,6 @@ internal class Hendelsefabrikk(
             periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
             periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            warnings = jsonNode.path("Godkjenning").path("warnings").path("aktiviteter").map { it["melding"].asText() },
             periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
             json = json
         )

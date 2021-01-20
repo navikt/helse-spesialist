@@ -4,6 +4,8 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.snapshotMedWarning
+import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -17,7 +19,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
+        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
@@ -131,11 +133,10 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak ved warnings`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotMedWarning(VEDTAKSPERIODE_ID)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            warnings = listOf("WARNING"),
             periodetype = Saksbehandleroppgavetype.FORLENGELSE
         )
         sendPersoninfoløsning(

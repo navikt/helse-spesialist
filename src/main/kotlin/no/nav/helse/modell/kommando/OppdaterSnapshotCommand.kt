@@ -1,14 +1,10 @@
 package no.nav.helse.modell.kommando
 
-import com.fasterxml.jackson.core.JsonParseException
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
@@ -47,35 +43,16 @@ internal class OppdaterSnapshotCommand(
 
     private fun oppdaterSnapshot(): Boolean {
         log.info("oppdaterer snapshot for $vedtaksperiodeId")
-        return speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer).let {
-            val oppdatertSnapshot = snapshotDao.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, it) != 0
-            if (oppdatertSnapshot) {
+        return speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer).let { snapshot ->
+            val snapshotBleOppdatert = snapshotDao.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, snapshot) != 0
+            if (snapshotBleOppdatert) {
                 log.info("oppdaterer warnings for $vedtaksperiodeId")
-                val warnings = warnings(it)
-                warningDao.oppdaterSpleisWarnings(
+                warningDao.oppdaterSpleisWarnings(vedtaksperiodeId, Warning.warnings(
                     vedtaksperiodeId,
-                    warnings.map { w -> Warning(w.melding, WarningKilde.Spleis) })
+                    objectMapper.readValue(snapshot)
+                ))
             }
-            oppdatertSnapshot
+            snapshotBleOppdatert
         }
     }
-
-    private fun warnings(json: String) =
-        try {
-            objectMapper.readValue<PersonFraSpleisDto>(json).arbeidsgivere
-                .flatMap { it.vedtaksperioder }
-                .filter { UUID.fromString(it["id"].asText()) == vedtaksperiodeId }
-                .flatMap { it.findValues("aktivitetslogg") }
-                .flatten()
-                .map { objectMapper.convertValue<WarningFraSpleis>(it) }
-                .filter { it.alvorlighetsgrad == "W" }
-        } catch (e: JsonParseException) {
-            throw RuntimeException("Feilet ved instansiering av speil-snapshot", e)
-        }
-
-    class WarningFraSpleis(
-        val alvorlighetsgrad: String,
-        val vedtaksperiodeId: String,
-        val melding: String
-    )
 }
