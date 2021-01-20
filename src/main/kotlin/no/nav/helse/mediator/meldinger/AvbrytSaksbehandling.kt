@@ -3,8 +3,7 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.kommando.AvbrytContextCommand
-import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
+import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -26,14 +25,7 @@ internal class AvbrytSaksbehandling(
     override fun toJson(): String = json
 
     override val commands: List<Command> = listOf(
-        AvbrytContextCommand(
-            vedtaksperiodeId = vedtaksperiodeId,
-            commandContextDao = commandContextDao
-        ),
-        AvbrytOppgaveCommand(
-            vedtaksperiodeId = vedtaksperiodeId,
-            oppgaveMediator = oppgaveMediator
-        )
+        AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator)
     )
 
     internal class AvbrytSaksbehandlingRiver(
