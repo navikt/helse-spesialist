@@ -6,7 +6,8 @@ import java.util.*
 data class PersonFraSpleisDto(
     val aktørId: String,
     val fødselsnummer: String,
-    val arbeidsgivere: List<ArbeidsgiverFraSpleisDto>
+    val arbeidsgivere: List<ArbeidsgiverFraSpleisDto>,
+    val inntektsgrunnlag: JsonNode
 )
 
 data class ArbeidsgiverFraSpleisDto(

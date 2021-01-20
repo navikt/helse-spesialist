@@ -162,7 +162,8 @@ internal class VedtaksperiodeMediator(
                 enhet = enhet,
                 saksbehandlerepost = saksbehandlerepost,
                 utbetalinger = utbetalinger,
-                arbeidsforhold = arbeidsforhold
+                arbeidsforhold = arbeidsforhold,
+                inntektsgrunnlag = speilSnapshot.inntektsgrunnlag
             )
         }
 

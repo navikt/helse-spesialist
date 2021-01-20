@@ -18,7 +18,8 @@ data class PersonForSpeilDto(
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto,
     val saksbehandlerepost: String?,
-    val arbeidsforhold: List<ArbeidsforholdForSpeilDto>
+    val arbeidsforhold: List<ArbeidsforholdForSpeilDto>,
+    val inntektsgrunnlag: JsonNode
 )
 
 data class ArbeidsforholdForSpeilDto(

@@ -5,8 +5,7 @@ import io.mockk.every
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -46,6 +45,22 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertTrue(
             speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("risikovurdering").isMissingOrNull()
         )
+    }
+
+    @Test
+    fun `inntektsgrunnlag på personnivå blir faktisk tatt med til speil`() {
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        assertFalse(speilSnapshot.inntektsgrunnlag.isNull)
+        assertEquals(speilSnapshot.inntektsgrunnlag.first()["skjæringstidspunkt"].textValue(), "2018-01-01")
+        assertEquals(speilSnapshot.inntektsgrunnlag.first()["sykepengegrunnlag"].doubleValue(), 581298.0)
     }
 
     @Test
@@ -179,7 +194,8 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         val orgnr1 = "987654321"
         val vedtaksperiodeId1 = UUID.randomUUID()
 
-        val godkjenningsmeldingId1 = sendGodkjenningsbehov(orgnr1, vedtaksperiodeId1, fødselsnummer = fødselsnummer1, aktørId = aktørId1)
+        val godkjenningsmeldingId1 =
+            sendGodkjenningsbehov(orgnr1, vedtaksperiodeId1, fødselsnummer = fødselsnummer1, aktørId = aktørId1)
         sendPersoninfoløsning(godkjenningsmeldingId1, orgnr1, vedtaksperiodeId1)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId1,
@@ -198,7 +214,8 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         val aktørId2 = "100000000010123"
         val orgnr2 = "876543219"
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val godkjenningsmeldingId2 = sendGodkjenningsbehov(orgnr2, vedtaksperiodeId2, fødselsnummer = fødselsnummer2, aktørId = aktørId2)
+        val godkjenningsmeldingId2 =
+            sendGodkjenningsbehov(orgnr2, vedtaksperiodeId2, fødselsnummer = fødselsnummer2, aktørId = aktørId2)
         sendPersoninfoløsning(godkjenningsmeldingId2, orgnr2, vedtaksperiodeId2)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId2,
@@ -317,6 +334,12 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
                             "id": "$VEDTAKSPERIODE_ID"
                         }
                     ]
+                }
+            ],
+            "inntektsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "sykepengegrunnlag": 581298.0
                 }
             ]
         }

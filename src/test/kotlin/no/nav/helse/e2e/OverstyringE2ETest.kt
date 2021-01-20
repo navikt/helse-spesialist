@@ -97,7 +97,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                         id = hendelseId,
                         vedtaksperioder = emptyList()
                     )
-                )
+                ),
+                inntektsgrunnlag = objectMapper.nullNode()
             )
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
