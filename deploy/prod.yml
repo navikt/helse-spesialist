@@ -80,4 +80,4 @@ spec:
     - name: STIKKPROEVER_FEATURE_TOGGLE
       value: "true"
     - name: STIKKPROEVER_DIVISOR
-      value: "500"
+      value: "200"
