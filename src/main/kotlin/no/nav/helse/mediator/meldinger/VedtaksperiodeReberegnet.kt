@@ -12,7 +12,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class AvbrytSaksbehandling(
+internal class VedtaksperiodeReberegnet(
     override val id: UUID,
     private val fødselsnummer: String,
     vedtaksperiodeId: UUID,
@@ -28,16 +28,16 @@ internal class AvbrytSaksbehandling(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator)
     )
 
-    internal class AvbrytSaksbehandlingRiver(
+    internal class River(
         rapidsConnection: RapidsConnection,
         private val mediator: IHendelseMediator
-    ) : River.PacketListener {
+    ) : no.nav.helse.rapids_rivers.River.PacketListener {
         private val log = LoggerFactory.getLogger(this::class.java)
 
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireValue("@event_name", "avbryt_saksbehandling")
+                    it.requireValue("@event_name", "vedtaksperiode_reberegnet")
                     it.requireKey(
                         "@id", "fødselsnummer", "vedtaksperiodeId"
                     )

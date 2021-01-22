@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 
-internal class AvbrytSaksbehandlingE2ETest : AbstractE2ETest() {
+internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val ORGNR = "222222222"

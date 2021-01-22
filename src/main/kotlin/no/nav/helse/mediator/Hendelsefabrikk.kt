@@ -379,9 +379,9 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun avbrytSaksbehandling(json: String): AvbrytSaksbehandling {
+    override fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
-        return AvbrytSaksbehandling(
+        return VedtaksperiodeReberegnet(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),

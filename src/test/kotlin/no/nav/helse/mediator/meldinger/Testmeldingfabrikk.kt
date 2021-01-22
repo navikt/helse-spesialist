@@ -492,7 +492,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         fødselsnummer: String = "12020052345",
         vedtaksperiodeId: UUID
     ) = nyHendelse(
-        id, "avbryt_saksbehandling", mapOf(
+        id, "vedtaksperiode_reberegnet", mapOf(
             "vedtaksperiodeId" to vedtaksperiodeId,
             "fødselsnummer" to fødselsnummer
         )

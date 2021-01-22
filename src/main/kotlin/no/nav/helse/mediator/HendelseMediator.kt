@@ -63,7 +63,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             OppgaveMakstidPåminnelse.River(it, this)
-            AvbrytSaksbehandling.AvbrytSaksbehandlingRiver(it, this)
+            VedtaksperiodeReberegnet.River(it, this)
         }
     }
 
@@ -276,7 +276,7 @@ internal class HendelseMediator(
     }
 
     override fun avbrytSaksbehandling(message: JsonMessage, context: RapidsConnection.MessageContext) {
-        utfør(hendelsefabrikk.avbrytSaksbehandling(message.toJson()), context)
+        utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
     fun håndter(overstyringMessage: OverstyringRestDto) {
