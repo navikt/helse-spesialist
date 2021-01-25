@@ -34,7 +34,8 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO abonnement_for_opptegnelse
-            VALUES (?, (SELECT id FROM person WHERE aktor_id = ?));
+            VALUES (?, (SELECT id FROM person WHERE aktor_id = ?))
+            ON CONFLICT DO NOTHING;
         """
         session.run(queryOf(statement, saksbehandlerId, aktørId).asUpdate)
     }
