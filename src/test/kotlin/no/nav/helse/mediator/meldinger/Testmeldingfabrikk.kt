@@ -1,8 +1,10 @@
 package no.nav.helse.mediator.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -368,7 +370,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID,
-        begrunnelserSomAleneKreverManuellBehandling: List<String> = emptyList()
+        kanGodkjennesAutomatisk: Boolean = true,
+        funn: List<String> = emptyList()
     ): String =
         nyHendelse(
             id,
@@ -384,10 +387,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
-                        "begrunnelserSomAleneKreverManuellBehandling" to begrunnelserSomAleneKreverManuellBehandling,
-                        "samletScore" to 10.0,
-                        "begrunnelser" to emptyList<String>() + begrunnelserSomAleneKreverManuellBehandling,
-                        "ufullstendig" to false
+                        "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
+                        "funn" to funn.map { objectMapper.createObjectNode().put("beskrivelse", it).put("kreverSupersaksbehandler", false) },
+                        "kontrollertOk" to emptyList<JsonNode>(),
                     )
                 )
             )

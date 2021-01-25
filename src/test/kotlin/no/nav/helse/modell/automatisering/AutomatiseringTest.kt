@@ -16,6 +16,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -97,7 +98,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(
-            risikovurderingDto(listOf("8-4 ikke fin"))
+            risikovurderingDto(false)
         )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
@@ -165,12 +166,11 @@ internal class AutomatiseringTest {
         }
     }
 
-    private fun risikovurderingDto(arbeidsuførhetsvurdering: List<String> = emptyList()) = RisikovurderingDto(
+    private fun risikovurderingDto(kanGodkjennesAutomatisk: Boolean = true) = RisikovurderingDto(
         vedtaksperiodeId = vedtaksperiodeId,
         opprettet = LocalDateTime.now(),
-        samletScore = 10.0,
-        faresignaler = emptyList(),
-        arbeidsuførhetvurdering = arbeidsuførhetsvurdering,
-        ufullstendig = false
+        kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+        kreverSupersaksbehandler = false,
+        data = objectMapper.createObjectNode()
     )
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
@@ -15,26 +16,22 @@ internal class Risikovurderingløsning(
     private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val opprettet: LocalDateTime,
-    private val samletScore: Double,
-    private val begrunnelser: List<String>,
-    private val ufullstendig: Boolean,
-    private val faresignaler: List<String>,
-    private val arbeidsuførhetvurdering: List<String>
+    private val kanGodkjennesAutomatisk: Boolean,
+    private val løsning: JsonNode,
 ) {
     internal fun lagre(risikovurderingDao: RisikovurderingDao) {
         risikovurderingDao.persisterRisikovurdering(
             RisikovurderingDto(
                 vedtaksperiodeId = vedtaksperiodeId,
                 opprettet = opprettet,
-                samletScore = samletScore,
-                faresignaler = faresignaler,
-                arbeidsuførhetvurdering = arbeidsuførhetvurdering,
-                ufullstendig = ufullstendig
+                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                kreverSupersaksbehandler = løsning["funn"].any { it["kreverSupersaksbehandler"].asBoolean() },
+                data = løsning,
             )
         )
     }
 
-    internal fun medførerWarning() = ufullstendig || arbeidsuførhetvurdering.isNotEmpty()
+    internal fun medførerWarning() = !kanGodkjennesAutomatisk
 
     internal class V2River(
         rapidsConnection: RapidsConnection,
@@ -55,10 +52,9 @@ internal class Risikovurderingløsning(
                     it.demandKey("hendelseId")
                     it.requireKey("@løsning.Risikovurdering")
                     it.requireKey(
-                        "@løsning.Risikovurdering.samletScore",
-                        "@løsning.Risikovurdering.begrunnelser",
-                        "@løsning.Risikovurdering.ufullstendig",
-                        "@løsning.Risikovurdering.begrunnelserSomAleneKreverManuellBehandling"
+                        "@løsning.Risikovurdering.kanGodkjennesAutomatisk",
+                        "@løsning.Risikovurdering.funn",
+                        "@løsning.Risikovurdering.kontrollertOk",
                     )
                 }
             }.register(this)
@@ -72,20 +68,14 @@ internal class Risikovurderingløsning(
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
 
             val løsning = packet["@løsning.Risikovurdering"]
-            val samletScore = løsning["samletScore"].asDouble()
-            val ufullstendig = løsning["ufullstendig"].asBoolean()
-            val faresignaler = løsning["begrunnelser"].map { it.asText() }
-            val arbeidsuførhetvurdering = løsning["begrunnelserSomAleneKreverManuellBehandling"].map { it.asText() }
+            val kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean()
 
             val risikovurdering = Risikovurderingløsning(
                 hendelseId = hendelseId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 opprettet = opprettet,
-                samletScore = samletScore,
-                begrunnelser = faresignaler,
-                ufullstendig = ufullstendig,
-                faresignaler = faresignaler,
-                arbeidsuførhetvurdering = arbeidsuførhetvurdering
+                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                løsning = løsning,
             )
 
             hendelseMediator.løsning(

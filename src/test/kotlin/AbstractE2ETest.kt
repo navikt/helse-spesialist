@@ -309,7 +309,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun sendRisikovurderingløsning(
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,
-        begrunnelser: List<String> = emptyList()
+        kanGodkjennesAutomatisk: Boolean = true,
+        funn: List<String> = emptyList(),
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -318,7 +319,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     godkjenningsmeldingId,
                     testRapid.inspektør.contextId(),
                     vedtaksperiodeId,
-                    begrunnelser
+                    kanGodkjennesAutomatisk,
+                    funn
                 )
             )
         }

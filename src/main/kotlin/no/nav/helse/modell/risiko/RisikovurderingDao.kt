@@ -2,68 +2,36 @@ package no.nav.helse.modell.risiko
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.objectMapper
 import java.util.*
 import javax.sql.DataSource
 
 internal class RisikovurderingDao(val dataSource: DataSource) {
     internal fun persisterRisikovurdering(risikovurdering: RisikovurderingDto) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            session.transaction { tx ->
-                val id = requireNotNull(
-                    tx.run(
-                        queryOf(
-                            "INSERT INTO risikovurdering (vedtaksperiode_id, opprettet, samlet_score, ufullstendig) VALUES (?, ?, ?, ?);",
-                            risikovurdering.vedtaksperiodeId,
-                            risikovurdering.opprettet,
-                            risikovurdering.samletScore.toInt(),
-                            risikovurdering.ufullstendig
-                        ).asUpdateAndReturnGeneratedKey
-                    )
-                )
-                risikovurdering.faresignaler.forEach { tekst ->
-                    tx.run(
-                        queryOf(
-                            "INSERT INTO risikovurdering_faresignal (risikovurdering_ref, tekst) VALUES (?, ?);",
-                            id,
-                            tekst
-                        ).asUpdate
-                    )
-                }
-                risikovurdering.arbeidsuførhetvurdering.forEach { tekst ->
-                    tx.run(
-                        queryOf(
-                            "INSERT INTO risikovurdering_arbeidsuforhetvurdering (risikovurdering_ref, tekst) VALUES (?, ?);",
-                            id,
-                            tekst
-                        ).asUpdate
-                    )
-                }
-            }
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    "INSERT INTO risikovurdering_2021 (vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data, opprettet) VALUES (?, ?, ?, CAST (? AS JSON), ?);",
+                    risikovurdering.vedtaksperiodeId,
+                    risikovurdering.kanGodkjennesAutomatisk,
+                    risikovurdering.kreverSupersaksbehandler,
+                    objectMapper.writeValueAsString(risikovurdering.data),
+                    risikovurdering.opprettet,
+                ).asUpdate
+            )
         }
     }
 
     internal fun hentRisikovurderingDto(vedtaksperiodeId: UUID): RisikovurderingDto? {
-        return sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        return sessionOf(dataSource).use { session ->
             session.run(
-                queryOf("SELECT * FROM risikovurdering WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1", vedtaksperiodeId).map {
-                    val id = it.long("id")
+                queryOf("SELECT * FROM risikovurdering_2021 WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1", vedtaksperiodeId).map {
                     RisikovurderingDto(
                         vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
                         opprettet = it.localDateTime("opprettet"),
-                        samletScore = it.int("samlet_score").toDouble(),
-                        ufullstendig = it.boolean("ufullstendig"),
-                        faresignaler = session.run(
-                            queryOf(
-                                "SELECT DISTINCT tekst FROM risikovurdering_faresignal WHERE risikovurdering_ref = ?",
-                                id
-                            ).map { it.string("tekst") }.asList
-                        ),
-                        arbeidsuførhetvurdering = session.run(
-                            queryOf(
-                                "SELECT DISTINCT tekst FROM risikovurdering_arbeidsuforhetvurdering WHERE risikovurdering_ref = ?",
-                                id
-                            ).map { it.string("tekst") }.asList
-                        )
+                        kanGodkjennesAutomatisk = it.boolean("kan_godkjennes_automatisk"),
+                        kreverSupersaksbehandler = it.boolean("krever_supersaksbehandler"),
+                        data = objectMapper.readTree(it.string("data")),
                     )
                 }.asSingle
             )

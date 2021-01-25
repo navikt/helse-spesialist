@@ -1,9 +1,11 @@
 package no.nav.helse.modell.risiko
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.objectMapper
+import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -16,32 +18,64 @@ internal class RisikovurderingTest {
     private val risikovurderingDaoMock = mockk<RisikovurderingDao>()
 
     @Test
-    fun `Fullstending vurdering kan behandles automatisk`() {
-        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto())
-        val risikovurdering = requireNotNull(risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
+    fun `Vurdering kan behandles automatisk`() {
+        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto(true))
+        val risikovurdering = requireNotNull(
+            risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
         assertTrue(risikovurdering.erAautomatiserbar())
     }
 
     @Test
-    fun `Ufullstendig vurdering kan ikke behandles automatisk`() {
-        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto(ufullstendig = true))
-        val risikovurdering = requireNotNull(risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
+    fun `Vurdering kan ikke behandles automatisk`() {
+        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto(false))
+        val risikovurdering = requireNotNull(
+            risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
         assertFalse(risikovurdering.erAautomatiserbar())
     }
 
     @Test
-    fun `Fullstending vurdering med 8-4 feil kan ikke behandles automatisk`() {
-        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(risikovurderingDto(arbeidsuførhetsvurdering = listOf("8-4 feil")))
-        val risikovurdering = requireNotNull(risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
-        assertFalse(risikovurdering.erAautomatiserbar())
+    fun `mapper verdier fra løsning`() {
+
+        @Language("json")
+        val data = """
+            {
+                "funn": [{
+                    "kategori": ["8-4"],
+                    "beskrivelse": "8-4 ikke ok",
+                    "kreverSupersaksbehandler": false
+                }],
+                "kontrollertOk": [{
+                    "kategori": ["arbeid"],
+                    "beskrivelse": "jobb ok"
+                }]
+            }
+        """.trimIndent()
+        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) }.returns(
+            risikovurderingDto(
+                false,
+                objectMapper.readTree(data)
+            )
+        )
+        val risikovurdering = requireNotNull(
+            risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) })
+        risikovurdering.speilDto().also { dto ->
+            assertEquals(listOf("jobb ok"), dto.kontrollertOk.map { it["beskrivelse"].asText() })
+            assertEquals(listOf("arbeid"), dto.kontrollertOk.flatMap { it["kategori"].map( JsonNode::asText) })
+
+            assertEquals(listOf("8-4 ikke ok"), dto.funn.map { it["beskrivelse"].asText() })
+            assertEquals(listOf("8-4"), dto.funn.flatMap { it["kategori"].map( JsonNode::asText) })
+            assertEquals(false, dto.funn.first()["kreverSupersaksbehandler"].asBoolean())
+        }
     }
 
-    private fun risikovurderingDto(arbeidsuførhetsvurdering: List<String> = emptyList(), ufullstendig: Boolean = false) = RisikovurderingDto(
+    private fun risikovurderingDto(
+        kanGodkjennesAutomatisk: Boolean,
+        data: JsonNode = objectMapper.createObjectNode().set("funn", objectMapper.createArrayNode())
+    ) = RisikovurderingDto(
         vedtaksperiodeId = vedtaksperiodeId,
         opprettet = LocalDateTime.now(),
-        samletScore = 10.0,
-        faresignaler = emptyList(),
-        arbeidsuførhetvurdering = arbeidsuførhetsvurdering,
-        ufullstendig = ufullstendig
+        kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+        kreverSupersaksbehandler = false,
+        data = data,
     )
 }

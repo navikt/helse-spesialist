@@ -222,8 +222,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendRisikovurderingløsning(
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             godkjenningsmeldingId = godkjenningsmeldingId,
-            begrunnelser = listOf("8-4 ikke oppfylt")
-
+            kanGodkjennesAutomatisk = false,
         )
         val løsningId = sendSaksbehandlerløsning(
             oppgaveId = OPPGAVEID,

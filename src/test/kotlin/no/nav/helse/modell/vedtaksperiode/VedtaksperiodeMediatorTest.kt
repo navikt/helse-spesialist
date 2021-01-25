@@ -86,14 +86,19 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         )
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            funn = listOf("8-4 ikke ok")
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
         val risikovurdering = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("risikovurdering")
 
-        assertEquals(false, risikovurdering["ufullstendig"].booleanValue())
-        assertTrue(risikovurdering["arbeidsuførhetvurdering"].isEmpty)
+        assertEquals("8-4 ikke ok", risikovurdering["funn"].first()["beskrivelse"].asText())
+        assertTrue(risikovurdering["kontrollertOk"].isEmpty)
+
+        // Bakoverkompatibilitet
+        assertEquals("8-4 ikke ok", risikovurdering["arbeidsuførhetvurdering"].first().asText())
+        assertFalse(risikovurdering["ufullstendig"].asBoolean())
     }
 
     @Test
@@ -120,7 +125,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            begrunnelser = listOf("8-4 ikke oppfylt")
+            kanGodkjennesAutomatisk = false,
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
