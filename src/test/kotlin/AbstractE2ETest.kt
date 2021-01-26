@@ -55,7 +55,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val vedtakDao = VedtakDao(dataSource)
     protected val warningDao = WarningDao(dataSource)
     protected val commandContextDao = CommandContextDao(dataSource)
-    private val tildelingDao = TildelingDao(dataSource)
+    protected val tildelingDao = TildelingDao(dataSource)
     protected val risikovurderingDao = RisikovurderingDao(dataSource)
     protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
@@ -69,7 +69,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val reservasjonDao = ReservasjonDao(dataSource)
+    protected val reservasjonDao = ReservasjonDao(dataSource)
 
     protected val testRapid = TestRapid()
 
@@ -310,7 +310,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
-        funn: List<String> = emptyList(),
+        funn: Map<String, Boolean> = emptyMap()
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(

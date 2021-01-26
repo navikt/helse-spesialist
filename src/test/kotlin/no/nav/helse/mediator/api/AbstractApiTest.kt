@@ -39,18 +39,18 @@ abstract class AbstractApiTest {
     }
 
     companion object {
-        private const val requiredGroup = "required_group"
+        private val requiredGroup: UUID = UUID.randomUUID()
         private const val clientId = "client_id"
         private const val epostadresse = "sara.saksbehandler@nav.no";
         private const val issuer = "https://jwt-provider-domain"
         internal val jwtStub = JwtStub()
 
-        fun HttpRequestBuilder.authentication(oid: UUID) {
+        fun HttpRequestBuilder.authentication(oid: UUID, group: String? = null) {
             header(
                 "Authorization",
                 "Bearer ${
                     jwtStub.getToken(
-                        arrayOf(requiredGroup),
+                        listOfNotNull(requiredGroup.toString(), group),
                         oid.toString(),
                         epostadresse,
                         clientId,
@@ -97,7 +97,7 @@ abstract class AbstractApiTest {
                         AzureAdAppConfig(
                             clientId = UUID.randomUUID().toString(),
                             speilClientId = clientId,
-                            requiredGroup = requiredGroup
+                            requiredGroup = requiredGroup.toString()
                         )
                     val jwkProvider = jwtStub.getJwkProviderMock()
                     azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)

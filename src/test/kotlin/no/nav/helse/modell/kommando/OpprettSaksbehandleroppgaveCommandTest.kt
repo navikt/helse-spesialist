@@ -9,6 +9,7 @@ import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +28,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
+    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private lateinit var context: CommandContext
     private val command = OpprettSaksbehandleroppgaveCommand(
         fødselsnummer = FNR,
@@ -35,7 +37,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         automatisering = automatisering,
         egenAnsattDao = egenAnsattDao,
         hendelseId = hendelseId,
-        personDao = personDao
+        personDao = personDao,
+        risikovurderingDao = risikovurderingDao
     )
 
     @BeforeEach

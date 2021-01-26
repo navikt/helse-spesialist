@@ -109,11 +109,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
 
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
+    private val oppgaveMediator = OppgaveMediator(
+        oppgaveDao,
+        vedtakDao,
+        tildelingDao,
+        reservasjonDao
+    )
 
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(env)
     private val plukkTilManuell: PlukkTilManuell = if (miljøstyrtFeatureToggle.stikkprøver) {
-        val divisor = requireNotNull(env["STIKKPROEVER_DIVISOR"]) { "STIKKPROEVER_DIVISOR må oppgis når stikkprøver er aktivert" }.toInt()
+        val divisor =
+            requireNotNull(env["STIKKPROEVER_DIVISOR"]) { "STIKKPROEVER_DIVISOR må oppgis når stikkprøver er aktivert" }.toInt()
         require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
         ({ nextInt(divisor) == 0 })
     } else {
@@ -192,7 +198,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             basicAuthentication(env.getValue("ADMIN_SECRET"))
             routing {
                 authenticate("saksbehandler") {
-                    oppgaveApi(oppgaveMediator)
+                    oppgaveApi(oppgaveMediator, env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
                     vedtaksperiodeApi(
                         hendelseMediator = hendelseMediator,
                         vedtaksperiodeMediator = VedtaksperiodeMediator(

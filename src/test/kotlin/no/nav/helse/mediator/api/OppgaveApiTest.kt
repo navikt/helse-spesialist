@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.net.ServerSocket
+import java.util.*
 import kotlin.test.assertEquals
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -34,7 +35,7 @@ internal class OppgaveApiTest {
         embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             routing {
-                oppgaveApi(oppgaveMediator)
+                oppgaveApi(oppgaveMediator, UUID.randomUUID().toString())
                 direkteOppgaveApi(oppgaveMediator)
             }
         }.also {

@@ -24,7 +24,7 @@ internal class OppgaveMediator(
     private val meldinger = mutableListOf<String>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    internal fun hentOppgaver() = oppgaveDao.finnOppgaver()
+    internal fun hentOppgaver(inkluderRiskQaOppgaver: Boolean) = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver)
 
     internal fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 

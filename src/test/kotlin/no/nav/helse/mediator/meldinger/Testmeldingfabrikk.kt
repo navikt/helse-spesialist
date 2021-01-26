@@ -371,7 +371,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
-        funn: List<String> = emptyList()
+        funn: Map<String, Boolean> = emptyMap()
     ): String =
         nyHendelse(
             id,
@@ -388,7 +388,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
                         "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
-                        "funn" to funn.map { objectMapper.createObjectNode().put("beskrivelse", it).put("kreverSupersaksbehandler", false) },
+                        "funn" to funn.map { (beskrivelse, kreverSupersaksbehandler) ->
+                            objectMapper.createObjectNode().put("beskrivelse", beskrivelse)
+                                .put("kreverSupersaksbehandler", kreverSupersaksbehandler)
+                        },
                         "kontrollertOk" to emptyList<JsonNode>(),
                     )
                 )

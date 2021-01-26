@@ -13,9 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.postgresql.util.PSQLException
-import java.lang.IllegalArgumentException
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 internal class OppgaveDaoTest : DatabaseIntegrationTest() {
@@ -66,10 +64,26 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgaver`() {
         nyPerson()
-        val oppgaver = oppgaveDao.finnOppgaver()
+        val oppgaver = oppgaveDao.finnOppgaver(false)
         val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
         assertEquals(oppgaveId, oppgave.oppgavereferanse)
+    }
+
+    @Test
+    fun `inkluder risk qa oppgaver bare for supersaksbehandlere`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettRisikovurdering(VEDTAKSPERIODE, true)
+        opprettOppgave(vedtakId = vedtakId, oppgavetype = "RISK_QA")
+
+        val oppgaver = oppgaveDao.finnOppgaver(true)
+        assertTrue(oppgaver.isNotEmpty())
+        val oppgave = oppgaver.first()
+        assertEquals("RISK_QA", oppgave.oppgavetype)
+        assertEquals(oppgaveId, oppgave.oppgavereferanse)
+        assertTrue(oppgaveDao.finnOppgaver(false).isEmpty())
     }
 
     @Test
@@ -89,10 +103,10 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgaver med tildeling`() {
         nyPerson()
-        assertEquals(null, oppgaveDao.finnOppgaver().first().saksbehandlerepost)
+        assertEquals(null, oppgaveDao.finnOppgaver(false).first().saksbehandlerepost)
         saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
-        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver().first().saksbehandlerepost)
+        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().saksbehandlerepost)
     }
 
     @Test

@@ -84,7 +84,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         assertNull(tildelingDao.finnSaksbehandlerEpost(oppgaveId))
         assertNull(tildelingDao.finnSaksbehandlerNavn(oppgaveId))
         assertNull(tildelingDao.tildelingForPerson(FNR))
-        assertTrue(oppgaveDao.finnOppgaver().none { it.saksbehandlerepost == saksbehandlerEpost })
+        assertTrue(oppgaveDao.finnOppgaver(false).none { it.saksbehandlerepost == saksbehandlerEpost })
     }
 
     private fun tildelTilSaksbehandler(

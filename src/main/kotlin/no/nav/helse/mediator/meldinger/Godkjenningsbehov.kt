@@ -143,7 +143,8 @@ internal class Godkjenningsbehov(
             automatisering = automatisering,
             egenAnsattDao = egenAnsattDao,
             hendelseId = id,
-            personDao = personDao
+            personDao = personDao,
+            risikovurderingDao = risikovurderingDao
         )
     )
 

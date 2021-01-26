@@ -68,7 +68,7 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
 
     post("/api/dummytildeling/{oppgavereferanse}") {
         modellfeilForRest {
-            val oppgaveId =call.parameters["oppgavereferanse"]!!.let {
+            val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
                 requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
             }
             secureLog.info("Dummy-post-tildeler oppgave med oppgaveid $oppgaveId")

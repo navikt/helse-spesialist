@@ -70,7 +70,7 @@ internal class VedtaksperiodeApiTest {
             "Authorization",
             "Bearer ${
                 jwtStub.getToken(
-                    arrayOf(requiredGroup),
+                    listOf(requiredGroup),
                     oid.toString(),
                     "epostadresse",
                     clientId,

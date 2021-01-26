@@ -5,6 +5,7 @@ import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.risiko.RisikovurderingDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -15,7 +16,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val automatisering: Automatisering,
     private val hendelseId: UUID,
     private val egenAnsattDao: EgenAnsattDao,
-    private val personDao: PersonDao
+    private val personDao: PersonDao,
+    private val risikovurderingDao: RisikovurderingDao
 ) : Command {
 
     private companion object {
@@ -27,7 +29,11 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (erEgenAnsatt) return true
         if (tilhørerUtlandsenhet) return true
 
-        val oppgave = if (automatisering.erStikkprøve(vedtaksperiodeId, hendelseId)) Oppgave.stikkprøve(vedtaksperiodeId) else Oppgave.søknad(vedtaksperiodeId)
+        val oppgave = when {
+            automatisering.erStikkprøve(vedtaksperiodeId, hendelseId) -> Oppgave.stikkprøve(vedtaksperiodeId)
+            risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(vedtaksperiodeId)
+            else -> Oppgave.søknad(vedtaksperiodeId)
+        }
         logg.info("Oppretter saksbehandleroppgave")
         oppgaveMediator.opprett(oppgave)
         return true

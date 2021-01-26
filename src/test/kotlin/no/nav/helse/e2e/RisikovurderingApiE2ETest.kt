@@ -1,0 +1,96 @@
+package no.nav.helse.e2e
+
+import AbstractE2ETest
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.mockk.every
+import kotlinx.coroutines.runBlocking
+import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.mediator.api.AbstractApiTest
+import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.mediator.api.oppgaveApi
+import no.nav.helse.snapshotUtenWarnings
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.util.*
+import kotlin.test.assertEquals
+
+private class RisikovurderingApiE2ETest : AbstractE2ETest() {
+    private companion object {
+        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private const val ORGNR = "222222222"
+        private val SAKSBEHANDLER_ID = UUID.randomUUID()
+    }
+
+    @BeforeEach
+    fun setup() {
+        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
+    }
+
+    @Test
+    fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        godkjenningsoppgave(mapOf("ny sjekk ikke ok" to true), VEDTAKSPERIODE_ID)
+        godkjenningsoppgave(mapOf("8-4 ikke ok" to false), UUID.randomUUID())
+
+        val riskQaGruppe = UUID.randomUUID().toString()
+        val respons =
+            AbstractApiTest.TestServer {
+                oppgaveApi(
+                    OppgaveMediator(
+                        oppgaveDao,
+                        vedtakDao,
+                        tildelingDao,
+                        reservasjonDao
+                    ), riskQaGruppe
+                )
+            }
+                .withAuthenticatedServer {
+                    it.get<HttpResponse>("/api/oppgaver/") {
+                        contentType(ContentType.Application.Json)
+                        accept(ContentType.Application.Json)
+                        authentication(SAKSBEHANDLER_ID, riskQaGruppe)
+                    }
+                }
+
+        Assertions.assertEquals(HttpStatusCode.OK, respons.status)
+        val json = runBlocking {
+            objectMapper.readTree(respons.readText())
+        }
+
+        assertEquals(listOf("RISK_QA", "SØKNAD"), json.map { it["oppgavetype"].asText() })
+    }
+
+    fun godkjenningsoppgave(funn: Map<String, Boolean>, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID) {
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            ORGNR,
+            vedtaksperiodeId
+        )
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            kanGodkjennesAutomatisk = false,
+            funn = funn
+        )
+    }
+}

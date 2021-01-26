@@ -59,7 +59,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
 
         assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
-        assertTrue(oppgaveDao.finnOppgaver().none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
+        assertTrue(oppgaveDao.finnOppgaver(false).none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
 
         val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
@@ -75,7 +75,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = hendelseId2
         )
-        val oppgave = oppgaveDao.finnOppgaver().find { it.fødselsnummer == FØDSELSNUMMER }
+        val oppgave = oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER }
         assertNotNull(oppgave)
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.saksbehandlerepost)
     }
@@ -141,7 +141,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
 
         // TODO: bør ikke koble seg på daoer i E2E
-        assertTrue(oppgaveDao.finnOppgaver().any { it.fødselsnummer == FØDSELSNUMMER })
+        assertTrue(oppgaveDao.finnOppgaver(false).any { it.fødselsnummer == FØDSELSNUMMER })
 
         val snapshot = vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER)
         assertNotNull(snapshot)
@@ -151,7 +151,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
-        val saksbehandlerOppgaver = oppgaveDao.finnOppgaver()
+        val saksbehandlerOppgaver = oppgaveDao.finnOppgaver(false)
         assertEquals(
             1,
             saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size

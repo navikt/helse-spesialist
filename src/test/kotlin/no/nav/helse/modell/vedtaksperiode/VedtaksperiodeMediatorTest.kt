@@ -87,7 +87,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            funn = listOf("8-4 ikke ok")
+            funn = mapOf("8-4 ikke ok" to false)
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 

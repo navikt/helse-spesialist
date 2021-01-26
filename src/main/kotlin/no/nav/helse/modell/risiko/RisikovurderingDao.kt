@@ -42,4 +42,8 @@ internal class RisikovurderingDao(val dataSource: DataSource) {
     internal fun hentRisikovurdering(vedtaksperiodeId: UUID): Risikovurdering? {
         return hentRisikovurderingDto(vedtaksperiodeId)?.let { Risikovurdering.restore(it) }
     }
+
+    fun kreverSupersaksbehandler(vedtaksperiodeId: UUID): Boolean {
+        return hentRisikovurderingDto(vedtaksperiodeId)?.kreverSupersaksbehandler ?: false;
+    }
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.modell
 
-import io.ktor.util.*
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
@@ -15,8 +14,9 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class OppgaveDao(private val dataSource: DataSource) {
-    internal fun finnOppgaver() =
+    internal fun finnOppgaver(inkluderRiskQaOppgaver: Boolean) =
         using(sessionOf(dataSource)) { session ->
+            val eventuellEkskluderingAvRiskQA = if(inkluderRiskQaOppgaver) "" else "AND o.type != 'RISK_QA'"
             @Language("PostgreSQL")
             val query = """
             SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
@@ -31,6 +31,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
                 LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+            $eventuellEkskluderingAvRiskQA
                 GROUP BY o.id, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, e.id, e.navn, t.saksbehandler_ref
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
