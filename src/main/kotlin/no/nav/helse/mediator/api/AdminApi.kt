@@ -7,8 +7,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 
 internal fun Application.adminApi(mediator: HendelseMediator) {
@@ -34,10 +32,6 @@ internal fun Application.adminApi(mediator: HendelseMediator) {
                     request.forEach { node ->
                         mediator.sendMeldingPåTopic(node)
                     }
-                    call.respond(HttpStatusCode.OK)
-                }
-                post("/oppdater-personer") {
-                    withContext(Dispatchers.IO) { mediator.oppdaterPersonsnapshotForSisteUkesAnnullerteOgForkastedeHendelser() }
                     call.respond(HttpStatusCode.OK)
                 }
             }

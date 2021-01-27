@@ -84,27 +84,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         } ?: false
     }
 
-    internal fun finnSisteUkesAnnullerteOgForkastede(): List<String> {
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT DISTINCT fodselsnummer
-            FROM hendelse h
-            WHERE h.type IN ('VEDTAKSPERIODE_FORKASTET', 'UTBETALING_ANNULLERT')
-            AND TO_DATE(h.data->>'@opprettet','YYYY-MM-DD') > CURRENT_DATE - INTERVAL '7 days'
-            AND TO_DATE(h.data->>'@opprettet','YYYY-MM-DD') > (
-                SELECT sist_endret
-                FROM speil_snapshot
-                    JOIN vedtak v ON speil_snapshot.id = v.speil_snapshot_ref
-                    JOIN person p ON v.person_ref = p.id
-                WHERE p.fodselsnummer = h.fodselsnummer
-                ORDER BY v.id DESC
-                LIMIT 1)
-            """
-        return using(sessionOf(dataSource)) { session ->
-            session.run(queryOf(statement).map { it.long("fodselsnummer").toFødselsnummer() }.asList)
-        }
-    }
-
     internal fun finn(id: UUID, hendelsefabrikk: IHendelsefabrikk) = using(sessionOf(dataSource)) { session ->
         session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
             fraHendelsetype(enumValueOf(row.string("type")), row.string("data"), hendelsefabrikk)
