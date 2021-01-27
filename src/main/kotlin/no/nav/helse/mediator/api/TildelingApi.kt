@@ -11,20 +11,20 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.modell.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.tildeling.TildelingMediator
 import org.slf4j.LoggerFactory
-import java.lang.Long.parseLong
 import java.util.*
 
 private val secureLog = LoggerFactory.getLogger("tjenestekall")
+private val log = LoggerFactory.getLogger("TildelingApi")
 
 internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
     post("/api/tildeling/{oppgavereferanse}") {
         val ref = UUID.randomUUID()
         try {
             modellfeilForRest {
-                val oppgaveId = try {
-                    parseLong(call.parameters["oppgavereferanse"])
-                } catch (e: NumberFormatException) {
-                    call.respond(HttpStatusCode.BadRequest, "Requesten må inneholde en gyldig oppgaveId")
+                val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
+                if (oppgaveId == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Ugyldig oppgavereferanse i path parameter")
+                    log.warn("POST - oppgavereferanse er null i path parameter")
                     return@post
                 }
 
@@ -54,13 +54,12 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
     }
 
     delete("/api/tildeling/{oppgavereferanse}") {
-        val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-        val navn = accessToken.payload.getClaim("name").asString().split(", ").let { tokens ->
-            "${tokens[1]} ${tokens[0]}"
+        val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
+        if (oppgaveId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Ugyldig oppgavereferanse i path parameter")
+            log.warn("DELETE - oppgavereferanse er null i path parameter")
+            return@delete
         }
-
-        val oppgaveId =
-            requireNotNull(call.parameters["oppgavereferanse"]?.toLong()) { "Ugyldig oppgavereferanse i path parameter. Kallet ble gjort av $navn" }
         secureLog.info("Sletter tildeling for oppgave med oppgaveid $oppgaveId")
         withContext(Dispatchers.IO) { tildelingMediator.fjernTildeling(oppgaveId) }
 

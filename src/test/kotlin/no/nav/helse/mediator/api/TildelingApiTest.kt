@@ -76,7 +76,7 @@ internal class TildelingApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `manglende oppgavereferanse gir Bad Request`() {
+    fun `manglende oppgavereferanse POST gir Bad Request`() {
         val response = runBlocking {
             client.post<HttpResponse>("/api/tildeling/null") {
                 contentType(ContentType.Application.Json)
@@ -86,6 +86,19 @@ internal class TildelingApiTest : AbstractApiTest() {
             }
         }
 
+        assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
+    }
+
+    @Test
+    fun `manglende oppgavereferanse DELETE gir Bad Request`() {
+        val response = runBlocking {
+            client.delete<HttpResponse>("/api/tildeling/null") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = objectMapper.createObjectNode()
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
     }
 
