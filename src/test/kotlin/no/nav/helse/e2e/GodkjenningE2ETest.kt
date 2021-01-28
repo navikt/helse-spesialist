@@ -397,12 +397,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `oppretter ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
+    fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         val hendelseId1 = håndterGodkjenningsbehov()
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        val hendelseId2 = håndterGodkjenningsbehov()
         assertTilstand(
             hendelseId1,
             "NY",
@@ -414,19 +413,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertTilstand(
-            hendelseId2,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertOppgaver(2)
+        assertOppgaver(1)
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
-        assertOppgave(1, AvventerSaksbehandler)
     }
 
     @Test

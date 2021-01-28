@@ -152,6 +152,31 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sjekker at det ikke fins ferdigstilt oppgave`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        val vedtakId = opprettVedtaksperiode()
+
+        opprettOppgave(vedtakId = vedtakId)
+        oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
+
+        assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `sjekker at det fins ferdigstilt oppgave`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        val vedtakId = opprettVedtaksperiode()
+
+        opprettOppgave(vedtakId = vedtakId)
+        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt)
+
+        assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
+    }
+
+
+    @Test
     fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
         nyPerson()
         opprettOppgave(vedtakId = vedtakId)

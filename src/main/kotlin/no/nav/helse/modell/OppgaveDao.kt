@@ -199,6 +199,16 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
     }) > 0
 
+    internal fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+                SELECT COUNT(1) AS oppgave_count FROM oppgave o
+                INNER JOIN vedtak v on o.vedtak_ref = v.id
+                WHERE v.vedtaksperiode_id = ? AND o.status = 'Ferdigstilt'::oppgavestatus
+            """
+        session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
+    }) > 0
+
     internal fun erAktivOppgave(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
