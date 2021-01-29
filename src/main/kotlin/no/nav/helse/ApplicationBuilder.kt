@@ -11,6 +11,7 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.*
@@ -47,6 +48,8 @@ import kotlin.random.Random.Default.nextInt
 
 const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
+private val logg = LoggerFactory.getLogger("ApplicationBuilder")
+private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val dataSourceBuilder = DataSourceBuilder(System.getenv())
@@ -173,6 +176,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     UUID.randomUUID().toString()
                 }
             }
+            installErrorHandling()
             install(CallLogging) {
                 logger = httpTraceLog
                 level = Level.INFO
@@ -261,5 +265,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private fun readClientSecret(): String {
         return Files.readString(Paths.get(azureMountPath, "client_secret"))
+    }
+}
+
+fun Application.installErrorHandling() {
+    install(StatusPages) {
+        exception<Throwable> { cause ->
+            val uri = call.request.uri
+            val verb = call.request.httpMethod.value
+            logg.error("Unhandled: $verb", cause)
+            sikkerLog.error("Unhandled: $verb - $uri", cause)
+            call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
+        }
     }
 }
