@@ -66,7 +66,7 @@ spec:
     - name: AZURE_REQUIRED_GROUP
       value: 611669fa-de5c-4dc2-a0e8-6041a019992a
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
-      value: 611669fa-de5c-4dc2-a0e8-6041a019992a
+      value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: SPLEIS_CLIENT_ID
       value: 60a60e52-7c16-459d-a288-7cc2911c6f81
     - name: SPESIALIST_OID
