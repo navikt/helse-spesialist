@@ -117,6 +117,7 @@ internal class HendelseMediator(
         rapidsConnection.publish(godkjenningMessage.toJson())
 
         val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
+        internOppgaveMediator.reserverOppgave(oid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
     }

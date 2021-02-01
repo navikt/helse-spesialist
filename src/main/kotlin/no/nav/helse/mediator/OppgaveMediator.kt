@@ -10,6 +10,7 @@ import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -125,6 +126,14 @@ internal class OppgaveMediator(
             ferdigstiltAvIdent,
             ferdigstiltAvOid,
         )
+    }
+
+    internal fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
+        try {
+            reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
+        } catch(e: PSQLException) {
+            log.warn("Kunne ikke reservere person")
+        }
     }
 
     private fun tildelOppgaver(fødselsnummer: String) {

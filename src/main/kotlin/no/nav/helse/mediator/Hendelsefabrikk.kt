@@ -92,7 +92,8 @@ internal class Hendelsefabrikk(
             oppgaveMediator = oppgaveMediator,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             automatisering = automatisering,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
+            opptegnelseDao = opptegnelseDao
         )
     }
 

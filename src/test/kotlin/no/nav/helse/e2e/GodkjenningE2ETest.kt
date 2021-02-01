@@ -13,6 +13,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -494,6 +495,62 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             assertTrue(it.path("makstidOppnådd").booleanValue())
         }
         assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
+    }
+
+    @Test
+    fun `reserverer person ved godkjenning av oppgave`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLEROID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId, 1
+        )
+        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+
+        val (saksbehandler, gyldigTil) = reservasjonDao.hentReservasjonFor(UNG_PERSON_FNR_2018)!!
+
+        assertEquals(SAKSBEHANDLEROID, saksbehandler)
+        assertTrue(gyldigTil.isAfter(LocalDateTime.now()))
+
+        val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
+
+        val godkjenningsmeldingId2 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID2)
+        sendPersoninfoløsning(godkjenningsmeldingId2, ORGNR, VEDTAKSPERIODE_ID2)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId2,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID2
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId2,
+            erEgenAnsatt = false
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId2,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId2, 1
+        )
+        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+
+        val tildeling = tildelingDao.finnSaksbehandlerEpost(OPPGAVEID)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling)
     }
 
     private fun sendPåminnelseOppgaveMakstid() {

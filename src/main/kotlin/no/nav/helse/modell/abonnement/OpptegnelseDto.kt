@@ -11,7 +11,8 @@ data class OpptegnelseDto(
 
 enum class OpptegnelseType {
     UTBETALING_ANNULLERING_FEILET,
-    UTBETALING_ANNULLERING_OK
+    UTBETALING_ANNULLERING_OK,
+    FERDIGBEHANDLET_GODKJENNIGSBEHOV
 }
 
 sealed class PayloadToSpeil {
@@ -21,5 +22,11 @@ sealed class PayloadToSpeil {
 data class UtbetalingPayload(private val utbetalingId: UUID): PayloadToSpeil() {
     override fun toJson() = """
         { "utbetalingId": "$utbetalingId" }
+    """.trimIndent()
+}
+
+data class GodkjenningsbehovPayload(private val hendelseId: UUID): PayloadToSpeil() {
+    override fun toJson() = """
+        { "hendelseId": "$hendelseId" }
     """.trimIndent()
 }

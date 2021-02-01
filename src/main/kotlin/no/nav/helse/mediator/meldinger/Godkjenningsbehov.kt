@@ -9,6 +9,8 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.abonnement.OpprettGodkjenningsbehovOpptegnelseCommand
+import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -60,7 +62,8 @@ internal class Godkjenningsbehov(
     oppgaveMediator: OppgaveMediator,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     automatisering: Automatisering,
-    godkjenningMediator: GodkjenningMediator
+    godkjenningMediator: GodkjenningMediator,
+    opptegnelseDao: OpptegnelseDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettKoblingTilHendelseCommand(
@@ -145,7 +148,12 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             personDao = personDao,
             risikovurderingDao = risikovurderingDao
-        )
+        ),
+        OpprettGodkjenningsbehovOpptegnelseCommand(
+            opptegnelseDao = opptegnelseDao,
+            fødselsnummer = fødselsnummer,
+            hendelseId = id
+        ),
     )
 
     override fun fødselsnummer() = fødselsnummer

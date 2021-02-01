@@ -40,7 +40,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, saksbehandlerId, aktørId).asUpdate)
     }
 
-    internal fun opprettOpptegnelse(fødselsnummer: String, payload: UtbetalingPayload, type: OpptegnelseType) =
+    internal fun opprettOpptegnelse(fødselsnummer: String, payload: PayloadToSpeil, type: OpptegnelseType) =
         using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
             val statement = """
