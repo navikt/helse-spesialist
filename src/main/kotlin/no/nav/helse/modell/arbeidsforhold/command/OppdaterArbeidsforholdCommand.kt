@@ -20,9 +20,16 @@ internal class OppdaterArbeidsforholdCommand(
         private val logg = LoggerFactory.getLogger(OppdaterArbeidsforholdCommand::class.java)
     }
 
-    override fun execute(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.arbeidsforhold() || arbeidsforholdOppdatert()) return ignorer()
-        return behandle(context)
+    override fun execute(context: CommandContext): Boolean = when {
+        !miljøstyrtFeatureToggle.arbeidsforhold() -> {
+            logg.info("Arbeidsforhold togglet av")
+            true
+        }
+        arbeidsforholdOppdatert() -> {
+            logg.info("Arbeidsforhold allerede oppdatert")
+            true
+        }
+        else -> behandle(context)
     }
 
     override fun resume(context: CommandContext): Boolean {
@@ -32,11 +39,6 @@ internal class OppdaterArbeidsforholdCommand(
     private fun arbeidsforholdOppdatert() =
         arbeidsforholdDao.findArbeidsforholdSistOppdatert(fødselsnummer, organisasjonsnummer) > LocalDate.now()
             .minusDays(14)
-
-    private fun ignorer(): Boolean {
-        logg.info(if (miljøstyrtFeatureToggle.arbeidsforhold()) "Arbeidsforhold togglet av" else "Arbeidsforhold allerede oppdatert")
-        return true
-    }
 
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<Arbeidsforholdløsning>() ?: return trengerMerInformasjon(context)
