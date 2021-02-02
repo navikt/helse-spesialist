@@ -51,7 +51,7 @@ internal class OppdaterArbeidsforholdCommand(
         context.behov(
             "Arbeidsforhold", mapOf(
                 "aktørId" to aktørId,
-                "organisasjonnummer" to organisasjonsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
                 "fom" to LocalDate.now().minusYears(3),
                 "tom" to LocalDate.now()
             )
