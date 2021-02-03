@@ -21,9 +21,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.assertThrows
 import java.net.ServerSocket
 import java.util.*
-import kotlin.test.assertEquals
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class OppgaveApiTest {
@@ -56,18 +56,20 @@ internal class OppgaveApiTest {
 
     @Test
     fun `returnerer 400 bad request hvis fødselsnummer ikke er satt eller er null`() {
-        val respons = runBlocking {
-            client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", null) }.execute()
+        assertThrows<ClientRequestException> {
+            runBlocking {
+                client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", null) }.execute()
+            }
         }
-        assertEquals(HttpStatusCode.BadRequest, respons.status)
     }
 
     @Test
     fun `får 404 not found hvis oppgaven ikke finnes`() {
         every { oppgaveMediator.hentOppgaveId(any()) } returns null
-        val response = runBlocking {
-            client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", "42069") }.execute()
+        assertThrows<ClientRequestException> {
+            runBlocking {
+                client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", "42069") }.execute()
+            }
         }
-        assertEquals(HttpStatusCode.NotFound, response.status)
     }
 }

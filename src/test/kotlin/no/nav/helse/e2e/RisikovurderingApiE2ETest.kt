@@ -49,7 +49,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
                 )
             }
                 .withAuthenticatedServer {
-                    it.get<HttpResponse>("/api/oppgaver/") {
+                    it.get<HttpResponse>("/api/oppgaver") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID, riskQaGruppe)
