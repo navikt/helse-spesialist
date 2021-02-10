@@ -5,7 +5,7 @@ WHERE id NOT IN (
     GROUP  BY orgnummer);
 
 delete from arbeidsgiver
-using lol;
+where id in (select * from lol);
 
 delete from arbeidsgiver_bransjer
 where id in (select bransjer_ref from arbeidsgiver a join lol on a.id = lol.id);
