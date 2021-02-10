@@ -17,15 +17,14 @@ class ModellFeil(val feil: Feil) : RuntimeException(feil.feilkode) {
 }
 
 enum class Loggnivå {
-    Warning
+    Warning, Info
 }
 
 sealed class Feil(val feilkode: String, val kategori: Feilkategori, val eksternKontekst: Map<String, String> = mapOf())
 data class OppgaveErAlleredeTildelt(val tildeltTil: String) :
-    Feil("oppgave_er_allerede_tildelt", Konflikt, mapOf("tildeltTil" to tildeltTil))
+    Feil("oppgave_er_allerede_tildelt", Feilkategori(HttpStatusCode.Conflict, Loggnivå.Info), mapOf("tildeltTil" to tildeltTil))
 
-sealed class Feilkategori(val httpStatus: HttpStatusCode, val loggnivå: Loggnivå)
-object Konflikt : Feilkategori(HttpStatusCode.Conflict, Loggnivå.Warning)
+class Feilkategori(val httpStatus: HttpStatusCode, val loggnivå: Loggnivå)
 
 suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda: () -> Unit) {
     try {
