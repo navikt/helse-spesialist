@@ -1,11 +1,16 @@
 package no.nav.helse.modell.tildeling
 
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import java.util.*
 
-internal class TildelingMediator(private val saksbehandlerDao: SaksbehandlerDao, private val tildelingDao: TildelingDao) {
+internal class TildelingMediator(
+    private val saksbehandlerDao: SaksbehandlerDao,
+    private val tildelingDao: TildelingDao,
+    private val hendelseMediator: HendelseMediator
+) {
 
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,
@@ -18,7 +23,7 @@ internal class TildelingMediator(private val saksbehandlerDao: SaksbehandlerDao,
             throw ModellFeil(OppgaveErAlleredeTildelt(saksbehandlerFor))
         }
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse)
-        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerreferanse)
+        hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
     }
 
     internal fun fjernTildeling(oppgaveId: Long) = tildelingDao.slettTildeling(oppgaveId)

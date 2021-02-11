@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.*
 
@@ -13,7 +14,11 @@ internal class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
 
-    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID) : this(type, status, vedtaksperiodeId) {
+    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID) : this(
+        type,
+        status,
+        vedtaksperiodeId
+    ) {
         this.id = id
     }
 
@@ -21,7 +26,58 @@ internal class Oppgave private constructor(
         fun søknad(vedtaksperiodeId: UUID) = oppgave("SØKNAD", vedtaksperiodeId)
         fun stikkprøve(vedtaksperiodeId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId)
         fun riskQA(vedtaksperiodeId: UUID) = oppgave("RISK_QA", vedtaksperiodeId)
-        private fun oppgave(type: String, vedtaksperiodeId: UUID) = Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
+        private fun oppgave(type: String, vedtaksperiodeId: UUID) =
+            Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
+
+        internal fun lagMelding(
+            oppgaveId: Long,
+            oppgaveDao: OppgaveDao
+        ): JsonMessage {
+            val hendelseId = oppgaveDao.finnHendelseId(oppgaveId)
+            val contextId = oppgaveDao.finnContextId(oppgaveId)
+            val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
+            val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+            val makstid = oppgaveDao.finnMakstid(oppgaveId)
+
+            return lagMelding(
+                "oppgave_oppdatert",
+                hendelseId,
+                contextId,
+                oppgaveId,
+                oppgave.status,
+                fødselsnummer,
+                makstid
+            )
+        }
+
+        internal fun lagMelding(
+            eventNavn: String,
+            hendelseId: UUID,
+            contextId: UUID,
+            oppgaveId: Long,
+            status: Oppgavestatus,
+            fødselsnummer: String,
+            makstid: LocalDateTime,
+            ferdigstiltAvIdent: String? = null,
+            ferdigstiltAvOid: UUID? = null,
+        ): JsonMessage {
+            return JsonMessage.newMessage(
+                mutableMapOf(
+                    "@event_name" to eventNavn,
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "hendelseId" to hendelseId,
+                    "contextId" to contextId,
+                    "oppgaveId" to oppgaveId,
+                    "status" to status.name,
+                    "fødselsnummer" to fødselsnummer,
+                    "makstid" to makstid
+                ).apply {
+                    ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
+                    ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
+                }
+            )
+        }
     }
 
     internal fun ferdigstill(ident: String, oid: UUID) {

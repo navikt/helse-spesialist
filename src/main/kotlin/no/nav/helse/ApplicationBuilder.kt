@@ -219,12 +219,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             arbeidsforholdDao = arbeidsforholdDao
                         )
                     )
-                    tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao))
+                    tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
                 }
                 authenticate("saksbehandler-direkte") {
-                    tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao))
+                    tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     direkteOppgaveApi(oppgaveMediator)
 
                 }

@@ -16,7 +16,8 @@ import javax.sql.DataSource
 internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun finnOppgaver(inkluderRiskQaOppgaver: Boolean) =
         using(sessionOf(dataSource)) { session ->
-            val eventuellEkskluderingAvRiskQA = if(inkluderRiskQaOppgaver) "" else "AND o.type != 'RISK_QA'"
+            val eventuellEkskluderingAvRiskQA = if (inkluderRiskQaOppgaver) "" else "AND o.type != 'RISK_QA'"
+
             @Language("PostgreSQL")
             val query = """
             SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
@@ -199,15 +200,16 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
     }) > 0
 
-    internal fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = requireNotNull(using(sessionOf(dataSource)) { session ->
-        @Language("PostgreSQL")
-        val query = """
+    internal fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
+        requireNotNull(using(sessionOf(dataSource)) { session ->
+            @Language("PostgreSQL")
+            val query = """
                 SELECT COUNT(1) AS oppgave_count FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
                 WHERE v.vedtaksperiode_id = ? AND o.status = 'Ferdigstilt'::oppgavestatus
             """
-        session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
-    }) > 0
+            session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
+        }) > 0
 
     internal fun erAktivOppgave(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
@@ -287,15 +289,14 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         oppdaterMakstid(oppgaveId, makstidDager)
     }
 
-     internal fun finnMakstid(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
+    internal fun finnMakstid(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT makstid FROM oppgave_makstid WHERE oppgave_ref = ?",
                 oppgaveId
             ).map { it.localDateTime("makstid") }.asSingle
         )
-    }
-
+    })
 
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
         oppgavereferanse = it.long("oppgave_id"),

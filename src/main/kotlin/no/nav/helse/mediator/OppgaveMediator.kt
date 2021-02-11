@@ -22,7 +22,7 @@ internal class OppgaveMediator(
     private val reservasjonDao: ReservasjonDao
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
-    private val meldinger = mutableListOf<String>()
+    private val meldinger = mutableListOf<JsonMessage>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     internal fun hentOppgaver(inkluderRiskQaOppgaver: Boolean) = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver)
@@ -33,7 +33,7 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+    internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
         tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
         oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
     }
@@ -99,7 +99,15 @@ internal class OppgaveMediator(
             val makstid = oppgaveDao.opprettMakstid(oppgaveId)
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
 
-            køMelding("oppgave_opprettet", hendelseId, contextId, oppgaveId, AvventerSaksbehandler, fødselsnummer, makstid)
+            meldinger.add(Oppgave.lagMelding(
+                "oppgave_opprettet",
+                hendelseId,
+                contextId,
+                oppgaveId,
+                AvventerSaksbehandler,
+                fødselsnummer,
+                makstid
+            ))
         }
     }
 
@@ -112,19 +120,20 @@ internal class OppgaveMediator(
         ferdigstiltAvOid: UUID?
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        val makstid = oppgaveDao.finnMakstid(oppgaveId) ?: oppgaveDao.opprettMakstid(oppgaveId)
+        val makstid = oppgaveDao.finnMakstid(oppgaveId)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-
-        køMelding(
-            "oppgave_oppdatert",
-            hendelseId,
-            contextId,
-            oppgaveId,
-            status,
-            fødselsnummer,
-            makstid,
-            ferdigstiltAvIdent,
-            ferdigstiltAvOid,
+        meldinger.add(
+            Oppgave.lagMelding(
+                "oppgave_oppdatert",
+                hendelseId,
+                contextId,
+                oppgaveId,
+                status,
+                fødselsnummer,
+                makstid,
+                ferdigstiltAvIdent,
+                ferdigstiltAvOid,
+            )
         )
     }
 
@@ -145,38 +154,9 @@ internal class OppgaveMediator(
     private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit, doAlso: () -> Unit = {}) {
         if (oppgaver.size > 1) log.info("Oppgaveliste har ${oppgaver.size} oppgaver, hendelsesId: $hendelseId og contextId: $contextId")
 
-        oppgaver.onEach { oppgave -> oppgave.lagre(this, hendelseId, contextId) }
+        oppgaver.forEach { oppgave -> oppgave.lagre(this, hendelseId, contextId) }
         doAlso()
         oppgaver.clear()
-        meldinger.onEach { publisher(it) }.clear()
-    }
-
-    private fun køMelding(
-        eventNavn: String,
-        hendelseId: UUID,
-        contextId: UUID,
-        oppgaveId: Long,
-        status: Oppgavestatus,
-        fødselsnummer: String,
-        makstid: LocalDateTime,
-        ferdigstiltAvIdent: String? = null,
-        ferdigstiltAvOid: UUID? = null,
-    ) {
-        meldinger.add(JsonMessage.newMessage(
-            mutableMapOf(
-                "@event_name" to eventNavn,
-                "@id" to UUID.randomUUID(),
-                "@opprettet" to LocalDateTime.now(),
-                "hendelseId" to hendelseId,
-                "contextId" to contextId,
-                "oppgaveId" to oppgaveId,
-                "status" to status.name,
-                "fødselsnummer" to fødselsnummer,
-                "makstid" to makstid
-            ).apply {
-                ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
-                ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
-            }
-        ).toJson())
+        meldinger.onEach { publisher(it.toJson()) }.clear()
     }
 }
