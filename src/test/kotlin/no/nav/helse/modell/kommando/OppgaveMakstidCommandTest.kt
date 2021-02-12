@@ -7,7 +7,6 @@ import no.nav.helse.modell.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.*
 
@@ -40,14 +39,14 @@ internal class OppgaveMakstidCommandTest {
 
     @Test
     fun `ved makstid oppnådd sendes løsning på Godkjenningsbehov med godkjent=false og oppdaterer oppgavestatus til MakstidOppnådd`() {
-        every { oppgaveDao.erAktivOppgave(OPPGAVE_ID) } returns true
+        every { oppgaveDao.venterPåSaksbehandler(OPPGAVE_ID) } returns true
         every { oppgaveDao.finnMakstid(OPPGAVE_ID) } returns FORTID
         every { oppgaveDao.finn(OPPGAVE_ID) } returns oppgave
         every { oppgaveDao.finnHendelseId(OPPGAVE_ID) } returns godkjenningsbehovhendelseId
         every { hendelseDao.finnUtbetalingsgodkjenningbehov(godkjenningsbehovhendelseId) } returns behov
 
         assertTrue(command.execute(commandContext))
-        verify(exactly = 1) { oppgaveDao.erAktivOppgave(OPPGAVE_ID) }
+        verify(exactly = 1) { oppgaveDao.venterPåSaksbehandler(OPPGAVE_ID) }
         verify(exactly = 1) { oppgaveDao.finnMakstid(OPPGAVE_ID) }
         verify(exactly = 1) { oppgaveDao.finn(OPPGAVE_ID) }
         verify(exactly = 1) { oppgaveDao.finnHendelseId(OPPGAVE_ID) }
@@ -58,7 +57,7 @@ internal class OppgaveMakstidCommandTest {
 
     @Test
     fun `ingenting skjer dersom makstid ikke er oppnådd`() {
-        every { oppgaveDao.erAktivOppgave(OPPGAVE_ID) } returns true
+        every { oppgaveDao.venterPåSaksbehandler(OPPGAVE_ID) } returns true
         every { oppgaveDao.finnMakstid(OPPGAVE_ID) } returns FREMTID
         assertTrue(command.execute(commandContext))
         verify(exactly = 0) { godkjenningMediator.makstidOppnådd(commandContext, behov, VEDTAKSPERIODE_ID, FNR) }
@@ -67,7 +66,7 @@ internal class OppgaveMakstidCommandTest {
 
     @Test
     fun `ingenting skjer dersom oppgavestatus ikke er AvventerSaksbehandler`() {
-        every { oppgaveDao.erAktivOppgave(OPPGAVE_ID) } returns false
+        every { oppgaveDao.venterPåSaksbehandler(OPPGAVE_ID) } returns false
         every { oppgaveDao.finnMakstid(OPPGAVE_ID) } returns FORTID
         assertTrue(command.execute(commandContext))
         verify(exactly = 0) { godkjenningMediator.makstidOppnådd(commandContext, behov, VEDTAKSPERIODE_ID, FNR) }

@@ -103,7 +103,6 @@ internal class Oppgave private constructor(
     }
 
     internal fun avbryt() {
-        if (status == Oppgavestatus.Ferdigstilt) return
         status = Oppgavestatus.Invalidert
     }
 

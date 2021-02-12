@@ -24,7 +24,7 @@ internal class OppgaveMakstidCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val erAktivOppgave = oppgaveDao.erAktivOppgave(oppgaveId)
+        val erAktivOppgave = oppgaveDao.venterPåSaksbehandler(oppgaveId)
         val oppgaveMakstidOppnådd = oppgaveDao.finnMakstid(oppgaveId)!! < LocalDateTime.now()
 
         if (erAktivOppgave && oppgaveMakstidOppnådd) {

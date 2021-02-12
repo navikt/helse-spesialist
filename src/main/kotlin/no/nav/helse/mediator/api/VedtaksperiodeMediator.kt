@@ -167,5 +167,5 @@ internal class VedtaksperiodeMediator(
             )
         }
 
-    fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.erAktivOppgave(oppgaveId)
+    fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 }

@@ -62,7 +62,7 @@ internal class OppgaveMakstidPåminnelseTest {
     fun `kjører OppgaveMakstidCommand`() {
         oppgaveMakstidPåminnelseMessage.execute(context)
 
-        verify(exactly = 1) { oppgaveDao.erAktivOppgave(OPPGAVE_ID) }
+        verify(exactly = 1) { oppgaveDao.venterPåSaksbehandler(OPPGAVE_ID) }
         verify(exactly = 1) { oppgaveDao.finnMakstid(OPPGAVE_ID) }
     }
 }

@@ -130,10 +130,10 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `sjekker om det fins aktiv oppgave`() {
         opprettOppgave()
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
-        assertTrue(oppgaveDao.erAktivOppgave(oppgaveId))
+        assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
 
         oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, null, null)
-        assertFalse(oppgaveDao.erAktivOppgave(oppgaveId))
+        assertFalse(oppgaveDao.venterPåSaksbehandler(oppgaveId))
     }
 
     @Test
@@ -180,7 +180,7 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
         nyPerson()
         opprettOppgave(vedtakId = vedtakId)
-        val oppgaver = oppgaveDao.finn(VEDTAKSPERIODE)
+        val oppgaver = oppgaveDao.finnAktive(VEDTAKSPERIODE)
         assertEquals(2, oppgaver.size)
     }
 
@@ -189,7 +189,7 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         opprettVedtaksperiode(UUID.randomUUID())
         opprettOppgave(vedtakId = vedtakId)
-        assertEquals(1, oppgaveDao.finn(VEDTAKSPERIODE).size)
+        assertEquals(1, oppgaveDao.finnAktive(VEDTAKSPERIODE).size)
     }
 
     @Test

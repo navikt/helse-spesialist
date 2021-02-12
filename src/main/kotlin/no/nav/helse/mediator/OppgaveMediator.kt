@@ -75,7 +75,7 @@ internal class OppgaveMediator(
     }
 
     internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
-        oppgaveDao.finn(vedtaksperiodeId).forEach(::avbryt)
+        oppgaveDao.finnAktive(vedtaksperiodeId).forEach(::avbryt)
     }
 
     internal fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
