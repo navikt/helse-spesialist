@@ -289,14 +289,14 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         oppdaterMakstid(oppgaveId, makstidDager)
     }
 
-    internal fun finnMakstid(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    internal fun finnMakstid(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
                 "SELECT makstid FROM oppgave_makstid WHERE oppgave_ref = ?",
                 oppgaveId
             ).map { it.localDateTime("makstid") }.asSingle
         )
-    })
+    }
 
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
         oppgavereferanse = it.long("oppgave_id"),

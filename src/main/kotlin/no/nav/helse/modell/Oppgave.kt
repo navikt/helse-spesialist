@@ -37,7 +37,7 @@ internal class Oppgave private constructor(
             val contextId = oppgaveDao.finnContextId(oppgaveId)
             val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-            val makstid = oppgaveDao.finnMakstid(oppgaveId)
+            val makstid = oppgaveDao.finnMakstid(oppgaveId) ?: oppgaveDao.opprettMakstid(oppgaveId)
 
             return lagMelding(
                 "oppgave_oppdatert",

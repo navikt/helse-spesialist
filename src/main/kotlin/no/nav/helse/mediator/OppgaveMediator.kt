@@ -120,7 +120,7 @@ internal class OppgaveMediator(
         ferdigstiltAvOid: UUID?
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        val makstid = oppgaveDao.finnMakstid(oppgaveId)
+        val makstid = oppgaveDao.finnMakstid(oppgaveId) ?: oppgaveDao.opprettMakstid(oppgaveId)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
         meldinger.add(
             Oppgave.lagMelding(
