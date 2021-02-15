@@ -1,14 +1,20 @@
 package no.nav.helse.modell.kommando
 
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.*
+import no.nav.helse.objectMapper
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.test.assertEquals
 
 internal class OppgaveMakstidCommandTest {
     private companion object {
@@ -17,7 +23,7 @@ internal class OppgaveMakstidCommandTest {
         private val FORTID = LocalDateTime.now().minusDays(1)
         private val FREMTID = LocalDateTime.now().plusDays(1)
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val oppgave = Oppgave(OPPGAVE_ID, "Et navn", Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        private val oppgave = Oppgave(OPPGAVE_ID, "", Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         private val godkjenningsbehovhendelseId = UUID.randomUUID()
     }
 
@@ -65,11 +71,16 @@ internal class OppgaveMakstidCommandTest {
     }
 
     @Test
-    fun `ingenting skjer dersom oppgavestatus ikke er AvventerSaksbehandler`() {
-        every { oppgaveDao.venterPåSaksbehandler(OPPGAVE_ID) } returns false
-        every { oppgaveDao.finnMakstid(OPPGAVE_ID) } returns FORTID
+    fun `kafka-melding 'oppgave_oppdatert' sendes dersom oppgaven er inaktiv`() {
+        every { oppgaveDao.finn(any<Long>()) } returns Oppgave(OPPGAVE_ID, "type", Oppgavestatus.Invalidert, VEDTAKSPERIODE_ID)
+        every { oppgaveDao.finnFødselsnummer(any()) } returns FNR
+        every { oppgaveDao.finnMakstid(any()) } returns FREMTID
         assertTrue(command.execute(commandContext))
-        verify(exactly = 0) { godkjenningMediator.makstidOppnådd(commandContext, behov, VEDTAKSPERIODE_ID, FNR) }
-        verify(exactly = 0) { oppgaveMediator.makstidOppnådd(oppgave) }
+        val melding = objectMapper.readTree(commandContext.meldinger()[0])
+        assertEquals("oppgave_oppdatert", melding["@event_name"].asText())
+        assertEquals(OPPGAVE_ID, melding["oppgaveId"].asLong())
+        assertEquals("Invalidert", melding["status"].asText())
+        assertEquals(FNR, melding["fødselsnummer"].asText())
+        assertEquals(FREMTID, melding["makstid"].asLocalDateTime())
     }
 }

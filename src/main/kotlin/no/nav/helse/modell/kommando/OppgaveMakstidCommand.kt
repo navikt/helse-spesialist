@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.OppgaveDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -26,6 +27,10 @@ internal class OppgaveMakstidCommand(
     override fun execute(context: CommandContext): Boolean {
         val erAktivOppgave = oppgaveDao.venterPåSaksbehandler(oppgaveId)
         val oppgaveMakstidOppnådd = oppgaveDao.finnMakstid(oppgaveId)!! < LocalDateTime.now()
+
+        if (!erAktivOppgave) {
+            context.publiser(Oppgave.lagMelding(oppgaveId, oppgaveDao).toJson())
+        }
 
         if (erAktivOppgave && oppgaveMakstidOppnådd) {
             val godkjenningsbehovhendelseId = oppgaveDao.finnHendelseId(oppgaveId)
