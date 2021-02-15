@@ -121,6 +121,19 @@ internal class VedtakDao(private val dataSource: DataSource) {
             }.asSingle)
         }
 
+    fun finnInntektskilde(vedtaksperiodeId: UUID): SaksbehandlerInntektskilde? =
+        sessionOf(dataSource).use { session ->
+            val vedtakRef =
+                requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
+
+            @Language("PostgreSQL")
+            val statement = "SELECT inntektskilde FROM saksbehandleroppgavetype where vedtak_ref = ?"
+            session.run(queryOf(statement, vedtakRef).map {
+                enumValueOf<SaksbehandlerInntektskilde>(it.string("inntektskilde"))
+            }.asSingle)
+        }
+
+
     internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) {
         it.findVedtakByVedtaksperiodeId(vedtaksperiodeId)
     }

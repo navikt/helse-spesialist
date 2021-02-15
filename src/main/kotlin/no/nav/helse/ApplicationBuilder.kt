@@ -159,6 +159,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             personDao = personDao,
+            vedtakDao = vedtakDao,
             plukkTilManuell = plukkTilManuell
         ),
         utbetalingDao = utbetalingDao,

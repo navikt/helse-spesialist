@@ -112,8 +112,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
-            personDao = personDao
-        ) { false },
+            personDao = personDao,
+            vedtakDao = vedtakDao
+            ) { false },
         utbetalingDao = utbetalingDao,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         opptegnelseDao = opptegnelseDao

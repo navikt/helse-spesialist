@@ -13,6 +13,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -49,6 +50,7 @@ internal class AutomatiseringTest {
             egenAnsattDao = egenAnsattDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggleMock,
             personDao = personDaoMock,
+            vedtakDao = vedtakDaoMock,
             plukkTilManuell = plukkTilManuellMock
         )
 
@@ -63,6 +65,7 @@ internal class AutomatiseringTest {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto())
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Saksbehandleroppgavetype.FORLENGELSE
+        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns SaksbehandlerInntektskilde.EN_ARBEIDSGIVER
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
@@ -164,6 +167,12 @@ internal class AutomatiseringTest {
         verify(exactly = 0) {
             plukkTilManuellMock()
         }
+    }
+
+    @Test
+    fun `person med flere arbeidsgivere skal ikke automatisk godkjennes`() {
+        every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
 
     private fun risikovurderingDto(kanGodkjennesAutomatisk: Boolean = true) = RisikovurderingDto(

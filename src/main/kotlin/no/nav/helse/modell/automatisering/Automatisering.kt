@@ -2,12 +2,14 @@ package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -20,6 +22,7 @@ internal class Automatisering(
     private val egenAnsattDao: EgenAnsattDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val personDao: PersonDao,
+    private val vedtakDao: VedtakDao,
     private val plukkTilManuell: PlukkTilManuell
 ) {
     private companion object {
@@ -52,6 +55,7 @@ internal class Automatisering(
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val tilhørerUtlandsenhet = personDao.tilhørerUtlandsenhet(fødselsnummer)
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
+        val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
 
         return valider(
             risikovurdering,
@@ -63,6 +67,7 @@ internal class Automatisering(
             validering("Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er skrudd av") { miljøstyrtFeatureToggle.risikovurdering() },
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
+            validering("Har flere arbeidsgivere") { inntektskilde == SaksbehandlerInntektskilde.EN_ARBEIDSGIVER },
             validering("Automatisering er skrudd av") { miljøstyrtFeatureToggle.automatisering() }
         )
     }

@@ -61,7 +61,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         val inntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER
         vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype, inntektskilde)
         assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, vedtakDao.finnVedtaksperiodetype(VEDTAKSPERIODE))
-        assertEquals(inntektskilde.name, finnInntektskilde(VEDTAKSPERIODE))
+        assertEquals(inntektskilde, vedtakDao.finnInntektskilde(VEDTAKSPERIODE))
     }
 
     @Test
@@ -149,15 +149,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
                 row.int("speil_snapshot_ref")
             )
         }.asList)
-    }
-
-    private fun finnInntektskilde(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
-        val vedtakRef =
-            requireNotNull(vedtakDao.finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
-        it.run(
-        queryOf("SELECT inntektskilde FROM saksbehandleroppgavetype where vedtak_ref = ?", vedtakRef)
-                .map { row -> row.string("inntektskilde") }.asSingle
-        )
     }
 
     private class Vedtak(
