@@ -94,13 +94,12 @@ internal class HendelseDao(private val dataSource: DataSource) {
         hendelsetype: Hendelsetype,
         json: String,
         hendelsefabrikk: IHendelsefabrikk
-    ): Hendelse? =
+    ): Hendelse =
         when (hendelsetype) {
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.vedtaksperiodeEndret(json)
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyring(json)
-            TILBAKERULLING -> hendelsefabrikk.tilbakerulling(json)
             SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
             UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
@@ -114,7 +113,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
         is Godkjenningsbehov -> GODKJENNING
         is Overstyring -> OVERSTYRING
-        is Tilbakerulling -> TILBAKERULLING
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
         is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
@@ -125,7 +123,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING, TILBAKERULLING,
+        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET, OPPGAVE_MAKSTID_PÅMINNELSE,
         VEDTAKSPERIODE_REBEREGNET
     }

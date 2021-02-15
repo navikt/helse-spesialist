@@ -21,39 +21,20 @@ internal class AdminApiKtTest {
     private val mediator: HendelseMediator = mockk(relaxed = true)
 
     @Test
-    fun `oppslag på rollback`() {
+    fun `API-et kan formidle en melding til rapid-en`() {
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             basicAuthentication("hunter2")
             adminApi(mediator)
         }) {
-            with(handleRequest(HttpMethod.Post, "/admin/rollback") {
-                val userpass = Base64.getEncoder().encodeToString("admin:hunter2".toByteArray())
-                addHeader(HttpHeaders.Authorization, "Basic $userpass")
-                addHeader(HttpHeaders.ContentType, "application/json")
-                setBody("""[{ "fødselsnummer": "fnr", "aktørId": "aktørId", "personVersjon": 4 }]""")
-            }) {
-                assertEquals(HttpStatusCode.OK, response.status())
-                verify(exactly = 1) { mediator.håndter(TilbakerullingDTO("fnr", "aktørId", 4L)) }
-            }
-        }
-    }
-
-    @Test
-    fun `oppslag på rollback_delete`() {
-        withTestApplication({
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            basicAuthentication("hunter2")
-            adminApi(mediator)
-        }) {
-            with(handleRequest(HttpMethod.Post, "/admin/rollback_delete") {
+            with(handleRequest(HttpMethod.Post, "/admin/send") {
                 val userpass = Base64.getEncoder().encodeToString("admin:hunter2".toByteArray())
                 addHeader(HttpHeaders.Authorization, "Basic $userpass")
                 addHeader(HttpHeaders.ContentType, "application/json")
                 setBody("""[{ "fødselsnummer": "fnr", "aktørId": "aktørId" }]""")
             }) {
                 assertEquals(HttpStatusCode.OK, response.status())
-                verify(exactly = 1) { mediator.håndter(TilbakerullingMedSlettingDTO("fnr", "aktørId")) }
+                verify(exactly = 1) { mediator.sendMeldingPåTopic(any()) }
             }
         }
     }
@@ -65,14 +46,14 @@ internal class AdminApiKtTest {
             basicAuthentication("hunter2")
             adminApi(mediator)
         }) {
-            with(handleRequest(HttpMethod.Post, "/admin/rollback_delete") {
+            with(handleRequest(HttpMethod.Post, "/admin/send") {
                 val userpass = Base64.getEncoder().encodeToString("admin:🅱️".toByteArray())
                 addHeader(HttpHeaders.Authorization, "Basic $userpass")
                 addHeader(HttpHeaders.ContentType, "application/json")
                 setBody("""[{ "fødselsnummer": "fnr", "aktørId": "aktørId" }]""")
             }) {
                 assertEquals(HttpStatusCode.Unauthorized, response.status())
-                verify(exactly = 0) { mediator.håndter(any<TilbakerullingMedSlettingDTO>()) }
+                verify(exactly = 0) { mediator.sendMeldingPåTopic(any()) }
             }
         }
     }

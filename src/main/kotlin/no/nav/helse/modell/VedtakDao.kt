@@ -92,14 +92,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
     }
 
-    internal fun fjernVedtaksperioder(vedtaksperiodeIder: List<UUID>) {
-        @Language("PostgreSQL")
-        val statement = "DELETE FROM vedtak WHERE vedtaksperiode_id in (${vedtaksperiodeIder.joinToString { "?" }})"
-        using(sessionOf(dataSource)) {
-            it.run(queryOf(statement, *vedtaksperiodeIder.toTypedArray()).asUpdate)
-        }
-    }
-
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype, inntektskilde: SaksbehandlerInntektskilde) =
         using(sessionOf(dataSource)) {
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using

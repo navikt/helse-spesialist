@@ -3,8 +3,6 @@ package no.nav.helse.mediator
 import io.mockk.mockk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.TilbakerullingDTO
-import no.nav.helse.mediator.api.TilbakerullingMedSlettingDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,23 +35,6 @@ internal class HendelseMediatorTest {
         val saksbehandlerIdent = "saksbehandler"
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertEquals("saksbehandler_løsning", testRapid.inspektør.field(0, "@event_name").asText())
-    }
-
-    @Test
-    fun `publiserer tilbakerulling på rapid`() {
-        mediator.håndter(TilbakerullingDTO("FNR", "AKTØRID", 1L))
-        assertEquals("rollback_person", testRapid.inspektør.field(0, "@event_name").asText())
-        assertEquals("FNR", testRapid.inspektør.field(0, "fødselsnummer").asText())
-        assertEquals("AKTØRID", testRapid.inspektør.field(0, "aktørId").asText())
-        assertEquals(1L, testRapid.inspektør.field(0, "personVersjon").asLong())
-    }
-
-    @Test
-    fun `publiserer tilbakerulling med sletting på rapid`() {
-        mediator.håndter(TilbakerullingMedSlettingDTO("FNR", "AKTØRID"))
-        assertEquals("rollback_person_delete", testRapid.inspektør.field(0, "@event_name").asText())
-        assertEquals("FNR", testRapid.inspektør.field(0, "fødselsnummer").asText())
-        assertEquals("AKTØRID", testRapid.inspektør.field(0, "aktørId").asText())
     }
 
     @Test

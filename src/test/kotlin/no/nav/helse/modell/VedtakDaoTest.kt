@@ -85,17 +85,6 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `fjerner vedtak`() {
-        val NY_VEDTAKSPERIODE = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettVedtaksperiode(NY_VEDTAKSPERIODE)
-        vedtakDao.fjernVedtaksperioder(listOf(VEDTAKSPERIODE, NY_VEDTAKSPERIODE))
-        assertEquals(0, vedtak().size)
-    }
-
-    @Test
     fun `insert speil snapshot`() {
         val newJson = """{ "id": 3}"""
         val nyVedtaksperiode = UUID.randomUUID()

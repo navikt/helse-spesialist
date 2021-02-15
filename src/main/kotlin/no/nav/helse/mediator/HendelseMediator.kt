@@ -3,7 +3,10 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
-import no.nav.helse.mediator.api.*
+import no.nav.helse.mediator.api.AnnulleringDto
+import no.nav.helse.mediator.api.GodkjenningDTO
+import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
+import no.nav.helse.mediator.api.OverstyringRestDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
@@ -46,7 +49,6 @@ internal class HendelseMediator(
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             Godkjenningsbehov.GodkjenningsbehovRiver(it, this)
-            Tilbakerulling.TilbakerullingRiver(it, this)
             HentPersoninfoløsning.PersoninfoRiver(it, this)
             HentEnhetløsning.HentEnhetRiver(it, this)
             HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
@@ -243,16 +245,6 @@ internal class HendelseMediator(
         utfør(fødselsnummer, hendelsefabrikk.overstyring(message.toJson()), context)
     }
 
-    override fun tilbakerulling(
-        message: JsonMessage,
-        id: UUID,
-        fødselsnummer: String,
-        vedtaksperiodeIder: List<UUID>,
-        context: RapidsConnection.MessageContext
-    ) {
-        utfør(hendelsefabrikk.tilbakerulling(message.toJson()), context)
-    }
-
     override fun utbetalingAnnullert(
         message: JsonMessage,
         context: RapidsConnection.MessageContext
@@ -302,30 +294,6 @@ internal class HendelseMediator(
         }
 
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
-    }
-
-    internal fun håndter(tilbakerullingMedSlettingDTO: TilbakerullingMedSlettingDTO) {
-
-        val tilbakerulling = JsonMessage.newMessage(
-            standardfelter("rollback_person_delete", tilbakerullingMedSlettingDTO.fødselsnummer).apply {
-                put("aktørId", tilbakerullingMedSlettingDTO.aktørId)
-            }
-        ).also {
-            sikkerLogg.info("Publiserer rollback_person_delete for ${tilbakerullingMedSlettingDTO.fødselsnummer}:\n${it.toJson()}")
-        }
-        rapidsConnection.publish(tilbakerulling.toJson())
-    }
-
-    internal fun håndter(tilbakerullingDTO: TilbakerullingDTO) {
-        val tilbakerulling = JsonMessage.newMessage(
-            standardfelter("rollback_person", tilbakerullingDTO.fødselsnummer).apply {
-                put("aktørId", tilbakerullingDTO.aktørId)
-                put("personVersjon", tilbakerullingDTO.personVersjon)
-            }
-        ).also {
-            sikkerLogg.info("Publiserer rollback_person for ${tilbakerullingDTO.fødselsnummer}:\n${it.toJson()}")
-        }
-        rapidsConnection.publish(tilbakerulling.toJson())
     }
 
     internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {

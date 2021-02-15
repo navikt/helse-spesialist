@@ -33,36 +33,6 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         lagre(hendelse, contextId, SUSPENDERT, sti)
     }
 
-    fun avbryt(fødselsnummer: String, contextId: UUID) {
-        using(sessionOf(dataSource)) {
-            @Language("PostgreSQL")
-            val query = """
-                INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
-                    SELECT context_id, hendelse_id, :avbrutt, data
-                    FROM (
-                        SELECT DISTINCT ON (context_id) * FROM command_context WHERE hendelse_id IN (
-                           SELECT id FROM hendelse WHERE fodselsnummer = :fodselsnummer
-                        )
-                        AND context_id != :contextId
-                        ORDER BY context_id, id DESC
-                    ) AS command_contexts
-                    WHERE tilstand IN (:ny, :suspendert)
-            """
-            it.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "avbrutt" to AVBRUTT.name,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "contextId" to contextId,
-                        "ny" to NY.name,
-                        "suspendert" to SUSPENDERT.name
-                    )
-                ).asUpdate
-            )
-        }
-    }
-
     fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) {
         using(sessionOf(dataSource)) {
             @Language("PostgreSQL")

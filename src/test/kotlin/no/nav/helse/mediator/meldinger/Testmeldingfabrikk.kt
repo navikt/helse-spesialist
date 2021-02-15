@@ -35,18 +35,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
-    fun lagTilbakerulling(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperioderSlettet: List<UUID>
-    ) = nyHendelse(
-        id, "person_rullet_tilbake", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "vedtaksperioderSlettet" to vedtaksperioderSlettet
-        )
-    )
-
-
     fun lagVedtaksperiodeForkastet(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),

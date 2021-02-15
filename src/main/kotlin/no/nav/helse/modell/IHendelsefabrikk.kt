@@ -69,14 +69,7 @@ internal interface IHendelsefabrikk {
     ): Overstyring
     fun overstyring(json: String): Overstyring
 
-    fun tilbakerulling(
-        id: UUID,
-        fødselsnummer: String,
-        vedtaksperiodeIder: List<UUID>,
-        json: String
-    ): Tilbakerulling
 
-    fun tilbakerulling(json: String): Tilbakerulling
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
     fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot

@@ -41,18 +41,6 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `avbryter command som er NY eller SUSPENDERT`() {
-        val contextId1 = UUID.randomUUID()
-        val contextId2 = ny()
-        val contextId3 = suspendert()
-        val contextId4 = ferdig()
-        avbrytForPerson(contextId1)
-        assertTilstand(contextId2, "NY", "AVBRUTT")
-        assertTilstand(contextId3, "NY", "SUSPENDERT", "AVBRUTT")
-        assertTilstand(contextId4, "NY", "FERDIG")
-    }
-
-    @Test
     fun `avbryter ikke commands som er FEIL eller FERDIG`() {
         val contextId1 = UUID.randomUUID()
         val contextId2 = ferdig()
@@ -71,15 +59,6 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
         avbryt(UUID.randomUUID(), HENDELSE1.vedtaksperiodeId()!!)
         assertTilstand(contextId1, "NY", "AVBRUTT")
         assertTilstand(contextId2, "NY")
-    }
-
-    @Test
-    fun `avbryter alle contexter for person`() {
-        val contextId1 = ny(HENDELSE1)
-        val contextId2 = ny(HENDELSE2)
-        avbrytForPerson(UUID.randomUUID())
-        assertTilstand(contextId1, "NY", "AVBRUTT")
-        assertTilstand(contextId2, "NY", "AVBRUTT")
     }
 
     @Test
@@ -107,10 +86,6 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 
     private fun avbryt(contextId: UUID, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID1) {
         commandContextDao.avbryt(vedtaksperiodeId, contextId)
-    }
-
-    private fun avbrytForPerson(contextId: UUID, fødselsnummer: String = FNR) {
-        commandContextDao.avbryt(fødselsnummer, contextId)
     }
 
     private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {

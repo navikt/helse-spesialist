@@ -13,20 +13,6 @@ internal fun Application.adminApi(mediator: HendelseMediator) {
     routing {
         authenticate("admin") {
             route("/admin") {
-                post("/rollback") {
-                    val rollback = call.receive<Array<TilbakerullingDTO>>()
-                    rollback.forEach {
-                        mediator.håndter(it)
-                    }
-                    call.respond(HttpStatusCode.OK)
-                }
-                post("/rollback_delete") {
-                    val rollback = call.receive<Array<TilbakerullingMedSlettingDTO>>()
-                    rollback.forEach {
-                        mediator.håndter(it)
-                    }
-                    call.respond(HttpStatusCode.OK)
-                }
                 post("/send") {
                     val request = call.receive<ArrayNode>()
                     request.forEach { node ->
@@ -38,6 +24,3 @@ internal fun Application.adminApi(mediator: HendelseMediator) {
         }
     }
 }
-
-data class TilbakerullingDTO(val fødselsnummer: String, val aktørId: String, val personVersjon: Long)
-data class TilbakerullingMedSlettingDTO(val fødselsnummer: String, val aktørId: String)
