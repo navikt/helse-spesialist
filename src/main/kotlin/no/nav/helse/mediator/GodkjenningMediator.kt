@@ -51,7 +51,6 @@ internal class GodkjenningMediator(
         fødselsnummer: String,
         behov: UtbetalingsgodkjenningMessage
     ) {
-        Thread.sleep(1000);
         context.publiser(
             VedtaksperiodeGodkjent(
                 vedtaksperiodeId = vedtaksperiodeId,
