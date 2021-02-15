@@ -112,7 +112,7 @@ abstract class AbstractApiTest {
         }
 
         override fun close() {
-            server.stop(1000, 1000)
+            server.stop(0, 0)
         }
 
 
