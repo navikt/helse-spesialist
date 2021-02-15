@@ -22,6 +22,8 @@ import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -138,6 +140,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(vedtakId = vedtakId)
+    }
+
+    protected fun opprettVedtakstype(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        type: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
+        inntektskilde: SaksbehandlerInntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER
+    ) {
+        vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
 
     protected fun opprettPerson(fødselsnummer: String = FNR, aktørId: String = AKTØR): Persondata {

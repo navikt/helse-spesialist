@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -68,7 +69,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         periodeTom: LocalDate = LocalDate.now(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = this.fødselsnummer,
-        aktørId: String = this.aktørId
+        aktørId: String = this.aktørId,
+        inntektskilde: SaksbehandlerInntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER,
     ) =
         nyHendelse(
             id, "behov",
@@ -81,7 +83,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "Godkjenning" to mapOf(
                     "periodeFom" to "$periodeFom",
                     "periodeTom" to "$periodeTom",
-                    "periodetype" to periodetype.name
+                    "periodetype" to periodetype.name,
+                    "inntektskilde" to inntektskilde.name
                 )
             )
         )

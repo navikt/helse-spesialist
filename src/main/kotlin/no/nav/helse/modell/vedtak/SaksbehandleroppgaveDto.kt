@@ -31,6 +31,7 @@ data class SaksbehandleroppgaveDto(
     val aktørId: String,
     val antallVarsler: Int,
     val type: Saksbehandleroppgavetype?,
+    val inntektskilde: SaksbehandlerInntektskilde?,
     var boenhet: EnhetDto
 )
 
@@ -43,4 +44,9 @@ enum class Saksbehandleroppgavetype {
     FORLENGELSE,
     INFOTRYGDFORLENGELSE,
     OVERGANG_FRA_IT
+}
+
+enum class SaksbehandlerInntektskilde{
+    EN_ARBEIDSGIVER,
+    FLERE_ARBEIDSGIVERE
 }

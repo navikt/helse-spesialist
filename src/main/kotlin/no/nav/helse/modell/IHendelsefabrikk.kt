@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -50,6 +51,7 @@ internal interface IHendelsefabrikk {
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
+        inntektskilde: SaksbehandlerInntektskilde,
         json: String
     ): Godkjenningsbehov
     fun godkjenning(json: String): Godkjenningsbehov

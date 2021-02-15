@@ -18,6 +18,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -65,6 +66,7 @@ internal class Hendelsefabrikk(
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
+        inntektskilde: SaksbehandlerInntektskilde,
         json: String
     ): Godkjenningsbehov {
         return Godkjenningsbehov(
@@ -76,6 +78,7 @@ internal class Hendelsefabrikk(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             periodetype = periodetype,
+            inntektskilde = inntektskilde,
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
@@ -108,6 +111,7 @@ internal class Hendelsefabrikk(
             periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
+            inntektskilde = SaksbehandlerInntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
             json = json
         )
     }

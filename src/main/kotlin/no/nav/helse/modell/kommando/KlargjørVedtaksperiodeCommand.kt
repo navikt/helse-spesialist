@@ -5,6 +5,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import java.time.LocalDate
@@ -18,6 +19,7 @@ internal class KlargjørVedtaksperiodeCommand(
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     vedtaksperiodetype: Saksbehandleroppgavetype,
+    inntektskilde: SaksbehandlerInntektskilde,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     snapshotDao: SnapshotDao,
@@ -38,6 +40,6 @@ internal class KlargjørVedtaksperiodeCommand(
             vedtakDao,
             warningDao,
         ),
-        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, vedtakDao)
+        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, inntektskilde, vedtakDao)
     )
 }

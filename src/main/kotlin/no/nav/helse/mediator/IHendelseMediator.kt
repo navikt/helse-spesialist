@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -59,6 +60,7 @@ internal interface IHendelseMediator {
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
+        inntektskilde: SaksbehandlerInntektskilde,
         context: RapidsConnection.MessageContext
     )
 

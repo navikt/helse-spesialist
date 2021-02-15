@@ -26,6 +26,7 @@ import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -46,6 +47,7 @@ internal class Godkjenningsbehov(
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     periodetype: Saksbehandleroppgavetype,
+    inntektskilde: SaksbehandlerInntektskilde,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -102,6 +104,7 @@ internal class Godkjenningsbehov(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             vedtaksperiodetype = periodetype,
+            inntektskilde = inntektskilde,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
@@ -179,6 +182,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.periodeFom",
                         "Godkjenning.periodeTom",
                         "Godkjenning.periodetype",
+                        "Godkjenning.inntektskilde"
                     )
                 }
             }.register(this)
@@ -209,6 +213,7 @@ internal class Godkjenningsbehov(
                 periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
                 periodetype = Saksbehandleroppgavetype.valueOf(packet["Godkjenning.periodetype"].asText()),
+                inntektskilde = SaksbehandlerInntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 context = context
             )
         }

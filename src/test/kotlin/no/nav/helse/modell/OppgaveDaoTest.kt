@@ -8,6 +8,8 @@ import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.Oppgavestatus.Ferdigstilt
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +18,7 @@ import org.postgresql.util.PSQLException
 import java.time.LocalDate
 import java.util.*
 
-internal class OppgaveDaoTest : DatabaseIntegrationTest() {
+class OppgaveDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private val CONTEXT_ID = UUID.randomUUID()
         private val TESTHENDELSE = TestHendelse(HENDELSE_ID, UUID.randomUUID(), FNR)
@@ -248,6 +250,15 @@ internal class OppgaveDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
         assertEquals(fødselsnummer, FNR)
+    }
+
+    @Test
+    fun `en oppgave har riktig oppgavetype og inntektskilde`(){
+        nyPerson()
+        opprettVedtakstype(type = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE)
+        val oppgaver = oppgaveDao.finnOppgaver(true)
+        assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
+        assertEquals(SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
     }
 
     private fun statusForOppgave(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->

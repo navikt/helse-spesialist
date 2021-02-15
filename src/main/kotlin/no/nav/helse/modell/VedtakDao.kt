@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtak.PersoninfoDto
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
@@ -99,13 +100,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype) =
+    internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype, inntektskilde: SaksbehandlerInntektskilde) =
         using(sessionOf(dataSource)) {
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
 
             @Language("PostgreSQL")
-            val statement = "INSERT INTO saksbehandleroppgavetype (type, vedtak_ref) VALUES (?, ?)"
-            it.run(queryOf(statement, type.name, vedtakRef).asUpdate)
+            val statement = "INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (?, ?, ?)"
+            it.run(queryOf(statement, type.name, inntektskilde.name, vedtakRef).asUpdate)
         }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? =

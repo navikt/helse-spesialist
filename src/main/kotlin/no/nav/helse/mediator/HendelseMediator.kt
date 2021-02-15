@@ -12,6 +12,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
 import no.nav.helse.overstyringsteller
@@ -175,6 +176,7 @@ internal class HendelseMediator(
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
+        inntektskilde: SaksbehandlerInntektskilde,
         context: RapidsConnection.MessageContext
     ) {
         if (oppgaveDao.harAktivOppgave(vedtaksperiodeId) || oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId) || vedtakDao.erAutomatiskGodkjent(vedtaksperiodeId)) {
@@ -191,6 +193,7 @@ internal class HendelseMediator(
                 periodeTom,
                 vedtaksperiodeId,
                 periodetype,
+                inntektskilde,
                 message.toJson()
             ), context
         )
