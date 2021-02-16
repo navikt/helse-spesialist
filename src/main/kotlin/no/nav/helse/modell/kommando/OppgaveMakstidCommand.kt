@@ -29,7 +29,7 @@ internal class OppgaveMakstidCommand(
         val oppgaveMakstidOppnådd = oppgaveDao.finnMakstid(oppgaveId)!! < LocalDateTime.now()
 
         if (!erAktivOppgave) {
-            context.publiser(Oppgave.lagMelding(oppgaveId, oppgaveDao).toJson())
+            context.publiser(Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).toJson())
         }
 
         if (erAktivOppgave && oppgaveMakstidOppnådd) {

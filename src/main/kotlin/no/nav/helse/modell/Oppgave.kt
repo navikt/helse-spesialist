@@ -14,12 +14,14 @@ internal class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
 
-    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID) : this(
+    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID, ferdigstiltAvIdent: String? = null, ferdigstiltAvOid: UUID? = null) : this(
         type,
         status,
-        vedtaksperiodeId
+        vedtaksperiodeId,
     ) {
         this.id = id
+        this.ferdigstiltAvIdent = ferdigstiltAvIdent
+        this.ferdigstiltAvOid = ferdigstiltAvOid
     }
 
     internal companion object {
@@ -31,6 +33,7 @@ internal class Oppgave private constructor(
 
         internal fun lagMelding(
             oppgaveId: Long,
+            eventName: String,
             oppgaveDao: OppgaveDao
         ): JsonMessage {
             val hendelseId = oppgaveDao.finnHendelseId(oppgaveId)
@@ -40,18 +43,20 @@ internal class Oppgave private constructor(
             val makstid = oppgaveDao.finnMakstid(oppgaveId) ?: oppgaveDao.opprettMakstid(oppgaveId)
 
             return lagMelding(
-                "oppgave_oppdatert",
+                eventName,
                 hendelseId,
                 contextId,
                 oppgaveId,
                 oppgave.status,
                 fødselsnummer,
-                makstid
+                makstid,
+                oppgave.ferdigstiltAvIdent,
+                oppgave.ferdigstiltAvOid
             )
         }
 
-        internal fun lagMelding(
-            eventNavn: String,
+        private fun lagMelding(
+            eventName: String,
             hendelseId: UUID,
             contextId: UUID,
             oppgaveId: Long,
@@ -63,7 +68,7 @@ internal class Oppgave private constructor(
         ): JsonMessage {
             return JsonMessage.newMessage(
                 mutableMapOf(
-                    "@event_name" to eventNavn,
+                    "@event_name" to eventName,
                     "@id" to UUID.randomUUID(),
                     "@opprettet" to LocalDateTime.now(),
                     "hendelseId" to hendelseId,
@@ -96,10 +101,10 @@ internal class Oppgave private constructor(
         status = Oppgavestatus.MakstidOppnådd
     }
 
-    internal fun lagre(oppgaveMediator: OppgaveMediator, hendelseId: UUID, contextId: UUID) {
+    internal fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
         id?.also {
-            oppgaveMediator.oppdater(hendelseId, contextId, it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(hendelseId, contextId, vedtaksperiodeId, type).also { id = it } ?: return
+            oppgaveMediator.oppdater(it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
+        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, type).also { id = it } ?: return
     }
 
     internal fun avbryt() {

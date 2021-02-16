@@ -68,7 +68,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun finn(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT o.type, o.status, v.vedtaksperiode_id
+            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE o.id = ?
@@ -80,7 +80,9 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                         id = oppgaveId,
                         type = row.string("type"),
                         status = enumValueOf(row.string("status")),
-                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
+                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                        ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                        ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
                     )
                 }.asSingle
         )

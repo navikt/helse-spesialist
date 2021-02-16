@@ -4,11 +4,9 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
@@ -22,7 +20,7 @@ internal class OppgaveMediator(
     private val reservasjonDao: ReservasjonDao
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
-    private val meldinger = mutableListOf<JsonMessage>()
+    private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     internal fun hentOppgaver(inkluderRiskQaOppgaver: Boolean) = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver)
@@ -62,7 +60,11 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    internal fun lagreOgTildelOppgaver(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext, contextId: UUID) {
+    internal fun lagreOgTildelOppgaver(
+        hendelse: Hendelse,
+        messageContext: RapidsConnection.MessageContext,
+        contextId: UUID
+    ) {
         lagreOppgaver(hendelse.id, contextId, { messageContext.send(it) }) { tildelOppgaver(hendelse.fødselsnummer()) }
     }
 
@@ -80,7 +82,6 @@ internal class OppgaveMediator(
     }
 
     internal fun opprett(
-        hendelseId: UUID,
         contextId: UUID,
         vedtaksperiodeId: UUID,
         navn: String
@@ -92,51 +93,24 @@ internal class OppgaveMediator(
             navn,
             vedtakRef
         ).also { oppgaveId ->
-            val makstid = oppgaveDao.opprettMakstid(oppgaveId)
-            val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-
-            meldinger.add(Oppgave.lagMelding(
-                "oppgave_opprettet",
-                hendelseId,
-                contextId,
-                oppgaveId,
-                AvventerSaksbehandler,
-                fødselsnummer,
-                makstid
-            ))
+            oppgaverForPublisering.put(oppgaveId, "oppgave_opprettet")
         }
     }
 
     internal fun oppdater(
-        hendelseId: UUID,
-        contextId: UUID,
         oppgaveId: Long,
         status: Oppgavestatus,
         ferdigstiltAvIdent: String?,
         ferdigstiltAvOid: UUID?
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        val makstid = oppgaveDao.finnMakstid(oppgaveId) ?: oppgaveDao.opprettMakstid(oppgaveId)
-        val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-        meldinger.add(
-            Oppgave.lagMelding(
-                "oppgave_oppdatert",
-                hendelseId,
-                contextId,
-                oppgaveId,
-                status,
-                fødselsnummer,
-                makstid,
-                ferdigstiltAvIdent,
-                ferdigstiltAvOid,
-            )
-        )
+        oppgaverForPublisering.put(oppgaveId, "oppgave_oppdatert")
     }
 
     internal fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
         try {
             reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
-        } catch(e: PSQLException) {
+        } catch (e: PSQLException) {
             log.warn("Kunne ikke reservere person")
         }
     }
@@ -150,9 +124,11 @@ internal class OppgaveMediator(
     private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit, doAlso: () -> Unit = {}) {
         if (oppgaver.size > 1) log.info("Oppgaveliste har ${oppgaver.size} oppgaver, hendelsesId: $hendelseId og contextId: $contextId")
 
-        oppgaver.forEach { oppgave -> oppgave.lagre(this, hendelseId, contextId) }
+        oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId) }
         doAlso()
         oppgaver.clear()
-        meldinger.onEach { publisher(it.toJson()) }.clear()
+        oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
+            Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).toJson().let(publisher)
+        }.clear()
     }
 }

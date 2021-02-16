@@ -45,16 +45,15 @@ internal class OppgaveTest {
     @Test
     fun `oppretter ny oppgave`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
-        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKREF) }
-        verify(exactly = 1) { oppgaveDao.opprettMakstid(any()) }
     }
 
     @Test
     fun `oppdater oppgave`() {
         val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
     }
 
@@ -62,7 +61,7 @@ internal class OppgaveTest {
     fun `oppdaterer makstid ved tildeling av oppgave`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
         val (oid, gyldigTil) = Pair(UUID.randomUUID(), LocalDateTime.now())
-        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         oppgave.tildel(oppgaveMediator, oid, gyldigTil)
         verify(exactly = 1) { oppgaveDao.oppdaterMakstidVedTildeling(any()) }
     }
@@ -80,7 +79,7 @@ internal class OppgaveTest {
     fun `Setter oppgavestatus til INVALIDERT når oppgaven avbrytes`() {
         val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         oppgave.avbryt()
-        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
     }
 
@@ -88,7 +87,7 @@ internal class OppgaveTest {
     fun `Setter oppgavestatus til MakstidOppnådd når oppgaven timer ut`() {
         val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         oppgave.makstidOppnådd()
-        oppgave.lagre(oppgaveMediator, HENDELSE_ID, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.MakstidOppnådd, null, null) }
     }
 

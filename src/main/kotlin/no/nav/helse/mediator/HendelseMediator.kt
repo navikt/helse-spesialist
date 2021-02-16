@@ -130,7 +130,7 @@ internal class HendelseMediator(
         saksbehandlerreferanse: UUID,
     ) {
         oppgaveMediator.tildel(oppgaveId, saksbehandlerreferanse)
-        rapidsConnection.publish(Oppgave.lagMelding(oppgaveId, oppgaveDao).toJson())
+        rapidsConnection.publish(Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).toJson())
     }
 
     internal fun sendMeldingPåTopic(melding: JsonNode) {
