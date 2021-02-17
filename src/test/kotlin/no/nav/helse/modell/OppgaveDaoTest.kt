@@ -195,13 +195,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `opprette makstid på 4 dager end of day for ny oppgave`() {
+    fun `opprette makstid på 7 dager end of day for ny oppgave`() {
         opprettOppgave()
         oppgaveDao.opprettMakstid(oppgaveId)
         assertEquals(
             LocalDate
                 .now()
-                .plusDays(4)
+                .plusDays(7)
                 .atTime(23, 59, 59),
             oppgaveDao.finnMakstid(oppgaveId)
         )
