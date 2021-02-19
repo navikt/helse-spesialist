@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class OpptegnelseDaoTest: DatabaseIntegrationTest() {
+internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
 
     companion object {
         private val PAYLOAD = UtbetalingPayload(UUID.randomUUID())
@@ -36,4 +36,18 @@ internal class OpptegnelseDaoTest: DatabaseIntegrationTest() {
         assertEquals(1, abonnementForSaksbehandler.size)
     }
 
+    @Test
+    fun `Skal ikke få opptegnelser fra før abonneringstidspunkt`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opptegnelseDao.opprettOpptegnelse(
+            FNR,
+            PAYLOAD,
+            UTBETALING_ANNULLERING_OK
+        )
+        opptegnelseDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
+
+        val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
+        assertEquals(0, alle.size)
+    }
 }
