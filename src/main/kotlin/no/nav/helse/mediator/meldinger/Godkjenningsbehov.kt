@@ -9,8 +9,9 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.abonnement.OpprettGodkjenningsbehovOpptegnelseCommand
+import no.nav.helse.modell.abonnement.OpprettOpptegnelseCommand
 import no.nav.helse.modell.abonnement.OpptegnelseDao
+import no.nav.helse.modell.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -152,10 +153,11 @@ internal class Godkjenningsbehov(
             personDao = personDao,
             risikovurderingDao = risikovurderingDao
         ),
-        OpprettGodkjenningsbehovOpptegnelseCommand(
+        OpprettOpptegnelseCommand(
             opptegnelseDao = opptegnelseDao,
             fødselsnummer = fødselsnummer,
-            hendelseId = id
+            hendelseId = id,
+            opptegnelseType = NY_SAKSBEHANDLEROPPGAVE
         ),
     )
 

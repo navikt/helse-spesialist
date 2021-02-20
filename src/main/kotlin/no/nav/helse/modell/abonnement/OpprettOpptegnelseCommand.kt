@@ -4,16 +4,17 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import java.util.*
 
-internal class OpprettGodkjenningsbehovOpptegnelseCommand(
+internal class OpprettOpptegnelseCommand(
     private val opptegnelseDao: OpptegnelseDao,
     private val fødselsnummer: String,
-    private val hendelseId: UUID
+    private val hendelseId: UUID,
+    private val opptegnelseType: OpptegnelseType
 ): Command {
     override fun execute(context: CommandContext): Boolean {
         opptegnelseDao.opprettOpptegnelse(
             fødselsnummer,
             GodkjenningsbehovPayload(hendelseId),
-            OpptegnelseType.FERDIGBEHANDLET_GODKJENNIGSBEHOV
+            opptegnelseType
         )
         return true
     }
