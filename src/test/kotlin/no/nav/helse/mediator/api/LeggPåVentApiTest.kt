@@ -11,8 +11,8 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.feilhåndtering.FeilDto
 import no.nav.helse.modell.feilhåndtering.ModellFeil
-import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
-import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.feilhåndtering.OppgaveErIkkeTildelt
+import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -25,30 +25,30 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @TestInstance(PER_CLASS)
-internal class TildelingApiTest : AbstractApiTest() {
+internal class LeggPåVentApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private lateinit var tildelingMediator: TildelingMediator
+    private lateinit var leggPåVentMediator: LeggPåVentMediator
 
     @BeforeAll
     fun setupTildeling() {
-        tildelingMediator = mockk(relaxed = true)
+        leggPåVentMediator = mockk(relaxed = true)
         setupServer {
-            tildelingApi(tildelingMediator)
+            leggPåVentApi(leggPåVentMediator)
         }
     }
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(tildelingMediator)
+        clearMocks(leggPåVentMediator)
     }
 
     @Test
-    fun `kan tildele en oppgave til seg selv`() {
+    fun `kan legge en oppgave på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.post<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -58,43 +58,17 @@ internal class TildelingApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            tildelingMediator.tildelOppgaveTilSaksbehandler(
-                oppgavereferanse,
-                SAKSBEHANDLER_OID,
-                any(),
-                any()
-            )
-        }
-    }
-
-    @Test
-    fun `kan slette en tildeling av en oppgave`() {
-        val oppgavereferanse = nextLong()
-        val response = runBlocking {
-            client.delete<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
-                authentication(SAKSBEHANDLER_OID)
-            }
-        }
-
-        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
-        verify(exactly = 1) {
-            tildelingMediator.fjernTildeling(
+            leggPåVentMediator.leggOppgavePåVent(
                 oppgavereferanse
             )
         }
     }
 
     @Test
-    fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
-        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws ModellFeil(
-            OppgaveErAlleredeTildelt("en annen saksbehandler")
-        )
+    fun `kan fjerne på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.delete<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -102,16 +76,38 @@ internal class TildelingApiTest : AbstractApiTest() {
             }
         }
 
-        assertEquals(HttpStatusCode.Conflict, response.status)
+        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
+        verify(exactly = 1) {
+            leggPåVentMediator.fjernPåVent(
+                oppgavereferanse
+            )
+        }
+    }
+
+    @Test
+    fun `gir feil hvis bruker forsøker å legge en oppgave på vent før den er tildelt bruker`() {
+        every { leggPåVentMediator.leggOppgavePåVent(any()) } throws ModellFeil(
+            OppgaveErIkkeTildelt(1L)
+        )
+        val oppgavereferanse = nextLong()
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = objectMapper.createObjectNode()
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+
+        assertEquals(HttpStatusCode.FailedDependency, response.status)
         val feilDto = runBlocking { response.receive<FeilDto>() }
-        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt("").feilkode)
-        assertEquals("en annen saksbehandler", feilDto.kontekst["tildeltTil"])
+           assertEquals(feilDto.feilkode, OppgaveErIkkeTildelt(1L).feilkode)
     }
 
     @Test
     fun `manglende oppgavereferanse POST gir Bad Request`() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/null") {
+            client.post<HttpResponse>("/api/leggpåvent/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -125,7 +121,7 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse DELETE gir Bad Request`() {
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/tildeling/null") {
+            client.delete<HttpResponse>("/api/leggpåvent/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()

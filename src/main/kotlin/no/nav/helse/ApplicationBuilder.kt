@@ -26,6 +26,7 @@ import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -223,6 +224,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
+                    leggPåVentApi(LeggPåVentMediator(tildelingDao, oppgaveDao, hendelseMediator))
                 }
                 authenticate("saksbehandler-direkte") {
                     tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))

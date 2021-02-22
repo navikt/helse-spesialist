@@ -276,15 +276,18 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     private fun oppdaterMakstid(oppgaveId: Long, makstidDager: Long) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf(
-                "UPDATE oppgave_makstid SET tildelt=?, makstid=? WHERE oppgave_ref=? AND tildelt = false;",
-                true,
-                LocalDate.now().plusDays(makstidDager).atTime(23, 59, 59),
+                "UPDATE oppgave_makstid SET makstid=makstid + INTERVAL '1 DAY' * ? WHERE oppgave_ref=?;",
+                makstidDager,
                 oppgaveId
             ).asUpdate
         )
     }
 
-    internal fun oppdaterMakstidVedTildeling(oppgaveId: Long, makstidDager: Long = 14) {
+    internal fun oppdaterMakstidVedTildeling(oppgaveId: Long, makstidDager: Long = 7) {
+        oppdaterMakstid(oppgaveId, makstidDager)
+    }
+
+    internal fun oppdaterMakstidVedLeggPåVent(oppgaveId: Long, makstidDager: Long = 14) {
         oppdaterMakstid(oppgaveId, makstidDager)
     }
 

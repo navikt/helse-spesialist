@@ -4,6 +4,9 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
+import kotliquery.LoanPattern.using
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -487,7 +490,14 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `løser godkjenningsbehov når makstid for oppgave oppnås`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         håndterGodkjenningsbehov()
-        oppgaveDao.oppdaterMakstidVedTildeling(OPPGAVEID, -1)
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    "UPDATE oppgave_makstid SET makstid=NOW() - INTERVAL '14 DAY' WHERE oppgave_ref=?;",
+                    OPPGAVEID
+                ).asUpdate
+            )
+        }
         sendPåminnelseOppgaveMakstid()
 
         assertOppgave(0, AvventerSaksbehandler, MakstidOppnådd)

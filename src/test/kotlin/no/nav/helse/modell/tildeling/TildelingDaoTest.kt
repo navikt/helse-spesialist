@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -87,6 +88,23 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         assertTrue(oppgaveDao.finnOppgaver(false).none { it.saksbehandlerepost == saksbehandlerEpost })
     }
 
+    @Test
+    fun `legger opppgave på vent`() {
+        nyPerson()
+        tildelTilSaksbehandler()
+        tildelingDao.leggOppgavePåVent(oppgaveId)
+        assertTrue(assertOppgavePåVent(oppgaveId))
+    }
+
+    @Test
+    fun `fjern på vent`() {
+        nyPerson()
+        tildelTilSaksbehandler()
+        tildelingDao.leggOppgavePåVent(oppgaveId)
+        tildelingDao.fjernPåVent(oppgaveId)
+        assertFalse(assertOppgavePåVent(oppgaveId))
+    }
+
     private fun tildelTilSaksbehandler(
         oppgaveId: Long = this.oppgaveId,
         oid: UUID = SAKSBEHANDLER_OID,
@@ -105,5 +123,14 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
             )
         }
         assertEquals(saksbehandleroid, result)
+    }
+
+    private fun assertOppgavePåVent(oppgaveId: Long) : Boolean {
+        return requireNotNull(using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf("SELECT på_vent FROM tildeling WHERE oppgave_id_ref = ?", oppgaveId)
+                    .map { it.boolean("på_vent") }.asSingle
+            )
+        })
     }
 }

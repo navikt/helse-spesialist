@@ -133,6 +133,12 @@ internal class HendelseMediator(
         rapidsConnection.publish(Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).toJson())
     }
 
+    internal fun leggOppgavePåVent(
+        oppgaveId: Long,
+    ) {
+        rapidsConnection.publish(Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).toJson())
+    }
+
     internal fun sendMeldingPåTopic(melding: JsonNode) {
         val fnr = melding["fødselsnummer"].asText()
         val rawJson = objectMapper.writeValueAsString(melding)

@@ -205,7 +205,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 .atTime(23, 59, 59),
             oppgaveDao.finnMakstid(oppgaveId)
         )
-        assertFalse(oppgaveMedMakstidErTildelt(oppgaveId))
     }
 
     @Test
@@ -227,19 +226,18 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 .atTime(23, 59, 59),
             oppgaveDao.finnMakstid(oppgaveId)
         )
-        assertTrue(oppgaveMedMakstidErTildelt(oppgaveId))
     }
 
     @Test
-    fun `en oppgave får ikke ny makstid hvis den tildeles flere ganger, første makstid for oppgaven er gjeldende`() {
+    fun `oppdaterer makstid i oppgave_makstid for en oppgave når den blir lagt på vent`() {
         opprettOppgave()
         oppgaveDao.opprettMakstid(oppgaveId)
-        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId, 14)
-        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId, 2)
+        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
+        oppgaveDao.oppdaterMakstidVedLeggPåVent(oppgaveId)
         assertEquals(
             LocalDate
                 .now()
-                .plusDays(14)
+                .plusDays(28)
                 .atTime(23, 59, 59),
             oppgaveDao.finnMakstid(oppgaveId)
         )
@@ -280,13 +278,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                     commandContextId = it.stringOrNull("command_context_id")?.let(UUID::fromString)
                 )
             }.asList)
-        }
-
-    private fun oppgaveMedMakstidErTildelt(oppgaveId: Long): Boolean =
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("SELECT tildelt FROM oppgave_makstid WHERE oppgave_ref=?", oppgaveId).map {
-                it.boolean("tildelt")
-            }.asSingle) ?: false
         }
 
     private class OppgaveAssertions(
