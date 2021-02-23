@@ -133,11 +133,11 @@ internal class UtbetalingEndret(
             }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLogg.error("Forstod ikke utbetaling_endret:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val forrigeStatus = packet["forrigeStatus"].asText()
             val status = packet["gjeldendeStatus"].asText()
             if (status !in godkjenteStatuser && forrigeStatus !in godkjenteStatuser) return

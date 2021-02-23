@@ -30,10 +30,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -190,11 +187,11 @@ internal class Godkjenningsbehov(
             }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLogg.error("Forstod ikke Godkjenning-behov:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
             logg.info(
                 "Mottok godkjenningsbehov med {}",

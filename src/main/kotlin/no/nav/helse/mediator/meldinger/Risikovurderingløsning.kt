@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -60,7 +57,7 @@ internal class Risikovurderingløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             sikkerLogg.info("Mottok melding RisikovurderingMessage: ", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val vedtaksperiodeId = UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())

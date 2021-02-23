@@ -20,6 +20,7 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.objectMapper
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -78,7 +79,7 @@ internal class HendelseMediator(
         contextId: UUID,
         behovId: UUID,
         løsning: Any,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         withMDC(
             mapOf(
@@ -117,7 +118,7 @@ internal class HendelseMediator(
             keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
             keyValue("hendelseId", hendelseId)
         )
-        rapidsConnection.publish(godkjenningMessage.toJson())
+        rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
         val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
         internOppgaveMediator.reserverOppgave(oid, fødselsnummer)
@@ -151,7 +152,7 @@ internal class HendelseMediator(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(
             vedtaksperiodeId,
@@ -165,7 +166,7 @@ internal class HendelseMediator(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(
             vedtaksperiodeId,
@@ -185,7 +186,7 @@ internal class HendelseMediator(
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
         inntektskilde: SaksbehandlerInntektskilde,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         if (oppgaveDao.harAktivOppgave(vedtaksperiodeId) || oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId) || vedtakDao.erAutomatiskGodkjent(vedtaksperiodeId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId har enten aktiv/ferdigstilt oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
@@ -221,7 +222,7 @@ internal class HendelseMediator(
         begrunnelser: List<String>?,
         kommentar: String?,
         oppgaveId: Long,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(
             fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
@@ -246,14 +247,14 @@ internal class HendelseMediator(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(fødselsnummer, hendelsefabrikk.overstyring(message.toJson()), context)
     }
 
     override fun utbetalingAnnullert(
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
     }
@@ -262,23 +263,23 @@ internal class HendelseMediator(
         fødselsnummer: String,
         organisasjonsnummer: String,
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
     }
 
-    override fun oppdaterPersonsnapshot(message: JsonMessage, context: RapidsConnection.MessageContext) {
+    override fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
     }
 
     override fun påminnelseOppgaveMakstid(
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     ) {
         utfør(hendelsefabrikk.oppgaveMakstidPåminnelse(message.toJson()), context)
     }
 
-    override fun avbrytSaksbehandling(message: JsonMessage, context: RapidsConnection.MessageContext) {
+    override fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
@@ -360,7 +361,7 @@ internal class HendelseMediator(
     }
 
     // fortsetter en command (resume) med oppsamlet løsninger
-    private fun fortsett(message: String, context: RapidsConnection.MessageContext) {
+    private fun fortsett(message: String, context: MessageContext) {
         løsninger?.fortsett(this, message, context)
     }
 
@@ -374,17 +375,17 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse)
     }
 
-    private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
+    private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: MessageContext) {
         if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
         return utfør(hendelse, messageContext)
     }
 
-    private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
+    private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: MessageContext) {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         return utfør(hendelse, messageContext)
     }
 
-    private fun utfør(hendelse: Hendelse, messageContext: RapidsConnection.MessageContext) {
+    private fun utfør(hendelse: Hendelse, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
         log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id}")
         utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
@@ -394,7 +395,7 @@ internal class HendelseMediator(
         hendelse: Hendelse,
         context: CommandContext,
         contextId: UUID,
-        messageContext: RapidsConnection.MessageContext
+        messageContext: MessageContext
     ) {
         withMDC(
             mapOf(
@@ -435,7 +436,7 @@ internal class HendelseMediator(
             commandContext.add(løsning)
         }
 
-        fun fortsett(mediator: HendelseMediator, message: String, context: RapidsConnection.MessageContext) {
+        fun fortsett(mediator: HendelseMediator, message: String, context: MessageContext) {
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
             sikkerLogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +

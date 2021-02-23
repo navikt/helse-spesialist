@@ -7,10 +7,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotUtenÅLagreWarningsCommand
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,11 +43,11 @@ internal class UtbetalingAnnullert(
             }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLogg.error("Forstod ikke utbetaling_annullert:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val id = UUID.fromString(packet["@id"].asText())
             val fagsystemId = packet["fagsystemId"].asText()
             log.info(

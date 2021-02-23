@@ -3,10 +3,7 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDto
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -50,7 +47,7 @@ internal class EgenAnsattløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             sikkerLogg.info("Mottok melding EgenAnsatt: ", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())

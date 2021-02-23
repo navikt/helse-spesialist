@@ -3,10 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -38,11 +35,11 @@ internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonN
                 }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLog.error("forstod ikke HentInfotrygdutbetalinger:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
             mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentInfotrygdutbetalingerløsning(packet["@løsning.HentInfotrygdutbetalinger"]), context)

@@ -5,13 +5,10 @@ import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.OppgaveDao
-import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.modell.kommando.OppgaveMakstidCommand
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -52,11 +49,11 @@ internal class OppgaveMakstidPåminnelse(
             }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLogg.error("Forstod ikke påminnelse_oppgave_makstid:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val oppgaveId = packet["oppgaveId"].asLong()
             val id = UUID.fromString(packet["@id"].asText())
             log.info(

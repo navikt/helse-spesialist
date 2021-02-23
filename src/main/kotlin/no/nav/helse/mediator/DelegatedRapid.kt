@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 internal class DelegatedRapid(

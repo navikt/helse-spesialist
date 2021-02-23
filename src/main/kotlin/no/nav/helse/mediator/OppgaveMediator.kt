@@ -7,6 +7,7 @@ import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
@@ -62,14 +63,14 @@ internal class OppgaveMediator(
 
     internal fun lagreOgTildelOppgaver(
         hendelse: Hendelse,
-        messageContext: RapidsConnection.MessageContext,
+        messageContext: MessageContext,
         contextId: UUID
     ) {
-        lagreOppgaver(hendelse.id, contextId, { messageContext.send(it) }) { tildelOppgaver(hendelse.fødselsnummer()) }
+        lagreOppgaver(hendelse.id, contextId, messageContext) { tildelOppgaver(hendelse.fødselsnummer()) }
     }
 
     internal fun lagreOppgaver(rapidsConnection: RapidsConnection, hendelseId: UUID, contextId: UUID) {
-        lagreOppgaver(hendelseId, contextId, { rapidsConnection.publish(it) })
+        lagreOppgaver(hendelseId, contextId, rapidsConnection)
     }
 
     internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
@@ -121,14 +122,14 @@ internal class OppgaveMediator(
         }
     }
 
-    private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, publisher: (String) -> Unit, doAlso: () -> Unit = {}) {
+    private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, messageContext: MessageContext, doAlso: () -> Unit = {}) {
         if (oppgaver.size > 1) log.info("Oppgaveliste har ${oppgaver.size} oppgaver, hendelsesId: $hendelseId og contextId: $contextId")
 
         oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId) }
         doAlso()
         oppgaver.clear()
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
-            Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).toJson().let(publisher)
+            messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).toJson())
         }.clear()
     }
 }

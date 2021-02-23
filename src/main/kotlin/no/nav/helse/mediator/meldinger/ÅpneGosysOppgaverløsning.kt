@@ -69,7 +69,7 @@ internal class ÅpneGosysOppgaverløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             sikkerLogg.info("Mottok melding ÅpneOppgaverMessage: ", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())

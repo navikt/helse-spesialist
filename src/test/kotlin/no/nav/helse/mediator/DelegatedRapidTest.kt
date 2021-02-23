@@ -1,9 +1,6 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -44,12 +41,12 @@ internal class DelegatedRapidTest : River.PacketListener {
     private fun beforeRiver() {
         order.add("BEFORE")
     }
-    override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
         order.add("PACKET")
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun afterRiver(message: String, context: RapidsConnection.MessageContext) {
+    private fun afterRiver(message: String, context: MessageContext) {
         order.add("AFTER")
     }
 
@@ -59,7 +56,7 @@ internal class DelegatedRapidTest : River.PacketListener {
         order.add("ERROR")
     }
 
-    override fun onSevere(error: MessageProblems.MessageException, context: RapidsConnection.MessageContext) {
+    override fun onSevere(error: MessageProblems.MessageException, context: MessageContext) {
         // rethrow to blow up the river
         throw error
     }

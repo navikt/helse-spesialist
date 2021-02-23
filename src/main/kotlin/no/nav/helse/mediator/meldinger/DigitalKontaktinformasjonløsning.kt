@@ -6,10 +6,7 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDto
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.warningteller
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -66,7 +63,7 @@ internal class DigitalKontaktinformasjonløsning(
             }.register(this)
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             sikkerLogg.info("Mottok melding DigitalKontaktinformasjonMessage: ", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())

@@ -3,7 +3,7 @@ package no.nav.helse.mediator
 import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.MessageContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -14,7 +14,7 @@ internal interface IHendelseMediator {
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun vedtaksperiodeForkastet(
@@ -22,7 +22,7 @@ internal interface IHendelseMediator {
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun saksbehandlerløsning(
@@ -39,7 +39,7 @@ internal interface IHendelseMediator {
         begrunnelser: List<String>?,
         kommentar: String?,
         oppgaveId: Long,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun løsning(
@@ -47,7 +47,7 @@ internal interface IHendelseMediator {
         contextId: UUID,
         behovId: UUID,
         løsning: Any,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun godkjenningsbehov(
@@ -61,35 +61,35 @@ internal interface IHendelseMediator {
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
         inntektskilde: SaksbehandlerInntektskilde,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
-    fun overstyring(message: JsonMessage, id: UUID, fødselsnummer: String, context: RapidsConnection.MessageContext)
+    fun overstyring(message: JsonMessage, id: UUID, fødselsnummer: String, context: MessageContext)
 
     fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun utbetalingAnnullert(
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun oppdaterPersonsnapshot(
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun påminnelseOppgaveMakstid(
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 
     fun avbrytSaksbehandling(
         message: JsonMessage,
-        context: RapidsConnection.MessageContext
+        context: MessageContext
     )
 }

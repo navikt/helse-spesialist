@@ -58,11 +58,11 @@ internal class Saksbehandlerløsning(
                 }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: RapidsConnection.MessageContext) {
+        override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLog.error("forstod ikke saksbehandlerløsning:\n${problems.toExtendedReport()}")
         }
 
-        override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+        override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             mediator.saksbehandlerløsning(
                 packet,
