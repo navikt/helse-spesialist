@@ -227,9 +227,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, oppgaveDao, hendelseMediator))
                 }
                 authenticate("saksbehandler-direkte") {
-                    tildelingV1Api(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     direkteOppgaveApi(oppgaveMediator)
-
                 }
             }
             adminApi(hendelseMediator)

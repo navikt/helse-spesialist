@@ -13,43 +13,32 @@ import no.nav.helse.modell.tildeling.TildelingMediator
 import org.slf4j.LoggerFactory
 import java.util.*
 
-private val secureLog = LoggerFactory.getLogger("tjenestekall")
 private val log = LoggerFactory.getLogger("TildelingApi")
 
 internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
     post("/api/tildeling/{oppgavereferanse}") {
-        val ref = UUID.randomUUID()
-        try {
-            modellfeilForRest {
-                val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
-                if (oppgaveId == null) {
-                    call.respond(HttpStatusCode.BadRequest, "Ugyldig oppgavereferanse i path parameter")
-                    log.warn("POST - oppgavereferanse er null i path parameter")
-                    return@post
-                }
-
-                secureLog.info("Tildeler oppgave med oppgaveid $oppgaveId (ref: $ref)")
-                val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-                val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-                val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
-                val navn = accessToken.payload.getClaim("name").asString()
-
-                withContext(Dispatchers.IO) {
-                    tildelingMediator.tildelOppgaveTilSaksbehandler(
-                        oppgaveId,
-                        saksbehandlerreferanse,
-                        epostadresse,
-                        navn
-                    )
-                }
-                call.respond(HttpStatusCode.OK)
+        modellfeilForRest {
+            val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
+            if (oppgaveId == null) {
+                call.respond(HttpStatusCode.BadRequest, "Ugyldig oppgavereferanse i path parameter")
+                log.warn("POST - oppgavereferanse er null i path parameter")
+                return@post
             }
-        } catch (e: Throwable) {
-            secureLog.warn("Feil i tildeling (ref: $ref)", e)
-            call.respond(HttpStatusCode.InternalServerError)
-            throw e
-        } finally {
-            secureLog.info("Ferdig med tildeling (ref: $ref)")
+
+            val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+            val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+            val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
+            val navn = accessToken.payload.getClaim("name").asString()
+
+            withContext(Dispatchers.IO) {
+                tildelingMediator.tildelOppgaveTilSaksbehandler(
+                    oppgaveId,
+                    saksbehandlerreferanse,
+                    epostadresse,
+                    navn
+                )
+            }
+            call.respond(HttpStatusCode.OK)
         }
     }
 
@@ -60,20 +49,8 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
             log.warn("DELETE - oppgavereferanse er null i path parameter")
             return@delete
         }
-        secureLog.info("Sletter tildeling for oppgave med oppgaveid $oppgaveId")
         withContext(Dispatchers.IO) { tildelingMediator.fjernTildeling(oppgaveId) }
 
         call.respond(HttpStatusCode.OK)
-    }
-
-    post("/api/dummytildeling/{oppgavereferanse}") {
-        modellfeilForRest {
-            val oppgaveId = call.parameters["oppgavereferanse"]!!.let {
-                requireNotNull(it.toLongOrNull()) { "$it er ugyldig oppgavereferanse i path parameter" }
-            }
-            secureLog.info("Dummy-post-tildeler oppgave med oppgaveid $oppgaveId")
-
-            call.respond(HttpStatusCode.OK)
-        }
     }
 }
