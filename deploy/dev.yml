@@ -34,6 +34,8 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  kafka:
+    pool: nav-dev
   webproxy: true
   secureLogs:
     enabled: true
