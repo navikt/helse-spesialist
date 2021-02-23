@@ -128,6 +128,7 @@ internal class Godkjenningsbehov(
         RisikoCommand(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            periodetype = periodetype,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle

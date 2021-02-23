@@ -6,6 +6,7 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.warningteller
@@ -15,6 +16,7 @@ import java.util.*
 internal class RisikoCommand(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val periodetype: Saksbehandleroppgavetype,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
@@ -30,7 +32,8 @@ internal class RisikoCommand(
         context.behov(
             "Risikovurdering", mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
-                "organisasjonsnummer" to organisasjonsnummer
+                "organisasjonsnummer" to organisasjonsnummer,
+                "periodetype" to periodetype
             )
         )
         return false

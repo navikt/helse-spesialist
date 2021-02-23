@@ -374,7 +374,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "hendelseId" to hendelseId,
                 "Risikovurdering" to mapOf(
                     "vedtaksperiodeId" to vedtaksperiodeId.toString(),
-                    "organisasjonsnummer" to "815493000"
+                    "organisasjonsnummer" to "815493000",
+                    "periodetype" to Saksbehandleroppgavetype.FORLENGELSE
                 ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
