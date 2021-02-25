@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -61,6 +62,7 @@ internal interface IHendelseMediator {
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
         inntektskilde: SaksbehandlerInntektskilde,
+        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext
     )
 

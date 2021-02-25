@@ -34,7 +34,20 @@ internal class GodkjenningsbehovRiverTest {
 
     @Test
     fun `leser Godkjenningbehov`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, organisasjonsnummer = ORGNR, periodeFom = FOM, periodeTom = TOM, inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE))
-        verify(exactly = 1) { mediator.godkjenningsbehov(any(), HENDELSE, FNR, AKTØR, ORGNR, FOM, TOM, VEDTAKSPERIODE, Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE, any()) }
+        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, orgnummer = ORGNR, periodeFom = FOM, periodeTom = TOM, inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE))
+        verify(exactly = 1) { mediator.godkjenningsbehov(
+            any(),
+            HENDELSE,
+            FNR,
+            AKTØR,
+            ORGNR,
+            FOM,
+            TOM,
+            VEDTAKSPERIODE,
+            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
+            SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE,
+            listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE)),
+            any()
+        ) }
     }
 }

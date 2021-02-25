@@ -186,6 +186,7 @@ internal class HendelseMediator(
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
         inntektskilde: SaksbehandlerInntektskilde,
+        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext
     ) {
         if (oppgaveDao.harAktivOppgave(vedtaksperiodeId) || oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId) || vedtakDao.erAutomatiskGodkjent(vedtaksperiodeId)) {
@@ -203,6 +204,7 @@ internal class HendelseMediator(
                 vedtaksperiodeId,
                 periodetype,
                 inntektskilde,
+                aktiveVedtaksperioder,
                 message.toJson()
             ), context
         )

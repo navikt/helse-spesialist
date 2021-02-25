@@ -52,6 +52,7 @@ internal interface IHendelsefabrikk {
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
         inntektskilde: SaksbehandlerInntektskilde,
+        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         json: String
     ): Godkjenningsbehov
     fun godkjenning(json: String): Godkjenningsbehov

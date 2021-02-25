@@ -67,6 +67,7 @@ internal class Hendelsefabrikk(
         vedtaksperiodeId: UUID,
         periodetype: Saksbehandleroppgavetype,
         inntektskilde: SaksbehandlerInntektskilde,
+        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         json: String
     ): Godkjenningsbehov {
         return Godkjenningsbehov(
@@ -96,6 +97,7 @@ internal class Hendelsefabrikk(
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
+            aktiveVedtaksperioder = aktiveVedtaksperioder,
             opptegnelseDao = opptegnelseDao
         )
     }
@@ -112,6 +114,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
             inntektskilde = SaksbehandlerInntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
+            aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")),
             json = json
         )
     }

@@ -6,7 +6,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 
 internal class OpprettArbeidsgiverCommand(
-    private val orgnummer: String,
+    private val orgnummere: List<String>,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : Command {
@@ -15,7 +15,7 @@ internal class OpprettArbeidsgiverCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (arbeidsgiverFinnes()) return ignorer()
+        if (arbeidsgivereSomIkkeFinnes().isEmpty()) return ignorer()
         return behandle(context)
     }
 
@@ -31,20 +31,23 @@ internal class OpprettArbeidsgiverCommand(
     private fun behandle(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon()) {
             log.info("oppretter arbeidsgiver")
-            arbeidsgiverDao.insertArbeidsgiver(orgnummer, "Ukjent", emptyList())
+            arbeidsgivereSomIkkeFinnes().forEach {
+                arbeidsgiverDao.insertArbeidsgiver(it, "Ukjent", emptyList())
+            }
         } else {
-            val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
-            if (arbeidsgiverFinnes()) return ignorer()
+            val arbeidsgivereSomIkkeFinnes = arbeidsgivereSomIkkeFinnes()
+            if (arbeidsgivereSomIkkeFinnes.isEmpty()) return ignorer()
+            val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context, arbeidsgivereSomIkkeFinnes)
             log.info("oppretter arbeidsgiver")
-            arbeidsgiver.opprett(arbeidsgiverDao, orgnummer)
+            arbeidsgiver.opprett(arbeidsgiverDao)
         }
         return true
     }
 
-    private fun arbeidsgiverFinnes() = arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer) != null
+    private fun arbeidsgivereSomIkkeFinnes() = orgnummere.filter { arbeidsgiverDao.findArbeidsgiverByOrgnummer(it) == null }
 
-    private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnummer))
+    private fun trengerMerInformasjon(context: CommandContext, arbeidsgivereSomIkkeFinnes: List<String>): Boolean {
+        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to arbeidsgivereSomIkkeFinnes))
         return false
     }
 }

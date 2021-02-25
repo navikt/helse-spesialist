@@ -22,7 +22,7 @@ internal class OppdaterArbeidsgiverCommandTest {
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(mapOf("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE" to "true"))
 
     private lateinit var context: CommandContext
-    private val command = OppdaterArbeidsgiverCommand(ORGNR, dao, miljøstyrtFeatureToggle)
+    private val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao, miljøstyrtFeatureToggle)
 
     @BeforeEach
     fun setup() {

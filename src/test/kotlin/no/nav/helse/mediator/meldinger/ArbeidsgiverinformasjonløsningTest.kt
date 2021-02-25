@@ -39,22 +39,28 @@ internal class ArbeidsgiverinformasjonløsningTest {
 
     @Test
     fun `oppretter løsning`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(NAVN, BRANSJER)
-        arbeidsgiver.opprett(dao, ORGNR)
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(listOf(
+            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+        ))
+        arbeidsgiver.opprett(dao)
         verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
     }
 
     @Test
     fun `oppdatere navn`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(NAVN, BRANSJER)
-        arbeidsgiver.oppdater(dao, ORGNR)
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(listOf(
+            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+        ))
+        arbeidsgiver.oppdater(dao)
         verify(exactly = 1) { dao.updateNavn(ORGNR, NAVN) }
     }
 
     @Test
     fun `oppdatere bransje`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(NAVN, BRANSJER)
-        arbeidsgiver.oppdater(dao, ORGNR)
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(listOf(
+            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+        ))
+        arbeidsgiver.oppdater(dao)
         verify(exactly = 1) { dao.updateBransjer(ORGNR, BRANSJER) }
     }
 }

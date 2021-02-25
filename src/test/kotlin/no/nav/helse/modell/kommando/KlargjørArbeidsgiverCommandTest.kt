@@ -25,7 +25,7 @@ internal class KlargjørArbeidsgiverCommandTest {
     private val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
 
     private lateinit var context: CommandContext
-    private val command = KlargjørArbeidsgiverCommand(ORGNR, dao, miljøstyrtFeatureToggle)
+    private val command = KlargjørArbeidsgiverCommand(listOf(ORGNR), dao, miljøstyrtFeatureToggle)
 
     @BeforeEach
     fun setup() {
@@ -37,7 +37,9 @@ internal class KlargjørArbeidsgiverCommandTest {
     @Test
     fun `opprett arbeidsgiver`() {
         arbeidsgiverFinnesIkke()
-        context.add(Arbeidsgiverinformasjonløsning(NAVN, BRANSJER))
+        context.add(Arbeidsgiverinformasjonløsning(listOf(
+            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+        )))
         assertTrue(command.execute(context))
         verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
     }

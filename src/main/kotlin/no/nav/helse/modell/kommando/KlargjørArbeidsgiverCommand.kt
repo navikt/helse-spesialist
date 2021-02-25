@@ -4,12 +4,12 @@ import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 
 internal class KlargjørArbeidsgiverCommand(
-    organisasjonsnummer: String,
+    orgnummere: List<String>,
     arbeidsgiverDao: ArbeidsgiverDao,
     miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : MacroCommand() {
     override val commands: List<Command> = listOf(
-        OpprettArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao, miljøstyrtFeatureToggle),
-        OppdaterArbeidsgiverCommand(organisasjonsnummer, arbeidsgiverDao, miljøstyrtFeatureToggle)
+        OpprettArbeidsgiverCommand(orgnummere, arbeidsgiverDao, miljøstyrtFeatureToggle),
+        OppdaterArbeidsgiverCommand(orgnummere, arbeidsgiverDao, miljøstyrtFeatureToggle)
     )
 }

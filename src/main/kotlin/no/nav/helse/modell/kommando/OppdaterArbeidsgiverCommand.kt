@@ -6,12 +6,13 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import java.time.LocalDate
 
 internal class OppdaterArbeidsgiverCommand(
-    private val orgnummer: String,
+    private val orgnummere: List<String>,
     private val arbeidsgiverDao: ArbeidsgiverDao,
     private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon() || (navnErOppdatert() && bransjerErOppdatert())) return true
+        val trengerOppdateringer = (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty()
+        if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon() || trengerOppdateringer) return true
         return behandle(context)
     }
 
@@ -19,24 +20,23 @@ internal class OppdaterArbeidsgiverCommand(
         return behandle(context)
     }
 
-    private fun navnErOppdatert(): Boolean {
-        val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer)
-        return sistOppdatert > LocalDate.now().minusDays(14)
+    private fun ikkeOppdaterteNavn() = orgnummere.filterNot { orgnummer ->
+        arbeidsgiverDao.findNavnSistOppdatert(orgnummer) > LocalDate.now().minusDays(14)
     }
 
-    private fun bransjerErOppdatert(): Boolean {
-        val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return false
-        return sistOppdatert > LocalDate.now().minusDays(14)
+    private fun ikkeOppdaterteBransjer() = orgnummere.filterNot { orgnummer ->
+        val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return@filterNot false
+        sistOppdatert > LocalDate.now().minusDays(14)
     }
 
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
-        løsning.oppdater(arbeidsgiverDao, orgnummer)
+        løsning.oppdater(arbeidsgiverDao)
         return true
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnummer))
+        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).distinct()))
         return false
     }
 }

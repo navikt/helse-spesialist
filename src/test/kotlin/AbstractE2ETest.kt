@@ -174,7 +174,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             meldingsfabrikk.lagGodkjenningsbehov(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
-                organisasjonsnummer = orgnr,
+                orgnummer = orgnr,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom,
                 periodetype = periodetype,
@@ -199,7 +199,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     hendelseId = hendelseId,
                     contextId = contextId,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    organisasjonsnummer = orgnr,
+                    orgnummer = orgnr,
                     navn = navn,
                     bransjer = bransjer
                 )

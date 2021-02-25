@@ -6,17 +6,18 @@ import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class Arbeidsgiverinformasjonløsning(private val navn: String, private val bransjer: List<String>) {
-    internal fun opprett(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
-        arbeidsgiverDao.insertArbeidsgiver(orgnummer, navn, bransjer)
+internal class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<ArbeidsgiverDto>) {
+    internal fun opprett(arbeidsgiverDao: ArbeidsgiverDao) {
+        arbeidsgivere.forEach {
+            arbeidsgiverDao.insertArbeidsgiver(it.orgnummer, it.navn, it.bransjer)
+        }
     }
 
-    internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao, orgnummer: String) {
-        arbeidsgiverDao.updateNavn(orgnummer, navn)
-        if (arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) != null)
-            arbeidsgiverDao.updateBransjer(orgnummer, bransjer)
-        else
-            arbeidsgiverDao.insertBransjer(orgnummer, bransjer)
+    internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao) {
+        arbeidsgivere.forEach {
+            arbeidsgiverDao.updateNavn(it.orgnummer, it.navn)
+            arbeidsgiverDao.updateBransjer(it.orgnummer, it.bransjer)
+        }
     }
 
     internal class ArbeidsgiverRiver(
@@ -46,18 +47,28 @@ internal class Arbeidsgiverinformasjonløsning(private val navn: String, private
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
+            val løsning = packet["@løsning.$behov"]
             mediator.løsning(
                 hendelseId,
                 contextId,
                 UUID.fromString(packet["@id"].asText()),
                 Arbeidsgiverinformasjonløsning(
-                    navn = packet["@løsning.$behov"].path("navn").asText(),
-                    bransjer = packet["@løsning.$behov"]
-                        .path("bransjer")
-                        .map { it.asText() }
+                    løsning.map { arbeidsgiver ->
+                        ArbeidsgiverDto(
+                            orgnummer = arbeidsgiver.path("orgnummer").asText(),
+                            navn = arbeidsgiver.path("navn").asText(),
+                            bransjer = arbeidsgiver.path("bransjer").map { it.asText() },
+                        )
+                    }
                 ),
                 context
             )
         }
     }
+
+    internal data class ArbeidsgiverDto(
+        val orgnummer: String,
+        val navn: String,
+        val bransjer: List<String>
+    )
 }

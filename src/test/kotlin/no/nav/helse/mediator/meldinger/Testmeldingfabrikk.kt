@@ -52,7 +52,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun lagGodkjenningsbehov(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr",
+        orgnummer: String = "orgnr",
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
@@ -66,13 +66,19 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
+                "organisasjonsnummer" to orgnummer,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "Godkjenning" to mapOf(
                     "periodeFom" to "$periodeFom",
                     "periodeTom" to "$periodeTom",
                     "periodetype" to periodetype.name,
-                    "inntektskilde" to inntektskilde.name
+                    "inntektskilde" to inntektskilde.name,
+                    "aktiveVedtaksperioder" to listOf(
+                        mapOf(
+                            "orgnummer" to orgnummer,
+                            "vedtaksperiodeId" to vedtaksperiodeId
+                        )
+                    )
                 )
             )
         )
@@ -82,7 +88,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr",
+        orgnummer: String = "orgnr",
         navn: String,
         bransjer: List<String>
     ) = nyHendelse(
@@ -94,11 +100,14 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
-            "orgnummer" to organisasjonsnummer,
+            "orgnummer" to orgnummer,
             "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to mapOf(
-                    "navn" to navn,
-                    "bransjer" to bransjer
+                "Arbeidsgiverinformasjon" to listOf(
+                    mapOf(
+                        "orgnummer" to orgnummer,
+                        "navn" to navn,
+                        "bransjer" to bransjer
+                    )
                 )
             )
         )

@@ -1,10 +1,13 @@
 package no.nav.helse.mediator.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -46,6 +49,7 @@ internal class Godkjenningsbehov(
     periodeTom: LocalDate,
     periodetype: Saksbehandleroppgavetype,
     inntektskilde: SaksbehandlerInntektskilde,
+    aktiveVedtaksperioder: List<AktivVedtaksperiode>,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -83,7 +87,7 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId
         ),
         KlargjørArbeidsgiverCommand(
-            organisasjonsnummer = organisasjonsnummer,
+            orgnummere = aktiveVedtaksperioder.orgnummere(),
             arbeidsgiverDao = arbeidsgiverDao,
             miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
         ),
@@ -182,7 +186,8 @@ internal class Godkjenningsbehov(
                         "Godkjenning.periodeFom",
                         "Godkjenning.periodeTom",
                         "Godkjenning.periodetype",
-                        "Godkjenning.inntektskilde"
+                        "Godkjenning.inntektskilde",
+                        "Godkjenning.aktiveVedtaksperioder"
                     )
                 }
             }.register(this)
@@ -214,8 +219,25 @@ internal class Godkjenningsbehov(
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
                 periodetype = Saksbehandleroppgavetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 inntektskilde = SaksbehandlerInntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
+                aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),
                 context = context
             )
+        }
+    }
+
+    internal data class AktivVedtaksperiode(
+        private val orgnummer: String,
+        private val vedtaksperiodeId: UUID
+    ) {
+        companion object {
+            internal fun List<AktivVedtaksperiode>.orgnummere() = map { it.orgnummer }
+
+            internal fun fromNode(json: JsonNode) = json.map {
+                AktivVedtaksperiode(
+                    orgnummer = it["orgnummer"].asText(),
+                    vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText())
+                )
+            }
         }
     }
 }

@@ -23,7 +23,7 @@ internal class OpprettArbeidsgiverCommandTest {
     private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(mapOf("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE" to "true"))
 
     private lateinit var context: CommandContext
-    private val command = OpprettArbeidsgiverCommand(ORGNR, dao, miljøstyrtFeatureToggle)
+    private val command = OpprettArbeidsgiverCommand(listOf(ORGNR), dao, miljøstyrtFeatureToggle)
 
     @BeforeEach
     fun setup() {
@@ -34,7 +34,7 @@ internal class OpprettArbeidsgiverCommandTest {
     @Test
     fun `opprett arbeidsgiver`() {
         arbeidsgiverFinnesIkke()
-        context.add(Arbeidsgiverinformasjonløsning(NAVN, BRANSJER))
+        context.add(Arbeidsgiverinformasjonløsning(listOf(Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER))))
         assertTrue(command.execute(context))
         verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
     }
