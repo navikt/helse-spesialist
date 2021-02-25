@@ -1,8 +1,8 @@
-val junitJupiterVersion = "5.7.0"
-val ktorVersion = "1.5.0"
+val junitJupiterVersion = "5.7.1"
+val ktorVersion = "1.5.1"
 
 plugins {
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.30"
 }
 
 group = "no.nav.helse"
@@ -13,13 +13,13 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:1.5e3ca6a")
+    implementation("com.github.navikt:rapids-and-rivers:a77261b7ab")
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
-    implementation("com.papertrailapp:logback-syslog4j:1.0.0")
-    implementation("com.zaxxer:HikariCP:3.4.5")
+    implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
+    implementation("com.zaxxer:HikariCP:4.0.2")
     implementation("no.nav:vault-jdbc:1.3.7")
-    implementation("org.flywaydb:flyway-core:6.5.0")
-    implementation("com.github.seratch:kotliquery:1.3.1")
+    implementation("org.flywaydb:flyway-core:7.5.4")
+    implementation("com.github.seratch:kotliquery:1.3.1") //April, 2019
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
@@ -35,8 +35,8 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-    testImplementation("com.opentable.components:otj-pg-embedded:0.13.3")
-    testImplementation("io.mockk:mockk:1.10.0")
+    testImplementation("com.opentable.components:otj-pg-embedded:0.13.3") //Oktober, 2019
+    testImplementation("io.mockk:mockk:1.10.6")
 }
 
 tasks {
@@ -74,6 +74,6 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "6.7"
+        gradleVersion = "6.8.3"
     }
 }
