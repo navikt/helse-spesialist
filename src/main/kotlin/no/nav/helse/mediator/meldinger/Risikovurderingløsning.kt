@@ -28,7 +28,9 @@ internal class Risikovurderingløsning(
         )
     }
 
-    internal fun medførerWarning() = !kanGodkjennesAutomatisk
+    internal fun arbeidsuførhetWarning() = !kanGodkjennesAutomatisk && løsning["funn"].any { it["kategori"].toList().map { it.asText() }.contains("8-4") }
+
+    internal fun faresignalWarning() = !kanGodkjennesAutomatisk && løsning["funn"].any { !it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
     internal class V2River(
         rapidsConnection: RapidsConnection,

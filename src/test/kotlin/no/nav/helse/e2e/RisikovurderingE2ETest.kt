@@ -1,11 +1,13 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.snapshotUtenWarnings
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,6 +19,22 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         private const val ORGNR = "222222222"
     }
 
+    @Language("json")
+    private val funn1 = objectMapper.readTree("""
+            [{
+                "kategori": ["8-4"],
+                "beskrivelse": "ny sjekk ikke ok",
+                "kreverSupersaksbehandler": true
+            }]
+        """)
+    private val funn2 = objectMapper.readTree("""
+            [{
+                "kategori": ["8-4"],
+                "beskrivelse": "8-4 ikke ok",
+                "kreverSupersaksbehandler": false
+            }]
+        """)
+
     @BeforeEach
     fun setup() {
         every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
@@ -26,7 +44,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
-        godkjenningsoppgave(mapOf("ny sjekk ikke ok" to true), VEDTAKSPERIODE_ID)
+        godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("RISK_QA", VEDTAKSPERIODE_ID)
     }
@@ -34,12 +52,12 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter oppgave av type SØKNAD`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
-        godkjenningsoppgave(mapOf("8-4 ikke ok" to false), VEDTAKSPERIODE_ID)
+        godkjenningsoppgave(funn2, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
     }
 
-    fun godkjenningsoppgave(funn: Map<String, Boolean>, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID) {
+    fun godkjenningsoppgave(funn: JsonNode, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             vedtaksperiodeId

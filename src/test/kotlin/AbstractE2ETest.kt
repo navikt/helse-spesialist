@@ -311,7 +311,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
-        funn: Map<String, Boolean> = emptyMap()
+        funn: JsonNode = objectMapper.createArrayNode()
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -562,7 +562,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertWarning(forventet: String, vedtaksperiodeId: UUID) {
-        assertEquals(forventet, using(sessionOf(dataSource)) {
+        assertTrue(using(sessionOf(dataSource)) {
             it.run(
                 queryOf(
                     "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
@@ -571,7 +571,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     )
                 ).map { row -> row.string("melding") }.asList
             )
-        }.first())
+        }.contains(forventet))
     }
 
     protected fun TestRapid.RapidInspector.meldinger() =

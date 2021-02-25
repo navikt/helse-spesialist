@@ -5,7 +5,6 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -371,7 +370,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
-        funn: Map<String, Boolean> = emptyMap()
+        funn: JsonNode
     ): String =
         nyHendelse(
             id,
@@ -389,10 +388,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
                         "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
-                        "funn" to funn.map { (beskrivelse, kreverSupersaksbehandler) ->
-                            objectMapper.createObjectNode().put("beskrivelse", beskrivelse)
-                                .put("kreverSupersaksbehandler", kreverSupersaksbehandler)
-                        },
+                        "funn" to funn,
                         "kontrollertOk" to emptyList<JsonNode>(),
                     )
                 )

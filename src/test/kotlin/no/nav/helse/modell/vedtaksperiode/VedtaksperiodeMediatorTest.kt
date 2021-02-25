@@ -4,6 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -20,6 +21,19 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         private const val ORGNR = "222222222"
         private val ID = UUID.randomUUID()
     }
+
+    @Language("json")
+    private val funn = objectMapper.readTree("""
+            [{
+                "kategori": ["8-4"],
+                "beskrivelse": "8-4 ikke ok",
+                "kreverSupersaksbehandler": false
+            },{
+                "kategori": [],
+                "beskrivelse": "faresignal ikke ok",
+                "kreverSupersaksbehandler": false
+            }]
+        """)
 
     @BeforeEach
     fun setup() {
@@ -87,13 +101,14 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            funn = mapOf("8-4 ikke ok" to false)
+            funn = funn
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
         val risikovurdering = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("risikovurdering")
 
         assertEquals("8-4 ikke ok", risikovurdering["funn"].first()["beskrivelse"].asText())
+        assertEquals("faresignal ikke ok", risikovurdering["funn"].last()["beskrivelse"].asText())
         assertTrue(risikovurdering["kontrollertOk"].isEmpty)
 
         // Bakoverkompatibilitet
@@ -126,12 +141,13 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             kanGodkjennesAutomatisk = false,
+            funn = funn
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
         val varsler = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("varsler")
 
-        assertEquals(1, varsler.size())
+        assertEquals(2, varsler.size())
     }
 
     @Test

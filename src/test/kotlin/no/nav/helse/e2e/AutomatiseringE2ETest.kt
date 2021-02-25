@@ -6,6 +6,7 @@ import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -192,6 +193,19 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+
+        @Language("json")
+        val funn = objectMapper.readTree("""
+            [{
+                "kategori": ["8-4"],
+                "beskrivelse": "8-4 ikke ok",
+                "kreverSupersaksbehandler": false
+            },{
+                "kategori": [],
+                "beskrivelse": "faresignaler ikke ok",
+                "kreverSupersaksbehandler": false
+            }]
+        """.trimIndent())
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
             periodetype = Saksbehandleroppgavetype.FORLENGELSE
@@ -223,6 +237,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             godkjenningsmeldingId = godkjenningsmeldingId,
             kanGodkjennesAutomatisk = false,
+            funn = funn
         )
         val løsningId = sendSaksbehandlerløsning(
             oppgaveId = OPPGAVEID,
@@ -247,6 +262,10 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
         assertWarning(
             "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden.",
+            VEDTAKSPERIODE_ID
+        )
+        assertWarning(
+            "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger.",
             VEDTAKSPERIODE_ID
         )
     }
