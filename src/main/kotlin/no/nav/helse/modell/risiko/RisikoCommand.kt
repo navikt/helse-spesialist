@@ -2,6 +2,8 @@ package no.nav.helse.modell.risiko
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -16,6 +18,7 @@ import java.util.*
 internal class RisikoCommand(
     private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
     private val periodetype: Saksbehandleroppgavetype,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
@@ -28,14 +31,23 @@ internal class RisikoCommand(
 
     override fun execute(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.risikovurdering()) return true
+
+        //Har fått løsning, return true
+
         logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
-        context.behov(
-            "Risikovurdering", mapOf(
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "periodetype" to periodetype
+
+        if (Toggles.FlereRisikobehovEnabled.enabled) {
+            aktiveVedtaksperioder.forEach { aktivVedtaksperiode -> aktivVedtaksperiode.behov(context) }
+        } else {
+            context.behov(
+                "Risikovurdering", mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "periodetype" to periodetype
+                )
             )
-        )
+        }
+
         return false
     }
 
@@ -56,6 +68,9 @@ internal class RisikoCommand(
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
+
+        //Hvis ikke alle "mine" behov er besvart, return false
+
         return true
     }
 }

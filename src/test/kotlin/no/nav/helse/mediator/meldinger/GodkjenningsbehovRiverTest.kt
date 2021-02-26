@@ -46,7 +46,7 @@ internal class GodkjenningsbehovRiverTest {
             VEDTAKSPERIODE,
             Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
             SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE,
-            listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE)),
+            listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING)),
             any()
         ) }
     }

@@ -75,7 +75,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                     "aktiveVedtaksperioder" to listOf(
                         mapOf(
                             "orgnummer" to orgnummer,
-                            "vedtaksperiodeId" to vedtaksperiodeId
+                            "vedtaksperiodeId" to vedtaksperiodeId,
+                            "periodetype" to periodetype
                         )
                     )
                 )

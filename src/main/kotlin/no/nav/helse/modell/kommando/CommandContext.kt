@@ -6,15 +6,34 @@ import java.util.*
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()) {
     private val data = mutableListOf<Any>()
-    private val behov = mutableMapOf<String, Map<String, Any>>()
+    private val behovsgrupper = mutableListOf<Behovgruppe>()
     private val sti: MutableList<Int> = sti.toMutableList()
     private val meldinger = mutableListOf<String>()
 
-    internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
-        this.behov[behovtype] = params
+    internal class Behovgruppe {
+        private val behov = mutableMapOf<String, Map<String, Any>>()
+
+        internal operator fun contains(behovtype: String) = behovtype in behov
+        internal operator fun get(behovtype: String) = behov.getValue(behovtype)
+        internal val size get() = behov.size
+
+        internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
+            this.behov[behovtype] = params
+        }
+
+        internal fun behov() = behov.toMap()
     }
 
-    internal fun behov() = behov.toMap()
+    internal fun nyBehovgruppe() {
+        behovsgrupper.add(Behovgruppe())
+    }
+
+    internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
+        if (behovsgrupper.isEmpty()) behovsgrupper.add(Behovgruppe())
+        this.behovsgrupper.last().behov(behovtype, params)
+    }
+
+    internal fun behovsgrupper() = behovsgrupper.filter { it.size > 0 }.toList()
     internal fun meldinger() = meldinger.toList()
 
     internal fun publiser(melding: String) {
@@ -38,7 +57,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         command.restore(sti.removeAt(0))
     }
 
-    internal fun harBehov() = behov.isNotEmpty()
+    internal fun harBehov() = behovsgrupper().isNotEmpty()
 
     internal fun sti() = sti.toList()
 

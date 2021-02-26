@@ -130,7 +130,50 @@ internal class CommandContextTest {
     }
 
     @Test
+    fun `grupperer behov`() {
+        context.behov("type 1", mapOf("param 1" to 1))
+        context.behov("type 2")
+        context.nyBehovgruppe()
+        context.behov("type 3", mapOf("param 2" to 2))
+        context.behov("type 4")
+        context.behov("type 5")
+        val result = context.behovsgrupper()
+        assertTrue(context.harBehov())
+        assertEquals(2, result.size)
+        assertEquals(2, result.first().size)
+        assertTrue(result.first().contains("type 1"))
+        assertTrue(result.first().contains("type 2"))
+        assertFalse(result.first().contains("type 3"))
+        assertFalse(result.first().contains("type 4"))
+        assertFalse(result.first().contains("type 5"))
+        assertEquals(3, result.last().size)
+        assertFalse(result.last().contains("type 1"))
+        assertFalse(result.last().contains("type 2"))
+        assertTrue(result.last().contains("type 3"))
+        assertTrue(result.last().contains("type 4"))
+        assertTrue(result.last().contains("type 5"))
+        assertEquals(mapOf("param 1" to 1), result.first()["type 1"] as Map<*, *>)
+        assertEquals(mapOf("param 2" to 2), result.last()["type 3"] as Map<*, *>)
+    }
+
+    @Test
+    fun `filterer ut tomme grupper`() {
+        context.behov("type 1")
+        context.nyBehovgruppe()
+        context.nyBehovgruppe()
+        context.behov("type 2")
+        context.behov("type 3")
+        context.nyBehovgruppe()
+        val result = context.behovsgrupper()
+        assertTrue(context.harBehov())
+        assertEquals(2, result.size)
+        assertEquals(1, result.first().size)
+        assertEquals(2, result.last().size)
+    }
+
+    @Test
     fun `har ingen behov`() {
+        context.nyBehovgruppe()
         val result = context.behov()
         assertFalse(context.harBehov())
         assertEquals(emptyMap<String, Any>(), result)
@@ -173,3 +216,5 @@ internal class CommandContextTest {
         }
     }
 }
+
+internal fun CommandContext.behov() = behovsgrupper().lastOrNull()?.behov() ?: emptyMap()

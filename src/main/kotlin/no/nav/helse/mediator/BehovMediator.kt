@@ -27,16 +27,20 @@ internal class BehovMediator(
 
     private fun publiserBehov(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         if (!context.harBehov()) return
-        publiser(hendelse, packet(hendelse, context, contextId))
+        context.behovsgrupper().forEach { behovgruppe ->
+            publiser(hendelse, packet(hendelse, behovgruppe, contextId))
+        }
     }
 
-    private fun packet(hendelse: Hendelse, context: CommandContext, contextId: UUID) = standardfelter(hendelse).apply {
-        this["@behov"] = context.behov().keys.toList()
-        this["contextId"] = contextId
-        this["hendelseId"] = hendelse.id
-        this["spleisBehovId"] = hendelse.id // only for BC because the need apps requires updating to use "hendelseId"
-        putAll(context.behov())
-    }.let { JsonMessage.newMessage(it).toJson() }
+    private fun packet(hendelse: Hendelse, context: CommandContext.Behovgruppe, contextId: UUID) =
+        standardfelter(hendelse).apply {
+            this["@behov"] = context.behov().keys.toList()
+            this["contextId"] = contextId
+            this["hendelseId"] = hendelse.id
+            this["spleisBehovId"] =
+                hendelse.id // only for BC because the need apps requires updating to use "hendelseId"
+            putAll(context.behov())
+        }.let { JsonMessage.newMessage(it).toJson() }
 
     private fun standardfelter(hendelse: Hendelse): MutableMap<String, Any> {
         val id = UUID.randomUUID()

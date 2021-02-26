@@ -132,6 +132,7 @@ internal class Godkjenningsbehov(
         RisikoCommand(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            aktiveVedtaksperioder = aktiveVedtaksperioder,
             periodetype = periodetype,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
@@ -227,15 +228,28 @@ internal class Godkjenningsbehov(
 
     internal data class AktivVedtaksperiode(
         private val orgnummer: String,
-        private val vedtaksperiodeId: UUID
+        private val vedtaksperiodeId: UUID,
+        private val periodetype: Saksbehandleroppgavetype
     ) {
+        internal fun behov(context: CommandContext) {
+            context.nyBehovgruppe()
+            context.behov(
+                "Risikovurdering", mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "organisasjonsnummer" to orgnummer,
+                    "periodetype" to periodetype
+                )
+            )
+        }
+
         companion object {
             internal fun List<AktivVedtaksperiode>.orgnummere() = map { it.orgnummer }
 
             internal fun fromNode(json: JsonNode) = json.map {
                 AktivVedtaksperiode(
                     orgnummer = it["orgnummer"].asText(),
-                    vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText())
+                    vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText()),
+                    periodetype = enumValueOf(it["periodetype"].asText())
                 )
             }
         }
