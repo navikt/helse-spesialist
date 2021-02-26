@@ -31,8 +31,7 @@ internal class RisikoCommand(
 
     override fun execute(context: CommandContext): Boolean {
         if (!miljøstyrtFeatureToggle.risikovurdering()) return true
-
-        //Har fått løsning, return true
+        if (risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null) return true
 
         logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
 

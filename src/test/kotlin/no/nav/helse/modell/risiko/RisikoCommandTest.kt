@@ -53,6 +53,7 @@ internal class RisikoCommandTest {
     fun setup() {
         clearAllMocks()
         every { MILJØSTYRT_FEATURE_TOGGLE.risikovurdering() } returns true
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_1) } returns null
     }
 
     @Test
@@ -80,6 +81,15 @@ internal class RisikoCommandTest {
         assertEquals(2, behovsgrupper.size)
         assertEquals("Risikovurdering", behovsgrupper.first().behov().keys.first())
         assertEquals("Risikovurdering", behovsgrupper.last().behov().keys.first())
+    }
+
+    @Test
+    fun `Går videre hvis risikovurderingen for vedtaksperioden allerede har en løsning`() {
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_1) } returns mockk()
+        val risikoCommand = risikoCommand()
+        val context = CommandContext(UUID.randomUUID())
+
+        assertTrue(risikoCommand.execute(context))
     }
 
     private fun risikoCommand(
