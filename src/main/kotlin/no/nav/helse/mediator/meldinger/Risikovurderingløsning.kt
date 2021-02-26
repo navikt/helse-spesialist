@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
@@ -16,7 +17,16 @@ internal class Risikovurderingløsning(
     private val kanGodkjennesAutomatisk: Boolean,
     private val løsning: JsonNode,
 ) {
-    internal fun lagre(risikovurderingDao: RisikovurderingDao) {
+    private companion object {
+        private val logg = LoggerFactory.getLogger(Risikovurderingløsning::class.java)
+    }
+
+    internal fun lagre(risikovurderingDao: RisikovurderingDao, vedtaksperiodeIdTilGodkjenning: UUID) {
+        logg.info(
+            "Mottok risikovurdering for {} (Periode til godkjenning: {})",
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("vedtaksperiodeIdTilGodkjenning", vedtaksperiodeIdTilGodkjenning)
+        )
         risikovurderingDao.persisterRisikovurdering(
             RisikovurderingDto(
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -28,9 +38,11 @@ internal class Risikovurderingløsning(
         )
     }
 
-    internal fun arbeidsuførhetWarning() = !kanGodkjennesAutomatisk && løsning["funn"].any { it["kategori"].toList().map { it.asText() }.contains("8-4") }
+    internal fun arbeidsuførhetWarning() =
+        !kanGodkjennesAutomatisk && løsning["funn"].any { it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
-    internal fun faresignalWarning() = !kanGodkjennesAutomatisk && løsning["funn"].any { !it["kategori"].toList().map { it.asText() }.contains("8-4") }
+    internal fun faresignalWarning() =
+        !kanGodkjennesAutomatisk && løsning["funn"].any { !it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
     internal class V2River(
         rapidsConnection: RapidsConnection,

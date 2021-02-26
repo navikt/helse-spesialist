@@ -32,11 +32,12 @@ internal class RisikoCommand(
         if (!Toggles.Risikovurdering.enabled) return true
         if (risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null) return true
 
-        logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
-
         if (Toggles.FlereRisikobehovEnabled.enabled) {
-            aktiveVedtaksperioder.forEach { aktivVedtaksperiode -> aktivVedtaksperiode.behov(context) }
+            aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
+                aktivVedtaksperiode.behov(context, vedtaksperiodeId)
+            }
         } else {
+            logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
             context.behov(
                 "Risikovurdering", mapOf(
                     "vedtaksperiodeId" to vedtaksperiodeId,
@@ -52,8 +53,7 @@ internal class RisikoCommand(
     override fun resume(context: CommandContext): Boolean {
         if (!Toggles.Risikovurdering.enabled) return true
         val løsning = context.get<Risikovurderingløsning>() ?: return false
-        logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
-        løsning.lagre(risikovurderingDao)
+        løsning.lagre(risikovurderingDao, vedtaksperiodeId)
         if (løsning.arbeidsuførhetWarning()) {
             val melding =
                 "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
