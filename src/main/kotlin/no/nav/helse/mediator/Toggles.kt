@@ -38,7 +38,7 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
         }
     }
 
-    object FlereRisikobehovEnabled : Toggles()
+    object FlereRisikobehovEnabled : Toggles(true)
 }
 
 internal class MiljøstyrtFeatureToggle(private val env: Map<String, String>) {
