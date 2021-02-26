@@ -2,11 +2,13 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -27,8 +29,14 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @BeforeEach
     fun setup() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
+        Toggles.Automatisering.enable()
+        Toggles.Risikovurdering.enable()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.Automatisering.pop()
+        Toggles.Risikovurdering.pop()
     }
 
     @Test
@@ -195,7 +203,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
 
         @Language("json")
-        val funn = objectMapper.readTree("""
+        val funn = objectMapper.readTree(
+            """
             [{
                 "kategori": ["8-4"],
                 "beskrivelse": "8-4 ikke ok",
@@ -205,7 +214,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
                 "beskrivelse": "faresignaler ikke ok",
                 "kreverSupersaksbehandler": false
             }]
-        """.trimIndent())
+        """.trimIndent()
+        )
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
             periodetype = Saksbehandleroppgavetype.FORLENGELSE
@@ -389,9 +399,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `fatter ikke automatisk vedtak ved avskrudd toggle`() {
+    fun `fatter ikke automatisk vedtak ved avskrudd toggle`() = Toggles.Automatisering.disable {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
-        every { miljøstyrtFeatureToggle.automatisering() } returns false
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -451,9 +460,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `fatter ikke automatisk vedtak ved avskrudd risktoggle`() {
+    fun `fatter ikke automatisk vedtak ved avskrudd risktoggle`() = Toggles.Risikovurdering.disable {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
-        every { miljøstyrtFeatureToggle.risikovurdering() } returns false
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -502,7 +510,12 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgave(
+            0,
+            Oppgavestatus.AvventerSaksbehandler,
+            Oppgavestatus.AvventerSystem,
+            Oppgavestatus.Ferdigstilt
+        )
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 }

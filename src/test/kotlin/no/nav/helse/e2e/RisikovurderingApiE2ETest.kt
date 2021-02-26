@@ -8,11 +8,13 @@ import io.ktor.http.*
 import io.mockk.every
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.oppgaveApi
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,8 +30,14 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
 
     @BeforeEach
     fun setup() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
+        Toggles.Automatisering.enable()
+        Toggles.Risikovurdering.enable()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.Automatisering.pop()
+        Toggles.Risikovurdering.pop()
     }
 
     @Test

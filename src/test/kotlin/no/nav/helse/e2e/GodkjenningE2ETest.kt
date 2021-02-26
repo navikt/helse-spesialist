@@ -7,6 +7,7 @@ import io.mockk.verify
 import kotliquery.LoanPattern.using
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -14,7 +15,6 @@ import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -210,7 +210,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `endringer på kjente vedtaksperioder`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returnsMany listOf(SNAPSHOT_UTEN_WARNINGS, SNAPSHOT_UTEN_WARNINGS)
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returnsMany listOf(
+            SNAPSHOT_UTEN_WARNINGS,
+            SNAPSHOT_UTEN_WARNINGS
+        )
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -333,9 +336,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `arbeidsforhold togglet på`() {
+    fun `arbeidsforhold togglet på`() = Toggles.Arbeidsforhold.enable {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
-        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns true
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -370,9 +372,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `arbeidsforhold togglet av`() {
+    fun `arbeidsforhold togglet av`() = Toggles.Arbeidsforhold.disable {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
-        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns false
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -473,17 +474,21 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
-        every { miljøstyrtFeatureToggle.automatisering() }.returns(true)
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
-        val hendelseId = håndterGodkjenningsbehov()
-        sendRisikovurderingløsning(hendelseId, VEDTAKSPERIODE_ID)
-        assertOppgaver(0)
-        assertAutomatisertLøsning()
+        Toggles.Risikovurdering.enable {
+            Toggles.Automatisering.enable {
+                every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(
+                    VEDTAKSPERIODE_ID
+                )
+                val hendelseId = håndterGodkjenningsbehov()
+                sendRisikovurderingløsning(hendelseId, VEDTAKSPERIODE_ID)
+                assertOppgaver(0)
+                assertAutomatisertLøsning()
 
-        testRapid.reset()
-        sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
-        assertTrue(testRapid.inspektør.behov().isEmpty())
+                testRapid.reset()
+                sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+                assertTrue(testRapid.inspektør.behov().isEmpty())
+            }
+        }
     }
 
     @Test
@@ -584,12 +589,5 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         assertEquals(SAKSBEHANDLERIDENT, vedtaksperiodeGodkjentEvent["saksbehandlerIdent"].asText())
         assertEquals(SAKSBEHANDLEREPOST, vedtaksperiodeGodkjentEvent["saksbehandlerEpost"].asText())
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        every { miljøstyrtFeatureToggle.risikovurdering() } returns false
-        every { miljøstyrtFeatureToggle.automatisering() } returns false
-        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns false
     }
 }

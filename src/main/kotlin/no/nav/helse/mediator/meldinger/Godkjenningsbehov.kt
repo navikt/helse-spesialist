@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
@@ -64,7 +63,6 @@ internal class Godkjenningsbehov(
     arbeidsforholdDao: ArbeidsforholdDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
-    miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     opptegnelseDao: OpptegnelseDao
@@ -88,15 +86,13 @@ internal class Godkjenningsbehov(
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = aktiveVedtaksperioder.orgnummere(),
-            arbeidsgiverDao = arbeidsgiverDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            arbeidsgiverDao = arbeidsgiverDao
         ),
         KlargjørArbeidsforholdCommand(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            arbeidsforholdDao = arbeidsforholdDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            arbeidsforholdDao = arbeidsforholdDao
         ),
         KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
@@ -135,8 +131,7 @@ internal class Godkjenningsbehov(
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             periodetype = periodetype,
             risikovurderingDao = risikovurderingDao,
-            warningDao = warningDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+            warningDao = warningDao
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,

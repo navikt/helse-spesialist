@@ -1,6 +1,6 @@
 package no.nav.helse.modell.arbeidsforhold.command
 
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.Command
@@ -12,8 +12,7 @@ internal class OppdaterArbeidsforholdCommand(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
-    private val arbeidsforholdDao: ArbeidsforholdDao,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val arbeidsforholdDao: ArbeidsforholdDao
 ) : Command {
 
     private companion object {
@@ -21,7 +20,7 @@ internal class OppdaterArbeidsforholdCommand(
     }
 
     override fun execute(context: CommandContext): Boolean = when {
-        !miljøstyrtFeatureToggle.arbeidsforhold() -> {
+        !Toggles.Arbeidsforhold.enabled -> {
             logg.info("Arbeidsforhold togglet av")
             true
         }

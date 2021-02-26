@@ -1,14 +1,13 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 
 internal class OpprettArbeidsgiverCommand(
     private val orgnummere: List<String>,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val arbeidsgiverDao: ArbeidsgiverDao
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettArbeidsgiverCommand::class.java)
@@ -29,7 +28,7 @@ internal class OpprettArbeidsgiverCommand(
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon()) {
+        if (!Toggles.Arbeidsgiverinformasjon.enabled) {
             log.info("oppretter arbeidsgiver")
             arbeidsgivereSomIkkeFinnes().forEach {
                 arbeidsgiverDao.insertArbeidsgiver(it, "Ukjent", emptyList())

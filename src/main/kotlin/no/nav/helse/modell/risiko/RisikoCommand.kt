@@ -1,7 +1,6 @@
 package no.nav.helse.modell.risiko
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.alleHarRisikovurdering
@@ -22,8 +21,7 @@ internal class RisikoCommand(
     private val aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
     private val periodetype: Saksbehandleroppgavetype,
     private val risikovurderingDao: RisikovurderingDao,
-    private val warningDao: WarningDao,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val warningDao: WarningDao
 ) : Command {
 
     private companion object {
@@ -31,7 +29,7 @@ internal class RisikoCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.risikovurdering()) return true
+        if (!Toggles.Risikovurdering.enabled) return true
         if (risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null) return true
 
         logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
@@ -52,7 +50,7 @@ internal class RisikoCommand(
     }
 
     override fun resume(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.risikovurdering()) return true
+        if (!Toggles.Risikovurdering.enabled) return true
         val løsning = context.get<Risikovurderingløsning>() ?: return false
         logg.info("Mottok risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
         løsning.lagre(risikovurderingDao)

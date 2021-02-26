@@ -2,12 +2,12 @@ package no.nav.helse.modell.vedtaksperiode
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -45,11 +45,6 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(any()) } returns SNAPSHOTV1
     }
 
-    @AfterEach
-    fun tearDown() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(false)
-    }
-
     @Test
     fun `manglende risikovurdering mappes ikke til speil`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
@@ -83,8 +78,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `En satt risikovurdering mappes til speil`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+    fun `En satt risikovurdering mappes til speil`() = Toggles.Risikovurdering.enable {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -122,8 +116,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Warnings mappes til speil som varsler`() {
-        every { miljøstyrtFeatureToggle.risikovurdering() }.returns(true)
+    fun `Warnings mappes til speil som varsler`() = Toggles.Risikovurdering.enable {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -256,7 +249,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `mapper arbeidsforhold`() {
+    fun `mapper arbeidsforhold`() = Toggles.Arbeidsforhold.enable {
         val arbeidsforholdløsning = listOf(
             Arbeidsforholdløsning.Løsning(
                 stillingstittel = "Sykepleier",
@@ -272,7 +265,6 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             )
         )
 
-        every { miljøstyrtFeatureToggle.arbeidsforhold() } returns true
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -315,8 +307,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `mapper bransjer for arbeidsgiver`() {
-        every { miljøstyrtFeatureToggle.arbeidsgiverinformasjon() } returns true
+    fun `mapper bransjer for arbeidsgiver`() = Toggles.Arbeidsgiverinformasjon.enable {
         val bransjer = listOf("En bransje", "En annen bransje")
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -348,12 +339,21 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Mapper arbeidsgiverinfo for flere arbeidsgivere`() {
+    fun `Mapper arbeidsgiverinfo for flere arbeidsgivere`() = Toggles.Arbeidsgiverinformasjon.enable {
         val aktiveVedtaksperioder = listOf(
-            Testmeldingfabrikk.AktivVedtaksperiodeJson(ORGNR, VEDTAKSPERIODE_ID, Saksbehandleroppgavetype.OVERGANG_FRA_IT),
-            Testmeldingfabrikk.AktivVedtaksperiodeJson(ORGNR2, UUID.randomUUID(), Saksbehandleroppgavetype.OVERGANG_FRA_IT)
+            Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                ORGNR,
+                VEDTAKSPERIODE_ID,
+                Saksbehandleroppgavetype.OVERGANG_FRA_IT
+            ),
+            Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                ORGNR2,
+                UUID.randomUUID(),
+                Saksbehandleroppgavetype.OVERGANG_FRA_IT
+            )
         )
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, aktiveVedtaksperioder = aktiveVedtaksperioder)
+        val godkjenningsmeldingId =
+            sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, aktiveVedtaksperioder = aktiveVedtaksperioder)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,

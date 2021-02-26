@@ -1,6 +1,8 @@
 package no.nav.helse.mediator
 
 abstract class Toggles internal constructor(enabled: Boolean = false, private val force: Boolean = false) {
+    private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
+
     private val states = mutableListOf(enabled)
 
     val enabled get() = states.last()
@@ -39,14 +41,9 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
     }
 
     object FlereRisikobehovEnabled : Toggles(true)
-}
-
-internal class MiljøstyrtFeatureToggle(private val env: Map<String, String>) {
-    internal fun risikovurdering() = env.getOrDefault("RISK_FEATURE_TOGGLE", "false").toBoolean()
-    internal fun automatisering() = env.getOrDefault("AUTOMATISERING_FEATURE_TOGGLE", "false").toBoolean()
-    internal fun arbeidsgiverinformasjon() =
-        env.getOrDefault("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE", "false").toBoolean()
-    internal val stikkprøver = env.getOrDefault("STIKKPROEVER_FEATURE_TOGGLE", "false").toBoolean()
-
-    internal fun arbeidsforhold() = env.getOrDefault("ARBEIDSFORHOLD_FEATURE_TOGGLE", "false").toBoolean()
+    object Risikovurdering : Toggles("RISK_FEATURE_TOGGLE")
+    object Automatisering : Toggles("AUTOMATISERING_FEATURE_TOGGLE")
+    object Arbeidsgiverinformasjon : Toggles("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE")
+    object Stikkprøver : Toggles("STIKKPROEVER_FEATURE_TOGGLE")
+    object Arbeidsforhold : Toggles("ARBEIDSFORHOLD_FEATURE_TOGGLE")
 }

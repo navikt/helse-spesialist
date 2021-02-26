@@ -3,12 +3,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.*
+import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -77,12 +79,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
-    internal val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle> {
-        every { risikovurdering() } returns false
-        every { automatisering() } returns false
-        every { arbeidsgiverinformasjon() } returns true
-        every { arbeidsforhold() } returns false
-    }
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
@@ -100,10 +96,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
-        arbeidsforholdDao = arbeidsforholdDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
-        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         automatisering = Automatisering(
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
@@ -111,12 +106,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
-            miljøstyrtFeatureToggle = miljøstyrtFeatureToggle,
             personDao = personDao,
             vedtakDao = vedtakDao
-            ) { false },
+        ) { false },
+        arbeidsforholdDao = arbeidsforholdDao,
         utbetalingDao = utbetalingDao,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         opptegnelseDao = opptegnelseDao
     )
     private val hendelseMediator = HendelseMediator(

@@ -3,7 +3,6 @@ package no.nav.helse.modell.risiko
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
@@ -11,6 +10,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -47,16 +47,20 @@ internal class RisikoCommandTest {
         )
         private val RISIKOVURDERING_DAO = mockk<RisikovurderingDao>()
         private val WARNING_DAO = mockk<WarningDao>()
-        private val MILJØSTYRT_FEATURE_TOGGLE = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
     }
 
     @BeforeEach
     fun setup() {
         clearAllMocks()
-        every { MILJØSTYRT_FEATURE_TOGGLE.risikovurdering() } returns true
         every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_1) } returns null
         every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_2) } returns null
         every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_3) } returns null
+        Toggles.Risikovurdering.enable()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.Risikovurdering.pop()
     }
 
     @Test
@@ -119,15 +123,13 @@ internal class RisikoCommandTest {
         ),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID_1,
         risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
-        warningDao: WarningDao = WARNING_DAO,
-        miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle = MILJØSTYRT_FEATURE_TOGGLE
+        warningDao: WarningDao = WARNING_DAO
     ) = RisikoCommand(
         organisasjonsnummer = ORGNUMMER1,
         vedtaksperiodeId = vedtaksperiodeId,
         aktiveVedtaksperioder = aktiveVedtaksperioder,
         periodetype = PERIODETYPE1,
         risikovurderingDao = risikovurderingDao,
-        warningDao = warningDao,
-        miljøstyrtFeatureToggle = miljøstyrtFeatureToggle
+        warningDao = warningDao
     )
 }

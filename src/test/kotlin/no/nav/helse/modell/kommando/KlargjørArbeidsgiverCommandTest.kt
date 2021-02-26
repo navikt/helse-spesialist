@@ -4,9 +4,10 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -22,24 +23,32 @@ internal class KlargjørArbeidsgiverCommandTest {
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
-    private val miljøstyrtFeatureToggle = mockk<MiljøstyrtFeatureToggle>(relaxed = true)
 
     private lateinit var context: CommandContext
-    private val command = KlargjørArbeidsgiverCommand(listOf(ORGNR), dao, miljøstyrtFeatureToggle)
+    private val command = KlargjørArbeidsgiverCommand(listOf(ORGNR), dao)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(dao)
-        every { miljøstyrtFeatureToggle.arbeidsgiverinformasjon() } returns true
+        Toggles.Arbeidsgiverinformasjon.enable()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.Arbeidsgiverinformasjon.pop()
     }
 
     @Test
     fun `opprett arbeidsgiver`() {
         arbeidsgiverFinnesIkke()
-        context.add(Arbeidsgiverinformasjonløsning(listOf(
-            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-        )))
+        context.add(
+            Arbeidsgiverinformasjonløsning(
+                listOf(
+                    Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+                )
+            )
+        )
         assertTrue(command.execute(context))
         verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
     }
@@ -52,8 +61,7 @@ internal class KlargjørArbeidsgiverCommandTest {
     }
 
     @Test
-    fun `sender ikke behov om feature toggle er skrudd av`() {
-        every { miljøstyrtFeatureToggle.arbeidsgiverinformasjon() } returns false
+    fun `sender ikke behov om feature toggle er skrudd av`() = Toggles.Arbeidsgiverinformasjon.disable {
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
         verify(exactly = 0) { dao.updateNavn(any(), any()) }

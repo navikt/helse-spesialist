@@ -1,6 +1,6 @@
 package no.nav.helse.modell.arbeidsforhold.command
 
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.Command
@@ -12,8 +12,7 @@ internal class OpprettArbeidsforholdCommand(
     private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
-    private val organisasjonsnummer: String,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val organisasjonsnummer: String
 ) : Command {
 
     private companion object {
@@ -21,7 +20,7 @@ internal class OpprettArbeidsforholdCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (!miljøstyrtFeatureToggle.arbeidsforhold() || arbeidsforholdOpprettet()) return ignorer()
+        if (!Toggles.Arbeidsforhold.enabled || arbeidsforholdOpprettet()) return ignorer()
         return behandle(context)
     }
 
@@ -31,14 +30,15 @@ internal class OpprettArbeidsforholdCommand(
         arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer).isNotEmpty()
 
     private fun ignorer(): Boolean {
-        logg.info(if (miljøstyrtFeatureToggle.arbeidsforhold()) "Arbeidsforhold togglet av" else "Arbeidsforhold finnes fra før")
+        logg.info(if (Toggles.Arbeidsforhold.enabled) "Arbeidsforhold togglet av" else "Arbeidsforhold finnes fra før")
         return true
     }
 
     private fun behandle(context: CommandContext): Boolean {
-        context.get<Arbeidsforholdløsning>()?.opprett(arbeidsforholdDao, fødselsnummer, organisasjonsnummer) ?: return trengerMerInformasjon(
-            context
-        )
+        context.get<Arbeidsforholdløsning>()?.opprett(arbeidsforholdDao, fødselsnummer, organisasjonsnummer)
+            ?: return trengerMerInformasjon(
+                context
+            )
         return true
     }
 

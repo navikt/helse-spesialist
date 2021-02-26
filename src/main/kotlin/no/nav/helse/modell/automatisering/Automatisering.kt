@@ -1,7 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -20,7 +20,6 @@ internal class Automatisering(
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val egenAnsattDao: EgenAnsattDao,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val plukkTilManuell: PlukkTilManuell
@@ -64,11 +63,11 @@ internal class Automatisering(
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false
             },
-            validering("Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er skrudd av") { miljøstyrtFeatureToggle.risikovurdering() },
+            validering("Vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning er skrudd av") { Toggles.Risikovurdering.enabled },
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == SaksbehandlerInntektskilde.EN_ARBEIDSGIVER },
-            validering("Automatisering er skrudd av") { miljøstyrtFeatureToggle.automatisering() }
+            validering("Automatisering er skrudd av") { Toggles.Automatisering.enabled }
         )
     }
 

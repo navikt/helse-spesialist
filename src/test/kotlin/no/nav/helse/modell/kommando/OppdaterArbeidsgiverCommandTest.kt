@@ -4,8 +4,9 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -19,15 +20,20 @@ internal class OppdaterArbeidsgiverCommandTest {
     }
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
-    private val miljøstyrtFeatureToggle = MiljøstyrtFeatureToggle(mapOf("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE" to "true"))
 
     private lateinit var context: CommandContext
-    private val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao, miljøstyrtFeatureToggle)
+    private val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(dao)
+        Toggles.Arbeidsgiverinformasjon.enable()
+    }
+
+    @AfterEach
+    fun teardown() {
+        Toggles.Arbeidsgiverinformasjon.pop()
     }
 
     @Test

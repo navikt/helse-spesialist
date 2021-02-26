@@ -1,18 +1,17 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.MiljøstyrtFeatureToggle
+import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import java.time.LocalDate
 
 internal class OppdaterArbeidsgiverCommand(
     private val orgnummere: List<String>,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val miljøstyrtFeatureToggle: MiljøstyrtFeatureToggle
+    private val arbeidsgiverDao: ArbeidsgiverDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val trengerOppdateringer = (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty()
-        if (!miljøstyrtFeatureToggle.arbeidsgiverinformasjon() || trengerOppdateringer) return true
+        if (!Toggles.Arbeidsgiverinformasjon.enabled || trengerOppdateringer) return true
         return behandle(context)
     }
 
@@ -36,7 +35,10 @@ internal class OppdaterArbeidsgiverCommand(
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).distinct()))
+        context.behov(
+            "Arbeidsgiverinformasjon",
+            mapOf("organisasjonsnummer" to (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).distinct())
+        )
         return false
     }
 }
