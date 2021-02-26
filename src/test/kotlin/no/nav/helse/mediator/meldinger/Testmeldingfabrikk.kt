@@ -512,7 +512,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@opprettet" to LocalDateTime.now()
     )
 
-    data class AktivVedtaksperiodeJson(val orgnummer: String, private val vedtaksperiodeId: UUID, private val periodetype: Saksbehandleroppgavetype) {
+    data class AktivVedtaksperiodeJson(val orgnummer: String, val vedtaksperiodeId: UUID, val periodetype: Saksbehandleroppgavetype) {
         fun toBody() = mapOf(
             "orgnummer" to orgnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,

@@ -6,6 +6,9 @@ import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.mediator.Toggles
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -20,20 +23,24 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     }
 
     @Language("json")
-    private val funn1 = objectMapper.readTree("""
+    private val funn1 = objectMapper.readTree(
+        """
             [{
                 "kategori": ["8-4"],
                 "beskrivelse": "ny sjekk ikke ok",
                 "kreverSupersaksbehandler": true
             }]
-        """)
-    private val funn2 = objectMapper.readTree("""
+        """
+    )
+    private val funn2 = objectMapper.readTree(
+        """
             [{
                 "kategori": ["8-4"],
                 "beskrivelse": "8-4 ikke ok",
                 "kreverSupersaksbehandler": false
             }]
-        """)
+        """
+    )
 
     @BeforeEach
     fun setup() {
@@ -57,16 +64,61 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
     }
 
-    fun godkjenningsoppgave(funn: JsonNode, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID) {
+    @Test
+    fun `Venter på alle løsninger på utstedte risikobehov`() = Toggles.FlereRisikobehovEnabled.enable {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        godkjenningsoppgave(
+            funn = funn2,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            aktiveVedtaksperioder = listOf(
+                Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                    ORGNR,
+                    VEDTAKSPERIODE_ID,
+                    Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                ),
+                Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                    "456789123",
+                    UUID.randomUUID(),
+                    Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                ),
+                Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                    "789456123",
+                    UUID.randomUUID(),
+                    Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                ),
+            ),
+            ekstraArbeidsgivere = listOf(
+                Testmeldingfabrikk.ArbeidsgiverinformasjonJson("456789123", "Shappa på hjørnet", listOf("Sjappe")),
+                Testmeldingfabrikk.ArbeidsgiverinformasjonJson("789456123", "Borti der", listOf("Skredsøker"))
+            )
+        )
+
+        assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
+    }
+
+    fun godkjenningsoppgave(
+        funn: JsonNode,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
+            Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                ORGNR,
+                vedtaksperiodeId,
+                Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+            )
+        ),
+        ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
+    ) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            ORGNR,
-            vedtaksperiodeId
+            orgnr = ORGNR,
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktiveVedtaksperioder = aktiveVedtaksperioder
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            ekstraArbeidsgivere = ekstraArbeidsgivere
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -79,12 +131,14 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            kanGodkjennesAutomatisk = false,
-            funn = funn
-        )
+        aktiveVedtaksperioder.forEach {
+            sendRisikovurderingløsning(
+                godkjenningsmeldingId = godkjenningsmeldingId,
+                vedtaksperiodeId = it.vedtaksperiodeId,
+                kanGodkjennesAutomatisk = false,
+                funn = funn
+            )
+        }
     }
 
     private fun assertOppgaveType(forventet: String, vedtaksperiodeId: UUID) {
