@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
@@ -54,6 +55,8 @@ internal class RisikoCommandTest {
         clearAllMocks()
         every { MILJØSTYRT_FEATURE_TOGGLE.risikovurdering() } returns true
         every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_1) } returns null
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_2) } returns null
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_3) } returns null
     }
 
     @Test
@@ -90,6 +93,22 @@ internal class RisikoCommandTest {
         val context = CommandContext(UUID.randomUUID())
 
         assertTrue(risikoCommand.execute(context))
+    }
+
+    @Test
+    fun `Venter på løsning på alle utstedte behov`() = Toggles.FlereRisikobehovEnabled.enable {
+        val risikoCommand = risikoCommand()
+        val context = CommandContext(UUID.randomUUID())
+        context.add(mockk<Risikovurderingløsning>(relaxed = true))
+
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_1) } returns mockk()
+        assertFalse(risikoCommand.resume(context))
+
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_2) } returns mockk()
+        assertFalse(risikoCommand.resume(context))
+
+        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID_3) } returns mockk()
+        assertTrue(risikoCommand.resume(context))
     }
 
     private fun risikoCommand(

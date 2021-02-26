@@ -4,6 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MiljøstyrtFeatureToggle
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.alleHarRisikovurdering
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -68,7 +69,9 @@ internal class RisikoCommand(
             warningteller.labels("WARN", melding).inc()
         }
 
-        //Hvis ikke alle "mine" behov er besvart, return false
+        if (Toggles.FlereRisikobehovEnabled.enabled) {
+            return aktiveVedtaksperioder.alleHarRisikovurdering(risikovurderingDao)
+        }
 
         return true
     }

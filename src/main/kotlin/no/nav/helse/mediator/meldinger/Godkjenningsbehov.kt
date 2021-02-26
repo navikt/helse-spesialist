@@ -245,6 +245,10 @@ internal class Godkjenningsbehov(
         companion object {
             internal fun List<AktivVedtaksperiode>.orgnummere() = map { it.orgnummer }
 
+            internal fun List<AktivVedtaksperiode>.alleHarRisikovurdering(risikovurderingDao: RisikovurderingDao) =
+                map { it.vedtaksperiodeId }
+                    .all { vedtaksperiodeId -> risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null }
+
             internal fun fromNode(json: JsonNode) = json.map {
                 AktivVedtaksperiode(
                     orgnummer = it["orgnummer"].asText(),
