@@ -25,7 +25,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
@@ -77,7 +77,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
@@ -126,7 +126,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId1,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(

@@ -72,7 +72,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(

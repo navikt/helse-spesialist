@@ -36,7 +36,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(hendelseId, false)
@@ -105,7 +105,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("Bransje1", "Bransje2")

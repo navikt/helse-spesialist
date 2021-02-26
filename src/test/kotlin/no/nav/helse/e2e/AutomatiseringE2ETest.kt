@@ -46,7 +46,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -98,7 +98,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -147,7 +147,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -217,7 +217,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -285,7 +285,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -343,7 +343,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -405,7 +405,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -466,7 +466,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")

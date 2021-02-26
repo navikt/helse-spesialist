@@ -58,16 +58,16 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findArbeidsgiver(arbeidsgiverId: Long) = sessionOf(dataSource).use { session ->
+    internal fun findArbeidsgiver(orgnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT an.navn, a.orgnummer, ab.bransjer FROM arbeidsgiver AS a
                 JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id
                 LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
-            WHERE a.id=?;
+            WHERE a.orgnummer=?;
         """
         session.run(
-            queryOf(query, arbeidsgiverId).map { row ->
+            queryOf(query, orgnummer.toLong()).map { row ->
                 ArbeidsgiverDto(
                     organisasjonsnummer = row.string("orgnummer"),
                     navn = row.string("navn"),

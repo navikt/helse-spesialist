@@ -52,9 +52,6 @@ internal class VedtaksperiodeMediator(
 
     private fun byggSpeilSnapshot(vedtak: VedtaksperiodeDto) =
         measureAsHistogram("byggSpeilSnapshot") {
-            val arbeidsgiverDto = measureAsHistogram("byggSpeilSnapshot_findArbeidsgiver") {
-                requireNotNull(arbeidsgiverDao.findArbeidsgiver(vedtak.arbeidsgiverRef)) { "Fant ikke arbeidsgiver" }
-            }
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
                 personDao.findInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
             }
@@ -80,11 +77,9 @@ internal class VedtaksperiodeMediator(
                 }
             }
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
-                val arbeidsgivernavn =
-                    if (it.organisasjonsnummer == arbeidsgiverDto.organisasjonsnummer)
-                        arbeidsgiverDto.navn
-                    else
-                        "Ikke tilgjengelig"
+                val arbeidsgiverDto = measureAsHistogram("byggSpeilSnapshot_findArbeidsgiver") {
+                    arbeidsgiverDao.findArbeidsgiver(it.organisasjonsnummer)
+                }
                 val overstyringer = overstyringDao.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
                         OverstyringForSpeilDto(
@@ -103,11 +98,11 @@ internal class VedtaksperiodeMediator(
                     }
                 ArbeidsgiverForSpeilDto(
                     organisasjonsnummer = it.organisasjonsnummer,
-                    navn = arbeidsgivernavn,
+                    navn = arbeidsgiverDto?.navn ?: "Ikke tilgjengelig",
                     id = it.id,
                     overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder,
-                    bransjer = arbeidsgiverDto.bransjer
+                    bransjer = arbeidsgiverDto?.bransjer
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {

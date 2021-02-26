@@ -89,7 +89,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId
         )
         sendEgenAnsattløsning(

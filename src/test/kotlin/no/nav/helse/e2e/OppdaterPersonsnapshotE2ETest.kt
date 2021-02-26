@@ -55,7 +55,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId
         )
         sendEgenAnsattløsning(

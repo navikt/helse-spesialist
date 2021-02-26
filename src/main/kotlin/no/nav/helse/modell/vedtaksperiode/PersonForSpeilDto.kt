@@ -36,7 +36,7 @@ data class ArbeidsgiverForSpeilDto(
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
     val overstyringer: List<OverstyringForSpeilDto>,
-    val bransjer: List<String>
+    val bransjer: List<String>?
 )
 
 data class OverstyringForSpeilDto(

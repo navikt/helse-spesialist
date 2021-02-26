@@ -58,6 +58,13 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId,
         inntektskilde: SaksbehandlerInntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER,
+        aktiveVedtaksperioder: List<AktivVedtaksperiodeJson> = listOf(
+            AktivVedtaksperiodeJson(
+                orgnummer,
+                vedtaksperiodeId,
+                periodetype
+            )
+        )
     ) =
         nyHendelse(
             id, "behov",
@@ -72,13 +79,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                     "periodeTom" to "$periodeTom",
                     "periodetype" to periodetype.name,
                     "inntektskilde" to inntektskilde.name,
-                    "aktiveVedtaksperioder" to listOf(
-                        mapOf(
-                            "orgnummer" to orgnummer,
-                            "vedtaksperiodeId" to vedtaksperiodeId,
-                            "periodetype" to periodetype
-                        )
-                    )
+                    "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiodeJson::toBody)
                 )
             )
         )
@@ -90,7 +91,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String = "orgnr",
         navn: String,
-        bransjer: List<String>
+        bransjer: List<String>,
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -102,13 +104,13 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "aktørId" to aktørId,
             "orgnummer" to orgnummer,
             "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to listOf(
-                    mapOf(
-                        "orgnummer" to orgnummer,
-                        "navn" to navn,
-                        "bransjer" to bransjer
+                "Arbeidsgiverinformasjon" to (listOf(
+                    ArbeidsgiverinformasjonJson(
+                        orgnummer,
+                        navn,
+                        bransjer
                     )
-                )
+                ) + ekstraArbeidsgivere).map(ArbeidsgiverinformasjonJson::toBody)
             )
         )
     )
@@ -509,4 +511,24 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@id" to id,
         "@opprettet" to LocalDateTime.now()
     )
+
+    data class AktivVedtaksperiodeJson(val orgnummer: String, private val vedtaksperiodeId: UUID, private val periodetype: Saksbehandleroppgavetype) {
+        fun toBody() = mapOf(
+            "orgnummer" to orgnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "periodetype" to periodetype.name
+        )
+    }
+
+    data class ArbeidsgiverinformasjonJson(
+        private val orgnummer: String,
+        private val navn: String,
+        private val bransjer: List<String>
+    ) {
+        fun toBody() = mapOf(
+            "orgnummer" to orgnummer,
+            "navn" to navn,
+            "bransjer" to bransjer
+        )
+    }
 }

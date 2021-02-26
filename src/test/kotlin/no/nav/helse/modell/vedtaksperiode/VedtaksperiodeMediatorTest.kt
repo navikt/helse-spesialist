@@ -2,7 +2,9 @@ package no.nav.helse.modell.vedtaksperiode
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
@@ -19,11 +21,13 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         private const val FØDSELSNUMMER = "12020052345"
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
+        private const val ORGNR2 = "13370420"
         private val ID = UUID.randomUUID()
     }
 
     @Language("json")
-    private val funn = objectMapper.readTree("""
+    private val funn = objectMapper.readTree(
+        """
             [{
                 "kategori": ["8-4"],
                 "beskrivelse": "8-4 ikke ok",
@@ -33,7 +37,8 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
                 "beskrivelse": "faresignal ikke ok",
                 "kreverSupersaksbehandler": false
             }]
-        """)
+        """
+    )
 
     @BeforeEach
     fun setup() {
@@ -51,7 +56,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
@@ -67,7 +72,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
@@ -84,7 +89,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
@@ -123,7 +128,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
         )
         sendEgenAnsattløsning(
@@ -156,7 +161,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendDigitalKontaktinformasjonløsning(
@@ -179,7 +184,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendDigitalKontaktinformasjonløsning(
@@ -220,7 +225,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId1, orgnr1, vedtaksperiodeId1)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId1,
-            orgnr = orgnr1,
+            orgnummer = orgnr1,
             vedtaksperiodeId = vedtaksperiodeId1
         )
         sendUtbetalingEndret(
@@ -240,7 +245,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId2, orgnr2, vedtaksperiodeId2)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId2,
-            orgnr = orgnr2,
+            orgnummer = orgnr2,
             vedtaksperiodeId = vedtaksperiodeId2
         )
 
@@ -272,7 +277,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendArbeidsforholdløsning(
@@ -317,7 +322,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
+            orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             bransjer = bransjer
         )
@@ -342,6 +347,28 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertEquals(bransjer, speilSnapshot.arbeidsgivere.first().bransjer)
     }
 
+    @Test
+    fun `Mapper arbeidsgiverinfo for flere arbeidsgivere`() {
+        val aktiveVedtaksperioder = listOf(
+            Testmeldingfabrikk.AktivVedtaksperiodeJson(ORGNR, VEDTAKSPERIODE_ID, Saksbehandleroppgavetype.OVERGANG_FRA_IT),
+            Testmeldingfabrikk.AktivVedtaksperiodeJson(ORGNR2, UUID.randomUUID(), Saksbehandleroppgavetype.OVERGANG_FRA_IT)
+        )
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, aktiveVedtaksperioder = aktiveVedtaksperioder)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            ekstraArbeidsgivere = listOf(
+                Testmeldingfabrikk.ArbeidsgiverinformasjonJson(ORGNR2, "Eliteserien", listOf("Fotball"))
+            )
+        )
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        assertEquals("Eliteserien", speilSnapshot.arbeidsgivere.last().navn)
+
+    }
+
     private val SNAPSHOTV1 = """
         {
             "aktørId": "$AKTØR",
@@ -353,6 +380,15 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
                     "vedtaksperioder": [
                         {
                             "id": "$VEDTAKSPERIODE_ID"
+                        }
+                    ]
+                },
+                {
+                    "id": "${UUID.randomUUID()}",
+                    "organisasjonsnummer": "$ORGNR2",
+                    "vedtaksperioder": [
+                        {
+                            "id": "${UUID.randomUUID()}"
                         }
                     ]
                 }

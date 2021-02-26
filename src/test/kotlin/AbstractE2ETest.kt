@@ -168,7 +168,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         periodeTom: LocalDate = LocalDate.now(),
         periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = UNG_PERSON_FNR_2018,
-        aktørId: String = AKTØR
+        aktørId: String = AKTØR,
+        aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
+            Testmeldingfabrikk.AktivVedtaksperiodeJson(
+                orgnr,
+                vedtaksperiodeId,
+                periodetype
+            )
+        )
     ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
@@ -179,18 +186,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 periodeTom = periodeTom,
                 periodetype = periodetype,
                 fødselsnummer = fødselsnummer,
-                aktørId = aktørId
+                aktørId = aktørId,
+                aktiveVedtaksperioder = aktiveVedtaksperioder
             )
         )
     }
 
     protected fun sendArbeidsgiverinformasjonløsning(
         hendelseId: UUID,
-        orgnr: String,
+        orgnummer: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
         navn: String = "En arbeidsgiver",
-        bransjer: List<String> = listOf("En bransje", "En annen bransje")
+        bransjer: List<String> = listOf("En bransje", "En annen bransje"),
+        ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -199,9 +208,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     hendelseId = hendelseId,
                     contextId = contextId,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    orgnummer = orgnr,
+                    orgnummer = orgnummer,
                     navn = navn,
-                    bransjer = bransjer
+                    bransjer = bransjer,
+                    ekstraArbeidsgivere = ekstraArbeidsgivere
                 )
             )
         }
