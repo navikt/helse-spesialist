@@ -19,7 +19,8 @@ data class PersonForSpeilDto(
     val enhet: EnhetDto,
     val saksbehandlerepost: String?,
     val arbeidsforhold: List<ArbeidsforholdForSpeilDto>,
-    val inntektsgrunnlag: JsonNode
+    val inntektsgrunnlag: JsonNode,
+    val erPåVent: Boolean
 )
 
 data class ArbeidsforholdForSpeilDto(

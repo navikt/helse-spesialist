@@ -28,8 +28,8 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     fun `henter saksbehandlerepost for tildeling med fødselsnummer`() {
         nyPerson()
         tildelTilSaksbehandler()
-        val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
-        assertEquals(SAKSBEHANDLEREPOST, saksbehandlerepost)
+        val tildeling = tildelingDao.tildelingForPerson(FNR)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling?.saksbehandlerepost)
     }
 
     @Test
@@ -67,8 +67,8 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
             navn = "Ny Saksbehandler",
             epost = nySaksbehandlerepost
         )
-        val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
-        assertEquals(nySaksbehandlerepost, saksbehandlerepost)
+        val tildeling = tildelingDao.tildelingForPerson(FNR)
+        assertEquals(nySaksbehandlerepost, tildeling?.saksbehandlerepost)
     }
 
     @Test

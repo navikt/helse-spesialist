@@ -5,7 +5,6 @@ import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.vedtak.*
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -18,7 +17,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             @Language("PostgreSQL")
             val query = """
             SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
-                   pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn
+                   pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -30,7 +29,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             $eventuellEkskluderingAvRiskQA
-                GROUP BY o.id, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, sot.inntektskilde, e.id, e.navn, t.saksbehandler_ref
+                GROUP BY o.id, o.opprettet, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, sot.inntektskilde, e.id, e.navn, t.saksbehandler_ref, t.på_vent
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                     CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
@@ -320,7 +319,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         antallVarsler = it.int("antall_varsler"),
         type = it.stringOrNull("saksbehandleroppgavetype")?.let(Saksbehandleroppgavetype::valueOf),
         inntektskilde = it.stringOrNull("inntektskilde")?.let(SaksbehandlerInntektskilde::valueOf),
-        boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn"))
+        boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn")),
+        erPåVent = it.boolean("på_vent")
     )
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

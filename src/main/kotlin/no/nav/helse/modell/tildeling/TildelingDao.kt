@@ -1,9 +1,6 @@
 package no.nav.helse.modell.tildeling
 
-import kotliquery.Session
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
+import kotliquery.*
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.*
@@ -94,10 +91,10 @@ internal class TildelingDao(private val dataSource: DataSource) {
         run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
     }
 
-    private fun Session.tildelingForPerson(fødselsnummer: String): String? {
+    private fun Session.tildelingForPerson(fødselsnummer: String): TildelingDto? {
         @Language("PostgreSQL")
         val query = """
-            SELECT s.epost FROM person
+            SELECT s.epost, t.på_vent FROM person
                  RIGHT JOIN vedtak v on person.id = v.person_ref
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
                  RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
@@ -106,10 +103,13 @@ internal class TildelingDao(private val dataSource: DataSource) {
                 AND o.status = 'AvventerSaksbehandler'
             ORDER BY o.opprettet DESC;
         """
-        return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map { row ->
-            row.string("epost")
-        }.asSingle)
+        return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map(::tildelingDto).asSingle)
     }
+
+    private fun tildelingDto(it: Row) = TildelingDto(
+        saksbehandlerepost = it.string("epost"),
+        erPåVent = it.boolean("på_vent")
+    )
 
     private fun Session.leggOppgavePåVent(oppgaveId: Long) {
         @Language("PostgreSQL")

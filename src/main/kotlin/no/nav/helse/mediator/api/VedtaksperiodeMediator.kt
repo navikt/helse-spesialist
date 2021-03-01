@@ -130,7 +130,7 @@ internal class VedtaksperiodeMediator(
                 personDao.findEnhet(vedtak.fødselsnummer)
             }
 
-            val saksbehandlerepost = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
+            val tildeling = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
 
             val arbeidsforhold = arbeidsgivere
                 .map { arbeidsgiver ->
@@ -155,10 +155,11 @@ internal class VedtaksperiodeMediator(
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,
-                saksbehandlerepost = saksbehandlerepost,
+                saksbehandlerepost = tildeling?.saksbehandlerepost,
                 utbetalinger = utbetalinger,
                 arbeidsforhold = arbeidsforhold,
-                inntektsgrunnlag = speilSnapshot.inntektsgrunnlag
+                inntektsgrunnlag = speilSnapshot.inntektsgrunnlag,
+                erPåVent = tildeling?.erPåVent ?: false
             )
         }
 

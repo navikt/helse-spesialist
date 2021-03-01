@@ -32,7 +32,8 @@ data class SaksbehandleroppgaveDto(
     val antallVarsler: Int,
     val type: Saksbehandleroppgavetype?,
     val inntektskilde: SaksbehandlerInntektskilde?,
-    var boenhet: EnhetDto
+    var boenhet: EnhetDto,
+    var erPåVent: Boolean
 )
 
 data class SaksbehandleroppgavereferanseDto(
