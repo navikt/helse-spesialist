@@ -24,7 +24,7 @@ spec:
       cpu: 50m
       memory: 512Mi
   replicas:
-    min: 3
+    min: 6
     max: 6
     cpuThresholdPercentage: 90
   ingresses:
