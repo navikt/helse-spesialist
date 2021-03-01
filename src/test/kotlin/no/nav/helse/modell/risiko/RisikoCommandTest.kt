@@ -76,7 +76,7 @@ internal class RisikoCommandTest {
     }
 
     @Test
-    fun `Sender behov for risikovurdering for to parallelle arbeidsgivere`() = Toggles.FlereRisikobehovEnabled.enable {
+    fun `Sender behov for risikovurdering for to parallelle arbeidsgivere`() {
         val risikoCommand =
             risikoCommand(aktiveVedtaksperioder = listOf(AKTIV_VEDTAKSPERIODE_1, AKTIV_VEDTAKSPERIODE_2))
         val context = CommandContext(UUID.randomUUID())
@@ -100,7 +100,7 @@ internal class RisikoCommandTest {
     }
 
     @Test
-    fun `Venter på løsning på alle utstedte behov`() = Toggles.FlereRisikobehovEnabled.enable {
+    fun `Venter på løsning på alle utstedte behov`() {
         val risikoCommand = risikoCommand()
         val context = CommandContext(UUID.randomUUID())
         context.add(mockk<Risikovurderingløsning>(relaxed = true))
@@ -125,10 +125,8 @@ internal class RisikoCommandTest {
         risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
         warningDao: WarningDao = WARNING_DAO
     ) = RisikoCommand(
-        organisasjonsnummer = ORGNUMMER1,
         vedtaksperiodeId = vedtaksperiodeId,
         aktiveVedtaksperioder = aktiveVedtaksperioder,
-        periodetype = PERIODETYPE1,
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao
     )

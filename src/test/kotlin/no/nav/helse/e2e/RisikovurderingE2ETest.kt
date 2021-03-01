@@ -72,7 +72,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Venter på alle løsninger på utstedte risikobehov`() = Toggles.FlereRisikobehovEnabled.enable {
+    fun `Venter på alle løsninger på utstedte risikobehov`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
         godkjenningsoppgave(
             funn = funn2,

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.risiko
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.alleHarRisikovurdering
@@ -16,35 +15,18 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class RisikoCommand(
-    private val organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
-    private val periodetype: Saksbehandleroppgavetype,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao
 ) : Command {
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(RisikoCommand::class.java)
-    }
 
     override fun execute(context: CommandContext): Boolean {
         if (!Toggles.Risikovurdering.enabled) return true
         if (risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null) return true
 
-        if (Toggles.FlereRisikobehovEnabled.enabled) {
-            aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
-                aktivVedtaksperiode.behov(context, vedtaksperiodeId)
-            }
-        } else {
-            logg.info("Trenger risikovurdering for {}", keyValue("vedtaksperiodeId", vedtaksperiodeId))
-            context.behov(
-                "Risikovurdering", mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "periodetype" to periodetype
-                )
-            )
+        aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
+            aktivVedtaksperiode.behov(context, vedtaksperiodeId)
         }
 
         return false
@@ -67,10 +49,6 @@ internal class RisikoCommand(
             warningteller.labels("WARN", melding).inc()
         }
 
-        if (Toggles.FlereRisikobehovEnabled.enabled) {
-            return aktiveVedtaksperioder.alleHarRisikovurdering(risikovurderingDao)
-        }
-
-        return true
+        return aktiveVedtaksperioder.alleHarRisikovurdering(risikovurderingDao)
     }
 }
