@@ -77,9 +77,7 @@ spec:
       value: "true"
     - name: ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE
       value: "true"
-    - name: ARBEIDSFORHOLD_FEATURE_TOGGLE
-      value: "true"
-    - name: STIKKPROEVER_FEATURE_TOGGLE
-      value: "true"
     - name: STIKKPROEVER_DIVISOR
       value: "200"
+    - name: UNLEASH_URL
+       value: https://unleash.nais.io/api

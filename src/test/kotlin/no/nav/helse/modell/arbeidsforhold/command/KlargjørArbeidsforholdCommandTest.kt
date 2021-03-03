@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.Toggles
+import no.nav.helse.mediator.FeatureToggle.ARBEIDSFORHOLD_TOGGLE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -44,12 +44,12 @@ internal class KlargjørArbeidsforholdCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(arbeidsforholdDao)
-        Toggles.Arbeidsforhold.enable()
+        ARBEIDSFORHOLD_TOGGLE.enable()
     }
 
     @AfterEach
-    fun teardown() {
-        Toggles.Arbeidsforhold.pop()
+    fun tearDown() {
+        ARBEIDSFORHOLD_TOGGLE.disable()
     }
 
     @Test
@@ -128,12 +128,11 @@ internal class KlargjørArbeidsforholdCommandTest {
 
     @Test
     fun `sender ikke behov om feature toggle er skrudd av`() {
+        ARBEIDSFORHOLD_TOGGLE.disable()
         arbeidsforholdFinnesIkke()
-        Toggles.Arbeidsforhold.disable {
-            assertTrue(command.execute(context))
-            assertFalse(context.harBehov())
-            verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
-        }
+        assertTrue(command.execute(context))
+        assertFalse(context.harBehov())
+        verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
     }
 
     private fun arbeidsforholdFinnes() {

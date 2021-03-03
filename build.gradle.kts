@@ -29,6 +29,8 @@ dependencies {
         exclude(group = "junit")
     }
 
+    implementation("no.finn.unleash:unleash-client-java:4.1.0")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
     testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
