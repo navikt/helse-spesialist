@@ -15,6 +15,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.*
+import no.nav.helse.mediator.FeatureToggle.STIKKPRØVE_TOGGLE
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.abonnement.OpptegnelseDao
@@ -120,7 +121,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         reservasjonDao
     )
 
-    private val plukkTilManuell: PlukkTilManuell = if (Toggles.Stikkprøver.enabled) {
+    private val plukkTilManuell: PlukkTilManuell = if (STIKKPRØVE_TOGGLE.enabled) {
         val divisor =
             requireNotNull(env["STIKKPROEVER_DIVISOR"]) { "STIKKPROEVER_DIVISOR må oppgis når stikkprøver er aktivert" }.toInt()
         require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }

@@ -7,6 +7,7 @@ import io.mockk.verify
 import kotliquery.LoanPattern.using
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.FeatureToggle.ARBEIDSFORHOLD_TOGGLE
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -14,6 +15,7 @@ import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -37,6 +39,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
+
+    @AfterEach
+    fun tearDown() {
+        ARBEIDSFORHOLD_TOGGLE.disable()
+    }
 
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
@@ -365,7 +372,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `arbeidsforhold togglet på`() = Toggles.Arbeidsforhold.enable {
+    fun `arbeidsforhold togglet på`() {
+        ARBEIDSFORHOLD_TOGGLE.enable()
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -406,7 +414,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `arbeidsforhold togglet av`() = Toggles.Arbeidsforhold.disable {
+    fun `arbeidsforhold togglet av`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)

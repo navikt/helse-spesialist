@@ -73,5 +73,5 @@ spec:
       value: "true"
     - name: ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE
       value: "true"
-    - name: ARBEIDSFORHOLD_FEATURE_TOGGLE
-      value: "true"
+    - name: UNLEASH_URL
+      value: https://unleash.nais.io/api

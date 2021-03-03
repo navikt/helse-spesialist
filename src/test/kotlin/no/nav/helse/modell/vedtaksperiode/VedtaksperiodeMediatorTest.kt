@@ -2,12 +2,14 @@ package no.nav.helse.modell.vedtaksperiode
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.FeatureToggle.ARBEIDSFORHOLD_TOGGLE
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,6 +45,11 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         every { restClient.hentSpeilSpapshot(any()) } returns SNAPSHOTV1
+    }
+
+    @AfterEach
+    fun tearDown() {
+        ARBEIDSFORHOLD_TOGGLE.disable()
     }
 
     @Test
@@ -249,7 +256,8 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `mapper arbeidsforhold`() = Toggles.Arbeidsforhold.enable {
+    fun `mapper arbeidsforhold`() {
+        ARBEIDSFORHOLD_TOGGLE.enable()
         val arbeidsforholdløsning = listOf(
             Arbeidsforholdløsning.Løsning(
                 stillingstittel = "Sykepleier",
