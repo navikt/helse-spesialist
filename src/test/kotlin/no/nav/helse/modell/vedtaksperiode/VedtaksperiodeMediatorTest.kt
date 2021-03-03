@@ -78,7 +78,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `En satt risikovurdering mappes til speil`() = Toggles.Risikovurdering.enable {
+    fun `En satt risikovurdering mappes til speil`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -116,7 +116,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Warnings mappes til speil som varsler`() = Toggles.Risikovurdering.enable {
+    fun `Warnings mappes til speil som varsler`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(

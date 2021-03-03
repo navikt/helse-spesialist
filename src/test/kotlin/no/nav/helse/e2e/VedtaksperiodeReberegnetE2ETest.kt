@@ -62,6 +62,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
@@ -108,6 +109,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
 
@@ -141,6 +143,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId1, 1
+        )
+
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId1,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         return godkjenningsmeldingId1
     }

@@ -40,7 +40,6 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
         }
     }
 
-    object Risikovurdering : Toggles("RISK_FEATURE_TOGGLE")
     object Automatisering : Toggles("AUTOMATISERING_FEATURE_TOGGLE")
     object Arbeidsgiverinformasjon : Toggles("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE")
     object Stikkprøver : Toggles("STIKKPROEVER_FEATURE_TOGGLE")

@@ -1,17 +1,14 @@
 package no.nav.helse.modell.risiko
 
-import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.alleHarRisikovurdering
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.warningteller
-import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class RisikoCommand(
@@ -22,7 +19,6 @@ internal class RisikoCommand(
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
-        if (!Toggles.Risikovurdering.enabled) return true
         if (risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null) return true
 
         aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
@@ -33,7 +29,6 @@ internal class RisikoCommand(
     }
 
     override fun resume(context: CommandContext): Boolean {
-        if (!Toggles.Risikovurdering.enabled) return true
         val løsning = context.get<Risikovurderingløsning>() ?: return false
         løsning.lagre(risikovurderingDao, vedtaksperiodeId)
         if (løsning.arbeidsuførhetWarning()) {

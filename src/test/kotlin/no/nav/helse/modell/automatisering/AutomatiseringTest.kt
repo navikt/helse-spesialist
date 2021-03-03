@@ -71,14 +71,12 @@ internal class AutomatiseringTest {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
         Toggles.Automatisering.enable()
-        Toggles.Risikovurdering.enable()
         every { plukkTilManuellMock() } returns false
     }
 
     @AfterEach
     fun teardown() {
         Toggles.Automatisering.pop()
-        Toggles.Risikovurdering.pop()
     }
 
     @Test
@@ -152,11 +150,6 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med egen ansatt er ikke automatiserbar`() {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
-    }
-
-    @Test
-    fun `vedtaksperiode med risikofeaturetoggle av er ikke automatiserbar`() = Toggles.Risikovurdering.disable {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
 

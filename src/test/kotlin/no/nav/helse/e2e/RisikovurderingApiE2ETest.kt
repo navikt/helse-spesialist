@@ -31,13 +31,11 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         Toggles.Automatisering.enable()
-        Toggles.Risikovurdering.enable()
     }
 
     @AfterEach
     fun teardown() {
         Toggles.Automatisering.pop()
-        Toggles.Risikovurdering.pop()
     }
 
     @Test
