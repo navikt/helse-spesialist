@@ -4,6 +4,7 @@ import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.FakeUnleash
 import no.finn.unleash.Unleash
 import no.finn.unleash.UnleashContext
+import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
 
 abstract class Toggles internal constructor(enabled: Boolean = false, private val force: Boolean = false) {
@@ -52,6 +53,8 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
 }
 
 
+
+
 object FeatureToggle {
 
     class Toggle(private val toggleName: String) {
@@ -61,6 +64,17 @@ object FeatureToggle {
         fun disable() = disable(toggleName)
     }
 
+    class ByEnvironmentStrategy(): Strategy {
+        override fun getName() = "byEnvironment"
+
+        override fun isEnabled(parameters: MutableMap<String, String>?) =
+            isEnabledByEnvironment(parameters, env)
+
+        fun isEnabledByEnvironment(parameters: MutableMap<String, String>?, environment: String): Boolean {
+            return parameters?.get("environment")?.split(",")?.map { it.trim() }?.contains(environment) == true
+        }
+    }
+
     private val env = System.getenv("NAIS_CLUSTER_NAME") ?: "test"
     private val fakeUnleash = FakeUnleash()
     private val unleash: Unleash = System.getenv("UNLEASH_URL")?.let {
@@ -68,7 +82,8 @@ object FeatureToggle {
             UnleashConfig.builder()
                 .appName(System.getenv("NAIS_APP_NAME"))
                 .unleashAPI(it)
-                .build()
+                .build(),
+            ByEnvironmentStrategy()
         )
     } ?: fakeUnleash
 
