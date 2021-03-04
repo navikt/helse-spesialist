@@ -63,7 +63,7 @@ object FeatureToggle {
     }
 
     class ByEnvironmentStrategy() : Strategy {
-        override fun getName() = "byEnvironment"
+        override fun getName() = "byEnvironmentParam"
 
         override fun isEnabled(parameters: MutableMap<String, String>?) =
             parameters?.get("environment")?.split(",")?.map { it.trim() }?.contains(env) == true
