@@ -53,26 +53,20 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
 }
 
 
-
-
 object FeatureToggle {
 
     class Toggle(private val toggleName: String) {
-        val enabled get()  = unleash.isEnabled(toggleName, context)
+        val enabled get() = unleash.isEnabled(toggleName, context)
         fun <R> ifEnabled(ifTrue: () -> R, ifFalse: () -> R) = if (enabled) ifTrue() else ifFalse()
         fun enable() = enable(toggleName)
         fun disable() = disable(toggleName)
     }
 
-    class ByEnvironmentStrategy(): Strategy {
+    class ByEnvironmentStrategy() : Strategy {
         override fun getName() = "byEnvironment"
 
         override fun isEnabled(parameters: MutableMap<String, String>?) =
-            isEnabledByEnvironment(parameters, env)
-
-        fun isEnabledByEnvironment(parameters: MutableMap<String, String>?, environment: String): Boolean {
-            return parameters?.get("environment")?.split(",")?.map { it.trim() }?.contains(environment) == true
-        }
+            parameters?.get("environment")?.split(",")?.map { it.trim() }?.contains(env) == true
     }
 
     private val env = System.getenv("NAIS_CLUSTER_NAME") ?: "test"
