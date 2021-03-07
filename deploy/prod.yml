@@ -24,9 +24,9 @@ spec:
       cpu: 50m
       memory: 512Mi
   replicas:
-    min: 6
-    max: 6
-    cpuThresholdPercentage: 90
+    min: 12
+    max: 12
+    cpuThresholdPercentage: 70
   ingresses:
     - https://spesialist.prod-fss.nais.io
     - https://spesialist.nais.adeo.no
