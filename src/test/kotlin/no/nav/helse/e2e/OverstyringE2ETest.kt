@@ -100,6 +100,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             PersonFraSpleisDto(
                 aktørId = AKTØR,
                 fødselsnummer = FØDSELSNUMMER,
+                dødsdato = null,
                 arbeidsgivere = listOf(
                     ArbeidsgiverFraSpleisDto(
                         organisasjonsnummer = ORGNR,

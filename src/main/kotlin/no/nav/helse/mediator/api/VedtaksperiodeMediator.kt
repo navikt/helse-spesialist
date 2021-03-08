@@ -151,6 +151,7 @@ internal class VedtaksperiodeMediator(
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,
                 fødselsnummer = speilSnapshot.fødselsnummer,
+                dødsdato = speilSnapshot.dødsdato,
                 personinfo = vedtak.personinfo,
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
