@@ -82,7 +82,6 @@ object FeatureToggle {
     } ?: fakeUnleash
 
 
-    val STIKKPRØVE_TOGGLE = Toggle("tbd.spesialist.stikkprove")
     val ARBEIDSFORHOLD_TOGGLE = Toggle("tbd.spesialist.arbeidsforhold")
 
     private val context = UnleashContext.builder()
