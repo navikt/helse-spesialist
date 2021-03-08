@@ -1,9 +1,14 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
+import no.nav.helse.modell.vedtak.snapshot.UtbetalingshistorikkElementDto
+import no.nav.helse.objectMapper
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -38,7 +43,8 @@ data class ArbeidsgiverForSpeilDto(
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
     val overstyringer: List<OverstyringForSpeilDto>,
-    val bransjer: List<String>?
+    val bransjer: List<String>?,
+    val utbetalingshistorikk: List<UtbetalingshistorikkElementForSpeilDto>
 )
 
 data class OverstyringForSpeilDto(
@@ -79,3 +85,76 @@ data class UtbetalingslinjeForSpeilDto(
     val fom: LocalDate,
     val tom: LocalDate
 )
+
+data class UtbetalingshistorikkElementForSpeilDto(
+    val beregningId: UUID,
+    val beregnettidslinje: List<Sykdomstidslinjedag>,
+    val hendelsetidslinje: List<Sykdomstidslinjedag>,
+    val utbetalinger: List<Utbetaling>
+) {
+    data class Sykdomstidslinjedag(
+        val dagen: LocalDate,
+        val type: String,
+        val kilde: Kilde,
+        val grad: Double? = null
+    ) {
+        data class Kilde(
+            val type: String,
+            val kildeId: UUID
+        )
+    }
+
+    data class Utbetaling(
+        val utbetalingstidslinje: List<Utbetalingsdag>
+    )
+
+    data class Utbetalingsdag(
+        val type: String,
+        val inntekt: Int,
+        val dato: LocalDate
+    )
+
+    companion object {
+        private val log = LoggerFactory.getLogger(UtbetalingshistorikkElementForSpeilDto::class.java)
+
+        fun toSpeilMap(utbetalingshistorikk: List<JsonNode>): List<UtbetalingshistorikkElementForSpeilDto> = try {
+            utbetalingshistorikk.map {
+                return@map objectMapper.treeToValue(it, UtbetalingshistorikkElementDto::class.java)
+                    .let { element ->
+                        UtbetalingshistorikkElementForSpeilDto(
+                            element.beregningId,
+                            element.beregnettidslinje.map { dag ->
+                                Sykdomstidslinjedag(
+                                    dag.dagen,
+                                    dag.type,
+                                    Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
+                                    dag.grad
+                                )
+                            },
+                            element.hendelsetidslinje.map { dag ->
+                                Sykdomstidslinjedag(
+                                    dag.dagen,
+                                    dag.type,
+                                    Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
+                                    dag.grad
+                                )
+                            },
+                            element.utbetalinger.map { utbetaling ->
+                                Utbetaling(
+                                    utbetaling.utbetalingstidslinje.map { dag ->
+                                        Utbetalingsdag(dag.type, dag.inntekt, dag.dato)
+                                    }
+                                )
+                            })
+                    }
+
+            }
+        } catch (e: JsonParseException) {
+            log.info("Ufullstendig sykdomshistorikk. Dette er forventet da vi har bygget ut historikkobjektet gradvis, men de burde bli borte etterhvert som tiden går")
+            emptyList()
+        } catch (e: MissingKotlinParameterException) {
+            log.info("Ufullstendig sykdomshistorikk. Dette er forventet da vi har bygget ut historikkobjektet gradvis, men de burde bli borte etterhvert som tiden går")
+            emptyList()
+        }
+    }
+}

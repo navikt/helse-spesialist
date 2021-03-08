@@ -102,7 +102,10 @@ internal class VedtaksperiodeMediator(
                     id = it.id,
                     overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder,
-                    bransjer = arbeidsgiverDto?.bransjer
+                    bransjer = arbeidsgiverDto?.bransjer,
+                    utbetalingshistorikk = it.utbetalingshistorikk?.let { utbetalingshistorikk ->
+                        UtbetalingshistorikkElementForSpeilDto.toSpeilMap(utbetalingshistorikk)
+                    } ?: emptyList()
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {
