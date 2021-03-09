@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.measureAsHistogram
+import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -17,6 +18,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
@@ -103,9 +105,7 @@ internal class VedtaksperiodeMediator(
                     overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder,
                     bransjer = arbeidsgiverDto?.bransjer,
-                    utbetalingshistorikk = it.utbetalingshistorikk?.let { utbetalingshistorikk ->
-                        UtbetalingshistorikkElementForSpeilDto.toSpeilMap(utbetalingshistorikk)
-                    } ?: emptyList()
+                    utbetalingshistorikk = if (REVURDERING_TOGGLE.enabled) mapUtbetalingshistorikk(it) else emptyList()
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {
@@ -166,6 +166,11 @@ internal class VedtaksperiodeMediator(
                 erPåVent = tildeling?.erPåVent ?: false
             )
         }
+
+    private fun mapUtbetalingshistorikk(it: ArbeidsgiverFraSpleisDto) =
+        it.utbetalingshistorikk?.let { utbetalingshistorikk ->
+            UtbetalingshistorikkElementForSpeilDto.toSpeilMap(utbetalingshistorikk)
+        } ?: emptyList()
 
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 }
