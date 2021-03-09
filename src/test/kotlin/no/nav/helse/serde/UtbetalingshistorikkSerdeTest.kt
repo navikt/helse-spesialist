@@ -3,9 +3,11 @@ package no.nav.helse.serde
 import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
+import no.nav.helse.desember
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -23,6 +25,32 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         every { restClient.hentSpeilSpapshot(any()) } returns snapshot()
+    }
+
+    @Test
+    fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
+        val beregningId = UUID.randomUUID()
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshot(utbetalingshistorikk(beregningId))
+
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
+        val historikkElement = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first()
+        val utbetaling = historikkElement.utbetalinger.first()
+        assertEquals(beregningId, historikkElement.beregningId)
+        assertEquals(2, historikkElement.beregnettidslinje.size)
+        assertEquals(1, historikkElement.hendelsetidslinje.size)
+        assertEquals(1, historikkElement.utbetalinger.size)
+        assertEquals(1, utbetaling.utbetalingstidslinje.size)
+        assertEquals(beregningId, utbetaling.beregningId)
+        assertEquals(237, utbetaling.gjenståendeSykedager)
+        assertEquals(28.desember(2018), utbetaling.maksdato)
+        assertEquals("UTBETALT", utbetaling.status)
+        assertEquals("UTBETALING", utbetaling.type)
+
     }
 
     @Test
@@ -53,23 +81,6 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         assertEquals(emptyList(), speilSnapshot.arbeidsgivere.last().utbetalingshistorikk)
     }
 
-    @Test
-    fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
-        val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshot(utbetalingshistorikk(beregningId))
-
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
-
-        assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
-        assertEquals(beregningId, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().beregningId)
-        assertEquals(2, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().beregnettidslinje.size)
-        assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().hendelsetidslinje.size)
-        assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().utbetalinger.size)
-        assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().utbetalinger.first().utbetalingstidslinje.size)
-    }
 
     @Test
     fun `mapper ikke ufullstending utbetalingshistorikk`() {
@@ -126,6 +137,8 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                         "beregningId": "$beregningId",
                         "type": "UTBETALING",
                         "maksdato": "2018-12-28",
+                        "status": "UTBETALT",
+                        "gjenståendeSykedager": 237,
                         "utbetalingstidslinje": [
                           {
                               "type": "NavDag",
