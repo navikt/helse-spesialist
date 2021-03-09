@@ -126,6 +126,8 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                         "beregningId": "$beregningId",
                         "type": "UTBETALING",
                         "maksdato": "2018-12-28",
+                        "status": "UTBETALT",
+                        "gjenståendeSykedager": 237,
                         "utbetalingstidslinje": [
                           {
                               "type": "NavDag",

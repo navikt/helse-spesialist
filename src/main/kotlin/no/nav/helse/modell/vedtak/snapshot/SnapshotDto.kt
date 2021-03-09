@@ -38,6 +38,11 @@ data class SykdomstidslinjedagDto(
 }
 
 data class UtbetalingDto(
+    val type: String,
+    val status: String,
+    val gjenståendeSykedager: Int?,
+    val maksdato: LocalDate,
+    val beregningId: UUID,
     val utbetalingstidslinje: List<UtbetalingsdagDto>
 )
 

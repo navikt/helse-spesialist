@@ -104,6 +104,11 @@ data class UtbetalingshistorikkElementForSpeilDto(
     }
 
     data class Utbetaling(
+        val type: String,
+        val status: String,
+        val gjenståendeSykedager: Int?,
+        val maksdato: LocalDate,
+        val beregningId: UUID,
         val utbetalingstidslinje: List<Utbetalingsdag>
     )
 
@@ -140,9 +145,12 @@ data class UtbetalingshistorikkElementForSpeilDto(
                             },
                             element.utbetalinger.map { utbetaling ->
                                 Utbetaling(
-                                    utbetaling.utbetalingstidslinje.map { dag ->
-                                        Utbetalingsdag(dag.type, dag.inntekt, dag.dato)
-                                    }
+                                    utbetalingstidslinje = utbetaling.utbetalingstidslinje.map { dag -> Utbetalingsdag(dag.type, dag.inntekt, dag.dato)},
+                                    type = utbetaling.type,
+                                    status = utbetaling.status,
+                                    gjenståendeSykedager = utbetaling.gjenståendeSykedager,
+                                    maksdato = utbetaling.maksdato,
+                                    beregningId = utbetaling.beregningId
                                 )
                             })
                     }
