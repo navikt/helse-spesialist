@@ -7,6 +7,7 @@ import io.mockk.verify
 import kotliquery.LoanPattern.using
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshotMedWarning
@@ -149,6 +150,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
         assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
     }
@@ -242,6 +244,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
     }
 
@@ -552,6 +555,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             )
         }
         sendPåminnelseOppgaveMakstid()
+
+        assertOppgave(0, AvventerSaksbehandler, MakstidOppnådd)
 
         assertAutomatisertLøsning(godkjent = false) {
             assertTrue(it.path("makstidOppnådd").booleanValue())
