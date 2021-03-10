@@ -125,6 +125,11 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = vedtaksperiodeId,
             ekstraArbeidsgivere = ekstraArbeidsgivere
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = vedtaksperiodeId,
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false

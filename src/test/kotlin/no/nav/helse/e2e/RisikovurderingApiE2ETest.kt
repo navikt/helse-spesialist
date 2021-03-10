@@ -98,6 +98,11 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false

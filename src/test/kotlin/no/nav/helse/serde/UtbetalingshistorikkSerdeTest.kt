@@ -34,8 +34,6 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         REVURDERING_TOGGLE.disable()
     }
 
-
-
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
         val beregningId = UUID.randomUUID()
@@ -44,6 +42,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
         assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
@@ -67,6 +66,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
         assertEquals(emptyList(), speilSnapshot.arbeidsgivere.first().utbetalingshistorikk)
     }
@@ -77,6 +77,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
         assertEquals(emptyList(), speilSnapshot.arbeidsgivere.last().utbetalingshistorikk)
     }
@@ -86,6 +87,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
         assertEquals(emptyList(), speilSnapshot.arbeidsgivere.last().utbetalingshistorikk)
     }
@@ -99,6 +101,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 
         assertEquals(0, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)

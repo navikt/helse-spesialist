@@ -1,6 +1,5 @@
 package no.nav.helse.modell.arbeidsforhold.command
 
-import no.nav.helse.mediator.FeatureToggle.ARBEIDSFORHOLD_TOGGLE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.Command
@@ -20,7 +19,7 @@ internal class OpprettArbeidsforholdCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (!ARBEIDSFORHOLD_TOGGLE.enabled || arbeidsforholdOpprettet()) return ignorer()
+        if (arbeidsforholdOpprettet()) return ignorer()
         return behandle(context)
     }
 
@@ -30,7 +29,7 @@ internal class OpprettArbeidsforholdCommand(
         arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer).isNotEmpty()
 
     private fun ignorer(): Boolean {
-        logg.info(ARBEIDSFORHOLD_TOGGLE.ifEnabled({ "Arbeidsforhold togglet av" }) { "Arbeidsforhold finnes fra før" })
+        logg.info("Arbeidsforhold finnes fra før")
         return true
     }
 

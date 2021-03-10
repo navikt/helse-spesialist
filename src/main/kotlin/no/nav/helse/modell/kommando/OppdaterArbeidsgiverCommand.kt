@@ -11,7 +11,7 @@ internal class OppdaterArbeidsgiverCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val trengerOppdateringer = (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty()
-        if (!Toggles.Arbeidsgiverinformasjon.enabled || trengerOppdateringer) return true
+        if (trengerOppdateringer) return true
         return behandle(context)
     }
 

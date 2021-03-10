@@ -63,6 +63,11 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId1,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId1,
             erEgenAnsatt = false

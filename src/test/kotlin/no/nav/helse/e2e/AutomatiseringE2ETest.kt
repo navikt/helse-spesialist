@@ -5,6 +5,7 @@ import io.mockk.every
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeMediatorTest
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
@@ -57,6 +58,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -75,6 +81,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -109,6 +116,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -127,6 +139,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -158,6 +171,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -183,6 +201,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -230,6 +249,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -257,6 +281,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -298,6 +323,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -323,6 +353,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -355,6 +386,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -389,6 +425,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -417,6 +454,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -444,6 +488,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",

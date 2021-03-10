@@ -1,6 +1,5 @@
 package no.nav.helse.modell.arbeidsforhold.command
 
-import no.nav.helse.mediator.FeatureToggle.ARBEIDSFORHOLD_TOGGLE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.Command
@@ -20,10 +19,6 @@ internal class OppdaterArbeidsforholdCommand(
     }
 
     override fun execute(context: CommandContext): Boolean = when {
-        !ARBEIDSFORHOLD_TOGGLE.enabled -> {
-            logg.info("Arbeidsforhold togglet av")
-            true
-        }
         arbeidsforholdOppdatert() -> {
             logg.info("Arbeidsforhold allerede oppdatert")
             true

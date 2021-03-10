@@ -7,7 +7,6 @@ import io.mockk.verify
 import kotliquery.LoanPattern.using
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.FeatureToggle.ARBEIDSFORHOLD_TOGGLE
 import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -15,7 +14,6 @@ import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -39,11 +37,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
-
-    @AfterEach
-    fun tearDown() {
-        ARBEIDSFORHOLD_TOGGLE.disable()
-    }
 
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
@@ -79,6 +72,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -101,6 +99,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertOppgave(0, AvventerSaksbehandler)
@@ -115,6 +114,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
@@ -144,6 +148,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -160,6 +165,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(
@@ -200,6 +210,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -227,6 +242,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
@@ -247,8 +263,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT",)
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         verify(exactly = 2) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
@@ -282,11 +303,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = hendelseId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
 
-        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
-        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
+        assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
     }
 
     @Test
@@ -300,6 +326,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(godkjenningsmeldingId, true)
         sendDigitalKontaktinformasjonløsning(
@@ -317,6 +348,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -342,6 +374,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -364,6 +401,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertVedtak(VEDTAKSPERIODE_ID)
@@ -372,8 +410,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `arbeidsforhold togglet på`() {
-        ARBEIDSFORHOLD_TOGGLE.enable()
+    fun `vanlig arbeidsforhold`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -414,41 +451,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `arbeidsforhold togglet av`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-    }
-
-    @Test
     fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         val hendelseId1 = håndterGodkjenningsbehov()
@@ -457,6 +459,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             hendelseId1,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -487,6 +490,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
     }
@@ -498,6 +502,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(
@@ -573,6 +582,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(

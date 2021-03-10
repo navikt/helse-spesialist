@@ -49,7 +49,6 @@ abstract class Toggles internal constructor(enabled: Boolean = false, private va
 
 
     object Automatisering : Toggles("AUTOMATISERING_FEATURE_TOGGLE")
-    object Arbeidsgiverinformasjon : Toggles("ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE")
 }
 
 

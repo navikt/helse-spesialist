@@ -39,6 +39,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = hendelseId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId,
@@ -118,6 +123,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("Bransje1", "Bransje2")
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = hendelseId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(hendelseId, false)
         sendDigitalKontaktinformasjonløsning(

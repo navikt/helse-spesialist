@@ -71,7 +71,5 @@ spec:
       value: 9b484b08-503a-4c72-9861-c59acec774e6
     - name: AUTOMATISERING_FEATURE_TOGGLE
       value: "true"
-    - name: ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE
-      value: "true"
     - name: UNLEASH_URL
       value: https://unleash.nais.io/api

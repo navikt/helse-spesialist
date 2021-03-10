@@ -28,6 +28,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -38,6 +43,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -63,6 +69,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
@@ -81,6 +88,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
@@ -95,6 +107,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "AVBRUTT"
         )
         assertOppgaver(0)
@@ -104,6 +117,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -129,6 +143,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId1,
             orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId1,
+            orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(

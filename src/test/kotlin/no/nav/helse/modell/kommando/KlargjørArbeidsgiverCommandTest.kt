@@ -31,12 +31,6 @@ internal class KlargjørArbeidsgiverCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(dao)
-        Toggles.Arbeidsgiverinformasjon.enable()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggles.Arbeidsgiverinformasjon.pop()
     }
 
     @Test
@@ -58,13 +52,6 @@ internal class KlargjørArbeidsgiverCommandTest {
         arbeidsgiverFinnes()
         assertTrue(command.execute(context))
         verify(exactly = 0) { dao.insertArbeidsgiver(any(), any(), any()) }
-    }
-
-    @Test
-    fun `sender ikke behov om feature toggle er skrudd av`() = Toggles.Arbeidsgiverinformasjon.disable {
-        assertTrue(command.execute(context))
-        assertFalse(context.harBehov())
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
     }
 
     private fun arbeidsgiverFinnes() {

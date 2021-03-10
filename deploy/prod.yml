@@ -75,8 +75,6 @@ spec:
       value: c1923167-0725-43fe-91ef-1a5dafc5e246
     - name: AUTOMATISERING_FEATURE_TOGGLE
       value: "true"
-    - name: ARBEIDSGIVERINFORMASJON_FEATURE_TOGGLE
-      value: "true"
     - name: STIKKPROEVER_DIVISOR
       value: "200"
     - name: UNLEASH_URL

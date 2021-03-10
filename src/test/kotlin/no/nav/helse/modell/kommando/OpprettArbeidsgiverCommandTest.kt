@@ -29,12 +29,6 @@ internal class OpprettArbeidsgiverCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearMocks(dao)
-        Toggles.Arbeidsgiverinformasjon.enable()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggles.Arbeidsgiverinformasjon.pop()
     }
 
     @Test
