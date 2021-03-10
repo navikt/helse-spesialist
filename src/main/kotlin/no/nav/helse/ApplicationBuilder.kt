@@ -120,11 +120,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         reservasjonDao
     )
 
-    private val plukkTilManuell: PlukkTilManuell =  ({
-        val divisor =
-            requireNotNull(env["STIKKPROEVER_DIVISOR"]) { "STIKKPROEVER_DIVISOR må oppgis når stikkprøver er aktivert" }.toInt()
-        require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-        nextInt(divisor) == 0 })
+    private val plukkTilManuell: PlukkTilManuell = ({
+        env["STIKKPROEVER_DIVISOR"]?.let {
+            val divisor = it.toInt()
+            require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
+            nextInt(divisor) == 0
+        } ?: false
+    })
+
 
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
