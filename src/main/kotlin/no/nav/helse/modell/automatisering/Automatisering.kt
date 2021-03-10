@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -66,7 +65,6 @@ internal class Automatisering(
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == SaksbehandlerInntektskilde.EN_ARBEIDSGIVER },
-            validering("Automatisering er skrudd av") { Toggles.Automatisering.enabled }
         )
     }
 

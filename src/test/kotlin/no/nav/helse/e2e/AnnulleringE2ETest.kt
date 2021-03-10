@@ -23,8 +23,6 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId1, snapshotV1)
         vedtaksperiode(vedtaksperiodeId2, snapshotV2)
 
-        assertDoesNotThrow("sanity check: oppgave ikke opprettet") { testRapid.inspektør.oppgaveId() }
-
         assertVedtak(vedtaksperiodeId2)
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotFinal
         sendUtbetalingAnnullert()
