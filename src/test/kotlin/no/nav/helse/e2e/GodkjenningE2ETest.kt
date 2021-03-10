@@ -7,8 +7,6 @@ import io.mockk.verify
 import kotliquery.LoanPattern.using
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.Toggles
-import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshotMedWarning
@@ -102,13 +100,12 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        assertOppgave(0, AvventerSaksbehandler)
         assertVedtak(VEDTAKSPERIODE_ID)
     }
 
     @Test
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -138,7 +135,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -152,7 +149,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
         assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
     }
@@ -202,7 +198,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `løser godkjenningsbehov når saksbehandler avslår`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -232,7 +228,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
-        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -246,7 +242,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
     }
 
@@ -269,7 +264,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT",)
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         verify(exactly = 2) { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
@@ -452,7 +447,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         val hendelseId1 = håndterGodkjenningsbehov()
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
@@ -469,8 +464,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgaver(1)
-        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
     }
 
     @Test
@@ -478,8 +471,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         val hendelseId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         val hendelseId2 = håndterGodkjenningsbehov()
-        assertOppgaver(1)
-        assertOppgave(0, AvventerSaksbehandler)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
         assertTilstand(
             hendelseId2,
@@ -527,7 +518,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
         håndterGodkjenningsbehov()
-        assertOppgaver(1)
 
         testRapid.reset()
         sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
@@ -536,24 +526,22 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
-        Toggles.Automatisering.enable {
-            every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(
-                VEDTAKSPERIODE_ID
-            )
-            val hendelseId = håndterGodkjenningsbehov()
-            sendRisikovurderingløsning(hendelseId, VEDTAKSPERIODE_ID)
-            assertOppgaver(0)
-            assertAutomatisertLøsning()
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(
+            VEDTAKSPERIODE_ID
+        )
+        val hendelseId = håndterGodkjenningsbehov()
+        sendRisikovurderingløsning(hendelseId, VEDTAKSPERIODE_ID)
+        assertOppgaver(0)
+        assertAutomatisertLøsning()
 
-            testRapid.reset()
-            sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
-            assertTrue(testRapid.inspektør.behov().isEmpty())
-        }
+        testRapid.reset()
+        sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        assertTrue(testRapid.inspektør.behov().isEmpty())
     }
 
     @Test
     fun `løser godkjenningsbehov når makstid for oppgave oppnås`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         håndterGodkjenningsbehov()
         using(sessionOf(dataSource)) {
             it.run(
@@ -565,7 +553,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         }
         sendPåminnelseOppgaveMakstid()
 
-        assertOppgave(0, AvventerSaksbehandler, MakstidOppnådd)
         assertAutomatisertLøsning(godkjent = false) {
             assertTrue(it.path("makstidOppnådd").booleanValue())
         }

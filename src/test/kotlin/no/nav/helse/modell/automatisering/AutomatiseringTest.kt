@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -18,7 +17,6 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.objectMapper
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -70,13 +68,7 @@ internal class AutomatiseringTest {
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
-        Toggles.Automatisering.enable()
         every { plukkTilManuellMock() } returns false
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggles.Automatisering.pop()
     }
 
     @Test
@@ -89,16 +81,6 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `lagrer automatiseringen som ikke automatisk godkjent hvis ikke automatiserbar`() {
-        Toggles.Automatisering.disable {
-            automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) {
-                fail("Denne skal ikke kalles når perioden blir automatisk behandlet")
-            }
-            verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any()) }
-        }
-    }
-
-    @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(
             Warning(
@@ -107,6 +89,10 @@ internal class AutomatiseringTest {
             )
         )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any()) }
+        verify(exactly = 0) {
+            plukkTilManuellMock()
+        }
     }
 
     @Test
@@ -154,22 +140,9 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `vedtaksperiode med automatiseringsfeaturetoggle av er ikke automatiserbar`() = Toggles.Automatisering.disable {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
-    }
-
-    @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
         every { plukkTilManuellMock() } returns true
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { fail("Denne skal ikke kalles") }
-    }
-
-    @Test
-    fun `Tar ikke stikkprøve av ikke-automatiserbar periode`() = Toggles.Automatisering.disable {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID()) { }
-        verify(exactly = 0) {
-            plukkTilManuellMock()
-        }
     }
 
     @Test

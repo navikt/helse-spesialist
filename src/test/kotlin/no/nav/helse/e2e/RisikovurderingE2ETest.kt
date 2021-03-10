@@ -6,14 +6,11 @@ import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -42,16 +39,6 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             }]
         """
     )
-
-    @BeforeEach
-    fun setup() {
-        Toggles.Automatisering.enable()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggles.Automatisering.pop()
-    }
 
     @Test
     fun `oppretter oppgave av type RISK_QA`() {

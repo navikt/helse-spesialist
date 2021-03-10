@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import no.nav.helse.desember
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
-import no.nav.helse.mediator.Toggles
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.*
-import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.Toggles
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import java.time.LocalDate

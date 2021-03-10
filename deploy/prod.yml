@@ -73,9 +73,7 @@ spec:
       value: 5cc46653-7c6c-4c5e-b617-baf648452ad4
     - name: SPEIL_CLIENT_ID
       value: c1923167-0725-43fe-91ef-1a5dafc5e246
-    - name: AUTOMATISERING_FEATURE_TOGGLE
-      value: "true"
-    - name: STIKKPROEVER_DIVISOR
+    - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering
       value: "200"
     - name: UNLEASH_URL
       value: https://unleash.nais.io/api

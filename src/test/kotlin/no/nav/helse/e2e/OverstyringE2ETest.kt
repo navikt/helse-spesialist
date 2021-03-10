@@ -4,9 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.overstyring.OverstyringDagDto
-import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
-import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
-import no.nav.helse.snapshotUtenWarnings
+import no.nav.helse.snapshotMedWarning
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -21,7 +19,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
-        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        private val SNAPSHOTV1 = snapshotMedWarning(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -101,21 +99,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns objectMapper.writeValueAsString(
-            PersonFraSpleisDto(
-                aktørId = AKTØR,
-                fødselsnummer = FØDSELSNUMMER,
-                dødsdato = null,
-                arbeidsgivere = listOf(
-                    ArbeidsgiverFraSpleisDto(
-                        organisasjonsnummer = ORGNR,
-                        id = hendelseId,
-                        vedtaksperioder = emptyList()
-                    )
-                ),
-                inntektsgrunnlag = objectMapper.nullNode()
-            )
-        )
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns  snapshotMedWarning(VEDTAKSPERIODE_ID, ORGNR)
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,

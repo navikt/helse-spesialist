@@ -2,15 +2,11 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.mediator.Toggles
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeMediatorTest
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertNotNull
@@ -27,16 +23,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
-
-    @BeforeEach
-    fun setup() {
-        Toggles.Automatisering.enable()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggles.Automatisering.pop()
-    }
 
     @Test
     fun `fatter automatisk vedtak`() {
@@ -403,75 +389,6 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             antall = 1,
-            oppslagFeilet = false
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        val løsningId = sendSaksbehandlerløsning(
-            oppgaveId = OPPGAVEID,
-            saksbehandlerIdent = SAKSBEHANDLERIDENT,
-            saksbehandlerEpost = SAKSBEHANDLEREPOST,
-            saksbehandlerOid = SAKSBEHANDLEROID,
-            godkjent = true
-        )
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
-        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
-    }
-
-    @Test
-    fun `fatter ikke automatisk vedtak ved avskrudd toggle`() = Toggles.Automatisering.disable {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Saksbehandleroppgavetype.FORLENGELSE
-        )
-        sendPersoninfoløsning(
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            hendelseId = godkjenningsmeldingId
-        )
-
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            navn = "En Arbeidsgiver",
-            bransjer = listOf("En eller flere bransjer")
-        )
-
-        sendArbeidsforholdløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-
-        sendEgenAnsattløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = false
-        )
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            antall = 0,
             oppslagFeilet = false
         )
         sendRisikovurderingløsning(
