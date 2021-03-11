@@ -53,6 +53,8 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         assertEquals(1, utbetaling.utbetalingstidslinje.size)
         assertEquals(beregningId, utbetaling.beregningId)
         assertEquals(237, utbetaling.gjenståendeSykedager)
+        assertEquals(11, utbetaling.forbrukteSykedager)
+        assertEquals(15741, utbetaling.arbeidsgiverNettoBeløp)
         assertEquals(28.desember(2018), utbetaling.maksdato)
         assertEquals("UTBETALT", utbetaling.status)
         assertEquals("UTBETALING", utbetaling.type)
@@ -149,6 +151,8 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                         "maksdato": "2018-12-28",
                         "status": "UTBETALT",
                         "gjenståendeSykedager": 237,
+                        "forbrukteSykedager": 11,
+                        "arbeidsgiverNettoBeløp":15741,
                         "utbetalingstidslinje": [
                           {
                               "type": "NavDag",

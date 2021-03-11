@@ -108,6 +108,8 @@ data class UtbetalingshistorikkElementForSpeilDto(
         val type: String,
         val status: String,
         val gjenståendeSykedager: Int?,
+        val forbrukteSykedager: Int?,
+        val arbeidsgiverNettoBeløp: Int,
         val maksdato: LocalDate,
         val beregningId: UUID,
         val utbetalingstidslinje: List<Utbetalingsdag>
@@ -150,6 +152,8 @@ data class UtbetalingshistorikkElementForSpeilDto(
                                     type = utbetaling.type,
                                     status = utbetaling.status,
                                     gjenståendeSykedager = utbetaling.gjenståendeSykedager,
+                                    forbrukteSykedager = utbetaling.forbrukteSykedager,
+                                    arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverNettoBeløp,
                                     maksdato = utbetaling.maksdato,
                                     beregningId = utbetaling.beregningId
                                 )

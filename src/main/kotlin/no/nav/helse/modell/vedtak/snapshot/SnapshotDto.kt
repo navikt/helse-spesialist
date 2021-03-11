@@ -42,6 +42,8 @@ data class UtbetalingDto(
     val type: String,
     val status: String,
     val gjenståendeSykedager: Int?,
+    val forbrukteSykedager: Int?,
+    val arbeidsgiverNettoBeløp: Int,
     val maksdato: LocalDate,
     val beregningId: UUID,
     val utbetalingstidslinje: List<UtbetalingsdagDto>
