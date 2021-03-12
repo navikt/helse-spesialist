@@ -34,9 +34,10 @@ internal class JwtStub {
         clientId: String,
         issuer: String,
         navn: String = "navn",
-    navIdent: String = "X999999"
+        navIdent: String = "X999999"
     ) = JWT.create()
         .withArrayClaim("groups", groups.toTypedArray())
+        .withSubject(navIdent)
         .withClaim("oid", oid)
         .withClaim("preferred_username", epostadresse)
         .withClaim("name", navn)

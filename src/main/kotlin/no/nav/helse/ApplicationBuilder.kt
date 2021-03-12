@@ -72,11 +72,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         install(JsonFeature) { serializer = JacksonSerializer() }
     }
     private val oidcDiscovery =
-        runBlocking { AzureAadClient(azureAdClient).oidcDiscovery(System.getenv("AZURE_CONFIG_URL")) }
+        runBlocking { AzureAadClient(azureAdClient).oidcDiscovery(System.getenv("AZURE_APP_WELL_KNOWN_URL") ?: System.getenv("AZURE_CONFIG_URL")) }
     private val accessTokenClient = AccessTokenClient(
         aadAccessTokenUrl = oidcDiscovery.token_endpoint,
-        clientId = readClientId(),
-        clientSecret = readClientSecret(),
+        clientId = System.getenv("AZURE_APP_CLIENT_ID") ?: readClientId(),
+        clientSecret = System.getenv("AZURE_APP_CLIENT_SECRET") ?: readClientSecret(),
         httpClient = azureAdClient
     )
     private val speilSnapshotRestClient = SpeilSnapshotRestClient(
@@ -86,9 +86,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
 
     private val azureConfig = AzureAdAppConfig(
-        clientId = readClientId(),
-        speilClientId = env.getValue("SPEIL_CLIENT_ID"),
-        requiredGroup = env.getValue("AZURE_REQUIRED_GROUP")
+        clientId = System.getenv("AZURE_APP_CLIENT_ID") ?: readClientId(),
+        requiredGroup = env["AZURE_REQUIRED_GROUP"]
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
@@ -200,7 +199,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             )
             basicAuthentication(env.getValue("ADMIN_SECRET"))
             routing {
-                authenticate("saksbehandler") {
+                authenticate("oidc") {
                     oppgaveApi(oppgaveMediator, env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
                     vedtaksperiodeApi(
                         hendelseMediator = hendelseMediator,
@@ -222,9 +221,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, oppgaveDao, hendelseMediator))
-                }
-                authenticate("saksbehandler-direkte") {
-                    direkteOppgaveApi(oppgaveMediator)
                 }
             }
             adminApi(hendelseMediator)

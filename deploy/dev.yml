@@ -54,9 +54,6 @@ spec:
         - application: speil
   vault:
     enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/azure
-        kvPath: /azuread/data/dev/creds/spesialist
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
@@ -70,17 +67,11 @@ spec:
       value: spesialist
     - name: VAULT_MOUNTPATH
       value: postgresql/preprod-fss/
-    - name: AZURE_CONFIG_URL
-      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/v2.0/.well-known/openid-configuration
-    - name: AZURE_REQUIRED_GROUP
-      value: f844f535-2174-445c-a0db-b6c55f2e4780
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: 1119ba1f-3b10-4598-a47b-16568c379114
     - name: SPLEIS_CLIENT_ID
-      value: db11b132-a015-41df-8593-53f8d50eda31
+      value: api://dev-fss.tbd.spleis-api/.default
     - name: SPESIALIST_OID
       value: be87b958-4ff0-405d-80b5-f47e836f0a0e
-    - name: SPEIL_CLIENT_ID
-      value: 9b484b08-503a-4c72-9861-c59acec774e6
     - name: UNLEASH_URL
       value: https://unleash.nais.io/api

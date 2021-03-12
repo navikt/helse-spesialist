@@ -1,18 +1,17 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
-import io.ktor.http.Parameters
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
+import kotlin.collections.HashMap
+import kotlin.collections.set
 
 class AccessTokenClient(
     private val aadAccessTokenUrl: String,
@@ -27,10 +26,10 @@ class AccessTokenClient(
     @Volatile
     private var tokenMap = HashMap<String, AadAccessToken>()
 
-    suspend fun hentAccessToken(resource: String): String {
+    suspend fun hentAccessToken(scope: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
-            (tokenMap[resource]
+            (tokenMap[scope]
                 ?.takeUnless { it.expiry.isBefore(omToMinutter) }
                 ?: run {
                     log.info("Henter nytt token fra Azure AD")
@@ -40,7 +39,7 @@ class AccessTokenClient(
                             method = HttpMethod.Post
                             body = FormDataContent(Parameters.build {
                                 append("client_id", clientId)
-                                append("scope", "api://$resource/.default")
+                                append("scope", scope)
                                 append("grant_type", "client_credentials")
                                 append("client_secret", clientSecret)
                             })
@@ -48,7 +47,7 @@ class AccessTokenClient(
                     } catch (e: Exception) {
                         throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
                     }
-                    tokenMap[resource] = response
+                    tokenMap[scope] = response
                     log.debug("Har hentet accesstoken")
                     return@run response
                 }).access_token

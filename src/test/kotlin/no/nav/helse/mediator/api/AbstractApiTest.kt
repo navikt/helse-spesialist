@@ -95,14 +95,13 @@ abstract class AbstractApiTest {
                         OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
                     val azureConfig =
                         AzureAdAppConfig(
-                            clientId = UUID.randomUUID().toString(),
-                            speilClientId = clientId,
+                            clientId = clientId,
                             requiredGroup = requiredGroup.toString()
                         )
                     val jwkProvider = jwtStub.getJwkProviderMock()
                     azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
                     routing {
-                        authenticate("saksbehandler-direkte", build = build)
+                        authenticate("oidc", build = build)
                     }
                 }
         }

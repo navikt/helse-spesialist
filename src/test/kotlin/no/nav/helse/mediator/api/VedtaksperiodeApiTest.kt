@@ -109,14 +109,13 @@ internal class VedtaksperiodeApiTest {
             val azureConfig =
                 AzureAdAppConfig(
                     clientId = clientId,
-                    speilClientId = "SpeilClientId",
                     requiredGroup = requiredGroup
                 )
             val jwkProvider = jwtStub.getJwkProviderMock()
             azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
 
             routing {
-                authenticate("saksbehandler") {
+                authenticate("oidc") {
                     vedtaksperiodeApi(vedtaksperiodeMediator, hendelseMediator)
                 }
             }
