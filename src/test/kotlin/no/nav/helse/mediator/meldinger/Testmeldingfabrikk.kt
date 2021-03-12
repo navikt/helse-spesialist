@@ -217,6 +217,24 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
+    fun lagUtbetalingAnnullertEvent(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String = "123456789",
+        fagsystemId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        annullertAvSaksbehandler: LocalDate = LocalDate.now(),
+        saksbehandlerIdent: String = "saksbehandler_ident"
+    ) =
+        nyHendelse(
+            id, "utbetaling_annullert", mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "fagsystemId" to fagsystemId.toString(),
+                "utbetalingId" to utbetalingId.toString(),
+                "annullertAvSaksbehandler" to annullertAvSaksbehandler.toString(),
+                "saksbehandlerIdent" to saksbehandlerIdent
+            )
+        )
+
     fun lagHentPersoninfoløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),

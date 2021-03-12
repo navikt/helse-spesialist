@@ -63,7 +63,7 @@ internal class HendelseMediator(
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
-            UtbetalingAnnullert.River(it, this)
+            UtbetalingAnnullert.UtbetalingAnnullertRiver(it, this)
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             OppgaveMakstidPåminnelse.River(it, this)

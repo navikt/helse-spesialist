@@ -5,7 +5,7 @@ import io.mockk.every
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
+import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -35,13 +35,16 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     private fun sendUtbetalingAnnullert() {
         @Language("JSON")
-        val json = """
-{
-    "@event_name": "utbetaling_annullert",
-    "@id": "${UUID.randomUUID()}",
-    "fødselsnummer": "$UNG_PERSON_FNR_2018",
-    "fagsystemId": "ASDJ12IA312KLS"
-}"""
+            val json = """
+            {
+                "@event_name": "utbetaling_annullert",
+                "@id": "${UUID.randomUUID()}",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "fagsystemId": "ASDJ12IA312KLS",
+                "utbetalingId": "ASDJ12IA312KLW",
+                "annullertAvSaksbehandler": "${LocalDate.now()}",
+                "saksbehandlerIdent": "saksbehandler_ident"
+            }"""
 
         testRapid.sendTestMessage(json)
     }

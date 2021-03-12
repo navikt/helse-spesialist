@@ -27,7 +27,7 @@ internal class UtbetalingAnnullert(
     override fun vedtaksperiodeId(): UUID? = null
     override fun toJson(): String = json
 
-    internal class River(
+    internal class UtbetalingAnnullertRiver(
         rapidsConnection: RapidsConnection,
         private val mediator: IHendelseMediator
     ) : PacketListener {
@@ -38,7 +38,7 @@ internal class UtbetalingAnnullert(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "utbetaling_annullert")
-                    it.requireKey("@id", "fødselsnummer", "fagsystemId")
+                    it.requireKey("@id", "fødselsnummer", "fagsystemId", "utbetalingId", "annullertAvSaksbehandler", "saksbehandlerIdent")
                 }
             }.register(this)
         }
