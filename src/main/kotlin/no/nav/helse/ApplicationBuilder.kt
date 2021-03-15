@@ -241,6 +241,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelseDao = hendelseDao,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
+            saksbehandlerDao = saksbehandlerDao,
             hendelsefabrikk = hendelsefabrikk,
             oppgaveMediator = oppgaveMediator
         )

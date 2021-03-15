@@ -23,6 +23,7 @@ internal class HendelseMediatorTest {
         hendelseDao = mockk(relaxed = true),
         tildelingDao = mockk(relaxed = true),
         reservasjonDao = mockk(relaxed = true),
+        saksbehandlerDao = mockk(relaxed = true),
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = mockk(relaxed = true)
     )

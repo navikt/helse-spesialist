@@ -191,6 +191,24 @@ ORDER BY ui.id, u.id DESC
         }
     }
 
+    internal fun nyAnnullering(annullertTidspunkt: LocalDateTime, saksbehandlerRef: UUID): Boolean {
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO annullert_av_saksbehandler(annullert_tidspunkt, saksbehandler_ref)
+            VALUES (:annullertTidspunkt, :saksbehandlerRef)
+        """
+        return using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    statement, mapOf(
+                        "annullertTidspunkt" to annullertTidspunkt,
+                        "saksbehandlerRef" to saksbehandlerRef
+                    )
+                ).asExecute
+            )
+        }
+    }
+
     private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
         @Language("PostgreSQL")
         val query = """SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"""

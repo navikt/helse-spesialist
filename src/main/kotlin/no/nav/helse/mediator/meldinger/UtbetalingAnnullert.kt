@@ -38,7 +38,7 @@ internal class UtbetalingAnnullert(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "utbetaling_annullert")
-                    it.requireKey("@id", "fødselsnummer", "fagsystemId", "utbetalingId", "annullertAvSaksbehandler", "saksbehandlerIdent")
+                    it.requireKey("@id", "fødselsnummer", "fagsystemId", "utbetalingId", "annullertAvSaksbehandler", "saksbehandlerEpost")
                 }
             }.register(this)
         }

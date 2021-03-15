@@ -21,6 +21,10 @@ internal class SaksbehandlerDao(private val dataSource: DataSource) {
         it.finnSaksbehandler(oid)
     }
 
+    internal fun finnSaksbehandler(epost: String) = sessionOf(dataSource).use {
+        it.finnSaksbehandler(epost)
+    }
+
     internal fun invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) =
         sessionOf(dataSource).use { it.invaliderSaksbehandleroppgaver(fødselsnummer, orgnummer) }
 
@@ -66,6 +70,22 @@ WHERE oid = ?
         return this.run(queryOf(finnSaksbehandlerQuery, oid).map { saksbehandlerRow ->
             SaksbehandlerDto(
                 oid = oid,
+                navn = saksbehandlerRow.string("navn"),
+                epost = saksbehandlerRow.string("epost")
+            )
+        }.asList)
+    }
+
+    private fun Session.finnSaksbehandler(epost: String): List<SaksbehandlerDto> {
+        @Language("PostgreSQL")
+        val finnSaksbehandlerQuery = """
+SELECT *
+FROM saksbehandler
+WHERE epost = ?
+    """
+        return this.run(queryOf(finnSaksbehandlerQuery, epost).map { saksbehandlerRow ->
+            SaksbehandlerDto(
+                oid = UUID.fromString(saksbehandlerRow.string("oid")),
                 navn = saksbehandlerRow.string("navn"),
                 epost = saksbehandlerRow.string("epost")
             )
