@@ -223,7 +223,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         fagsystemId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         annullertAvSaksbehandler: LocalDate = LocalDate.now(),
-        saksbehandlerIdent: String = "saksbehandler_ident"
+        saksbehandlerEpost: String = "saksbehandler_epost"
     ) =
         nyHendelse(
             id, "utbetaling_annullert", mapOf(
@@ -231,7 +231,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "fagsystemId" to fagsystemId.toString(),
                 "utbetalingId" to utbetalingId.toString(),
                 "annullertAvSaksbehandler" to annullertAvSaksbehandler.toString(),
-                "saksbehandlerIdent" to saksbehandlerIdent
+                "saksbehandlerEpost" to saksbehandlerEpost
             )
         )
 

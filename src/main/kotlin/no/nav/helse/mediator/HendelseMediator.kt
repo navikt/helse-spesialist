@@ -13,6 +13,7 @@ import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
@@ -36,6 +37,7 @@ internal class HendelseMediator(
     private val hendelseDao: HendelseDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
+    private val saksbehandlerDao: SaksbehandlerDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {
@@ -307,6 +309,7 @@ internal class HendelseMediator(
 
     internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
         annulleringsteller.inc()
+        saksbehandler.persister(saksbehandlerDao)
 
         val annulleringMessage = annulleringDto.run {
             JsonMessage.newMessage(

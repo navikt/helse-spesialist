@@ -122,6 +122,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelseDao = hendelseDao,
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
         hendelsefabrikk = hendelsefabrikk,
         oppgaveMediator = oppgaveMediator
     )

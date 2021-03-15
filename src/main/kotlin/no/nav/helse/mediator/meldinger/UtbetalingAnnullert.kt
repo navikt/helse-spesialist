@@ -4,25 +4,46 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.LagreAnnulleringCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotUtenÅLagreWarningsCommand
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.*
 
 internal class UtbetalingAnnullert(
     override val id: UUID,
     private val fødselsnummer: String,
+    utbetalingId: UUID,
+    annullertTidspunkt: LocalDateTime,
+    saksbehandlerEpost: String,
     private val json: String,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    vedtakDao: VedtakDao
+    vedtakDao: VedtakDao,
+    utbetalingDao: UtbetalingDao,
+    saksbehandlerDao: SaksbehandlerDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSnapshotUtenÅLagreWarningsCommand(speilSnapshotRestClient = speilSnapshotRestClient, vedtakDao = vedtakDao, fødselsnummer = fødselsnummer)
+        OppdaterSnapshotUtenÅLagreWarningsCommand(
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            vedtakDao = vedtakDao,
+            fødselsnummer = fødselsnummer
+        ),
+        LagreAnnulleringCommand(
+            utbetalingDao = utbetalingDao,
+            saksbehandlerDao = saksbehandlerDao,
+            annullertTidspunkt = annullertTidspunkt,
+            saksbehandlerEpost = saksbehandlerEpost,
+            utbetalingId = utbetalingId
+        )
     )
+
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID? = null
     override fun toJson(): String = json
@@ -38,13 +59,23 @@ internal class UtbetalingAnnullert(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "utbetaling_annullert")
-                    it.requireKey("@id", "fødselsnummer", "fagsystemId", "utbetalingId", "annullertAvSaksbehandler", "saksbehandlerIdent")
+                    it.requireKey(
+                        "@id",
+                        "fødselsnummer",
+                        "fagsystemId",
+                        "utbetalingId",
+                        "annullertAvSaksbehandler",
+                        "saksbehandlerEpost"
+                    )
                 }
             }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLogg.error("Forstod ikke utbetaling_annullert:\n${problems.toExtendedReport()}")
+        }
+        override fun onSevere(ex: MessageProblems.MessageException, context: MessageContext) {
+            sikkerLogg.error("Forstod ikke utbetaling_annullert:\n${ex}")
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {

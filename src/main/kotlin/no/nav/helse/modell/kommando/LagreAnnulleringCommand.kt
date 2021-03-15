@@ -1,0 +1,27 @@
+package no.nav.helse.modell.kommando
+
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
+import java.time.LocalDateTime
+import java.util.*
+
+internal class LagreAnnulleringCommand(
+    private val utbetalingDao: UtbetalingDao,
+    private val saksbehandlerDao: SaksbehandlerDao,
+    private val annullertTidspunkt: LocalDateTime,
+    private val saksbehandlerEpost: String,
+    private val utbetalingId: UUID
+) : Command {
+
+    override fun execute(context: CommandContext): Boolean {
+        return lagreSaksbehandlerInfo()
+    }
+
+    private fun lagreSaksbehandlerInfo(): Boolean {
+        val saksbehandlerOid = requireNotNull(saksbehandlerDao.finnSaksbehandler(saksbehandlerEpost)
+            .firstOrNull()) { "Finner ikke saksbehandler for annullering med id: $utbetalingId " } .oid
+        val annulleringId = utbetalingDao.nyAnnullering(annullertTidspunkt, saksbehandlerOid)
+
+        return utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
+    }
+}

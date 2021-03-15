@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api.modell
 
 import io.ktor.auth.jwt.*
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import java.util.*
 
 internal class Saksbehandler(
@@ -25,6 +26,10 @@ internal class Saksbehandler(
             ident = ident,
             navn = jwtPrincipal.payload.getClaim("name").asString(),
         )
+    }
+
+    internal fun persister(saksbehandlerDao: SaksbehandlerDao) {
+        saksbehandlerDao.opprettSaksbehandler(oid = oid, navn = navn, epost = epostadresse)
     }
 
     internal fun json() = mapOf(

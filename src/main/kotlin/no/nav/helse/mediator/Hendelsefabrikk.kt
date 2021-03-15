@@ -282,9 +282,14 @@ internal class Hendelsefabrikk(
         return UtbetalingAnnullert(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            utbetalingId = UUID.fromString(jsonNode["utbetalingId"].asText()),
+            annullertTidspunkt = LocalDateTime.parse(jsonNode["annullertAvSaksbehandler"].asText()),
+            saksbehandlerEpost = jsonNode["saksbehandlerEpost"].asText(),
             json = json,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            utbetalingDao = utbetalingDao,
+            saksbehandlerDao = saksbehandlerDao,
         )
     }
 

@@ -191,6 +191,24 @@ ORDER BY ui.id, u.id DESC
         }
     }
 
+    internal fun nyAnnullering(annullertTidspunkt: LocalDateTime, saksbehandlerRef: UUID): Long {
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO annullert_av_saksbehandler(annullert_tidspunkt, saksbehandler_ref)
+            VALUES (:annullertTidspunkt, :saksbehandlerRef)
+        """
+        return using(sessionOf(dataSource, returnGeneratedKey = true)) {
+            requireNotNull(it.run(
+                queryOf(
+                    statement, mapOf(
+                        "annullertTidspunkt" to annullertTidspunkt,
+                        "saksbehandlerRef" to saksbehandlerRef
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )) { "Kunne ikke opprette annullering"}
+        }
+    }
+
     private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
         @Language("PostgreSQL")
         val query = """SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"""
@@ -203,6 +221,23 @@ ORDER BY ui.id, u.id DESC
                 )
             }
             .asList)
+    }
+
+    fun leggTilAnnullertAvSaksbehandler(utbetalingId: UUID, annullertAvSaksbehandlerRef: Long): Boolean {
+        val utbetalingIdRef = finnUtbetalingIdRef(utbetalingId)
+        @Language("PostgreSQL")
+        val query = """UPDATE utbetaling SET annullert_av_saksbehandler_ref=:annullertAvSaksbehandlerRef WHERE utbetaling_id_ref=:utbetalingIdRef"""
+
+        return using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    query, mapOf(
+                        "annullertAvSaksbehandlerRef" to annullertAvSaksbehandlerRef,
+                        "utbetalingIdRef" to utbetalingIdRef
+                    )
+                ).asExecute
+            )
+        }
     }
 
     data class UtbetalingDto(

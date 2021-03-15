@@ -5,7 +5,7 @@ import io.mockk.every
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -14,6 +14,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
     private val arbeidsgiverId = UUID.randomUUID()
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
     private val vedtaksperiodeId2: UUID = UUID.randomUUID()
+    private val utbetalingId: UUID = UUID.randomUUID()
     private val snapshotV1 = """{"aktørId": "$AKTØR", "fødselsnummer": "$UNG_PERSON_FNR_2018", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}]}]}"""
     private val snapshotV2 = """{"aktørId": "$AKTØR", "fødselsnummer": "$UNG_PERSON_FNR_2018", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
     private val snapshotFinal = """{"nyKey": "nyValueSomSkalLagres", "aktørId": "$AKTØR", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
@@ -41,9 +42,9 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
                 "@id": "${UUID.randomUUID()}",
                 "fødselsnummer": "$UNG_PERSON_FNR_2018",
                 "fagsystemId": "ASDJ12IA312KLS",
-                "utbetalingId": "ASDJ12IA312KLW",
-                "annullertAvSaksbehandler": "${LocalDate.now()}",
-                "saksbehandlerIdent": "saksbehandler_ident"
+                "utbetalingId": "$utbetalingId",
+                "annullertAvSaksbehandler": "${LocalDateTime.now()}",
+                "saksbehandlerEpost": "saksbehandler_epost"
             }"""
 
         testRapid.sendTestMessage(json)
