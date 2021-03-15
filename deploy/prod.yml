@@ -39,13 +39,21 @@ spec:
   webproxy: true
   secureLogs:
     enabled: true
+  azure:
+    application:
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: "611669fa-de5c-4dc2-a0e8-6041a019992a"
+          - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: speil
   vault:
     enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/service_user
-        kvPath: /serviceuser/data/prod/srvspesialist
-      - mountPath: /var/run/secrets/nais.io/azure
-        kvPath: /azuread/data/prod/creds/spesialist
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
@@ -61,14 +69,10 @@ spec:
       value: spesialist
     - name: VAULT_MOUNTPATH
       value: postgresql/prod-fss/
-    - name: AZURE_CONFIG_URL
-      value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
-    - name: AZURE_REQUIRED_GROUP
-      value: 611669fa-de5c-4dc2-a0e8-6041a019992a
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: SPLEIS_CLIENT_ID
-      value: api://60a60e52-7c16-459d-a288-7cc2911c6f81/.default
+      value: api://dev-fss.tbd.spleis-api/.default
     - name: SPESIALIST_OID
       value: 5cc46653-7c6c-4c5e-b617-baf648452ad4
     - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering
