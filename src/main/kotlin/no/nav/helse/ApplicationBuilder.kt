@@ -1,5 +1,6 @@
 package no.nav.helse
 
+import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -13,7 +14,6 @@ import io.ktor.jackson.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.*
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
@@ -42,8 +42,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.net.ProxySelector
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.net.URL
 import java.util.*
 import kotlin.random.Random.Default.nextInt
 
@@ -71,12 +70,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val spleisClient = HttpClient {
         install(JsonFeature) { serializer = JacksonSerializer() }
     }
-    private val oidcDiscovery =
-        runBlocking { AzureAadClient(azureAdClient).oidcDiscovery(System.getenv("AZURE_APP_WELL_KNOWN_URL") ?: System.getenv("AZURE_CONFIG_URL")) }
     private val accessTokenClient = AccessTokenClient(
-        aadAccessTokenUrl = oidcDiscovery.token_endpoint,
-        clientId = System.getenv("AZURE_APP_CLIENT_ID") ?: readClientId(),
-        clientSecret = System.getenv("AZURE_APP_CLIENT_SECRET") ?: readClientSecret(),
+        aadAccessTokenUrl = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+        clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET"),
         httpClient = azureAdClient
     )
     private val speilSnapshotRestClient = SpeilSnapshotRestClient(
@@ -86,8 +83,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
 
     private val azureConfig = AzureAdAppConfig(
-        clientId = System.getenv("AZURE_APP_CLIENT_ID") ?: readClientId(),
-        requiredGroup = env["AZURE_REQUIRED_GROUP"]
+        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+        issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
+        jwkProvider = JwkProviderBuilder(URL(env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"))).build()
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
@@ -193,10 +191,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
-            azureAdAppAuthentication(
-                oidcDiscovery = oidcDiscovery,
-                config = azureConfig
-            )
+            azureAdAppAuthentication(azureConfig)
             basicAuthentication(env.getValue("ADMIN_SECRET"))
             routing {
                 authenticate("oidc") {
@@ -251,14 +246,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
-    }
-
-    private fun readClientId(): String {
-        return Files.readString(Paths.get(azureMountPath, "client_id"))
-    }
-
-    private fun readClientSecret(): String {
-        return Files.readString(Paths.get(azureMountPath, "client_secret"))
     }
 }
 

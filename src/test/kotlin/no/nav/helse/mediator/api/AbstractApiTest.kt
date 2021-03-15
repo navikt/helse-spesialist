@@ -14,7 +14,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
-import no.nav.helse.OidcDiscovery
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterAll
@@ -91,15 +90,14 @@ abstract class AbstractApiTest {
                             JacksonConverter(objectMapper)
                         )
                     }
-                    val oidcDiscovery =
-                        OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
+                    val jwkProvider = jwtStub.getJwkProviderMock()
                     val azureConfig =
                         AzureAdAppConfig(
                             clientId = clientId,
-                            requiredGroup = requiredGroup.toString()
+                            issuer = issuer,
+                            jwkProvider = jwkProvider
                         )
-                    val jwkProvider = jwtStub.getJwkProviderMock()
-                    azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
+                    azureAdAppAuthentication(azureConfig)
                     routing {
                         authenticate("oidc", build = build)
                     }

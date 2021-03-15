@@ -18,7 +18,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
-import no.nav.helse.OidcDiscovery
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.objectMapper
@@ -70,7 +69,7 @@ internal class VedtaksperiodeApiTest {
             "Authorization",
             "Bearer ${
                 jwtStub.getToken(
-                    listOf(requiredGroup),
+                    emptyList(),
                     oid.toString(),
                     "epostadresse",
                     clientId,
@@ -84,7 +83,6 @@ internal class VedtaksperiodeApiTest {
 
     private val httpPort = ServerSocket(0).use { it.localPort }
     private val jwtStub = JwtStub()
-    private val requiredGroup = "required_group"
     private val clientId = "client_id"
     private val issuer = "https://jwt-provider-domain"
     private val client = HttpClient {
@@ -105,15 +103,13 @@ internal class VedtaksperiodeApiTest {
         server = embeddedServer(Netty, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
-            val oidcDiscovery = OidcDiscovery(token_endpoint = "token_endpoint", jwks_uri = "en_uri", issuer = issuer)
-            val azureConfig =
-                AzureAdAppConfig(
-                    clientId = clientId,
-                    requiredGroup = requiredGroup
-                )
             val jwkProvider = jwtStub.getJwkProviderMock()
-            azureAdAppAuthentication(oidcDiscovery, azureConfig, jwkProvider)
-
+            val azureConfig = AzureAdAppConfig(
+                clientId = clientId,
+                issuer = issuer,
+                jwkProvider = jwkProvider
+            )
+            azureAdAppAuthentication(azureConfig)
             routing {
                 authenticate("oidc") {
                     vedtaksperiodeApi(vedtaksperiodeMediator, hendelseMediator)
