@@ -72,7 +72,7 @@ spec:
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: SPLEIS_CLIENT_ID
-      value: api://dev-fss.tbd.spleis-api/.default
+      value: api://prod-fss.tbd.spleis-api/.default
     - name: SPESIALIST_OID
       value: 5cc46653-7c6c-4c5e-b617-baf648452ad4
     - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering
