@@ -74,9 +74,6 @@ internal class UtbetalingAnnullert(
         override fun onError(problems: MessageProblems, context: MessageContext) {
             sikkerLogg.error("Forstod ikke utbetaling_annullert:\n${problems.toExtendedReport()}")
         }
-        override fun onSevere(ex: MessageProblems.MessageException, context: MessageContext) {
-            sikkerLogg.error("Forstod ikke utbetaling_annullert:\n${ex}")
-        }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val id = UUID.fromString(packet["@id"].asText())
