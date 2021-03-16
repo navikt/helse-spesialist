@@ -170,6 +170,8 @@ FROM utbetaling_id ui
          JOIN oppdrag o ON ui.arbeidsgiver_fagsystem_id_ref = o.id
          JOIN person p on ui.person_ref = p.id
          JOIN arbeidsgiver a on ui.arbeidsgiver_ref = a.id
+         LEFT JOIN annullert_av_saksbehandler aas on u.annullert_av_saksbehandler_ref = aas.id
+         LEFT JOIN saksbehandler s on aas.saksbehandler_ref = s.oid
          WHERE fodselsnummer = :fodselsnummer
 ORDER BY ui.id, u.id DESC
         """.trimIndent()
@@ -184,7 +186,13 @@ ORDER BY ui.id, u.id DESC
                             organisasjonsnummer = row.string("orgnummer"),
                             fagsystemId = row.string("fagsystem_id"),
                             linjer = findUtbetalingslinjer(session, row.long("oppdrag_id"))
-                        )
+                        ),
+                        annullertAvSaksbehandler = row.localDateTimeOrNull("annullert_tidspunkt")?.let {
+                            UtbetalingDto.AnnullertAvSaksbehandlerDto(
+                                annullertTidspunkt = it,
+                                saksbehandlerNavn = row.string("navn")
+                            )
+                        }
                     )
                 }
                 .asList)
@@ -243,7 +251,8 @@ ORDER BY ui.id, u.id DESC
     data class UtbetalingDto(
         val type: String,
         val status: String,
-        val arbeidsgiverOppdrag: OppdragDto
+        val arbeidsgiverOppdrag: OppdragDto,
+        val annullertAvSaksbehandler: AnnullertAvSaksbehandlerDto? = null
     ) {
         data class OppdragDto(
             val organisasjonsnummer: String,
@@ -255,5 +264,9 @@ ORDER BY ui.id, u.id DESC
                 val tom: LocalDate
             )
         }
+        data class AnnullertAvSaksbehandlerDto(
+            val annullertTidspunkt: LocalDateTime,
+            val saksbehandlerNavn: String
+        )
     }
 }

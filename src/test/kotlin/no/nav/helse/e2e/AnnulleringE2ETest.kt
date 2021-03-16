@@ -2,12 +2,17 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.api.AnnulleringDto
+import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeMediatorTest
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class AnnulleringE2ETest : AbstractE2ETest() {
     val ORGNR = "987654321"
@@ -34,20 +39,28 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         )
     }
 
-    private fun sendUtbetalingAnnullert() {
-        @Language("JSON")
-            val json = """
-            {
-                "@event_name": "utbetaling_annullert",
-                "@id": "${UUID.randomUUID()}",
-                "fødselsnummer": "$UNG_PERSON_FNR_2018",
-                "fagsystemId": "ASDJ12IA312KLS",
-                "utbetalingId": "$utbetalingId",
-                "annullertAvSaksbehandler": "${LocalDateTime.now()}",
-                "saksbehandlerEpost": "saksbehandler_epost"
-            }"""
+    @Test
+    fun `Annullert av saksbehandler mappes til speil`() {
+        vedtaksperiode(vedtaksperiodeId1, snapshotV1)
+        sendUtbetalingEndret(
+            type = "UTBETALING",
+            status = "UTBETALT",
+            orgnr = ORGNR,
+            arbeidsgiverFagsystemId = "arbeidsgiver_fagsystem_id",
+            forrigeStatus = "SENDT"
+        )
 
-        testRapid.sendTestMessage(json)
+        val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123")
+        val saksbehandler = Saksbehandler("saksbehandler_epost", UUID.randomUUID(), "123", "Test")
+        håndterAnnullering(annulleringDto, saksbehandler)
+
+        sendUtbetalingAnnullert()
+
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
+        val annullerAvSaksbehandler = speilSnapshot.utbetalinger.first().annullertAvSaksbehandler
+
+        assertNotNull(annullerAvSaksbehandler?.annullertTidspunkt)
+        Assertions.assertEquals("Test", annullerAvSaksbehandler?.saksbehandlerNavn)
     }
 
     fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String) {

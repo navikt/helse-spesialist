@@ -72,7 +72,13 @@ data class RisikovurderingForSpeilDto(
 data class UtbetalingForSpeilDto(
     val type: String,
     val status: String,
-    val arbeidsgiverOppdrag: OppdragForSpeilDto
+    val arbeidsgiverOppdrag: OppdragForSpeilDto,
+    val annullertAvSaksbehandler: AnnullertAvSaksbehandlerForSpeilDto?
+)
+
+data class AnnullertAvSaksbehandlerForSpeilDto(
+    val annullertTidspunkt: LocalDateTime,
+    val saksbehandlerNavn: String
 )
 
 data class OppdragForSpeilDto(
