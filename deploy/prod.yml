@@ -27,10 +27,6 @@ spec:
     min: 12
     max: 12
     cpuThresholdPercentage: 70
-  ingresses:
-    - https://spesialist.prod-fss.nais.io
-    - https://spesialist.nais.adeo.no
-    - https://speil.nais.adeo.no/api/v1
   prometheus:
     enabled: true
     path: /metrics
@@ -54,6 +50,8 @@ spec:
         - application: speil
   vault:
     enabled: true
+  envFrom:
+    - secret: speil
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
