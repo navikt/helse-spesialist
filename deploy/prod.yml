@@ -51,7 +51,7 @@ spec:
   vault:
     enabled: true
   envFrom:
-    - secret: speil
+    - secret: spesialist
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
