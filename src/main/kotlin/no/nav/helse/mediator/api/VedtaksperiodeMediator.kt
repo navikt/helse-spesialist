@@ -74,10 +74,18 @@ internal class VedtaksperiodeMediator(
                                     fom = linje.fom,
                                     tom = linje.tom
                                 )
-                            })
+                            }
+                        ),
+                        annullertAvSaksbehandler = utbetaling.annullertAvSaksbehandler?.let {
+                            AnnullertAvSaksbehandlerForSpeilDto(
+                                annullertTidspunkt = it.annullertTidspunkt,
+                                saksbehandlerNavn = it.saksbehandlerNavn
+                            )
+                        }
                     )
                 }
             }
+
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
                 val arbeidsgiverDto = measureAsHistogram("byggSpeilSnapshot_findArbeidsgiver") {
                     arbeidsgiverDao.findArbeidsgiver(it.organisasjonsnummer)

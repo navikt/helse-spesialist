@@ -2,19 +2,20 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.api.AnnulleringDto
+import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class AnnulleringE2ETest : AbstractE2ETest() {
     val ORGNR = "987654321"
     private val arbeidsgiverId = UUID.randomUUID()
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
     private val vedtaksperiodeId2: UUID = UUID.randomUUID()
-    private val utbetalingId: UUID = UUID.randomUUID()
     private val snapshotV1 = """{"aktørId": "$AKTØR", "fødselsnummer": "$UNG_PERSON_FNR_2018", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}]}]}"""
     private val snapshotV2 = """{"aktørId": "$AKTØR", "fødselsnummer": "$UNG_PERSON_FNR_2018", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
     private val snapshotFinal = """{"nyKey": "nyValueSomSkalLagres", "aktørId": "$AKTØR", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
@@ -34,20 +35,29 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         )
     }
 
-    private fun sendUtbetalingAnnullert() {
-        @Language("JSON")
-            val json = """
-            {
-                "@event_name": "utbetaling_annullert",
-                "@id": "${UUID.randomUUID()}",
-                "fødselsnummer": "$UNG_PERSON_FNR_2018",
-                "fagsystemId": "ASDJ12IA312KLS",
-                "utbetalingId": "$utbetalingId",
-                "annullertAvSaksbehandler": "${LocalDateTime.now()}",
-                "saksbehandlerEpost": "saksbehandler_epost"
-            }"""
+    @Test
+    fun `Annullert av saksbehandler mappes til speil`() {
+        vedtaksperiode(vedtaksperiodeId1, snapshotV1)
 
-        testRapid.sendTestMessage(json)
+        sendUtbetalingEndret(
+            type = "UTBETALING",
+            status = "UTBETALT",
+            orgnr = ORGNR,
+            arbeidsgiverFagsystemId = "arbeidsgiver_fagsystem_id",
+            forrigeStatus = "SENDT"
+        )
+
+        val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123")
+        val saksbehandler = Saksbehandler("kevders.chilleby@nav.no", UUID.randomUUID(), "123", "Kevders Chilleby")
+        håndterAnnullering(annulleringDto, saksbehandler)
+
+        sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")
+
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
+        val annullerAvSaksbehandler = speilSnapshot.utbetalinger.first().annullertAvSaksbehandler
+
+        assertNotNull(annullerAvSaksbehandler?.annullertTidspunkt)
+        Assertions.assertEquals("Kevders Chilleby", annullerAvSaksbehandler?.saksbehandlerNavn)
     }
 
     fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String) {

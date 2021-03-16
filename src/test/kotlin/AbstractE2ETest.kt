@@ -11,8 +11,10 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
+import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.VedtaksperiodeMediator
+import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
 import no.nav.helse.modell.abonnement.OpptegnelseDao
@@ -50,6 +52,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
+        internal val utbetalingId = UUID.randomUUID()
+
     }
 
     protected val oppgaveDao = OppgaveDao(dataSource)
@@ -72,6 +76,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
+
 
     protected val testRapid = TestRapid()
 
@@ -210,6 +215,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 )
             )
         }
+
+    protected fun håndterAnnullering(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler){
+        hendelseMediator.håndter(annulleringDto, saksbehandler)
+    }
 
     protected fun sendArbeidsforholdløsning(
         hendelseId: UUID,
@@ -388,7 +397,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     "@event_name": "utbetaling_endret",
     "@id": "${UUID.randomUUID()}",
     "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "${UUID.randomUUID()}",
+    "utbetalingId": "$utbetalingId",
     "fødselsnummer": "$fødselsnummer",
     "type": "$type",
     "forrigeStatus": "$forrigeStatus",
@@ -439,6 +448,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
       "linjer": []
     }
 }"""
+
+        testRapid.sendTestMessage(json)
+    }
+
+    protected fun sendUtbetalingAnnullert(fagsystemId: String = "ASDJ12IA312KLS", saksbehandlerEpost: String = "saksbehandler_epost") {
+        @Language("JSON")
+        val json = """
+            {
+                "@event_name": "utbetaling_annullert",
+                "@id": "${UUID.randomUUID()}",
+                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "fagsystemId": "$fagsystemId",
+                "utbetalingId": "$utbetalingId",
+                "annullertAvSaksbehandler": "${LocalDateTime.now()}",
+                "saksbehandlerEpost": "$saksbehandlerEpost"
+            }"""
 
         testRapid.sendTestMessage(json)
     }
