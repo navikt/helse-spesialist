@@ -21,7 +21,8 @@ internal fun Route.oppgaveApi(
     val riskSupersaksbehandlergruppe = UUID.fromString(riskSupersaksbehandlergruppe)
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
-            oppgaveMediator.hentOppgaver(getGrupper().contains(riskSupersaksbehandlergruppe))
+            val erRiskSupersaksbehandler = getGrupper().contains(riskSupersaksbehandlergruppe)
+            oppgaveMediator.hentOppgaver(erRiskSupersaksbehandler)
         }
         call.respond(saksbehandlerOppgaver)
     }

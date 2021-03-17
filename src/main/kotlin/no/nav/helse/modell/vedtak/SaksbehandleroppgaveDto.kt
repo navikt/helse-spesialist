@@ -21,6 +21,7 @@ data class EnhetDto(@JsonProperty("id") private val _id: String, val navn: Strin
 data class SaksbehandleroppgaveDto(
     val oppgavereferanse: Long,
     val oppgavetype: String,
+    @Deprecated("Erstattes av tildelingDto")
     val saksbehandlerepost: String?,
     val opprettet: LocalDateTime,
     val vedtaksperiodeId: UUID,
@@ -33,8 +34,16 @@ data class SaksbehandleroppgaveDto(
     val type: Saksbehandleroppgavetype?,
     val inntektskilde: SaksbehandlerInntektskilde?,
     var boenhet: EnhetDto,
-    var erPåVent: Boolean
-)
+    @Deprecated("Erstattes av tildelingDto")
+    var erPåVent: Boolean,
+    val tildeling: Tildeling?
+) {
+    data class Tildeling(
+        val epost: String,
+        val oid: UUID,
+        val påVent: Boolean
+    )
+}
 
 data class SaksbehandleroppgavereferanseDto(
     val oppgavereferanse: Long

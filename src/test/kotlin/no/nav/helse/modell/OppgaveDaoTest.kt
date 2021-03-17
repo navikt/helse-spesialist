@@ -109,6 +109,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
         assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().saksbehandlerepost)
+        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
+        assertEquals(false, oppgaveDao.finnOppgaver(false).first().tildeling?.påVent)
+        assertEquals(SAKSBEHANDLER_OID, oppgaveDao.finnOppgaver(false).first().tildeling?.oid)
     }
 
     @Test
