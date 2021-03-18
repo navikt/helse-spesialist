@@ -163,4 +163,4 @@ data class OverstyringDagDto(
     val grad: Int?
 )
 
-enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag }
+enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }

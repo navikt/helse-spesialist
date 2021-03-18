@@ -146,7 +146,7 @@ data class OverstyringRestDto(
         val type: Type,
         val grad: Int?
     ) {
-        enum class Type { Sykedag, Feriedag, Egenmeldingsdag }
+        enum class Type { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }
     }
 }
 
