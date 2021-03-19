@@ -7,31 +7,42 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.modell.vedtak.TildelingDto
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertEquals
 
 internal class TildelingMediatorTest {
+
+    companion object {
+        val navn = "Sara Saksbehandler"
+        val epost = "sara.saksbehandler@nav.no"
+        val oid = UUID.randomUUID()
+    }
+
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
-    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
+    private val tildelingDao = mockk<TildelingDao>()
     private val hendelsesMediator = mockk<HendelseMediator>(relaxed = true)
     private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao, hendelsesMediator)
 
     @Test
     fun `stopper tildeling av allerede tildelt sak`() {
-        val enAnnenSaksbehandler = "enAnnenSaksbehandler"
-        val saksbehandleroid = UUID.randomUUID()
-        val epost = "sara.saksbehandler@nav.no"
-        val navn = "Sara Saksbehandler"
-
-        every { tildelingDao.finnSaksbehandlerNavn(any()) } returns enAnnenSaksbehandler
+        val eksisterendeTildeling = TildelingDto(epost = "epost@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "annen saksbehandler")
+        every { tildelingDao.tildelingForOppgave(any()) } returns eksisterendeTildeling
 
         val feil = assertThrows<ModellFeil> {
-            tildelingMediator.tildelOppgaveTilSaksbehandler(1L, saksbehandleroid, epost, navn)
+            tildelingMediator.tildelOppgaveTilSaksbehandler(
+                oppgaveId = 1L,
+                saksbehandlerreferanse = eksisterendeTildeling.oid,
+                epostadresse = eksisterendeTildeling.epost,
+                navn = "navn"
+            )
         }
+
         assertEquals(HttpStatusCode.Conflict, feil.httpKode())
-        assertEquals(OppgaveErAlleredeTildelt(enAnnenSaksbehandler), feil.feil)
-        assertEquals(enAnnenSaksbehandler, feil.feil.eksternKontekst["tildeltTil"])
+        assertEquals(eksisterendeTildeling, feil.feil.eksternKontekst["tildeling"])
+        assertEquals(eksisterendeTildeling.navn, feil.feil.eksternKontekst["tildeltTil"])
+        assertEquals(OppgaveErAlleredeTildelt(eksisterendeTildeling), feil.feil)
     }
 }

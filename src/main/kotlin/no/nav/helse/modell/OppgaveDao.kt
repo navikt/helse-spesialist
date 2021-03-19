@@ -16,7 +16,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
 
             @Language("PostgreSQL")
             val query = """
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                    pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -323,9 +323,10 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         erPåVent = it.boolean("på_vent"),
         tildeling = it.stringOrNull("epost")?.let { epost ->
             TildelingDto(
-                epost,
-                UUID.fromString(it.string("oid")),
-                it.boolean("på_vent")
+                navn = it.string("saksbehandler_navn"),
+                epost = epost,
+                oid = UUID.fromString(it.string("oid")),
+                påVent = it.boolean("på_vent")
             )
         }
     )

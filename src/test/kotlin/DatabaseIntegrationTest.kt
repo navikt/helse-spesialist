@@ -61,6 +61,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         internal val SAKSBEHANDLER_OID = UUID.randomUUID()
 
         internal const val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
+        internal const val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
     }
 
     internal var personId: Long = -1

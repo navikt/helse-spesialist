@@ -56,7 +56,8 @@ enum class SaksbehandlerInntektskilde{
 }
 
 data class TildelingDto (
+    val navn: String,
     val epost: String,
     val oid: UUID,
-    val påVent: Boolean,
+    val påVent: Boolean
 )

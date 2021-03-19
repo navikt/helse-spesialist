@@ -95,7 +95,7 @@ internal class TildelingDao(private val dataSource: DataSource) {
     private fun Session.tildelingForPerson(fødselsnummer: String): TildelingDto? {
         @Language("PostgreSQL")
         val query = """
-            SELECT s.epost, s.oid, t.på_vent FROM person
+            SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
                  RIGHT JOIN vedtak v on person.id = v.person_ref
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
                  RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
@@ -110,7 +110,8 @@ internal class TildelingDao(private val dataSource: DataSource) {
     private fun tildelingDto(it: Row) = TildelingDto(
         epost = it.string("epost"),
         påVent = it.boolean("på_vent"),
-        oid = UUID.fromString(it.string("oid"))
+        oid = UUID.fromString(it.string("oid")),
+        navn = it.string("navn")
     )
 
     private fun Session.leggOppgavePåVent(oppgaveId: Long) {
@@ -123,5 +124,16 @@ internal class TildelingDao(private val dataSource: DataSource) {
                 )
             ).asUpdate
         )
+    }
+
+    fun tildelingForOppgave(oppgaveId: Long): TildelingDto? = using(sessionOf(dataSource)) {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT s.oid, s.epost, s.navn, t.på_vent FROM tildeling t
+                INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
+                INNER JOIN oppgave o on t.oppgave_id_ref = o.id
+            WHERE o.id = :oppgaveId
+            """
+        it.run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
     }
 }

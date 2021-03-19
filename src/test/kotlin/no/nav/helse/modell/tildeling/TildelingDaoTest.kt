@@ -105,10 +105,21 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         assertFalse(assertOppgavePåVent(oppgaveId))
     }
 
+    @Test
+    fun `finn tildeling for oppgave`() {
+        nyPerson()
+        tildelTilSaksbehandler()
+        val tildeling = tildelingDao.tildelingForOppgave(this.oppgaveId)
+        assertEquals(SAKSBEHANDLER_OID, tildeling?.oid)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling?.epost)
+        assertEquals(SAKSBEHANDLER_NAVN, tildeling?.navn)
+        assertEquals(false, tildeling?.påVent)
+    }
+
     private fun tildelTilSaksbehandler(
         oppgaveId: Long = this.oppgaveId,
         oid: UUID = SAKSBEHANDLER_OID,
-        navn: String = "Sara Saksbehandler",
+        navn: String = SAKSBEHANDLER_NAVN,
         epost: String = SAKSBEHANDLEREPOST
     ) {
         saksbehandlerDao.persisterSaksbehandler(oid, navn, epost)

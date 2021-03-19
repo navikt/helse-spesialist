@@ -18,11 +18,16 @@ internal class TildelingMediator(
         epostadresse: String,
         navn: String
     ) {
-        val saksbehandlerFor = tildelingDao.finnSaksbehandlerNavn(oppgaveId)
-        if (saksbehandlerFor != null) {
-            throw ModellFeil(OppgaveErAlleredeTildelt(saksbehandlerFor))
+
+        val eksisterendeTildeling = tildelingDao.tildelingForOppgave(oppgaveId)
+        if (eksisterendeTildeling != null) {
+            throw ModellFeil(OppgaveErAlleredeTildelt(eksisterendeTildeling))
         }
+        //TODO: Dette burde gjøres ute i mediatoren
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse)
+
+        //TODO: Her burde egentlig tildelOppgave kaste en feil om den allerede er tildelt som vi kan fange og håndtere på en fin måte.
+        // Da slipper vi den raceconditionen vi har her om to tråder begge sjekker for tildeling samtidig og så tildeler samtidig
         hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
     }
 

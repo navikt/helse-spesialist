@@ -13,6 +13,7 @@ import no.nav.helse.modell.feilhåndtering.FeilDto
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.vedtak.TildelingDto
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -89,8 +90,9 @@ internal class TildelingApiTest : AbstractApiTest() {
 
     @Test
     fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
+        val tildeltFeil = OppgaveErAlleredeTildelt(TildelingDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
         every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws ModellFeil(
-            OppgaveErAlleredeTildelt("en annen saksbehandler")
+            tildeltFeil
         )
         val oppgavereferanse = nextLong()
         val response = runBlocking {
@@ -104,7 +106,7 @@ internal class TildelingApiTest : AbstractApiTest() {
 
         assertEquals(HttpStatusCode.Conflict, response.status)
         val feilDto = runBlocking { response.receive<FeilDto>() }
-        assertEquals(feilDto.feilkode, OppgaveErAlleredeTildelt("").feilkode)
+        assertEquals(feilDto.feilkode, tildeltFeil.feilkode)
         assertEquals("en annen saksbehandler", feilDto.kontekst["tildeltTil"])
     }
 
