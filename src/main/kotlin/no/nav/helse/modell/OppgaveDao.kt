@@ -322,7 +322,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn")),
         erPåVent = it.boolean("på_vent"),
         tildeling = it.stringOrNull("epost")?.let { epost ->
-            SaksbehandleroppgaveDto.Tildeling(
+            TildelingDto(
                 epost,
                 UUID.fromString(it.string("oid")),
                 it.boolean("på_vent")

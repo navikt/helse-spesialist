@@ -1,6 +1,7 @@
 package no.nav.helse.modell.tildeling
 
 import kotliquery.*
+import no.nav.helse.modell.vedtak.TildelingDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.*
@@ -94,7 +95,7 @@ internal class TildelingDao(private val dataSource: DataSource) {
     private fun Session.tildelingForPerson(fødselsnummer: String): TildelingDto? {
         @Language("PostgreSQL")
         val query = """
-            SELECT s.epost, t.på_vent FROM person
+            SELECT s.epost, s.oid, t.på_vent FROM person
                  RIGHT JOIN vedtak v on person.id = v.person_ref
                  RIGHT JOIN oppgave o on v.id = o.vedtak_ref
                  RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
@@ -107,8 +108,9 @@ internal class TildelingDao(private val dataSource: DataSource) {
     }
 
     private fun tildelingDto(it: Row) = TildelingDto(
-        saksbehandlerepost = it.string("epost"),
-        erPåVent = it.boolean("på_vent")
+        epost = it.string("epost"),
+        påVent = it.boolean("på_vent"),
+        oid = UUID.fromString(it.string("oid"))
     )
 
     private fun Session.leggOppgavePåVent(oppgaveId: Long) {

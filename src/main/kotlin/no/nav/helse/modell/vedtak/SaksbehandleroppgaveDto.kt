@@ -36,14 +36,8 @@ data class SaksbehandleroppgaveDto(
     var boenhet: EnhetDto,
     @Deprecated("Erstattes av tildelingDto")
     var erPåVent: Boolean,
-    val tildeling: Tildeling?
-) {
-    data class Tildeling(
-        val epost: String,
-        val oid: UUID,
-        val påVent: Boolean
-    )
-}
+    val tildeling: TildelingDto?
+)
 
 data class SaksbehandleroppgavereferanseDto(
     val oppgavereferanse: Long
@@ -60,3 +54,9 @@ enum class SaksbehandlerInntektskilde{
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE
 }
+
+data class TildelingDto (
+    val epost: String,
+    val oid: UUID,
+    val påVent: Boolean,
+)

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.vedtak.EnhetDto
 import no.nav.helse.modell.vedtak.PersoninfoDto
+import no.nav.helse.modell.vedtak.TildelingDto
 import no.nav.helse.modell.vedtak.snapshot.UtbetalingshistorikkElementDto
 import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
@@ -23,10 +24,13 @@ data class PersonForSpeilDto(
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto,
+    @Deprecated("erstattes av eget tildelingsobjekt")
     val saksbehandlerepost: String?,
     val arbeidsforhold: List<ArbeidsforholdForSpeilDto>,
     val inntektsgrunnlag: JsonNode,
-    val erPåVent: Boolean
+    @Deprecated("erstattes av eget tildelingsobjekt")
+    val erPåVent: Boolean,
+    val tildeling: TildelingDto?
 )
 
 data class ArbeidsforholdForSpeilDto(

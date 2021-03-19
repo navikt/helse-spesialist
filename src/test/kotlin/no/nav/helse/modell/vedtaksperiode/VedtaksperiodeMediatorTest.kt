@@ -412,6 +412,27 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertEquals("Eliteserien", speilSnapshot.arbeidsgivere.last().navn)
     }
 
+    @Test
+    fun `saksbehandleroid på snapshot`() {
+        val saksbehandlerOid = UUID.randomUUID()
+        val saksbehandlerEpost = "saksbehandler@nav.no"
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendDigitalKontaktinformasjonløsning(godkjenningsmeldingId, true)
+        sendÅpneGosysOppgaverløsning(godkjenningsmeldingId)
+        sendRisikovurderingløsning(godkjenningsmeldingId, VEDTAKSPERIODE_ID, funn = funn, kanGodkjennesAutomatisk = false)
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Navn Navnesen", saksbehandlerEpost)
+        tildelingDao.opprettTildeling(testRapid.inspektør.oppgaveId(), saksbehandlerOid)
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        assertEquals(saksbehandlerOid, speilSnapshot.tildeling?.oid)
+        assertEquals(saksbehandlerEpost, speilSnapshot.tildeling?.epost)
+        assertEquals(false, speilSnapshot.tildeling?.påVent)
+    }
+
     private val SNAPSHOTV1 = """
         {
             "aktørId": "$AKTØR",

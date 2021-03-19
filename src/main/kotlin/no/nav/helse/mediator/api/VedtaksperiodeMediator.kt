@@ -167,11 +167,12 @@ internal class VedtaksperiodeMediator(
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,
-                saksbehandlerepost = tildeling?.saksbehandlerepost,
+                saksbehandlerepost = tildeling?.epost,
                 utbetalinger = utbetalinger,
                 arbeidsforhold = arbeidsforhold,
                 inntektsgrunnlag = speilSnapshot.inntektsgrunnlag,
-                erPåVent = tildeling?.erPåVent ?: false
+                erPåVent = tildeling?.påVent ?: false,
+                tildeling = tildeling
             )
         }
 
