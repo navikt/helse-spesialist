@@ -18,7 +18,7 @@ internal class TildelingMediator(
         epostadresse: String,
         navn: String
     ) {
-        val saksbehandlerFor = tildelingDao.finnSaksbehandlerNavn(oppgaveId)
+        val saksbehandlerFor = tildelingDao.tildelingForOppgave(oppgaveId)
         if (saksbehandlerFor != null) {
             throw ModellFeil(OppgaveErAlleredeTildelt(saksbehandlerFor))
         }

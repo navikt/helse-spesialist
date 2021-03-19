@@ -5,6 +5,7 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.modell.vedtak.TildelingDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -20,9 +21,10 @@ enum class Loggnivå {
     Warning, Info
 }
 
-sealed class Feil(val feilkode: String, val kategori: Feilkategori, val eksternKontekst: Map<String, String> = mapOf())
-data class OppgaveErAlleredeTildelt(val tildeltTil: String) :
-    Feil("oppgave_er_allerede_tildelt", Feilkategori(HttpStatusCode.Conflict, Loggnivå.Info), mapOf("tildeltTil" to tildeltTil))
+sealed class Feil(val feilkode: String, val kategori: Feilkategori, val eksternKontekst: Map<String, Any> = mapOf())
+data class OppgaveErAlleredeTildelt(val tildeling: TildelingDto) :
+    Feil("oppgave_er_allerede_tildelt", Feilkategori(HttpStatusCode.Conflict, Loggnivå.Info),
+        mapOf("tildeltTil" to tildeling.epost, "tildeling" to tildeling))
 
 data class OppgaveErIkkeTildelt(val oppgaveId: Long) :
     Feil("oppgave_er_ikke_tildelt", Feilkategori(HttpStatusCode.FailedDependency, Loggnivå.Info), mapOf("oppgaveId" to oppgaveId.toString()))
