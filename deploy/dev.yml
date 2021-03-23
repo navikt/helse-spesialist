@@ -45,6 +45,7 @@ spec:
         groups:
           - id: "611669fa-de5c-4dc2-a0e8-6041a019992a"
           - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
+          - id: "1119ba1f-3b10-4598-a47b-16568c379114"
   accessPolicy:
     inbound:
       rules:
