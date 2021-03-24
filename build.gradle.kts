@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:a77261b7ab")
+    implementation("com.github.navikt:rapids-and-rivers:1.f3e5de3")
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
     implementation("com.zaxxer:HikariCP:4.0.2")

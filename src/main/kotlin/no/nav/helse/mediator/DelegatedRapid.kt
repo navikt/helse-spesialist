@@ -17,7 +17,7 @@ internal class DelegatedRapid(
     override fun onMessage(message: String, context: MessageContext) {
         try {
             beforeRiverAction()
-            listeners.forEach { it.onMessage(message, context) }
+            notifyMessage(message, context)
             afterRiverAction(message, context)
         } catch (err: Exception) {
             errorAction(err, message)
