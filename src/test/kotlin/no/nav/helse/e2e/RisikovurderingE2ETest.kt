@@ -30,6 +30,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             }]
         """
     )
+    @Language("json")
     private val funn2 = objectMapper.readTree(
         """
             [{
