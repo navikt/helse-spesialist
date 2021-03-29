@@ -4,15 +4,11 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
-import kotliquery.LoanPattern.using
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.modell.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -489,34 +485,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
     }
 
-    private fun håndterGodkjenningsbehov(): UUID {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        )
-        sendArbeidsforholdløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        return godkjenningsmeldingId
-    }
-
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
@@ -540,28 +508,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         testRapid.reset()
         sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
         assertTrue(testRapid.inspektør.behov().isEmpty())
-    }
-
-    @Test
-    fun `løser godkjenningsbehov når makstid for oppgave oppnås`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        håndterGodkjenningsbehov()
-        using(sessionOf(dataSource)) {
-            it.run(
-                queryOf(
-                    "UPDATE oppgave_makstid SET makstid=NOW() - INTERVAL '14 DAY' WHERE oppgave_ref=?;",
-                    OPPGAVEID
-                ).asUpdate
-            )
-        }
-        sendPåminnelseOppgaveMakstid()
-
-        assertOppgave(0, AvventerSaksbehandler, MakstidOppnådd)
-
-        assertAutomatisertLøsning(godkjent = false) {
-            assertTrue(it.path("makstidOppnådd").booleanValue())
-        }
-        assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
     }
 
     @Test
@@ -633,17 +579,32 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertEquals(SAKSBEHANDLEREPOST, tildeling)
     }
 
-    private fun sendPåminnelseOppgaveMakstid() {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "påminnelse_oppgave_makstid",
-    "@id": "${UUID.randomUUID()}",
-    "fødselsnummer": "$UNG_PERSON_FNR_2018",
-    "oppgaveId": "$OPPGAVEID"
-}"""
-
-        testRapid.sendTestMessage(json)
+    private fun håndterGodkjenningsbehov(): UUID {
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        return godkjenningsmeldingId
     }
 
     private fun assertVedtaksperiodeGodkjentEvent(vedtaksperiodeGodkjentEvent: JsonNode) {

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
 import kotlin.random.Random
 
@@ -58,15 +57,6 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `oppdaterer makstid ved tildeling av oppgave`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
-        val (oid, gyldigTil) = Pair(UUID.randomUUID(), LocalDateTime.now())
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
-        oppgave.tildel(oppgaveMediator, oid, gyldigTil)
-        verify(exactly = 1) { oppgaveDao.oppdaterMakstidVedTildeling(any()) }
-    }
-
-    @Test
     fun `gjenoppretter oppgave`() {
         val oppgave1 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         val oppgave2 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
@@ -81,14 +71,6 @@ internal class OppgaveTest {
         oppgave.avbryt()
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
-    }
-
-    @Test
-    fun `Setter oppgavestatus til MakstidOppnådd når oppgaven timer ut`() {
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
-        oppgave.makstidOppnådd()
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.MakstidOppnådd, null, null) }
     }
 
     @Test

@@ -85,11 +85,6 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
-    fun påminnelseOppgaveMakstid(
-        message: JsonMessage,
-        context: MessageContext
-    )
-
     fun avbrytSaksbehandling(
         message: JsonMessage,
         context: MessageContext

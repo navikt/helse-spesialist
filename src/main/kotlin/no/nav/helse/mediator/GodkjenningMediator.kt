@@ -34,17 +34,6 @@ internal class GodkjenningMediator(
         publiserVedtaksperiodeGodkjent(context, vedtaksperiodeId, fødselsnummer, behov)
     }
 
-    internal fun makstidOppnådd(
-        context: CommandContext,
-        behov: UtbetalingsgodkjenningMessage,
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String
-    ) {
-        behov.makstidOppnådd(listOf("Makstid oppnådd"))
-        context.publiser(behov.toJson())
-        publiserVedtaksperiodeGodkjent(context, vedtaksperiodeId, fødselsnummer, behov)
-    }
-
     private fun publiserVedtaksperiodeGodkjent(
         context: CommandContext,
         vedtaksperiodeId: UUID,

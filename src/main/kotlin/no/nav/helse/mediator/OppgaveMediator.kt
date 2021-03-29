@@ -34,7 +34,6 @@ internal class OppgaveMediator(
 
     internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
         tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
-        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
     }
 
     private fun nyOppgave(oppgave: Oppgave) {
@@ -48,11 +47,6 @@ internal class OppgaveMediator(
 
     private fun avbryt(oppgave: Oppgave) {
         oppgave.avbryt()
-        nyOppgave(oppgave)
-    }
-
-    internal fun makstidOppnådd(oppgave: Oppgave) {
-        oppgave.makstidOppnådd()
         nyOppgave(oppgave)
     }
 

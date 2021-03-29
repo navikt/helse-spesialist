@@ -13,8 +13,6 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.postgresql.util.PSQLException
 import java.time.LocalDate
 import java.util.*
 
@@ -198,55 +196,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `opprette makstid på 7 dager end of day for ny oppgave`() {
-        opprettOppgave()
-        oppgaveDao.opprettMakstid(oppgaveId)
-        assertEquals(
-            LocalDate
-                .now()
-                .plusDays(7)
-                .atTime(23, 59, 59),
-            oppgaveDao.finnMakstid(oppgaveId)
-        )
-    }
-
-    @Test
-    fun `kan ikke opprette en oppgave_makstid flere ganger for samme oppgave`() {
-        opprettOppgave()
-        oppgaveDao.opprettMakstid(oppgaveId)
-        assertThrows<PSQLException>{ oppgaveDao.opprettMakstid(oppgaveId) }
-    }
-
-    @Test
-    fun `oppdaterer makstid i oppgave_makstid for en oppgave når den blir tildelt`() {
-        opprettOppgave()
-        oppgaveDao.opprettMakstid(oppgaveId)
-        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
-        assertEquals(
-            LocalDate
-                .now()
-                .plusDays(14)
-                .atTime(23, 59, 59),
-            oppgaveDao.finnMakstid(oppgaveId)
-        )
-    }
-
-    @Test
-    fun `oppdaterer makstid i oppgave_makstid for en oppgave når den blir lagt på vent`() {
-        opprettOppgave()
-        oppgaveDao.opprettMakstid(oppgaveId)
-        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
-        oppgaveDao.oppdaterMakstidVedLeggPåVent(oppgaveId)
-        assertEquals(
-            LocalDate
-                .now()
-                .plusDays(28)
-                .atTime(23, 59, 59),
-            oppgaveDao.finnMakstid(oppgaveId)
-        )
-    }
-
-    @Test
     fun `henter fødselsnummeret til personen en oppgave gjelder for`(){
         nyPerson()
         val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
@@ -260,12 +209,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveDao.finnOppgaver(true)
         assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
         assertEquals(SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
-    }
-
-    private fun statusForOppgave(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
-        session.run(queryOf("SELECT status FROM oppgave WHERE id = ?", oppgaveId).map {
-            enumValueOf<Oppgavestatus>(it.string(1))
-        }.asSingle)
     }
 
     private fun oppgave() =

@@ -5,7 +5,6 @@ import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.vedtak.*
 import org.intellij.lang.annotations.Language
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -251,51 +250,6 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         return this.run(
             queryOf(statement, vedtaksperiodeId)
                 .map { it.long("id") }.asSingle
-        )
-    }
-
-    private fun Session.opprettMakstid(oppgaveId: Long): LocalDateTime? {
-        @Language("PostgreSQL")
-        val statement = """
-                INSERT INTO oppgave_makstid(oppgave_ref)
-                VALUES (?)
-                RETURNING makstid
-            """
-        return this.run(
-            queryOf(statement, oppgaveId).map { it.localDateTime("makstid") }.asSingle
-        )
-    }
-
-    internal fun opprettMakstid(oppgaveId: Long): LocalDateTime {
-        return requireNotNull(using(sessionOf(dataSource)) { session ->
-            session.opprettMakstid(oppgaveId)
-        })
-    }
-
-    private fun oppdaterMakstid(oppgaveId: Long, makstidDager: Long) = sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf(
-                "UPDATE oppgave_makstid SET makstid=makstid + INTERVAL '1 DAY' * ? WHERE oppgave_ref=?;",
-                makstidDager,
-                oppgaveId
-            ).asUpdate
-        )
-    }
-
-    internal fun oppdaterMakstidVedTildeling(oppgaveId: Long, makstidDager: Long = 7) {
-        oppdaterMakstid(oppgaveId, makstidDager)
-    }
-
-    internal fun oppdaterMakstidVedLeggPåVent(oppgaveId: Long, makstidDager: Long = 14) {
-        oppdaterMakstid(oppgaveId, makstidDager)
-    }
-
-    internal fun finnMakstid(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
-        session.run(
-            queryOf(
-                "SELECT makstid FROM oppgave_makstid WHERE oppgave_ref = ?",
-                oppgaveId
-            ).map { it.localDateTime("makstid") }.asSingle
         )
     }
 

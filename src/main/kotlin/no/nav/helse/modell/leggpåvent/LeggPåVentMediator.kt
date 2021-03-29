@@ -20,7 +20,6 @@ internal class LeggPåVentMediator(
             throw ModellFeil(OppgaveErIkkeTildelt(oppgaveId))
         }
         tildelingDao.leggOppgavePåVent(oppgaveId)
-        oppgaveDao.oppdaterMakstidVedTildeling(oppgaveId)
         hendelseMediator.leggOppgavePåVent(oppgaveId)
     }
 

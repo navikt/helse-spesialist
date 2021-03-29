@@ -74,6 +74,5 @@ internal interface IHendelsefabrikk {
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
     fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot
-    fun oppgaveMakstidPåminnelse(json: String): OppgaveMakstidPåminnelse
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet
 }

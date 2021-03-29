@@ -104,7 +104,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
             UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
-            OPPGAVE_MAKSTID_PÅMINNELSE -> hendelsefabrikk.oppgaveMakstidPåminnelse(json)
             VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
         }
 
@@ -117,14 +116,13 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
         is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
         is UtbetalingEndret -> UTBETALING_ENDRET
-        is OppgaveMakstidPåminnelse -> OPPGAVE_MAKSTID_PÅMINNELSE
         is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
     private enum class Hendelsetype {
         VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
-        SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET, OPPGAVE_MAKSTID_PÅMINNELSE,
+        SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET
     }
 }

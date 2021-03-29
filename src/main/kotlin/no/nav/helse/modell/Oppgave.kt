@@ -40,7 +40,6 @@ internal class Oppgave private constructor(
             val contextId = oppgaveDao.finnContextId(oppgaveId)
             val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-            val makstid = oppgaveDao.finnMakstid(oppgaveId) ?: oppgaveDao.opprettMakstid(oppgaveId)
 
             return lagMelding(
                 eventName,
@@ -49,7 +48,6 @@ internal class Oppgave private constructor(
                 oppgaveId,
                 oppgave.status,
                 fødselsnummer,
-                makstid,
                 oppgave.ferdigstiltAvIdent,
                 oppgave.ferdigstiltAvOid
             )
@@ -62,7 +60,6 @@ internal class Oppgave private constructor(
             oppgaveId: Long,
             status: Oppgavestatus,
             fødselsnummer: String,
-            makstid: LocalDateTime,
             ferdigstiltAvIdent: String? = null,
             ferdigstiltAvOid: UUID? = null,
         ): JsonMessage {
@@ -75,8 +72,7 @@ internal class Oppgave private constructor(
                     "contextId" to contextId,
                     "oppgaveId" to oppgaveId,
                     "status" to status.name,
-                    "fødselsnummer" to fødselsnummer,
-                    "makstid" to makstid
+                    "fødselsnummer" to fødselsnummer
                 ).apply {
                     ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
                     ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
@@ -95,10 +91,6 @@ internal class Oppgave private constructor(
         status = Oppgavestatus.AvventerSystem
         ferdigstiltAvIdent = ident
         ferdigstiltAvOid = oid
-    }
-
-    internal fun makstidOppnådd() {
-        status = Oppgavestatus.MakstidOppnådd
     }
 
     internal fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
