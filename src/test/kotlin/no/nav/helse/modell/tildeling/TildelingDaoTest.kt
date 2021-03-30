@@ -122,7 +122,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         navn: String = SAKSBEHANDLER_NAVN,
         epost: String = SAKSBEHANDLEREPOST
     ) {
-        saksbehandlerDao.persisterSaksbehandler(oid, navn, epost)
+        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost)
         tildelingDao.tildelOppgave(oppgaveId, oid)
     }
 

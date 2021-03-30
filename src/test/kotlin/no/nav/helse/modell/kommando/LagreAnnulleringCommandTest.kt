@@ -42,13 +42,8 @@ internal class LagreAnnulleringCommandTest {
 
     @Test
     fun `Legg til annullert av saksbehandler`() {
-        every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER_EPOST) } returns listOf(
-            SaksbehandlerDto(
-                oid = UUID.randomUUID(),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST
-            )
-        )
+        every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER_EPOST) } returns
+            SaksbehandlerDto(UUID.randomUUID(), SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST)
         every { utbetalingDao.nyAnnullering(ANNULLERT_TIDSPUNKT, any()) } returns ANNULLERING_ID
 
         command.execute(context)

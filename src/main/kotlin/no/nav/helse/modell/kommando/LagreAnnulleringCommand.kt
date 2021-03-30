@@ -18,8 +18,9 @@ internal class LagreAnnulleringCommand(
     }
 
     private fun lagreSaksbehandlerInfo(): Boolean {
-        val saksbehandlerOid = requireNotNull(saksbehandlerDao.finnSaksbehandler(saksbehandlerEpost)
-            .firstOrNull()) { "Finner ikke saksbehandler for annullering med id: $utbetalingId " } .oid
+        val saksbehandlerOid =
+            requireNotNull(saksbehandlerDao.finnSaksbehandler(saksbehandlerEpost)) { "Finner ikke saksbehandler for annullering med id: $utbetalingId " }
+            .oid
         val annulleringId = utbetalingDao.nyAnnullering(annullertTidspunkt, saksbehandlerOid)
 
         return utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
