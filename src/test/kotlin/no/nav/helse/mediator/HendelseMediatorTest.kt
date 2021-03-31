@@ -49,7 +49,7 @@ internal class HendelseMediatorTest {
                 organisasjonsnummer = "12",
                 fagsystemId = "foo",
                 saksbehandlerIdent = "X999999"
-            ), Saksbehandler("siri.saksbehandler@nav.no", oid, "X999999", navn)
+            ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn)
         )
         assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals("siri.saksbehandler@nav.no", testRapid.inspektør.field(0, "saksbehandler")["epostaddresse"].asText())

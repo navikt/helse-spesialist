@@ -13,7 +13,7 @@ import no.nav.helse.mediator.api.modell.Saksbehandler
 internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
     post("/api/annullering") {
         val annullering = call.receive<AnnulleringDto>()
-        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()), annullering.saksbehandlerIdent)
+        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
         hendelseMediator.håndter(annullering, saksbehandler)
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))

@@ -6,24 +6,13 @@ import java.util.*
 
 internal class Saksbehandler(
     private val epostadresse: String,
-    val oid: UUID,
-    private val ident: String,
+    private val oid: UUID,
     private val navn: String
 ) {
     companion object {
-        fun fraToken(jwtPrincipal: JWTPrincipal): Saksbehandler {
-            return Saksbehandler(
-                oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
-                epostadresse = jwtPrincipal.payload.getClaim("preferred_username").asString(),
-                ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
-                navn = jwtPrincipal.payload.getClaim("name").asString(),
-            )
-        }
-
-        fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal, ident: String) = Saksbehandler(
-            oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
+        fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal) = Saksbehandler(
             epostadresse = jwtPrincipal.payload.getClaim("preferred_username").asString(),
-            ident = ident,
+            oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
             navn = jwtPrincipal.payload.getClaim("name").asString(),
         )
     }
@@ -35,7 +24,6 @@ internal class Saksbehandler(
     internal fun json() = mapOf(
         "epostaddresse" to epostadresse,
         "oid" to oid,
-        "ident" to ident,
         "navn" to navn,
     )
 }
