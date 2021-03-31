@@ -204,8 +204,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `en oppgave har riktig oppgavetype og inntektskilde`(){
-        nyPerson()
-        opprettVedtakstype(type = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE)
+        nyPerson(inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE)
         val oppgaver = oppgaveDao.finnOppgaver(true)
         assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
         assertEquals(SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)

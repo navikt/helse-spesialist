@@ -1,6 +1,9 @@
 package no.nav.helse.modell
 
-import kotliquery.*
+import kotliquery.Row
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.vedtak.*
@@ -43,7 +46,19 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         }
 
     internal fun finnOppgaveId(vedtaksperiodeId: UUID) =
-        using(sessionOf(dataSource)) { it.finnOppgaveId(vedtaksperiodeId) }
+        using(sessionOf(dataSource)) {
+            @Language("PostgreSQL")
+            val statement = """
+                SELECT id FROM oppgave
+                WHERE vedtak_ref =
+                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
+                AND status = 'AvventerSaksbehandler'::oppgavestatus
+                """
+            it.run(
+                queryOf(statement, vedtaksperiodeId)
+                    .map { it.long("id") }.asSingle
+            )
+        }
 
     internal fun finnOppgaveId(fødselsnummer: String) =
         using(sessionOf(dataSource)) { session ->
@@ -150,7 +165,20 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         oppgavetype: String,
         vedtakRef: Long?
     ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
-        it.insertOppgave(oppgavetype, AvventerSaksbehandler, null, null, vedtakRef, commandContextId)
+        it.run(
+            queryOf(
+                """
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?);
+            """,
+                oppgavetype,
+                AvventerSaksbehandler.name,
+                null,
+                null,
+                vedtakRef,
+                commandContextId
+            ).asUpdateAndReturnGeneratedKey
+        )
     }) { "Kunne ikke opprette oppgave" }
 
     internal fun updateOppgave(
@@ -215,43 +243,6 @@ internal class OppgaveDao(private val dataSource: DataSource) {
             """
         session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
-
-    private fun Session.insertOppgave(
-        oppgavetype: String,
-        oppgavestatus: Oppgavestatus,
-        ferdigstiltAv: String?,
-        oid: UUID?,
-        vedtakRef: Long?,
-        commandContextId: UUID?
-    ) =
-        this.run(
-            queryOf(
-                """
-                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
-                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?);
-            """,
-                oppgavetype,
-                oppgavestatus.name,
-                ferdigstiltAv,
-                oid,
-                vedtakRef,
-                commandContextId
-            ).asUpdateAndReturnGeneratedKey
-        )
-
-    private fun Session.finnOppgaveId(vedtaksperiodeId: UUID): Long? {
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT id FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
-            AND status = 'AvventerSaksbehandler'::oppgavestatus
-            """
-        return this.run(
-            queryOf(statement, vedtaksperiodeId)
-                .map { it.long("id") }.asSingle
-        )
-    }
 
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
         oppgavereferanse = it.long("oppgave_id"),

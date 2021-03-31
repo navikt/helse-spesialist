@@ -12,7 +12,6 @@ import java.util.*
 import kotlin.test.assertEquals
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
-    private val utbetalingDao = UtbetalingDao(dataSource)
 
     @Test
     fun `hent utbetalinger for en person`() {
