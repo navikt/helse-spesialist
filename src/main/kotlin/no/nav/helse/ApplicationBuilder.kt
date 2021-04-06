@@ -27,6 +27,7 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
+import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -109,6 +110,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
@@ -216,6 +218,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, oppgaveDao, hendelseMediator))
+                    behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                 }
             }
             adminApi(hendelseMediator)

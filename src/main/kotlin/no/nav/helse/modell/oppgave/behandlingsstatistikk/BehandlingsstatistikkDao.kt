@@ -1,4 +1,4 @@
-package no.nav.helse.modell.saksbehandler.behandlingsstatistikk
+package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import kotliquery.Row
 import kotliquery.queryOf
@@ -11,7 +11,7 @@ import javax.sql.DataSource
 
 class BehandlingsstatistikkDao(private val dataSource: DataSource) {
 
-    internal fun oppgavestatistikk(fom: LocalDate) = using(sessionOf(dataSource)) { session ->
+    internal fun oppgavestatistikk(fom: LocalDate = LocalDate.now()) = using(sessionOf(dataSource)) { session ->
         val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype(fom)
         val totaltTilGodkjenning = tilGodkjenningPerPeriodetype.values.sumBy { it }
         BehandlingsstatistikkDto(

@@ -1,4 +1,4 @@
-package no.nav.helse.modell.saksbehandler.behandlingsstatistikk
+package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 

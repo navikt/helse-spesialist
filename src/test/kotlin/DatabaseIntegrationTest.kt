@@ -15,12 +15,12 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
-import no.nav.helse.modell.saksbehandler.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
