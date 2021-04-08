@@ -111,7 +111,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun godkjenningsbehov(
-        hendelseId: UUID,
+        hendelseId: UUID = HENDELSE_ID,
         fødselsnummer: String = FNR,
         json: String = "{}"
     ) {

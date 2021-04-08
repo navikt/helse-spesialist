@@ -3,13 +3,18 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 
 data class BehandlingsstatistikkDto(
-    val oppgaverTilGodkjenning: OppgaverTilGodkjenningDto,
-    val antallTildelteOppgaver: Int,
-    val antallGodkjenteOppgaver: Int,
-    val antallAnnulleringer: Int
+    val oppgaverTilGodkjenning: OppgavestatistikkDto,
+    val tildelteOppgaver: OppgavestatistikkDto,
+    val fullførteBehandlinger: BehandlingerDto
 ) {
-    data class OppgaverTilGodkjenningDto(
+    data class OppgavestatistikkDto(
         val totalt: Int,
-        val perPeriodetype: Map<Saksbehandleroppgavetype, Int>
+        val perPeriodetype: List<Pair<Saksbehandleroppgavetype, Int>>
+    )
+    data class BehandlingerDto(
+        val totalt: Int,
+        val annullert: Int,
+        val manuelt: Int,
+        val automatisk: Int
     )
 }

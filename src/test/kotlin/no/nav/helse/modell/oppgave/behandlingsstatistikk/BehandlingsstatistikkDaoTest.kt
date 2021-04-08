@@ -2,6 +2,8 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import DatabaseIntegrationTest
 import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
+import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype.FORLENGELSE
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,32 +16,49 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     private val NOW = LocalDate.now()
 
     @Test
-    fun happyCase() {
+    fun `en periode til godkjenning`() {
         nyPerson()
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
-        assertEquals(0, dto.antallGodkjenteOppgaver)
-        assertEquals(0, dto.antallTildelteOppgaver)
-        assertEquals(0, dto.antallAnnulleringer)
+        assertEquals(0, dto.fullførteBehandlinger.totalt)
+        assertEquals(0, dto.fullførteBehandlinger.automatisk)
+        assertEquals(0, dto.fullførteBehandlinger.manuelt)
+        assertEquals(0, dto.fullførteBehandlinger.annullert)
+        assertEquals(0, dto.tildelteOppgaver.totalt)
+        assertEquals(0, dto.tildelteOppgaver.perPeriodetype.size)
         assertEquals(1, dto.oppgaverTilGodkjenning.totalt)
         assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype.size)
         assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[FØRSTEGANGSBEHANDLING])
     }
 
     @Test
-    fun antallTildelteOppgaver() {
+    fun `antall tildelte oppgaver`() {
         nyPerson()
         opprettSaksbehandler()
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
-        assertEquals(1, dto.antallTildelteOppgaver)
+        assertEquals(1, dto.tildelteOppgaver.totalt)
+        assertEquals(1, dto.tildelteOppgaver.perPeriodetype[FØRSTEGANGSBEHANDLING])
     }
 
     @Test
-    fun antallGodkjenteOppgaver() {
+    fun antallManuelleGodkjenninger() {
         nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, Oppgavestatus.Ferdigstilt)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
-        assertEquals(1, dto.antallGodkjenteOppgaver)
+        assertEquals(1, dto.fullførteBehandlinger.totalt)
+        assertEquals(1, dto.fullførteBehandlinger.manuelt)
+        assertEquals(0, dto.fullførteBehandlinger.automatisk)
+        assertEquals(0, dto.fullførteBehandlinger.annullert)
+    }
+
+    @Test
+    fun antallAutomatiskeGodkjenninger() {
+        nyPersonMedAutomatiskVedtak()
+        val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
+        assertEquals(1, dto.fullførteBehandlinger.totalt)
+        assertEquals(0, dto.fullførteBehandlinger.manuelt)
+        assertEquals(1, dto.fullførteBehandlinger.automatisk)
+        assertEquals(0, dto.fullførteBehandlinger.annullert)
     }
 
     @Test
@@ -47,7 +66,10 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler()
         utbetalingDao.nyAnnullering(LocalDateTime.now(), SAKSBEHANDLER_OID)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
-        assertEquals(1, dto.antallAnnulleringer)
+        assertEquals(1, dto.fullførteBehandlinger.totalt)
+        assertEquals(0, dto.fullførteBehandlinger.manuelt)
+        assertEquals(1, dto.fullførteBehandlinger.annullert)
+        assertEquals(0, dto.fullførteBehandlinger.automatisk)
     }
 
     @Test
@@ -65,10 +87,23 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         val fremtidigDato = NOW.plusDays(1)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(fremtidigDato)
-        assertEquals(0, dto.antallGodkjenteOppgaver)
-        assertEquals(0, dto.antallTildelteOppgaver)
-        assertEquals(0, dto.antallAnnulleringer)
+        assertEquals(0, dto.fullførteBehandlinger.totalt)
+        assertEquals(0, dto.fullførteBehandlinger.annullert)
+        assertEquals(0, dto.fullførteBehandlinger.manuelt)
+        assertEquals(0, dto.fullførteBehandlinger.automatisk)
+        assertEquals(0, dto.tildelteOppgaver.totalt)
+        assertEquals(0, dto.tildelteOppgaver.perPeriodetype.size)
         assertEquals(0, dto.oppgaverTilGodkjenning.totalt)
         assertEquals(0, dto.oppgaverTilGodkjenning.perPeriodetype.size)
+    }
+
+    private operator fun List<Pair<Saksbehandleroppgavetype, Int>>.get(type: Saksbehandleroppgavetype) = this.first { it.first == type }.second
+
+    private fun nyPersonMedAutomatiskVedtak(periodetype: Saksbehandleroppgavetype = FØRSTEGANGSBEHANDLING, inntektskilde: SaksbehandlerInntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER) {
+        godkjenningsbehov()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
+        nyttAutomatiseringsinnslag(true)
     }
 }

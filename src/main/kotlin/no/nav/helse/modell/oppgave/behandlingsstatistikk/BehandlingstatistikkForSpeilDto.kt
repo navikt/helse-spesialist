@@ -4,14 +4,20 @@ import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 
 
 data class BehandlingstatistikkForSpeilDto(
-    val antallOppgaverTilGodkjenning: AntallOppgaverTilGodkjenningForSpeilDto,
-    val antallTildelteOppgaver: Int,
-    val antallGodkjenteOppgaver: Int,
-    val antallAnnulleringer: Int
+    val antallOppgaverTilGodkjenning: OppgavestatistikkForSpeilDto,
+    val antallTildelteOppgaver: OppgavestatistikkForSpeilDto,
+    val fullførteBehandlinger: BehandlingerForSpeilDto
 ) {
-    data class AntallOppgaverTilGodkjenningForSpeilDto(
+    data class OppgavestatistikkForSpeilDto(
         val totalt: Int,
-        val perPeriodetype: Map<PeriodetypeForSpeil, Int>
+        val perPeriodetype: List<Pair<PeriodetypeForSpeil, Int>>
+    )
+
+    data class BehandlingerForSpeilDto(
+        val totalt: Int,
+        val annulleringer: Int,
+        val manuelt: Int,
+        val automatisk: Int
     )
 
     enum class PeriodetypeForSpeil {
@@ -23,15 +29,24 @@ data class BehandlingstatistikkForSpeilDto(
 
     internal companion object {
         internal fun toSpeilMap(behandlingsstatistikkDto: BehandlingsstatistikkDto) = BehandlingstatistikkForSpeilDto(
-            antallOppgaverTilGodkjenning = AntallOppgaverTilGodkjenningForSpeilDto(
+            antallOppgaverTilGodkjenning = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.oppgaverTilGodkjenning.totalt,
                 perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.map { (type, antall) ->
                     toPeriodetypeForSpeil(type) to antall
-                }.toMap()
+                }
             ),
-            antallTildelteOppgaver = behandlingsstatistikkDto.antallTildelteOppgaver,
-            antallGodkjenteOppgaver = behandlingsstatistikkDto.antallGodkjenteOppgaver,
-            antallAnnulleringer = behandlingsstatistikkDto.antallAnnulleringer
+            antallTildelteOppgaver = OppgavestatistikkForSpeilDto(
+                totalt = behandlingsstatistikkDto.tildelteOppgaver.totalt,
+                perPeriodetype = behandlingsstatistikkDto.tildelteOppgaver.perPeriodetype.map { (type, antall) ->
+                    toPeriodetypeForSpeil(type) to antall
+                }
+            ),
+            fullførteBehandlinger = BehandlingerForSpeilDto(
+                totalt = behandlingsstatistikkDto.fullførteBehandlinger.totalt,
+                annulleringer = behandlingsstatistikkDto.fullførteBehandlinger.annullert,
+                manuelt = behandlingsstatistikkDto.fullførteBehandlinger.manuelt,
+                automatisk = behandlingsstatistikkDto.fullførteBehandlinger.automatisk,
+            )
         )
 
         private fun toPeriodetypeForSpeil(periodetype: Saksbehandleroppgavetype) = when (periodetype) {

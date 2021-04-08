@@ -11,17 +11,29 @@ import javax.sql.DataSource
 
 class BehandlingsstatistikkDao(private val dataSource: DataSource) {
 
-    internal fun oppgavestatistikk(fom: LocalDate = LocalDate.now()) = using(sessionOf(dataSource)) { session ->
+    internal fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
         val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype(fom)
-        val totaltTilGodkjenning = tilGodkjenningPerPeriodetype.values.sumBy { it }
-        BehandlingsstatistikkDto(
-            BehandlingsstatistikkDto.OppgaverTilGodkjenningDto(
-                totaltTilGodkjenning,
-                tilGodkjenningPerPeriodetype(fom)
+        val tildeltPerPeriodetype = tildeltPerPeriodetype(fom)
+        val antallAnnulleringer = antallAnnulleringer(fom)
+        val antallManuelleGodkjenninger = godkjentManueltTotalt(fom)
+        val antallAutomatiskeGodkjenninger = godkjentAutomatiskTotalt(fom)
+        val behandletTotalt = antallAnnulleringer + antallAutomatiskeGodkjenninger + antallManuelleGodkjenninger
+
+        return BehandlingsstatistikkDto(
+            oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(
+                totalt = tilGodkjenningPerPeriodetype.sumBy { (_, antall) -> antall },
+                perPeriodetype = tilGodkjenningPerPeriodetype
             ),
-            tideltTotalt(fom),
-            godkjentTotalt(fom),
-            antallAnnulleringer(fom)
+            tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(
+                totalt = tildeltPerPeriodetype.sumBy { (_, antall) -> antall },
+                perPeriodetype = tildeltPerPeriodetype
+            ),
+            fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(
+                annullert = antallAnnulleringer,
+                manuelt = antallManuelleGodkjenninger,
+                automatisk = antallAutomatiskeGodkjenninger,
+                totalt = behandletTotalt
+            )
         )
     }
 
@@ -34,23 +46,36 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
             WHERE o.status = 'AvventerSaksbehandler' AND o.oppdatert >= :fom
             GROUP BY s.type
         """
-        session.run(queryOf(query, mapOf("fom" to fom)).map { tilGodkjenningForPeriodetypeDto(it) }.asList).toMap()
+        session.run(queryOf(query, mapOf("fom" to fom)).map { perPeriodetype(it) }.asList)
     }
 
-    private fun tideltTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    private fun tildeltPerPeriodetype(fom: LocalDate) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
-            SELECT COUNT(1) as antall FROM oppgave o
-                INNER JOIN tildeling t on o.id = t.oppgave_id_ref
+            SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
+                 INNER JOIN vedtak v on o.vedtak_ref = v.id
+                 INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
+                 INNER JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler' AND o.oppdatert >= :fom
+            GROUP BY s.type
+        """
+        session.run(queryOf(query, mapOf("fom" to fom)).map { perPeriodetype(it) }.asList)
+    }
+
+    private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom
         """
         session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
     })
 
-    private fun godkjentTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) {session ->
         @Language("PostgreSQL")
         val query = """
-            SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom
+            SELECT COUNT(1) as antall FROM automatisering a
+                INNER JOIN vedtak v on a.vedtaksperiode_ref = v.id
+            WHERE a.automatisert = true AND stikkprøve = false AND a.opprettet >= :fom
         """
         session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
     })
@@ -63,6 +88,6 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
     })
 
-    private fun tilGodkjenningForPeriodetypeDto(row: Row) =
+    private fun perPeriodetype(row: Row) =
         Saksbehandleroppgavetype.valueOf(row.string("periodetype")) to row.int("antall")
 }
