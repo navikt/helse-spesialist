@@ -2,15 +2,20 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 
-
 data class BehandlingstatistikkForSpeilDto(
     val antallOppgaverTilGodkjenning: OppgavestatistikkForSpeilDto,
     val antallTildelteOppgaver: OppgavestatistikkForSpeilDto,
     val fullførteBehandlinger: BehandlingerForSpeilDto
 ) {
+
+    data class PerPeriodetype(
+        val periodetypeForSpeil: PeriodetypeForSpeil,
+        val antall: Int
+    )
+
     data class OppgavestatistikkForSpeilDto(
         val totalt: Int,
-        val perPeriodetype: List<Pair<PeriodetypeForSpeil, Int>>
+        val perPeriodetype: List<PerPeriodetype>
     )
 
     data class BehandlingerForSpeilDto(
@@ -32,13 +37,13 @@ data class BehandlingstatistikkForSpeilDto(
             antallOppgaverTilGodkjenning = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.oppgaverTilGodkjenning.totalt,
                 perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.map { (type, antall) ->
-                    toPeriodetypeForSpeil(type) to antall
+                    PerPeriodetype(toPeriodetypeForSpeil(type), antall)
                 }
             ),
             antallTildelteOppgaver = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.tildelteOppgaver.totalt,
                 perPeriodetype = behandlingsstatistikkDto.tildelteOppgaver.perPeriodetype.map { (type, antall) ->
-                    toPeriodetypeForSpeil(type) to antall
+                    PerPeriodetype(toPeriodetypeForSpeil(type), antall)
                 }
             ),
             fullførteBehandlinger = BehandlingerForSpeilDto(

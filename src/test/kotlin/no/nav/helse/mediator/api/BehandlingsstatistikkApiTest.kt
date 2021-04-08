@@ -47,10 +47,10 @@ internal class BehandlingsstatistikkApiTest {
                 assertEquals(0, deserialized.antallTildelteOppgaver.totalt)
                 assertEquals(0, deserialized.antallTildelteOppgaver.perPeriodetype.size)
                 assertEquals(1, deserialized.antallOppgaverTilGodkjenning.totalt)
-                assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype[PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING])
+                assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.size)
+                assertEquals(PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.first().periodetypeForSpeil)
+                assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.first().antall)
             }
         }
     }
-
-    private operator fun List<Pair<PeriodetypeForSpeil, Int>>.get(type: PeriodetypeForSpeil) = this.first { it.first == type }.second
 }
