@@ -28,7 +28,6 @@ data class BehandlingstatistikkForSpeilDto(
     enum class PeriodetypeForSpeil {
         FØRSTEGANGSBEHANDLING,
         FORLENGELSE,
-        INFOTRYGDFORLENGELSE,
         OVERGANG_FRA_IT
     }
 
@@ -36,15 +35,11 @@ data class BehandlingstatistikkForSpeilDto(
         internal fun toSpeilMap(behandlingsstatistikkDto: BehandlingsstatistikkDto) = BehandlingstatistikkForSpeilDto(
             antallOppgaverTilGodkjenning = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.oppgaverTilGodkjenning.totalt,
-                perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.map { (type, antall) ->
-                    PerPeriodetype(toPeriodetypeForSpeil(type), antall)
-                }
+                perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.toPerPeriodetypeForSpeil()
             ),
             antallTildelteOppgaver = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.tildelteOppgaver.totalt,
-                perPeriodetype = behandlingsstatistikkDto.tildelteOppgaver.perPeriodetype.map { (type, antall) ->
-                    PerPeriodetype(toPeriodetypeForSpeil(type), antall)
-                }
+                perPeriodetype = behandlingsstatistikkDto.tildelteOppgaver.perPeriodetype.toPerPeriodetypeForSpeil()
             ),
             fullførteBehandlinger = BehandlingerForSpeilDto(
                 totalt = behandlingsstatistikkDto.fullførteBehandlinger.totalt,
@@ -54,10 +49,16 @@ data class BehandlingstatistikkForSpeilDto(
             )
         )
 
+        private fun List<Pair<Saksbehandleroppgavetype, Int>>.toPerPeriodetypeForSpeil() =
+            groupBy { toPeriodetypeForSpeil(it.first) }
+            .map { (key, value) ->
+                PerPeriodetype(key, value.sumBy { it.second })
+            }
+
         private fun toPeriodetypeForSpeil(periodetype: Saksbehandleroppgavetype) = when (periodetype) {
+            Saksbehandleroppgavetype.FORLENGELSE,
+            Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
             Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING -> PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING
-            Saksbehandleroppgavetype.FORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
-            Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.INFOTRYGDFORLENGELSE
             Saksbehandleroppgavetype.OVERGANG_FRA_IT -> PeriodetypeForSpeil.OVERGANG_FRA_IT
         }
     }

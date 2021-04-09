@@ -83,18 +83,17 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `tar ikke med innslag som er eldre enn dato som sendes inn`() {
-        nyPerson()
+    fun `tar ikke med innslag som er eldre enn dato som sendes inn for fullførte behandlinger`() {
+        nyPersonMedAutomatiskVedtak()
+        opprettOppgave(vedtakId = vedtakId)
         val fremtidigDato = NOW.plusDays(1)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(fremtidigDato)
         assertEquals(0, dto.fullførteBehandlinger.totalt)
         assertEquals(0, dto.fullførteBehandlinger.annullert)
         assertEquals(0, dto.fullførteBehandlinger.manuelt)
         assertEquals(0, dto.fullførteBehandlinger.automatisk)
-        assertEquals(0, dto.tildelteOppgaver.totalt)
-        assertEquals(0, dto.tildelteOppgaver.perPeriodetype.size)
-        assertEquals(0, dto.oppgaverTilGodkjenning.totalt)
-        assertEquals(0, dto.oppgaverTilGodkjenning.perPeriodetype.size)
+        assertEquals(1, dto.oppgaverTilGodkjenning.totalt)
+        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype.size)
     }
 
     private operator fun List<Pair<Saksbehandleroppgavetype, Int>>.get(type: Saksbehandleroppgavetype) = this.first { it.first == type }.second

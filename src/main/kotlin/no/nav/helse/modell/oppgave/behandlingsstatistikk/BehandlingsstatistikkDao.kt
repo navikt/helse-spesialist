@@ -12,8 +12,8 @@ import javax.sql.DataSource
 class BehandlingsstatistikkDao(private val dataSource: DataSource) {
 
     internal fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
-        val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype(fom)
-        val tildeltPerPeriodetype = tildeltPerPeriodetype(fom)
+        val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype()
+        val tildeltPerPeriodetype = tildeltPerPeriodetype()
         val antallAnnulleringer = antallAnnulleringer(fom)
         val antallManuelleGodkjenninger = godkjentManueltTotalt(fom)
         val antallAutomatiskeGodkjenninger = godkjentAutomatiskTotalt(fom)
@@ -37,29 +37,29 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         )
     }
 
-    private fun tilGodkjenningPerPeriodetype(fom: LocalDate) = using(sessionOf(dataSource)) { session ->
+    private fun tilGodkjenningPerPeriodetype() = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
                  INNER JOIN vedtak v on o.vedtak_ref = v.id
                  INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
-            WHERE o.status = 'AvventerSaksbehandler' AND o.oppdatert >= :fom
+            WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type
         """
-        session.run(queryOf(query, mapOf("fom" to fom)).map { perPeriodetype(it) }.asList)
+        session.run(queryOf(query).map { perPeriodetype(it) }.asList)
     }
 
-    private fun tildeltPerPeriodetype(fom: LocalDate) = using(sessionOf(dataSource)) { session ->
+    private fun tildeltPerPeriodetype() = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
                  INNER JOIN vedtak v on o.vedtak_ref = v.id
                  INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
                  INNER JOIN tildeling t on o.id = t.oppgave_id_ref
-            WHERE o.status = 'AvventerSaksbehandler' AND o.oppdatert >= :fom
+            WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type
         """
-        session.run(queryOf(query, mapOf("fom" to fom)).map { perPeriodetype(it) }.asList)
+        session.run(queryOf(query).map { perPeriodetype(it) }.asList)
     }
 
     private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) { session ->
