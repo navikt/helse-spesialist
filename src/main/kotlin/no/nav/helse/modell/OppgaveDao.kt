@@ -245,7 +245,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     })
 
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
-        oppgavereferanse = it.long("oppgave_id"),
+        oppgavereferanse = it.string("oppgave_id"),
         oppgavetype = it.string("oppgavetype"),
         saksbehandlerepost = it.stringOrNull("epost"),
         opprettet = it.localDateTime("opprettet"),

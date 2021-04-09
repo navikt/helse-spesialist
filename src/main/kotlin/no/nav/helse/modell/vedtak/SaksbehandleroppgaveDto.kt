@@ -19,7 +19,7 @@ data class EnhetDto(@JsonProperty("id") private val _id: String, val navn: Strin
 }
 
 data class SaksbehandleroppgaveDto(
-    val oppgavereferanse: Long,
+    val oppgavereferanse: String,
     val oppgavetype: String,
     @Deprecated("Erstattes av tildelingDto")
     val saksbehandlerepost: String?,

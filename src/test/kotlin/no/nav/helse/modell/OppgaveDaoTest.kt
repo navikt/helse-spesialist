@@ -67,7 +67,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveDao.finnOppgaver(false)
         val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
-        assertEquals(oppgaveId, oppgave.oppgavereferanse)
+        assertEquals(oppgaveId.toString(), oppgave.oppgavereferanse)
     }
 
     @Test
@@ -82,7 +82,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertTrue(oppgaver.isNotEmpty())
         val oppgave = oppgaver.first()
         assertEquals("RISK_QA", oppgave.oppgavetype)
-        assertEquals(oppgaveId, oppgave.oppgavereferanse)
+        assertEquals(oppgaveId.toString(), oppgave.oppgavereferanse)
         assertTrue(oppgaveDao.finnOppgaver(false).isEmpty())
     }
 

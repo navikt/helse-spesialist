@@ -648,5 +648,5 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelser("oppgave_opprettet")
             .last { it.path("hendelseId").asText() == hendelseId.toString() }
             .path("oppgaveId")
-            .asLong()
+            .asText()
 }
