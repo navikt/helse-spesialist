@@ -133,6 +133,7 @@ internal class TildelingDao(private val dataSource: DataSource) {
                 INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
                 INNER JOIN oppgave o on t.oppgave_id_ref = o.id
             WHERE o.id = :oppgaveId
+            AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
             """
         it.run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
     }
