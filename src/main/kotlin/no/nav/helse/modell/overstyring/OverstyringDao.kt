@@ -3,7 +3,6 @@ package no.nav.helse.modell.overstyring
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.arbeidsgiver.findArbeidsgiverByOrgnummer
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -32,11 +31,6 @@ internal class OverstyringDao(private val dataSource: DataSource) {
         }
     }
 
-    fun finnOverstyring(
-        fødselsnummer: String,
-        organisasjonsnummer: String
-    ) = sessionOf(dataSource).use { it.finnOverstyring(fødselsnummer, organisasjonsnummer) }
-
     private fun Session.persisterOverstyring(
         hendelseId: UUID,
         fødselsnummer: String,
@@ -44,15 +38,14 @@ internal class OverstyringDao(private val dataSource: DataSource) {
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
         saksbehandlerRef: UUID
-    ): Long? {
+    ) {
         @Language("PostgreSQL")
         val opprettOverstyringQuery = """
         INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref)
-        VALUES (:hendelse_id,
-                :person_ref,
-                :arbeidsgiver_ref,
-                :begrunnelse,
-                :saksbehandler_ref)
+            SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref
+            FROM arbeidsgiver ag, person p
+            WHERE p.fodselsnummer=:fodselsnummer
+            AND ag.orgnummer=:orgnr
     """
 
         @Language("PostgreSQL")
@@ -63,17 +56,13 @@ internal class OverstyringDao(private val dataSource: DataSource) {
                 :dagtype,
                 :grad)
     """
-
-        val person_ref = findPersonByFødselsnummer(fødselsnummer)
-        val arbeidsgiver_ref = findArbeidsgiverByOrgnummer(organisasjonsnummer)
-
         val overstyringRef = this.run(
             queryOf(
                 opprettOverstyringQuery,
                 mapOf(
                     "hendelse_id" to hendelseId,
-                    "person_ref" to person_ref,
-                    "arbeidsgiver_ref" to arbeidsgiver_ref,
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "orgnr" to organisasjonsnummer.toLong(),
                     "begrunnelse" to begrunnelse,
                     "saksbehandler_ref" to saksbehandlerRef
                 )
@@ -95,14 +84,12 @@ internal class OverstyringDao(private val dataSource: DataSource) {
                 )
             }
         }
-        return overstyringRef
     }
 
-    private fun Session.findPersonByFødselsnummer(fødselsnummer: String): Int? = this.run(
-        queryOf("SELECT id FROM person WHERE fodselsnummer=?;", fødselsnummer.toLong())
-            .map { it.int("id") }
-            .asSingle
-    )
+    fun finnOverstyring(
+        fødselsnummer: String,
+        organisasjonsnummer: String
+    ) = sessionOf(dataSource).use { it.finnOverstyring(fødselsnummer, organisasjonsnummer) }
 
     private fun Session.finnOverstyring(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringDto> {
         @Language("PostgreSQL")

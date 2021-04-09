@@ -1,7 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
@@ -10,15 +9,37 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 internal class ArbeidsgiverDao(private val dataSource: DataSource) {
-    internal fun findArbeidsgiverByOrgnummer(orgnummer: String) = sessionOf(dataSource).use {
-        it.findArbeidsgiverByOrgnummer(orgnummer)
+    internal fun findArbeidsgiverByOrgnummer(orgnummer: String) = sessionOf(dataSource).use { session ->
+        session.run(
+            queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
+                .map { it.long("id") }
+                .asSingle
+        )
     }
 
     internal fun insertArbeidsgiver(orgnummer: String, navn: String, bransjer: List<String>) =
-        sessionOf(dataSource, returnGeneratedKey = true).use {
-            val navnRef = requireNotNull(it.insertArbeidsgivernavn(navn))
-            val bransjerRef = requireNotNull(it.insertBransjer(bransjer))
-            it.run(
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val navnRef = requireNotNull(
+                session.run(
+                    queryOf(
+                        "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
+                        navn,
+                        LocalDateTime.now()
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            )
+            val bransjerRef = requireNotNull(
+                session.run(
+                    queryOf(
+                        "INSERT INTO arbeidsgiver_bransjer(bransjer, oppdatert) VALUES(:bransjer, :oppdatert);",
+                        mapOf(
+                            "bransjer" to objectMapper.writeValueAsString(bransjer),
+                            "oppdatert" to LocalDateTime.now()
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            )
+            session.run(
                 queryOf(
                     "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(:orgnummer, :navnRef, :bransjerRef);",
                     mapOf(
@@ -26,8 +47,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
                         "navnRef" to navnRef,
                         "bransjerRef" to bransjerRef
                     )
-                )
-                    .asUpdateAndReturnGeneratedKey
+                ).asUpdateAndReturnGeneratedKey
             )
         }
 
@@ -142,28 +162,3 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         }
 }
 
-internal fun Session.findArbeidsgiverByOrgnummer(orgnummer: String): Long? = this.run(
-    queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
-        .map { it.long("id") }
-        .asSingle
-)
-
-private fun Session.insertArbeidsgivernavn(navn: String): Long? = run(
-    queryOf(
-        "INSERT INTO arbeidsgiver_navn(navn, navn_oppdatert) VALUES(?, ?);",
-        navn,
-        LocalDateTime.now()
-    )
-        .asUpdateAndReturnGeneratedKey
-)
-
-private fun Session.insertBransjer(bransjer: List<String>) = run(
-    queryOf(
-        "INSERT INTO arbeidsgiver_bransjer(bransjer, oppdatert) VALUES(:bransjer, :oppdatert);",
-        mapOf(
-            "bransjer" to objectMapper.writeValueAsString(bransjer),
-            "oppdatert" to LocalDateTime.now()
-        )
-    )
-        .asUpdateAndReturnGeneratedKey
-)
