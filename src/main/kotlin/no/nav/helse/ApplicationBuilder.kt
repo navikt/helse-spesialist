@@ -217,7 +217,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
-                    leggPåVentApi(LeggPåVentMediator(tildelingDao, oppgaveDao, hendelseMediator))
+                    leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                 }
             }

@@ -26,13 +26,6 @@ internal class TildelingDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun finnSaksbehandlerNavn(oppgaveId: Long) = sessionOf(dataSource).use { session ->
-        session.hentSaksbehandlerNavnFor(oppgaveId)
-    }
-
-    internal fun finnSaksbehandlerEpost(oppgaveId: Long) = sessionOf(dataSource)
-        .use { it.hentSaksbehandlerEpostFor(oppgaveId) }
-
     internal fun tildelingForPerson(fødselsnummer: String) = sessionOf(dataSource)
         .use { it.tildelingForPerson(fødselsnummer) }
 
@@ -58,24 +51,6 @@ internal class TildelingDao(private val dataSource: DataSource) {
                 )
             ).asUpdate
         )
-    }
-
-    private fun Session.hentSaksbehandlerEpostFor(oppgaveId: Long): String? {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_id_ref=:oppgave_id_ref AND (gyldig_til IS NULL OR gyldig_til > now());"
-        return run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).map { row ->
-            row.string("epost")
-        }.asSingle)
-    }
-
-    private fun Session.hentSaksbehandlerNavnFor(oppgaveId: Long): String? {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT * FROM tildeling INNER JOIN saksbehandler s on s.oid = tildeling.saksbehandler_ref WHERE oppgave_id_ref=:oppgave_id_ref AND (gyldig_til IS NULL OR gyldig_til > now());"
-        return run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).map { row ->
-            row.string("navn")
-        }.asSingle)
     }
 
     private fun Session.slettOppgavetildeling(oppgaveId: Long) {

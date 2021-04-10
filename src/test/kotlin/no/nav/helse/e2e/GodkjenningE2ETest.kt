@@ -579,8 +579,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
-        val tildeling = tildelingDao.finnSaksbehandlerEpost(OPPGAVEID)
-        assertEquals(SAKSBEHANDLEREPOST, tildeling)
+        val tildeling = tildelingDao.tildelingForOppgave(OPPGAVEID)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling?.epost)
     }
 
     private fun håndterGodkjenningsbehov(): UUID {

@@ -78,14 +78,16 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         val saksbehandlerEpost = "${UUID.randomUUID()}@nav.no"
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave()
+        val vedtakId = opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
+        opprettOppgave(vedtakId = vedtakId)
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Sara Saksbehandler", saksbehandlerEpost)
         tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusDays(1))
-        assertNull(tildelingDao.finnSaksbehandlerEpost(oppgaveId))
-        assertNull(tildelingDao.finnSaksbehandlerNavn(oppgaveId))
+        assertNull(tildelingDao.tildelingForOppgave(oppgaveId))
         assertNull(tildelingDao.tildelingForPerson(FNR))
-        assertTrue(oppgaveDao.finnOppgaver(false).none { it.saksbehandlerepost == saksbehandlerEpost })
+        oppgaveDao.finnOppgaver(false).also { oppgaver ->
+            assertTrue(oppgaver.isNotEmpty())
+            assertTrue(oppgaver.none { it.saksbehandlerepost == saksbehandlerEpost })
+        }
     }
 
     @Test
