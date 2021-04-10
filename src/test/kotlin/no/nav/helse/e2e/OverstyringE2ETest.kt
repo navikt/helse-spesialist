@@ -88,7 +88,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
         val oppgave = oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER }
         assertNotNull(oppgave)
-        assertEquals(SAKSBEHANDLER_EPOST, oppgave.saksbehandlerepost)
+        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
     @Test

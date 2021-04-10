@@ -103,10 +103,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgaver med tildeling`() {
         nyPerson()
-        assertEquals(null, oppgaveDao.finnOppgaver(false).first().saksbehandlerepost)
+        assertEquals(null, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
         saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
-        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().saksbehandlerepost)
+        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
         assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
         assertEquals(false, oppgaveDao.finnOppgaver(false).first().tildeling?.påVent)
         assertEquals(SAKSBEHANDLER_OID, oppgaveDao.finnOppgaver(false).first().tildeling?.oid)

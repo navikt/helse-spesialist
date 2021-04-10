@@ -24,8 +24,6 @@ data class PersonForSpeilDto(
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto,
-    @Deprecated("erstattes av eget tildelingsobjekt")
-    val saksbehandlerepost: String?,
     val arbeidsforhold: List<ArbeidsforholdForSpeilDto>,
     val inntektsgrunnlag: JsonNode,
     @Deprecated("erstattes av eget tildelingsobjekt")

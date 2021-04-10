@@ -167,7 +167,6 @@ internal class VedtaksperiodeMediator(
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,
-                saksbehandlerepost = tildeling?.epost,
                 utbetalinger = utbetalinger,
                 arbeidsforhold = arbeidsforhold,
                 inntektsgrunnlag = speilSnapshot.inntektsgrunnlag,

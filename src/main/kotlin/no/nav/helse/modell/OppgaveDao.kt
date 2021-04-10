@@ -247,7 +247,6 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),
         oppgavetype = it.string("oppgavetype"),
-        saksbehandlerepost = it.stringOrNull("epost"),
         opprettet = it.localDateTime("opprettet"),
         vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
         periodeFom = it.localDate("fom"),
