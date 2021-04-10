@@ -175,7 +175,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erDigital = true
         )
         sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId, 1
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            antall = 1,
         )
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -536,7 +537,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erDigital = true
         )
         sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId, 1
+            godkjenningsmeldingId = godkjenningsmeldingId,
         )
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -549,7 +550,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertEquals(SAKSBEHANDLEROID, saksbehandler)
         assertTrue(gyldigTil.isAfter(LocalDateTime.now()))
 
+        testRapid.reset()
+
         val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotMedWarning(VEDTAKSPERIODE_ID2)
 
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID2)
         sendPersoninfoløsning(godkjenningsmeldingId2, ORGNR, VEDTAKSPERIODE_ID2)
@@ -567,11 +571,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erDigital = true
         )
         sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId2, 1
+            godkjenningsmeldingId = godkjenningsmeldingId2,
         )
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId2,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
+            vedtaksperiodeId = VEDTAKSPERIODE_ID2,
         )
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 

@@ -644,7 +644,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             .asText()
             .let { UUID.fromString(it) }
 
-    protected fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID) =
+    protected fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID): String =
         hendelser("oppgave_opprettet")
             .last { it.path("hendelseId").asText() == hendelseId.toString() }
             .path("oppgaveId")
