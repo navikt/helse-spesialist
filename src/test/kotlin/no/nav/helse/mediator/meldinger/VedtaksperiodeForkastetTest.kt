@@ -49,6 +49,7 @@ internal class VedtaksperiodeForkastetTest {
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             reservasjonDao = mockk(),
+            tildelingDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
             risikovurderingDao = risikovurderingDao,

@@ -95,6 +95,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         commandContextDao = commandContextDao,
         snapshotDao = SnapshotDao(dataSource),
         reservasjonDao = reservasjonDao,
+        tildelingDao = tildelingDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = OverstyringDao(dataSource),
         risikovurderingDao = risikovurderingDao,

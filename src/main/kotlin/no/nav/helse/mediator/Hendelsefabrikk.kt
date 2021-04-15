@@ -17,6 +17,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
 import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
@@ -38,6 +39,7 @@ internal class Hendelsefabrikk(
     private val commandContextDao: CommandContextDao,
     private val snapshotDao: SnapshotDao,
     private val reservasjonDao: ReservasjonDao,
+    private val tildelingDao: TildelingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val overstyringDao: OverstyringDao,
     private val risikovurderingDao: RisikovurderingDao,
@@ -357,7 +359,9 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             json = json,
             commandContextDao = commandContextDao,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao
         )
     }
 }

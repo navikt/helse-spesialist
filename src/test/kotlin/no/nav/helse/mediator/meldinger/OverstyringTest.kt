@@ -10,6 +10,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.TildelingDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -36,6 +37,7 @@ internal class OverstyringTest {
 
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
+    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
@@ -48,6 +50,7 @@ internal class OverstyringTest {
         commandContextDao = mockk(),
         snapshotDao = mockk(),
         reservasjonDao = reservasjonDao,
+        tildelingDao = tildelingDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
         risikovurderingDao = risikovurderingDao,

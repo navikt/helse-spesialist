@@ -15,6 +15,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -49,6 +50,7 @@ internal class SaksbehandlerløsningTest {
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
+    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
@@ -61,6 +63,7 @@ internal class SaksbehandlerløsningTest {
         commandContextDao = commandContextDao,
         snapshotDao = snapshotDao,
         reservasjonDao = reservasjonDao,
+        tildelingDao = tildelingDao,
         saksbehandlerDao = mockk(),
         overstyringDao = mockk(),
         risikovurderingDao = risikovurderingDao,

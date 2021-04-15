@@ -6,6 +6,9 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
+import no.nav.helse.modell.tildeling.ReservasjonDao
+import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -19,13 +22,16 @@ internal class VedtaksperiodeReberegnet(
     vedtaksperiodeId: UUID,
     commandContextDao: CommandContextDao,
     private val json: String,
-    oppgaveMediator: OppgaveMediator
+    oppgaveMediator: OppgaveMediator,
+    reservasjonDao: ReservasjonDao,
+    tildelingDao: TildelingDao,
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
 
     override val commands: List<Command> = listOf(
+        ReserverPersonHvisTildeltCommand(fødselsnummer, reservasjonDao, tildelingDao),
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator)
     )
 

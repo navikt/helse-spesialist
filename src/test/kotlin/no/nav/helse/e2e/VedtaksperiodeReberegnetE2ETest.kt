@@ -2,6 +2,10 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import junit.framework.Assert.assertEquals
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Test
@@ -14,6 +18,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         private const val ORGNR = "222222222"
         private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
     }
+
+    private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
@@ -76,7 +82,23 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `oppretter oppgave hos saksbehandler andre runde`() {
+    fun `tildeler andre rundes oppgave til saksbehandler`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        val saksbehandlerOid = UUID.randomUUID()
+
+        vedtaksperiodeTilGodkjenning()
+        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
+        tildelOppgave(saksbehandlerOid)
+
+        sendAvbrytSaksbehandling(UNG_PERSON_FNR_2018, VEDTAKSPERIODE_ID)
+        testRapid.reset()
+        vedtaksperiodeTilGodkjenning()
+
+        assertEquals(saksbehandlerOid, finnOidForTildeling(OPPGAVEID))
+    }
+
+    @Test
+    fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         var godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
@@ -169,5 +191,48 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         return godkjenningsmeldingId1
+    }
+
+    private fun tildelOppgave(saksbehandlerOid: UUID) {
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, gyldig_til) VALUES(:oppgave_id_ref, :saksbehandler_ref, now() + INTERVAL '14 DAYS');",
+                    mapOf(
+                        "oppgave_id_ref" to OPPGAVEID,
+                        "saksbehandler_ref" to saksbehandlerOid
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
+    private fun finnOidForTildeling(oppgaveId: Long) =
+        using(sessionOf(dataSource)) {
+            it.run(
+                queryOf(
+                    "SELECT * FROM tildeling WHERE oppgave_id_ref=?;", oppgaveId
+                ).map {
+                    UUID.fromString(it.string("saksbehandler_ref"))
+                }.asSingle
+            )
+        }
+
+    private fun opprettSaksbehandler(
+        oid: UUID,
+        navn: String,
+        epost: String
+    ) {
+        using(sessionOf(dataSource)) {
+            val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost) VALUES (:oid, :navn, :epost)"
+            it.run(
+                queryOf(
+                    opprettSaksbehandlerQuery,
+                    mapOf<String, Any>(
+                        "oid" to oid, "navn" to navn, "epost" to epost
+                    )
+                ).asUpdate
+            )
+        }
     }
 }

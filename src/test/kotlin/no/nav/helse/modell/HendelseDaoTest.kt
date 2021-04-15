@@ -38,6 +38,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
             reservasjonDao = mockk(),
+            tildelingDao = mockk(),
             saksbehandlerDao = mockk(),
             overstyringDao = mockk(),
             risikovurderingDao = mockk(),
