@@ -11,6 +11,7 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -18,6 +19,8 @@ internal fun Route.vedtaksperiodeApi(
     vedtaksperiodeMediator: VedtaksperiodeMediator,
     hendelseMediator: HendelseMediator
 ) {
+    val log = LoggerFactory.getLogger("VedtaksperiodeApi")
+
     get("/api/person/{vedtaksperiodeId}") {
         val speilSnapshot = withContext(Dispatchers.IO) {
             vedtaksperiodeMediator
@@ -73,6 +76,7 @@ internal fun Route.vedtaksperiodeApi(
     }
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDTO>()
+        log.info("Behandler godkjenning av ${godkjenning.oppgavereferanse}")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
             UUID.fromString(it.getClaim("oid").asString()) to it.getClaim("preferred_username").asString()
         }
