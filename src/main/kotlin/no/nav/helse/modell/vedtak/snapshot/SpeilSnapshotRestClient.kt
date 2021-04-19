@@ -6,22 +6,36 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.ContentType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AccessTokenClient
+import java.io.IOException
 
 class SpeilSnapshotRestClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
-    private val spleisClientId: String
+    private val spleisClientId: String,
+    private val retryInterval: Long = 5000L
 ) {
     internal fun hentSpeilSpapshot(fnr: String): String {
         return runBlocking {
-            val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
-            httpClient.get<HttpStatement>("http://spleis-api.tbd.svc.nais.local/api/person-snapshot") {
-                header("Authorization", "Bearer $accessToken")
-                header("fnr", fnr)
-                accept(ContentType.Application.Json)
-            }.receive<String>()
+            hentSpeilSpapshot(fnr, 5)
+        }
+    }
+
+    private suspend fun hentSpeilSpapshot(fnr: String, retries: Int): String = try {
+        val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
+        httpClient.get<HttpStatement>("http://spleis-api.tbd.svc.nais.local/api/person-snapshot") {
+            header("Authorization", "Bearer $accessToken")
+            header("fnr", fnr)
+            accept(ContentType.Application.Json)
+        }.receive()
+    } catch (e: IOException) {
+        if (retries <= 1) {
+            throw e
+        } else {
+            delay(retryInterval)
+            hentSpeilSpapshot(fnr, retries - 1)
         }
     }
 }
