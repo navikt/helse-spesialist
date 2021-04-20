@@ -68,8 +68,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
         }
     }
-    private val spleisClient = HttpClient {
+    private val spleisClient = HttpClient(Apache) {
         install(JsonFeature) { serializer = JacksonSerializer() }
+        engine {
+            socketTimeout = 30_000
+            connectTimeout = 30_000
+            connectionRequestTimeout = 40_000
+        }
     }
     private val accessTokenClient = AccessTokenClient(
         aadAccessTokenUrl = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
