@@ -18,10 +18,10 @@ internal fun Route.oppgaveApi(
     oppgaveMediator: OppgaveMediator,
     riskSupersaksbehandlergruppe: String
 ) {
-    val riskSupersaksbehandlergruppe = UUID.fromString(riskSupersaksbehandlergruppe)
+    val gruppeIdForRiskSaksbehandlere = UUID.fromString(riskSupersaksbehandlergruppe)
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
-            val erRiskSupersaksbehandler = getGrupper().contains(riskSupersaksbehandlergruppe)
+            val erRiskSupersaksbehandler = getGrupper().contains(gruppeIdForRiskSaksbehandlere)
             oppgaveMediator.hentOppgaver(erRiskSupersaksbehandler)
         }
         call.respond(saksbehandlerOppgaver)
