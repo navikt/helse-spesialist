@@ -75,7 +75,7 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave(1L, OPPGAVETYPE,Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val gjenopptattOppgave = Oppgave(1L, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
         val oppgave1 = Oppgave.søknad(VEDTAKSPERIODE_ID)
         val oppgave2 = Oppgave.søknad(VEDTAKSPERIODE_ID)
         val oppgave3 = Oppgave.søknad(UUID.randomUUID())

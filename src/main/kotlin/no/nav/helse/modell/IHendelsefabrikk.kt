@@ -2,8 +2,8 @@ package no.nav.helse.modell
 
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -50,8 +50,8 @@ internal interface IHendelsefabrikk {
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        periodetype: Saksbehandleroppgavetype,
-        inntektskilde: SaksbehandlerInntektskilde,
+        periodetype: Periodetype,
+        inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         json: String
     ): Godkjenningsbehov

@@ -24,10 +24,10 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Inntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtak.Periodetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -142,14 +142,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         else automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID)
     }
 
-    protected fun nyPerson(periodetype: Saksbehandleroppgavetype = FØRSTEGANGSBEHANDLING, inntektskilde: SaksbehandlerInntektskilde = EN_ARBEIDSGIVER) {
+    protected fun nyPerson(periodetype: Periodetype = FØRSTEGANGSBEHANDLING, inntektskilde: Inntektskilde = EN_ARBEIDSGIVER) {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
         opprettOppgave(vedtakId = vedtakId)
     }
 
-    protected fun nyVedtaksperiode(periodetype: Saksbehandleroppgavetype = FØRSTEGANGSBEHANDLING) {
+    protected fun nyVedtaksperiode(periodetype: Periodetype = FØRSTEGANGSBEHANDLING) {
         val vedtaksperiodeId = UUID.randomUUID()
         val id = opprettVedtaksperiode(vedtaksperiodeId, periodetype = periodetype)
         opprettOppgave(vedtakId = id)
@@ -157,8 +157,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettVedtakstype(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        type: Saksbehandleroppgavetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: SaksbehandlerInntektskilde = EN_ARBEIDSGIVER
+        type: Periodetype = FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
     ) {
         vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
@@ -200,8 +200,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
         tom: LocalDate = TOM,
-        periodetype: Saksbehandleroppgavetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: SaksbehandlerInntektskilde = EN_ARBEIDSGIVER
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
     ): Long {
         opprettSnapshot()
         return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)

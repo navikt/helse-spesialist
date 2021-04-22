@@ -4,7 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -66,7 +66,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Saksbehandleroppgavetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

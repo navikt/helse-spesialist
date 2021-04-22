@@ -11,7 +11,7 @@ import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.vedtak.SaksbehandleroppgavereferanseDto
+import no.nav.helse.modell.vedtak.OppgavereferanseDto
 import java.util.*
 
 internal fun Route.oppgaveApi(
@@ -38,7 +38,7 @@ internal fun Route.direkteOppgaveApi(oppgaveMediator: OppgaveMediator) {
 
         withContext(Dispatchers.IO) { oppgaveMediator.hentOppgaveId(fødselsnummer) }
             ?.let {
-                call.respond(SaksbehandleroppgavereferanseDto(it))
+                call.respond(OppgavereferanseDto(it))
             } ?: call.respond(HttpStatusCode.NotFound)
     }
 }

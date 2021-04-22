@@ -3,8 +3,8 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +34,7 @@ internal class GodkjenningsbehovRiverTest {
 
     @Test
     fun `leser Godkjenningbehov`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, orgnummer = ORGNR, periodeFom = FOM, periodeTom = TOM, inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, orgnummer = ORGNR, periodeFom = FOM, periodeTom = TOM, inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE))
         verify(exactly = 1) { mediator.godkjenningsbehov(
             any(),
             HENDELSE,
@@ -44,9 +44,9 @@ internal class GodkjenningsbehovRiverTest {
             FOM,
             TOM,
             VEDTAKSPERIODE,
-            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
-            SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE,
-            listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING)),
+            Periodetype.FØRSTEGANGSBEHANDLING,
+            Inntektskilde.FLERE_ARBEIDSGIVERE,
+            listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Periodetype.FØRSTEGANGSBEHANDLING)),
             any()
         ) }
     }

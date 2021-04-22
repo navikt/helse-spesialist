@@ -8,7 +8,7 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -22,9 +22,9 @@ internal class RisikoCommandTest {
         private const val ORGNUMMER1 = "123456789"
         private const val ORGNUMMER2 = "456789123"
         private const val ORGNUMMER3 = "789456123"
-        private val PERIODETYPE1 = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
-        private val PERIODETYPE2 = Saksbehandleroppgavetype.FORLENGELSE
-        private val PERIODETYPE3 = Saksbehandleroppgavetype.OVERGANG_FRA_IT
+        private val PERIODETYPE1 = Periodetype.FØRSTEGANGSBEHANDLING
+        private val PERIODETYPE2 = Periodetype.FORLENGELSE
+        private val PERIODETYPE3 = Periodetype.OVERGANG_FRA_IT
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_3 = UUID.randomUUID()

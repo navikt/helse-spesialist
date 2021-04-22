@@ -14,7 +14,7 @@ import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDt
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.Companion.toSpeilMap
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtak.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

@@ -4,8 +4,8 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -57,10 +57,10 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        val vedtaksperiodetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
-        val inntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER
+        val vedtaksperiodetype = Periodetype.FØRSTEGANGSBEHANDLING
+        val inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
         vedtakDao.leggTilVedtaksperiodetype(VEDTAKSPERIODE, vedtaksperiodetype, inntektskilde)
-        assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, vedtakDao.finnVedtaksperiodetype(VEDTAKSPERIODE))
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, vedtakDao.finnVedtaksperiodetype(VEDTAKSPERIODE))
         assertEquals(inntektskilde, vedtakDao.finnInntektskilde(VEDTAKSPERIODE))
     }
 

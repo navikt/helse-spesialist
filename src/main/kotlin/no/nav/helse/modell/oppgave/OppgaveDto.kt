@@ -18,35 +18,33 @@ data class EnhetDto(@JsonProperty("id") private val _id: String, val navn: Strin
     val id get() = if (_id.length == 3) "0$_id" else _id
 }
 
-data class SaksbehandleroppgaveDto(
+data class OppgaveDto(
     val oppgavereferanse: String,
     val oppgavetype: String,
     val opprettet: LocalDateTime,
     val vedtaksperiodeId: UUID,
-    val periodeFom: LocalDate,
-    val periodeTom: LocalDate,
     val personinfo: PersoninfoDto,
     val fødselsnummer: String,
     val aktørId: String,
     val antallVarsler: Int,
-    val type: Saksbehandleroppgavetype?,
-    val inntektskilde: SaksbehandlerInntektskilde?,
+    val type: Periodetype?,
+    val inntektskilde: Inntektskilde?,
     var boenhet: EnhetDto,
     val tildeling: TildelingDto?
 )
 
-data class SaksbehandleroppgavereferanseDto(
+data class OppgavereferanseDto(
     val oppgavereferanse: Long
 )
 
-enum class Saksbehandleroppgavetype {
+enum class Periodetype {
     FØRSTEGANGSBEHANDLING,
     FORLENGELSE,
     INFOTRYGDFORLENGELSE,
     OVERGANG_FRA_IT
 }
 
-enum class SaksbehandlerInntektskilde{
+enum class Inntektskilde {
     EN_ARBEIDSGIVER,
     FLERE_ARBEIDSGIVERE
 }

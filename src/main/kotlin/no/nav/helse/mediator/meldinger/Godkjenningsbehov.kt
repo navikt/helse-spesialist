@@ -29,8 +29,8 @@ import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -46,8 +46,8 @@ internal class Godkjenningsbehov(
     private val vedtaksperiodeId: UUID,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    periodetype: Saksbehandleroppgavetype,
-    inntektskilde: SaksbehandlerInntektskilde,
+    periodetype: Periodetype,
+    inntektskilde: Inntektskilde,
     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
     private val json: String,
     personDao: PersonDao,
@@ -211,8 +211,8 @@ internal class Godkjenningsbehov(
                 periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
                 periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
-                periodetype = Saksbehandleroppgavetype.valueOf(packet["Godkjenning.periodetype"].asText()),
-                inntektskilde = SaksbehandlerInntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
+                periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
+                inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),
                 context = context
             )
@@ -222,7 +222,7 @@ internal class Godkjenningsbehov(
     internal data class AktivVedtaksperiode(
         private val orgnummer: String,
         private val vedtaksperiodeId: UUID,
-        private val periodetype: Saksbehandleroppgavetype
+        private val periodetype: Periodetype
     ) {
         internal fun behov(context: CommandContext, vedtaksperiodeIdTilGodkjenning: UUID) {
             context.nyBehovgruppe()

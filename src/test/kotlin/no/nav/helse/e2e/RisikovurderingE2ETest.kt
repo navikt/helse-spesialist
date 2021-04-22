@@ -7,7 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -67,17 +67,17 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
                 Testmeldingfabrikk.AktivVedtaksperiodeJson(
                     ORGNR,
                     VEDTAKSPERIODE_ID,
-                    Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                    Periodetype.FØRSTEGANGSBEHANDLING
                 ),
                 Testmeldingfabrikk.AktivVedtaksperiodeJson(
                     "456789123",
                     UUID.randomUUID(),
-                    Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                    Periodetype.FØRSTEGANGSBEHANDLING
                 ),
                 Testmeldingfabrikk.AktivVedtaksperiodeJson(
                     "789456123",
                     UUID.randomUUID(),
-                    Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                    Periodetype.FØRSTEGANGSBEHANDLING
                 ),
             ),
             ekstraArbeidsgivere = listOf(
@@ -96,7 +96,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             Testmeldingfabrikk.AktivVedtaksperiodeJson(
                 ORGNR,
                 vedtaksperiodeId,
-                Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+                Periodetype.FØRSTEGANGSBEHANDLING
             )
         ),
         ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()

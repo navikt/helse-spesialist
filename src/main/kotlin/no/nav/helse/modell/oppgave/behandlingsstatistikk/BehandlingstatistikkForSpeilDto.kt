@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 
 data class BehandlingstatistikkForSpeilDto(
     val antallOppgaverTilGodkjenning: OppgavestatistikkForSpeilDto,
@@ -49,17 +49,17 @@ data class BehandlingstatistikkForSpeilDto(
             )
         )
 
-        private fun List<Pair<Saksbehandleroppgavetype, Int>>.toPerPeriodetypeForSpeil() =
+        private fun List<Pair<Periodetype, Int>>.toPerPeriodetypeForSpeil() =
             groupBy { toPeriodetypeForSpeil(it.first) }
             .map { (key, value) ->
                 PerPeriodetype(key, value.sumBy { it.second })
             }
 
-        private fun toPeriodetypeForSpeil(periodetype: Saksbehandleroppgavetype) = when (periodetype) {
-            Saksbehandleroppgavetype.FORLENGELSE,
-            Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
-            Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING -> PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING
-            Saksbehandleroppgavetype.OVERGANG_FRA_IT -> PeriodetypeForSpeil.OVERGANG_FRA_IT
+        private fun toPeriodetypeForSpeil(periodetype: Periodetype) = when (periodetype) {
+            Periodetype.FORLENGELSE,
+            Periodetype.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
+            Periodetype.FØRSTEGANGSBEHANDLING -> PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING
+            Periodetype.OVERGANG_FRA_IT -> PeriodetypeForSpeil.OVERGANG_FRA_IT
         }
     }
 }

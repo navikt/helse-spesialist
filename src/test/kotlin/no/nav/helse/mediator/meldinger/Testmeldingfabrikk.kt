@@ -3,8 +3,8 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.overstyring.OverstyringDagDto
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -54,10 +54,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         orgnummer: String = "orgnr",
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
-        periodetype: Saksbehandleroppgavetype = Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId,
-        inntektskilde: SaksbehandlerInntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         aktiveVedtaksperioder: List<AktivVedtaksperiodeJson> = listOf(
             AktivVedtaksperiodeJson(
                 orgnummer,
@@ -404,7 +404,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "Risikovurdering" to mapOf(
                     "vedtaksperiodeId" to vedtaksperiodeId.toString(),
                     "organisasjonsnummer" to "815493000",
-                    "periodetype" to Saksbehandleroppgavetype.FORLENGELSE
+                    "periodetype" to Periodetype.FORLENGELSE
                 ),
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
@@ -530,7 +530,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@opprettet" to LocalDateTime.now()
     )
 
-    data class AktivVedtaksperiodeJson(val orgnummer: String, val vedtaksperiodeId: UUID, val periodetype: Saksbehandleroppgavetype) {
+    data class AktivVedtaksperiodeJson(val orgnummer: String, val vedtaksperiodeId: UUID, val periodetype: Periodetype) {
         fun toBody() = mapOf(
             "orgnummer" to orgnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,

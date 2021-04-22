@@ -19,8 +19,8 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -66,8 +66,8 @@ internal class Hendelsefabrikk(
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        periodetype: Saksbehandleroppgavetype,
-        inntektskilde: SaksbehandlerInntektskilde,
+        periodetype: Periodetype,
+        inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         json: String
     ): Godkjenningsbehov {
@@ -112,8 +112,8 @@ internal class Hendelsefabrikk(
             periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
             periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            periodetype = Saksbehandleroppgavetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
-            inntektskilde = SaksbehandlerInntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
+            periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
+            inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
             aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")),
             json = json
         )

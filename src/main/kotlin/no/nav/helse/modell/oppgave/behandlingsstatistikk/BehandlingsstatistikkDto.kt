@@ -1,6 +1,6 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 
 data class BehandlingsstatistikkDto(
     val oppgaverTilGodkjenning: OppgavestatistikkDto,
@@ -9,7 +9,7 @@ data class BehandlingsstatistikkDto(
 ) {
     data class OppgavestatistikkDto(
         val totalt: Int,
-        val perPeriodetype: List<Pair<Saksbehandleroppgavetype, Int>>
+        val perPeriodetype: List<Pair<Periodetype, Int>>
     )
     data class BehandlingerDto(
         val totalt: Int,

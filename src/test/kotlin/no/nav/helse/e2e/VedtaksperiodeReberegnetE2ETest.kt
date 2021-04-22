@@ -2,12 +2,12 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import junit.framework.Assert.assertEquals
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.snapshotUtenWarnings
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*

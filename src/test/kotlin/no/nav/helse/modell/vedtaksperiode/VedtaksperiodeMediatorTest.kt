@@ -4,7 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
@@ -383,12 +383,12 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             Testmeldingfabrikk.AktivVedtaksperiodeJson(
                 ORGNR,
                 VEDTAKSPERIODE_ID,
-                Saksbehandleroppgavetype.OVERGANG_FRA_IT
+                Periodetype.OVERGANG_FRA_IT
             ),
             Testmeldingfabrikk.AktivVedtaksperiodeJson(
                 ORGNR2,
                 UUID.randomUUID(),
-                Saksbehandleroppgavetype.OVERGANG_FRA_IT
+                Periodetype.OVERGANG_FRA_IT
             )
         )
         val godkjenningsmeldingId =

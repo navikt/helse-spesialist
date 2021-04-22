@@ -4,7 +4,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import javax.sql.DataSource
@@ -89,5 +89,5 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
     })
 
     private fun perPeriodetype(row: Row) =
-        Saksbehandleroppgavetype.valueOf(row.string("periodetype")) to row.int("antall")
+        Periodetype.valueOf(row.string("periodetype")) to row.int("antall")
 }

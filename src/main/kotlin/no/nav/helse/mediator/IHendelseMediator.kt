@@ -1,8 +1,8 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import java.time.LocalDate
@@ -60,8 +60,8 @@ internal interface IHendelseMediator {
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        periodetype: Saksbehandleroppgavetype,
-        inntektskilde: SaksbehandlerInntektskilde,
+        periodetype: Periodetype,
+        inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext
     )

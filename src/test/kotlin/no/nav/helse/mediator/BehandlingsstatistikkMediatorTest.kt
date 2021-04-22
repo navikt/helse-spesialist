@@ -6,11 +6,10 @@ import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDa
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto.BehandlingerDto
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto.OppgavestatistikkDto
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -26,19 +25,19 @@ internal class BehandlingsstatistikkMediatorTest {
                 oppgaverTilGodkjenning = OppgavestatistikkDto(
                     totalt = 34,
                     perPeriodetype = listOf(
-                        Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING to 10,
-                        Saksbehandleroppgavetype.FORLENGELSE to 9,
-                        Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE to 8,
-                        Saksbehandleroppgavetype.OVERGANG_FRA_IT to 7
+                        Periodetype.FØRSTEGANGSBEHANDLING to 10,
+                        Periodetype.FORLENGELSE to 9,
+                        Periodetype.INFOTRYGDFORLENGELSE to 8,
+                        Periodetype.OVERGANG_FRA_IT to 7
                     )
                 ),
                 tildelteOppgaver = OppgavestatistikkDto(
                     totalt = 34,
                     perPeriodetype = listOf(
-                        Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING to 10,
-                        Saksbehandleroppgavetype.FORLENGELSE to 9,
-                        Saksbehandleroppgavetype.INFOTRYGDFORLENGELSE to 8,
-                        Saksbehandleroppgavetype.OVERGANG_FRA_IT to 7
+                        Periodetype.FØRSTEGANGSBEHANDLING to 10,
+                        Periodetype.FORLENGELSE to 9,
+                        Periodetype.INFOTRYGDFORLENGELSE to 8,
+                        Periodetype.OVERGANG_FRA_IT to 7
                     )
                 ),
                 fullførteBehandlinger = BehandlingerDto(

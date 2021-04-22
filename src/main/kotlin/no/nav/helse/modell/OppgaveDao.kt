@@ -244,13 +244,11 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
 
-    private fun saksbehandleroppgaveDto(it: Row) = SaksbehandleroppgaveDto(
+    private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),
         oppgavetype = it.string("oppgavetype"),
         opprettet = it.localDateTime("opprettet"),
         vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-        periodeFom = it.localDate("fom"),
-        periodeTom = it.localDate("tom"),
         personinfo = PersoninfoDto(
             it.string("fornavn"),
             it.stringOrNull("mellomnavn"),
@@ -261,8 +259,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         aktørId = it.long("aktor_id").toString(),
         fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
         antallVarsler = it.int("antall_varsler"),
-        type = it.stringOrNull("saksbehandleroppgavetype")?.let(Saksbehandleroppgavetype::valueOf),
-        inntektskilde = it.stringOrNull("inntektskilde")?.let(SaksbehandlerInntektskilde::valueOf),
+        type = it.stringOrNull("saksbehandleroppgavetype")?.let(Periodetype::valueOf),
+        inntektskilde = it.stringOrNull("inntektskilde")?.let(Inntektskilde::valueOf),
         boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn")),
         tildeling = it.stringOrNull("epost")?.let { epost ->
             TildelingDto(

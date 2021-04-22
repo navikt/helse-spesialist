@@ -2,10 +2,10 @@ package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import DatabaseIntegrationTest
 import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype.FORLENGELSE
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtak.Periodetype.FORLENGELSE
+import no.nav.helse.modell.vedtak.Periodetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -96,9 +96,9 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype.size)
     }
 
-    private operator fun List<Pair<Saksbehandleroppgavetype, Int>>.get(type: Saksbehandleroppgavetype) = this.first { it.first == type }.second
+    private operator fun List<Pair<Periodetype, Int>>.get(type: Periodetype) = this.first { it.first == type }.second
 
-    private fun nyPersonMedAutomatiskVedtak(periodetype: Saksbehandleroppgavetype = FØRSTEGANGSBEHANDLING, inntektskilde: SaksbehandlerInntektskilde = SaksbehandlerInntektskilde.EN_ARBEIDSGIVER) {
+    private fun nyPersonMedAutomatiskVedtak(periodetype: Periodetype = FØRSTEGANGSBEHANDLING, inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER) {
         godkjenningsbehov()
         opprettPerson()
         opprettArbeidsgiver()

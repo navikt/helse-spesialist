@@ -8,8 +8,8 @@ import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.Oppgavestatus.Ferdigstilt
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -204,10 +204,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `en oppgave har riktig oppgavetype og inntektskilde`(){
-        nyPerson(inntektskilde = SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE)
+        nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
         val oppgaver = oppgaveDao.finnOppgaver(true)
-        assertEquals(Saksbehandleroppgavetype.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
-        assertEquals(SaksbehandlerInntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
+        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
     }
 
     private fun oppgave() =

@@ -2,9 +2,9 @@ package no.nav.helse.modell
 
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.modell.vedtak.PersoninfoDto
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import org.intellij.lang.annotations.Language
@@ -92,7 +92,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
     }
 
-    internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Saksbehandleroppgavetype, inntektskilde: SaksbehandlerInntektskilde) =
+    internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Periodetype, inntektskilde: Inntektskilde) =
         using(sessionOf(dataSource)) {
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
 
@@ -101,7 +101,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             it.run(queryOf(statement, type.name, inntektskilde.name, vedtakRef).asUpdate)
         }
 
-    internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Saksbehandleroppgavetype? =
+    internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype? =
         sessionOf(dataSource).use { session ->
             val vedtakRef =
                 requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
@@ -109,11 +109,11 @@ internal class VedtakDao(private val dataSource: DataSource) {
             @Language("PostgreSQL")
             val statement = "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = ?"
             session.run(queryOf(statement, vedtakRef).map {
-                enumValueOf<Saksbehandleroppgavetype>(it.string("type"))
+                enumValueOf<Periodetype>(it.string("type"))
             }.asSingle)
         }
 
-    fun finnInntektskilde(vedtaksperiodeId: UUID): SaksbehandlerInntektskilde? =
+    fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         sessionOf(dataSource).use { session ->
             val vedtakRef =
                 requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
@@ -121,7 +121,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             @Language("PostgreSQL")
             val statement = "SELECT inntektskilde FROM saksbehandleroppgavetype where vedtak_ref = ?"
             session.run(queryOf(statement, vedtakRef).map {
-                enumValueOf<SaksbehandlerInntektskilde>(it.string("inntektskilde"))
+                enumValueOf<Inntektskilde>(it.string("inntektskilde"))
             }.asSingle)
         }
 

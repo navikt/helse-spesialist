@@ -8,7 +8,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
+import no.nav.helse.modell.vedtak.Inntektskilde
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -64,7 +64,7 @@ internal class Automatisering(
             },
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
-            validering("Har flere arbeidsgivere") { inntektskilde == SaksbehandlerInntektskilde.EN_ARBEIDSGIVER },
+            validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
         )
     }
 

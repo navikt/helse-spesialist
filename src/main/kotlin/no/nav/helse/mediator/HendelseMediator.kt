@@ -16,8 +16,8 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
-import no.nav.helse.modell.vedtak.SaksbehandlerInntektskilde
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Inntektskilde
+import no.nav.helse.modell.vedtak.Periodetype
 import no.nav.helse.objectMapper
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -185,8 +185,8 @@ internal class HendelseMediator(
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
-        periodetype: Saksbehandleroppgavetype,
-        inntektskilde: SaksbehandlerInntektskilde,
+        periodetype: Periodetype,
+        inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext
     ) {

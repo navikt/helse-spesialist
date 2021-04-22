@@ -2,7 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.modell.vedtak.Saksbehandleroppgavetype
+import no.nav.helse.modell.vedtak.Periodetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -46,7 +46,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Saksbehandleroppgavetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
