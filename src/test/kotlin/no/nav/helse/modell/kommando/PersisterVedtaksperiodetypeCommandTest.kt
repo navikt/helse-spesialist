@@ -3,8 +3,8 @@ package no.nav.helse.modell.kommando
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.vedtak.Inntektskilde
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Test
 import java.util.*
 

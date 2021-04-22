@@ -2,6 +2,8 @@ package no.nav.helse.modell.vedtak
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.helse.mediator.meldinger.Kjønn
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -18,7 +20,7 @@ data class EnhetDto(@JsonProperty("id") private val _id: String, val navn: Strin
     val id get() = if (_id.length == 3) "0$_id" else _id
 }
 
-data class OppgaveDto(
+data class OppgaveDto (
     val oppgavereferanse: String,
     val oppgavetype: String,
     val opprettet: LocalDateTime,
@@ -36,18 +38,6 @@ data class OppgaveDto(
 data class OppgavereferanseDto(
     val oppgavereferanse: Long
 )
-
-enum class Periodetype {
-    FØRSTEGANGSBEHANDLING,
-    FORLENGELSE,
-    INFOTRYGDFORLENGELSE,
-    OVERGANG_FRA_IT
-}
-
-enum class Inntektskilde {
-    EN_ARBEIDSGIVER,
-    FLERE_ARBEIDSGIVERE
-}
 
 data class TildelingDto (
     val navn: String,

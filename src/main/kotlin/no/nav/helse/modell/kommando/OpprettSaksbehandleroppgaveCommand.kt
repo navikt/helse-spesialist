@@ -1,9 +1,9 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.Oppgave
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import org.slf4j.LoggerFactory

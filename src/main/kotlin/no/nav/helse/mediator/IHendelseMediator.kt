@@ -1,8 +1,8 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
-import no.nav.helse.modell.vedtak.Inntektskilde
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import java.time.LocalDate

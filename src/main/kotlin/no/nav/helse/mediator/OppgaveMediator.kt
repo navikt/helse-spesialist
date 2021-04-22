@@ -1,10 +1,10 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.modell.Oppgave
-import no.nav.helse.modell.OppgaveDao
-import no.nav.helse.modell.Oppgavestatus
 import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.MessageContext

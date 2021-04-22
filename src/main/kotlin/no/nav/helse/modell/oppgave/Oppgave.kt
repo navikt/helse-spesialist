@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.oppgave
 
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.rapids_rivers.JsonMessage

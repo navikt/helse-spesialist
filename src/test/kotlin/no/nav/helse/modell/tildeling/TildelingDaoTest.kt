@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.modell.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*

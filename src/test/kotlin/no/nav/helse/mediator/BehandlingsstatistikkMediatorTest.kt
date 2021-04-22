@@ -9,7 +9,7 @@ import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDt
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

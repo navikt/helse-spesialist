@@ -2,8 +2,8 @@ package no.nav.helse.modell
 
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.overstyring.OverstyringDagDto
-import no.nav.helse.modell.vedtak.Inntektskilde
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

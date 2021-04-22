@@ -5,7 +5,7 @@ import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.Oppgavestatus
+import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

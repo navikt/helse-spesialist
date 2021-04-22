@@ -4,7 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*

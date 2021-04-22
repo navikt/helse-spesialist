@@ -4,9 +4,9 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
-import no.nav.helse.modell.Oppgavestatus.*
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.oppgave.Oppgavestatus.*
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Assertions.assertFalse

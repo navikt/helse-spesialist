@@ -15,6 +15,8 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -24,10 +26,10 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.vedtak.Inntektskilde
-import no.nav.helse.modell.vedtak.Inntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.modell.vedtak.Periodetype
-import no.nav.helse.modell.vedtak.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate

@@ -1,12 +1,17 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.oppgave
 
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
-import no.nav.helse.modell.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.modell.vedtak.*
+import no.nav.helse.modell.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.modell.vedtak.EnhetDto
+import no.nav.helse.modell.vedtak.OppgaveDto
+import no.nav.helse.modell.vedtak.PersoninfoDto
+import no.nav.helse.modell.vedtak.TildelingDto
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource

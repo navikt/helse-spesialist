@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.modell.oppgave
 
 enum class Oppgavestatus {
     AvventerSystem,

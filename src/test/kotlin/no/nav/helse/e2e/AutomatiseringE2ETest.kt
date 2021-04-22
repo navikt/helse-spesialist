@@ -2,8 +2,8 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.oppgave.Oppgavestatus
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language

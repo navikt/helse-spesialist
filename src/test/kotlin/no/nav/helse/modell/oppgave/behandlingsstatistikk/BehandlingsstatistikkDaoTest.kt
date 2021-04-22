@@ -1,11 +1,11 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.Oppgavestatus
-import no.nav.helse.modell.vedtak.Inntektskilde
-import no.nav.helse.modell.vedtak.Periodetype
-import no.nav.helse.modell.vedtak.Periodetype.FORLENGELSE
-import no.nav.helse.modell.vedtak.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.oppgave.Oppgavestatus
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

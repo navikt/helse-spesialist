@@ -5,10 +5,10 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.OppgaveDao
 import no.nav.helse.modell.kommando.FerdigstillOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime

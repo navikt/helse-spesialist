@@ -7,7 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.modell.vedtak.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
