@@ -264,7 +264,6 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         type = it.stringOrNull("saksbehandleroppgavetype")?.let(Saksbehandleroppgavetype::valueOf),
         inntektskilde = it.stringOrNull("inntektskilde")?.let(SaksbehandlerInntektskilde::valueOf),
         boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn")),
-        erPåVent = it.boolean("på_vent"),
         tildeling = it.stringOrNull("epost")?.let { epost ->
             TildelingDto(
                 navn = it.string("saksbehandler_navn"),

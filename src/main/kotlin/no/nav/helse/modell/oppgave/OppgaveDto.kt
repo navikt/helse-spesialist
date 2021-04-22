@@ -32,8 +32,6 @@ data class SaksbehandleroppgaveDto(
     val type: Saksbehandleroppgavetype?,
     val inntektskilde: SaksbehandlerInntektskilde?,
     var boenhet: EnhetDto,
-    @Deprecated("Erstattes av tildelingDto")
-    var erPåVent: Boolean,
     val tildeling: TildelingDto?
 )
 
