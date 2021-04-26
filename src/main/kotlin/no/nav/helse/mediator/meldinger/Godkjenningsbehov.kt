@@ -95,7 +95,8 @@ internal class Godkjenningsbehov(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            arbeidsforholdDao = arbeidsforholdDao
+            arbeidsforholdDao = arbeidsforholdDao,
+            periodetype = periodetype
         ),
         KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,

@@ -8,9 +8,11 @@ import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -35,7 +37,8 @@ internal class KlargjørArbeidsforholdCommandTest {
         aktørId = AKTØR_ID,
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
-        arbeidsforholdDao = arbeidsforholdDao
+        arbeidsforholdDao = arbeidsforholdDao,
+        periodetype = Periodetype.FORLENGELSE
     )
 
     @BeforeEach
@@ -118,7 +121,37 @@ internal class KlargjørArbeidsforholdCommandTest {
         verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
     }
 
-    private fun arbeidsforholdFinnes() {
+    @Disabled
+    @Test
+    fun `oppdaterer arbeidsforhold for førstegangsbehandling som er oppdatert for en dag siden eller mer`(){
+        val førstegangsCommand = KlargjørArbeidsforholdCommand(
+            aktørId = AKTØR_ID,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            arbeidsforholdDao = arbeidsforholdDao,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING
+        )
+        arbeidsforholdFinnes(LocalDate.now().minusDays(1))
+        assertTrue(førstegangsCommand.execute(context))
+        verify(exactly =  1) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Disabled
+    @Test
+    fun `oppdaterer ikke arbeidsforhold for førstegangsbehandling som er oppdatert for mindre enn en dag siden`(){
+        val førstegangsCommand = KlargjørArbeidsforholdCommand(
+            aktørId = AKTØR_ID,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            arbeidsforholdDao = arbeidsforholdDao,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING
+        )
+        arbeidsforholdFinnes()
+        assertTrue(førstegangsCommand.execute(context))
+        verify(exactly =  0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
+    }
+
+    private fun arbeidsforholdFinnes(opprettet: LocalDate = LocalDate.now()) {
         every {
             arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER)
         } returns listOf(
@@ -136,7 +169,7 @@ internal class KlargjørArbeidsforholdCommandTest {
                 FØDSELSNUMMER,
                 ORGANISASJONSNUMMER
             )
-        } returns LocalDate.now()
+        } returns opprettet
     }
 
     private fun arbeidsforholdErUtdatert() {
