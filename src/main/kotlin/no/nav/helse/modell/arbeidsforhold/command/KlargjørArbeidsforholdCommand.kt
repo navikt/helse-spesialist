@@ -23,7 +23,8 @@ internal class KlargjørArbeidsforholdCommand(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            arbeidsforholdDao = arbeidsforholdDao
+            arbeidsforholdDao = arbeidsforholdDao,
+            periodetype = periodetype
         )
     )
 }

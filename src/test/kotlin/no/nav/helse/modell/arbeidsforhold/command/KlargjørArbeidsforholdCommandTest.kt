@@ -12,7 +12,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -121,7 +120,6 @@ internal class KlargjørArbeidsforholdCommandTest {
         verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
     }
 
-    @Disabled
     @Test
     fun `oppdaterer arbeidsforhold for førstegangsbehandling som er oppdatert for en dag siden eller mer`(){
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
@@ -132,11 +130,24 @@ internal class KlargjørArbeidsforholdCommandTest {
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING
         )
         arbeidsforholdFinnes(LocalDate.now().minusDays(1))
+        assertFalse(førstegangsCommand.execute(context))
+        assertTrue(context.harBehov())
+        context.add(
+            Arbeidsforholdløsning(
+                listOf(
+                    Arbeidsforholdløsning.Løsning(
+                        STARTDATO,
+                        SLUTTDATO,
+                        STILLINGSTITTEL,
+                        STILLINGSPROSENT
+                    )
+                )
+            )
+        )
         assertTrue(førstegangsCommand.execute(context))
         verify(exactly =  1) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
     }
 
-    @Disabled
     @Test
     fun `oppdaterer ikke arbeidsforhold for førstegangsbehandling som er oppdatert for mindre enn en dag siden`(){
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
