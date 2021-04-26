@@ -22,7 +22,7 @@ internal class SjekkArbeidsforholdCommand(
     private val warningDao: WarningDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if(!FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE.enabled || arbeidsforholdId == null || periodetype != Periodetype.FØRSTEGANGSBEHANDLING){
+        if(!FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE.enabled || arbeidsforholdId.isNullOrBlank() || periodetype != Periodetype.FØRSTEGANGSBEHANDLING){
             return true
         }
         val aktiveArbeidsforhold = arbeidsforholdDao.findArbeidsforhold(fødselsnummer, orgnummer)
