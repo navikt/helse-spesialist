@@ -39,6 +39,7 @@ object FeatureToggle {
 
     val ARBEIDSFORHOLD_TOGGLE = Toggle("tbd.spesialist.arbeidsforhold")
     val REVURDERING_TOGGLE = Toggle("tbd.revurdering")
+    val ARBEIDSFORHOLD_WARNING_TOGGLE = Toggle("tbd.arbeidsforhold_warning")
 
 
     private val context = UnleashContext.builder()
