@@ -8,6 +8,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
@@ -21,6 +22,7 @@ internal class SjekkArbeidsforholdCommand(
     private val arbeidsforholdDao: ArbeidsforholdDao,
     private val warningDao: WarningDao
 ) : Command {
+    private val log = LoggerFactory.getLogger("sjekk-arbeidsforhold")
     override fun execute(context: CommandContext): Boolean {
         if(!FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE.enabled || arbeidsforholdId.isNullOrBlank() || periodetype != Periodetype.FØRSTEGANGSBEHANDLING){
             return true
@@ -29,6 +31,7 @@ internal class SjekkArbeidsforholdCommand(
             .filter { it.startdato <= skjæringstidspunkt  }
             .filter { it.sluttdato == null || it.sluttdato > skjæringstidspunkt }
         if (aktiveArbeidsforhold.size > 1){
+            log.info("Legger til warning for arbeidsforholdId på vedtaksperiode $vedtaksperiodeId")
             warningDao.leggTilWarning(vedtaksperiodeId, Warning("ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig.", WarningKilde.Spesialist))
         }
         return true
