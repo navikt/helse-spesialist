@@ -212,7 +212,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             warningDao = warningDao,
                             personDao = personDao,
                             arbeidsgiverDao = arbeidsgiverDao,
-                            snapshotDao = snapshotDao,
                             overstyringDao = overstyringDao,
                             oppgaveDao = oppgaveDao,
                             tildelingDao = tildelingDao,

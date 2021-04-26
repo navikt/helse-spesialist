@@ -1,12 +1,15 @@
 package no.nav.helse.modell
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtak.PersoninfoDto
 import no.nav.helse.modell.vedtak.VedtakDto
+import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
@@ -137,6 +140,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 FROM vedtak AS v
                          INNER JOIN person AS p ON v.person_ref = p.id
                          INNER JOIN person_info as pi ON pi.id=p.info_ref
+                         INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
                 WHERE v.vedtaksperiode_id = ?
                 ORDER BY v.id DESC
                 LIMIT 1;
@@ -220,6 +224,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 FROM vedtak AS v
                          INNER JOIN person AS p ON v.person_ref = p.id
                          INNER JOIN person_info as pi ON pi.id=p.info_ref
+                         INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
                 WHERE p.fodselsnummer = ?
                 ORDER BY v.id DESC
                 LIMIT 1;
@@ -238,6 +243,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 FROM vedtak AS v
                          INNER JOIN person AS p ON v.person_ref = p.id
                          INNER JOIN person_info AS pi ON pi.id=p.info_ref
+                         INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
                 WHERE p.aktor_id = ?
                 ORDER BY v.id DESC
                 LIMIT 1;
@@ -247,19 +253,23 @@ internal class VedtakDao(private val dataSource: DataSource) {
             .asSingle
     )
 
-    private fun tilVedtaksperiode(row: Row) = VedtaksperiodeDto(
-        fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
-        aktørId = row.long("aktor_id").toString(),
-        personinfo = PersoninfoDto(
-            fornavn = row.string("fornavn"),
-            mellomnavn = row.stringOrNull("mellomnavn"),
-            etternavn = row.string("etternavn"),
-            fødselsdato = row.localDateOrNull("fodselsdato"),
-            kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf)
-        ),
-        arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-        speilSnapshotRef = row.int("speil_snapshot_ref"),
-        infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
-    )
+    private fun tilVedtaksperiode(row: Row): Pair<VedtaksperiodeDto, PersonFraSpleisDto> {
+        val vedtak = VedtaksperiodeDto(
+            fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
+            aktørId = row.long("aktor_id").toString(),
+            personinfo = PersoninfoDto(
+                fornavn = row.string("fornavn"),
+                mellomnavn = row.stringOrNull("mellomnavn"),
+                etternavn = row.string("etternavn"),
+                fødselsdato = row.localDateOrNull("fodselsdato"),
+                kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf)
+            ),
+            arbeidsgiverRef = row.long("arbeidsgiver_ref"),
+            speilSnapshotRef = row.int("speil_snapshot_ref"),
+            infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
+        )
+        val snapshot = objectMapper.readValue<PersonFraSpleisDto>(row.string("data"))
+        return vedtak to snapshot
+    }
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

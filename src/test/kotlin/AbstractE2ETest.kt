@@ -139,7 +139,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         warningDao = warningDao,
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
-        snapshotDao = snapshotDao,
         overstyringDao = overstyringDao,
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,

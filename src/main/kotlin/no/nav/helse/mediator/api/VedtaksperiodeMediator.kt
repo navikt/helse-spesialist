@@ -3,10 +3,8 @@ package no.nav.helse.mediator.api
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -29,7 +27,6 @@ internal class VedtaksperiodeMediator(
     private val warningDao: WarningDao,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val snapshotDao: SnapshotDao,
     private val overstyringDao: OverstyringDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
@@ -39,27 +36,24 @@ internal class VedtaksperiodeMediator(
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            vedtakDao.findVedtakByFnr(fnr)?.let { byggSpeilSnapshot(it) }
+            vedtakDao.findVedtakByFnr(fnr)?.let(::byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            vedtakDao.findVedtakByAktørId(aktørId)?.let { byggSpeilSnapshot(it) }
+            vedtakDao.findVedtakByAktørId(aktørId)?.let(::byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSpeilSnapshot(it) }
+            vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
         }
 
-    private fun byggSpeilSnapshot(vedtak: VedtaksperiodeDto) =
+    private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeDto, PersonFraSpleisDto>) =
         measureAsHistogram("byggSpeilSnapshot") {
+            val (vedtak, speilSnapshot) = vedtakinfo
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
                 personDao.findInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
-            }
-            val speilSnapshot = measureAsHistogram("byggSpeilSnapshot_findSpeilSnapshot") {
-                requireNotNull(snapshotDao.findSpeilSnapshot(vedtak.speilSnapshotRef)) { "Fant ikke speilSnapshot" }
-                    .let { objectMapper.readValue<PersonFraSpleisDto>(it) }
             }
             val utbetalinger = measureAsHistogram("byggSpeilSnapshot_findUtbetaling") {
                 utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
