@@ -54,6 +54,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         orgnummer: String = "orgnr",
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
+        skjæringstidspunkt: LocalDate = LocalDate.now(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId,
@@ -77,6 +78,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "Godkjenning" to mapOf(
                     "periodeFom" to "$periodeFom",
                     "periodeTom" to "$periodeTom",
+                    "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                     "periodetype" to periodetype.name,
                     "inntektskilde" to inntektskilde.name,
                     "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiodeJson::toBody)

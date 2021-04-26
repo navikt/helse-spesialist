@@ -16,6 +16,7 @@ import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
+import no.nav.helse.modell.arbeidsforhold.command.SjekkArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
@@ -44,8 +45,10 @@ internal class Godkjenningsbehov(
     aktørId: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    arbeidsforholdId: String?,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
+    skjæringstidspunkt: LocalDate,
     periodetype: Periodetype,
     inntektskilde: Inntektskilde,
     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
@@ -125,6 +128,16 @@ internal class Godkjenningsbehov(
             warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId
         ),
+        SjekkArbeidsforholdCommand(
+            fødselsnummer = fødselsnummer,
+            arbeidsforholdId = arbeidsforholdId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodetype = periodetype,
+            skjæringstidspunkt = skjæringstidspunkt,
+            orgnummer = organisasjonsnummer,
+            arbeidsforholdDao = arbeidsforholdDao,
+            warningDao = warningDao
+        ),
         RisikoCommand(
             vedtaksperiodeId = vedtaksperiodeId,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
@@ -179,10 +192,12 @@ internal class Godkjenningsbehov(
                     it.requireKey(
                         "Godkjenning.periodeFom",
                         "Godkjenning.periodeTom",
+                        "Godkjenning.skjæringstidspunkt",
                         "Godkjenning.periodetype",
                         "Godkjenning.inntektskilde",
                         "Godkjenning.aktiveVedtaksperioder"
                     )
+                    it.interestedIn("Godkjenning.arbeidsforholdId")
                 }
             }.register(this)
         }
@@ -210,7 +225,9 @@ internal class Godkjenningsbehov(
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
                 periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
+                skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+                arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),

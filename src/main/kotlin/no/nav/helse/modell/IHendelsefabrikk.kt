@@ -50,6 +50,8 @@ internal interface IHendelsefabrikk {
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
+        arbeidsforholdId: String?,
+        skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
