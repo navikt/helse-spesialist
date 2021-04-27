@@ -2,6 +2,7 @@ package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
 import org.flywaydb.core.Flyway
+import java.time.Duration
 import javax.sql.DataSource
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration as createDataSource
 
@@ -14,25 +15,30 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
         requireNotNull(env["DATABASE_PORT"]) { "database port must be set if jdbc url is not provided" }
     private val vaultMountPath = env["VAULT_MOUNTPATH"]
 
+    private val dbUrl = env["DATABASE_JDBC_URL"] ?: String.format(
+        "jdbc:postgresql://%s:%s/%s", databaseHost, databasePort,
+        databaseName
+    )
     private val hikariConfig = HikariConfig().apply {
-        jdbcUrl = env["DATABASE_JDBC_URL"] ?: String.format(
-            "jdbc:postgresql://%s:%s/%s", databaseHost, databasePort,
-            databaseName
-        )
-
-        maximumPoolSize = 9
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
-        leakDetectionThreshold = 30000
+        jdbcUrl = dbUrl
+        maximumPoolSize = 5
+        minimumIdle = 2
+        idleTimeout = Duration.ofMinutes(1).toMillis()
+        maxLifetime = idleTimeout * 5
+        connectionTimeout = Duration.ofSeconds(5).toMillis()
+        leakDetectionThreshold = Duration.ofSeconds(5).toMillis()
+    }
+    private val hikariMigrationConfig = HikariConfig().apply {
+        jdbcUrl = dbUrl
+        maximumPoolSize = 1
     }
 
-    fun getDataSource(role: Role = Role.User) =
-        createDataSource(hikariConfig, vaultMountPath, role.asRole(databaseName))
+    fun getDataSource() =
+        createDataSource(hikariConfig, vaultMountPath, Role.User.asRole(databaseName))
 
     fun migrate() {
-        runMigration(getDataSource(Role.Admin), "SET ROLE \"${Role.Admin.asRole(databaseName)}\"")
+        val dataSource = createDataSource(hikariMigrationConfig, vaultMountPath, Role.Admin.asRole(databaseName))
+        runMigration(dataSource, "SET ROLE \"${Role.Admin.asRole(databaseName)}\"")
     }
 
     private fun runMigration(dataSource: DataSource, initSql: String? = null) =

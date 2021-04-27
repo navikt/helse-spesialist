@@ -55,7 +55,7 @@ private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val dataSourceBuilder = DataSourceBuilder(System.getenv())
-    private val dataSource = dataSourceBuilder.getDataSource(DataSourceBuilder.Role.User)
+    private val dataSource = dataSourceBuilder.getDataSource()
 
     private val azureAdClient = HttpClient(Apache) {
         engine {
