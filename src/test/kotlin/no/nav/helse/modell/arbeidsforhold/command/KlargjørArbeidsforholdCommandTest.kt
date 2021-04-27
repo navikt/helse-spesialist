@@ -98,10 +98,14 @@ internal class KlargjørArbeidsforholdCommandTest {
             arbeidsforholdDao.oppdaterArbeidsforhold(
                 FØDSELSNUMMER,
                 ORGANISASJONSNUMMER,
-                STARTDATO,
-                SLUTTDATO,
-                STILLINGSTITTEL,
-                STILLINGSPROSENT
+                listOf(
+                    Arbeidsforholdløsning.Løsning(
+                        STARTDATO,
+                        SLUTTDATO,
+                        STILLINGSTITTEL,
+                        STILLINGSPROSENT
+                    )
+                )
             )
         }
     }
@@ -117,11 +121,11 @@ internal class KlargjørArbeidsforholdCommandTest {
     fun `oppdaterer ikke arbeidsforhold når den er oppdatert`() {
         arbeidsforholdFinnes()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any()) }
     }
 
     @Test
-    fun `oppdaterer arbeidsforhold for førstegangsbehandling som er oppdatert for en dag siden eller mer`(){
+    fun `oppdaterer arbeidsforhold for førstegangsbehandling som er oppdatert for en dag siden eller mer`() {
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
             aktørId = AKTØR_ID,
             fødselsnummer = FØDSELSNUMMER,
@@ -145,11 +149,11 @@ internal class KlargjørArbeidsforholdCommandTest {
             )
         )
         assertTrue(førstegangsCommand.execute(context))
-        verify(exactly =  1) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any()) }
     }
 
     @Test
-    fun `oppdaterer ikke arbeidsforhold for førstegangsbehandling som er oppdatert for mindre enn en dag siden`(){
+    fun `oppdaterer ikke arbeidsforhold for førstegangsbehandling som er oppdatert for mindre enn en dag siden`() {
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
             aktørId = AKTØR_ID,
             fødselsnummer = FØDSELSNUMMER,
@@ -159,7 +163,7 @@ internal class KlargjørArbeidsforholdCommandTest {
         )
         arbeidsforholdFinnes()
         assertTrue(førstegangsCommand.execute(context))
-        verify(exactly =  0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { arbeidsforholdDao.oppdaterArbeidsforhold(any(), any(), any()) }
     }
 
     private fun arbeidsforholdFinnes(opprettet: LocalDate = LocalDate.now()) {

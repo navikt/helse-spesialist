@@ -1,26 +1,33 @@
 package no.nav.helse.modell.arbeidsforhold
 
 import DatabaseIntegrationTest
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.april
+import no.nav.helse.januar
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class ArbeidsforholdDaoTest: DatabaseIntegrationTest() {
+internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     private companion object {
-        const val FØDSELSNUMMER = "12345678910"
-        const val ORGANISASJONSNUMMER = "987654321"
         const val STILLINGSPROSENT = 100
         const val STILLINGSTITTEL = "Slabberasansvarlig"
         val STARTDATO: LocalDate = LocalDate.now()
         val SLUTTDATO = null
     }
 
+    @BeforeEach
+    fun setup() {
+        resetDatabase()
+        opprettPerson()
+        opprettArbeidsgiver()
+    }
+
     @Test
     fun `oppretter arbeidsforhold`() {
-        opprettPerson(FØDSELSNUMMER)
-        opprettArbeidsgiver(ORGANISASJONSNUMMER)
-        arbeidsforholdDao.insertArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
-        arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER).first().also {
+        arbeidsforholdDao.insertArbeidsforhold(FNR, ORGNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).first().also {
             assertEquals(STILLINGSPROSENT, it.stillingsprosent)
             assertEquals(STILLINGSTITTEL, it.stillingstittel)
             assertEquals(STARTDATO, it.startdato)
@@ -34,11 +41,12 @@ internal class ArbeidsforholdDaoTest: DatabaseIntegrationTest() {
         val nySluttdato = LocalDate.now()
         val nyStillingstittel = "Sto i med kona til sjefen"
         val nyStillingsprosent = 0
-        opprettPerson(FØDSELSNUMMER)
-        opprettArbeidsgiver(ORGANISASJONSNUMMER)
-        arbeidsforholdDao.insertArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
-        arbeidsforholdDao.oppdaterArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, nyStartdato, nySluttdato, nyStillingstittel, nyStillingsprosent)
-        arbeidsforholdDao.findArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER).first().also {
+        val arbeidsforhold = listOf(
+            Arbeidsforholdløsning.Løsning(nyStartdato, nySluttdato, nyStillingstittel, nyStillingsprosent)
+        )
+        arbeidsforholdDao.insertArbeidsforhold(FNR, ORGNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        arbeidsforholdDao.oppdaterArbeidsforhold(FNR, ORGNUMMER, arbeidsforhold)
+        arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).first().also {
             assertEquals(nyStillingsprosent, it.stillingsprosent)
             assertEquals(nyStillingstittel, it.stillingstittel)
             assertEquals(nyStartdato, it.startdato)
@@ -52,31 +60,75 @@ internal class ArbeidsforholdDaoTest: DatabaseIntegrationTest() {
         val stillingstittel2 = "Slabberasmedarbeider"
         val fødselsnummer3 = "10273645894"
         val stillingstittel3 = "Stillingstittel3"
-        opprettPerson(FØDSELSNUMMER)
         opprettPerson(fødselsnummer2)
         opprettPerson(fødselsnummer3)
-        opprettArbeidsgiver(ORGANISASJONSNUMMER)
 
-        arbeidsforholdDao.insertArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
-        arbeidsforholdDao.insertArbeidsforhold(fødselsnummer2, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, stillingstittel2, STILLINGSPROSENT)
-        arbeidsforholdDao.insertArbeidsforhold(fødselsnummer3, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, stillingstittel3, STILLINGSPROSENT)
+        arbeidsforholdDao.insertArbeidsforhold(FNR, ORGNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        arbeidsforholdDao.insertArbeidsforhold(
+            fødselsnummer2,
+            ORGNUMMER,
+            STARTDATO,
+            SLUTTDATO,
+            stillingstittel2,
+            STILLINGSPROSENT
+        )
+        arbeidsforholdDao.insertArbeidsforhold(
+            fødselsnummer3,
+            ORGNUMMER,
+            STARTDATO,
+            SLUTTDATO,
+            stillingstittel3,
+            STILLINGSPROSENT
+        )
 
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer2, ORGANISASJONSNUMMER).first().also {
+        arbeidsforholdDao.findArbeidsforhold(fødselsnummer2, ORGNUMMER).first().also {
             assertEquals(stillingstittel2, it.stillingstittel)
         }
 
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer3, ORGANISASJONSNUMMER).first().also {
+        arbeidsforholdDao.findArbeidsforhold(fødselsnummer3, ORGNUMMER).first().also {
             assertEquals(stillingstittel3, it.stillingstittel)
         }
     }
 
     @Test
     fun `finner sist oppdatert`() {
-        opprettPerson(FØDSELSNUMMER)
-        opprettArbeidsgiver(ORGANISASJONSNUMMER)
-        arbeidsforholdDao.insertArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
-        arbeidsforholdDao.findArbeidsforholdSistOppdatert(FØDSELSNUMMER, ORGANISASJONSNUMMER).also {
+        arbeidsforholdDao.insertArbeidsforhold(FNR, ORGNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        arbeidsforholdDao.findArbeidsforholdSistOppdatert(FNR, ORGNUMMER).also {
             assertTrue(it > LocalDate.now().minusDays(10))
         }
+    }
+
+    @Test
+    fun `skriver ikke over alle arbeidsforhold med samme informasjon`() {
+        val løsninger = Arbeidsforholdløsning(
+            listOf(
+                Arbeidsforholdløsning.Løsning(1.januar, null, "Nerd", 50),
+                Arbeidsforholdløsning.Løsning(20.april, null, "Noe annet", 50)
+            )
+        )
+
+        løsninger.opprett(arbeidsforholdDao, FNR, ORGNUMMER)
+        val arbeidsforhold = arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER)
+
+        løsninger.oppdater(arbeidsforholdDao, FNR, ORGNUMMER)
+        kotlin.test.assertEquals(arbeidsforhold, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER))
+    }
+
+    @Test
+    fun `fjerner arbeidsforhold som er borte fra aareg`() {
+        Arbeidsforholdløsning(
+            listOf(
+                Arbeidsforholdløsning.Løsning(1.januar, null, "Nerd", 50),
+                Arbeidsforholdløsning.Løsning(20.april, null, "Noe annet", 50)
+            )
+        ).opprett(arbeidsforholdDao, FNR, ORGNUMMER)
+
+        Arbeidsforholdløsning(
+            listOf(
+                Arbeidsforholdløsning.Løsning(1.januar, null, "Nerd", 50)
+            )
+        ).oppdater(arbeidsforholdDao, FNR, ORGNUMMER)
+
+        kotlin.test.assertEquals(1, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).size)
     }
 }

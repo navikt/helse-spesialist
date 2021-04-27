@@ -1,5 +1,6 @@
 package no.nav.helse.modell.arbeidsforhold
 
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -15,6 +16,17 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
         stillingstittel: String,
         stillingsprosent: Int
     ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        session.insertArbeidsforhold(fødselsnummer, organisasjonsnummer, startdato, sluttdato, stillingstittel, stillingsprosent)
+    }
+
+    private fun Session.insertArbeidsforhold(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        startdato: LocalDate,
+        sluttdato: LocalDate?,
+        stillingstittel: String,
+        stillingsprosent: Int
+    ): Long {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent)
@@ -24,8 +36,8 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                 :startdato, :sluttdato, :stillingstittel, :stillingsprosent
             );
         """
-        requireNotNull(
-            session.run(
+        return requireNotNull(
+            run(
                 queryOf(
                     query,
                     mapOf(
@@ -69,38 +81,30 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
             )
         }
 
-    fun oppdaterArbeidsforhold(
+    internal fun oppdaterArbeidsforhold(
         fødselsnummer: String,
         organisasjonsnummer: String,
-        startdato: LocalDate,
-        sluttdato: LocalDate?,
-        stillingstittel: String,
-        stillingsprosent: Int
+        arbeidsforhold: List<Arbeidsforholdløsning.Løsning>
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            UPDATE arbeidsforhold
-            SET startdato=:startdato,
-                sluttdato=:sluttdato,
-                stillingstittel=:stillingstittel,
-                stillingsprosent=:stillingsprosent
-            WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
-              AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
-        """
-        requireNotNull(
-            session.run(
+        session.transaction { transaction ->
+            @Language("PostgreSQL")
+            val deleteQuery = """
+                DELETE FROM arbeidsforhold
+                WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+                    AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
+            """
+            transaction.run(
                 queryOf(
-                    query, mapOf(
+                    deleteQuery, mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "organisasjonsnummer" to organisasjonsnummer.toLong(),
-                        "startdato" to startdato,
-                        "sluttdato" to sluttdato,
-                        "stillingstittel" to stillingstittel,
-                        "stillingsprosent" to stillingsprosent
+                        "organisasjonsnummer" to organisasjonsnummer.toLong()
                     )
-                ).asUpdateAndReturnGeneratedKey
+                ).asUpdate
             )
-        )
+            arbeidsforhold.forEach {
+                transaction.insertArbeidsforhold(fødselsnummer, organisasjonsnummer, it.startdato, it.sluttdato, it.stillingstittel, it.stillingsprosent)
+            }
+        }
     }
 
     internal fun findArbeidsforholdSistOppdatert(

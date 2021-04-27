@@ -35,16 +35,11 @@ internal class Arbeidsforholdløsning(
         }
 
     internal fun oppdater(personDao: ArbeidsforholdDao, fødselsnummer: String, organisasjonsnummer: String) {
-        løsninger.forEach {
-            personDao.oppdaterArbeidsforhold(
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                startdato = it.startdato,
-                sluttdato = it.sluttdato,
-                stillingstittel = it.stillingstittel,
-                stillingsprosent = it.stillingsprosent
-            )
-        }
+        personDao.oppdaterArbeidsforhold(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            arbeidsforhold = løsninger
+        )
     }
 
     internal class ArbeidsforholdRiver(
