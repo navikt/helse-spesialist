@@ -1,6 +1,5 @@
 package no.nav.helse.modell.arbeidsforhold.command
 
-import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.kommando.Command
@@ -24,7 +23,7 @@ internal class SjekkArbeidsforholdCommand(
 ) : Command {
     private val log = LoggerFactory.getLogger("sjekk-arbeidsforhold")
     override fun execute(context: CommandContext): Boolean {
-        if(!FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE.enabled || arbeidsforholdId.isNullOrBlank() || periodetype != Periodetype.FØRSTEGANGSBEHANDLING){
+        if(arbeidsforholdId.isNullOrBlank() || periodetype != Periodetype.FØRSTEGANGSBEHANDLING){
             return true
         }
         val aktiveArbeidsforhold = arbeidsforholdDao.findArbeidsforhold(fødselsnummer, orgnummer)

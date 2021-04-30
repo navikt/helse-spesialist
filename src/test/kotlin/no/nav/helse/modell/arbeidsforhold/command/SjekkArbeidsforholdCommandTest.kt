@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.januar
-import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
@@ -28,7 +27,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Om inntektsmeldingen ikke har en arbeidsforholdId skal vi ikke lage warning, selv om aareg gir oss flere arbeidsforhold`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen ikke har en arbeidsforholdId skal vi ikke lage warning, selv om aareg gir oss flere arbeidsforhold`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, null, arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -42,7 +41,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi lage warning om aareg gir oss flere arbeidsforhold`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi lage warning om aareg gir oss flere arbeidsforhold`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -56,7 +55,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Om inntektsmeldingen har en arbeidsforholdId og periodetype ikke er førstegangsbehandling, lager vi ikke warning`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen har en arbeidsforholdId og periodetype ikke er førstegangsbehandling, lager vi ikke warning`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FORLENGELSE, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -70,7 +69,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi ikke lage warning om aareg gir oss et arbeidsforhold`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi ikke lage warning om aareg gir oss et arbeidsforhold`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -83,7 +82,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi ikke lage warning om arbeidsforholdet starter etter skjæringstidspunktet`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi ikke lage warning om arbeidsforholdet starter etter skjæringstidspunktet`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -97,7 +96,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi ikke lage warning om arbeidsforholdet slutter før skjæringstidspunktet`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen har en arbeidsforholdId skal vi ikke lage warning om arbeidsforholdet slutter før skjæringstidspunktet`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -111,23 +110,7 @@ internal class SjekkArbeidsforholdCommandTest {
     }
 
     @Test
-    fun `Toggle er av for flere arbeidsforhold`() {
-
-        val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
-
-        every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
-            ArbeidsforholdDto(1, 1, 1.januar, null, 50, "Utvikler"),
-            ArbeidsforholdDto(1, 1, 1.januar, null, 50, "Produkteier")
-        )
-
-        command.execute(CommandContext(UUID.randomUUID()))
-
-        verify(exactly = 0) { warningsDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-
-    }
-
-    @Test
-    fun `Om inntektsmeldingen har en arbeidsforholdId og sluttdato er etter skjæringstidspunkt skal vi lage warning om aareg gir oss flere arbeidsforhold`() = withToggle(FeatureToggle.ARBEIDSFORHOLD_WARNING_TOGGLE) {
+    fun `Om inntektsmeldingen har en arbeidsforholdId og sluttdato er etter skjæringstidspunkt skal vi lage warning om aareg gir oss flere arbeidsforhold`() {
         val command = SjekkArbeidsforholdCommand(FNR, ORGNUMMER, VEDTAKSPERIODE_ID, Periodetype.FØRSTEGANGSBEHANDLING, 16.januar, "YEP", arbeidsforholdDao, warningsDao)
 
         every { arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER) } returns listOf(
@@ -138,12 +121,5 @@ internal class SjekkArbeidsforholdCommandTest {
         command.execute(CommandContext(UUID.randomUUID()))
 
         verify(exactly = 1) { warningsDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
-    }
-
-    fun withToggle(toggle: FeatureToggle.Toggle, execute: () -> Unit){
-        val preState = toggle.enabled
-        toggle.enable()
-        execute()
-        if(!preState) toggle.disable()
     }
 }
