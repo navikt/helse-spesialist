@@ -8,16 +8,18 @@ import java.util.*
 internal class Oppgave private constructor(
     private val type: String,
     private var status: Oppgavestatus,
-    private val vedtaksperiodeId: UUID
+    private val vedtaksperiodeId: UUID,
+    private val utbetalingId: UUID?
 ) {
     private var id: Long? = null
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
 
-    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID, ferdigstiltAvIdent: String? = null, ferdigstiltAvOid: UUID? = null) : this(
+    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID, ferdigstiltAvIdent: String? = null, ferdigstiltAvOid: UUID? = null, utbetalingId: UUID?) : this(
         type,
         status,
         vedtaksperiodeId,
+        utbetalingId
     ) {
         this.id = id
         this.ferdigstiltAvIdent = ferdigstiltAvIdent
@@ -25,11 +27,11 @@ internal class Oppgave private constructor(
     }
 
     internal companion object {
-        fun søknad(vedtaksperiodeId: UUID) = oppgave("SØKNAD", vedtaksperiodeId)
-        fun stikkprøve(vedtaksperiodeId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId)
-        fun riskQA(vedtaksperiodeId: UUID) = oppgave("RISK_QA", vedtaksperiodeId)
-        private fun oppgave(type: String, vedtaksperiodeId: UUID) =
-            Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId)
+        fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("SØKNAD", vedtaksperiodeId, utbetalingId)
+        fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId, utbetalingId)
+        fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("RISK_QA", vedtaksperiodeId, utbetalingId)
+        private fun oppgave(type: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+            Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
 
         internal fun lagMelding(
             oppgaveId: Long,
@@ -96,7 +98,7 @@ internal class Oppgave private constructor(
     internal fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
         id?.also {
             oppgaveMediator.oppdater(it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, type).also { id = it } ?: return
+        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId!!, type).also { id = it } ?: return
     }
 
     internal fun avbryt() {

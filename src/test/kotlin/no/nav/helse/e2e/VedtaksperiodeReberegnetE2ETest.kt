@@ -26,7 +26,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
-            VEDTAKSPERIODE_ID
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -102,7 +103,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
         var godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
-            VEDTAKSPERIODE_ID
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -159,7 +161,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     private fun vedtaksperiodeTilGodkjenning(): UUID {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(
             ORGNR,
-            VEDTAKSPERIODE_ID
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(

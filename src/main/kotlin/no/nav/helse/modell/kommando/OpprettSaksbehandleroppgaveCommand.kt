@@ -17,7 +17,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val hendelseId: UUID,
     private val egenAnsattDao: EgenAnsattDao,
     private val personDao: PersonDao,
-    private val risikovurderingDao: RisikovurderingDao
+    private val risikovurderingDao: RisikovurderingDao,
+    private val utbetalingId: UUID
 ) : Command {
 
     private companion object {
@@ -30,9 +31,9 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (tilhørerUtlandsenhet) return true
 
         val oppgave = when {
-            automatisering.erStikkprøve(vedtaksperiodeId, hendelseId) -> Oppgave.stikkprøve(vedtaksperiodeId)
-            risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(vedtaksperiodeId)
-            else -> Oppgave.søknad(vedtaksperiodeId)
+            automatisering.erStikkprøve(vedtaksperiodeId, hendelseId) -> Oppgave.stikkprøve(vedtaksperiodeId, utbetalingId)
+            risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(vedtaksperiodeId, utbetalingId)
+            else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave")
         oppgaveMediator.opprett(oppgave)

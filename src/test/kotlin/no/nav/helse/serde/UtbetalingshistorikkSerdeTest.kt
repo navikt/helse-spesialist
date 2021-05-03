@@ -37,7 +37,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val beregningId = UUID.randomUUID()
         every { restClient.hentSpeilSpapshot(any()) } returns snapshot(utbetalingshistorikk(beregningId))
 
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -63,7 +63,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     @Test
     fun `manglende utbetalingshistorikk mapper til tom utbetalingshistorikk til Speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -74,7 +74,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `utbetalingshistorikk satt lik null mapper til tom utbetalingshistorikk til Speil`() {
         every { restClient.hentSpeilSpapshot(any()) } returns snapshot(null)
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -84,7 +84,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     @Test
     fun `tom utbetalingshistorikk mapper til tom utbetalingshistorikk til Speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -98,7 +98,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val beregningId = UUID.randomUUID()
         every { restClient.hentSpeilSpapshot(any()) } returns snapshot(ufullstendigUtbetalingshistorikk(beregningId))
 
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)

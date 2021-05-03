@@ -73,7 +73,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID,
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

@@ -77,7 +77,8 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     fun godkjenningsoppgave(funn: JsonNode, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
-            vedtaksperiodeId
+            vedtaksperiodeId,
+            UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
         sendArbeidsgiverinformasjonløsning(

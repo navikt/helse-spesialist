@@ -28,8 +28,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val hendelseId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
             LocalDate.of(2018, 1, 1),
-            LocalDate.of(2018, 1, 31)
+            LocalDate.of(2018, 1, 31),
         )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -71,6 +72,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
@@ -96,6 +98,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val hendelseId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
@@ -131,6 +134,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )

@@ -19,6 +19,7 @@ import java.util.*
 internal class OpprettSaksbehandleroppgaveCommandTest {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val UTBETALING_ID = UUID.randomUUID()
         private const val FNR = "12345678910"
         private val hendelseId = UUID.randomUUID()
     }
@@ -38,7 +39,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         egenAnsattDao = egenAnsattDao,
         hendelseId = hendelseId,
         personDao = personDao,
-        risikovurderingDao = risikovurderingDao
+        risikovurderingDao = risikovurderingDao,
+        utbetalingId = UUID.randomUUID()
     )
 
     @BeforeEach
@@ -51,7 +53,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     fun `oppretter oppgave`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.søknad(VEDTAKSPERIODE_ID)) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
     }
 
     @Test
@@ -59,6 +61,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.stikkprøve(VEDTAKSPERIODE_ID)) }
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.stikkprøve(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
     }
 }

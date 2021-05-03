@@ -45,7 +45,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @Test
     fun `manglende risikovurdering mappes ikke til speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -66,7 +66,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @Test
     fun `inntektsgrunnlag på personnivå blir faktisk tatt med til speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -87,7 +87,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @Test
     fun `En satt risikovurdering mappes til speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -130,7 +130,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @Test
     fun `Warnings mappes til speil som varsler`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -168,7 +168,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @Test
     fun `Ingen warnings mappes til speil som tom liste`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -196,7 +196,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @Test
     fun `om en person har utbetalinger blir dette en del av speil snapshot`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -242,7 +242,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         val vedtaksperiodeId1 = UUID.randomUUID()
 
         val godkjenningsmeldingId1 =
-            sendGodkjenningsbehov(orgnr1, vedtaksperiodeId1, fødselsnummer = fødselsnummer1, aktørId = aktørId1)
+            sendGodkjenningsbehov(orgnr1, vedtaksperiodeId1, fødselsnummer = fødselsnummer1, aktørId = aktørId1, utbetalingId = UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId1, orgnr1, vedtaksperiodeId1)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId1,
@@ -267,7 +267,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         val orgnr2 = "876543219"
         val vedtaksperiodeId2 = UUID.randomUUID()
         val godkjenningsmeldingId2 =
-            sendGodkjenningsbehov(orgnr2, vedtaksperiodeId2, fødselsnummer = fødselsnummer2, aktørId = aktørId2)
+            sendGodkjenningsbehov(orgnr2, vedtaksperiodeId2, fødselsnummer = fødselsnummer2, aktørId = aktørId2, utbetalingId = UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId2, orgnr2, vedtaksperiodeId2)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId2,
@@ -303,7 +303,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             )
         )
 
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -347,7 +347,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     @Test
     fun `mapper bransjer for arbeidsgiver`() {
         val bransjer = listOf("En bransje", "En annen bransje")
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -391,7 +391,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             )
         )
         val godkjenningsmeldingId =
-            sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, aktiveVedtaksperioder = aktiveVedtaksperioder)
+            sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, aktiveVedtaksperioder = aktiveVedtaksperioder, utbetalingId = UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -415,7 +415,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     fun `saksbehandleroid på snapshot`() {
         val saksbehandlerOid = UUID.randomUUID()
         val saksbehandlerEpost = "saksbehandler@nav.no"
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)

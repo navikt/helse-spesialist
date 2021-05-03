@@ -30,7 +30,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
@@ -88,7 +89,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Periodetype.INFOTRYGDFORLENGELSE
+            periodetype = Periodetype.INFOTRYGDFORLENGELSE,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
@@ -143,7 +145,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
@@ -221,7 +224,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
@@ -295,7 +299,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,
@@ -359,7 +364,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

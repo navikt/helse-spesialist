@@ -86,7 +86,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun finn(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
+            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE o.id = ?
@@ -99,6 +99,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                         type = row.string("type"),
                         status = enumValueOf(row.string("status")),
                         vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
                         ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                         ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
                     )
@@ -109,7 +110,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun finnAktive(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT o.id, o.type, o.status
+            SELECT o.id, o.type, o.status, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = ? AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
@@ -121,7 +122,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                         id = row.long("id"),
                         type = row.string("type"),
                         status = enumValueOf(row.string("status")),
-                        vedtaksperiodeId = vedtaksperiodeId
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
                     )
                 }.asList
         )
@@ -130,7 +132,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun finn(fødselsnummer: String) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT o.id, o.type, o.status, v.vedtaksperiode_id
+            SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             INNER JOIN person p on v.person_ref = p.id
@@ -143,7 +145,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                         id = row.long("id"),
                         type = row.string("type"),
                         status = enumValueOf(row.string("status")),
-                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
+                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
                     )
                 }.asList
         )
@@ -168,20 +171,22 @@ internal class OppgaveDao(private val dataSource: DataSource) {
     internal fun opprettOppgave(
         commandContextId: UUID,
         oppgavetype: String,
-        vedtakRef: Long?
-    ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        vedtakRef: Long?,
+        utbetalingId: UUID
+        ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
         it.run(
             queryOf(
                 """
-                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id)
-                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?);
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id)
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?);
             """,
                 oppgavetype,
                 AvventerSaksbehandler.name,
                 null,
                 null,
                 vedtakRef,
-                commandContextId
+                commandContextId,
+                utbetalingId
             ).asUpdateAndReturnGeneratedKey
         )
     }) { "Kunne ikke opprette oppgave" }

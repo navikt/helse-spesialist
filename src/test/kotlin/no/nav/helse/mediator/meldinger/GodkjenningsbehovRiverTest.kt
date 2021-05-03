@@ -15,6 +15,7 @@ internal class GodkjenningsbehovRiverTest {
     private companion object {
         private val HENDELSE = UUID.randomUUID()
         private val VEDTAKSPERIODE = UUID.randomUUID()
+        private val UTBETALING_ID = UUID.randomUUID()
         private const val FNR = "12345678911"
         private const val AKTØR = "1234567891234"
         private const val ORGNR = "123456789"
@@ -34,7 +35,7 @@ internal class GodkjenningsbehovRiverTest {
 
     @Test
     fun `leser Godkjenningbehov`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, orgnummer = ORGNR, skjæringstidspunkt = FOM, periodeFom = FOM, periodeTom = TOM, inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, orgnummer = ORGNR, skjæringstidspunkt = FOM, periodeFom = FOM, periodeTom = TOM, inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE, utbetalingId = UTBETALING_ID))
         verify(exactly = 1) { mediator.godkjenningsbehov(
             any(),
             HENDELSE,
@@ -45,6 +46,7 @@ internal class GodkjenningsbehovRiverTest {
             TOM,
             FOM,
             VEDTAKSPERIODE,
+            UTBETALING_ID,
             null,
             Periodetype.FØRSTEGANGSBEHANDLING,
             Inntektskilde.FLERE_ARBEIDSGIVERE,

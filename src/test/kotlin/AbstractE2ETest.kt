@@ -54,7 +54,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-        internal val utbetalingId = UUID.randomUUID()
+        internal val UTBETALING_ID = UUID.randomUUID()
 
     }
 
@@ -166,6 +166,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun sendGodkjenningsbehov(
         orgnr: String,
         vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
         skjæringstidspunkt: LocalDate = LocalDate.now(),
@@ -184,6 +185,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             meldingsfabrikk.lagGodkjenningsbehov(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
                 orgnummer = orgnr,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom,
@@ -401,7 +403,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     "@event_name": "utbetaling_endret",
     "@id": "${UUID.randomUUID()}",
     "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "$utbetalingId",
+    "utbetalingId": "$UTBETALING_ID",
     "fødselsnummer": "$fødselsnummer",
     "type": "$type",
     "forrigeStatus": "$forrigeStatus",
@@ -466,7 +468,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 "@id": "${UUID.randomUUID()}",
                 "fødselsnummer": "$UNG_PERSON_FNR_2018",
                 "fagsystemId": "$fagsystemId",
-                "utbetalingId": "$utbetalingId",
+                "utbetalingId": "$UTBETALING_ID",
                 "annullertAvSaksbehandler": "${LocalDateTime.now()}",
                 "saksbehandlerEpost": "$saksbehandlerEpost"
             }"""

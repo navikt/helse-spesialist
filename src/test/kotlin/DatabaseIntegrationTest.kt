@@ -45,6 +45,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal val VEDTAKSPERIODE = UUID.randomUUID()
 
+        internal val UTBETALING_ID = UUID.randomUUID()
+
         internal const val OPPGAVETYPE = "SØKNAD"
         internal val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
 
@@ -218,12 +220,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtakId: Long? = null,
-        oppgavetype: String = OPPGAVETYPE
+        oppgavetype: String = OPPGAVETYPE,
+        utbetalingId: UUID = UTBETALING_ID
     ) {
         oppgaveId = oppgaveDao.opprettOppgave(
             contextId,
             oppgavetype,
-            vedtakId
+            vedtakId,
+            utbetalingId
         )
     }
 

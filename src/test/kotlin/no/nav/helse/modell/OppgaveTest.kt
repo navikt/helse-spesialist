@@ -22,6 +22,7 @@ internal class OppgaveTest {
     private companion object {
         private const val OPPGAVETYPE = "SØKNAD"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val UTBETALING_ID = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
         private const val SAKSBEHANDLERIDENT = "Z999999"
@@ -37,7 +38,7 @@ internal class OppgaveTest {
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
 
-    private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID)
+    private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
 
     @BeforeEach
     fun setup() {
@@ -48,12 +49,12 @@ internal class OppgaveTest {
     fun `oppretter ny oppgave`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKREF) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKREF, UTBETALING_ID) }
     }
 
     @Test
     fun `oppdater oppgave`() {
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
@@ -61,16 +62,16 @@ internal class OppgaveTest {
 
     @Test
     fun `gjenoppretter oppgave`() {
-        val oppgave1 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
-        val oppgave2 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
-        val oppgave3 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSystem, VEDTAKSPERIODE_ID)
+        val oppgave1 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave2 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave3 = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSystem, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1, oppgave3)
     }
 
     @Test
     fun `Setter oppgavestatus til INVALIDERT når oppgaven avbrytes`() {
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         oppgave.avbryt()
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
@@ -78,11 +79,11 @@ internal class OppgaveTest {
 
     @Test
     fun equals() {
-        val gjenopptattOppgave = Oppgave(1L, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
-        val oppgave1 = Oppgave.søknad(VEDTAKSPERIODE_ID)
-        val oppgave2 = Oppgave.søknad(VEDTAKSPERIODE_ID)
-        val oppgave3 = Oppgave.søknad(UUID.randomUUID())
-        val oppgave4 = Oppgave.stikkprøve(VEDTAKSPERIODE_ID)
+        val gjenopptattOppgave = Oppgave(1L, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave1 = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val oppgave2 = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val oppgave3 = Oppgave.søknad(UUID.randomUUID(), UTBETALING_ID)
+        val oppgave4 = Oppgave.stikkprøve(VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)

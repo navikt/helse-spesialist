@@ -60,13 +60,14 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         Assertions.assertEquals("Kevders Chilleby", annullerAvSaksbehandler?.saksbehandlerNavn)
     }
 
-    fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String) {
+    fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String, utbetalingId: UUID = UUID.randomUUID()) {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshot
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = utbetalingId
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

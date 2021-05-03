@@ -79,6 +79,7 @@ internal class OppgaveMediator(
     internal fun opprett(
         contextId: UUID,
         vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
         navn: String
     ): Long? {
         if (oppgaveDao.harAktivOppgave(vedtaksperiodeId)) return null
@@ -86,7 +87,8 @@ internal class OppgaveMediator(
         return oppgaveDao.opprettOppgave(
             contextId,
             navn,
-            vedtakRef
+            vedtakRef,
+            utbetalingId
         ).also { oppgaveId ->
             oppgaverForPublisering.put(oppgaveId, "oppgave_opprettet")
         }

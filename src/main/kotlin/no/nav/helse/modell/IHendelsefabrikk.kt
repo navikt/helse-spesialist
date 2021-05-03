@@ -50,6 +50,7 @@ internal interface IHendelsefabrikk {
         periodeFom: LocalDate,
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
         arbeidsforholdId: String?,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,

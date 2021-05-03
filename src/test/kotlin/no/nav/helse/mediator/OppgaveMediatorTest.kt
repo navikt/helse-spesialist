@@ -26,6 +26,8 @@ internal class OppgaveMediatorTest {
     private companion object {
         private const val FNR = "12345678911"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val UTBETALING_ID = UUID.randomUUID()
+        private val UTBETALING_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val HENDELSE_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
@@ -44,8 +46,8 @@ internal class OppgaveMediatorTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val mediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
-    private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID)
-    private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2)
+    private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
+    private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
 
     private val testRapid = TestRapid()
 
@@ -62,15 +64,15 @@ internal class OppgaveMediatorTest {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any()) } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any()) } returns 1L
+        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
+        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
         mediator.opprett(søknadsoppgave)
         mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, VEDTAKREF) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_STIKKPRØVE, VEDTAKREF2) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, VEDTAKREF, UTBETALING_ID) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_STIKKPRØVE, VEDTAKREF2, UTBETALING_ID_2) }
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertOppgaveevent(1, "oppgave_opprettet")
@@ -89,7 +91,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `oppdaterer oppgave`() {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
-        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         every { oppgaveDao.finn(any<Long>()) } returns oppgave
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
@@ -111,7 +113,7 @@ internal class OppgaveMediatorTest {
         mediator.opprett(søknadsoppgave)
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any()) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
     }
 
     @Test
@@ -119,8 +121,8 @@ internal class OppgaveMediatorTest {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any()) } returns 0L
-        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any()) } returns 1L
+        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
+        every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
         mediator.opprett(søknadsoppgave)
         mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
@@ -132,8 +134,8 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `avbryter oppgaver`() {
-        val oppgave1 = Oppgave(1L, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
-        val oppgave2 = Oppgave(2L, OPPGAVETYPE_STIKKPRØVE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID)
+        val oppgave1 = Oppgave(1L, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
+        val oppgave2 = Oppgave(2L, OPPGAVETYPE_STIKKPRØVE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         every { oppgaveDao.finnAktive(VEDTAKSPERIODE_ID) } returns listOf(oppgave1, oppgave2)
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(1L) } returns oppgave1

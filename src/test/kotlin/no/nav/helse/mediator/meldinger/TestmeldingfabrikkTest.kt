@@ -18,6 +18,7 @@ internal class TestmeldingfabrikkTest {
         private val AKTØR = "${UUID.randomUUID()}"
         private val HENDELSE_ID = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
+        private val UTBETALING_ID = UUID.randomUUID()
     }
 
     private val fabrikk = Testmeldingfabrikk(FNR, AKTØR)
@@ -53,7 +54,7 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun godkjenningsbehov() {
-        val melding = fabrikk.lagGodkjenningsbehov(HENDELSE_ID, VEDTAKSPERIODE_ID, "orgnr")
+        val melding = fabrikk.lagGodkjenningsbehov(HENDELSE_ID, VEDTAKSPERIODE_ID, UTBETALING_ID,"orgnr")
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)

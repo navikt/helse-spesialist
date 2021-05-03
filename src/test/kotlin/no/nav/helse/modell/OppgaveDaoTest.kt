@@ -7,6 +7,7 @@ import kotliquery.using
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.oppgave.Oppgavestatus.Ferdigstilt
@@ -92,7 +93,17 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner oppgave`() {
         nyPerson()
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE), oppgave)
+        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = UTBETALING_ID), oppgave)
+    }
+
+    @Test
+    fun `finner oppgave uten utbetalingId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        val oppgaveId = insertOppgave(utbetalingId = null, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
+        val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
+        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null), oppgave)
     }
 
     @Test
@@ -226,6 +237,29 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 )
             }.asList)
         }
+
+    private fun insertOppgave(
+        commandContextId: UUID,
+        oppgavetype: String,
+        vedtakRef: Long? = null,
+        utbetalingId: UUID?
+    ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        it.run(
+            queryOf(
+                """
+                INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id)
+                VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?);
+            """,
+                oppgavetype,
+                AvventerSaksbehandler.name,
+                null,
+                null,
+                vedtakRef,
+                commandContextId,
+                utbetalingId
+            ).asUpdateAndReturnGeneratedKey
+        )
+    }) { "Kunne ikke opprette oppgave" }
 
     private class OppgaveAssertions(
         private val oppdatert: LocalDate,

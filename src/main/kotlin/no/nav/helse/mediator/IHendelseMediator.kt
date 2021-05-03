@@ -61,6 +61,7 @@ internal interface IHendelseMediator {
         periodeTom: LocalDate,
         skjæringstidspunkt: LocalDate,
         vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
         arbeidsforholdId: String?,
         periodetype: Periodetype,
         inntektskilde: Inntektskilde,

@@ -104,7 +104,8 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
-            aktiveVedtaksperioder = aktiveVedtaksperioder
+            aktiveVedtaksperioder = aktiveVedtaksperioder,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
         sendArbeidsgiverinformasjonløsning(

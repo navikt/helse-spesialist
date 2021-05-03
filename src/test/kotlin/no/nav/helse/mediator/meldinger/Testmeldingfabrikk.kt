@@ -51,6 +51,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun lagGodkjenningsbehov(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
         orgnummer: String = "orgnr",
         periodeFom: LocalDate = LocalDate.now(),
         periodeTom: LocalDate = LocalDate.now(),
@@ -75,6 +76,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to orgnummer,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "utbetalingId" to "$utbetalingId",
                 "Godkjenning" to mapOf(
                     "periodeFom" to "$periodeFom",
                     "periodeTom" to "$periodeTom",

@@ -55,7 +55,8 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
     private fun vedtaksperiodeTilGodkjenning(): UUID {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(
             ORGNR,
-            VEDTAKSPERIODE_ID
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(

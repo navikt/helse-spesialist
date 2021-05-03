@@ -19,7 +19,7 @@ internal class FerdigstillOppgaveCommandTest {
         private const val IDENT = "Z999999"
         private val OID = UUID.randomUUID()
         private const val OPPGAVE_ID = 1L
-        private val oppgave = Oppgave(OPPGAVE_ID, "Et navn", Oppgavestatus.AvventerSaksbehandler, UUID.randomUUID())
+        private val oppgave = Oppgave(OPPGAVE_ID, "Et navn", Oppgavestatus.AvventerSaksbehandler, UUID.randomUUID(), utbetalingId = UUID.randomUUID())
     }
     private val mediator = mockk<OppgaveMediator>(relaxed = true)
     private val dao = mockk<OppgaveDao>(relaxed = true)

@@ -45,6 +45,7 @@ internal class Godkjenningsbehov(
     aktørId: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val utbetalingId: UUID,
     arbeidsforholdId: String?,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
@@ -156,6 +157,7 @@ internal class Godkjenningsbehov(
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             egenAnsattDao = egenAnsattDao,
@@ -188,7 +190,7 @@ internal class Godkjenningsbehov(
                     it.demandAll("@behov", listOf("Godkjenning"))
                     it.rejectKey("@løsning")
                     it.requireKey(
-                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId"
+                        "@id", "fødselsnummer", "aktørId", "organisasjonsnummer", "vedtaksperiodeId", "utbetalingId"
                     )
                     it.requireKey(
                         "Godkjenning.periodeFom",
@@ -228,6 +230,7 @@ internal class Godkjenningsbehov(
                 periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
                 skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
+                utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
                 arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
