@@ -54,7 +54,8 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(listOf(UtbetalingDao.UtbetalingDto.OppdragDto.UtbetalingLinje(
             fom = 1.juli(),
-            tom = 31.juli()
+            tom = 31.juli(),
+            totalbeløp = null
         )), utbetaling.arbeidsgiverOppdrag.linjer)
     }
 
@@ -85,6 +86,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
             fom = fom,
             tom = tom,
             dagsats = 1200,
+            totalbeløp = null,
             lønn = 3000,
             grad = 100.0,
             delytelseId = 1,

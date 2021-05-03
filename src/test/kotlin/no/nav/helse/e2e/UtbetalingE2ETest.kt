@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -39,7 +38,6 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         assertEquals(1, utbetalinger().size)
     }
 
-    @Disabled
     @Test
     fun `legger på totalbeløp på utbetaling`() {
         vedtaksperiode()

@@ -55,6 +55,7 @@ internal class UtbetalingEndret(
             private val fom: LocalDate,
             private val tom: LocalDate,
             private val dagsats: Int,
+            private val totalbeløp: Int?,
             private val lønn: Int,
             private val grad: Double,
             private val delytelseId: Int,
@@ -62,7 +63,7 @@ internal class UtbetalingEndret(
             private val refFagsystemId: String?
         ) {
             internal fun lagre(utbetalingDao: UtbetalingDao, oppdragId: Long) {
-                utbetalingDao.nyLinje(oppdragId, endringskode, klassekode, statuskode, datoStatusFom, fom, tom, dagsats, lønn, grad, delytelseId, refDelytelseId, refFagsystemId)
+                utbetalingDao.nyLinje(oppdragId, endringskode, klassekode, statuskode, datoStatusFom, fom, tom, dagsats, totalbeløp, lønn, grad, delytelseId, refDelytelseId, refFagsystemId)
             }
         }
     }

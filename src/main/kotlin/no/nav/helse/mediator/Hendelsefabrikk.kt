@@ -341,6 +341,7 @@ internal class Hendelsefabrikk(
                 fom = linje.path("fom").asLocalDate(),
                 tom = linje.path("tom").asLocalDate(),
                 dagsats = linje.path("dagsats").asInt(),
+                totalbeløp = linje.path("totalbeløp").takeIf(JsonNode::isInt)?.asInt(),
                 lønn = linje.path("lønn").asInt(),
                 grad = linje.path("grad").asDouble(),
                 delytelseId = linje.path("delytelseId").asInt(),

@@ -126,6 +126,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
         fom: LocalDate,
         tom: LocalDate,
         dagsats: Int,
+        totalbeløp: Int?,
         lønn: Int,
         grad: Double,
         delytelseId: Int,
@@ -134,9 +135,9 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
     ) {
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO utbetalingslinje(oppdrag_id, delytelseId, refdelytelseid, reffagsystemid, endringskode, klassekode, statuskode, datostatusfom, fom, tom, dagsats, lønn, grad)
+            INSERT INTO utbetalingslinje(oppdrag_id, delytelseId, refdelytelseid, reffagsystemid, endringskode, klassekode, statuskode, datostatusfom, fom, tom, dagsats, totalbeløp, lønn, grad)
             VALUES (:oppdragIdRef, :delytelseId, :refDelytelseId, :refFagsystemId, CAST(:endringskode as oppdrag_endringskode), CAST(:klassekode as oppdrag_klassekode),
-            CAST(:statuskode as oppdrag_statuskode), :datoStatusFom, :fom, :tom, :dagsats, :lonn, :grad)
+            CAST(:statuskode as oppdrag_statuskode), :datoStatusFom, :fom, :tom, :dagsats, :totalbelop, :lonn, :grad)
         """
         return using(sessionOf(dataSource)) {
             it.run(
@@ -153,6 +154,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
                         "fom" to fom,
                         "tom" to tom,
                         "dagsats" to dagsats,
+                        "totalbelop" to totalbeløp,
                         "lonn" to lønn,
                         "grad" to grad
                     )
@@ -179,13 +181,15 @@ ORDER BY ui.id, u.id DESC
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
                 .map { row ->
+                    val linjer = findUtbetalingslinjer(session, row.long("oppdrag_id"))
+
                     UtbetalingDto(
                         type = row.string("type"),
                         status = row.string("status"),
                         arbeidsgiverOppdrag = UtbetalingDto.OppdragDto(
                             organisasjonsnummer = row.string("orgnummer"),
                             fagsystemId = row.string("fagsystem_id"),
-                            linjer = findUtbetalingslinjer(session, row.long("oppdrag_id"))
+                            linjer = linjer
                         ),
                         annullertAvSaksbehandler = row.localDateTimeOrNull("annullert_tidspunkt")?.let {
                             UtbetalingDto.AnnullertAvSaksbehandlerDto(
@@ -193,7 +197,7 @@ ORDER BY ui.id, u.id DESC
                                 saksbehandlerNavn = row.string("navn")
                             )
                         },
-                        totalbeløp = null
+                        totalbeløp = linjer.sumBy { it.totalbeløp ?: 0 }
                     )
                 }
                 .asList)
@@ -226,7 +230,8 @@ ORDER BY ui.id, u.id DESC
             .map { row ->
                 UtbetalingDto.OppdragDto.UtbetalingLinje(
                     fom = row.localDate("fom"),
-                    tom = row.localDate("tom")
+                    tom = row.localDate("tom"),
+                    totalbeløp = row.intOrNull("totalbeløp")
                 )
             }
             .asList)
@@ -263,7 +268,8 @@ ORDER BY ui.id, u.id DESC
         ) {
             data class UtbetalingLinje(
                 val fom: LocalDate,
-                val tom: LocalDate
+                val tom: LocalDate,
+                val totalbeløp: Int?
             )
         }
         data class AnnullertAvSaksbehandlerDto(
