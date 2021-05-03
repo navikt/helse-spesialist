@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -44,6 +45,15 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         sendUtbetalingEndret("ETTERUTBETALING", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
 
         assertEquals(4000, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().totalbeløp)
+    }
+
+    @Disabled
+    @Test
+    fun `feriepengeutbetalinger har riktig type på utbetaling`() {
+        vedtaksperiode()
+        sendUtbetalingEndret("FERIEPENGER", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
+
+        assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().type)
     }
 
     private fun utbetalinger(): List<Long> {
