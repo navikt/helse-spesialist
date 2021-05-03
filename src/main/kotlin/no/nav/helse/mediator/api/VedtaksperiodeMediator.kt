@@ -59,7 +59,7 @@ internal class VedtaksperiodeMediator(
                 utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
                     UtbetalingForSpeilDto(
                         type = utbetaling.type,
-                        status = utbetaling.status,
+                        status = utbetaling.status.toString(),
                         arbeidsgiverOppdrag = OppdragForSpeilDto(
                             organisasjonsnummer = utbetaling.arbeidsgiverOppdrag.organisasjonsnummer,
                             fagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId,

@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.oppgave.Oppgavestatus
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
@@ -187,6 +188,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -268,6 +270,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -341,6 +344,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -408,6 +412,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         assertTilstand(
             godkjenningsmeldingId,
             "NY",

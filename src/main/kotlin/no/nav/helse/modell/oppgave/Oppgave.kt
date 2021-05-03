@@ -89,6 +89,10 @@ internal class Oppgave private constructor(
         ferdigstiltAvOid = oid
     }
 
+    internal fun ferdigstill() {
+        status = Oppgavestatus.Ferdigstilt
+    }
+
     internal fun avventerSystem(ident: String, oid: UUID) {
         status = Oppgavestatus.AvventerSystem
         ferdigstiltAvIdent = ident

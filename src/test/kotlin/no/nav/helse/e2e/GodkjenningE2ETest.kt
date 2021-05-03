@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.modell.oppgave.Oppgavestatus.*
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.snapshotMedWarning
@@ -132,6 +133,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
@@ -227,6 +229,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,

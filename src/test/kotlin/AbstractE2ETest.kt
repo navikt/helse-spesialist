@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -36,6 +37,7 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -287,14 +289,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun sendDigitalKontaktinformasjonløsning(
         godkjenningsmeldingId: UUID,
-        erDigital: Boolean = true
+        erDigital: Boolean = true,
+        contextId: UUID = testRapid.inspektør.contextId()
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
                     id,
                     godkjenningsmeldingId,
-                    testRapid.inspektør.contextId(),
+                    contextId,
                     erDigital
                 )
             )
@@ -304,14 +307,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun sendÅpneGosysOppgaverløsning(
         godkjenningsmeldingId: UUID,
         antall: Int = 0,
-        oppslagFeilet: Boolean = false
+        oppslagFeilet: Boolean = false,
+        contextId: UUID = testRapid.inspektør.contextId()
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagÅpneGosysOppgaverløsning(
                     id,
                     godkjenningsmeldingId,
-                    testRapid.inspektør.contextId(),
+                    contextId,
                     antall,
                     oppslagFeilet
                 )
@@ -331,6 +335,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
+        contextId: UUID = testRapid.inspektør.contextId(),
         funn: JsonNode = objectMapper.createArrayNode()
     ) {
         nyHendelseId().also { id ->
@@ -338,7 +343,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 meldingsfabrikk.lagRisikovurderingløsning(
                     id,
                     godkjenningsmeldingId,
-                    testRapid.inspektør.contextId(),
+                    contextId,
                     vedtaksperiodeId,
                     kanGodkjennesAutomatisk,
                     funn
@@ -349,14 +354,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun sendEgenAnsattløsning(
         godkjenningsmeldingId: UUID,
-        erEgenAnsatt: Boolean
+        erEgenAnsatt: Boolean,
+        contextId: UUID = testRapid.inspektør.contextId()
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagEgenAnsattløsning(
                     id,
                     godkjenningsmeldingId,
-                    testRapid.inspektør.contextId(),
+                    contextId,
                     erEgenAnsatt
                 )
             )
@@ -390,11 +396,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun sendUtbetalingEndret(
         type: String,
-        status: String,
+        status: Utbetalingsstatus,
         orgnr: String,
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
-        forrigeStatus: String = status,
+        forrigeStatus: Utbetalingsstatus = status,
         fødselsnummer: String = UNG_PERSON_FNR_2018
     ) {
         @Language("JSON")
@@ -509,6 +515,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
+    private fun contextId(hendelseId: UUID): UUID {
+        return using(sessionOf(dataSource)) { session ->
+            requireNotNull(session.run(
+                queryOf("SELECT context_id FROM command_context WHERE hendelse_id = ?",
+                    hendelseId
+                ).map { UUID.fromString(it.string("context_id")) }.asSingle
+            ))
+        }
+    }
+
     protected fun assertGodkjenningsbehovløsning(
         godkjent: Boolean,
         saksbehandlerIdent: String,
@@ -611,6 +627,80 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }.contains(forventet))
     }
+
+    protected fun vedtaksperiode(
+        organisasjonsnummer: String = "987654321",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        kanAutomatiseres: Boolean = false,
+        snapshot: String = snapshot()
+    ): UUID {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshot
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodetype = Periodetype.FORLENGELSE,
+            utbetalingId = UTBETALING_ID,
+        )
+        sendPersoninfoløsning(
+            orgnr = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            hendelseId = godkjenningsmeldingId,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            kanGodkjennesAutomatisk = kanAutomatiseres,
+            contextId = contextId(godkjenningsmeldingId)
+        )
+        return godkjenningsmeldingId
+    }
+
+    @Language("JSON")
+    protected fun snapshot() = """{
+      "version": "this_is_version_1",
+      "aktørId": "123456789101112",
+      "fødselsnummer": "12345612345",
+      "arbeidsgivere": [
+        {
+          "organisasjonsnummer": "987654321",
+          "id": "${UUID.randomUUID()}",
+          "vedtaksperioder": [
+            {
+              "id": "${UUID.randomUUID()}",
+              "aktivitetslogg": []
+            }
+          ]
+        }
+      ],
+      "inntektsgrunnlag": {}
+      }"""
 
     protected fun TestRapid.RapidInspector.meldinger() =
         (0 until size).map { index -> message(index) }

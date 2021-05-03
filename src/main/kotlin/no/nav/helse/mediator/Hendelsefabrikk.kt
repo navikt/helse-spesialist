@@ -19,7 +19,9 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -158,7 +160,6 @@ internal class Hendelsefabrikk(
         oppgaveId = oppgaveId,
         godkjenningsbehovhendelseId = godkjenningsbehovhendelseId,
         hendelseDao = hendelseDao,
-        oppgaveMediator = oppgaveMediator,
         oppgaveDao = oppgaveDao,
         godkjenningMediator = godkjenningMediator
     )
@@ -313,17 +314,20 @@ internal class Hendelsefabrikk(
             orgnummer = jsonNode.path("organisasjonsnummer").asText(),
             utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
             type = jsonNode.path("type").asText(),
-            status = jsonNode.path("gjeldendeStatus").asText(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
+            forrigeStatus = Utbetalingsstatus.valueOf(jsonNode.path("forrigeStatus").asText()),
+            gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode.path("gjeldendeStatus").asText()),
             arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag")),
             personOppdrag = tilOppdrag(jsonNode.path("personOppdrag")),
             json = json,
             utbetalingDao = utbetalingDao,
-            opptegnelseDao = opptegnelseDao
+            opptegnelseDao = opptegnelseDao,
+            oppgaveDao = oppgaveDao,
+            oppgaveMediator = oppgaveMediator
         )
     }
 
-    private fun tilOppdrag(jsonNode: JsonNode) = UtbetalingEndret.Oppdrag(
+    private fun tilOppdrag(jsonNode: JsonNode) = LagreOppdragCommand.Oppdrag(
         fagsystemId = jsonNode.path("fagsystemId").asText(),
         fagområde = jsonNode.path("fagområde").asText(),
         mottaker = jsonNode.path("mottaker").asText(),
@@ -333,7 +337,7 @@ internal class Hendelsefabrikk(
             ?.asLocalDate()
             ?.takeUnless { it == LocalDate.MIN },
         linjer = jsonNode.path("linjer").map { linje ->
-            UtbetalingEndret.Oppdrag.Utbetalingslinje(
+            LagreOppdragCommand.Oppdrag.Utbetalingslinje(
                 endringskode = linje.path("endringskode").asText(),
                 klassekode = linje.path("klassekode").asText(),
                 statuskode = linje.path("statuskode").takeIf(JsonNode::isTextual)?.asText(),

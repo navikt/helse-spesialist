@@ -45,7 +45,17 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
+    internal fun ferdigstill(oppgave: Oppgave) {
+        oppgave.ferdigstill()
+        nyOppgave(oppgave)
+    }
+
     private fun avbryt(oppgave: Oppgave) {
+        oppgave.avbryt()
+        nyOppgave(oppgave)
+    }
+
+    internal fun invalider(oppgave: Oppgave) {
         oppgave.avbryt()
         nyOppgave(oppgave)
     }

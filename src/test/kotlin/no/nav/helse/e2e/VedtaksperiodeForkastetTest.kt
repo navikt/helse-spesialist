@@ -5,6 +5,7 @@ import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -26,6 +27,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
         val tidspunktVedFerdigstilling = oppgaveOppdatertTidspunkt()
         sendVedtaksperiodeForkastet()
         assertEquals(tidspunktVedFerdigstilling, oppgaveOppdatertTidspunkt())
