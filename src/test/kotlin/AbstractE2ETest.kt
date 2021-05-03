@@ -73,7 +73,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val snapshotDao = SnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
-    private val utbetalingDao = UtbetalingDao(dataSource)
+    protected val utbetalingDao = UtbetalingDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -418,6 +418,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
           "fom": "${LocalDate.now()}",
           "tom": "${LocalDate.now()}",
           "dagsats": 2000,
+          "totalbeløp": 2000,
           "lønn": 2000,
           "grad": 100.00,
           "refFagsystemId": "asdfg",
@@ -432,6 +433,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
           "fom": "${LocalDate.now()}",
           "tom": "${LocalDate.now()}",
           "dagsats": 2000,
+          "totalbeløp": 2000,
           "lønn": 2000,
           "grad": 100.00,
           "refFagsystemId": null,

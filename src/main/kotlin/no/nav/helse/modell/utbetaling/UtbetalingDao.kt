@@ -192,7 +192,8 @@ ORDER BY ui.id, u.id DESC
                                 annullertTidspunkt = it,
                                 saksbehandlerNavn = row.string("navn")
                             )
-                        }
+                        },
+                        totalbeløp = null
                     )
                 }
                 .asList)
@@ -252,7 +253,8 @@ ORDER BY ui.id, u.id DESC
         val type: String,
         val status: String,
         val arbeidsgiverOppdrag: OppdragDto,
-        val annullertAvSaksbehandler: AnnullertAvSaksbehandlerDto? = null
+        val annullertAvSaksbehandler: AnnullertAvSaksbehandlerDto? = null,
+        val totalbeløp: Int?
     ) {
         data class OppdragDto(
             val organisasjonsnummer: String,
