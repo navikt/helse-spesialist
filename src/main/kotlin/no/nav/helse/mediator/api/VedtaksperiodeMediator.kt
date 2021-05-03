@@ -75,7 +75,8 @@ internal class VedtaksperiodeMediator(
                                 annullertTidspunkt = it.annullertTidspunkt,
                                 saksbehandlerNavn = it.saksbehandlerNavn
                             )
-                        }
+                        },
+                        totalbeløp = utbetaling.totalbeløp
                     )
                 }
             }

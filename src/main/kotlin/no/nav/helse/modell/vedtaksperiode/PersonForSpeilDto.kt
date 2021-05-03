@@ -75,7 +75,8 @@ data class UtbetalingForSpeilDto(
     val type: String,
     val status: String,
     val arbeidsgiverOppdrag: OppdragForSpeilDto,
-    val annullertAvSaksbehandler: AnnullertAvSaksbehandlerForSpeilDto?
+    val annullertAvSaksbehandler: AnnullertAvSaksbehandlerForSpeilDto?,
+    val totalbeløp: Int?
 )
 
 data class AnnullertAvSaksbehandlerForSpeilDto(
