@@ -126,7 +126,7 @@ internal class UtbetalingEndret(
                     it.requireKey("@id", "fødselsnummer", "organisasjonsnummer",
                         "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId"
                     )
-                    it.requireAny("type", listOf("UTBETALING", "ANNULLERING", "ETTERUTBETALING"))
+                    it.requireAny("type", listOf("UTBETALING", "ANNULLERING", "ETTERUTBETALING", "FERIEPENGER"))
                     it.requireAny("forrigeStatus", gyldigeStatuser)
                     it.requireAny("gjeldendeStatus", gyldigeStatuser)
                     it.require("@opprettet", JsonNode::asLocalDateTime)

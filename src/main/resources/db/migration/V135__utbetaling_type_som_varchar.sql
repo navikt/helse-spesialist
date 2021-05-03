@@ -1,0 +1,1 @@
+ALTER TYPE utbetaling_type ADD VALUE 'FERIEPENGER';
