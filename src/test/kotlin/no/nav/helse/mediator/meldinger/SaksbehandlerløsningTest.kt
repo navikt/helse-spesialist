@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OppgaveMediator
@@ -110,7 +109,6 @@ internal class SaksbehandlerløsningTest {
         val saksbehandlerløsning = saksbehandlerløsning(true)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(true)
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(any(), IDENT, OID) }
     }
 
     @Test
@@ -119,7 +117,6 @@ internal class SaksbehandlerløsningTest {
         val saksbehandlerløsning = saksbehandlerløsning(false)
         assertTrue(saksbehandlerløsning.execute(context))
         assertLøsning(false)
-        verify(exactly = 1) { oppgaveMediator.ferdigstill(any(), IDENT, OID) }
     }
 
     private fun assertLøsning(godkjent: Boolean) {

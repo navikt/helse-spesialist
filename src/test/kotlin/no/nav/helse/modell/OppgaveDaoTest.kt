@@ -7,7 +7,6 @@ import kotliquery.using
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.oppgave.Oppgavestatus.Ferdigstilt
@@ -97,7 +96,18 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner oppgave uten utbetalingId`() {
+    fun `finner oppgave fra utbetalingId`() {
+        val utbetalingId = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        val oppgaveId = insertOppgave(utbetalingId = utbetalingId, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
+        val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
+        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = utbetalingId), oppgave)
+    }
+
+    @Test
+    fun `kan hente oppgave selv om utbetalingId mangler`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)

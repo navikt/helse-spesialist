@@ -24,7 +24,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
 
     fun nyUtbetalingStatus(
         utbetalingIdRef: Long,
-        status: String,
+        status: Utbetalingsstatus,
         opprettet: LocalDateTime,
         json: String
     ) {
@@ -38,7 +38,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
                 queryOf(
                     statement, mapOf(
                         "utbetalingIdRef" to utbetalingIdRef,
-                        "status" to status,
+                        "status" to status.toString(),
                         "opprettet" to opprettet,
                         "json" to json
                     )
@@ -185,7 +185,7 @@ ORDER BY ui.id, u.id DESC
 
                     UtbetalingDto(
                         type = row.string("type"),
-                        status = row.string("status"),
+                        status = Utbetalingsstatus.valueOf(row.string("status")),
                         arbeidsgiverOppdrag = UtbetalingDto.OppdragDto(
                             organisasjonsnummer = row.string("orgnummer"),
                             fagsystemId = row.string("fagsystem_id"),
@@ -256,7 +256,7 @@ ORDER BY ui.id, u.id DESC
 
     data class UtbetalingDto(
         val type: String,
-        val status: String,
+        val status: Utbetalingsstatus,
         val arbeidsgiverOppdrag: OppdragDto,
         val annullertAvSaksbehandler: AnnullertAvSaksbehandlerDto? = null,
         val totalbeløp: Int?

@@ -3,9 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.kommando.FerdigstillOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -29,14 +27,12 @@ internal class Saksbehandlerløsning(
     private val oppgaveId: Long,
     godkjenningsbehovhendelseId: UUID,
     hendelseDao: HendelseDao,
-    oppgaveMediator: OppgaveMediator,
     private val oppgaveDao: OppgaveDao,
     godkjenningMediator: GodkjenningMediator
 ) : Hendelse, MacroCommand() {
 
     override val commands = listOf(
         UtbetalingsgodkjenningCommand(godkjent, saksbehandlerIdent, oid, epostadresse, godkjenttidspunkt, årsak, begrunnelser, kommentar, godkjenningsbehovhendelseId, hendelseDao, godkjenningMediator, vedtaksperiodeId(), fødselsnummer),
-        FerdigstillOppgaveCommand(oppgaveMediator, saksbehandlerIdent, oid, oppgaveId, oppgaveDao)
     )
 
     override fun fødselsnummer() = fødselsnummer

@@ -1,11 +1,10 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -22,26 +21,26 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {
-        vedtaksperiode()
-        sendUtbetalingEndret("UTBETALING", "GODKJENT", ORGNR, arbeidsgiverFagsystemId)
-        sendUtbetalingEndret("ETTERUTBETALING", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
-        sendUtbetalingEndret("ANNULLERING", "ANNULLERT", ORGNR, arbeidsgiverFagsystemId)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1)
+        sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId)
         assertEquals(3, utbetalinger().size)
     }
 
     @Test
     fun `utbetaling forkastet`() {
-        vedtaksperiode()
-        sendUtbetalingEndret("UTBETALING", "FORKASTET", ORGNR, arbeidsgiverFagsystemId, forrigeStatus = "IKKE_UTBETALT")
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1)
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGNR, arbeidsgiverFagsystemId, forrigeStatus = IKKE_GODKJENT)
         assertEquals(0, utbetalinger().size)
-        sendUtbetalingEndret("UTBETALING", "FORKASTET", ORGNR, arbeidsgiverFagsystemId, forrigeStatus = "GODKJENT")
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGNR, arbeidsgiverFagsystemId, forrigeStatus = GODKJENT)
         assertEquals(1, utbetalinger().size)
     }
 
     @Test
     fun `legger på totalbeløp på utbetaling`() {
-        vedtaksperiode()
-        sendUtbetalingEndret("ETTERUTBETALING", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1)
+        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
 
         assertEquals(4000, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().totalbeløp)
     }
@@ -49,7 +48,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     @Test
     fun `feriepengeutbetalinger har riktig type på utbetaling`() {
         vedtaksperiode()
-        sendUtbetalingEndret("FERIEPENGER", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
 
         assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().type)
     }
@@ -72,40 +71,5 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 "orgnummer" to ORGNR.toLong()
             )).map { row -> row.long("utbetaling_id_ref") }.asList)
         }
-    }
-
-    fun vedtaksperiode(vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID, snapshot: String = SNAPSHOTV1) {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshot
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Periodetype.FORLENGELSE,
-            utbetalingId = UTBETALING_ID,
-        )
-        sendPersoninfoløsning(
-            orgnr = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId,
-            hendelseId = godkjenningsmeldingId
-        )
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = false
-        )
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
     }
 }

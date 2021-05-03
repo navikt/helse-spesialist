@@ -4,6 +4,8 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
@@ -217,13 +219,13 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         )
         val arbeidsgiverFagsystemId = "JHKSDA3412SFHJKA489KASDJL"
 
-        sendUtbetalingEndret("UTBETALING", "OVERFØRT", ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
         val speilSnapshot1 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
         assertEquals(1, speilSnapshot1.utbetalinger.size)
         val utbetaling1 = speilSnapshot1.utbetalinger.first()
         assertEquals("OVERFØRT", utbetaling1.status)
 
-        sendUtbetalingEndret("UTBETALING", "UTBETALT", ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, arbeidsgiverFagsystemId)
         val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
         val utbetaling2 = speilSnapshot2.utbetalinger.first()
         assertEquals("UTBETALT", utbetaling2.status)
@@ -258,7 +260,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         )
         sendUtbetalingEndret(
             type = "UTBETALING",
-            status = "OVERFØRT",
+            status = OVERFØRT,
             fødselsnummer = fødselsnummer1,
             orgnr = orgnr1,
             arbeidsgiverFagsystemId = "JHKSDA3412SFHJKA489KASDJL"

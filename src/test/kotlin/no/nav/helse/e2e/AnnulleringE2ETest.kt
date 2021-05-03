@@ -4,6 +4,8 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -41,10 +43,10 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
         sendUtbetalingEndret(
             type = "UTBETALING",
-            status = "UTBETALT",
+            status = UTBETALT,
             orgnr = ORGNR,
             arbeidsgiverFagsystemId = "arbeidsgiver_fagsystem_id",
-            forrigeStatus = "SENDT"
+            forrigeStatus = SENDT
         )
 
         val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123")

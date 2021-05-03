@@ -5,6 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,16 +23,16 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
         lagLinje(arbeidsgiverOppdragId, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         val utbetalingIdId = lagUtbetalingId(arbeidsgiverOppdragId)
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, "GODKJENT", LocalDateTime.now(), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, "SENDT", LocalDateTime.now(), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, "OVERFØRT", LocalDateTime.now(), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, "UTBETALT", LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, GODKJENT, LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, SENDT, LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, OVERFØRT, LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, UTBETALT, LocalDateTime.now(), "{}")
 
         val utbetalinger = utbetalingDao.findUtbetalinger(FNR)
         assertEquals(1, utbetalinger.size)
         val utbetaling = utbetalinger.first()
 
-        assertEquals("UTBETALT", utbetaling.status)
+        assertEquals(UTBETALT, utbetaling.status)
         assertEquals("UTBETALING", utbetaling.type)
         assertEquals(fagsystemId, utbetaling.arbeidsgiverOppdrag.fagsystemId)
         assertEquals(ORGNUMMER, utbetaling.arbeidsgiverOppdrag.organisasjonsnummer)
@@ -48,7 +49,7 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagOppdrag()
         lagLinje(arbeidsgiverOppdragId, 1.juli(), 31.juli())
         val utbetalingIdId = lagUtbetalingId(arbeidsgiverOppdragId)
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, "UTBETALT", LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, UTBETALT, LocalDateTime.now(), "{}")
 
         val utbetaling = utbetalingDao.findUtbetalinger(FNR).first()
 
