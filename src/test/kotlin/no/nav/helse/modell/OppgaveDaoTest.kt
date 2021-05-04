@@ -11,7 +11,7 @@ import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.modell.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -89,6 +89,33 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `sorterer RISK_QA-oppgaver først, så forlengelser, så resten`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettRisikovurdering(VEDTAKSPERIODE, false)
+        opprettOppgave(vedtakId = vedtakId)
+
+        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = OVERGANG_FRA_IT)
+        opprettRisikovurdering(VEDTAKSPERIODE, true)
+        opprettOppgave(vedtakId = vedtakId, oppgavetype = "RISK_QA")
+
+        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = INFOTRYGDFORLENGELSE)
+        opprettRisikovurdering(VEDTAKSPERIODE, false)
+        opprettOppgave(vedtakId = vedtakId)
+
+        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = FORLENGELSE)
+        opprettRisikovurdering(VEDTAKSPERIODE, false)
+        opprettOppgave(vedtakId = vedtakId)
+
+        val oppgaver = oppgaveDao.finnOppgaver(true)
+        assertEquals("RISK_QA", oppgaver[0].oppgavetype)
+        assertEquals(INFOTRYGDFORLENGELSE, oppgaver[1].type)
+        assertEquals(FORLENGELSE, oppgaver[2].type)
+        assertEquals(FØRSTEGANGSBEHANDLING, oppgaver[3].type)
+    }
+
+    @Test
     fun `finner oppgave`() {
         nyPerson()
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
@@ -100,7 +127,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(periodetype = FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
         val oppgaveId = insertOppgave(utbetalingId = utbetalingId, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = utbetalingId), oppgave)
@@ -110,7 +137,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `kan hente oppgave selv om utbetalingId mangler`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(periodetype = FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
         val oppgaveId = insertOppgave(utbetalingId = null, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null), oppgave)
@@ -229,7 +256,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `en oppgave har riktig oppgavetype og inntektskilde`(){
         nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
         val oppgaver = oppgaveDao.finnOppgaver(true)
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
+        assertEquals(FØRSTEGANGSBEHANDLING, oppgaver.first().type)
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
     }
 

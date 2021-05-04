@@ -39,6 +39,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                 GROUP BY o.id, o.opprettet, s.oid, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, sot.inntektskilde, e.id, e.navn, t.saksbehandler_ref, t.på_vent
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
+                    CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
                     CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
                 opprettet ASC
             LIMIT 1000;
