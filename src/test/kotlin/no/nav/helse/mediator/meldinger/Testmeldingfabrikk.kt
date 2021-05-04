@@ -489,7 +489,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
 
-    fun lagUtbelingEndret(
+    fun lagUtbetalingEndret(
         id: UUID = UUID.randomUUID(),
         fødselsnummer: String = "12020052345",
         orgnummer: String = "123456789",

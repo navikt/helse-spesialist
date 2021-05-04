@@ -42,7 +42,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val abonnementer = opptegnelseDao.finnAbonnement(SAKSBEHANDLER_ID)
         assertEquals(1, abonnementer.size)
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagUtbelingEndret(
+        testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingEndret(
             type = "ANNULLERING",
             status = "UTBETALING_FEILET"
         ))
