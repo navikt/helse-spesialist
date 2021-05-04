@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -21,7 +20,6 @@ import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDa
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.tildeling.TildelingDao
@@ -228,22 +226,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             oppgavetype,
             vedtakId,
             utbetalingId
-        )
-    }
-
-    protected fun opprettRisikovurdering(
-        vedtaksperiodeId: UUID,
-        kreverSupersaksbehandler: Boolean
-    ) {
-        val data = objectMapper.createObjectNode().set<JsonNode>("funn", objectMapper.createArrayNode())
-        risikovurderingDao.persisterRisikovurdering(
-            RisikovurderingDto(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
-                kanGodkjennesAutomatisk = false,
-                kreverSupersaksbehandler = kreverSupersaksbehandler,
-                data = data,
-            )
         )
     }
 

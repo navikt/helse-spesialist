@@ -77,7 +77,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettRisikovurdering(VEDTAKSPERIODE, true)
         opprettOppgave(vedtakId = vedtakId, oppgavetype = "RISK_QA")
 
         val oppgaver = oppgaveDao.finnOppgaver(true)
@@ -93,19 +92,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettRisikovurdering(VEDTAKSPERIODE, false)
         opprettOppgave(vedtakId = vedtakId)
 
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = OVERGANG_FRA_IT)
-        opprettRisikovurdering(VEDTAKSPERIODE, true)
         opprettOppgave(vedtakId = vedtakId, oppgavetype = "RISK_QA")
 
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = INFOTRYGDFORLENGELSE)
-        opprettRisikovurdering(VEDTAKSPERIODE, false)
         opprettOppgave(vedtakId = vedtakId)
 
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = FORLENGELSE)
-        opprettRisikovurdering(VEDTAKSPERIODE, false)
         opprettOppgave(vedtakId = vedtakId)
 
         val oppgaver = oppgaveDao.finnOppgaver(true)
