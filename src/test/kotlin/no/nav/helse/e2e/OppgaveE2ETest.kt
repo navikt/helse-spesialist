@@ -1,11 +1,15 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.oppgave.Oppgavestatus.*
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.assertEquals
 
 internal class OppgaveE2ETest: AbstractE2ETest() {
 
@@ -20,6 +24,17 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
         sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
         assertOppgave(0, AvventerSaksbehandler, Invalidert)
+    }
+
+    @Test
+    fun `ferdigstiller oppgaven først når utbetalingen er utbetalt`() {
+        val oid = UUID.randomUUID()
+        val godkjenningsbehov = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
+        sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(godkjenningsbehov).toLong(), "ident", "epost", oid, true)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
+        val oppgave = oppgaveDao.finn(UTBETALING_ID)
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
+        assertOppgavedetaljer(oppgave, Ferdigstilt, "SØKNAD", "ident", oid, UTBETALING_ID, godkjenningsbehov, VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -59,5 +74,9 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         assertHendelse(behov2)
         assertOppgave(0, AvventerSaksbehandler)
         assertOppgaver(1)
+    }
+
+    private fun assertOppgavedetaljer(oppgave: Oppgave?, status: Oppgavestatus, type: String, ferdigstiltAv: String, ferdigstiltAvOid: UUID, utbetalingId: UUID, hendelseId: UUID, vedtaksperiodeId: UUID) {
+        assertEquals(Oppgave(testRapid.inspektør.oppgaveId(hendelseId).toLong(), type, status, vedtaksperiodeId, ferdigstiltAv, ferdigstiltAvOid, utbetalingId), oppgave)
     }
 }

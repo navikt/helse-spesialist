@@ -129,33 +129,10 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun finn(fødselsnummer: String) = using(sessionOf(dataSource)) { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            INNER JOIN person p on v.person_ref = p.id
-            WHERE p.fodselsnummer = ?
-        """
-        session.run(
-            queryOf(statement, fødselsnummer)
-                .map { row ->
-                    Oppgave(
-                        id = row.long("id"),
-                        type = row.string("type"),
-                        status = enumValueOf(row.string("status")),
-                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
-                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
-                    )
-                }.asList
-        )
-    }
-
     internal fun finn(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val statement = """
-            SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id
+            SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             WHERE utbetaling_id = ?
@@ -169,6 +146,8 @@ internal class OppgaveDao(private val dataSource: DataSource) {
                         status = enumValueOf(row.string("status")),
                         vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
                         utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
+                        ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                        ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
                     )
                 }.asSingle
         )
