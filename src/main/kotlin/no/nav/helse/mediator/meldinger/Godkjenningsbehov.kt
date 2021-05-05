@@ -149,6 +149,7 @@ internal class Godkjenningsbehov(
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
             hendelseId = id,
             automatisering = automatisering,
             godkjenningsbehovJson = json,
