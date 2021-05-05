@@ -8,16 +8,16 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class AutomatiseringDao(val dataSource: DataSource) {
-    internal fun manuellSaksbehandling(problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID?) =
+    internal fun manuellSaksbehandling(problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID) =
         lagre(automatisert = false, stikkprøve = false, vedtaksperiodeId, hendelseId, problems, utbetalingId)
 
-    internal fun automatisert(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID?) =
+    internal fun automatisert(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID) =
         lagre(automatisert = true, stikkprøve = false, vedtaksperiodeId, hendelseId, utbetalingId = utbetalingId)
 
-    internal fun stikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID?) =
+    internal fun stikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID) =
         lagre(automatisert = false, stikkprøve = true, vedtaksperiodeId, hendelseId, utbetalingId = utbetalingId)
 
-    private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList(), utbetalingId: UUID?) {
+    private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList(), utbetalingId: UUID) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run(

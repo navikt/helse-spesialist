@@ -1,6 +1,8 @@
 package no.nav.helse.modell.automatisering
 
 import DatabaseIntegrationTest
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,7 +43,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     }
     @Test
     fun `lagre og lese false uten utbetalingsId`() {
-        automatiseringDao.manuellSaksbehandling(listOf("Problem"), VEDTAKSPERIODE, HENDELSE_ID, null)
+        insertAutomatisering(false, false, VEDTAKSPERIODE, HENDELSE_ID,listOf("Problem"), null)
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering( VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(false, automatiseringSvar.automatisert)
@@ -120,5 +122,35 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     fun `stikkprøve happy case`() {
         automatiseringDao.stikkprøve(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         assertTrue(automatiseringDao.plukketUtTilStikkprøve(VEDTAKSPERIODE, HENDELSE_ID))
+    }
+
+
+    private fun insertAutomatisering(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList(), utbetalingId: UUID?) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                transactionalSession.run(
+                    queryOf(
+                        """
+                            INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
+                            VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
+                        """,
+                        vedtaksperiodeId,
+                        hendelseId,
+                        automatisert,
+                        stikkprøve,
+                        utbetalingId
+                    ).asUpdate
+                )
+
+                problems.forEach { problem ->
+                    transactionalSession.run(
+                        queryOf(
+                            "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)",
+                            vedtaksperiodeId, hendelseId, problem
+                        ).asUpdate
+                    )
+                }
+            }
+        }
     }
 }
