@@ -87,7 +87,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             @Language("PostgreSQL")
             val query =
                 """
-                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id, a.utbetaling_id utbetaling_id
+                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, v.id vedtaksperiode_ref, h.id hendelse_id, a.utbetaling_id utbetaling_id
                 FROM automatisering a
                          JOIN vedtak v ON a.vedtaksperiode_ref = v.id
                          JOIN hendelse h on h.id = a.hendelse_ref
@@ -99,6 +99,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                     utbetalingId,
                 ).map { row ->
                     val vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
+                    val vedtaksperiodeRef = row.long("vedtaksperiode_ref")
                     val hendelseId = UUID.fromString(row.string("hendelse_id"))
                     AutomatiseringDto(
                         automatisert = row.boolean("automatisert"),
@@ -107,7 +108,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                         problemer = session.run(
                             queryOf(
                                 "SELECT * FROM automatisering_problem WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?",
-                                vedtaksperiodeId,
+                                vedtaksperiodeRef,
                                 hendelseId
                             ).map { it.string("problem") }.asList
                         ),

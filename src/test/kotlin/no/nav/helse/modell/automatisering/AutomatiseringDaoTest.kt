@@ -30,6 +30,29 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `lagre og lese false basert på utbetalingsId`() {
+        automatiseringDao.manuellSaksbehandling(listOf("Problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering( UTBETALING_ID))
+
+        assertEquals(false, automatiseringSvar.automatisert)
+        assertEquals(VEDTAKSPERIODE, automatiseringSvar.vedtaksperiodeId)
+        assertEquals(HENDELSE_ID, automatiseringSvar.hendelseId)
+        assertEquals(1, automatiseringSvar.problemer.size)
+    }
+    @Test
+    fun `lagre og lese false uten utbetalingsId`() {
+        automatiseringDao.manuellSaksbehandling(listOf("Problem"), VEDTAKSPERIODE, HENDELSE_ID, null)
+        val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering( VEDTAKSPERIODE, HENDELSE_ID))
+
+        assertEquals(false, automatiseringSvar.automatisert)
+        assertEquals(VEDTAKSPERIODE, automatiseringSvar.vedtaksperiodeId)
+        assertEquals(HENDELSE_ID, automatiseringSvar.hendelseId)
+        assertEquals(1, automatiseringSvar.problemer.size)
+        assertNull(automatiseringSvar.utbetalingId)
+
+    }
+
+    @Test
     fun `lagre og lese true`() {
         automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
