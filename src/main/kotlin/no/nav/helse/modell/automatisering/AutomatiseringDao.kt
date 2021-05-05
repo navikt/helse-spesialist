@@ -8,28 +8,29 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class AutomatiseringDao(val dataSource: DataSource) {
-    internal fun manuellSaksbehandling(problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID) =
-        lagre(automatisert = false, stikkprøve = false, vedtaksperiodeId, hendelseId, problems)
+    internal fun manuellSaksbehandling(problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID?) =
+        lagre(automatisert = false, stikkprøve = false, vedtaksperiodeId, hendelseId, problems, utbetalingId)
 
-    internal fun automatisert(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        lagre(automatisert = true, stikkprøve = false, vedtaksperiodeId, hendelseId)
+    internal fun automatisert(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID?) =
+        lagre(automatisert = true, stikkprøve = false, vedtaksperiodeId, hendelseId, utbetalingId = utbetalingId)
 
-    internal fun stikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        lagre(automatisert = false, stikkprøve = true, vedtaksperiodeId, hendelseId)
+    internal fun stikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID?) =
+        lagre(automatisert = false, stikkprøve = true, vedtaksperiodeId, hendelseId, utbetalingId = utbetalingId)
 
-    private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList()) {
+    private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList(), utbetalingId: UUID?) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run(
                     queryOf(
                         """
-                            INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve)
-                            VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?)
+                            INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
+                            VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
                         """,
                         vedtaksperiodeId,
                         hendelseId,
                         automatisert,
-                        stikkprøve
+                        stikkprøve,
+                        utbetalingId
                     ).asUpdate
                 )
 
@@ -52,7 +53,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             @Language("PostgreSQL")
             val query =
                 """
-                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id
+                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id, a.utbetaling_id utbetaling_id
                 FROM automatisering a
                          JOIN vedtak v ON a.vedtaksperiode_ref = v.id
                          JOIN hendelse h on h.id = a.hendelse_ref
@@ -74,7 +75,43 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                                 vedtaksperiodeRef,
                                 hendelseId
                             ).map { it.string("problem") }.asList
-                        )
+                        ),
+                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString)
+                    )
+                }.asSingle
+            )
+        }
+
+    fun hentAutomatisering(utbetalingId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                """
+                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id, a.utbetaling_id utbetaling_id
+                FROM automatisering a
+                         JOIN vedtak v ON a.vedtaksperiode_ref = v.id
+                         JOIN hendelse h on h.id = a.hendelse_ref
+                WHERE a.utbetaling_id = ?
+                """
+            session.run(
+                queryOf(
+                    query,
+                    utbetalingId,
+                ).map { row ->
+                    val vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
+                    val hendelseId = UUID.fromString(row.string("hendelse_id"))
+                    AutomatiseringDto(
+                        automatisert = row.boolean("automatisert"),
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        hendelseId = hendelseId,
+                        problemer = session.run(
+                            queryOf(
+                                "SELECT * FROM automatisering_problem WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?",
+                                vedtaksperiodeId,
+                                hendelseId
+                            ).map { it.string("problem") }.asList
+                        ),
+                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString)
                     )
                 }.asSingle
             )
@@ -109,5 +146,6 @@ data class AutomatiseringDto(
     val automatisert: Boolean,
     val vedtaksperiodeId: UUID,
     val hendelseId: UUID,
-    val problemer: List<String>
+    val problemer: List<String>,
+    val utbetalingId: UUID?
 )

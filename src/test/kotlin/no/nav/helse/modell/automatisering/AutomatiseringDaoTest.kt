@@ -20,7 +20,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre og lese false`() {
-        automatiseringDao.manuellSaksbehandling(listOf("Problem"), VEDTAKSPERIODE, HENDELSE_ID)
+        automatiseringDao.manuellSaksbehandling(listOf("Problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(false, automatiseringSvar.automatisert)
@@ -31,7 +31,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre og lese true`() {
-        automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID)
+        automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(true, automatiseringSvar.automatisert)
@@ -52,8 +52,8 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId = hendelseId2)
 
-        automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID)
-        automatiseringDao.automatisert(VEDTAKSPERIODE, hendelseId2)
+        automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        automatiseringDao.automatisert(VEDTAKSPERIODE, hendelseId2, UTBETALING_ID)
 
         val automatiseringSvar1 = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
         val automatiseringSvar2 = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, hendelseId2))
@@ -66,8 +66,8 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `to automatiseringer på samme vedtaksperiode og samme hendelseID kræsjer`() {
-        automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID)
-        assertThrows<PSQLException> { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID) }
+        automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        assertThrows<PSQLException> { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) }
 
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
@@ -84,7 +84,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `ikke stikkprøve hvis automatisert`() {
-        automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID)
+        automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         assertFalse(automatiseringDao.plukketUtTilStikkprøve(VEDTAKSPERIODE, HENDELSE_ID))
     }
 
@@ -95,7 +95,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `stikkprøve happy case`() {
-        automatiseringDao.stikkprøve(VEDTAKSPERIODE, HENDELSE_ID)
+        automatiseringDao.stikkprøve(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         assertTrue(automatiseringDao.plukketUtTilStikkprøve(VEDTAKSPERIODE, HENDELSE_ID))
     }
 }

@@ -140,8 +140,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun nyttAutomatiseringsinnslag(automatisert: Boolean) {
-        if (automatisert) automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID)
-        else automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID)
+        if (automatisert) automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        else automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
     }
 
     protected fun nyPerson(periodetype: Periodetype = FØRSTEGANGSBEHANDLING, inntektskilde: Inntektskilde = EN_ARBEIDSGIVER) {
