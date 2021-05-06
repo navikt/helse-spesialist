@@ -1,5 +1,6 @@
 package no.nav.helse.modell.automatisering
 
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -26,19 +27,18 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                             INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
                             VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
                         """,
-                        vedtaksperiodeId,
-                        hendelseId,
-                        automatisert,
-                        stikkprøve,
-                        utbetalingId
+                        vedtaksperiodeId, hendelseId, automatisert, stikkprøve, utbetalingId
                     ).asUpdate
                 )
 
                 problems.forEach { problem ->
                     transactionalSession.run(
                         queryOf(
-                            "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)",
-                            vedtaksperiodeId, hendelseId, problem
+                            """
+                                INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem, utbetaling_id)
+                                VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?)
+                                """,
+                            vedtaksperiodeId, hendelseId, problem, utbetalingId
                         ).asUpdate
                     )
                 }
@@ -46,79 +46,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
         }
     }
 
-    fun hentAutomatisering(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        sessionOf(dataSource).use { session ->
-            val vedtaksperiodeRef = finnVedtaksperiode(vedtaksperiodeId) ?: return null
-
-            @Language("PostgreSQL")
-            val query =
-                """
-                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id, a.utbetaling_id utbetaling_id
-                FROM automatisering a
-                         JOIN vedtak v ON a.vedtaksperiode_ref = v.id
-                         JOIN hendelse h on h.id = a.hendelse_ref
-                WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?
-                """
-            session.run(
-                queryOf(
-                    query,
-                    vedtaksperiodeRef,
-                    hendelseId
-                ).map { row ->
-                    AutomatiseringDto(
-                        automatisert = row.boolean("automatisert"),
-                        vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
-                        hendelseId = UUID.fromString(row.string("hendelse_id")),
-                        problemer = session.run(
-                            queryOf(
-                                "SELECT * FROM automatisering_problem WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?",
-                                vedtaksperiodeRef,
-                                hendelseId
-                            ).map { it.string("problem") }.asList
-                        ),
-                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString)
-                    )
-                }.asSingle
-            )
-        }
-
-    fun hentAutomatisering(utbetalingId: UUID) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                """
-                SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, v.id vedtaksperiode_ref, h.id hendelse_id, a.utbetaling_id utbetaling_id
-                FROM automatisering a
-                         JOIN vedtak v ON a.vedtaksperiode_ref = v.id
-                         JOIN hendelse h on h.id = a.hendelse_ref
-                WHERE a.utbetaling_id = ?
-                """
-            session.run(
-                queryOf(
-                    query,
-                    utbetalingId,
-                ).map { row ->
-                    val vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id"))
-                    val vedtaksperiodeRef = row.long("vedtaksperiode_ref")
-                    val hendelseId = UUID.fromString(row.string("hendelse_id"))
-                    AutomatiseringDto(
-                        automatisert = row.boolean("automatisert"),
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        hendelseId = hendelseId,
-                        problemer = session.run(
-                            queryOf(
-                                "SELECT * FROM automatisering_problem WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?",
-                                vedtaksperiodeRef,
-                                hendelseId
-                            ).map { it.string("problem") }.asList
-                        ),
-                        utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString)
-                    )
-                }.asSingle
-            )
-        }
-
-    fun plukketUtTilStikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
+    internal fun plukketUtTilStikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
@@ -133,6 +61,65 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             )
         } ?: false
 
+    internal fun plukketUtTilStikkprøve(utbetalingId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT a.stikkprøve FROM automatisering a WHERE utbetaling_id = ?"
+            session.run(queryOf(query, utbetalingId).map { it.boolean(1) }.asSingle)
+        } ?: false
+
+    internal fun hentAutomatisering(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
+        val vedtaksperiodeRef = finnVedtaksperiode(vedtaksperiodeId) ?: return@using null
+        val problemer = finnProblemer(vedtaksperiodeRef, hendelseId)
+
+        @Language("PostgreSQL")
+        val query = """
+            SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id, a.utbetaling_id utbetaling_id
+            FROM automatisering a
+                     JOIN vedtak v ON a.vedtaksperiode_ref = v.id
+                     JOIN hendelse h on h.id = a.hendelse_ref
+            WHERE vedtaksperiode_ref = ? AND hendelse_ref = ?
+            """
+        session.run(queryOf(query, vedtaksperiodeRef, hendelseId).map { row -> tilAutomatiseringDto(problemer, row) }.asSingle
+        )
+    }
+
+    internal fun hentAutomatisering(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
+        val problemer = finnProblemer(utbetalingId)
+        @Language("PostgreSQL")
+        val query = """
+            SELECT a.automatisert automatisert, v.vedtaksperiode_id vedtaksperiode_id, h.id hendelse_id, a.utbetaling_id utbetaling_id
+            FROM automatisering a
+                     JOIN vedtak v ON a.vedtaksperiode_ref = v.id
+                     JOIN hendelse h on h.id = a.hendelse_ref
+            WHERE a.utbetaling_id = ?
+            """
+        session.run(queryOf(query, utbetalingId).map { row -> tilAutomatiseringDto(problemer, row) }.asSingle
+        )
+    }
+
+    private fun finnProblemer(vedtaksperiodeRef: Long, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT * FROM automatisering_problem WHERE hendelse_ref = ? AND vedtaksperiode_ref = ?"
+
+        session.run(
+            queryOf(query, hendelseId, vedtaksperiodeRef).map {
+                it.string("problem")
+            }.asList
+        )
+    }
+
+    private fun finnProblemer(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT * FROM automatisering_problem WHERE utbetaling_id = ?"
+
+        session.run(
+            queryOf(query, utbetalingId).map {
+                it.string("problem")
+            }.asList
+        )
+    }
+
     private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
         session.run(
             queryOf(
@@ -141,6 +128,15 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             ).map { it.long(1) }.asSingle
         )
     }
+
+    private fun tilAutomatiseringDto(problemer: List<String>, row: Row) =
+        AutomatiseringDto(
+            automatisert = row.boolean("automatisert"),
+            vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+            hendelseId = UUID.fromString(row.string("hendelse_id")),
+            problemer = problemer,
+            utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString)
+        )
 }
 
 data class AutomatiseringDto(
