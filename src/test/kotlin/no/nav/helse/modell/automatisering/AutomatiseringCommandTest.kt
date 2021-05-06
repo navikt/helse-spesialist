@@ -15,6 +15,7 @@ import kotlin.test.assertNotNull
 internal class AutomatiseringCommandTest {
     private companion object {
         private val vedtaksperiodeId = UUID.randomUUID()
+        private val utbetalingId = UUID.randomUUID()
         private const val fødselsnummer = "12345678910"
         private val hendelseId = UUID.randomUUID()
     }
@@ -24,6 +25,7 @@ internal class AutomatiseringCommandTest {
         AutomatiseringCommand(
             fødselsnummer,
             vedtaksperiodeId,
+            utbetalingId,
             hendelseId,
             automatisering,
             """{ "@event_name": "behov" }""",
@@ -41,7 +43,7 @@ internal class AutomatiseringCommandTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.utfør(any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any())
         }
     }
 
@@ -49,9 +51,9 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), captureLambda())
+            automatisering.utfør(any(), any(), any(), any(),captureLambda())
         } answers {
-            arg<() -> Unit>(3).invoke()
+            arg<() -> Unit>(4).invoke()
         }
 
         assertTrue(command.execute(context))

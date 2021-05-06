@@ -10,6 +10,7 @@ import java.util.*
 internal class AutomatiseringCommand(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val utbetalingId: UUID,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
     private val godkjenningsbehovJson: String,
@@ -21,7 +22,7 @@ internal class AutomatiseringCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId) {
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer)
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")

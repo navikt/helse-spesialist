@@ -27,19 +27,19 @@ internal class Automatisering(
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
     }
 
-    internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, onAutomatiserbar: () -> Unit) {
+    internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID, onAutomatiserbar: () -> Unit) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId)
 
         when {
             problemer.isNotEmpty() ->
-                automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId)
+                automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             plukkTilManuell() -> {
-                automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId)
+                automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
                 logger.info("Automatisk godkjenning av {} avbrutt, sendes til manuell behandling", keyValue("vedtaksperiodeId", vedtaksperiodeId))
             }
             else -> {
                 onAutomatiserbar()
-                automatiseringDao.automatisert(vedtaksperiodeId, hendelseId)
+                automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
             }
         }
     }
