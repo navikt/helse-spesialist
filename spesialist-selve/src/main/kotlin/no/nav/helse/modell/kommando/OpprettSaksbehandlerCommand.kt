@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.LoggerFactory
 import java.util.*
 

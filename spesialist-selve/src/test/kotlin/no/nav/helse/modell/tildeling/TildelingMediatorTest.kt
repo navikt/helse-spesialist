@@ -6,7 +6,7 @@ import io.mockk.mockk
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingApiDto
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Test

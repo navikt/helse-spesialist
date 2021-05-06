@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.saksbehandler.SaksbehandlerDao
 import java.time.LocalDateTime
 import java.util.*
 

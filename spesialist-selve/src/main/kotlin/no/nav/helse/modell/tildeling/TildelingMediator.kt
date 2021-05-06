@@ -3,7 +3,7 @@ package no.nav.helse.modell.tildeling
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
+import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import java.util.*
 

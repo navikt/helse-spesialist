@@ -1,4 +1,4 @@
-package no.nav.helse.modell.saksbehandler
+package no.nav.helse.saksbehandler
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -6,8 +6,8 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-internal class SaksbehandlerDao(private val dataSource: DataSource) {
-    internal fun opprettSaksbehandler(
+class SaksbehandlerDao(private val dataSource: DataSource) {
+    fun opprettSaksbehandler(
         oid: UUID,
         navn: String,
         epost: String
@@ -28,7 +28,7 @@ internal class SaksbehandlerDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun finnSaksbehandler(oid: UUID) = sessionOf(dataSource).use {
+    fun finnSaksbehandler(oid: UUID) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """ SELECT * FROM saksbehandler WHERE oid = ? LIMIT 1"""
         it.run(queryOf(query, oid).map { row ->
@@ -40,7 +40,7 @@ internal class SaksbehandlerDao(private val dataSource: DataSource) {
         }.asSingle)
     }
 
-    internal fun finnSaksbehandler(epost: String) = sessionOf(dataSource).use {
+    fun finnSaksbehandler(epost: String) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """ SELECT * FROM saksbehandler WHERE epost = ? LIMIT 1"""
         it.run(queryOf(query, epost).map { row ->
@@ -52,7 +52,7 @@ internal class SaksbehandlerDao(private val dataSource: DataSource) {
         }.asSingle)
     }
 
-    internal fun invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) =
+    fun invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) =
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val finnOppgaveIder = """
@@ -75,11 +75,5 @@ internal class SaksbehandlerDao(private val dataSource: DataSource) {
                 ).map { it.long("id") }.asList
             ).forEach { id -> it.run(queryOf(invaliderOppgave, mapOf("id" to id)).asUpdate) }
         }
-
 }
 
-data class SaksbehandlerDto(
-    val oid: UUID,
-    val navn: String,
-    val epost: String
-)
