@@ -18,7 +18,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -28,6 +27,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.tildeling.TildelingDao
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

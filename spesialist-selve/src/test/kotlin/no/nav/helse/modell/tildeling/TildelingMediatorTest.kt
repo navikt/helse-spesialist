@@ -7,7 +7,8 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
-import no.nav.helse.modell.vedtak.TildelingDto
+import no.nav.helse.tildeling.TildelingApiDto
+import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
@@ -28,7 +29,7 @@ internal class TildelingMediatorTest {
 
     @Test
     fun `stopper tildeling av allerede tildelt sak`() {
-        val eksisterendeTildeling = TildelingDto(epost = "epost@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "annen saksbehandler")
+        val eksisterendeTildeling = TildelingApiDto(epost = "epost@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "annen saksbehandler")
         every { tildelingDao.tildelingForOppgave(any()) } returns eksisterendeTildeling
 
         val feil = assertThrows<ModellFeil> {

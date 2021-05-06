@@ -11,9 +11,9 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

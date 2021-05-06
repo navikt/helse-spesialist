@@ -6,12 +6,9 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.modell.vedtak.EnhetDto
-import no.nav.helse.modell.vedtak.OppgaveDto
-import no.nav.helse.modell.vedtak.PersoninfoDto
-import no.nav.helse.modell.vedtak.TildelingDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.tildeling.TildelingApiDto
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
@@ -275,7 +272,7 @@ internal class OppgaveDao(private val dataSource: DataSource) {
         inntektskilde = it.stringOrNull("inntektskilde")?.let(Inntektskilde::valueOf),
         boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn")),
         tildeling = it.stringOrNull("epost")?.let { epost ->
-            TildelingDto(
+            TildelingApiDto(
                 navn = it.string("saksbehandler_navn"),
                 epost = epost,
                 oid = UUID.fromString(it.string("oid")),

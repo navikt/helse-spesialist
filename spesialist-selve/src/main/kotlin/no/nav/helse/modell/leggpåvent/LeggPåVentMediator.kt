@@ -3,7 +3,7 @@ package no.nav.helse.modell.leggpåvent
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErIkkeTildelt
-import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.tildeling.TildelingDao
 
 internal class LeggPåVentMediator(
     private val tildelingDao: TildelingDao,

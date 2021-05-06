@@ -5,7 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.mediator.meldinger.Kjønn
-import no.nav.helse.modell.vedtak.EnhetDto
+import no.nav.helse.modell.oppgave.EnhetDto
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate

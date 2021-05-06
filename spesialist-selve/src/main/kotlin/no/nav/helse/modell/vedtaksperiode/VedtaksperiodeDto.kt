@@ -1,6 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.modell.vedtak.PersoninfoDto
+import no.nav.helse.modell.oppgave.PersoninfoDto
 
 data class VedtaksperiodeDto(
     val fødselsnummer: String,

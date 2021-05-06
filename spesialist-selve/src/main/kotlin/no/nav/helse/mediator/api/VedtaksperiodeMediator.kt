@@ -13,13 +13,13 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
+import no.nav.helse.tildeling.TildelingDao
 import java.util.*
 
 internal class VedtaksperiodeMediator(

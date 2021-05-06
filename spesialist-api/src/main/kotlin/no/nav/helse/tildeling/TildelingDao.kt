@@ -1,38 +1,37 @@
-package no.nav.helse.modell.tildeling
+package no.nav.helse.tildeling
 
 import kotliquery.*
-import no.nav.helse.modell.vedtak.TildelingDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
-internal class TildelingDao(private val dataSource: DataSource) {
-    internal fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
+class TildelingDao(private val dataSource: DataSource) {
+    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
         sessionOf(dataSource).use {
             it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil)
         }
     }
 
-    internal fun slettTildeling(oppgaveId: Long) {
+    fun slettTildeling(oppgaveId: Long) {
         sessionOf(dataSource).use { session ->
             session.slettOppgavetildeling(oppgaveId)
         }
     }
 
-    internal fun fjernPåVent(oppgaveId: Long) {
+    fun fjernPåVent(oppgaveId: Long) {
         sessionOf(dataSource).use { session ->
             session.fjernPåVent(oppgaveId)
         }
     }
 
-    internal fun tildelingForPerson(fødselsnummer: String) = sessionOf(dataSource)
+    fun tildelingForPerson(fødselsnummer: String) = sessionOf(dataSource)
         .use { it.tildelingForPerson(fødselsnummer) }
 
-    internal fun tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) =
+    fun tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) =
         using(sessionOf(dataSource)) { it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil) }
 
-    internal fun leggOppgavePåVent(oppgaveId: Long) {
+    fun leggOppgavePåVent(oppgaveId: Long) {
         sessionOf(dataSource).use {
             it.leggOppgavePåVent(oppgaveId)
         }
@@ -67,7 +66,7 @@ internal class TildelingDao(private val dataSource: DataSource) {
         run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
     }
 
-    private fun Session.tildelingForPerson(fødselsnummer: String): TildelingDto? {
+    private fun Session.tildelingForPerson(fødselsnummer: String): TildelingApiDto? {
         @Language("PostgreSQL")
         val query = """
             SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
@@ -82,7 +81,7 @@ internal class TildelingDao(private val dataSource: DataSource) {
         return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map(::tildelingDto).asSingle)
     }
 
-    private fun tildelingDto(it: Row) = TildelingDto(
+    private fun tildelingDto(it: Row) = TildelingApiDto(
         epost = it.string("epost"),
         påVent = it.boolean("på_vent"),
         oid = UUID.fromString(it.string("oid")),
@@ -101,7 +100,7 @@ internal class TildelingDao(private val dataSource: DataSource) {
         )
     }
 
-    fun tildelingForOppgave(oppgaveId: Long): TildelingDto? = using(sessionOf(dataSource)) {
+    fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? = using(sessionOf(dataSource)) {
         @Language("PostgreSQL")
         val query = """
             SELECT s.oid, s.epost, s.navn, t.på_vent FROM tildeling t

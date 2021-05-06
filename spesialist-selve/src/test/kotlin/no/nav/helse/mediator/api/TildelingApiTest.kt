@@ -13,8 +13,8 @@ import no.nav.helse.modell.feilhåndtering.FeilDto
 import no.nav.helse.modell.feilhåndtering.ModellFeil
 import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.tildeling.TildelingMediator
-import no.nav.helse.modell.vedtak.TildelingDto
 import no.nav.helse.objectMapper
+import no.nav.helse.tildeling.TildelingApiDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -90,7 +90,7 @@ internal class TildelingApiTest : AbstractApiTest() {
 
     @Test
     fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
-        val tildeltFeil = OppgaveErAlleredeTildelt(TildelingDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
+        val tildeltFeil = OppgaveErAlleredeTildelt(TildelingApiDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
         every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws ModellFeil(
             tildeltFeil
         )

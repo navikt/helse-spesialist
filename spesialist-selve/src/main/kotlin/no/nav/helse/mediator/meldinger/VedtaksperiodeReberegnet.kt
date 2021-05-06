@@ -8,11 +8,11 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.util.*
 

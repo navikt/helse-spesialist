@@ -15,8 +15,8 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

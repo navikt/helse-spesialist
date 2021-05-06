@@ -6,9 +6,9 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.TildelingDao
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime

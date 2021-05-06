@@ -1,9 +1,10 @@
-package no.nav.helse.modell.vedtak
+package no.nav.helse.modell.oppgave
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.tildeling.TildelingApiDto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -32,16 +33,9 @@ data class OppgaveDto (
     val type: Periodetype?,
     val inntektskilde: Inntektskilde?,
     var boenhet: EnhetDto,
-    val tildeling: TildelingDto?
+    val tildeling: TildelingApiDto?
 )
 
 data class OppgavereferanseDto(
     val oppgavereferanse: Long
-)
-
-data class TildelingDto (
-    val navn: String,
-    val epost: String,
-    val oid: UUID,
-    val påVent: Boolean
 )

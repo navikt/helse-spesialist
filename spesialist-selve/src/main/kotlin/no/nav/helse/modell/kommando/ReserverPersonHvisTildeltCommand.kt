@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
+import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

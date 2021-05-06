@@ -3,7 +3,7 @@ package no.nav.helse.modell
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
 import no.nav.helse.mediator.meldinger.Kjønn
-import no.nav.helse.modell.vedtak.PersoninfoDto
+import no.nav.helse.modell.oppgave.PersoninfoDto
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde

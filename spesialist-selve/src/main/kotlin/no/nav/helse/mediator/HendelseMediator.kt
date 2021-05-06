@@ -20,7 +20,6 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDao
 import no.nav.helse.modell.tildeling.ReservasjonDao
-import no.nav.helse.modell.tildeling.TildelingDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
@@ -28,6 +27,7 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime

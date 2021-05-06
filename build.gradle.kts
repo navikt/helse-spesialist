@@ -46,8 +46,6 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-
     tasks {
         withType<Test> {
             useJUnitPlatform()
@@ -100,6 +98,7 @@ subprojects {
 tasks {
     named<Jar>("jar") { enabled = false }
 }
+
 gradle.buildFinished {
     project.buildDir.deleteRecursively()
 }

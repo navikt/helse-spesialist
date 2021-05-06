@@ -11,7 +11,7 @@ import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.vedtak.OppgavereferanseDto
+import no.nav.helse.modell.oppgave.OppgavereferanseDto
 import java.util.*
 
 internal fun Route.oppgaveApi(
