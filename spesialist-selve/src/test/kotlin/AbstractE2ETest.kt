@@ -57,6 +57,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
         internal val UTBETALING_ID = UUID.randomUUID()
+        internal val UTBETALING_ID2 = UUID.randomUUID()
 
     }
 
