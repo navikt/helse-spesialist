@@ -20,7 +20,7 @@ data class PersonForSpeilDto(
     val aktørId: String,
     val fødselsnummer: String,
     val dødsdato: LocalDate?,
-    val personinfoApi: PersoninfoApiDto,
+    val personinfo: PersoninfoApiDto,
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto,

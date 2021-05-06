@@ -13,7 +13,7 @@ data class OppgaveDto (
     val oppgavetype: String,
     val opprettet: LocalDateTime,
     val vedtaksperiodeId: UUID,
-    val personinfoApi: PersoninfoApiDto,
+    val personinfo: PersoninfoApiDto,
     val fødselsnummer: String,
     val aktørId: String,
     val antallVarsler: Int,

@@ -5,7 +5,7 @@ import no.nav.helse.person.PersoninfoApiDto
 data class VedtaksperiodeDto(
     val fødselsnummer: String,
     val aktørId: String,
-    val personinfoApi: PersoninfoApiDto,
+    val personinfo: PersoninfoApiDto,
     val arbeidsgiverRef: Long,
     val speilSnapshotRef: Int,
     val infotrygdutbetalingerRef: Int?

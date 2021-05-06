@@ -273,7 +273,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         oppgavetype = it.string("oppgavetype"),
         opprettet = it.localDateTime("opprettet"),
         vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-        personinfoApi = PersoninfoApiDto(
+        personinfo = PersoninfoApiDto(
             it.string("fornavn"),
             it.stringOrNull("mellomnavn"),
             it.string("etternavn"),

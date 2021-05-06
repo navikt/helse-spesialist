@@ -257,7 +257,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         val vedtak = VedtaksperiodeDto(
             fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
             aktørId = row.long("aktor_id").toString(),
-            personinfoApi = PersoninfoApiDto(
+            personinfo = PersoninfoApiDto(
                 fornavn = row.string("fornavn"),
                 mellomnavn = row.stringOrNull("mellomnavn"),
                 etternavn = row.string("etternavn"),
