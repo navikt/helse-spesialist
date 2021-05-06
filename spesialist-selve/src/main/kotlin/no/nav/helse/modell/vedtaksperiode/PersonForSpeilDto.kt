@@ -3,12 +3,12 @@ package no.nav.helse.modell.vedtaksperiode
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import no.nav.helse.modell.oppgave.EnhetDto
-import no.nav.helse.modell.oppgave.PersoninfoDto
 import no.nav.helse.modell.overstyring.Dagtype
 import no.nav.helse.modell.vedtak.snapshot.UtbetalingshistorikkElementDto
 import no.nav.helse.objectMapper
+import no.nav.helse.person.PersoninfoApiDto
 import no.nav.helse.tildeling.TildelingApiDto
+import no.nav.helse.vedtaksperiode.EnhetDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,7 +20,7 @@ data class PersonForSpeilDto(
     val aktørId: String,
     val fødselsnummer: String,
     val dødsdato: LocalDate?,
-    val personinfo: PersoninfoDto,
+    val personinfoApi: PersoninfoApiDto,
     val arbeidsgivere: List<ArbeidsgiverForSpeilDto>,
     val infotrygdutbetalinger: JsonNode?,
     val enhet: EnhetDto,

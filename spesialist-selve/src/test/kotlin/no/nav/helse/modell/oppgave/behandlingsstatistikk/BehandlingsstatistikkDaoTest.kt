@@ -1,11 +1,11 @@
 package no.nav.helse.modell.oppgave.behandlingsstatistikk
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -85,7 +85,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `tar ikke med innslag som er eldre enn dato som sendes inn for fullførte behandlinger`() {
         nyPersonMedAutomatiskVedtak()
-        opprettOppgave(vedtakId = vedtakId)
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
         val fremtidigDato = NOW.plusDays(1)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(fremtidigDato)
         assertEquals(0, dto.fullførteBehandlinger.totalt)

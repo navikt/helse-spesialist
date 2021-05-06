@@ -4,12 +4,12 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.OppgaveMediator
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.Oppgavestatus
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.vedtak.VedtakDto
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -36,7 +36,7 @@ internal class OppgaveTest {
     private val vedtakDao = mockk<VedtakDao>()
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
 
     private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
 
@@ -49,7 +49,7 @@ internal class OppgaveTest {
     fun `oppretter ny oppgave`() {
         every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKREF, UTBETALING_ID) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKSPERIODE_ID, UTBETALING_ID) }
     }
 
     @Test

@@ -3,9 +3,12 @@ package no.nav.helse.modell.oppgave
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.*

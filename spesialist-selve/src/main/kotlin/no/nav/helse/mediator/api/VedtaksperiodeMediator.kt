@@ -9,7 +9,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -19,6 +18,7 @@ import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.tildeling.TildelingDao
 import java.util.*
 
@@ -158,7 +158,7 @@ internal class VedtaksperiodeMediator(
                 aktørId = speilSnapshot.aktørId,
                 fødselsnummer = speilSnapshot.fødselsnummer,
                 dødsdato = speilSnapshot.dødsdato,
-                personinfo = vedtak.personinfo,
+                personinfoApi = vedtak.personinfoApi,
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,

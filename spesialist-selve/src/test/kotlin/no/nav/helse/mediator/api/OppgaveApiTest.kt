@@ -15,8 +15,8 @@ import io.ktor.server.netty.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.objectMapper
+import no.nav.helse.oppgave.OppgaveMediator
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

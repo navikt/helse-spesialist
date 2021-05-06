@@ -3,7 +3,7 @@ package no.nav.helse.modell.tildeling
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Kjønn
+import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*

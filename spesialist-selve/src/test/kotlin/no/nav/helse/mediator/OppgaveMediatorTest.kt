@@ -7,12 +7,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.Oppgavestatus
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.vedtak.VedtakDto
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -45,7 +46,7 @@ internal class OppgaveMediatorTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val mediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
+    private val mediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
     private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
     private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
 
@@ -70,9 +71,9 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
         mediator.opprett(søknadsoppgave)
         mediator.opprett(stikkprøveoppgave)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, VEDTAKREF, UTBETALING_ID) }
-        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_STIKKPRØVE, VEDTAKREF2, UTBETALING_ID_2) }
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, VEDTAKSPERIODE_ID, UTBETALING_ID) }
+        verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_STIKKPRØVE, VEDTAKSPERIODE_ID_2, UTBETALING_ID_2) }
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertOppgaveevent(1, "oppgave_opprettet")
@@ -84,7 +85,7 @@ internal class OppgaveMediatorTest {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns (oid to gyldigTil)
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, gyldigTil) }
     }
 
@@ -96,7 +97,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
         mediator.ferdigstill(oppgave, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(1, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_oppdatert", Oppgavestatus.Ferdigstilt) {
             assertEquals(OPPGAVE_ID, it.path("oppgaveId").longValue())
@@ -112,7 +113,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
         mediator.opprett(søknadsoppgave)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
     }
 
@@ -125,10 +126,10 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
         mediator.opprett(søknadsoppgave)
         mediator.opprett(stikkprøveoppgave)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(2, testRapid.inspektør.size)
         testRapid.reset()
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(0, testRapid.inspektør.size)
     }
 
@@ -141,7 +142,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finn(1L) } returns oppgave1
         every { oppgaveDao.finn(2L) } returns oppgave2
         mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)
-        mediator.lagreOgTildelOppgaver(TESTHENDELSE, testRapid, COMMAND_CONTEXT_ID)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.finnAktive(VEDTAKSPERIODE_ID) }
         verify(exactly = 2) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
     }

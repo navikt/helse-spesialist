@@ -8,8 +8,8 @@ import io.mockk.verify
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
-import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

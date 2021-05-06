@@ -1,11 +1,11 @@
 package no.nav.helse.modell.vedtaksperiode
 
-import no.nav.helse.modell.oppgave.PersoninfoDto
+import no.nav.helse.person.PersoninfoApiDto
 
 data class VedtaksperiodeDto(
     val fødselsnummer: String,
     val aktørId: String,
-    val personinfo: PersoninfoDto,
+    val personinfoApi: PersoninfoApiDto,
     val arbeidsgiverRef: Long,
     val speilSnapshotRef: Int,
     val infotrygdutbetalingerRef: Int?

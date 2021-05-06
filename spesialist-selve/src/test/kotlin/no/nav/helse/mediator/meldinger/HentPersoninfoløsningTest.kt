@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 

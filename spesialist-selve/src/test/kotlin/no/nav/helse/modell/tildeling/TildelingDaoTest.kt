@@ -4,7 +4,7 @@ import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -60,7 +60,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         nyPerson()
         tildelTilSaksbehandler()
         opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID())
-        opprettOppgave(vedtakId = vedtakId)
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
         tildelTilSaksbehandler(
             oppgaveId = oppgaveId,
             oid = UUID.randomUUID(),
@@ -78,8 +78,8 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         val saksbehandlerEpost = "${UUID.randomUUID()}@nav.no"
         opprettPerson()
         opprettArbeidsgiver()
-        val vedtakId = opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave(vedtakId = vedtakId)
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId)
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Sara Saksbehandler", saksbehandlerEpost)
         tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusDays(1))
         assertNull(tildelingDao.tildelingForOppgave(oppgaveId))

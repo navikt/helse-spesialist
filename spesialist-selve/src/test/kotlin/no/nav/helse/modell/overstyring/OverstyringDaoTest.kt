@@ -1,7 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
-import no.nav.helse.mediator.meldinger.Kjønn
+import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*

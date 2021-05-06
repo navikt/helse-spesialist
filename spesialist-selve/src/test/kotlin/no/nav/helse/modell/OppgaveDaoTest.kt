@@ -6,17 +6,19 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgavestatus
-import no.nav.helse.modell.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.modell.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype.*
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde as InntektskildeFraSpleis
+import no.nav.helse.modell.vedtaksperiode.Periodetype as PeriodetypeFraSpleis
+import no.nav.helse.vedtaksperiode.Inntektskilde as InntektskildeForApi
+import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
 
 class OppgaveDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -32,6 +34,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre oppgave`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
@@ -40,19 +45,25 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             OPPGAVESTATUS,
             null,
             null,
-            null,
+            vedtakId,
             CONTEXT_ID
         )
     }
 
     @Test
     fun `finner contextId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(CONTEXT_ID, oppgaveDao.finnContextId(oppgaveId))
     }
 
     @Test
     fun `finner hendelseId`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(HENDELSE_ID, oppgaveDao.finnHendelseId(oppgaveId))
     }
@@ -77,7 +88,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(vedtakId = vedtakId, oppgavetype = "RISK_QA")
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = "RISK_QA")
 
         val oppgaver = oppgaveDao.finnOppgaver(true)
         assertTrue(oppgaver.isNotEmpty())
@@ -92,22 +103,25 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(vedtakId = vedtakId)
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
 
-        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = OVERGANG_FRA_IT)
-        opprettOppgave(vedtakId = vedtakId, oppgavetype = "RISK_QA")
+        val v2 = UUID.randomUUID()
+        val v3 = UUID.randomUUID()
+        val v4 = UUID.randomUUID()
+        opprettVedtaksperiode(vedtaksperiodeId = v2, periodetype = PeriodetypeFraSpleis.OVERGANG_FRA_IT)
+        opprettOppgave(vedtaksperiodeId = v2, oppgavetype = "RISK_QA")
 
-        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = INFOTRYGDFORLENGELSE)
-        opprettOppgave(vedtakId = vedtakId)
+        opprettVedtaksperiode(vedtaksperiodeId = v3, periodetype = PeriodetypeFraSpleis.INFOTRYGDFORLENGELSE)
+        opprettOppgave(vedtaksperiodeId = v3)
 
-        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID(), periodetype = FORLENGELSE)
-        opprettOppgave(vedtakId = vedtakId)
+        opprettVedtaksperiode(vedtaksperiodeId = v4, periodetype = PeriodetypeFraSpleis.FORLENGELSE)
+        opprettOppgave(vedtaksperiodeId = v4)
 
         val oppgaver = oppgaveDao.finnOppgaver(true)
         assertEquals("RISK_QA", oppgaver[0].oppgavetype)
-        assertEquals(INFOTRYGDFORLENGELSE, oppgaver[1].type)
-        assertEquals(FORLENGELSE, oppgaver[2].type)
-        assertEquals(FØRSTEGANGSBEHANDLING, oppgaver[3].type)
+        assertEquals(PeriodetypeForApi.INFOTRYGDFORLENGELSE, oppgaver[1].type)
+        assertEquals(PeriodetypeForApi.FORLENGELSE, oppgaver[2].type)
+        assertEquals(PeriodetypeForApi.FØRSTEGANGSBEHANDLING, oppgaver[3].type)
     }
 
     @Test
@@ -122,7 +136,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(periodetype = PeriodetypeFraSpleis.FØRSTEGANGSBEHANDLING, inntektskilde = InntektskildeFraSpleis.EN_ARBEIDSGIVER)
         val oppgaveId = insertOppgave(utbetalingId = utbetalingId, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = utbetalingId), oppgave)
@@ -132,7 +146,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `kan hente oppgave selv om utbetalingId mangler`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(periodetype = PeriodetypeFraSpleis.FØRSTEGANGSBEHANDLING, inntektskilde = InntektskildeFraSpleis.EN_ARBEIDSGIVER)
         val oppgaveId = insertOppgave(utbetalingId = null, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null), oppgave)
@@ -160,6 +174,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `oppdatere oppgave`() {
         val nyStatus = Ferdigstilt
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID)
         assertEquals(1, oppgave().size)
@@ -169,14 +186,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             nyStatus,
             SAKSBEHANDLEREPOST,
             SAKSBEHANDLER_OID,
-            null,
+            vedtakId,
             CONTEXT_ID
         )
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave`() {
-        opprettOppgave()
+        nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler, null, null)
         assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
 
@@ -186,14 +203,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        val vedtakId = opprettVedtaksperiode()
-
-        opprettOppgave(vedtakId = vedtakId)
+        nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
 
-        opprettOppgave(vedtakId = vedtakId)
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
 
         assertTrue(oppgaveDao.harAktivOppgave(VEDTAKSPERIODE))
@@ -201,11 +214,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        val vedtakId = opprettVedtaksperiode()
-
-        opprettOppgave(vedtakId = vedtakId)
+        nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
 
         assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
@@ -213,11 +222,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `sjekker at det fins ferdigstilt oppgave`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        val vedtakId = opprettVedtaksperiode()
-
-        opprettOppgave(vedtakId = vedtakId)
+        nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt)
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
@@ -227,16 +232,17 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner alle oppgaver knyttet til vedtaksperiodeId`() {
         nyPerson()
-        opprettOppgave(vedtakId = vedtakId)
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
         val oppgaver = oppgaveDao.finnAktive(VEDTAKSPERIODE)
         assertEquals(2, oppgaver.size)
     }
 
     @Test
     fun `finner ikke oppgaver knyttet til andre vedtaksperiodeider`() {
+        val v2 = UUID.randomUUID()
         nyPerson()
-        opprettVedtaksperiode(UUID.randomUUID())
-        opprettOppgave(vedtakId = vedtakId)
+        opprettVedtaksperiode(v2)
+        opprettOppgave(vedtaksperiodeId = v2)
         assertEquals(1, oppgaveDao.finnAktive(VEDTAKSPERIODE).size)
     }
 
@@ -249,10 +255,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `en oppgave har riktig oppgavetype og inntektskilde`(){
-        nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
+        nyPerson(inntektskilde = InntektskildeFraSpleis.FLERE_ARBEIDSGIVERE)
         val oppgaver = oppgaveDao.finnOppgaver(true)
-        assertEquals(FØRSTEGANGSBEHANDLING, oppgaver.first().type)
-        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
+        assertEquals(PeriodetypeForApi.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
+        assertEquals(InntektskildeForApi.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
     }
 
     private fun oppgave() =

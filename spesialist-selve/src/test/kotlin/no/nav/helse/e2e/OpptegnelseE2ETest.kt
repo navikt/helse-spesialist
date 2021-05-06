@@ -9,8 +9,8 @@ import no.nav.helse.mediator.OpptegnelseMediator
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.opptegnelseApi
-import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.abonnement.OpptegnelseDto
+import no.nav.helse.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -3,8 +3,8 @@ package no.nav.helse.modell.kommando
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

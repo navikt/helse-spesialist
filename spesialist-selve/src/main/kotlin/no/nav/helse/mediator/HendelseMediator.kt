@@ -15,17 +15,18 @@ import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
@@ -126,7 +127,7 @@ internal class HendelseMediator(
         )
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
-        val internOppgaveMediator = OppgaveMediator(oppgaveDao, vedtakDao, tildelingDao, reservasjonDao)
+        val internOppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
         internOppgaveMediator.reserverOppgave(oid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
@@ -417,7 +418,7 @@ internal class HendelseMediator(
                 if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
                 else log.info("${hendelse::class.simpleName} er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
-                oppgaveMediator.lagreOgTildelOppgaver(hendelse, messageContext, contextId)
+                oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
             } catch (err: Exception) {
                 log.warn(
                     "Feil ved kjøring av ${hendelse::class.simpleName}: contextId={}, message={}",

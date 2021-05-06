@@ -1,11 +1,10 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.oppgave
 
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.util.*
 
-internal class Oppgave private constructor(
+class Oppgave private constructor(
     private val type: String,
     private var status: Oppgavestatus,
     private val vedtaksperiodeId: UUID,
@@ -26,14 +25,14 @@ internal class Oppgave private constructor(
         this.ferdigstiltAvOid = ferdigstiltAvOid
     }
 
-    internal companion object {
+    companion object {
         fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("SØKNAD", vedtaksperiodeId, utbetalingId)
         fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId, utbetalingId)
         fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("RISK_QA", vedtaksperiodeId, utbetalingId)
         private fun oppgave(type: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
 
-        internal fun lagMelding(
+        fun lagMelding(
             oppgaveId: Long,
             eventName: String,
             oppgaveDao: OppgaveDao
@@ -83,33 +82,33 @@ internal class Oppgave private constructor(
         }
     }
 
-    internal fun ferdigstill(ident: String, oid: UUID) {
+    fun ferdigstill(ident: String, oid: UUID) {
         status = Oppgavestatus.Ferdigstilt
         ferdigstiltAvIdent = ident
         ferdigstiltAvOid = oid
     }
 
-    internal fun ferdigstill() {
+    fun ferdigstill() {
         status = Oppgavestatus.Ferdigstilt
     }
 
-    internal fun avventerSystem(ident: String, oid: UUID) {
+    fun avventerSystem(ident: String, oid: UUID) {
         status = Oppgavestatus.AvventerSystem
         ferdigstiltAvIdent = ident
         ferdigstiltAvOid = oid
     }
 
-    internal fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
+    fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
         id?.also {
             oppgaveMediator.oppdater(it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
         } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId!!, type).also { id = it } ?: return
     }
 
-    internal fun avbryt() {
+    fun avbryt() {
         status = Oppgavestatus.Invalidert
     }
 
-    internal fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
+    fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
         oppgaveMediator.tildel(requireNotNull(id), saksbehandleroid, gyldigTil)
     }
 

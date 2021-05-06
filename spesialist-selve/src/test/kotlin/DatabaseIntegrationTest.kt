@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.mediator.meldinger.Kjønn
 import no.nav.helse.modell.*
 import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -14,18 +13,19 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.person.Kjønn
+import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.TestInstance
@@ -148,13 +148,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
-        opprettOppgave(vedtakId = vedtakId)
+        opprettOppgave()
     }
 
     protected fun nyVedtaksperiode(periodetype: Periodetype = FØRSTEGANGSBEHANDLING) {
         val vedtaksperiodeId = UUID.randomUUID()
-        val id = opprettVedtaksperiode(vedtaksperiodeId, periodetype = periodetype)
-        opprettOppgave(vedtakId = id)
+        opprettVedtaksperiode(vedtaksperiodeId, periodetype = periodetype)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId)
     }
 
     protected fun opprettVedtakstype(
@@ -217,14 +217,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
-        vedtakId: Long? = null,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         oppgavetype: String = OPPGAVETYPE,
         utbetalingId: UUID = UTBETALING_ID
     ) {
         oppgaveId = oppgaveDao.opprettOppgave(
             contextId,
             oppgavetype,
-            vedtakId,
+            vedtaksperiodeId,
             utbetalingId
         )
     }

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
-import no.nav.helse.mediator.meldinger.Kjønn
-import no.nav.helse.modell.oppgave.EnhetDto
 import no.nav.helse.objectMapper
+import no.nav.helse.person.Kjønn
+import no.nav.helse.vedtaksperiode.EnhetDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import javax.sql.DataSource
@@ -239,7 +239,8 @@ internal class PersonDao(private val dataSource: DataSource) {
                     .map { row -> EnhetDto(
                         row.string("id"),
                         row.string("navn")
-                    )}
+                    )
+                    }
                     .asSingle
             )
         )

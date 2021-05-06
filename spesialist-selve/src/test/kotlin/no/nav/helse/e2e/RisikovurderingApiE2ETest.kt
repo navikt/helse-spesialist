@@ -7,10 +7,10 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.mockk.every
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.oppgaveApi
+import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -52,7 +52,6 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
                 oppgaveApi(
                     OppgaveMediator(
                         oppgaveDao,
-                        vedtakDao,
                         tildelingDao,
                         reservasjonDao
                     ), riskQaGruppe

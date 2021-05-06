@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.OppgaveMediator
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.oppgave.OppgaveMediator
 import java.util.*
 
 internal class AvbrytCommand(

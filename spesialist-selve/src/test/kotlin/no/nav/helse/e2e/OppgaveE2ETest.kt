@@ -1,11 +1,11 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgavestatus
-import no.nav.helse.modell.oppgave.Oppgavestatus.*
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.Oppgavestatus.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*

@@ -2,14 +2,14 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
-import no.nav.helse.mediator.meldinger.Kjønn
-import no.nav.helse.modell.oppgave.PersoninfoDto
 import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.objectMapper
+import no.nav.helse.person.Kjønn
+import no.nav.helse.person.PersoninfoApiDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
@@ -257,7 +257,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         val vedtak = VedtaksperiodeDto(
             fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
             aktørId = row.long("aktor_id").toString(),
-            personinfo = PersoninfoDto(
+            personinfoApi = PersoninfoApiDto(
                 fornavn = row.string("fornavn"),
                 mellomnavn = row.stringOrNull("mellomnavn"),
                 etternavn = row.string("etternavn"),

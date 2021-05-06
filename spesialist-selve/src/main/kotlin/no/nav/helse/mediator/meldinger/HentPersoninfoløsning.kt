@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.person.Kjønn
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -67,5 +68,3 @@ internal class HentPersoninfoløsning(
         }
     }
 }
-
-enum class Kjønn { Mann, Kvinne, Ukjent }

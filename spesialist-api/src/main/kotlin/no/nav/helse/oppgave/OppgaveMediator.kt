@@ -1,22 +1,16 @@
-package no.nav.helse.mediator
+package no.nav.helse.oppgave
 
-import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.oppgave.Oppgavestatus
-import no.nav.helse.modell.tildeling.ReservasjonDao
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-internal class OppgaveMediator(
+class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
-    private val vedtakDao: VedtakDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao
 ) {
@@ -24,15 +18,15 @@ internal class OppgaveMediator(
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    internal fun hentOppgaver(inkluderRiskQaOppgaver: Boolean) = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver)
+    fun hentOppgaver(inkluderRiskQaOppgaver: Boolean) = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver)
 
-    internal fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
+    fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 
-    internal fun opprett(oppgave: Oppgave) {
+    fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)
     }
 
-    internal fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
+    fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
         tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
     }
 
@@ -40,12 +34,12 @@ internal class OppgaveMediator(
         oppgaver.add(oppgave)
     }
 
-    internal fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
+    fun ferdigstill(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
         oppgave.ferdigstill(saksbehandlerIdent, oid)
         nyOppgave(oppgave)
     }
 
-    internal fun ferdigstill(oppgave: Oppgave) {
+    fun ferdigstill(oppgave: Oppgave) {
         oppgave.ferdigstill()
         nyOppgave(oppgave)
     }
@@ -55,7 +49,7 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    internal fun invalider(oppgave: Oppgave) {
+    fun invalider(oppgave: Oppgave) {
         oppgave.avbryt()
         nyOppgave(oppgave)
     }
@@ -65,46 +59,30 @@ internal class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    internal fun lagreOgTildelOppgaver(
-        hendelse: Hendelse,
-        messageContext: MessageContext,
-        contextId: UUID
-    ) {
-        lagreOppgaver(hendelse.id, contextId, messageContext) { tildelOppgaver(hendelse.fødselsnummer()) }
+    fun lagreOgTildelOppgaver(hendelseId: UUID, fødselsnummer: String, contextId: UUID, messageContext: MessageContext) {
+        lagreOppgaver(hendelseId, contextId, messageContext) { tildelOppgaver(fødselsnummer) }
     }
 
-    internal fun lagreOppgaver(rapidsConnection: RapidsConnection, hendelseId: UUID, contextId: UUID) {
+    fun lagreOppgaver(rapidsConnection: RapidsConnection, hendelseId: UUID, contextId: UUID) {
         lagreOppgaver(hendelseId, contextId, rapidsConnection)
     }
 
-    internal fun avbrytOppgaver(vedtaksperiodeId: UUID) {
+    fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finnAktive(vedtaksperiodeId).forEach(::avbryt)
     }
 
-    internal fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
+    fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
         val oppgave = oppgaveDao.finn(oppgaveId) ?: return
         avventerSystem(oppgave, saksbehandlerIdent, oid)
     }
 
-    internal fun opprett(
-        contextId: UUID,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        navn: String
-    ): Long? {
+    fun opprett(contextId: UUID, vedtaksperiodeId: UUID, utbetalingId: UUID, navn: String): Long? {
         if (oppgaveDao.harAktivOppgave(vedtaksperiodeId)) return null
-        val vedtakRef = requireNotNull(vedtakDao.findVedtak(vedtaksperiodeId)?.id)
-        return oppgaveDao.opprettOppgave(
-            contextId,
-            navn,
-            vedtakRef,
-            utbetalingId
-        ).also { oppgaveId ->
-            oppgaverForPublisering.put(oppgaveId, "oppgave_opprettet")
-        }
+        return oppgaveDao.opprettOppgave(contextId, navn, vedtaksperiodeId, utbetalingId)
+            .also { oppgaveId -> oppgaverForPublisering[oppgaveId] = "oppgave_opprettet" }
     }
 
-    internal fun oppdater(
+    fun oppdater(
         oppgaveId: Long,
         status: Oppgavestatus,
         ferdigstiltAvIdent: String?,
@@ -114,7 +92,7 @@ internal class OppgaveMediator(
         oppgaverForPublisering.put(oppgaveId, "oppgave_oppdatert")
     }
 
-    internal fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
+    fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
         try {
             reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
         } catch (e: PSQLException) {

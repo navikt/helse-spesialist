@@ -1,4 +1,4 @@
-package no.nav.helse.modell.tildeling
+package no.nav.helse.reservasjon
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -6,7 +6,7 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-internal class ReservasjonDao(private val dataSource: DataSource) {
+class ReservasjonDao(private val dataSource: DataSource) {
     fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = """INSERT INTO reserver_person(saksbehandler_ref, person_ref)
