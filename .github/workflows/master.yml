@@ -13,7 +13,7 @@ jobs:
             - name: create docker tag
               run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
         outputs:
-            image: docker.pkg.github.com/${{ github.repository }}/spesialist:${{ env.TAG }}
+            image: docker.pkg.github.com/${{ github.repository }}/spesialist-selve:${{ env.TAG }}
 
     build:
         name: build docker image
@@ -23,9 +23,9 @@ jobs:
             - uses: actions/checkout@v1
             - uses: actions/setup-java@v1
               with:
-                  java-version: '14.x'
+                  java-version: '15.x'
             - name: test and build
-              run: ./gradlew test build
+              run: ./gradlew --project-dir=spesialist-selve build
               env:
                   ORG_GRADLE_PROJECT_githubUser: x-access-token
                   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
                   ORG_GRADLE_PROJECT_githubUser: x-access-token
                   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  args: --project-name=spesialist --org=tbd-ty7 --fail-on=all
+                  args: --project-name=spesialist-selve --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
                   command: monitor
 
     deployDev:
@@ -64,15 +64,15 @@ jobs:
                   RESOURCE: deploy/dev.yml
                   IMAGE: ${{ needs.set_version.outputs.image }}
 
-    deployProd:
-        name: deploy to prod
-        needs: [set_version, deployDev]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v1
-            - uses: nais/deploy/actions/deploy@v1
-              env:
-                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-                  CLUSTER: prod-fss
-                  RESOURCE: deploy/prod.yml
-                  IMAGE: ${{ needs.set_version.outputs.image }}
+#    deployProd:
+#        name: deploy to prod
+#        needs: [set_version, deployDev]
+#        runs-on: ubuntu-latest
+#        steps:
+#            - uses: actions/checkout@v1
+#            - uses: nais/deploy/actions/deploy@v1
+#              env:
+#                  APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#                  CLUSTER: prod-fss
+#                  RESOURCE: deploy/prod.yml
+#                  IMAGE: ${{ needs.set_version.outputs.image }}
