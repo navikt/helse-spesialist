@@ -45,7 +45,7 @@ internal class Godkjenningsbehov(
     aktørId: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID,
+    utbetalingId: UUID,
     arbeidsforholdId: String?,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
