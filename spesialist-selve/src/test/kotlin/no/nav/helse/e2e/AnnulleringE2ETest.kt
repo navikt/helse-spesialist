@@ -46,7 +46,8 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
             status = UTBETALT,
             orgnr = ORGNR,
             arbeidsgiverFagsystemId = "arbeidsgiver_fagsystem_id",
-            forrigeStatus = SENDT
+            forrigeStatus = SENDT,
+            utbetalingId = UTBETALING_ID
         )
 
         val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123")

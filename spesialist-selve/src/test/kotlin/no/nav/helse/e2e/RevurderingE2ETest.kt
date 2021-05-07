@@ -33,14 +33,26 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        sendUtbetalingEndret("UTBETALING", Utbetalingsstatus.UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret(
+            "UTBETALING",
+            Utbetalingsstatus.UTBETALT,
+            ORGNR,
+            "EN_FAGSYSTEMID",
+            utbetalingId = UTBETALING_ID
+        )
         assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
 
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID2) // revurdering
         håndterGodkjenningsbehov(godkjenningsmeldingId2)
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        sendUtbetalingEndret("UTBETALING", Utbetalingsstatus.UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret(
+            "UTBETALING",
+            Utbetalingsstatus.UTBETALT,
+            ORGNR,
+            "EN_FAGSYSTEMID",
+            utbetalingId = UTBETALING_ID2
+        )
         assertOppgave(1, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
 

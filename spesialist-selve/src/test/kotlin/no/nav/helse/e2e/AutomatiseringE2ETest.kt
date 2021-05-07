@@ -188,7 +188,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -270,7 +270,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -344,7 +344,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -412,7 +412,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             saksbehandlerOid = SAKSBEHANDLEROID,
             godkjent = true
         )
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",

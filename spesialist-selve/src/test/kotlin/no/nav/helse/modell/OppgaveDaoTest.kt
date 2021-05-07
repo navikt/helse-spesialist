@@ -209,7 +209,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
         oppgaveDao.updateOppgave(oppgaveId, AvventerSaksbehandler)
 
-        assertTrue(oppgaveDao.harAktivOppgave(VEDTAKSPERIODE))
+        assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
     }
 
     @Test

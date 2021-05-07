@@ -108,7 +108,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
-        every { oppgaveDao.harAktivOppgave(VEDTAKSPERIODE_ID) } returnsMany listOf(false, true)
+        every { oppgaveDao.harGyldigOppgave( UTBETALING_ID) } returnsMany listOf(false, true)
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)

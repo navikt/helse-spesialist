@@ -402,7 +402,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
         forrigeStatus: Utbetalingsstatus = status,
-        fødselsnummer: String = UNG_PERSON_FNR_2018
+        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        utbetalingId: UUID
     ) {
         @Language("JSON")
         val json = """
@@ -410,7 +411,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     "@event_name": "utbetaling_endret",
     "@id": "${UUID.randomUUID()}",
     "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "$UTBETALING_ID",
+    "utbetalingId": "$utbetalingId",
     "fødselsnummer": "$fødselsnummer",
     "type": "$type",
     "forrigeStatus": "$forrigeStatus",
@@ -633,14 +634,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = "987654321",
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kanAutomatiseres: Boolean = false,
-        snapshot: String = snapshot()
+        snapshot: String = snapshot(),
+        utbetalingId: UUID
     ): UUID {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             periodetype = Periodetype.FORLENGELSE,
-            utbetalingId = UTBETALING_ID,
+            utbetalingId = utbetalingId,
         )
         sendPersoninfoløsning(
             orgnr = organisasjonsnummer,

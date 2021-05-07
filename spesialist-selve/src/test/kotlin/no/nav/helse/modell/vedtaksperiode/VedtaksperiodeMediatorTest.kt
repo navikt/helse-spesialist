@@ -219,13 +219,13 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         )
         val arbeidsgiverFagsystemId = "JHKSDA3412SFHJKA489KASDJL"
 
-        sendUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         val speilSnapshot1 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
         assertEquals(1, speilSnapshot1.utbetalinger.size)
         val utbetaling1 = speilSnapshot1.utbetalinger.first()
         assertEquals("OVERFØRT", utbetaling1.status)
 
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, arbeidsgiverFagsystemId)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
         val utbetaling2 = speilSnapshot2.utbetalinger.first()
         assertEquals("UTBETALT", utbetaling2.status)
@@ -261,9 +261,10 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendUtbetalingEndret(
             type = "UTBETALING",
             status = OVERFØRT,
-            fødselsnummer = fødselsnummer1,
             orgnr = orgnr1,
-            arbeidsgiverFagsystemId = "JHKSDA3412SFHJKA489KASDJL"
+            arbeidsgiverFagsystemId = "JHKSDA3412SFHJKA489KASDJL",
+            fødselsnummer = fødselsnummer1,
+            utbetalingId = UTBETALING_ID
         )
 
         val fødselsnummer2 = "23456789102"

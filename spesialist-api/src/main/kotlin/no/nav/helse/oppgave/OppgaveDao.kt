@@ -222,14 +222,13 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     })
 
-    fun harAktivOppgave(vedtaksperiodeId: UUID) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
-                SELECT COUNT(1) AS oppgave_count FROM oppgave o
-                INNER JOIN vedtak v on o.vedtak_ref = v.id
-                WHERE v.vedtaksperiode_id = ? AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
+                SELECT COUNT(1) AS oppgave_count FROM oppgave
+                WHERE utbetaling_id = ? AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
             """
-        session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
+        session.run(queryOf(query, utbetalingId).map { it.int("oppgave_count") }.asSingle)
     }) > 0
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =

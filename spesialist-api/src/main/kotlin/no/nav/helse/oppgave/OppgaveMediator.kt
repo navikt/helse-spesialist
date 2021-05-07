@@ -77,7 +77,7 @@ class OppgaveMediator(
     }
 
     fun opprett(contextId: UUID, vedtaksperiodeId: UUID, utbetalingId: UUID, navn: String): Long? {
-        if (oppgaveDao.harAktivOppgave(vedtaksperiodeId)) return null
+        if (oppgaveDao.harGyldigOppgave(utbetalingId)) return null
         return oppgaveDao.opprettOppgave(contextId, navn, vedtaksperiodeId, utbetalingId)
             .also { oppgaveId -> oppgaverForPublisering[oppgaveId] = "oppgave_opprettet" }
     }

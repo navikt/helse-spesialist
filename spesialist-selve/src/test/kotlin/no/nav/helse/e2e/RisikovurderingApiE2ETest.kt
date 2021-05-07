@@ -43,8 +43,8 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
                 "kreverSupersaksbehandler": false
             }]
         """)
-        godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID)
-        godkjenningsoppgave(funn2, UUID.randomUUID())
+        godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        godkjenningsoppgave(funn2, UUID.randomUUID(), UTBETALING_ID2)
 
         val riskQaGruppe = UUID.randomUUID().toString()
         val respons =
@@ -73,11 +73,11 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         assertEquals(listOf("RISK_QA", "SØKNAD"), json.map { it["oppgavetype"].asText() })
     }
 
-    fun godkjenningsoppgave(funn: JsonNode, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID) {
+    fun godkjenningsoppgave(funn: JsonNode, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID, utbetalingId: UUID = UTBETALING_ID) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             vedtaksperiodeId,
-            UTBETALING_ID
+            utbetalingId
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
         sendArbeidsgiverinformasjonløsning(

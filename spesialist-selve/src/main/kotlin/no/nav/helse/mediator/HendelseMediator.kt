@@ -199,7 +199,7 @@ internal class HendelseMediator(
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext
     ) {
-        if (oppgaveDao.harAktivOppgave(vedtaksperiodeId) || oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId) || vedtakDao.erAutomatiskGodkjent(vedtaksperiodeId)) {
+        if (oppgaveDao.harGyldigOppgave(utbetalingId) ||vedtakDao.erAutomatiskGodkjent(vedtaksperiodeId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId har enten aktiv/ferdigstilt oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
             return
         }

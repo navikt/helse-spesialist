@@ -27,7 +27,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID")
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         val tidspunktVedFerdigstilling = oppgaveOppdatertTidspunkt()
         sendVedtaksperiodeForkastet()
         assertEquals(tidspunktVedFerdigstilling, oppgaveOppdatertTidspunkt())

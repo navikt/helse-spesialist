@@ -21,34 +21,48 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1)
-        sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId)
-        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
-        sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         assertEquals(3, utbetalinger().size)
     }
 
     @Test
     fun `utbetaling forkastet`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGNR, arbeidsgiverFagsystemId, forrigeStatus = IKKE_GODKJENT)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        sendUtbetalingEndret(
+            "UTBETALING",
+            FORKASTET,
+            ORGNR,
+            arbeidsgiverFagsystemId,
+            forrigeStatus = IKKE_GODKJENT,
+            utbetalingId = UTBETALING_ID
+        )
         assertEquals(0, utbetalinger().size)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGNR, arbeidsgiverFagsystemId, forrigeStatus = GODKJENT)
+        sendUtbetalingEndret(
+            "UTBETALING",
+            FORKASTET,
+            ORGNR,
+            arbeidsgiverFagsystemId,
+            forrigeStatus = GODKJENT,
+            utbetalingId = UTBETALING_ID
+        )
         assertEquals(1, utbetalinger().size)
     }
 
     @Test
     fun `legger på totalbeløp på utbetaling`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1)
-        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
         assertEquals(4000, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().totalbeløp)
     }
 
     @Test
     fun `feriepengeutbetalinger har riktig type på utbetaling`() {
-        vedtaksperiode()
-        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId)
+        vedtaksperiode(utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
         assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().type)
     }

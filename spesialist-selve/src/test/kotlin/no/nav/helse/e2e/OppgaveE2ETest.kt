@@ -21,17 +21,22 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
 
     @Test
     fun `invaliderer oppgave når utbetalingen har blitt forkastet`() {
-        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
         assertOppgave(0, AvventerSaksbehandler, Invalidert)
     }
 
     @Test
     fun `ferdigstiller oppgaven først når utbetalingen er utbetalt`() {
         val oid = UUID.randomUUID()
-        val godkjenningsbehov = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
+        val godkjenningsbehov = vedtaksperiode(
+            ORGANISASJONSNUMMER,
+            VEDTAKSPERIODE_ID,
+            false,
+            utbetalingId = UTBETALING_ID
+        )
         sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(godkjenningsbehov).toLong(), "ident", "epost", oid, true)
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
         val oppgave = oppgaveDao.finn(UTBETALING_ID)
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertOppgavedetaljer(oppgave, Ferdigstilt, "SØKNAD", "ident", oid, UTBETALING_ID, godkjenningsbehov, VEDTAKSPERIODE_ID)
@@ -39,17 +44,17 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
 
     @Test
     fun `oppretter ny oppgave når det finnes en invalidert oppgave for en vedtaksperiode`() {
-        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
-        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         assertOppgave(0, AvventerSaksbehandler, Invalidert)
         assertOppgave(1, AvventerSaksbehandler)
     }
 
     @Test
     fun `oppretter ikke ny oppgave når det finnes en aktiv oppgave`() {
-        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
-        val behov2 = sendGodkjenningsbehov(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
+        val behov2 = sendGodkjenningsbehov(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertOppgave(0, AvventerSaksbehandler)
         assertOppgaver(1)
         assertIkkeHendelse(behov2)
@@ -57,20 +62,20 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
 
     @Test
     fun `oppretter ny oppgave når saksbehandler har godkjent, men spleis har reberegnet i mellomtiden`() {
-        val behov1 = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
+        val behov1 = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(behov1).toLong(), "ident", "epost", UUID.randomUUID(), true)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
-        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Invalidert)
         assertOppgave(1, AvventerSaksbehandler)
     }
 
-    @Disabled("Må støtte å kunne invalidere et automatisert vedtak")
     @Test
+    @Disabled
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
-        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID,true)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID)
-        val behov2 = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false)
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, true, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        val behov2 = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID2)
         assertHendelse(behov2)
         assertOppgave(0, AvventerSaksbehandler)
         assertOppgaver(1)
