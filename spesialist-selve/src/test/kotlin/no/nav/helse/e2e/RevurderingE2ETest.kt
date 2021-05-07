@@ -2,9 +2,8 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import junit.framework.Assert.assertTrue
-import no.nav.helse.modell.oppgave.Oppgavestatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Test
