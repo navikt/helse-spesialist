@@ -71,14 +71,11 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     }
 
     @Test
-    @Disabled
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
         vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, true, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
-        val behov2 = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID2)
+        val behov2 = sendGodkjenningsbehov(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID2)
         assertHendelse(behov2)
-        assertOppgave(0, AvventerSaksbehandler)
-        assertOppgaver(1)
     }
 
     private fun assertOppgavedetaljer(oppgave: Oppgave?, status: Oppgavestatus, type: String, ferdigstiltAv: String, ferdigstiltAvOid: UUID, utbetalingId: UUID, hendelseId: UUID, vedtaksperiodeId: UUID) {
