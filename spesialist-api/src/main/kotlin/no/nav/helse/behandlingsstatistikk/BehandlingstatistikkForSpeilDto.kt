@@ -1,6 +1,6 @@
-package no.nav.helse.modell.oppgave.behandlingsstatistikk
+package no.nav.helse.behandlingsstatistikk
 
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.vedtaksperiode.Periodetype
 
 data class BehandlingstatistikkForSpeilDto(
     val antallOppgaverTilGodkjenning: OppgavestatistikkForSpeilDto,
@@ -31,8 +31,8 @@ data class BehandlingstatistikkForSpeilDto(
         OVERGANG_FRA_IT
     }
 
-    internal companion object {
-        internal fun toSpeilMap(behandlingsstatistikkDto: BehandlingsstatistikkDto) = BehandlingstatistikkForSpeilDto(
+    companion object {
+        fun toSpeilMap(behandlingsstatistikkDto: BehandlingsstatistikkDto) = BehandlingstatistikkForSpeilDto(
             antallOppgaverTilGodkjenning = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.oppgaverTilGodkjenning.totalt,
                 perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.toPerPeriodetypeForSpeil()

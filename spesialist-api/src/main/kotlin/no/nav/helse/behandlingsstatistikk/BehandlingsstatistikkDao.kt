@@ -1,17 +1,17 @@
-package no.nav.helse.modell.oppgave.behandlingsstatistikk
+package no.nav.helse.behandlingsstatistikk
 
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import javax.sql.DataSource
 
 class BehandlingsstatistikkDao(private val dataSource: DataSource) {
 
-    internal fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
+    fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
         val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype()
         val tildeltPerPeriodetype = tildeltPerPeriodetype()
         val antallAnnulleringer = antallAnnulleringer(fom)

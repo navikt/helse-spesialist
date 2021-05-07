@@ -6,6 +6,8 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
@@ -15,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde as InntektskildeFraSpleis
-import no.nav.helse.modell.vedtaksperiode.Periodetype as PeriodetypeFraSpleis
 import no.nav.helse.vedtaksperiode.Inntektskilde as InntektskildeForApi
 import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
 
@@ -108,13 +108,13 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val v2 = UUID.randomUUID()
         val v3 = UUID.randomUUID()
         val v4 = UUID.randomUUID()
-        opprettVedtaksperiode(vedtaksperiodeId = v2, periodetype = PeriodetypeFraSpleis.OVERGANG_FRA_IT)
+        opprettVedtaksperiode(vedtaksperiodeId = v2, periodetype = Periodetype.OVERGANG_FRA_IT)
         opprettOppgave(vedtaksperiodeId = v2, oppgavetype = "RISK_QA")
 
-        opprettVedtaksperiode(vedtaksperiodeId = v3, periodetype = PeriodetypeFraSpleis.INFOTRYGDFORLENGELSE)
+        opprettVedtaksperiode(vedtaksperiodeId = v3, periodetype = Periodetype.INFOTRYGDFORLENGELSE)
         opprettOppgave(vedtaksperiodeId = v3)
 
-        opprettVedtaksperiode(vedtaksperiodeId = v4, periodetype = PeriodetypeFraSpleis.FORLENGELSE)
+        opprettVedtaksperiode(vedtaksperiodeId = v4, periodetype = Periodetype.FORLENGELSE)
         opprettOppgave(vedtaksperiodeId = v4)
 
         val oppgaver = oppgaveDao.finnOppgaver(true)
@@ -136,7 +136,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = PeriodetypeFraSpleis.FØRSTEGANGSBEHANDLING, inntektskilde = InntektskildeFraSpleis.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
         val oppgaveId = insertOppgave(utbetalingId = utbetalingId, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = utbetalingId), oppgave)
@@ -146,7 +146,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `kan hente oppgave selv om utbetalingId mangler`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = PeriodetypeFraSpleis.FØRSTEGANGSBEHANDLING, inntektskilde = InntektskildeFraSpleis.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
         val oppgaveId = insertOppgave(utbetalingId = null, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null), oppgave)
@@ -255,7 +255,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `en oppgave har riktig oppgavetype og inntektskilde`(){
-        nyPerson(inntektskilde = InntektskildeFraSpleis.FLERE_ARBEIDSGIVERE)
+        nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
         val oppgaver = oppgaveDao.finnOppgaver(true)
         assertEquals(PeriodetypeForApi.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
         assertEquals(InntektskildeForApi.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)

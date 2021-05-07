@@ -2,14 +2,15 @@ package no.nav.helse.mediator
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDao
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto.BehandlingerDto
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto.OppgavestatistikkDto
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto.BehandlingerDto
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto.OppgavestatistikkDto
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
+import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
+import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
+import no.nav.helse.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

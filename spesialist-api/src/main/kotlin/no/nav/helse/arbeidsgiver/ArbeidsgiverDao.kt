@@ -1,4 +1,4 @@
-package no.nav.helse.modell.arbeidsgiver
+package no.nav.helse.arbeidsgiver
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
@@ -8,8 +8,8 @@ import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-internal class ArbeidsgiverDao(private val dataSource: DataSource) {
-    internal fun findArbeidsgiverByOrgnummer(orgnummer: String) = sessionOf(dataSource).use { session ->
+class ArbeidsgiverDao(private val dataSource: DataSource) {
+    fun findArbeidsgiverByOrgnummer(orgnummer: String) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
                 .map { it.long("id") }
@@ -17,7 +17,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun insertArbeidsgiver(orgnummer: String, navn: String, bransjer: List<String>) =
+    fun insertArbeidsgiver(orgnummer: String, navn: String, bransjer: List<String>) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val navnRef = requireNotNull(
                 session.run(
@@ -51,7 +51,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun findNavnSistOppdatert(orgnummer: String) = sessionOf(dataSource).use { session ->
+    fun findNavnSistOppdatert(orgnummer: String) = sessionOf(dataSource).use { session ->
         requireNotNull(
             session.run(
                 queryOf(
@@ -64,7 +64,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findBransjerSistOppdatert(orgnummer: String) = sessionOf(dataSource).use { session ->
+    fun findBransjerSistOppdatert(orgnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement =
             "SELECT oppdatert FROM arbeidsgiver_bransjer WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);"
@@ -78,7 +78,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findArbeidsgiver(orgnummer: String) = sessionOf(dataSource).use { session ->
+    fun findArbeidsgiver(orgnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT an.navn, a.orgnummer, ab.bransjer FROM arbeidsgiver AS a
@@ -88,19 +88,19 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         """
         session.run(
             queryOf(query, orgnummer.toLong()).map { row ->
-                ArbeidsgiverDto(
+                ArbeidsgiverApiDto(
                     organisasjonsnummer = row.string("orgnummer"),
                     navn = row.string("navn"),
                     bransjer = row.stringOrNull("bransjer")
                         ?.takeIf { it.isNotBlank() }
-                        ?.let { objectMapper.readValue(it) }
+                        ?.let { objectMapper.readValue<List<String>>(it) }
                         ?: emptyList()
                 )
             }.asSingle
         )
     }
 
-    internal fun updateNavn(orgnummer: String, navn: String) = sessionOf(dataSource).use {
+    fun updateNavn(orgnummer: String, navn: String) = sessionOf(dataSource).use {
         it.run(
             queryOf(
                 "UPDATE arbeidsgiver_navn SET navn=?, navn_oppdatert=? WHERE id=(SELECT navn_ref FROM arbeidsgiver WHERE orgnummer=?);",
@@ -111,7 +111,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun updateBransjer(orgnummer: String, bransjer: List<String>) = sessionOf(dataSource).use {
+    fun updateBransjer(orgnummer: String, bransjer: List<String>) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val statement = """
             UPDATE arbeidsgiver_bransjer
@@ -131,7 +131,7 @@ internal class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun insertBransjer(orgnummer: String, bransjer: List<String>): Int =
+    fun insertBransjer(orgnummer: String, bransjer: List<String>): Int =
         sessionOf(dataSource, returnGeneratedKey = true).use {
             @Language("PostgreSQL")
             val insertBransjeStatement =

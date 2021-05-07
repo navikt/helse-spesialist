@@ -9,13 +9,14 @@ import io.ktor.routing.*
 import io.ktor.server.testing.*
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.mediator.BehandlingsstatistikkMediator
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingsstatistikkDto
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.Companion.toSpeilMap
-import no.nav.helse.modell.oppgave.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
-import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto
+import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.Companion.toSpeilMap
+import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
+import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.objectMapper
+import no.nav.helse.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -26,7 +27,8 @@ internal class BehandlingsstatistikkApiTest {
                 oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(1, listOf(FØRSTEGANGSBEHANDLING to 1)),
                 tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(0, emptyList()),
                 fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(0, 0, 0, 0)
-            ))
+            )
+        )
     }
 
     @Test

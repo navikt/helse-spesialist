@@ -1,6 +1,6 @@
-package no.nav.helse.modell.oppgave.behandlingsstatistikk
+package no.nav.helse.behandlingsstatistikk
 
-import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.vedtaksperiode.Periodetype
 
 data class BehandlingsstatistikkDto(
     val oppgaverTilGodkjenning: OppgavestatistikkDto,

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 
 internal class OpprettArbeidsgiverCommand(
