@@ -1,12 +1,10 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavestatus.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -24,6 +22,14 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
         assertOppgave(0, AvventerSaksbehandler, Invalidert)
+    }
+
+    @Test
+    fun `invaliderer oppgave når utbetaling som har status IKKE_UTBETALT blir forkastet`() {
+        vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
+        sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(), "ident", "ident@nav.no", UUID.randomUUID(), true)
+        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID, forrigeStatus = IKKE_UTBETALT)
+        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Invalidert)
     }
 
     @Test
@@ -71,14 +77,11 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     }
 
     @Test
-    @Disabled
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
         vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, true, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
-        val behov2 = vedtaksperiode(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID2)
-        assertHendelse(behov2)
-        assertOppgave(0, AvventerSaksbehandler)
-        assertOppgaver(1)
+        val behov = sendGodkjenningsbehov(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID2)
+        assertHendelse(behov)
     }
 
     private fun assertOppgavedetaljer(oppgave: Oppgave?, status: Oppgavestatus, type: String, ferdigstiltAv: String, ferdigstiltAvOid: UUID, utbetalingId: UUID, hendelseId: UUID, vedtaksperiodeId: UUID) {

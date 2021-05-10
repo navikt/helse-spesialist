@@ -101,7 +101,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `ikke automatisk godkjent dersom det ikke finnes innslag i db`() {
         nyPerson()
-        assertFalse(vedtakDao.erAutomatiskGodkjent(VEDTAKSPERIODE))
+        assertFalse(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         godkjenningsbehov(HENDELSE_ID)
         nyPerson()
         nyttAutomatiseringsinnslag(false)
-        assertFalse(vedtakDao.erAutomatiskGodkjent(VEDTAKSPERIODE))
+        assertFalse(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
     @Test
@@ -117,7 +117,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         godkjenningsbehov(HENDELSE_ID)
         nyPerson()
         nyttAutomatiseringsinnslag(true)
-        assertTrue(vedtakDao.erAutomatiskGodkjent(VEDTAKSPERIODE))
+        assertTrue(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
     private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {

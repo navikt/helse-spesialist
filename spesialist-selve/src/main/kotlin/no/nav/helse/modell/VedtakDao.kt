@@ -180,15 +180,10 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.execute(queryOf(query, mapOf("ref" to ref)))
     }
 
-    internal fun erAutomatiskGodkjent(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun erAutomatiskGodkjent(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
-        val query =
-        """
-            SELECT automatisert FROM automatisering WHERE vedtaksperiode_ref = (
-                SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId
-            )
-        """
-        session.run(queryOf(query, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map { it.boolean("automatisert") }.asSingle)
+        val query = """ SELECT automatisert FROM automatisering WHERE utbetaling_id = ? """
+        session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
 
     internal fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { it.findVedtakByFnr(fnr) }
