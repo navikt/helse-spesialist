@@ -17,6 +17,7 @@ internal class OppdaterOppgavestatusCommand(
     override fun execute(context: CommandContext): Boolean {
         oppgaveDao.finn(utbetalingId)?.also {
             when (status) {
+                GODKJENT_UTEN_UTBETALING,
                 UTBETALT,
                 IKKE_GODKJENT -> oppgaveMediator.ferdigstill(it)
                 FORKASTET -> oppgaveMediator.invalider(it)

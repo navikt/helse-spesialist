@@ -32,6 +32,17 @@ internal class OppdaterOppgavestatusCommandTest {
     }
 
     @Test
+    fun `ferdigstiller oppgave når utbetalingen har blitt godkjent uten utbetaling`() {
+        val oppgave = Oppgave(1L, "SØKNAD", Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
+        every { oppgaveDao.finn(any<UUID>()) } returns oppgave
+        val status = GODKJENT_UTEN_UTBETALING
+        val command = OppdaterOppgavestatusCommand(UTBETALING_ID, status, oppgaveDao, oppgaveMediator)
+
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.ferdigstill(oppgave) }
+    }
+
+    @Test
     fun `ferdigstiller oppgave når utbetalingen har blitt avslått`() {
         val oppgave = Oppgave(1L, "SØKNAD", Oppgavestatus.AvventerSystem, UUID.randomUUID(), "IDENT", UUID.randomUUID(), UTBETALING_ID)
         every { oppgaveDao.finn(any<UUID>()) } returns oppgave
