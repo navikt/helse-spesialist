@@ -2,22 +2,19 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
-import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.objectMapper
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.PersoninfoApiDto
+import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
 internal class VedtakDao(private val dataSource: DataSource) {
-    internal fun findVedtak(id: UUID) = sessionOf(dataSource).use { it.findVedtak(id) }
-
     internal fun opprett(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
@@ -25,15 +22,15 @@ internal class VedtakDao(private val dataSource: DataSource) {
         personRef: Long,
         arbeidsgiverRef: Long,
         speilSnapshotRef: Int
-    ) = using(sessionOf(dataSource)) {
+    ) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
-        val statement = """
+        val query = """
             INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref)
-            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :speil_snapshot_ref)
+            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :speil_snapshot_ref);
         """
-        it.run(
+        session.run(
             queryOf(
-                statement, mapOf(
+                query, mapOf(
                     "vedtaksperiode_id" to vedtaksperiodeId,
                     "fom" to fom,
                     "tom" to tom,
@@ -46,13 +43,16 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) =
-        using(sessionOf(dataSource)) {
+        using(sessionOf(dataSource)) { session ->
             @Language("PostgreSQL")
-            val statement =
-                "UPDATE vedtak SET fom=:fom, tom=:tom, speil_snapshot_ref=:speil_snapshot_ref WHERE id=:vedtak_ref"
-            it.run(
+            val query = """
+                UPDATE vedtak
+                SET fom = :fom, tom = :tom, speil_snapshot_ref = :speil_snapshot_ref
+                WHERE id = :vedtak_ref
+            """
+            session.run(
                 queryOf(
-                    statement, mapOf(
+                    query, mapOf(
                         "vedtak_ref" to vedtakRef,
                         "fom" to fom,
                         "tom" to tom,
@@ -61,17 +61,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 ).asUpdate
             )
         }
-
-    private fun Session.findVedtak(vedtaksperiodeId: UUID): VedtakDto? {
-        @Language("PostgreSQL")
-        val statement = "SELECT * FROM vedtak WHERE vedtaksperiode_id=?"
-        return this.run(queryOf(statement, vedtaksperiodeId).map {
-            VedtakDto(
-                id = it.long("id"),
-                speilSnapshotRef = it.long("speil_snapshot_ref")
-            )
-        }.asSingle)
-    }
 
     internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
@@ -96,12 +85,12 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Periodetype, inntektskilde: Inntektskilde) =
-        using(sessionOf(dataSource)) {
+        using(sessionOf(dataSource)) { session ->
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
 
             @Language("PostgreSQL")
             val statement = "INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (?, ?, ?)"
-            it.run(queryOf(statement, type.name, inntektskilde.name, vedtakRef).asUpdate)
+            session.run(queryOf(statement, type.name, inntektskilde.name, vedtakRef).asUpdate)
         }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype? =
@@ -116,7 +105,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             }.asSingle)
         }
 
-    fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
+    internal fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         sessionOf(dataSource).use { session ->
             val vedtakRef =
                 requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
@@ -128,30 +117,8 @@ internal class VedtakDao(private val dataSource: DataSource) {
             }.asSingle)
         }
 
-
-    internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) {
-        it.findVedtakByVedtaksperiodeId(vedtaksperiodeId)
-    }
-
-    private fun Session.findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = this.run(
-        queryOf(
-            """
-                SELECT *
-                FROM vedtak AS v
-                         INNER JOIN person AS p ON v.person_ref = p.id
-                         INNER JOIN person_info as pi ON pi.id=p.info_ref
-                         INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
-                WHERE v.vedtaksperiode_id = ?
-                ORDER BY v.id DESC
-                LIMIT 1;
-            """, vedtaksperiodeId
-        )
-            .map(::tilVedtaksperiode)
-            .asSingle
-    )
-
     internal fun oppdaterSnapshot(fødselsnummer: String, snapshot: String) {
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
             session.transaction { tx ->
                 val sisteReferanse = insertSpeilSnapshot(tx, snapshot)
                 val referanser = findSpeilSnapshotRefs(fødselsnummer)
@@ -161,95 +128,81 @@ internal class VedtakDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun insertSpeilSnapshot(transactionalSession: TransactionalSession, personBlob: String): Long {
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO speil_snapshot(data) VALUES(CAST(:personBlob as json));"
-        return requireNotNull(
-            transactionalSession.run(
-                queryOf(
-                    statement,
-                    mapOf("personBlob" to personBlob)
-                ).asUpdateAndReturnGeneratedKey
-            )
-        )
-    }
-
-    private fun slett(session: Session, ref: Long) {
-        @Language("PostgreSQL")
-        val query = """DELETE FROM speil_snapshot WHERE id = :ref"""
-        session.execute(queryOf(query, mapOf("ref" to ref)))
-    }
-
     internal fun erAutomatiskGodkjent(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
-        val query = """ SELECT automatisert FROM automatisering WHERE utbetaling_id = ? """
+        val query = "SELECT automatisert FROM automatisering WHERE utbetaling_id = ?;"
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
 
-    internal fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { it.findVedtakByFnr(fnr) }
-
-    private fun findSpeilSnapshotRefs(fnr: String) = sessionOf(dataSource).use {
+    internal fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
-           SELECT v.speil_snapshot_ref FROM vedtak v join person p on v.person_ref = p.id WHERE p.fodselsnummer = :fnr
+            SELECT * FROM vedtak AS v
+                INNER JOIN person AS p ON v.person_ref = p.id
+                INNER JOIN person_info as pi ON pi.id=p.info_ref
+                INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
+            WHERE p.fodselsnummer = ? ORDER BY v.id DESC LIMIT 1;
         """
-        it.run(queryOf(query, mapOf("fnr" to fnr.toLong())).map { it.long("speil_snapshot_ref") }.asList)
+        session.run(queryOf(query, fnr.toLong()).map(::tilVedtaksperiode).asSingle)
+    }
+
+    internal fun findVedtakByAktørId(aktørId: String) = using(sessionOf(dataSource)) {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT * FROM vedtak AS v
+                INNER JOIN person AS p ON v.person_ref = p.id
+                INNER JOIN person_info AS pi ON pi.id=p.info_ref
+                INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
+            WHERE p.aktor_id = ? ORDER BY v.id DESC LIMIT 1;
+        """
+        it.run(queryOf(query, aktørId.toLong()).map(::tilVedtaksperiode).asSingle)
+    }
+
+    internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT * FROM vedtak AS v
+                 INNER JOIN person AS p ON v.person_ref = p.id
+                 INNER JOIN person_info as pi ON pi.id=p.info_ref
+                 INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
+            WHERE v.vedtaksperiode_id = ? ORDER BY v.id DESC LIMIT 1;
+        """
+        session.run(queryOf(query, vedtaksperiodeId).map(::tilVedtaksperiode).asSingle)
+    }
+
+    private fun findSpeilSnapshotRefs(fnr: String) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT v.speil_snapshot_ref FROM vedtak v
+                JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = ?;
+        """
+        session.run(queryOf(query, fnr.toLong()).map { it.long("speil_snapshot_ref") }.asList)
     }
 
     private fun oppdaterSnapshotRef(session: Session, fnr: String, ref: Long) {
         @Language("PostgreSQL")
         val query = """
-           UPDATE vedtak SET speil_snapshot_ref = :ref WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr)
+           UPDATE vedtak SET speil_snapshot_ref = ?
+           WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = ?)
         """
-        session.execute(
-            queryOf(
-                query,
-                mapOf(
-                    "fnr" to fnr.toLong(),
-                    "ref" to ref
-                )
-            )
-        )
+        session.execute(queryOf(query, ref, fnr.toLong()))
     }
 
-    private fun Session.findVedtakByFnr(fnr: String) = this.run(
-        queryOf(
-            """
-                SELECT *
-                FROM vedtak AS v
-                         INNER JOIN person AS p ON v.person_ref = p.id
-                         INNER JOIN person_info as pi ON pi.id=p.info_ref
-                         INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
-                WHERE p.fodselsnummer = ?
-                ORDER BY v.id DESC
-                LIMIT 1;
-            """, fnr.toLong()
-        )
-            .map(::tilVedtaksperiode)
-            .asSingle
-    )
+    private fun insertSpeilSnapshot(transactionalSession: TransactionalSession, personBlob: String): Long {
+        @Language("PostgreSQL")
+        val statement = "INSERT INTO speil_snapshot(data) VALUES(CAST(? as json));"
+        return requireNotNull(transactionalSession.run(queryOf(statement, personBlob).asUpdateAndReturnGeneratedKey))
+    }
 
-    internal fun findVedtakByAktørId(aktørId: String) = using(sessionOf(dataSource)) { it.findVedtakByAktørId(aktørId) }
+    private fun slett(session: Session, ref: Long) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM speil_snapshot WHERE id = ?"
+        session.execute(queryOf(query, ref))
+    }
 
-    private fun Session.findVedtakByAktørId(aktørId: String) = this.run(
-        queryOf(
-            """
-                SELECT *
-                FROM vedtak AS v
-                         INNER JOIN person AS p ON v.person_ref = p.id
-                         INNER JOIN person_info AS pi ON pi.id=p.info_ref
-                         INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
-                WHERE p.aktor_id = ?
-                ORDER BY v.id DESC
-                LIMIT 1;
-            """, aktørId.toLong()
-        )
-            .map(::tilVedtaksperiode)
-            .asSingle
-    )
-
-    private fun tilVedtaksperiode(row: Row): Pair<VedtaksperiodeDto, PersonFraSpleisDto> {
-        val vedtak = VedtaksperiodeDto(
+    private fun tilVedtaksperiode(row: Row): Pair<VedtaksperiodeApiDto, PersonFraSpleisDto> {
+        val vedtak = VedtaksperiodeApiDto(
             fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
             aktørId = row.long("aktor_id").toString(),
             personinfo = PersoninfoApiDto(
@@ -266,5 +219,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
         val snapshot = objectMapper.readValue<PersonFraSpleisDto>(row.string("data"))
         return vedtak to snapshot
     }
+
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }

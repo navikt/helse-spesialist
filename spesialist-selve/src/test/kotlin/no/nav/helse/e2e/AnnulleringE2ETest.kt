@@ -10,7 +10,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 internal class AnnulleringE2ETest : AbstractE2ETest() {
@@ -31,10 +30,8 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotFinal
         sendUtbetalingAnnullert()
 
-        assertEquals(
-            snapshotFinal,
-            snapshotDao.findSpeilSnapshot(vedtakDao.findVedtak(vedtaksperiodeId2)!!.speilSnapshotRef.toInt())
-        )
+        assertSnapshot(snapshotFinal, vedtaksperiodeId1)
+        assertSnapshot(snapshotFinal, vedtaksperiodeId2)
     }
 
     @Test

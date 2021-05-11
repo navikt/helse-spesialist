@@ -1,10 +1,8 @@
 package no.nav.helse.modell
 
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
@@ -23,13 +21,10 @@ internal class OppgaveTest {
         private const val OPPGAVETYPE = "SØKNAD"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
-        private val HENDELSE_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private val OPPGAVE_ID = Random.nextLong()
-        private val VEDTAKREF = Random.nextLong()
-        private val VEDTAK = VedtakDto(VEDTAKREF, 1L)
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -47,7 +42,6 @@ internal class OppgaveTest {
 
     @Test
     fun `oppretter ny oppgave`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VEDTAK
         oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKSPERIODE_ID, UTBETALING_ID) }
     }

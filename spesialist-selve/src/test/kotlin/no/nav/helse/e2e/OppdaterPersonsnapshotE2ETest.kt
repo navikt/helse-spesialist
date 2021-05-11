@@ -6,7 +6,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
 
 internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     val ORGNR = "987654321"
@@ -27,7 +26,8 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotFinal
         sendOppdaterPersonsnapshot()
 
-        assertEquals(snapshotFinal, snapshotDao.findSpeilSnapshot(vedtakDao.findVedtak(vedtaksperiodeId2)!!.speilSnapshotRef.toInt()))
+        assertSnapshot(snapshotFinal, vedtaksperiodeId1)
+        assertSnapshot(snapshotFinal, vedtaksperiodeId2)
     }
 
     private fun sendOppdaterPersonsnapshot() {

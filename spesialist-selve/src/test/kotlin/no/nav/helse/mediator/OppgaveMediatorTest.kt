@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
@@ -34,8 +33,6 @@ internal class OppgaveMediatorTest {
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
         private val TESTHENDELSE = TestHendelse(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
         private val OPPGAVE_ID = nextLong()
-        private val VEDTAKREF = nextLong()
-        private val VEDTAKREF2 = nextLong()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private const val OPPGAVETYPE_SØKNAD = "SØKNAD"
@@ -60,8 +57,6 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer oppgaver`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID) } returns VedtakDto(VEDTAKREF, 2L)
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE_ID_2) } returns VedtakDto(VEDTAKREF2, 2L)
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.finn(1L) } returns stikkprøveoppgave

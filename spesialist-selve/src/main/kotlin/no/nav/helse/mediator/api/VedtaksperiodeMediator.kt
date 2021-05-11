@@ -20,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDto
 import java.util.*
 
 internal class VedtaksperiodeMediator(
@@ -49,7 +50,7 @@ internal class VedtaksperiodeMediator(
             vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
         }
 
-    private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeDto, PersonFraSpleisDto>) =
+    private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeApiDto, PersonFraSpleisDto>) =
         measureAsHistogram("byggSpeilSnapshot") {
             val (vedtak, speilSnapshot) = vedtakinfo
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {

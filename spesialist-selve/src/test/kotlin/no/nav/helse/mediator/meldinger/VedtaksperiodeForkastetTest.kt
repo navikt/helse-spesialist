@@ -11,7 +11,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.vedtak.VedtakDto
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
@@ -30,7 +29,6 @@ internal class VedtaksperiodeForkastetTest {
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
         private val SNAPSHOT = snapshotUtenWarnings(VEDTAKSPERIODE)
-        private val vedtak = VedtakDto(1, 2)
     }
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")
@@ -83,7 +81,6 @@ internal class VedtaksperiodeForkastetTest {
 
     @Test
     fun `avbryter kommandoer og oppdaterer snapshot`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE) } returns vedtak
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
@@ -93,7 +90,6 @@ internal class VedtaksperiodeForkastetTest {
 
     @Test
     fun `kommando feiler når snapshot feiler`() {
-        every { vedtakDao.findVedtak(VEDTAKSPERIODE) } returns vedtak
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
         every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns 0
         assertFalse(vedtaksperiodeForkastetMessage.execute(context))
