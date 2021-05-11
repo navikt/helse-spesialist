@@ -3,12 +3,14 @@ package no.nav.helse.arbeidsgiver
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
 class ArbeidsgiverDao(private val dataSource: DataSource) {
+
     fun findArbeidsgiverByOrgnummer(orgnummer: String) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf("SELECT id FROM arbeidsgiver WHERE orgnummer=?;", orgnummer.toLong())
@@ -78,24 +80,33 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    fun findArbeidsgiver(orgnummer: String) = sessionOf(dataSource).use { session ->
+    fun finnBransjer(orgnummer: String) = using(sessionOf(dataSource)) { session ->
         @Language("PostgreSQL")
         val query = """
-            SELECT an.navn, a.orgnummer, ab.bransjer FROM arbeidsgiver AS a
-                JOIN arbeidsgiver_navn AS an ON a.navn_ref = an.id
+            SELECT ab.bransjer FROM arbeidsgiver a
                 LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
             WHERE a.orgnummer=?;
         """
         session.run(
             queryOf(query, orgnummer.toLong()).map { row ->
-                ArbeidsgiverDto(
-                    organisasjonsnummer = row.string("orgnummer"),
-                    navn = row.string("navn"),
-                    bransjer = row.stringOrNull("bransjer")
-                        ?.takeIf { it.isNotBlank() }
-                        ?.let { objectMapper.readValue<List<String>>(it) }
-                        ?: emptyList()
-                )
+                row.stringOrNull("bransjer")
+                    ?.let { objectMapper.readValue<List<String>>(it) }
+                    ?.filter { it.isNotBlank() }
+
+            }.asSingle
+        ) ?: emptyList()
+    }
+
+    fun finnNavn(orgnummer: String) = using(sessionOf(dataSource)) { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT an.navn FROM arbeidsgiver a
+                JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
+            WHERE a.orgnummer=?;
+        """
+        session.run(
+            queryOf(query, orgnummer.toLong()).map { row ->
+                row.string("navn")
             }.asSingle
         )
     }
@@ -131,34 +142,5 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    fun insertBransjer(orgnummer: String, bransjer: List<String>): Int =
-        sessionOf(dataSource, returnGeneratedKey = true).use {
-            @Language("PostgreSQL")
-            val insertBransjeStatement =
-                "INSERT INTO arbeidsgiver_bransjer (bransjer, oppdatert) VALUES (?, now());"
-
-            @Language("PostgreSQL")
-            val updateBransjeRefStatement =
-                "UPDATE arbeidsgiver SET bransjer_ref=:bransje_ref WHERE orgnummer=:orgnummer;"
-
-            it.transaction { transaction ->
-                val bransjeRef =
-                    transaction.run(
-                        queryOf(
-                            insertBransjeStatement,
-                            objectMapper.writeValueAsString(bransjer)
-                        ).asUpdateAndReturnGeneratedKey
-                    )
-                transaction.run(
-                    queryOf(
-                        updateBransjeRefStatement,
-                        mapOf(
-                            "bransje_ref" to bransjeRef,
-                            "orgnummer" to orgnummer.toLong()
-                        )
-                    ).asUpdate
-                )
-            }
-        }
 }
 

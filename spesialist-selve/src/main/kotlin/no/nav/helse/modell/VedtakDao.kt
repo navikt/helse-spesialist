@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
-import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
+import no.nav.helse.person.PersonDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
@@ -201,7 +201,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.execute(queryOf(query, ref))
     }
 
-    private fun tilVedtaksperiode(row: Row): Pair<VedtaksperiodeApiDto, PersonFraSpleisDto> {
+    private fun tilVedtaksperiode(row: Row): Pair<VedtaksperiodeApiDto, PersonDto> {
         val vedtak = VedtaksperiodeApiDto(
             fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
             aktørId = row.long("aktor_id").toString(),
@@ -216,7 +216,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             speilSnapshotRef = row.int("speil_snapshot_ref"),
             infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
         )
-        val snapshot = objectMapper.readValue<PersonFraSpleisDto>(row.string("data"))
+        val snapshot = objectMapper.readValue<PersonDto>(row.string("data"))
         return vedtak to snapshot
     }
 

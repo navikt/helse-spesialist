@@ -20,6 +20,6 @@ data class ArbeidsgiverApiDto(
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
     val overstyringer: List<OverstyringApiDto>,
-    val bransjer: List<String>?,
+    val bransjer: List<String>,
     val utbetalingshistorikk: List<UtbetalingshistorikkElementApiDto>
 )

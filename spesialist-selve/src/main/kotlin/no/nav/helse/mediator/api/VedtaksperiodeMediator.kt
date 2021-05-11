@@ -17,8 +17,8 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
-import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
+import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
+import no.nav.helse.person.PersonDto
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDto
@@ -46,7 +46,8 @@ internal class VedtaksperiodeMediator(
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            vedtakDao.findVedtakByFnr(fnr)?.let(::byggSpeilSnapshot)
+            vedtakDao.findVedtakByFnr(fnr)?.let(::
+            byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String) =
@@ -59,7 +60,7 @@ internal class VedtaksperiodeMediator(
             vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
         }
 
-    private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeApiDto, PersonFraSpleisDto>) =
+    private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeApiDto, PersonDto>) =
         measureAsHistogram("byggSpeilSnapshot") {
             val (vedtak, speilSnapshot) = vedtakinfo
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
@@ -92,9 +93,8 @@ internal class VedtaksperiodeMediator(
             }
 
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
-                val arbeidsgiverDto = measureAsHistogram("byggSpeilSnapshot_findArbeidsgiver") {
-                    arbeidsgiverDao.findArbeidsgiver(it.organisasjonsnummer)
-                }
+                val navn = arbeidsgiverDao.finnNavn(it.organisasjonsnummer)
+                val bransjer = arbeidsgiverDao.finnBransjer(it.organisasjonsnummer)
                 val overstyringer = overstyringDao.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
                         OverstyringApiDto(
@@ -113,11 +113,11 @@ internal class VedtaksperiodeMediator(
                     }
                 ArbeidsgiverApiDto(
                     organisasjonsnummer = it.organisasjonsnummer,
-                    navn = arbeidsgiverDto?.navn ?: "Ikke tilgjengelig",
+                    navn = navn ?: "Ikke tilgjengelig",
                     id = it.id,
                     overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder,
-                    bransjer = arbeidsgiverDto?.bransjer,
+                    bransjer = bransjer,
                     utbetalingshistorikk = if (REVURDERING_TOGGLE.enabled) mapUtbetalingshistorikk(it) else emptyList()
                 )
             }
@@ -180,7 +180,7 @@ internal class VedtaksperiodeMediator(
             )
         }
 
-    private fun mapUtbetalingshistorikk(it: ArbeidsgiverFraSpleisDto) =
+    private fun mapUtbetalingshistorikk(it: ArbeidsgiverDto) =
         it.utbetalingshistorikk?.let { utbetalingshistorikk ->
             UtbetalingshistorikkElementApiDto.toSpeilMap(utbetalingshistorikk)
         } ?: emptyList()
