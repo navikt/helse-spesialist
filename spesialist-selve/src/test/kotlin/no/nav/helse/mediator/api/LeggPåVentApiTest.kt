@@ -10,8 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.feilhåndtering.FeilDto
-import no.nav.helse.feilhåndtering.Modellfeil
-import no.nav.helse.feilhåndtering.OppgaveErIkkeTildelt
+import no.nav.helse.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
@@ -58,9 +57,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            leggPåVentMediator.leggOppgavePåVent(
-                oppgavereferanse
-            )
+            leggPåVentMediator.leggOppgavePåVent(oppgavereferanse)
         }
     }
 
@@ -78,17 +75,13 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            leggPåVentMediator.fjernPåVent(
-                oppgavereferanse
-            )
+            leggPåVentMediator.fjernPåVent(oppgavereferanse)
         }
     }
 
     @Test
     fun `gir feil hvis bruker forsøker å legge en oppgave på vent før den er tildelt bruker`() {
-        every { leggPåVentMediator.leggOppgavePåVent(any()) } throws Modellfeil(
-            OppgaveErIkkeTildelt(1L)
-        )
+        every { leggPåVentMediator.leggOppgavePåVent(any()) } throws OppgaveIkkeTildelt(1L)
         val oppgavereferanse = nextLong()
         val response = runBlocking {
             client.post<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
@@ -100,8 +93,8 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
         }
 
         assertEquals(HttpStatusCode.FailedDependency, response.status)
-        val feilDto = runBlocking { response.receive<FeilDto>() }
-           assertEquals(feilDto.feilkode, OppgaveErIkkeTildelt(1L).feilkode)
+        val feil = runBlocking { response.receive<FeilDto>() }
+        assertEquals("oppgave_er_ikke_tildelt", feil.feilkode)
     }
 
     @Test

@@ -1,7 +1,6 @@
 package no.nav.helse.modell.leggpåvent
 
-import no.nav.helse.feilhåndtering.Modellfeil
-import no.nav.helse.feilhåndtering.OppgaveErIkkeTildelt
+import no.nav.helse.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.tildeling.TildelingDao
 
@@ -13,7 +12,7 @@ internal class LeggPåVentMediator(
     internal fun leggOppgavePåVent(
         oppgaveId: Long
     ) {
-        tildelingDao.tildelingForOppgave(oppgaveId) ?: throw Modellfeil(OppgaveErIkkeTildelt(oppgaveId))
+        tildelingDao.tildelingForOppgave(oppgaveId) ?: throw OppgaveIkkeTildelt(oppgaveId)
         tildelingDao.leggOppgavePåVent(oppgaveId)
         hendelseMediator.leggOppgavePåVent(oppgaveId)
     }

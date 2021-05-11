@@ -9,9 +9,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.feilhåndtering.FeilDto
-import no.nav.helse.feilhåndtering.Modellfeil
-import no.nav.helse.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.TildelingApiDto
@@ -59,12 +58,7 @@ internal class TildelingApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            tildelingMediator.tildelOppgaveTilSaksbehandler(
-                oppgavereferanse,
-                SAKSBEHANDLER_OID,
-                any(),
-                any()
-            )
+            tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, SAKSBEHANDLER_OID, any(), any())
         }
     }
 
@@ -82,18 +76,14 @@ internal class TildelingApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            tildelingMediator.fjernTildeling(
-                oppgavereferanse
-            )
+            tildelingMediator.fjernTildeling(oppgavereferanse)
         }
     }
 
     @Test
     fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
-        val tildeltFeil = OppgaveErAlleredeTildelt(TildelingApiDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
-        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws Modellfeil(
-            tildeltFeil
-        )
+        val tildeltFeil = OppgaveAlleredeTildelt(TildelingApiDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
+        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws tildeltFeil
         val oppgavereferanse = nextLong()
         val response = runBlocking {
             client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
@@ -106,8 +96,9 @@ internal class TildelingApiTest : AbstractApiTest() {
 
         assertEquals(HttpStatusCode.Conflict, response.status)
         val feilDto = runBlocking { response.receive<FeilDto>() }
-        assertEquals(feilDto.feilkode, tildeltFeil.feilkode)
+        assertEquals( "oppgave_er_allerede_tildelt", feilDto.feilkode)
         assertEquals("en annen saksbehandler", feilDto.kontekst["tildeltTil"])
+        assertEquals("spesialist", feilDto.kildesystem)
     }
 
     @Test
