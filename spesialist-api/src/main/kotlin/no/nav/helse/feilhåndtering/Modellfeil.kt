@@ -6,49 +6,64 @@ import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.tildeling.TildelingApiDto
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class Modellfeil(val feil: Feil) : RuntimeException(feil.feilkode) {
-    fun feilkode() = this.feil.feilkode
+abstract class Modellfeil protected constructor() : RuntimeException() {
+    protected companion object {
+        val logg = LoggerFactory.getLogger(this::class.java)
+        val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    }
 
-    fun httpKode() = this.feil.kategori.httpStatus
+    protected abstract val eksternKontekst: Map<String, Any>
+    protected abstract val melding: String
+    abstract val httpkode: HttpStatusCode
+    open fun logger() = Unit
+    open fun tilFeilDto(): FeilDto = FeilDto(melding, eksternKontekst)
 
-    fun loggNivå() = this.feil.kategori.loggnivå
+    override val message: String get() = melding
 }
 
-enum class Loggnivå { Warning, Info }
+class OppgaveAlleredeTildelt(tildeling: TildelingApiDto) : Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = mapOf(
+        "tildeltTil" to tildeling.navn,
+        "tildeling" to tildeling
+    )
 
-sealed class Feil(val feilkode: String, val kategori: Feilkategori, val eksternKontekst: Map<String, Any> = mapOf())
+    override val httpkode = HttpStatusCode.Conflict
+    override val melding: String = "oppgave_er_allerede_tildelt"
 
-data class OppgaveErAlleredeTildelt(val tildeling: TildelingApiDto) :
-    Feil("oppgave_er_allerede_tildelt", Feilkategori(HttpStatusCode.Conflict, Loggnivå.Info),
-        mapOf(
-            "tildeltTil" to tildeling.navn,
-            "tildeling" to tildeling
-        ))
+    override fun logger() {
+        logg.info(
+            "Returnerer {} for {}",
+            keyValue("httpkode", httpkode),
+            keyValue("melding", melding)
+        )
+        sikkerLogg.info(
+            "Returnerer {} for {}, tildelingsinfo=$eksternKontekst",
+            keyValue("httpkode", httpkode.value),
+            keyValue("melding", melding)
+        )
+    }
+}
 
-data class OppgaveErIkkeTildelt(val oppgaveId: Long) :
-    Feil("oppgave_er_ikke_tildelt", Feilkategori(HttpStatusCode.FailedDependency, Loggnivå.Info), mapOf("oppgaveId" to oppgaveId.toString()))
-
-class Feilkategori(val httpStatus: HttpStatusCode, val loggnivå: Loggnivå)
+class OppgaveIkkeTildelt(private val oppgaveId: Long): Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
+    override val httpkode = HttpStatusCode.FailedDependency
+    override val melding: String = "oppgave_er_ikke_tildelt"
+    override fun logger() {
+        logg.info(
+            "Returnerer {} for {} for oppgaveId=$oppgaveId",
+            keyValue("httpkode", httpkode.value),
+            keyValue("melding", melding)
+        )
+    }
+}
 
 suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda: () -> Unit) {
     try {
         lambda()
     } catch (feil: Modellfeil) {
-        val f: (String, Any, Any) -> Unit = when (feil.loggNivå()) {
-            Loggnivå.Warning -> logg(this)::warn
-            Loggnivå.Info -> logg(this)::info
-        }
-
-        f("Returnerer {} for {}",
-            keyValue("httpKode", feil.httpKode().value),
-            keyValue("feilkode", feil.feilkode()))
-
-        call.respond(status = feil.httpKode(), message = FeilDto(feil.feilkode(), feil.feil.eksternKontekst))
+        feil.logger()
+        call.respond(status = feil.httpkode, message = feil.tilFeilDto())
     }
 }
-
-fun logg(that: Any): Logger = LoggerFactory.getLogger(that::class.java)
-
