@@ -3,9 +3,9 @@ package no.nav.helse.modell.tildeling
 import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.feilhåndtering.Modellfeil
+import no.nav.helse.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.feilhåndtering.ModellFeil
-import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingApiDto
 import no.nav.helse.tildeling.TildelingDao
@@ -32,7 +32,7 @@ internal class TildelingMediatorTest {
         val eksisterendeTildeling = TildelingApiDto(epost = "epost@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "annen saksbehandler")
         every { tildelingDao.tildelingForOppgave(any()) } returns eksisterendeTildeling
 
-        val feil = assertThrows<ModellFeil> {
+        val feil = assertThrows<Modellfeil> {
             tildelingMediator.tildelOppgaveTilSaksbehandler(
                 oppgaveId = 1L,
                 saksbehandlerreferanse = eksisterendeTildeling.oid,

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.tildeling
 
+import no.nav.helse.feilhåndtering.Modellfeil
+import no.nav.helse.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.feilhåndtering.ModellFeil
-import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import java.util.*
@@ -22,7 +22,7 @@ internal class TildelingMediator(
 
         val eksisterendeTildeling = tildelingDao.tildelingForOppgave(oppgaveId)
         if (eksisterendeTildeling != null) {
-            throw ModellFeil(OppgaveErAlleredeTildelt(eksisterendeTildeling))
+            throw Modellfeil(OppgaveErAlleredeTildelt(eksisterendeTildeling))
         }
         //TODO: Dette burde gjøres ute i mediatoren
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse)

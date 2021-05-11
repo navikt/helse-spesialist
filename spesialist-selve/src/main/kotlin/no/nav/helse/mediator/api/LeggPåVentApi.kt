@@ -6,7 +6,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.modell.feilhåndtering.modellfeilForRest
+import no.nav.helse.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import org.slf4j.LoggerFactory
 

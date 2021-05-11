@@ -9,9 +9,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.modell.feilhåndtering.FeilDto
-import no.nav.helse.modell.feilhåndtering.ModellFeil
-import no.nav.helse.modell.feilhåndtering.OppgaveErAlleredeTildelt
+import no.nav.helse.feilhåndtering.FeilDto
+import no.nav.helse.feilhåndtering.Modellfeil
+import no.nav.helse.feilhåndtering.OppgaveErAlleredeTildelt
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.TildelingApiDto
@@ -91,7 +91,7 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
         val tildeltFeil = OppgaveErAlleredeTildelt(TildelingApiDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
-        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws ModellFeil(
+        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws Modellfeil(
             tildeltFeil
         )
         val oppgavereferanse = nextLong()

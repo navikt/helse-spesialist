@@ -1,4 +1,4 @@
-package no.nav.helse.modell.feilhåndtering
+package no.nav.helse.feilhåndtering
 
 import io.ktor.application.*
 import io.ktor.http.*
@@ -9,7 +9,7 @@ import no.nav.helse.tildeling.TildelingApiDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class ModellFeil(val feil: Feil) : RuntimeException(feil.feilkode) {
+class Modellfeil(val feil: Feil) : RuntimeException(feil.feilkode) {
     fun feilkode() = this.feil.feilkode
 
     fun httpKode() = this.feil.kategori.httpStatus
@@ -17,9 +17,7 @@ class ModellFeil(val feil: Feil) : RuntimeException(feil.feilkode) {
     fun loggNivå() = this.feil.kategori.loggnivå
 }
 
-enum class Loggnivå {
-    Warning, Info
-}
+enum class Loggnivå { Warning, Info }
 
 sealed class Feil(val feilkode: String, val kategori: Feilkategori, val eksternKontekst: Map<String, Any> = mapOf())
 
@@ -38,7 +36,7 @@ class Feilkategori(val httpStatus: HttpStatusCode, val loggnivå: Loggnivå)
 suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda: () -> Unit) {
     try {
         lambda()
-    } catch (feil: ModellFeil) {
+    } catch (feil: Modellfeil) {
         val f: (String, Any, Any) -> Unit = when (feil.loggNivå()) {
             Loggnivå.Warning -> logg(this)::warn
             Loggnivå.Info -> logg(this)::info
@@ -52,6 +50,5 @@ suspend inline fun PipelineContext<*, ApplicationCall>.modellfeilForRest(lambda:
     }
 }
 
-fun logg(that: Any): Logger =
-    LoggerFactory.getLogger(that::class.java)
+fun logg(that: Any): Logger = LoggerFactory.getLogger(that::class.java)
 

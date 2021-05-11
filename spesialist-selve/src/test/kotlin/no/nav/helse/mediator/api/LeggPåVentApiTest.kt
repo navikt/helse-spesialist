@@ -9,9 +9,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.modell.feilhåndtering.FeilDto
-import no.nav.helse.modell.feilhåndtering.ModellFeil
-import no.nav.helse.modell.feilhåndtering.OppgaveErIkkeTildelt
+import no.nav.helse.feilhåndtering.FeilDto
+import no.nav.helse.feilhåndtering.Modellfeil
+import no.nav.helse.feilhåndtering.OppgaveErIkkeTildelt
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
@@ -86,7 +86,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
     @Test
     fun `gir feil hvis bruker forsøker å legge en oppgave på vent før den er tildelt bruker`() {
-        every { leggPåVentMediator.leggOppgavePåVent(any()) } throws ModellFeil(
+        every { leggPåVentMediator.leggOppgavePåVent(any()) } throws Modellfeil(
             OppgaveErIkkeTildelt(1L)
         )
         val oppgavereferanse = nextLong()
