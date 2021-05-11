@@ -35,7 +35,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
             risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(vedtaksperiodeId, utbetalingId)
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
-        logg.info("Oppretter saksbehandleroppgave")
+        logg.info("Oppretter saksbehandleroppgave på utbetalingId $utbetalingId og vedtaksperiodeId $vedtaksperiodeId")
         oppgaveMediator.opprett(oppgave)
         return true
     }

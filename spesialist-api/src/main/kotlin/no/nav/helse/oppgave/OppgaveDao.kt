@@ -135,7 +135,7 @@ class OppgaveDao(private val dataSource: DataSource) {
             SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE utbetaling_id = ?
+            WHERE utbetaling_id = ? AND o.status NOT IN ('Invalidert'::oppgavestatus)
         """
         session.run(
             queryOf(statement, utbetalingId)

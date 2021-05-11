@@ -10,8 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.oppgave.Oppgavestatus.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -140,6 +139,23 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId = insertOppgave(utbetalingId = utbetalingId, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
         val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
         assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = utbetalingId), oppgave)
+    }
+
+    @Test
+    fun `finner ikke oppgave fra utbetalingId dersom oppgaven er invalidert`() {
+        val utbetalingId = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        insertOppgave(
+            utbetalingId = utbetalingId,
+            commandContextId = CONTEXT_ID,
+            vedtakRef = vedtakId,
+            oppgavetype = OPPGAVETYPE,
+            status = Invalidert
+        )
+        val oppgave = oppgaveDao.finn(utbetalingId)
+        assertNull(oppgave)
     }
 
     @Test
@@ -280,7 +296,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         commandContextId: UUID,
         oppgavetype: String,
         vedtakRef: Long? = null,
-        utbetalingId: UUID?
+        utbetalingId: UUID?,
+        status: Oppgavestatus = AvventerSaksbehandler
     ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
         it.run(
             queryOf(
@@ -289,7 +306,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?);
             """,
                 oppgavetype,
-                AvventerSaksbehandler.name,
+                status.name,
                 null,
                 null,
                 vedtakRef,
