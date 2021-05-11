@@ -21,7 +21,7 @@ internal class OppdaterOppgavestatusCommand(
                 UTBETALT,
                 IKKE_GODKJENT -> oppgaveMediator.ferdigstill(it)
                 FORKASTET -> oppgaveMediator.invalider(it)
-                else -> Unit
+                else -> {} // NOP
             }
         }
         return true

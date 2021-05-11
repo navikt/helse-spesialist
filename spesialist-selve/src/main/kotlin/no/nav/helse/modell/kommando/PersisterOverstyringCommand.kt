@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import java.util.*
 

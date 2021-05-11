@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage

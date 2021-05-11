@@ -2,8 +2,8 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import no.nav.helse.modell.overstyring.Dagtype
-import no.nav.helse.modell.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.Dagtype
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.snapshotMedWarning
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

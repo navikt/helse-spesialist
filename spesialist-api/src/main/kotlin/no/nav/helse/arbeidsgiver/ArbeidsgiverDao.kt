@@ -88,7 +88,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         """
         session.run(
             queryOf(query, orgnummer.toLong()).map { row ->
-                ArbeidsgiverApiDto(
+                ArbeidsgiverDto(
                     organisasjonsnummer = row.string("orgnummer"),
                     navn = row.string("navn"),
                     bransjer = row.stringOrNull("bransjer")

@@ -4,9 +4,9 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.person.toFødselsnummer
+import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyringDto
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -133,21 +133,3 @@ WHERE p.fodselsnummer = ?
         )
     }
 }
-
-data class OverstyringDto(
-    val hendelseId: UUID,
-    val fødselsnummer: String,
-    val organisasjonsnummer: String,
-    val begrunnelse: String,
-    val timestamp: LocalDateTime,
-    val saksbehandlerNavn: String,
-    val overstyrteDager: List<OverstyringDagDto>
-)
-
-data class OverstyringDagDto(
-    val dato: LocalDate,
-    val type: Dagtype,
-    val grad: Int?
-)
-
-enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }

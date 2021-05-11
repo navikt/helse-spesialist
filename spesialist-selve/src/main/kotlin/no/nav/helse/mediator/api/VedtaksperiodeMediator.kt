@@ -1,9 +1,12 @@
 package no.nav.helse.mediator.api
 
+import UtbetalingshistorikkElementApiDto
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.helse.arbeidsgiver.ArbeidsforholdApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import no.nav.helse.modell.VedtakDao
@@ -16,10 +19,16 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.snapshot.ArbeidsgiverFraSpleisDto
 import no.nav.helse.modell.vedtak.snapshot.PersonFraSpleisDto
-import no.nav.helse.modell.vedtaksperiode.*
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyringApiDto
+import no.nav.helse.overstyring.OverstyrtDagApiDto
+import no.nav.helse.person.PersonForSpeilDto
 import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.utbetaling.AnnullertAvSaksbehandlerApiDto
+import no.nav.helse.utbetaling.OppdragApiDto
+import no.nav.helse.utbetaling.UtbetalingApiDto
+import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDto
 import java.util.*
 
@@ -58,21 +67,21 @@ internal class VedtaksperiodeMediator(
             }
             val utbetalinger = measureAsHistogram("byggSpeilSnapshot_findUtbetaling") {
                 utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
-                    UtbetalingForSpeilDto(
+                    UtbetalingApiDto(
                         type = utbetaling.type,
                         status = utbetaling.status.toString(),
-                        arbeidsgiverOppdrag = OppdragForSpeilDto(
+                        arbeidsgiverOppdrag = OppdragApiDto(
                             organisasjonsnummer = utbetaling.arbeidsgiverOppdrag.organisasjonsnummer,
                             fagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId,
                             utbetalingslinjer = utbetaling.arbeidsgiverOppdrag.linjer.map { linje ->
-                                UtbetalingslinjeForSpeilDto(
+                                UtbetalingslinjeApiDto(
                                     fom = linje.fom,
                                     tom = linje.tom
                                 )
                             }
                         ),
                         annullertAvSaksbehandler = utbetaling.annullertAvSaksbehandler?.let {
-                            AnnullertAvSaksbehandlerForSpeilDto(
+                            AnnullertAvSaksbehandlerApiDto(
                                 annullertTidspunkt = it.annullertTidspunkt,
                                 saksbehandlerNavn = it.saksbehandlerNavn
                             )
@@ -88,13 +97,13 @@ internal class VedtaksperiodeMediator(
                 }
                 val overstyringer = overstyringDao.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
-                        OverstyringForSpeilDto(
+                        OverstyringApiDto(
                             hendelseId = overstyring.hendelseId,
                             begrunnelse = overstyring.begrunnelse,
                             timestamp = overstyring.timestamp,
                             saksbehandlerNavn = overstyring.saksbehandlerNavn,
                             overstyrteDager = overstyring.overstyrteDager.map { dag ->
-                                OverstyringDagForSpeilDto(
+                                OverstyrtDagApiDto(
                                     dato = dag.dato,
                                     dagtype = dag.type,
                                     grad = dag.grad
@@ -102,7 +111,7 @@ internal class VedtaksperiodeMediator(
                             }
                         )
                     }
-                ArbeidsgiverForSpeilDto(
+                ArbeidsgiverApiDto(
                     organisasjonsnummer = it.organisasjonsnummer,
                     navn = arbeidsgiverDto?.navn ?: "Ikke tilgjengelig",
                     id = it.id,
@@ -144,7 +153,7 @@ internal class VedtaksperiodeMediator(
                     arbeidsforholdDao
                         .findArbeidsforhold(vedtak.fødselsnummer, arbeidsgiver.organisasjonsnummer)
                         .map { arbeidsforhold ->
-                            ArbeidsforholdForSpeilDto(
+                            ArbeidsforholdApiDto(
                                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                                 stillingstittel = arbeidsforhold.stillingstittel,
                                 stillingsprosent = arbeidsforhold.stillingsprosent,
@@ -173,7 +182,7 @@ internal class VedtaksperiodeMediator(
 
     private fun mapUtbetalingshistorikk(it: ArbeidsgiverFraSpleisDto) =
         it.utbetalingshistorikk?.let { utbetalingshistorikk ->
-            UtbetalingshistorikkElementForSpeilDto.toSpeilMap(utbetalingshistorikk)
+            UtbetalingshistorikkElementApiDto.toSpeilMap(utbetalingshistorikk)
         } ?: emptyList()
 
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
