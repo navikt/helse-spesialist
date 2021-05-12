@@ -2,7 +2,6 @@ package no.nav.helse.modell
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.intellij.lang.annotations.Language
@@ -17,7 +16,7 @@ internal class WarningDao(private val dataSource: DataSource) {
 
     internal fun fjernWarnings(vedtaksperiodeId: UUID) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")
             val statement = "DELETE FROM warning WHERE vedtak_ref=?"
             session.run(queryOf(statement, vedtakRef).asExecute)
@@ -25,7 +24,7 @@ internal class WarningDao(private val dataSource: DataSource) {
     }
 
     private fun fjernWarnings(vedtakRef: Long, kilde: WarningKilde) {
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")
             val statement = "DELETE FROM warning WHERE vedtak_ref=? AND kilde=CAST(? as warning_kilde)"
             session.run(queryOf(statement, vedtakRef, kilde.name).asExecute)
@@ -43,7 +42,7 @@ internal class WarningDao(private val dataSource: DataSource) {
         warning.lagre(this, vedtakRef)
     }
 
-    internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = using(sessionOf(dataSource)) { session ->
+    internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = "INSERT INTO warning (melding, kilde, vedtak_ref) VALUES (?, CAST(? as warning_kilde), ?)"
         session.run(queryOf(statement, melding, kilde.name, vedtakRef).asUpdate)
@@ -56,7 +55,7 @@ internal class WarningDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, vedtakRef).map { Warning( melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
     }
 
-    private fun finnVedtakId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+    private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
         session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)

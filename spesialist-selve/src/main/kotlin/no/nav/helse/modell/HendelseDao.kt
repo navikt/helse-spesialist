@@ -3,7 +3,6 @@ package no.nav.helse.modell
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.person.toFødselsnummer
@@ -13,7 +12,7 @@ import javax.sql.DataSource
 
 internal class HendelseDao(private val dataSource: DataSource) {
     internal fun opprett(hendelse: Hendelse) {
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
                 transactionalSession.run {
                     opprettHendelse(hendelse)
@@ -24,7 +23,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     internal fun finnFødselsnummer(hendelseId: UUID): String {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """SELECT fodselsnummer FROM hendelse WHERE id = ?"""
             requireNotNull(session.run(queryOf(statement, hendelseId).map {
@@ -38,7 +37,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     private fun finnJson(hendelseId: UUID, hendelsetype: Hendelsetype): String {
-        return requireNotNull(using(sessionOf(dataSource)) { session ->
+        return requireNotNull(sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = """SELECT data FROM hendelse WHERE id = ? AND type = ?"""
             session.run(queryOf(statement, hendelseId, hendelsetype.name).map { it.string("data") }.asSingle)
@@ -75,7 +74,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     internal fun harKoblingTil(vedtaksperiodeId: UUID): Boolean {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT 1 FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id=?", vedtaksperiodeId
@@ -84,7 +83,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         } ?: false
     }
 
-    internal fun finn(id: UUID, hendelsefabrikk: IHendelsefabrikk) = using(sessionOf(dataSource)) { session ->
+    internal fun finn(id: UUID, hendelsefabrikk: IHendelsefabrikk) = sessionOf(dataSource).use { session ->
         session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
             fraHendelsetype(enumValueOf(row.string("type")), row.string("data"), hendelsefabrikk)
         }.asSingle)

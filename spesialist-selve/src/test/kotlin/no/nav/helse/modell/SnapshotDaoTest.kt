@@ -3,7 +3,6 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -20,7 +19,7 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
         assertEquals(LocalDate.now(), snapshot().first().second)
     }
 
-    private fun snapshot() = using(sessionOf(dataSource)) {
+    private fun snapshot() = sessionOf(dataSource).use  {
         it.run(queryOf("SELECT data, sist_endret FROM speil_snapshot").map {
             it.string("data") to it.localDate("sist_endret")
         }.asList)

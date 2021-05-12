@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -26,7 +25,6 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -37,6 +35,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -485,13 +484,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertHendelse(hendelseId: UUID) {
-        assertEquals(1, using(sessionOf(dataSource)) {
+        assertEquals(1, sessionOf(dataSource).use {
             it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
         })
     }
 
     protected fun assertIkkeHendelse(hendelseId: UUID) {
-        assertEquals(0, using(sessionOf(dataSource)) {
+        assertEquals(0, sessionOf(dataSource).use {
             it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
         })
     }
@@ -505,7 +504,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun vedtak(vedtaksperiodeId: UUID): Int {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             requireNotNull(
                 session.run(
                     queryOf(
@@ -518,7 +517,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun contextId(hendelseId: UUID): UUID {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             requireNotNull(session.run(
                 queryOf("SELECT context_id FROM command_context WHERE hendelse_id = ?",
                     hendelseId
@@ -557,7 +556,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertTilstand(hendelseId: UUID, vararg tilstand: String) {
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT tilstand FROM command_context WHERE hendelse_id = ? ORDER BY id ASC",
@@ -605,7 +604,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertSnapshot(forventet: String, vedtaksperiodeId: UUID) {
-        assertEquals(forventet, using(sessionOf(dataSource)) {
+        assertEquals(forventet, sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "SELECT data FROM speil_snapshot WHERE id = (SELECT speil_snapshot_ref FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
@@ -618,7 +617,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertWarning(forventet: String, vedtaksperiodeId: UUID) {
-        assertTrue(using(sessionOf(dataSource)) {
+        assertTrue(sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",

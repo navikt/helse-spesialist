@@ -3,7 +3,6 @@ package no.nav.helse.modell.kommando
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.meldinger.Hendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -89,7 +88,7 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun assertTilstand(contextId: UUID, vararg expectedTilstand: String) {
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             session.run(
                 queryOf(
                     "SELECT tilstand FROM command_context WHERE context_id = ? ORDER BY id ASC",
@@ -102,7 +101,7 @@ internal class CommandContextDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun assertContextRad(finnes: Boolean, contextId: UUID) {
-        val count = using(sessionOf(dataSource)) {
+        val count = sessionOf(dataSource).use  {
             it.run(
                 queryOf("SELECT COUNT(1) FROM command_context WHERE context_id = ?",
                 contextId

@@ -3,7 +3,6 @@ package no.nav.helse.arbeidsgiver
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
@@ -80,7 +79,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    fun finnBransjer(orgnummer: String) = using(sessionOf(dataSource)) { session ->
+    fun finnBransjer(orgnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT ab.bransjer FROM arbeidsgiver a
@@ -97,7 +96,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         ) ?: emptyList()
     }
 
-    fun finnNavn(orgnummer: String) = using(sessionOf(dataSource)) { session ->
+    fun finnNavn(orgnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT an.navn FROM arbeidsgiver a

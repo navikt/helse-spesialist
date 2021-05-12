@@ -1,10 +1,6 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import DatabaseIntegrationTest
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import kotliquery.using
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

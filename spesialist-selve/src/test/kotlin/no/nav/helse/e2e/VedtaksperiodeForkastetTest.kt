@@ -4,7 +4,6 @@ import AbstractE2ETest
 import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.snapshotUtenWarnings
 import org.intellij.lang.annotations.Language
@@ -48,7 +47,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
     }
 
     private fun oppgaveOppdatertTidspunkt() =
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use  {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
                 it.localDateTime("oppdatert")
             }.asSingle)

@@ -3,7 +3,6 @@ package no.nav.helse.behandlingsstatistikk
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -37,7 +36,7 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         )
     }
 
-    private fun tilGodkjenningPerPeriodetype() = using(sessionOf(dataSource)) { session ->
+    private fun tilGodkjenningPerPeriodetype() = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
@@ -49,7 +48,7 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         session.run(queryOf(query).map { perPeriodetype(it) }.asList)
     }
 
-    private fun tildeltPerPeriodetype() = using(sessionOf(dataSource)) { session ->
+    private fun tildeltPerPeriodetype() = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
@@ -62,7 +61,7 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         session.run(queryOf(query).map { perPeriodetype(it) }.asList)
     }
 
-    private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom
@@ -70,7 +69,7 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
     })
 
-    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) {session ->
+    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(sessionOf(dataSource).use {session ->
         @Language("PostgreSQL")
         val query = """
             SELECT COUNT(1) as antall FROM automatisering a
@@ -80,7 +79,7 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
     })
 
-    private fun antallAnnulleringer(fom: LocalDate) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    private fun antallAnnulleringer(fom: LocalDate) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT COUNT(1) as antall FROM annullert_av_saksbehandler WHERE annullert_tidspunkt >= :fom

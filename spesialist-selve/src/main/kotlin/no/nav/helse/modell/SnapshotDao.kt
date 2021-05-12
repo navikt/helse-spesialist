@@ -3,14 +3,13 @@ package no.nav.helse.modell
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
 internal class SnapshotDao(private val dataSource: DataSource) {
 
-    fun insertSpeilSnapshot(personBlob: String) = using(sessionOf(dataSource, returnGeneratedKey = true)) {
+    fun insertSpeilSnapshot(personBlob: String) = sessionOf(dataSource, returnGeneratedKey = true).use {
         it.insertSpeilSnapshot(personBlob).toInt()
     }
 
@@ -30,7 +29,7 @@ internal class SnapshotDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun findSpeilSnapshot(id: Int) = using(sessionOf(dataSource)) { it.findSpeilSnapshot(id) }
+    internal fun findSpeilSnapshot(id: Int) = sessionOf(dataSource).use { it.findSpeilSnapshot(id) }
 
     private fun Session.findSpeilSnapshot(id: Int): String? {
         @Language("PostgreSQL")

@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -79,7 +78,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             INNER JOIN oppdrag o2 ON (o2.id = ui.person_fagsystem_id_ref)
             WHERE p.fodselsnummer = :fodselsnummer AND a.orgnummer = :orgnummer
             """
-        return using(sessionOf(dataSource)) {
+        return sessionOf(dataSource).use  {
             it.run(queryOf(statement, mapOf(
                 "fodselsnummer" to UNG_PERSON_FNR_2018.toLong(),
                 "orgnummer" to ORGNR.toLong()

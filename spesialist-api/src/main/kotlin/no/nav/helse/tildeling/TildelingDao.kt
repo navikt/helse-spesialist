@@ -1,6 +1,9 @@
 package no.nav.helse.tildeling
 
-import kotliquery.*
+import kotliquery.Row
+import kotliquery.Session
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.util.*
@@ -25,11 +28,22 @@ class TildelingDao(private val dataSource: DataSource) {
         }
     }
 
-    fun tildelingForPerson(fødselsnummer: String) = sessionOf(dataSource)
-        .use { it.tildelingForPerson(fødselsnummer) }
+    fun tildelingForPerson(fødselsnummer: String) = sessionOf(dataSource).use {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
+                 RIGHT JOIN vedtak v on person.id = v.person_ref
+                 RIGHT JOIN oppgave o on v.id = o.vedtak_ref
+                 RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
+                 RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+            WHERE fodselsnummer = ? AND o.status = 'AvventerSaksbehandler'
+            ORDER BY o.opprettet DESC;
+        """
+        it.run(queryOf(query, fødselsnummer.toLong()).map(::tildelingDto).asSingle)
+    }
 
     fun tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) =
-        using(sessionOf(dataSource)) { it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil) }
+        sessionOf(dataSource).use { it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil) }
 
     fun leggOppgavePåVent(oppgaveId: Long) {
         sessionOf(dataSource).use {
@@ -66,21 +80,6 @@ class TildelingDao(private val dataSource: DataSource) {
         run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
     }
 
-    private fun Session.tildelingForPerson(fødselsnummer: String): TildelingApiDto? {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT s.epost, s.oid, s.navn, t.på_vent FROM person
-                 RIGHT JOIN vedtak v on person.id = v.person_ref
-                 RIGHT JOIN oppgave o on v.id = o.vedtak_ref
-                 RIGHT JOIN tildeling t on o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
-                 RIGHT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-            WHERE fodselsnummer = :fodselsnummer
-                AND o.status = 'AvventerSaksbehandler'
-            ORDER BY o.opprettet DESC;
-        """
-        return run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong())).map(::tildelingDto).asSingle)
-    }
-
     private fun tildelingDto(it: Row) = TildelingApiDto(
         epost = it.string("epost"),
         påVent = it.boolean("på_vent"),
@@ -100,7 +99,7 @@ class TildelingDao(private val dataSource: DataSource) {
         )
     }
 
-    fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? = using(sessionOf(dataSource)) {
+    fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
             SELECT s.oid, s.epost, s.navn, t.på_vent FROM tildeling t

@@ -3,7 +3,6 @@ package no.nav.helse.oppgave
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.PersoninfoApiDto
@@ -17,7 +16,7 @@ import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) {
     fun finnOppgaver(inkluderRiskQaOppgaver: Boolean) =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA = if (inkluderRiskQaOppgaver) "" else "AND o.type != 'RISK_QA'"
 
             @Language("PostgreSQL")
@@ -51,7 +50,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         }
 
     fun finnOppgaveId(vedtaksperiodeId: UUID) =
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val statement = """
                 SELECT id FROM oppgave
@@ -66,7 +65,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         }
 
     fun finnOppgaveId(fødselsnummer: String) =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 """
@@ -83,7 +82,7 @@ class OppgaveDao(private val dataSource: DataSource) {
             )
         }
 
-    fun finn(oppgaveId: Long) = using(sessionOf(dataSource)) { session ->
+    fun finn(oppgaveId: Long) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
@@ -107,7 +106,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-    fun finnAktive(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+    fun finnAktive(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT o.id, o.type, o.status, o.utbetaling_id
@@ -129,7 +128,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-    fun finn(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
+    fun finn(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
@@ -153,7 +152,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-    fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT v.vedtaksperiode_id
@@ -170,7 +169,7 @@ class OppgaveDao(private val dataSource: DataSource) {
     })
 
     fun opprettOppgave(commandContextId: UUID, oppgavetype: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
-        requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
             @Language("PostgreSQL")
             val query = """
@@ -182,7 +181,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }) { "Kunne ikke opprette oppgave" }
 
-    private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(using(sessionOf(dataSource)) {
+    private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
         it.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
@@ -193,7 +192,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String? = null,
         oid: UUID? = null
-    ) = using(sessionOf(dataSource)) {
+    ) = sessionOf(dataSource).use {
         it.run(
             queryOf(
                 "UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus WHERE id=?",
@@ -205,14 +204,14 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }
 
-    fun finnContextId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun finnContextId(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
         session.run(
             queryOf("SELECT command_context_id FROM oppgave WHERE id = ?", oppgaveId)
                 .map { row -> UUID.fromString(row.string("command_context_id")) }.asSingle
         )
     })
 
-    fun finnHendelseId(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun finnHendelseId(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement =
             """SELECT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = ?)"""
@@ -222,7 +221,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     })
 
-    fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
                 SELECT COUNT(1) AS oppgave_count FROM oppgave
@@ -232,7 +231,7 @@ class OppgaveDao(private val dataSource: DataSource) {
     }) > 0
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
-        requireNotNull(using(sessionOf(dataSource)) { session ->
+        requireNotNull(sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
                 SELECT COUNT(1) AS oppgave_count FROM oppgave o
@@ -242,7 +241,7 @@ class OppgaveDao(private val dataSource: DataSource) {
             session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
         }) > 0
 
-    fun venterPåSaksbehandler(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun venterPåSaksbehandler(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
                 SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=? AND status IN('AvventerSaksbehandler'::oppgavestatus) )
@@ -250,7 +249,7 @@ class OppgaveDao(private val dataSource: DataSource) {
         session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
     })
 
-    fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(using(sessionOf(dataSource)) { session ->
+    fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
                 SELECT fodselsnummer from person

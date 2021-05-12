@@ -3,7 +3,6 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -278,7 +277,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun oppgave() =
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
                 OppgaveAssertions(
                     oppdatert = it.localDate("oppdatert"),
@@ -298,7 +297,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         vedtakRef: Long? = null,
         utbetalingId: UUID?,
         status: Oppgavestatus = AvventerSaksbehandler
-    ) = requireNotNull(using(sessionOf(dataSource, returnGeneratedKey = true)) {
+    ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
         it.run(
             queryOf(
                 """

@@ -3,7 +3,6 @@ package no.nav.helse.modell.tildeling
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -129,7 +128,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun assertTildeling(oppgaveId: Long, saksbehandleroid: UUID?) {
-        val result = using(sessionOf(dataSource)) { session ->
+        val result = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf("SELECT saksbehandler_ref FROM tildeling WHERE oppgave_id_ref = ?", oppgaveId)
                     .map { UUID.fromString(it.string("saksbehandler_ref")) }.asSingle
@@ -139,7 +138,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun assertOppgavePåVent(oppgaveId: Long) : Boolean {
-        return requireNotNull(using(sessionOf(dataSource)) { session ->
+        return requireNotNull(sessionOf(dataSource).use { session ->
             session.run(
                 queryOf("SELECT på_vent FROM tildeling WHERE oppgave_id_ref = ?", oppgaveId)
                     .map { it.boolean("på_vent") }.asSingle

@@ -4,7 +4,6 @@ import DatabaseIntegrationTest
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
@@ -103,7 +102,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
         assertEquals(FNR, hendelseDao.finnFødselsnummer(HENDELSE_ID))
     }
 
-    private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = using(sessionOf(dataSource)) { session ->
+    private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
                 .map { UUID.fromString(it.string(1)) }.asSingle

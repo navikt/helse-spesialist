@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao.CommandContextTilstand.*
 import no.nav.helse.modell.kommando.CommandContext
@@ -34,7 +33,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     }
 
     fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use  {
             @Language("PostgreSQL")
             val query = """
                 INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
@@ -71,7 +70,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         tilstand: CommandContextTilstand,
         sti: List<Int> = emptyList()
     ) {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use  {
             it.run(
                 queryOf(
                     "INSERT INTO command_context(context_id,hendelse_id,tilstand,data) VALUES (?, ?, ?, ?::json)",
@@ -89,7 +88,7 @@ internal class CommandContextDao(private val dataSource: DataSource) {
     }
 
     private fun finnSiste(id: UUID) =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             session.run(
                 queryOf(
                     "SELECT tilstand, data FROM command_context WHERE context_id = ? ORDER BY id DESC LIMIT 1",

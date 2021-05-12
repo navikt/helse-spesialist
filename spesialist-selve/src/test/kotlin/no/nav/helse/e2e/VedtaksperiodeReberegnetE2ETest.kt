@@ -4,7 +4,6 @@ import AbstractE2ETest
 import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -197,7 +196,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     private fun tildelOppgave(saksbehandlerOid: UUID) {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, gyldig_til) VALUES(:oppgave_id_ref, :saksbehandler_ref, now() + INTERVAL '14 DAYS');",
@@ -211,7 +210,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     private fun finnOidForTildeling(oppgaveId: Long) =
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "SELECT * FROM tildeling WHERE oppgave_id_ref=?;", oppgaveId
@@ -226,7 +225,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         navn: String,
         epost: String
     ) {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost) VALUES (:oid, :navn, :epost)"
             it.run(
                 queryOf(

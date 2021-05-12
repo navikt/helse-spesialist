@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.snapshotUtenWarnings
@@ -141,7 +140,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     }
 
     private fun assertOppgaveType(forventet: String, vedtaksperiodeId: UUID) {
-        Assertions.assertEquals(forventet, using(sessionOf(dataSource)) {
+        Assertions.assertEquals(forventet, sessionOf(dataSource).use  {
             it.run(
                 queryOf(
                     "SELECT type FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",

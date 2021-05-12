@@ -3,7 +3,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.*
@@ -126,7 +125,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         type: String,
         json: String = "{}"
     ) {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use  {
             it.run(
                 queryOf(
                     "INSERT INTO hendelse(id, fodselsnummer, data, type) VALUES(?, ?, ?::json, ?)",

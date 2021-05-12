@@ -3,7 +3,6 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions.*
@@ -119,14 +118,14 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertTrue(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
-    private fun finnKobling(hendelseId: UUID) = using(sessionOf(dataSource)) {
+    private fun finnKobling(hendelseId: UUID) = sessionOf(dataSource).use  {
         it.run(
             queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
                 .map { row -> UUID.fromString(row.string(1)) }.asSingle
         )
     }
 
-    private fun vedtak() = using(sessionOf(dataSource)) {
+    private fun vedtak() = sessionOf(dataSource).use  {
         it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref FROM vedtak").map { row ->
             Vedtak(
                 UUID.fromString(row.string("vedtaksperiode_id")),

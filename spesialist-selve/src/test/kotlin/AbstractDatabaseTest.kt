@@ -3,7 +3,6 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
@@ -74,14 +73,14 @@ abstract class AbstractDatabaseTest {
 
     @BeforeEach
     internal fun resetDatabase() {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use  {
             it.run(queryOf("SELECT truncate_tables()").asExecute)
         }
     }
 }
 
 internal fun createTruncateFunction(dataSource: DataSource) {
-    using(sessionOf(dataSource)) {
+    sessionOf(dataSource).use  {
         @Language("PostgreSQL")
         val query = """
             CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$

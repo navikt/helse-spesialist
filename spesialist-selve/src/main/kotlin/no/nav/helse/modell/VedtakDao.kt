@@ -2,11 +2,11 @@ package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.*
-import no.nav.helse.person.PersonDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import no.nav.helse.person.Kjønn
+import no.nav.helse.person.PersonDto
 import no.nav.helse.person.PersoninfoApiDto
 import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDto
 import org.intellij.lang.annotations.Language
@@ -22,7 +22,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         personRef: Long,
         arbeidsgiverRef: Long,
         speilSnapshotRef: Int
-    ) = using(sessionOf(dataSource)) { session ->
+    ) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref)
@@ -43,7 +43,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")
             val query = """
                 UPDATE vedtak
@@ -62,7 +62,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES (?, ?)
@@ -72,21 +72,22 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun fjernKobling(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+
+        sessionOf(dataSource, returnGeneratedKey = true).use  { session ->
             @Language("PostgreSQL")
             val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_id = ?"
             session.run(queryOf(statement, hendelseId, vedtaksperiodeId).asUpdate)
         }
 
-    internal fun finnVedtakId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
         session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
     }
 
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Periodetype, inntektskilde: Inntektskilde) =
-        using(sessionOf(dataSource)) { session ->
-            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@using
+        sessionOf(dataSource).use  { session ->
+            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@use
 
             @Language("PostgreSQL")
             val statement = "INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (?, ?, ?)"
@@ -118,7 +119,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         }
 
     internal fun oppdaterSnapshot(fødselsnummer: String, snapshot: String) {
-        using(sessionOf(dataSource, returnGeneratedKey = true)) { session ->
+        sessionOf(dataSource, returnGeneratedKey = true).use  { session ->
             session.transaction { tx ->
                 val sisteReferanse = insertSpeilSnapshot(tx, snapshot)
                 val referanser = findSpeilSnapshotRefs(fødselsnummer)
@@ -128,13 +129,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun erAutomatiskGodkjent(utbetalingId: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun erAutomatiskGodkjent(utbetalingId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = "SELECT automatisert FROM automatisering WHERE utbetaling_id = ?;"
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
 
-    internal fun findVedtakByFnr(fnr: String) = using(sessionOf(dataSource)) { session ->
+    internal fun findVedtakByFnr(fnr: String) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT * FROM vedtak AS v
@@ -146,7 +147,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(query, fnr.toLong()).map(::tilVedtaksperiode).asSingle)
     }
 
-    internal fun findVedtakByAktørId(aktørId: String) = using(sessionOf(dataSource)) {
+    internal fun findVedtakByAktørId(aktørId: String) = sessionOf(dataSource).use  {
         @Language("PostgreSQL")
         val query = """
             SELECT * FROM vedtak AS v
@@ -158,7 +159,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         it.run(queryOf(query, aktørId.toLong()).map(::tilVedtaksperiode).asSingle)
     }
 
-    internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun findVedtakByVedtaksperiodeId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT * FROM vedtak AS v
@@ -170,7 +171,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         session.run(queryOf(query, vedtaksperiodeId).map(::tilVedtaksperiode).asSingle)
     }
 
-    private fun findSpeilSnapshotRefs(fnr: String) = using(sessionOf(dataSource)) { session ->
+    private fun findSpeilSnapshotRefs(fnr: String) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = """
             SELECT v.speil_snapshot_ref FROM vedtak v

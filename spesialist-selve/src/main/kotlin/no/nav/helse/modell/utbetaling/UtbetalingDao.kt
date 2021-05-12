@@ -3,7 +3,6 @@ package no.nav.helse.modell.utbetaling
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,10 +11,9 @@ import javax.sql.DataSource
 
 internal class UtbetalingDao(private val dataSource: DataSource) {
     internal fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
-        val statement = """
-            SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1
-        """
-        return using(sessionOf(dataSource)) {
+        @Language("PostgreSQL")
+        val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"
+        return sessionOf(dataSource).use {
             it.run(queryOf(statement, utbetalingId).map {
                 it.long("id")
             }.asSingle)
@@ -30,10 +28,10 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
     ) {
         @Language("PostgreSQL")
         val statement = """
-                INSERT INTO utbetaling ( utbetaling_id_ref, status, opprettet, data )
-                VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json))
+            INSERT INTO utbetaling ( utbetaling_id_ref, status, opprettet, data )
+            VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json))
         """
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     statement, mapOf(
@@ -58,20 +56,20 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
     ): Long {
         @Language("PostgreSQL")
         val statement = """
-                INSERT INTO utbetaling_id (
-                    utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref
-                ) VALUES (
-                    :utbetalingId,
-                    (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
-                    (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
-                    CAST(:type as utbetaling_type),
-                    :opprettet,
-                    :arbeidsgiverFagsystemIdRef,
-                    :personFagsystemIdRef
-                )
-                ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
+            INSERT INTO utbetaling_id (
+                utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref
+            ) VALUES (
+                :utbetalingId,
+                (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
+                (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer),
+                CAST(:type as utbetaling_type),
+                :opprettet,
+                :arbeidsgiverFagsystemIdRef,
+                :personFagsystemIdRef
+            )
+            ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
         """
-        return using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        return sessionOf(dataSource, returnGeneratedKey = true).use {
             requireNotNull(
                 it.run(
                     queryOf(
@@ -102,7 +100,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
             INSERT INTO oppdrag (fagsystem_id, mottaker, fagområde, endringskode, sisteArbeidsgiverdag)
             VALUES (:fagsystemId, :mottaker, CAST(:fagomrade as oppdrag_fagområde), CAST(:endringskode as oppdrag_endringskode), :sisteArbeidsgiverdag)
         """
-        return using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        return sessionOf(dataSource, returnGeneratedKey = true).use {
             it.run(
                 queryOf(
                     statement, mapOf(
@@ -139,7 +137,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
             VALUES (:oppdragIdRef, :delytelseId, :refDelytelseId, :refFagsystemId, CAST(:endringskode as oppdrag_endringskode), CAST(:klassekode as oppdrag_klassekode),
             CAST(:statuskode as oppdrag_statuskode), :datoStatusFom, :fom, :tom, :dagsats, :totalbelop, :lonn, :grad)
         """
-        return using(sessionOf(dataSource)) {
+        return sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     statement, mapOf(
@@ -210,7 +208,7 @@ ORDER BY ui.id, u.id DESC
             INSERT INTO annullert_av_saksbehandler(annullert_tidspunkt, saksbehandler_ref)
             VALUES (:annullertTidspunkt, :saksbehandlerRef)
         """
-        return using(sessionOf(dataSource, returnGeneratedKey = true)) {
+        return sessionOf(dataSource, returnGeneratedKey = true).use {
             requireNotNull(it.run(
                 queryOf(
                     statement, mapOf(
@@ -224,7 +222,7 @@ ORDER BY ui.id, u.id DESC
 
     private fun findUtbetalingslinjer(session: Session, oppdragId: Long): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
         @Language("PostgreSQL")
-        val query = """SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"""
+        val query = "SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"
 
         return session.run(queryOf(query, mapOf("oppdrag_id" to oppdragId))
             .map { row ->
@@ -240,9 +238,13 @@ ORDER BY ui.id, u.id DESC
     fun leggTilAnnullertAvSaksbehandler(utbetalingId: UUID, annullertAvSaksbehandlerRef: Long): Boolean {
         val utbetalingIdRef = finnUtbetalingIdRef(utbetalingId)
         @Language("PostgreSQL")
-        val query = """UPDATE utbetaling SET annullert_av_saksbehandler_ref=:annullertAvSaksbehandlerRef WHERE utbetaling_id_ref=:utbetalingIdRef"""
+        val query = """
+            UPDATE utbetaling
+                SET annullert_av_saksbehandler_ref = :annullertAvSaksbehandlerRef
+            WHERE utbetaling_id_ref = :utbetalingIdRef
+        """
 
-        return using(sessionOf(dataSource)) {
+        return sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     query, mapOf(

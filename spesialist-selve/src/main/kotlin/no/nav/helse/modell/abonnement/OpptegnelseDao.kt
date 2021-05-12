@@ -2,7 +2,6 @@ package no.nav.helse.modell.abonnement
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.modell.Abonnement
 import org.intellij.lang.annotations.Language
 import java.util.*
@@ -10,7 +9,7 @@ import javax.sql.DataSource
 
 internal class OpptegnelseDao(private val dataSource: DataSource) {
 
-    internal fun finnAbonnement(saksbehandlerId: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun finnAbonnement(saksbehandlerId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT o.saksbehandler_id, p.aktor_id, o.siste_sekvensnummer
@@ -30,7 +29,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun opprettAbonnement(saksbehandlerId: UUID, aktørId: Long) = using(sessionOf(dataSource)) { session ->
+    internal fun opprettAbonnement(saksbehandlerId: UUID, aktørId: Long) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO abonnement_for_opptegnelse
@@ -41,7 +40,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
     }
 
     internal fun opprettOpptegnelse(fødselsnummer: String, payload: PayloadToSpeil, type: OpptegnelseType) =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")
             val statement = """
             INSERT INTO opptegnelse (person_id, payload, type)
@@ -50,12 +49,12 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
             session.run(queryOf(statement, fødselsnummer.toLong(), payload.toJson(), type.toString()).asUpdate)
         }
 
-    internal fun alleOpptegnelser() = using(sessionOf(dataSource)) { session ->
+    internal fun alleOpptegnelser() = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT * FROM opptegnelse;
         """
-        return@using session.run(queryOf(statement).map { row ->
+        return@use session.run(queryOf(statement).map { row ->
             OpptegnelseDto(
                 payload = row.string("payload"),
                 aktørId = row.long("person_id"),
@@ -65,7 +64,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
         }.asList)
     }
 
-    internal fun finnOpptegnelser(saksbehandlerIdent: UUID) = using(sessionOf(dataSource)) { session ->
+    internal fun finnOpptegnelser(saksbehandlerIdent: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val statement = """
             SELECT o.sekvensnummer, p.aktor_id, o.payload, o.type
@@ -93,7 +92,7 @@ internal class OpptegnelseDao(private val dataSource: DataSource) {
     }
 
     fun registrerSistekvensnummer(saksbehandlerIdent: UUID, sisteSekvensId: Int) =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use  { session ->
             @Language("PostgreSQL")
             val statement = """
                 UPDATE abonnement_for_opptegnelse

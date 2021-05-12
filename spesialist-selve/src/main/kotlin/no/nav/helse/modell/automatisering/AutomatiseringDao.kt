@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
@@ -61,8 +60,8 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             )
         } ?: false
 
-    internal fun hentAutomatisering(vedtaksperiodeId: UUID, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
-        val vedtaksperiodeRef = finnVedtaksperiode(vedtaksperiodeId) ?: return@using null
+    internal fun hentAutomatisering(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
+        val vedtaksperiodeRef = finnVedtaksperiode(vedtaksperiodeId) ?: return@use null
         val problemer = finnProblemer(vedtaksperiodeRef, hendelseId)
 
         @Language("PostgreSQL")
@@ -77,7 +76,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
         )
     }
 
-    private fun finnProblemer(vedtaksperiodeRef: Long, hendelseId: UUID) = using(sessionOf(dataSource)) { session ->
+    private fun finnProblemer(vedtaksperiodeRef: Long, hendelseId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT * FROM automatisering_problem WHERE hendelse_ref = ? AND vedtaksperiode_ref = ?"
 
@@ -88,7 +87,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
         )
     }
 
-    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? = using(sessionOf(dataSource)) { session ->
+    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long? = sessionOf(dataSource).use { session ->
         session.run(
             queryOf(
                 "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?",
