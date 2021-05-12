@@ -1,10 +1,10 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.modell.abonnement.OpptegnelseDao
-import no.nav.helse.modell.abonnement.OpptegnelseType
-import no.nav.helse.modell.abonnement.UtbetalingPayload
+import no.nav.helse.abonnement.OpptegnelseType
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.opptegnelse.OpptegnelseDao
+import no.nav.helse.modell.opptegnelse.UtbetalingPayload
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.godkjenteStatuser
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET

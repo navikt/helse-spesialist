@@ -5,11 +5,11 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.helse.mediator.OpptegnelseMediator
+import no.nav.helse.abonnement.OpptegnelseDto
+import no.nav.helse.abonnement.OpptegnelseMediator
+import no.nav.helse.abonnement.opptegnelseApi
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
-import no.nav.helse.mediator.api.opptegnelseApi
-import no.nav.helse.modell.abonnement.OpptegnelseDto
 import no.nav.helse.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -28,7 +28,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         setupSaksbehandler()
 
         val respons =
-            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
                     it.post<HttpResponse>("/api/opptegnelse/abonner/$AKTØR") {
                         contentType(ContentType.Application.Json)
@@ -39,16 +39,13 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
 
         assertEquals(HttpStatusCode.OK, respons.status)
 
-        val abonnementer = opptegnelseDao.finnAbonnement(SAKSBEHANDLER_ID)
-        assertEquals(1, abonnementer.size)
-
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingEndret(
             type = "ANNULLERING",
             status = "UTBETALING_FEILET"
         ))
 
         val opptegnelser =
-            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
                     it.get<HttpResponse>("/api/opptegnelse/hent") {
                         contentType(ContentType.Application.Json)
@@ -60,7 +57,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         assertEquals(1, opptegnelser.size)
 
         val oppdateringer =
-            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseDao)) }
+            AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
                     it.get<HttpResponse>("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
                         contentType(ContentType.Application.Json)

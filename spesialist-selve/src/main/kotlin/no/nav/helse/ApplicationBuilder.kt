@@ -14,6 +14,9 @@ import io.ktor.jackson.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import no.nav.helse.abonnement.AbonnementDao
+import no.nav.helse.abonnement.OpptegnelseMediator
+import no.nav.helse.abonnement.opptegnelseApi
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
@@ -21,10 +24,8 @@ import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.OpptegnelseMediator
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
-import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -33,6 +34,7 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
+import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -53,6 +55,7 @@ import java.net.ProxySelector
 import java.net.URL
 import java.util.*
 import kotlin.random.Random.Default.nextInt
+import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
@@ -122,6 +125,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
+    private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
+    private val abonnementDao = AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
@@ -227,7 +232,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     )
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     annulleringApi(hendelseMediator)
-                    opptegnelseApi(OpptegnelseMediator(opptegnelseDao))
+                    opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                 }

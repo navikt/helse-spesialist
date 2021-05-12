@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.api
+package no.nav.helse.abonnement
 
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -7,10 +7,9 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
-import no.nav.helse.mediator.OpptegnelseMediator
 import java.util.*
 
-internal fun Route.opptegnelseApi(opptegnelseMediator: OpptegnelseMediator) {
+fun Route.opptegnelseApi(opptegnelseMediator: OpptegnelseMediator) {
     post("/api/opptegnelse/abonner/{aktørId}") {
         val saksbehandlerreferanse = getSaksbehandlerOid()
         val aktørId = call.parameters["aktørId"]!!.let {

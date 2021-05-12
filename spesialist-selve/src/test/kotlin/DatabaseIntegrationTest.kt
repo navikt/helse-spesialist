@@ -3,16 +3,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.*
-import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
+import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -99,6 +100,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(dataSource)
     internal val opptegnelseDao = OpptegnelseDao(dataSource)
+    internal val opptegnelseApiDao = no.nav.helse.abonnement.OpptegnelseDao(dataSource)
+    internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
 

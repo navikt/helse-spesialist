@@ -1,8 +1,8 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
-import no.nav.helse.modell.abonnement.UtbetalingPayload
+import no.nav.helse.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
+import no.nav.helse.modell.opptegnelse.UtbetalingPayload
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -14,26 +14,18 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Får opprettet opptegnelse`() {
-        opprettPerson(fødselsnummer = FNR)
+    fun `Kan opprette abonnement og få opptegnelser`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
         opptegnelseDao.opprettOpptegnelse(
             FNR,
             PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
 
-        val alle = opptegnelseDao.alleOpptegnelser()
+        val alle = opptegnelseApiDao.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(1, alle.size)
-    }
-
-    @Test
-    fun `Kan abonnere`() {
-        opprettPerson(aktørId = AKTØR)
-        opprettSaksbehandler(saksbehandlerOID = SAKSBEHANDLER_OID)
-        opptegnelseDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
-
-        val abonnementForSaksbehandler = opptegnelseDao.finnAbonnement(SAKSBEHANDLER_OID)
-        assertEquals(1, abonnementForSaksbehandler.size)
     }
 
     @Test
@@ -45,9 +37,9 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
             PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
-        opptegnelseDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
+        abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
 
-        val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
+        val alle = opptegnelseApiDao.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(0, alle.size)
     }
 }

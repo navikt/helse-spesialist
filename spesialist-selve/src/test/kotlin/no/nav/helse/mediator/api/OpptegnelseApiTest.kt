@@ -7,9 +7,10 @@ import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.OpptegnelseMediator
-import no.nav.helse.modell.abonnement.OpptegnelseDto
-import no.nav.helse.modell.abonnement.OpptegnelseType
+import no.nav.helse.abonnement.OpptegnelseDto
+import no.nav.helse.abonnement.OpptegnelseMediator
+import no.nav.helse.abonnement.OpptegnelseType
+import no.nav.helse.abonnement.opptegnelseApi
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -46,12 +47,12 @@ class OpptegnelseApiTest : AbstractApiTest() {
         val oppdatering1 = OpptegnelseDto(
             aktørId=11,
             sekvensnummer = 0,
-            type=OpptegnelseType.UTBETALING_ANNULLERING_FEILET,
+            type= OpptegnelseType.UTBETALING_ANNULLERING_FEILET,
             payload = """{ "test": "1" }""")
         val oppdatering2 = OpptegnelseDto(
             aktørId=12,
             sekvensnummer = 1,
-            type=OpptegnelseType.UTBETALING_ANNULLERING_OK,
+            type= OpptegnelseType.UTBETALING_ANNULLERING_OK,
             payload = """{ "test": "2" }""")
         val expected = listOf(oppdatering1, oppdatering2)
 

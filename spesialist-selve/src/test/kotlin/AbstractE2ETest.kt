@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -17,7 +18,6 @@ import no.nav.helse.mediator.api.VedtaksperiodeMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
-import no.nav.helse.modell.abonnement.OpptegnelseDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.automatisering.Automatisering
@@ -25,6 +25,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected companion object {
@@ -78,6 +80,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val utbetalingDao = UtbetalingDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
+    protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
+    protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
 
