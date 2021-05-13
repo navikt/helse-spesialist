@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDto
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -14,13 +13,7 @@ internal class EgenAnsattløsning(
     private val erEgenAnsatt: Boolean
 ) {
     internal fun lagre(egenAnsattDao: EgenAnsattDao) {
-        egenAnsattDao.persisterEgenAnsatt(
-            EgenAnsattDto(
-                fødselsnummer = fødselsnummer,
-                erEgenAnsatt = erEgenAnsatt,
-                opprettet = opprettet
-            )
-        )
+        egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
     }
 
     internal fun evaluer() = erEgenAnsatt

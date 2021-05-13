@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDto
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.*
@@ -18,13 +17,7 @@ internal class DigitalKontaktinformasjonløsning(
     private val erDigital: Boolean
 ) {
     internal fun lagre(digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao) {
-        digitalKontaktinformasjonDao.persisterDigitalKontaktinformasjon(
-            DigitalKontaktinformasjonDto(
-                fødselsnummer = fødselsnummer,
-                erDigital = erDigital,
-                opprettet = opprettet
-            )
-        )
+        digitalKontaktinformasjonDao.lagre(fødselsnummer, erDigital, opprettet)
     }
 
     internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {

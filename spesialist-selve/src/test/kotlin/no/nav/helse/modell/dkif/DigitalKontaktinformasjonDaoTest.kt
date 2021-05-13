@@ -19,9 +19,7 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre og lese ikke-digital bruker`() {
-        digitalKontaktinformasjonDao.persisterDigitalKontaktinformasjon(
-            DigitalKontaktinformasjonDto(FNR, false, LocalDateTime.now())
-        )
+        digitalKontaktinformasjonDao.lagre(FNR, false, LocalDateTime.now())
         val erDigitalSvar = digitalKontaktinformasjonDao.erDigital(FNR)
 
         assertNotNull(erDigitalSvar) {
@@ -31,9 +29,7 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre og lese digital bruker`() {
-        digitalKontaktinformasjonDao.persisterDigitalKontaktinformasjon(
-            DigitalKontaktinformasjonDto(FNR, true, LocalDateTime.now())
-        )
+        digitalKontaktinformasjonDao.lagre(FNR, true, LocalDateTime.now())
         val erDigitalSvar = digitalKontaktinformasjonDao.erDigital(FNR)
 
         assertNotNull(erDigitalSvar) {
@@ -43,18 +39,14 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppdaterer digital bruker til å bli ikke-digital`() {
-        digitalKontaktinformasjonDao.persisterDigitalKontaktinformasjon(
-            DigitalKontaktinformasjonDto(FNR, true, LocalDateTime.now())
-        )
+        digitalKontaktinformasjonDao.lagre(FNR, true, LocalDateTime.now())
         val erDigitalSvar = digitalKontaktinformasjonDao.erDigital(FNR)
 
         assertNotNull(erDigitalSvar) {
             assertTrue(it)
         }
 
-        digitalKontaktinformasjonDao.persisterDigitalKontaktinformasjon(
-            DigitalKontaktinformasjonDto(FNR, false, LocalDateTime.now())
-        )
+        digitalKontaktinformasjonDao.lagre(FNR, false, LocalDateTime.now())
         val erDigitalSvar2 = digitalKontaktinformasjonDao.erDigital(FNR)
 
         assertNotNull(erDigitalSvar2) {
@@ -65,9 +57,7 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `mangler dkif-sjekk`() {
         opprettPerson("12345678910")
-        digitalKontaktinformasjonDao.persisterDigitalKontaktinformasjon(
-            DigitalKontaktinformasjonDto("12345678910", true, LocalDateTime.now())
-        )
+        digitalKontaktinformasjonDao.lagre("12345678910", true, LocalDateTime.now())
         assertNull(digitalKontaktinformasjonDao.erDigital(FNR))
     }
 }

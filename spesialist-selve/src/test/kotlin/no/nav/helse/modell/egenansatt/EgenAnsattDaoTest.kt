@@ -16,7 +16,7 @@ internal class EgenAnsattDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `setter og henter egen ansatt`() {
-        egenAnsattDao.persisterEgenAnsatt(EgenAnsattDto(FNR, false, LocalDateTime.now()))
+        egenAnsattDao.lagre(FNR, false, LocalDateTime.now())
         val egenAnsattSvar = egenAnsattDao.erEgenAnsatt(FNR)
         assertNotNull(egenAnsattSvar) {
             assertFalse(it)

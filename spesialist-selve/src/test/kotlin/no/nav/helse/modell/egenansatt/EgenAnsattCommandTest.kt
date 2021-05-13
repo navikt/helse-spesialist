@@ -40,14 +40,14 @@ internal class EgenAnsattCommandTest {
     @Test
     fun `mangler løsning ved resume`() {
         assertFalse(command.resume(context))
-        verify(exactly = 0) { dao.persisterEgenAnsatt(any()) }
+        verify(exactly = 0) { dao.lagre(any(), any(), any()) }
     }
 
     @Test
     fun `lagrer løsning ved resume`() {
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.persisterEgenAnsatt(any()) }
+        verify(exactly = 1) { dao.lagre(any(), any(), any()) }
     }
 
     @Test

@@ -46,21 +46,21 @@ internal class DigitalKontaktinformasjonCommandTest {
     @Test
     fun `Mangler løsning ved resume`() {
         assertFalse(command.resume(context))
-        verify(exactly = 0) { dao.persisterDigitalKontaktinformasjon(any()) }
+        verify(exactly = 0) { dao.lagre(any(), any(), any()) }
     }
 
     @Test
     fun `Lagrer løsning ved resume`() {
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
+        verify(exactly = 1) { dao.lagre(any(), any(), any()) }
     }
 
     @Test
     fun `Lagrer ikke warning ved digital person`() {
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, true))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
+        verify(exactly = 1) { dao.lagre(any(), any(), any()) }
         verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
     }
 
@@ -72,7 +72,7 @@ internal class DigitalKontaktinformasjonCommandTest {
         )
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.persisterDigitalKontaktinformasjon(any()) }
+        verify(exactly = 1) { dao.lagre(any(), any(), any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, forventetWarning) }
     }
 }
