@@ -1,2 +1,2 @@
 rootProject.name = "spesialist"
-include("spesialist-api", "spesialist-selve")
+include("spesialist-felles", "spesialist-api", "spesialist-selve")
