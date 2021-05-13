@@ -1,3 +1,5 @@
+package no.nav.helse
+
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -17,7 +19,7 @@ abstract class AbstractDatabaseTest {
     companion object {
 
         private val hikariConfig = HikariConfig().apply {
-            jdbcUrl = this@Companion.getJdbcUrl()
+            jdbcUrl = Companion.getJdbcUrl()
             maximumPoolSize = 5
             minimumIdle = 1
             idleTimeout = 500001
@@ -58,7 +60,7 @@ abstract class AbstractDatabaseTest {
             }
         }
 
-        internal val dataSource = HikariDataSource(hikariConfig)
+        val dataSource = HikariDataSource(hikariConfig)
 
         init {
             Flyway.configure()
@@ -72,14 +74,14 @@ abstract class AbstractDatabaseTest {
     }
 
     @BeforeEach
-    internal fun resetDatabase() {
+    fun resetDatabase() {
         sessionOf(dataSource).use  {
             it.run(queryOf("SELECT truncate_tables()").asExecute)
         }
     }
 }
 
-internal fun createTruncateFunction(dataSource: DataSource) {
+private fun createTruncateFunction(dataSource: DataSource) {
     sessionOf(dataSource).use  {
         @Language("PostgreSQL")
         val query = """

@@ -1,4 +1,5 @@
 dependencies {
+    implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
 }
 
