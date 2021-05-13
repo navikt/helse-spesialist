@@ -12,8 +12,8 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         assertNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNUMMER))
         assertEquals(LocalDate.now(), arbeidsgiverDao.findNavnSistOppdatert(ORGNUMMER))
-        assertEquals(ORGNAVN, arbeidsgiverDao.finnNavn(ORGNUMMER))
-        assertEquals(BRANSJER, arbeidsgiverDao.finnBransjer(ORGNUMMER))
+        assertEquals(ORGNAVN, arbeidsgiverApiDao.finnNavn(ORGNUMMER))
+        assertEquals(BRANSJER, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
     }
 
     @Test
@@ -21,7 +21,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyttNavn = "Nærbutikken ASA"
         arbeidsgiverDao.updateNavn(ORGNUMMER, nyttNavn)
-        assertEquals(nyttNavn, arbeidsgiverDao.finnNavn(ORGNUMMER))
+        assertEquals(nyttNavn, arbeidsgiverApiDao.finnNavn(ORGNUMMER))
     }
 
     @Test
@@ -29,30 +29,30 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyBransje = listOf("Ny bransje")
         arbeidsgiverDao.updateBransjer(ORGNUMMER, nyBransje)
-        assertEquals(nyBransje, arbeidsgiverDao.finnBransjer(ORGNUMMER))
+        assertEquals(nyBransje, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
     }
 
     @Test
     fun `kan hente bransjer`() {
         assertNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER))
-        assertEquals(BRANSJER, arbeidsgiverDao.finnBransjer(ORGNUMMER))
+        assertEquals(BRANSJER, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
     }
 
     @Test
     fun `kan hente blanke bransjer`() {
         assertNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, listOf("")))
-        assertTrue(arbeidsgiverDao.finnBransjer(ORGNUMMER).isEmpty())
+        assertTrue(arbeidsgiverApiDao.finnBransjer(ORGNUMMER).isEmpty())
     }
 
     @Test
     fun `kan hente tomme bransjer`() {
         assertNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, emptyList()))
-        assertTrue(arbeidsgiverDao.finnBransjer(ORGNUMMER).isEmpty())
+        assertTrue(arbeidsgiverApiDao.finnBransjer(ORGNUMMER).isEmpty())
     }
 
     @Test
     fun `kan hente navn`() {
         assertNotNull(arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, listOf("")))
-        assertEquals(ORGNAVN, arbeidsgiverDao.finnNavn(ORGNUMMER))
+        assertEquals(ORGNAVN, arbeidsgiverApiDao.finnNavn(ORGNUMMER))
     }
 }

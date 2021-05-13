@@ -17,7 +17,7 @@ import io.ktor.routing.*
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.abonnement.opptegnelseApi
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
@@ -27,6 +27,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
@@ -120,6 +121,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
@@ -221,7 +223,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             vedtakDao = vedtakDao,
                             warningDao = warningDao,
                             personDao = personDao,
-                            arbeidsgiverDao = arbeidsgiverDao,
+                            arbeidsgiverDao = arbeidsgiverApiDao,
                             overstyringDao = overstyringDao,
                             oppgaveDao = oppgaveDao,
                             tildelingDao = tildelingDao,

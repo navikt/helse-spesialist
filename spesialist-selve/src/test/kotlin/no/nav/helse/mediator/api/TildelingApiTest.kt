@@ -9,8 +9,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.feilhåndtering.FeilDto
+import no.nav.helse.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.tildeling.TildelingApiDto

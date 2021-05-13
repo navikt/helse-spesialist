@@ -4,10 +4,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.overstyring.Dagtype
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao

@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.util.*

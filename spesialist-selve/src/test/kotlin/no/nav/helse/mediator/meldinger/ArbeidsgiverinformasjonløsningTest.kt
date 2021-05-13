@@ -2,8 +2,8 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

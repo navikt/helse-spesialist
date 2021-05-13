@@ -8,7 +8,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.abonnement.AbonnementDao
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
@@ -20,6 +20,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -76,6 +77,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val overstyringDao = OverstyringDao(dataSource)
     protected val snapshotDao = SnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
@@ -144,7 +146,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtakDao = vedtakDao,
         warningDao = warningDao,
         personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
+        arbeidsgiverDao = arbeidsgiverApiDao,
         overstyringDao = overstyringDao,
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,

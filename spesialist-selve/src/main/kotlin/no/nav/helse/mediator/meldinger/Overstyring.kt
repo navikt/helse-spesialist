@@ -3,8 +3,8 @@ package no.nav.helse.mediator.meldinger
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.*
-import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

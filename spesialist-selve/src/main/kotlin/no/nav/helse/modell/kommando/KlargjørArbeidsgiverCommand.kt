@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 
 internal class KlargjørArbeidsgiverCommand(
     orgnummere: List<String>,

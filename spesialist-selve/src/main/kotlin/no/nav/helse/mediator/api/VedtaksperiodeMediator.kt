@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.helse.arbeidsgiver.ArbeidsforholdApiDto
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
+import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import no.nav.helse.modell.VedtakDao
@@ -17,12 +18,11 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
-import no.nav.helse.person.PersonDto
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDto
 import no.nav.helse.overstyring.OverstyrtDagApiDto
+import no.nav.helse.person.PersonDto
 import no.nav.helse.person.PersonForSpeilDto
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.utbetaling.AnnullertAvSaksbehandlerApiDto
@@ -36,7 +36,7 @@ internal class VedtaksperiodeMediator(
     private val vedtakDao: VedtakDao,
     private val warningDao: WarningDao,
     private val personDao: PersonDao,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
+    private val arbeidsgiverDao: ArbeidsgiverApiDao,
     private val overstyringDao: OverstyringDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,

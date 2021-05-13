@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
@@ -15,6 +14,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsforhold.command.SjekkArbeidsforholdCommand
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand

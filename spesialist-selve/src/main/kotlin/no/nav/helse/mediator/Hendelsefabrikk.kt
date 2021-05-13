@@ -2,10 +2,10 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao

@@ -4,10 +4,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.abonnement.AbonnementDao
-import no.nav.helse.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -85,6 +86,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val oppgaveDao = OppgaveDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
+    internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
     internal val warningDao = WarningDao(dataSource)
