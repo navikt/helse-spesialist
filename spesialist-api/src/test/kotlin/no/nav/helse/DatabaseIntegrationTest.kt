@@ -2,6 +2,7 @@ package no.nav.helse
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -19,6 +20,7 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
     }
 
     protected val varselDao: VarselDao = VarselDao(dataSource)
+    protected val risikovurderingApiDao: RisikovurderingApiDao = RisikovurderingApiDao(dataSource)
 
     protected fun nyVedtaksperiode() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         val (id, fom, tom) = PERIODE

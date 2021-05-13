@@ -11,7 +11,6 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
@@ -21,6 +20,7 @@ import no.nav.helse.overstyring.OverstyrtDagApiDto
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.person.PersonDto
 import no.nav.helse.person.PersonForSpeilDto
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.utbetaling.AnnullertAvSaksbehandlerApiDto
 import no.nav.helse.utbetaling.OppdragApiDto
@@ -39,7 +39,7 @@ internal class VedtaksperiodeMediator(
     private val overstyringDao: OverstyringApiDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
-    private val risikovurderingDao: RisikovurderingDao,
+    private val risikovurderingApiDao: RisikovurderingApiDao,
     private val utbetalingDao: UtbetalingDao,
     private val arbeidsforholdDao: ArbeidsforholdDao
 ) {
@@ -124,16 +124,13 @@ internal class VedtaksperiodeMediator(
                     arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
-                        val risikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
+                        val risikovurdering = risikovurderingApiDao.finnRisikovurdering(vedtaksperiodeId)
                         val varsler = varselDao.finnVarsler(vedtaksperiodeId)
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
                         risikovurdering?.let {
-                            vedtaksperiode.set<ObjectNode>(
-                                "risikovurdering",
-                                objectMapper.convertValue(it.speilDto(), ObjectNode::class.java)
-                            )
+                            vedtaksperiode.set<ObjectNode>("risikovurdering", objectMapper.convertValue(it, ObjectNode::class.java))
                         }
                         vedtaksperiode.set<ArrayNode>("varsler", objectMapper.convertValue<ArrayNode>(varsler))
                     }

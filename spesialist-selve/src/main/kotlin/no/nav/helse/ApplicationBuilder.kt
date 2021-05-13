@@ -49,6 +49,7 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.reservasjon.ReservasjonDao
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
@@ -119,6 +120,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vedtakDao = VedtakDao(dataSource)
     private val warningDao = WarningDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
+    private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
@@ -235,7 +237,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             overstyringDao = overstyringApiDao,
                             oppgaveDao = oppgaveDao,
                             tildelingDao = tildelingDao,
-                            risikovurderingDao = risikovurderingDao,
+                            risikovurderingApiDao = risikovurderingApiDao,
                             utbetalingDao = utbetalingDao,
                             arbeidsforholdDao = arbeidsforholdDao
                         )

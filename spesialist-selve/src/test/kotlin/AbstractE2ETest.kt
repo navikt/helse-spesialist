@@ -44,6 +44,7 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
@@ -75,6 +76,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val commandContextDao = CommandContextDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     protected val risikovurderingDao = RisikovurderingDao(dataSource)
+    protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
@@ -159,7 +161,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         overstyringDao = overstyringApiDao,
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
-        risikovurderingDao = risikovurderingDao,
+        risikovurderingApiDao = risikovurderingApiDao,
         utbetalingDao = utbetalingDao,
         arbeidsforholdDao = arbeidsforholdDao
     )

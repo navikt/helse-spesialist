@@ -10,12 +10,13 @@ import java.util.*
 import kotlin.test.assertEquals
 
 internal class UtbetalingE2ETest : AbstractE2ETest() {
+    private val SNAPSHOTV1 = snapshot()
+
     private companion object {
         private const val ORGNR = "987654321"
         private const val arbeidsgiverFagsystemId = "ASDJ12IA312KLS"
 
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val SNAPSHOTV1 = """{"version": "this_is_version_1"}"""
     }
 
     @Test
