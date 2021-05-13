@@ -42,7 +42,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         personDao.insertPerson(FØDSELSNUMMER, AKTØR_ID, navn_ref, 420, infotrygdutbetaling_ref)
         overstyringDao.persisterOverstyring(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID)
-        val hentetOverstyring = overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyring(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)

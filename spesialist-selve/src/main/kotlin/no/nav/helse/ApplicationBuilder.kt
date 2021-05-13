@@ -44,6 +44,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -124,6 +125,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
@@ -230,7 +232,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             varselDao = varselDao,
                             personDao = personApiDao,
                             arbeidsgiverDao = arbeidsgiverApiDao,
-                            overstyringDao = overstyringDao,
+                            overstyringDao = overstyringApiDao,
                             oppgaveDao = oppgaveDao,
                             tildelingDao = tildelingDao,
                             risikovurderingDao = risikovurderingDao,

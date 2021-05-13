@@ -26,6 +26,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.Kjønn
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
@@ -95,6 +96,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val tildelingDao = TildelingDao(dataSource)
     internal val saksbehandlerDao = SaksbehandlerDao(dataSource)
     internal val overstyringDao = OverstyringDao(dataSource)
+    internal val overstyringApiDao = OverstyringApiDao(dataSource)
     internal val reservasjonDao = ReservasjonDao(dataSource)
     internal val hendelseDao = HendelseDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)

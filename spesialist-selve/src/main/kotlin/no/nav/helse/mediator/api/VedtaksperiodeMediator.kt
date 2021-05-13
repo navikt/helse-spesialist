@@ -11,11 +11,11 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringApiDto
 import no.nav.helse.overstyring.OverstyrtDagApiDto
 import no.nav.helse.person.PersonApiDao
@@ -36,7 +36,7 @@ internal class VedtaksperiodeMediator(
     private val varselDao: VarselDao,
     private val personDao: PersonApiDao,
     private val arbeidsgiverDao: ArbeidsgiverApiDao,
-    private val overstyringDao: OverstyringDao,
+    private val overstyringDao: OverstyringApiDao,
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val risikovurderingDao: RisikovurderingDao,

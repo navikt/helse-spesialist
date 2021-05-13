@@ -66,7 +66,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
 
-        assertTrue(overstyringDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
+        assertTrue(overstyringApiDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
         assertTrue(oppgaveDao.finnOppgaver(false).none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
 
         val hendelseId2 = sendGodkjenningsbehov(

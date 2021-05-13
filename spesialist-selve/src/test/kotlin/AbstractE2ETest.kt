@@ -38,6 +38,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -79,6 +80,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
+    protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val snapshotDao = SnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
@@ -154,7 +156,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         varselDao = varselDao,
         personDao = personApiDao,
         arbeidsgiverDao = arbeidsgiverApiDao,
-        overstyringDao = overstyringDao,
+        overstyringDao = overstyringApiDao,
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         risikovurderingDao = risikovurderingDao,
