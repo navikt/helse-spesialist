@@ -44,11 +44,14 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -108,6 +111,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private lateinit var hendelseMediator: HendelseMediator
 
     private val personDao = PersonDao(dataSource)
+    private val personApiDao = PersonApiDao(dataSource)
+    private val varselDao = VarselDao(dataSource)
+    private val vedtaksperiodeApiDao = VedtaksperiodeApiDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val warningDao = WarningDao(dataSource)
@@ -220,9 +226,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     vedtaksperiodeApi(
                         hendelseMediator = hendelseMediator,
                         vedtaksperiodeMediator = VedtaksperiodeMediator(
-                            vedtakDao = vedtakDao,
-                            warningDao = warningDao,
-                            personDao = personDao,
+                            vedtaksperiodeDao = vedtaksperiodeApiDao,
+                            varselDao = varselDao,
+                            personDao = personApiDao,
                             arbeidsgiverDao = arbeidsgiverApiDao,
                             overstyringDao = overstyringDao,
                             oppgaveDao = oppgaveDao,

@@ -38,11 +38,14 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -86,6 +89,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
+    private val personApiDao = PersonApiDao(dataSource)
+    private val varselDao = VarselDao(dataSource)
+    private val vedtaksperiodeApiDao = VedtaksperiodeApiDao(dataSource)
 
 
     protected val testRapid = TestRapid()
@@ -143,9 +149,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveMediator = oppgaveMediator
     )
     internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
-        vedtakDao = vedtakDao,
-        warningDao = warningDao,
-        personDao = personDao,
+        vedtaksperiodeDao = vedtaksperiodeApiDao,
+        varselDao = varselDao,
+        personDao = personApiDao,
         arbeidsgiverDao = arbeidsgiverApiDao,
         overstyringDao = overstyringDao,
         oppgaveDao = oppgaveDao,

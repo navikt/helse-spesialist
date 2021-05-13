@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -51,7 +52,7 @@ internal class Automatisering(
         val warnings = warningDao.finnWarnings(vedtaksperiodeId)
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
-        val tilhørerUtlandsenhet = personDao.tilhørerUtlandsenhet(fødselsnummer)
+        val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
 

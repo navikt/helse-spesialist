@@ -3,10 +3,8 @@ package no.nav.helse.modell.person
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.objectMapper
 import no.nav.helse.person.Kjønn
-import no.nav.helse.vedtaksperiode.EnhetDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import javax.sql.DataSource
@@ -228,22 +226,10 @@ internal class PersonDao(private val dataSource: DataSource) {
         )
     })
 
-    internal fun tilhørerUtlandsenhet(fødselsnummer: String) = erEnhetUtland(findEnhet(fødselsnummer).id)
-
-    internal fun findEnhet(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+    internal fun finnEnhetId(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val query = "SELECT id, navn from enhet WHERE id=(SELECT enhet_ref FROM person where fodselsnummer =?);"
-        requireNotNull(
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row -> EnhetDto(
-                        row.string("id"),
-                        row.string("navn")
-                    )
-                    }
-                    .asSingle
-            )
-        )
+        val statement = "SELECT id FROM enhet WHERE id = (SELECT enhet_ref FROM person where fodselsnummer = ?);"
+        requireNotNull(session.run(queryOf(statement, fødselsnummer.toLong()).map { it.string("id") }.asSingle))
     }
 }
 

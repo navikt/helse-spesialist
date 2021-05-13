@@ -54,6 +54,12 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `finner enhet`() {
+        opprettPerson()
+        assertEquals(ENHET.toInt(), personDao.finnEnhetId(FNR).toInt())
+    }
+
+    @Test
     fun `oppdaterer enhet`() {
         opprettPerson()
         val nyEnhet = "2100".toInt()

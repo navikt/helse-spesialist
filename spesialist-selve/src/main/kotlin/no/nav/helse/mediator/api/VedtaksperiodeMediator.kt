@@ -10,18 +10,15 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDto
 import no.nav.helse.overstyring.OverstyrtDagApiDto
+import no.nav.helse.person.PersonApiDao
 import no.nav.helse.person.PersonDto
 import no.nav.helse.person.PersonForSpeilDto
 import no.nav.helse.tildeling.TildelingDao
@@ -29,13 +26,15 @@ import no.nav.helse.utbetaling.AnnullertAvSaksbehandlerApiDto
 import no.nav.helse.utbetaling.OppdragApiDto
 import no.nav.helse.utbetaling.UtbetalingApiDto
 import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
+import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDao
 import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDto
 import java.util.*
 
 internal class VedtaksperiodeMediator(
-    private val vedtakDao: VedtakDao,
-    private val warningDao: WarningDao,
-    private val personDao: PersonDao,
+    private val vedtaksperiodeDao: VedtaksperiodeApiDao,
+    private val varselDao: VarselDao,
+    private val personDao: PersonApiDao,
     private val arbeidsgiverDao: ArbeidsgiverApiDao,
     private val overstyringDao: OverstyringDao,
     private val oppgaveDao: OppgaveDao,
@@ -46,25 +45,24 @@ internal class VedtaksperiodeMediator(
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            vedtakDao.findVedtakByFnr(fnr)?.let(::
-            byggSpeilSnapshot)
+            vedtaksperiodeDao.findVedtakByFnr(fnr)?.let(::byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            vedtakDao.findVedtakByAktørId(aktørId)?.let(::byggSpeilSnapshot)
+            vedtaksperiodeDao.findVedtakByAktørId(aktørId)?.let(::byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            vedtakDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
+            vedtaksperiodeDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
         }
 
     private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeApiDto, PersonDto>) =
         measureAsHistogram("byggSpeilSnapshot") {
             val (vedtak, speilSnapshot) = vedtakinfo
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
-                personDao.findInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
+                personDao.finnInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
             }
             val utbetalinger = measureAsHistogram("byggSpeilSnapshot_findUtbetaling") {
                 utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
@@ -127,7 +125,7 @@ internal class VedtaksperiodeMediator(
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
                         val risikovurdering = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
-                        val varsler = Warning.meldinger(warningDao.finnWarnings(vedtaksperiodeId))
+                        val varsler = varselDao.finnVarsler(vedtaksperiodeId)
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
@@ -143,7 +141,7 @@ internal class VedtaksperiodeMediator(
             }
 
             val enhet = measureAsHistogram("byggSpeilSnapshot_findEnhet") {
-                personDao.findEnhet(vedtak.fødselsnummer)
+                personDao.finnEnhet(vedtak.fødselsnummer)
             }
 
             val tildeling = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
