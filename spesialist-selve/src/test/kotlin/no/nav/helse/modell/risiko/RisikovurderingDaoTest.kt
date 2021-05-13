@@ -2,66 +2,111 @@ package no.nav.helse.modell.risiko
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
-    fun `les og skriv`() {
+    fun `lagrer risikovurdering`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val data = objectMapper.createObjectNode().set<JsonNode>("funn", objectMapper.createArrayNode())
-        risikovurderingDao.persisterRisikovurdering(
-            RisikovurderingDto(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
-                kanGodkjennesAutomatisk = false,
-                kreverSupersaksbehandler = false,
-                data = data,
-            )
+        risikovurderingDao.lagre(
+            vedtaksperiodeId = vedtaksperiodeId,
+            opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
+            kanGodkjennesAutomatisk = false,
+            kreverSupersaksbehandler = false,
+            data = data
         )
 
-        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurderingDto(vedtaksperiodeId))
-        assertEquals(vurdering.vedtaksperiodeId, vedtaksperiodeId)
-        assertEquals(vurdering.opprettet, LocalDate.of(2020, 9, 22).atStartOfDay())
-        assertEquals(vurdering.kanGodkjennesAutomatisk, false)
-        assertEquals(vurdering.kreverSupersaksbehandler, false)
-        assertEquals(vurdering.data, data)
+        risikovurdering().first().assertEquals(
+            forventetVedtaksperiodeId = vedtaksperiodeId,
+            forventetKanGodkjennesAutomatisk = false,
+            forventetKreverSupersaksbehandler = false,
+            forventetData = data,
+            forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay()
+        )
     }
 
     @Test
-    fun `dobbel insert`() {
+    fun `dobbel insert medfører to innslag`() {
         val data = objectMapper.createObjectNode().set<JsonNode>("funn", objectMapper.createArrayNode())
         val vedtaksperiodeId = UUID.randomUUID()
-        risikovurderingDao.persisterRisikovurdering(
-            RisikovurderingDto(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
-                kanGodkjennesAutomatisk = false,
-                kreverSupersaksbehandler = false,
-                data = data,
-            )
+        risikovurderingDao.lagre(
+            vedtaksperiodeId = vedtaksperiodeId,
+            opprettet = LocalDate.of(2020, 9, 22).atStartOfDay(),
+            kanGodkjennesAutomatisk = false,
+            kreverSupersaksbehandler = false,
+            data = data
         )
-        risikovurderingDao.persisterRisikovurdering(
-            RisikovurderingDto(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = LocalDate.of(2020, 9, 23).atStartOfDay(),
-                kanGodkjennesAutomatisk = false,
-                kreverSupersaksbehandler = false,
-                data = data,
-            )
+        risikovurderingDao.lagre(
+            vedtaksperiodeId = vedtaksperiodeId,
+            opprettet = LocalDate.of(2020, 9, 23).atStartOfDay(),
+            kanGodkjennesAutomatisk = false,
+            kreverSupersaksbehandler = false,
+            data = data
         )
 
-        val vurdering = requireNotNull(risikovurderingDao.hentRisikovurderingDto(vedtaksperiodeId))
-        assertEquals(vurdering.vedtaksperiodeId, vedtaksperiodeId)
-        assertEquals(vurdering.opprettet, LocalDate.of(2020, 9, 23).atStartOfDay())
+        risikovurdering().also {
+            assertEquals(2, it.size)
+            it.first().assertEquals(
+                forventetVedtaksperiodeId = vedtaksperiodeId,
+                forventetKanGodkjennesAutomatisk = false,
+                forventetKreverSupersaksbehandler = false,
+                forventetData = data,
+                forventetOpprettet = LocalDate.of(2020, 9, 23).atStartOfDay()
+            )
+            it[1].assertEquals(
+                forventetVedtaksperiodeId = vedtaksperiodeId,
+                forventetKanGodkjennesAutomatisk = false,
+                forventetKreverSupersaksbehandler = false,
+                forventetData = data,
+                forventetOpprettet = LocalDate.of(2020, 9, 22).atStartOfDay()
+            )
+        }
     }
 
-    @Test
-    fun `leser manglende risikovurdering`() {
-        assertNull(risikovurderingDao.hentRisikovurderingDto(UUID.randomUUID()))
+    private fun risikovurdering() =
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val statement = "SELECT * FROM risikovurdering_2021 ORDER BY id DESC"
+            it.run(queryOf(statement).map { row ->
+                RisikovurderingAssertions(
+                    vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                    kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
+                    kreverSupersaksbehandler = row.boolean("krever_supersaksbehandler"),
+                    data = objectMapper.readTree(row.string("data")),
+                    opprettet = row.localDateTime("opprettet")
+                )
+            }.asList)
+        }
+
+    private class RisikovurderingAssertions(
+        private val vedtaksperiodeId: UUID,
+        private val kanGodkjennesAutomatisk: Boolean,
+        private val kreverSupersaksbehandler: Boolean,
+        private val data: JsonNode,
+        private val opprettet: LocalDateTime
+    ) {
+        fun assertEquals(
+            forventetVedtaksperiodeId: UUID,
+            forventetKanGodkjennesAutomatisk: Boolean,
+            forventetKreverSupersaksbehandler: Boolean,
+            forventetData: JsonNode,
+            forventetOpprettet: LocalDateTime
+        ) {
+            Assertions.assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
+            Assertions.assertEquals(forventetKanGodkjennesAutomatisk, kanGodkjennesAutomatisk)
+            Assertions.assertEquals(forventetKreverSupersaksbehandler, kreverSupersaksbehandler)
+            Assertions.assertEquals(forventetData, data)
+            Assertions.assertEquals(forventetOpprettet, opprettet)
+        }
     }
 }

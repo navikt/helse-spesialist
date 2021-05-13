@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.assertNull
 
 internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
 
@@ -50,6 +51,11 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
             assertEquals(listOf("8-4"), dto.funn.flatMap { it["kategori"].map(JsonNode::asText) })
             assertEquals(false, dto.funn.first()["kreverSupersaksbehandler"].asBoolean())
         }
+    }
+
+    @Test
+    fun `leser manglende risikovurdering`() {
+        assertNull(risikovurderingApiDao.finnRisikovurdering(UUID.randomUUID()))
     }
 
     private fun risikovurdering(vedtaksperiodeId: UUID = PERIODE.first, data: String = riskrespons) = sessionOf(dataSource).use { session ->

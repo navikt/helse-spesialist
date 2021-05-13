@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -27,14 +26,12 @@ internal class Risikovurderingløsning(
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("vedtaksperiodeIdTilGodkjenning", vedtaksperiodeIdTilGodkjenning)
         )
-        risikovurderingDao.persisterRisikovurdering(
-            RisikovurderingDto(
-                vedtaksperiodeId = vedtaksperiodeId,
-                opprettet = opprettet,
-                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-                kreverSupersaksbehandler = løsning["funn"].any { it["kreverSupersaksbehandler"].asBoolean() },
-                data = løsning,
-            )
+        risikovurderingDao.lagre(
+            vedtaksperiodeId = vedtaksperiodeId,
+            opprettet = opprettet,
+            kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+            kreverSupersaksbehandler = løsning["funn"].any { it["kreverSupersaksbehandler"].asBoolean() },
+            data = løsning
         )
     }
 

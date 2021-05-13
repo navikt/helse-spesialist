@@ -11,16 +11,13 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.risiko.RisikovurderingDto
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import java.time.LocalDateTime
 import java.util.*
 
 internal class AutomatiseringTest {
@@ -28,8 +25,7 @@ internal class AutomatiseringTest {
     private val vedtakDaoMock = mockk<VedtakDao>()
     private val warningDaoMock = mockk<WarningDao>()
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
-        every { hentRisikovurderingDto(vedtaksperiodeId) } returns risikovurderingDto()
-        every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(risikovurderingDto())
+        every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
     }
     private val digitalKontaktinformasjonDaoMock = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
@@ -58,10 +54,7 @@ internal class AutomatiseringTest {
 
     @BeforeEach
     fun setupDefaultTilHappyCase() {
-        every { risikovurderingDaoMock.hentRisikovurderingDto(vedtaksperiodeId) } returns risikovurderingDto()
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(
-            risikovurderingDto()
-        )
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Periodetype.FORLENGELSE
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
@@ -97,9 +90,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
-        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(
-            risikovurderingDto(false)
-        )
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
 
@@ -150,12 +141,4 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
     }
-
-    private fun risikovurderingDto(kanGodkjennesAutomatisk: Boolean = true) = RisikovurderingDto(
-        vedtaksperiodeId = vedtaksperiodeId,
-        opprettet = LocalDateTime.now(),
-        kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-        kreverSupersaksbehandler = false,
-        data = objectMapper.createObjectNode()
-    )
 }
