@@ -323,9 +323,11 @@ internal class HendelseMediator(
                             "organisasjonsnummer" to organisasjonsnummer,
                             "aktørId" to aktørId,
                             "saksbehandler" to saksbehandler.json().toMutableMap().apply { put("ident", annulleringDto.saksbehandlerIdent) },
-                            "fagsystemId" to fagsystemId
+                            "fagsystemId" to fagsystemId,
+                            "årsak" to årsak,
                         )
                     )
+                    annulleringDto.kommentar?.let { put("kommentar", it) }
                 }
             )
         }
