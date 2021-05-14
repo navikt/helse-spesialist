@@ -4,13 +4,11 @@ import UtbetalingshistorikkElementApiDto
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.helse.arbeidsgiver.ArbeidsforholdApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
@@ -40,8 +38,7 @@ internal class VedtaksperiodeMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val utbetalingDao: UtbetalingDao,
-    private val arbeidsforholdDao: ArbeidsforholdDao
+    private val utbetalingDao: UtbetalingDao
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
@@ -144,19 +141,7 @@ internal class VedtaksperiodeMediator(
             val tildeling = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
 
             val arbeidsforhold = arbeidsgivere
-                .map { arbeidsgiver ->
-                    arbeidsforholdDao
-                        .findArbeidsforhold(vedtak.fødselsnummer, arbeidsgiver.organisasjonsnummer)
-                        .map { arbeidsforhold ->
-                            ArbeidsforholdApiDto(
-                                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                                stillingstittel = arbeidsforhold.stillingstittel,
-                                stillingsprosent = arbeidsforhold.stillingsprosent,
-                                startdato = arbeidsforhold.startdato,
-                                sluttdato = arbeidsforhold.sluttdato
-                            )
-                        }
-                }
+                .map { arbeidsgiverDao.finnArbeidsforhold(vedtak.fødselsnummer, it.organisasjonsnummer) }
                 .flatten()
 
             PersonForSpeilDto(

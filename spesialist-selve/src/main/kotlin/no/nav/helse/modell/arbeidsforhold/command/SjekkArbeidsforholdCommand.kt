@@ -28,7 +28,7 @@ internal class SjekkArbeidsforholdCommand(
             return true
         }
         val aktiveArbeidsforhold = arbeidsforholdDao.findArbeidsforhold(fødselsnummer, orgnummer)
-            .filter { it.startdato <= skjæringstidspunkt  }
+            .filter { it.startdato <= skjæringstidspunkt }
             .filter { it.sluttdato == null || it.sluttdato > skjæringstidspunkt }
         if (aktiveArbeidsforhold.size > 1){
             val melding = "ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig."

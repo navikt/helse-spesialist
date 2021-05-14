@@ -162,8 +162,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         risikovurderingApiDao = risikovurderingApiDao,
-        utbetalingDao = utbetalingDao,
-        arbeidsforholdDao = arbeidsforholdDao
+        utbetalingDao = utbetalingDao
     )
 
     @BeforeEach

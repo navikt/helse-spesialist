@@ -14,7 +14,7 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
         const val STILLINGSPROSENT = 100
         const val STILLINGSTITTEL = "Slabberasansvarlig"
         val STARTDATO: LocalDate = LocalDate.now()
-        val SLUTTDATO = null
+        val SLUTTDATO: LocalDate? = null
     }
 
     @BeforeEach
@@ -111,7 +111,7 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
         val arbeidsforhold = arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER)
 
         løsninger.oppdater(arbeidsforholdDao, FNR, ORGNUMMER)
-        kotlin.test.assertEquals(arbeidsforhold, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER))
+        assertEquals(arbeidsforhold, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER))
     }
 
     @Test
@@ -129,6 +129,6 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
             )
         ).oppdater(arbeidsforholdDao, FNR, ORGNUMMER)
 
-        kotlin.test.assertEquals(1, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).size)
+        assertEquals(1, arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).size)
     }
 }

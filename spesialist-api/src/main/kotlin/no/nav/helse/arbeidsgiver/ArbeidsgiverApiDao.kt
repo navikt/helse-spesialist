@@ -1,6 +1,7 @@
 package no.nav.helse.arbeidsgiver
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
@@ -39,5 +40,23 @@ class ArbeidsgiverApiDao(private val dataSource: DataSource) {
             }.asSingle
         )
     }
+
+    fun finnArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
+            WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = ?)
+            AND person_ref = (SELECT id FROM person WHERE fodselsnummer = ?)
+        """
+        session.run(queryOf(statement, organisasjonsnummer.toInt(), fødselsnummer.toLong()).map { tilArbeidsforholdApiDto(organisasjonsnummer, it) }.asList)
+    }
+
+    private fun tilArbeidsforholdApiDto(organisasjonsnummer: String, row: Row) = ArbeidsforholdApiDto(
+        organisasjonsnummer = organisasjonsnummer,
+        stillingstittel = row.string("stillingstittel"),
+        stillingsprosent = row.int("stillingsprosent"),
+        startdato = row.localDate("startdato"),
+        sluttdato = row.localDateOrNull("sluttdato")
+    )
 }
 
