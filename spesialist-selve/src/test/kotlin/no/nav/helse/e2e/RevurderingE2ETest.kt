@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.snapshotMedWarning
 import no.nav.helse.snapshotUtenWarnings
@@ -40,28 +41,28 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
             "EN_FAGSYSTEMID",
             utbetalingId = UTBETALING_ID
         )
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavetype(0, "SØKNAD")
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
 
-        val godkjenningsmeldingId2 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID2) // revurdering
+        val godkjenningsmeldingId2 = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID2,
+            utbetalingtype = Utbetalingtype.REVURDERING
+        )
         håndterGodkjenningsbehov(godkjenningsmeldingId2)
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
-            "UTBETALING",
+            "REVURDERING",
             Utbetalingsstatus.UTBETALT,
             ORGNR,
             "EN_FAGSYSTEMID",
             utbetalingId = UTBETALING_ID2
         )
-        assertOppgave(1, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavestatuser(1, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavetype(1, "REVURDERING")
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
-
-    }
-
-
-    @Test
-    fun `revurdering ved automatisering`() {
-
     }
 
     private fun håndterGodkjenningsbehov(godkjenningsmeldingId: UUID) {

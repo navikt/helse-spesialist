@@ -17,6 +17,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -74,6 +75,7 @@ internal class Hendelsefabrikk(
         arbeidsforholdId: String?,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
+        utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         json: String
@@ -90,6 +92,7 @@ internal class Hendelsefabrikk(
             periodeTom = periodeTom,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
+            utbetalingtype = utbetalingtype,
             inntektskilde = inntektskilde,
             json = json,
             personDao = personDao,
@@ -126,6 +129,7 @@ internal class Hendelsefabrikk(
             arbeidsforholdId = jsonNode.path("Godkjenning").path("arbeidsforholdId").takeUnless(JsonNode::isMissingOrNull)?.asText(),
             skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
             periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
+            utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
             inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
             aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")),
             json = json

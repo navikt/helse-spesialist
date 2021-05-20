@@ -5,6 +5,7 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
@@ -19,7 +20,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val egenAnsattDao: EgenAnsattDao,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
-    private val utbetalingId: UUID
+    private val utbetalingId: UUID,
+    private val utbetalingtype: Utbetalingtype
 ) : Command {
 
     private companion object {
@@ -32,6 +34,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (tilhørerUtlandsenhet) return true
 
         val oppgave = when {
+            utbetalingtype == Utbetalingtype.REVURDERING -> Oppgave.revurdering(vedtaksperiodeId, utbetalingId)
             automatisering.erStikkprøve(vedtaksperiodeId, hendelseId) -> Oppgave.stikkprøve(vedtaksperiodeId, utbetalingId)
             risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(vedtaksperiodeId, utbetalingId)
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)

@@ -33,6 +33,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.OppgaveDao
@@ -197,7 +198,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 vedtaksperiodeId,
                 periodetype
             )
-        )
+        ),
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
     ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
@@ -211,7 +213,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 periodetype = periodetype,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
-                aktiveVedtaksperioder = aktiveVedtaksperioder
+                aktiveVedtaksperioder = aktiveVedtaksperioder,
+                utbetalingtype = utbetalingtype
             )
         )
     }
@@ -589,12 +592,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(antall, oppgaver.size)
     }
 
-    protected fun assertOppgave(indeks: Int, vararg status: Oppgavestatus) {
+    protected fun assertOppgavestatuser(indeks: Int, vararg status: Oppgavestatus) {
         val oppgaver = testRapid.inspektør.oppgaver()
-        assertEquals(status.toList(), oppgaver[indeks])
+        assertEquals(status.toList(), oppgaver[indeks]?.statuser)
     }
 
-    private fun TestRapid.RapidInspector.oppgaver(): Map<Int, List<Oppgavestatus>> {
+    protected fun assertOppgavetype(indeks: Int, type: String) {
+        val oppgaver = testRapid.inspektør.oppgaver()
+        assertEquals(type, oppgaver[indeks]?.type)
+    }
+
+    private fun TestRapid.RapidInspector.oppgaver(): Map<Int, OppgaveSnapshot> {
         val oppgaveindekser = mutableListOf<Long>()
         val oppgaver = mutableMapOf<Int, MutableList<JsonNode>>()
         hendelser("oppgave_opprettet")
@@ -609,11 +617,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             }
         return oppgaver
             .mapValues { (_, oppgaver) ->
-                oppgaver.map { oppgave ->
-                    Oppgavestatus.valueOf(oppgave.path("status").asText())
-                }
+                OppgaveSnapshot(
+                    type = oppgaver.first().path("type").asText(),
+                    statuser = oppgaver.map { Oppgavestatus.valueOf(it.path("status").asText()) }
+                )
             }
     }
+
+    private data class OppgaveSnapshot(
+        val statuser: List<Oppgavestatus>,
+        val type: String
+    )
 
     protected fun assertIngenOppgave() {
         assertEquals(0, testRapid.inspektør.hendelser("oppgave_opprettet").size)

@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -57,6 +58,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         periodeTom: LocalDate = LocalDate.now(),
         skjæringstidspunkt: LocalDate = LocalDate.now(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
@@ -82,6 +84,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                     "periodeTom" to "$periodeTom",
                     "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                     "periodetype" to periodetype.name,
+                    "utbetalingtype" to utbetalingtype.name,
                     "inntektskilde" to inntektskilde.name,
                     "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiodeJson::toBody)
                 )

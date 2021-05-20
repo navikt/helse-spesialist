@@ -78,7 +78,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
+        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
     }
 
     @Test
@@ -150,7 +150,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
 
-        assertOppgave(0, Oppgavestatus.AvventerSaksbehandler)
+        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler)
     }
 
     @Test

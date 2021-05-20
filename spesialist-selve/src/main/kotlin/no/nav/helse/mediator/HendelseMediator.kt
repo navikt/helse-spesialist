@@ -16,6 +16,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
@@ -195,6 +196,7 @@ internal class HendelseMediator(
         utbetalingId: UUID,
         arbeidsforholdId: String?,
         periodetype: Periodetype,
+        utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext
@@ -216,6 +218,7 @@ internal class HendelseMediator(
                 arbeidsforholdId,
                 skjæringstidspunkt,
                 periodetype,
+                utbetalingtype,
                 inntektskilde,
                 aktiveVedtaksperioder,
                 message.toJson()

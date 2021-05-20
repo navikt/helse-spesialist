@@ -28,6 +28,7 @@ class Oppgave private constructor(
     companion object {
         fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("SØKNAD", vedtaksperiodeId, utbetalingId)
         fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId, utbetalingId)
+        fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("REVURDERING", vedtaksperiodeId, utbetalingId)
         fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("RISK_QA", vedtaksperiodeId, utbetalingId)
         private fun oppgave(type: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
@@ -43,14 +44,15 @@ class Oppgave private constructor(
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
 
             return lagMelding(
-                eventName,
-                hendelseId,
-                contextId,
-                oppgaveId,
-                oppgave.status,
-                fødselsnummer,
-                oppgave.ferdigstiltAvIdent,
-                oppgave.ferdigstiltAvOid
+                eventName = eventName,
+                hendelseId = hendelseId,
+                contextId = contextId,
+                oppgaveId = oppgaveId,
+                status = oppgave.status,
+                type = oppgave.type,
+                fødselsnummer = fødselsnummer,
+                ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
+                ferdigstiltAvOid = oppgave.ferdigstiltAvOid
             )
         }
 
@@ -60,6 +62,7 @@ class Oppgave private constructor(
             contextId: UUID,
             oppgaveId: Long,
             status: Oppgavestatus,
+            type: String,
             fødselsnummer: String,
             ferdigstiltAvIdent: String? = null,
             ferdigstiltAvOid: UUID? = null,
@@ -73,6 +76,7 @@ class Oppgave private constructor(
                     "contextId" to contextId,
                     "oppgaveId" to oppgaveId,
                     "status" to status.name,
+                    "type" to type,
                     "fødselsnummer" to fødselsnummer
                 ).apply {
                     ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }

@@ -148,7 +148,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
+        assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
         assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
     }
@@ -244,7 +244,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgave(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
+        assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
     }
 

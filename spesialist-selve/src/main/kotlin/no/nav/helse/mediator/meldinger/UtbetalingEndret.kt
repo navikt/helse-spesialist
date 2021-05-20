@@ -12,6 +12,8 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.gyldigeStatuser
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
+import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.*
@@ -74,7 +76,7 @@ internal class UtbetalingEndret(
                         "@id", "fødselsnummer", "organisasjonsnummer",
                         "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId"
                     )
-                    it.requireAny("type", listOf("UTBETALING", "ANNULLERING", "ETTERUTBETALING", "FERIEPENGER"))
+                    it.requireAny("type", Utbetalingtype.gyldigeTyper.values())
                     it.requireAny("forrigeStatus", gyldigeStatuser.values())
                     it.requireAny("gjeldendeStatus", gyldigeStatuser.values())
                     it.require("@opprettet", JsonNode::asLocalDateTime)
