@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -35,7 +36,16 @@ internal class GodkjenningsbehovRiverTest {
 
     @Test
     fun `leser Godkjenningbehov`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(id = HENDELSE, vedtaksperiodeId = VEDTAKSPERIODE, orgnummer = ORGNR, skjæringstidspunkt = FOM, periodeFom = FOM, periodeTom = TOM, inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE, utbetalingId = UTBETALING_ID))
+        testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(
+            id = HENDELSE,
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            orgnummer = ORGNR,
+            skjæringstidspunkt = FOM,
+            periodeFom = FOM,
+            periodeTom = TOM,
+            inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
+            utbetalingId = UTBETALING_ID
+        ))
         verify(exactly = 1) { mediator.godkjenningsbehov(
             any(),
             HENDELSE,
@@ -49,6 +59,7 @@ internal class GodkjenningsbehovRiverTest {
             UTBETALING_ID,
             null,
             Periodetype.FØRSTEGANGSBEHANDLING,
+            Utbetalingtype.UTBETALING,
             Inntektskilde.FLERE_ARBEIDSGIVERE,
             listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Periodetype.FØRSTEGANGSBEHANDLING)),
             any()

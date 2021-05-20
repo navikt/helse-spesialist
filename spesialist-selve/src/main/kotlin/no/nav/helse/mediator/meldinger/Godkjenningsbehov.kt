@@ -29,6 +29,8 @@ import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -51,6 +53,7 @@ internal class Godkjenningsbehov(
     periodeTom: LocalDate,
     skjæringstidspunkt: LocalDate,
     periodetype: Periodetype,
+    utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
     private val json: String,
@@ -159,6 +162,7 @@ internal class Godkjenningsbehov(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
+            utbetalingtype = utbetalingtype,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             egenAnsattDao = egenAnsattDao,
@@ -201,6 +205,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.inntektskilde",
                         "Godkjenning.aktiveVedtaksperioder"
                     )
+                    it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                     it.interestedIn("Godkjenning.arbeidsforholdId")
                 }
             }.register(this)
@@ -234,6 +239,7 @@ internal class Godkjenningsbehov(
                 utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
                 arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
+                utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),
                 context = context

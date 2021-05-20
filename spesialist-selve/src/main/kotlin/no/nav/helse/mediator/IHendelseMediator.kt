@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -64,6 +65,7 @@ internal interface IHendelseMediator {
         utbetalingId: UUID,
         arbeidsforholdId: String?,
         periodetype: Periodetype,
+        utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         context: MessageContext

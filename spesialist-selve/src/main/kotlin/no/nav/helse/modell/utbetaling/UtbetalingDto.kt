@@ -22,4 +22,13 @@ enum class Utbetalingsstatus {
         internal fun EnumSet<Utbetalingsstatus>.values() = this.map(Utbetalingsstatus::toString)
     }
 }
+enum class Utbetalingtype {
+    UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER;
+
+    internal companion object {
+        internal val gyldigeTyper = EnumSet.allOf(Utbetalingtype::class.java)
+
+        internal fun EnumSet<Utbetalingtype>.values() = this.map(Utbetalingtype::toString)
+    }
+}
 

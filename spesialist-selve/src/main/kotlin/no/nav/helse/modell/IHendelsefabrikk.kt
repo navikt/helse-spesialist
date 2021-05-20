@@ -1,6 +1,7 @@
 package no.nav.helse.modell
 
 import no.nav.helse.mediator.meldinger.*
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -54,6 +55,7 @@ internal interface IHendelsefabrikk {
         arbeidsforholdId: String?,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
+        utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         json: String

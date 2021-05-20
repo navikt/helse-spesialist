@@ -1,1 +1,2 @@
 ALTER TYPE oppgavetype ADD VALUE 'RISK_QA';
+ALTER TYPE utbetaling_type ADD VALUE 'REVURDERING';
