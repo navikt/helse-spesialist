@@ -23,12 +23,14 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling annullert oppdaterer alle snapshots på personen`() {
+        val (oid, navn, epost) = Triple(UUID.randomUUID(), "en saksbehandler", "saksbehandler_epost")
+        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost)
         vedtaksperiode(vedtaksperiodeId1, snapshotV1)
         vedtaksperiode(vedtaksperiodeId2, snapshotV2)
 
         assertVedtak(vedtaksperiodeId2)
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotFinal
-        sendUtbetalingAnnullert()
+        sendUtbetalingAnnullert(saksbehandlerEpost = epost)
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
         assertSnapshot(snapshotFinal, vedtaksperiodeId2)

@@ -21,6 +21,7 @@ internal class DelegatedRapid(
             afterRiverAction(message, context)
         } catch (err: Exception) {
             errorAction(err, message)
+            throw err
         }
     }
 

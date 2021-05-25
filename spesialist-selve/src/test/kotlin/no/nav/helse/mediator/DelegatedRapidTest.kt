@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class DelegatedRapidTest : River.PacketListener {
     private val testRapid = TestRapid()
@@ -36,7 +37,9 @@ internal class DelegatedRapidTest : River.PacketListener {
 
     @Test
     fun `error handler is called on exceptions`() {
-        testRapid.sendTestMessage("this_is_not_valid_json")
+        assertThrows<Exception> {
+            testRapid.sendTestMessage("this_is_not_valid_json")
+        }
         assertTrue(error)
         assertEquals(listOf("BEFORE", "ERROR"), order)
     }
