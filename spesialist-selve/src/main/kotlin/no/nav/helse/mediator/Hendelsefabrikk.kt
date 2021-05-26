@@ -305,7 +305,7 @@ internal class Hendelsefabrikk(
             saksbehandlerEpost = jsonNode["saksbehandlerEpost"].asText(),
             json = json,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
             utbetalingDao = utbetalingDao,
             saksbehandlerDao = saksbehandlerDao,
         )
@@ -367,7 +367,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             json = json,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtakDao = vedtakDao
+            snapshotDao = snapshotDao
         )
     }
 

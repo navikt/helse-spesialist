@@ -38,7 +38,7 @@ internal class OpprettVedtakCommand(
     private fun oppdater(vedtakRef: Long): Boolean {
         log.info("Henter oppdatert snapshot for vedtaksperiode: $vedtaksperiodeId")
         val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
-        val snapshotId = snapshotDao.insertSpeilSnapshot(snapshot)
+        val snapshotId = snapshotDao.lagre(fødselsnummer, snapshot)
         oppdaterWarnings(snapshot)
 
         log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
@@ -54,7 +54,7 @@ internal class OpprettVedtakCommand(
     private fun opprett(): Boolean {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
         val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
-        val snapshotId = snapshotDao.insertSpeilSnapshot(snapshot)
+        val snapshotId = snapshotDao.lagre(fødselsnummer, snapshot)
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer))
         log.info("Oppretter vedtak for vedtaksperiode: $vedtaksperiodeId for person=$personRef, arbeidsgiver=$arbeidsgiverRef")

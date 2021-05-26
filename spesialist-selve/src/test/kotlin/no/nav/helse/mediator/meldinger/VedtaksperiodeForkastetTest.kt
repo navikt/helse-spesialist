@@ -15,7 +15,6 @@ import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.snapshotUtenWarnings
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -82,18 +81,9 @@ internal class VedtaksperiodeForkastetTest {
     @Test
     fun `avbryter kommandoer og oppdaterer snapshot`() {
         every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
-        every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns 1
+        every { snapshotDao.lagre(FNR, SNAPSHOT) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
-        verify(exactly = 1) { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) }
-    }
-
-    @Test
-    fun `kommando feiler når snapshot feiler`() {
-        every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
-        every { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) } returns 0
-        assertFalse(vedtaksperiodeForkastetMessage.execute(context))
-        verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
-        verify(exactly = 1) { snapshotDao.oppdaterSnapshotForVedtaksperiode(VEDTAKSPERIODE, SNAPSHOT) }
+        verify(exactly = 1) { snapshotDao.lagre(FNR, SNAPSHOT) }
     }
 }

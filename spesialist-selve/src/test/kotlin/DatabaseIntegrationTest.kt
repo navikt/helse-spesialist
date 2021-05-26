@@ -202,7 +202,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettSnapshot(personBlob: String = "{}") {
-        snapshotId = snapshotDao.insertSpeilSnapshot(personBlob)
+        snapshotId = snapshotDao.lagre(FNR, personBlob)
     }
 
     protected fun opprettVedtaksperiode(

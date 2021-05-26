@@ -1,7 +1,5 @@
 package no.nav.helse.modell
 
-import kotliquery.Session
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -115,51 +113,9 @@ internal class VedtakDao(private val dataSource: DataSource) {
             }.asSingle)
         }
 
-    internal fun oppdaterSnapshot(fødselsnummer: String, snapshot: String) {
-        sessionOf(dataSource, returnGeneratedKey = true).use  { session ->
-            session.transaction { tx ->
-                val sisteReferanse = insertSpeilSnapshot(tx, snapshot)
-                val referanser = findSpeilSnapshotRefs(fødselsnummer)
-                oppdaterSnapshotRef(tx, fødselsnummer, sisteReferanse)
-                referanser.forEach { ref -> slett(tx, ref) }
-            }
-        }
-    }
-
     internal fun erAutomatiskGodkjent(utbetalingId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = "SELECT automatisert FROM automatisering WHERE utbetaling_id = ?;"
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
-
-    private fun findSpeilSnapshotRefs(fnr: String) = sessionOf(dataSource).use  { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT v.speil_snapshot_ref FROM vedtak v
-                JOIN person p ON v.person_ref = p.id
-            WHERE p.fodselsnummer = ?;
-        """
-        session.run(queryOf(query, fnr.toLong()).map { it.long("speil_snapshot_ref") }.asList)
-    }
-
-    private fun oppdaterSnapshotRef(session: Session, fnr: String, ref: Long) {
-        @Language("PostgreSQL")
-        val query = """
-           UPDATE vedtak SET speil_snapshot_ref = ?
-           WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = ?)
-        """
-        session.execute(queryOf(query, ref, fnr.toLong()))
-    }
-
-    private fun insertSpeilSnapshot(transactionalSession: TransactionalSession, personBlob: String): Long {
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO speil_snapshot(data) VALUES(CAST(? as json));"
-        return requireNotNull(transactionalSession.run(queryOf(statement, personBlob).asUpdateAndReturnGeneratedKey))
-    }
-
-    private fun slett(session: Session, ref: Long) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM speil_snapshot WHERE id = ?"
-        session.execute(queryOf(query, ref))
-    }
 }

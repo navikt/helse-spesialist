@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
 import no.nav.helse.modell.kommando.MacroCommand
@@ -25,14 +25,14 @@ internal class UtbetalingAnnullert(
     saksbehandlerEpost: String,
     private val json: String,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    vedtakDao: VedtakDao,
+    snapshotDao: SnapshotDao,
     utbetalingDao: UtbetalingDao,
     saksbehandlerDao: SaksbehandlerDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
             fødselsnummer = fødselsnummer
         ),
         LagreAnnulleringCommand(

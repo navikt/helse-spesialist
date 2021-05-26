@@ -1,64 +1,41 @@
 package no.nav.helse.modell
 
-import kotliquery.Session
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import java.util.*
 import javax.sql.DataSource
 
 internal class SnapshotDao(private val dataSource: DataSource) {
 
-    fun insertSpeilSnapshot(personBlob: String) = sessionOf(dataSource, returnGeneratedKey = true).use {
-        it.insertSpeilSnapshot(personBlob).toInt()
-    }
+    fun lagre(fødselsnummer: String, snapshot: String) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        session.transaction { tx ->
+            val personRef = tx.finnPersonRef(fødselsnummer)
 
-    fun oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId: UUID, snapshot: String) =
-        sessionOf(dataSource).use { it.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, snapshot) }
-
-    private fun Session.insertSpeilSnapshot(personBlob: String): Long {
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO speil_snapshot(data) VALUES(CAST(:personBlob as json));"
-        return requireNotNull(
-            this.run(
-                queryOf(
-                    statement,
-                    mapOf("personBlob" to personBlob)
-                ).asUpdateAndReturnGeneratedKey
+            @Language("PostgreSQL")
+            val statement = """
+            INSERT INTO speil_snapshot(person_ref, data)
+                VALUES(:person_ref, CAST(:snapshot as json))
+            ON CONFLICT(person_ref) DO UPDATE
+                SET data = CAST(:snapshot as json), sist_endret = now();
+        """
+            requireNotNull(
+                tx.run(
+                    queryOf(
+                        statement,
+                        mapOf(
+                            "person_ref" to personRef,
+                            "snapshot" to snapshot
+                        )
+                    ).asUpdateAndReturnGeneratedKey
+                )
             )
-        )
+        }.toInt()
     }
 
-    internal fun findSpeilSnapshot(id: Int) = sessionOf(dataSource).use { it.findSpeilSnapshot(id) }
-
-    private fun Session.findSpeilSnapshot(id: Int): String? {
+    private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Int? {
         @Language("PostgreSQL")
-        val statement = "SELECT data FROM speil_snapshot WHERE id=:id;"
-        return this.run(
-            queryOf(
-                statement,
-                mapOf("id" to id)
-            ).map { it.string("data") }.asSingle
-        )
-    }
-
-    private fun Session.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId: UUID, snapshot: String): Int {
-        @Language("PostgreSQL")
-        val statement = """
-        UPDATE speil_snapshot
-        SET data=CAST(:snapshot as json), sist_endret=now()
-        WHERE id = (SELECT speil_snapshot_ref FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId);
-    """
-        return requireNotNull(
-            this.run(
-                queryOf(
-                    statement,
-                    mapOf(
-                        "snapshot" to snapshot,
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).asUpdate
-            )
-        )
+        val statement = "SELECT id FROM person WHERE fodselsnummer = ?"
+        return this.run(queryOf(statement, fødselsnummer.toLong()).map { it.int("id") }.asSingle)
     }
 }

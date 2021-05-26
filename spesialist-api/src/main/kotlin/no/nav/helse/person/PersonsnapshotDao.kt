@@ -13,11 +13,10 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
     fun finnPersonByFnr(fnr: String) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")
         val query = """
-            SELECT * FROM vedtak AS v
-                INNER JOIN person AS p ON v.person_ref = p.id
-                INNER JOIN person_info as pi ON pi.id=p.info_ref
-                INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
-            WHERE p.fodselsnummer = ? ORDER BY v.id DESC LIMIT 1;
+            SELECT * FROM person AS p
+                INNER JOIN person_info as pi ON pi.id = p.info_ref
+                INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
+            WHERE p.fodselsnummer = ?;
         """
         session.run(queryOf(query, fnr.toLong()).map(::tilPersonsnapshot).asSingle)
     }
@@ -25,11 +24,10 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
     fun finnPersonByAktørid(aktørId: String) = sessionOf(dataSource).use  {
         @Language("PostgreSQL")
         val query = """
-            SELECT * FROM vedtak AS v
-                INNER JOIN person AS p ON v.person_ref = p.id
-                INNER JOIN person_info AS pi ON pi.id=p.info_ref
-                INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
-            WHERE p.aktor_id = ? ORDER BY v.id DESC LIMIT 1;
+            SELECT * FROM person AS p
+                INNER JOIN person_info as pi ON pi.id = p.info_ref
+                INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
+            WHERE p.aktor_id = ?;
         """
         it.run(queryOf(query, aktørId.toLong()).map(::tilPersonsnapshot).asSingle)
     }
@@ -39,15 +37,15 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
         val query = """
             SELECT * FROM vedtak AS v
                  INNER JOIN person AS p ON v.person_ref = p.id
-                 INNER JOIN person_info as pi ON pi.id=p.info_ref
-                 INNER JOIN speil_snapshot AS ss ON ss.id = v.speil_snapshot_ref
+                 INNER JOIN person_info as pi ON pi.id = p.info_ref
+                 INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
             WHERE v.vedtaksperiode_id = ? ORDER BY v.id DESC LIMIT 1;
         """
         session.run(queryOf(query, vedtaksperiodeId).map(::tilPersonsnapshot).asSingle)
     }
 
-    private fun tilPersonsnapshot(row: Row): Pair<PersonMetadataDto, SnapshotDto> {
-        val person = PersonMetadataDto(
+    private fun tilPersonsnapshot(row: Row): Pair<PersonMetadataApiDto, SnapshotDto> {
+        val person = PersonMetadataApiDto(
             fødselsnummer = row.long("fodselsnummer").toFødselsnummer(),
             aktørId = row.long("aktor_id").toString(),
             personinfo = PersoninfoApiDto(
@@ -56,10 +54,7 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
                 etternavn = row.string("etternavn"),
                 fødselsdato = row.localDateOrNull("fodselsdato"),
                 kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf)
-            ),
-            arbeidsgiverRef = row.long("arbeidsgiver_ref"),
-            speilSnapshotRef = row.int("speil_snapshot_ref"),
-            infotrygdutbetalingerRef = row.intOrNull("infotrygdutbetalinger_ref")
+            )
         )
         val snapshot = objectMapper.readValue<SnapshotDto>(row.string("data"))
         return person to snapshot

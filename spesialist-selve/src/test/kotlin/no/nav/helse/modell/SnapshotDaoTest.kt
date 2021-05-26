@@ -13,7 +13,7 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre snapshot`() {
         val personBlob = "{}"
-        snapshotDao.insertSpeilSnapshot(personBlob)
+        snapshotDao.lagre(FNR, personBlob)
         assertEquals(1, snapshot().size)
         assertEquals(personBlob, snapshot().first().first)
         assertEquals(LocalDate.now(), snapshot().first().second)

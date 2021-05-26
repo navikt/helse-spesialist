@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.slf4j.LoggerFactory
 
 internal class OppdaterSnapshotUtenÅLagreWarningsCommand(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
-    private val vedtakDao: VedtakDao,
+    private val snapshotDao: SnapshotDao,
     private val fødselsnummer: String
 ) : Command {
 
@@ -20,7 +20,7 @@ internal class OppdaterSnapshotUtenÅLagreWarningsCommand(
 
     private fun oppdaterSnapshot(): Boolean {
         val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
-        vedtakDao.oppdaterSnapshot(fødselsnummer, snapshot)
+        snapshotDao.lagre(fødselsnummer, snapshot)
         log.info("Oppdaterte snapshot på person: ${fødselsnummer.substring(0, 4)}*******")
         return true
     }

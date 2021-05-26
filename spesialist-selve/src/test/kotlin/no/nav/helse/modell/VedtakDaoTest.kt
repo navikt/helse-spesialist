@@ -32,7 +32,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.insertSpeilSnapshot("{}")
+        val nySnapshotRef = snapshotDao.lagre(FNR, "{}")
         assertThrows<PSQLException> { vedtakDao.opprett(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef) }
     }
 
@@ -44,7 +44,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.insertSpeilSnapshot("{}")
+        val nySnapshotRef = snapshotDao.lagre(FNR, "{}")
         vedtakDao.oppdater(vedtakId, nyFom, nyTom, nySnapshotRef)
         assertEquals(1, vedtak().size)
         vedtak().first().assertEquals(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef)
@@ -90,9 +90,9 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettVedtaksperiode(nyVedtaksperiode)
-        vedtakDao.oppdaterSnapshot(FNR, newJson)
+        snapshotDao.lagre(FNR, newJson)
         val vedtak = vedtak()
-        assertTrue(vedtak.all {  snapshotDao.findSpeilSnapshot(it.snapshotRef) == newJson },
+        assertTrue(vedtak.all { snapshot(it.snapshotRef) == newJson },
             "Alle snapshots på person skal matche den nye jsonen")
     }
 
@@ -154,5 +154,9 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
             assertEquals(forventetArbeidsgiverRef, arbeidsgiverRef)
             assertEquals(forventetSnapshotRef, snapshotRef)
         }
+    }
+
+    private fun snapshot(snapshotRef: Int) = sessionOf(dataSource).use  {
+        it.run(queryOf("SELECT data FROM speil_snapshot WHERE id = ?", snapshotRef).map { it.string("data") }.asSingle)
     }
 }

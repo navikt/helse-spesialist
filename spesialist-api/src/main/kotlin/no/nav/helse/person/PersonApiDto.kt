@@ -16,6 +16,12 @@ data class PersoninfoApiDto(
     val kjønn: Kjønn?
 )
 
+data class PersonMetadataApiDto(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val personinfo: PersoninfoApiDto
+)
+
 enum class Kjønn { Mann, Kvinne, Ukjent }
 
 data class PersonForSpeilDto(

@@ -51,7 +51,7 @@ internal class VedtaksperiodeMediator(
             personsnapshotDao.finnPersonByVedtaksperiodeid(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
         }
 
-    private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataDto, SnapshotDto>) =
+    private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataApiDto, SnapshotDto>) =
         measureAsHistogram("byggSpeilSnapshot") {
             val (personMetadata, speilSnapshot) = personsnapshot
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {

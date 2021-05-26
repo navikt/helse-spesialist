@@ -28,14 +28,6 @@ internal class OppdaterSnapshotCommand(
         return oppdaterSnapshot()
     }
 
-    override fun resume(context: CommandContext): Boolean {
-        return oppdaterSnapshot()
-    }
-
-    override fun undo(context: CommandContext) {
-        // sletting av snapshot gir ikke mening i denne kontekst
-    }
-
     private fun ignorer(): Boolean {
         log.info("kjenner ikke til vedtaksperiode $vedtaksperiodeId")
         return true
@@ -44,15 +36,10 @@ internal class OppdaterSnapshotCommand(
     private fun oppdaterSnapshot(): Boolean {
         log.info("oppdaterer snapshot for $vedtaksperiodeId")
         return speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer).let { snapshot ->
-            val snapshotBleOppdatert = snapshotDao.oppdaterSnapshotForVedtaksperiode(vedtaksperiodeId, snapshot) != 0
-            if (snapshotBleOppdatert) {
-                log.info("oppdaterer warnings for $vedtaksperiodeId")
-                warningDao.oppdaterSpleisWarnings(vedtaksperiodeId, Warning.warnings(
-                    vedtaksperiodeId,
-                    objectMapper.readValue(snapshot)
-                ))
-            }
-            snapshotBleOppdatert
+            snapshotDao.lagre(fødselsnummer, snapshot)
+            log.info("oppdaterer warnings for $vedtaksperiodeId")
+            warningDao.oppdaterSpleisWarnings(vedtaksperiodeId, Warning.warnings(vedtaksperiodeId, objectMapper.readValue(snapshot)))
+            true
         }
     }
 }
