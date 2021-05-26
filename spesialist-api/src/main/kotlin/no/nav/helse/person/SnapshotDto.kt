@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import java.time.LocalDate
 
-data class PersonDto(
+data class SnapshotDto(
     val aktørId: String,
     val fødselsnummer: String,
     val dødsdato: LocalDate?,

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.vedtak
 
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.person.PersonDto
+import no.nav.helse.person.SnapshotDto
 import java.util.*
 
 internal class Warning(
@@ -15,7 +15,7 @@ internal class Warning(
             warnings.forEach { it.lagre(warningDao, vedtakRef) }
         }
 
-        internal fun warnings(vedtaksperiodeId: UUID, snapshot: PersonDto) =
+        internal fun warnings(vedtaksperiodeId: UUID, snapshot: SnapshotDto) =
             snapshot.arbeidsgivere
                 .flatMap { it.vedtaksperioder }
                 .filter { UUID.fromString(it["id"].asText()) == vedtaksperiodeId }

@@ -15,9 +15,7 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringApiDto
 import no.nav.helse.overstyring.OverstyrtDagApiDto
-import no.nav.helse.person.PersonApiDao
-import no.nav.helse.person.PersonDto
-import no.nav.helse.person.PersonForSpeilDto
+import no.nav.helse.person.*
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.utbetaling.AnnullertAvSaksbehandlerApiDto
@@ -25,12 +23,10 @@ import no.nav.helse.utbetaling.OppdragApiDto
 import no.nav.helse.utbetaling.UtbetalingApiDto
 import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.vedtaksperiode.VarselDao
-import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDao
-import no.nav.helse.vedtaksperiode.VedtaksperiodeApiDto
 import java.util.*
 
 internal class VedtaksperiodeMediator(
-    private val vedtaksperiodeDao: VedtaksperiodeApiDao,
+    private val personsnapshotDao: PersonsnapshotDao,
     private val varselDao: VarselDao,
     private val personDao: PersonApiDao,
     private val arbeidsgiverDao: ArbeidsgiverApiDao,
@@ -42,27 +38,27 @@ internal class VedtaksperiodeMediator(
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            vedtaksperiodeDao.findVedtakByFnr(fnr)?.let(::byggSpeilSnapshot)
+            personsnapshotDao.finnPersonByFnr(fnr)?.let(::byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            vedtaksperiodeDao.findVedtakByAktørId(aktørId)?.let(::byggSpeilSnapshot)
+            personsnapshotDao.finnPersonByAktørid(aktørId)?.let(::byggSpeilSnapshot)
         }
 
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            vedtaksperiodeDao.findVedtakByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
+            personsnapshotDao.finnPersonByVedtaksperiodeid(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
         }
 
-    private fun byggSpeilSnapshot(vedtakinfo: Pair<VedtaksperiodeApiDto, PersonDto>) =
+    private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataDto, SnapshotDto>) =
         measureAsHistogram("byggSpeilSnapshot") {
-            val (vedtak, speilSnapshot) = vedtakinfo
+            val (personMetadata, speilSnapshot) = personsnapshot
             val infotrygdutbetalinger = measureAsHistogram("byggSpeilSnapshot_findInfotrygdutbetalinger") {
-                personDao.finnInfotrygdutbetalinger(vedtak.fødselsnummer)?.let { objectMapper.readTree(it) }
+                personDao.finnInfotrygdutbetalinger(personMetadata.fødselsnummer)?.let { objectMapper.readTree(it) }
             }
             val utbetalinger = measureAsHistogram("byggSpeilSnapshot_findUtbetaling") {
-                utbetalingDao.findUtbetalinger(vedtak.fødselsnummer).map { utbetaling ->
+                utbetalingDao.findUtbetalinger(personMetadata.fødselsnummer).map { utbetaling ->
                     UtbetalingApiDto(
                         type = utbetaling.type,
                         status = utbetaling.status.toString(),
@@ -90,7 +86,7 @@ internal class VedtaksperiodeMediator(
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
                 val navn = arbeidsgiverDao.finnNavn(it.organisasjonsnummer)
                 val bransjer = arbeidsgiverDao.finnBransjer(it.organisasjonsnummer)
-                val overstyringer = overstyringDao.finnOverstyring(vedtak.fødselsnummer, it.organisasjonsnummer)
+                val overstyringer = overstyringDao.finnOverstyring(personMetadata.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
                         OverstyringApiDto(
                             hendelseId = overstyring.hendelseId,
@@ -135,20 +131,20 @@ internal class VedtaksperiodeMediator(
             }
 
             val enhet = measureAsHistogram("byggSpeilSnapshot_findEnhet") {
-                personDao.finnEnhet(vedtak.fødselsnummer)
+                personDao.finnEnhet(personMetadata.fødselsnummer)
             }
 
-            val tildeling = tildelingDao.tildelingForPerson(vedtak.fødselsnummer)
+            val tildeling = tildelingDao.tildelingForPerson(personMetadata.fødselsnummer)
 
             val arbeidsforhold = arbeidsgivere
-                .map { arbeidsgiverDao.finnArbeidsforhold(vedtak.fødselsnummer, it.organisasjonsnummer) }
+                .map { arbeidsgiverDao.finnArbeidsforhold(personMetadata.fødselsnummer, it.organisasjonsnummer) }
                 .flatten()
 
             PersonForSpeilDto(
                 aktørId = speilSnapshot.aktørId,
                 fødselsnummer = speilSnapshot.fødselsnummer,
                 dødsdato = speilSnapshot.dødsdato,
-                personinfo = vedtak.personinfo,
+                personinfo = personMetadata.personinfo,
                 arbeidsgivere = arbeidsgivere,
                 infotrygdutbetalinger = infotrygdutbetalinger,
                 enhet = enhet,

@@ -1,8 +1,6 @@
-package no.nav.helse.vedtaksperiode
+package no.nav.helse.person
 
-import no.nav.helse.person.PersoninfoApiDto
-
-data class VedtaksperiodeApiDto(
+data class PersonMetadataDto(
     val fødselsnummer: String,
     val aktørId: String,
     val personinfo: PersoninfoApiDto,
