@@ -25,7 +25,7 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "SELECT fodselsnummer FROM person WHERE aktor_id = ?"
 
-        it.run(queryOf(query, aktørId).map { it.string("fodselsnummer") }.asSingle)
+        it.run(queryOf(query, aktørId.toLong()).map { it.string("fodselsnummer") }.asSingle)
     }
 
     fun finnFnrByVedtaksperiodeId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
