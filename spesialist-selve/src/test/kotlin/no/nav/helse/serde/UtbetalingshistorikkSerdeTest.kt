@@ -26,7 +26,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         REVURDERING_TOGGLE.enable()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshot()
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk()
     }
 
     @AfterEach
@@ -37,7 +37,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
         val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshot(utbetalingshistorikk(beregningId))
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -75,7 +75,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     @Test
     fun `utbetalingshistorikk satt lik null mapper til tom utbetalingshistorikk til Speil`() {
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshot(null)
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(null)
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -98,7 +98,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `mapper ikke ufullstending utbetalingshistorikk`() {
         val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshot(ufullstendigUtbetalingshistorikk(beregningId))
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(ufullstendigUtbetalingshistorikk(beregningId))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -211,37 +211,38 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     )
 
     @Language("JSON")
-    private fun snapshot(utbetalingshistorikk: JsonNode? = objectMapper.createArrayNode()) = """
+    private fun snapshotMedHistorikk(utbetalingshistorikk: JsonNode? = objectMapper.createArrayNode()) = """
         {
-            "aktørId": "$AKTØR",
-            "fødselsnummer": "$FØDSELSNUMMER",
-            "arbeidsgivere": [
+          "versjon": 1,
+          "aktørId": "$AKTØR",
+          "fødselsnummer": "$FØDSELSNUMMER",
+          "arbeidsgivere": [
+            {
+              "id": "$ID",
+              "organisasjonsnummer": "$ORGNR",
+              "vedtaksperioder": [
                 {
-                    "id": "$ID",
-                    "organisasjonsnummer": "$ORGNR",
-                    "vedtaksperioder": [
-                        {
-                            "id": "$VEDTAKSPERIODE_ID"
-                        }
-                    ]
-                },
-                {
-                    "id": "${UUID.randomUUID()}",
-                    "organisasjonsnummer": "$ORGNR2",
-                    "vedtaksperioder": [
-                        {
-                            "id": "${UUID.randomUUID()}"
-                        }
-                    ],
-                    "utbetalingshistorikk": $utbetalingshistorikk
+                  "id": "$VEDTAKSPERIODE_ID"
                 }
-            ],
-            "inntektsgrunnlag": [
+              ]
+            },
+            {
+              "id": "${UUID.randomUUID()}",
+              "organisasjonsnummer": "$ORGNR2",
+              "vedtaksperioder": [
                 {
-                    "skjæringstidspunkt": "2018-01-01",
-                    "sykepengegrunnlag": 581298.0
+                  "id": "${UUID.randomUUID()}"
                 }
-            ]
+              ],
+              "utbetalingshistorikk": $utbetalingshistorikk
+            }
+          ],
+          "inntektsgrunnlag": [
+            {
+              "skjæringstidspunkt": "2018-01-01",
+              "sykepengegrunnlag": 581298.0
+            }
+          ]
         }
-        """.trimIndent()
+        """
 }

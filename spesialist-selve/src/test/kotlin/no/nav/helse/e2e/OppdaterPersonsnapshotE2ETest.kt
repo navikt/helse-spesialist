@@ -9,14 +9,13 @@ import java.util.*
 
 internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     val ORGNR = "987654321"
-    private val arbeidsgiverId = UUID.randomUUID()
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
     private val vedtaksperiodeId2: UUID = UUID.randomUUID()
     private val utbetalingId1: UUID = UUID.randomUUID()
     private val utbetalingId2: UUID = UUID.randomUUID()
-    private val snapshotV1 = """{"aktørId": "$AKTØR", "fødselsnummer": "$UNG_PERSON_FNR_2018", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}]}]}"""
-    private val snapshotV2 = """{"aktørId": "$AKTØR", "fødselsnummer": "$UNG_PERSON_FNR_2018", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
-    private val snapshotFinal = """{"nyKey": "nyValueSomSkalLagres", "aktørId": "$AKTØR", "arbeidsgivere":[{"id":"$arbeidsgiverId", "organisasjonsnummer":"123","vedtaksperioder":[{"id":"$vedtaksperiodeId1"}, {"id":"$vedtaksperiodeId2"}]}]}"""
+    private val snapshotV1 = snapshot(1)
+    private val snapshotV2 = snapshot(2)
+    private val snapshotFinal = snapshot(3)
 
     @Test
     fun `Oppdater personsnapshot oppdaterer alle snapshots på personen`() {

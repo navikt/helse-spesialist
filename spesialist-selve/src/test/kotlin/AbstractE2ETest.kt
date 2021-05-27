@@ -715,8 +715,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     @Language("JSON")
-    protected fun snapshot() = """{
-      "version": "this_is_version_1",
+    protected fun snapshot(versjon: Int = 1) = """{
+      "versjon": $versjon,
       "aktørId": "123456789101112",
       "fødselsnummer": "12345612345",
       "arbeidsgivere": [

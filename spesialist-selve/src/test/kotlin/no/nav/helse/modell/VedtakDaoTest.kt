@@ -32,7 +32,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.lagre(FNR, "{}")
+        val nySnapshotRef = snapshotDao.lagre(FNR, snapshot())
         assertThrows<PSQLException> { vedtakDao.opprett(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef) }
     }
 
@@ -44,7 +44,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.lagre(FNR, "{}")
+        val nySnapshotRef = snapshotDao.lagre(FNR, snapshot())
         vedtakDao.oppdater(vedtakId, nyFom, nyTom, nySnapshotRef)
         assertEquals(1, vedtak().size)
         vedtak().first().assertEquals(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef)
@@ -84,7 +84,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `insert speil snapshot`() {
-        val newJson = """{ "id": 3}"""
+        val newJson = snapshot()
         val nyVedtaksperiode = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
@@ -92,7 +92,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(nyVedtaksperiode)
         snapshotDao.lagre(FNR, newJson)
         val vedtak = vedtak()
-        assertTrue(vedtak.all { snapshot(it.snapshotRef) == newJson },
+        assertTrue(vedtak.all { finnSnapshot(it.snapshotRef) == newJson },
             "Alle snapshots på person skal matche den nye jsonen")
     }
 
@@ -156,7 +156,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun snapshot(snapshotRef: Int) = sessionOf(dataSource).use  {
+    private fun finnSnapshot(snapshotRef: Int) = sessionOf(dataSource).use  {
         it.run(queryOf("SELECT data FROM speil_snapshot WHERE id = ?", snapshotRef).map { it.string("data") }.asSingle)
     }
 }

@@ -437,37 +437,37 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertEquals(false, speilSnapshot.tildeling?.påVent)
     }
 
-    private val SNAPSHOTV1 = """
+    @Language("JSON")
+    private val SNAPSHOTV1 = """{
+  "versjon": 1,
+  "aktørId": "$AKTØR",
+  "fødselsnummer": "$FØDSELSNUMMER",
+  "arbeidsgivere": [
+    {
+      "id": "$ID",
+      "organisasjonsnummer": "$ORGNR",
+      "vedtaksperioder": [
         {
-            "aktørId": "$AKTØR",
-            "fødselsnummer": "$FØDSELSNUMMER",
-            "arbeidsgivere": [
-                {
-                    "id": "$ID",
-                    "organisasjonsnummer": "$ORGNR",
-                    "vedtaksperioder": [
-                        {
-                            "id": "$VEDTAKSPERIODE_ID"
-                        }
-                    ]
-                },
-                {
-                    "id": "${UUID.randomUUID()}",
-                    "organisasjonsnummer": "$ORGNR2",
-                    "vedtaksperioder": [
-                        {
-                            "id": "${UUID.randomUUID()}"
-                        }
-                    ]
-                }
-            ],
-            "inntektsgrunnlag": [
-                {
-                    "skjæringstidspunkt": "2018-01-01",
-                    "sykepengegrunnlag": 581298.0
-                }
-            ]
+          "id": "$VEDTAKSPERIODE_ID"
         }
-        """.trimIndent()
-
+      ]
+    },
+    {
+      "id": "${UUID.randomUUID()}",
+      "organisasjonsnummer": "$ORGNR2",
+      "vedtaksperioder": [
+        {
+          "id": "${UUID.randomUUID()}"
+        }
+      ]
+    }
+  ],
+  "inntektsgrunnlag": [
+    {
+      "skjæringstidspunkt": "2018-01-01",
+      "sykepengegrunnlag": 581298.0
+    }
+  ]
+}
+        """
 }

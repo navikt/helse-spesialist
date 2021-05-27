@@ -31,6 +31,7 @@ import no.nav.helse.person.Kjønn
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
@@ -201,7 +202,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
     }
 
-    protected fun opprettSnapshot(personBlob: String = "{}") {
+    protected fun opprettSnapshot(personBlob: String = snapshot()) {
         snapshotId = snapshotDao.lagre(FNR, personBlob)
     }
 
@@ -242,4 +243,25 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val enhetId: Int,
         val infotrygdutbetalingerId: Long
     )
+
+    @Language("JSON")
+    protected fun snapshot(versjon: Int = 1) = """{
+      "versjon": $versjon,
+      "aktørId": "123456789101112",
+      "fødselsnummer": "12345612345",
+      "arbeidsgivere": [
+        {
+          "organisasjonsnummer": "987654321",
+          "id": "${UUID.randomUUID()}",
+          "vedtaksperioder": [
+            {
+              "id": "${UUID.randomUUID()}",
+              "aktivitetslogg": []
+            }
+          ]
+        }
+      ],
+      "inntektsgrunnlag": {}
+      }"""
+
 }

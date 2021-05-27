@@ -32,5 +32,4 @@ internal class UtbetalingAnnullertRiverTest {
         testRapid.sendTestMessage(testmeldingfabrikk.lagUtbetalingAnnullertEvent())
         verify(exactly = 1) { mediator.utbetalingAnnullert(any(), any()) }
     }
-
 }

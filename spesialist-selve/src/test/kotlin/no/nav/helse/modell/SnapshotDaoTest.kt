@@ -12,16 +12,37 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre snapshot`() {
-        val personBlob = "{}"
-        snapshotDao.lagre(FNR, personBlob)
-        assertEquals(1, snapshot().size)
-        assertEquals(personBlob, snapshot().first().first)
-        assertEquals(LocalDate.now(), snapshot().first().second)
+        val snapshot = snapshot()
+        opprettPerson()
+        snapshotDao.lagre(FNR, snapshot)
+        assertEquals(1, finnAlleSnapshot().size)
+        assertEquals(snapshot, finnAlleSnapshot().first().first)
+        assertEquals(LocalDate.now(), finnAlleSnapshot().first().second)
     }
 
-    private fun snapshot() = sessionOf(dataSource).use  {
-        it.run(queryOf("SELECT data, sist_endret FROM speil_snapshot").map {
-            it.string("data") to it.localDate("sist_endret")
+    @Test
+    fun `oppdaterer globalt og pr snapshot dersom utdatert`() {
+        val snapshot = snapshot(1)
+        val nyttSnapshot = snapshot(2)
+        opprettPerson()
+        snapshotDao.lagre(FNR, snapshot)
+        snapshotDao.lagre(FNR, nyttSnapshot)
+
+        val alleSnapshots = finnAlleSnapshot()
+        assertEquals(1, alleSnapshots.size)
+        assertEquals(nyttSnapshot, alleSnapshots.first().first)
+        assertEquals(LocalDate.now(), alleSnapshots.first().second)
+        assertEquals(2, alleSnapshots.first().third)
+        assertEquals(2, globaltVersjonsnummer())
+    }
+
+    private fun finnAlleSnapshot() = sessionOf(dataSource).use  {
+        it.run(queryOf("SELECT data, sist_endret, versjon FROM speil_snapshot").map {
+            Triple(it.string("data"), it.localDate("sist_endret"), it.int("versjon"))
         }.asList)
+    }
+
+    private fun globaltVersjonsnummer() = sessionOf(dataSource).use {
+        it.run(queryOf("SELECT versjon FROM global_snapshot_versjon").map { it.int("versjon") }.asSingle)
     }
 }
