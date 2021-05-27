@@ -25,7 +25,7 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = "SELECT fodselsnummer FROM person WHERE aktor_id = ?"
 
-        it.run(queryOf(query, aktørId.toLong()).map { it.string("fodselsnummer") }.asSingle)
+        it.run(queryOf(query, aktørId.toLong()).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle)
     }
 
     fun finnFnrByVedtaksperiodeId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
@@ -35,7 +35,7 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
                 INNER JOIN vedtak v on person.id = v.person_ref
             WHERE v.vedtaksperiode_id = ?
             """
-        it.run(queryOf(query, vedtaksperiodeId).map { it.string("fodselsnummer") }.asSingle)
+        it.run(queryOf(query, vedtaksperiodeId).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle)
     }
 
     private fun tilPersonsnapshot(row: Row): Pair<PersonMetadataApiDto, SnapshotDto> {

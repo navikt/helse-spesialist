@@ -3,6 +3,7 @@ package no.nav.helse
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.person.PersonsnapshotDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -22,6 +23,7 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
     }
 
     protected val varselDao: VarselDao = VarselDao(dataSource)
+    protected val personsnapshotDao: PersonsnapshotDao = PersonsnapshotDao(dataSource)
     protected val arbeidsgiverApiDao: ArbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao: RisikovurderingApiDao = RisikovurderingApiDao(dataSource)
 
