@@ -231,6 +231,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         hendelseMediator = hendelseMediator,
                         vedtaksperiodeMediator = VedtaksperiodeMediator(
                             personsnapshotDao = personsnapshotDao,
+                            snapshotDao = snapshotDao,
                             varselDao = varselDao,
                             personDao = personApiDao,
                             arbeidsgiverDao = arbeidsgiverApiDao,
@@ -238,7 +239,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             oppgaveDao = oppgaveDao,
                             tildelingDao = tildelingDao,
                             risikovurderingApiDao = risikovurderingApiDao,
-                            utbetalingDao = utbetalingDao
+                            utbetalingDao = utbetalingDao,
+                            speilSnapshotRestClient = speilSnapshotRestClient
                         )
                     )
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))

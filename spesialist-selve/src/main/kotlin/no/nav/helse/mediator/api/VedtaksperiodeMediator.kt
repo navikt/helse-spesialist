@@ -9,7 +9,9 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -34,22 +36,32 @@ internal class VedtaksperiodeMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val utbetalingDao: UtbetalingDao
+    private val utbetalingDao: UtbetalingDao,
+    private val snapshotDao: SnapshotDao,
+    private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
     fun byggSpeilSnapshotForFnr(fnr: String) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            personsnapshotDao.finnPersonByFnr(fnr)?.let(::byggSpeilSnapshot)
+            byggSnapshot(fnr)
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            personsnapshotDao.finnPersonByAktørid(aktørId)?.let(::byggSpeilSnapshot)
+            personsnapshotDao.finnFnrByAktørId(aktørId)?.let(::byggSnapshot)
         }
 
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            personsnapshotDao.finnPersonByVedtaksperiodeid(vedtaksperiodeId)?.let(::byggSpeilSnapshot)
+            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSnapshot)
         }
+
+    private fun byggSnapshot(fnr: String): PersonForSpeilDto? {
+        if (snapshotDao.utdatert(fnr)) {
+            val nyttSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fnr)
+            snapshotDao.lagre(fnr, nyttSnapshot)
+        }
+        return personsnapshotDao.finnPersonByFnr(fnr)?.let(::byggSpeilSnapshot)
+    }
 
     private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataApiDto, SnapshotDto>) =
         measureAsHistogram("byggSpeilSnapshot") {

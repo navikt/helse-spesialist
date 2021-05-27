@@ -1,0 +1,27 @@
+package no.nav.helse.mediator
+
+import AbstractE2ETest
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.verify
+import org.junit.jupiter.api.Test
+import java.util.*
+
+internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
+
+    @Test
+    fun `utdatert snapshot`() {
+        val utbetalingId = UUID.randomUUID()
+        val gammelSnapshot = snapshot(-1)
+        val nyttSnapshot = snapshot(2)
+        vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
+        every { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns nyttSnapshot
+
+        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018)
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+
+        clearMocks(speilSnapshotRestClient)
+        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018)
+        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+    }
+}

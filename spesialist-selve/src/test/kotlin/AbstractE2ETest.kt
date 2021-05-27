@@ -99,6 +99,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val varselDao = VarselDao(dataSource)
     private val personsnapshotDao = PersonsnapshotDao(dataSource)
 
+    protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
 
     protected val testRapid = TestRapid()
 
@@ -163,7 +164,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveDao = oppgaveDao,
         tildelingDao = tildelingDao,
         risikovurderingApiDao = risikovurderingApiDao,
-        utbetalingDao = utbetalingDao
+        utbetalingDao = utbetalingDao,
+        snapshotDao = snapshotDao,
+        speilSnapshotRestClient = speilSnapshotRestClient
     )
 
     @BeforeEach

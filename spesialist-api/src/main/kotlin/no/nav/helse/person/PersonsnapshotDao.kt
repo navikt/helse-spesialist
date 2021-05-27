@@ -21,27 +21,21 @@ class PersonsnapshotDao(private val dataSource: DataSource) {
         session.run(queryOf(query, fnr.toLong()).map(::tilPersonsnapshot).asSingle)
     }
 
-    fun finnPersonByAktørid(aktørId: String) = sessionOf(dataSource).use  {
+    fun finnFnrByAktørId(aktørId: String) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
-        val query = """
-            SELECT * FROM person AS p
-                INNER JOIN person_info as pi ON pi.id = p.info_ref
-                INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
-            WHERE p.aktor_id = ?;
-        """
-        it.run(queryOf(query, aktørId.toLong()).map(::tilPersonsnapshot).asSingle)
+        val query = "SELECT fodselsnummer FROM person WHERE aktor_id = ?"
+
+        it.run(queryOf(query, aktørId).map { it.string("fodselsnummer") }.asSingle)
     }
 
-    fun finnPersonByVedtaksperiodeid(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
+    fun finnFnrByVedtaksperiodeId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
-            SELECT * FROM vedtak AS v
-                 INNER JOIN person AS p ON v.person_ref = p.id
-                 INNER JOIN person_info as pi ON pi.id = p.info_ref
-                 INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
-            WHERE v.vedtaksperiode_id = ? ORDER BY v.id DESC LIMIT 1;
-        """
-        session.run(queryOf(query, vedtaksperiodeId).map(::tilPersonsnapshot).asSingle)
+            SELECT fodselsnummer FROM person
+                INNER JOIN vedtak v on person.id = v.person_ref
+            WHERE v.vedtaksperiode_id = ?
+            """
+        it.run(queryOf(query, vedtaksperiodeId).map { it.string("fodselsnummer") }.asSingle)
     }
 
     private fun tilPersonsnapshot(row: Row): Pair<PersonMetadataApiDto, SnapshotDto> {

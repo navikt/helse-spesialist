@@ -38,6 +38,25 @@ internal class SnapshotDao(private val dataSource: DataSource) {
         }.toInt()
     }
 
+    fun utdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        session.transaction { tx ->
+            val versjonForSnapshot = tx.finnSnapshotVersjon(fødselsnummer)
+            val sisteGjeldendeVersjon = tx.finnGlobalVersjon()
+
+            versjonForSnapshot?.let { it < sisteGjeldendeVersjon } ?: true
+        }
+    }
+
+    private fun TransactionalSession.finnSnapshotVersjon(fødselsnummer: String): Int? {
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT versjon FROM speil_snapshot s
+                INNER JOIN person p on p.id = s.person_ref
+            WHERE p.fodselsnummer = ?
+        """
+        return run(queryOf(statement, fødselsnummer.toLong()).map { it.int("versjon") }.asSingle)
+    }
+
     private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Int? {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM person WHERE fodselsnummer = ?"
