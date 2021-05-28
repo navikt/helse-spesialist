@@ -99,6 +99,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
         val statement = """
             INSERT INTO oppdrag (fagsystem_id, mottaker, fagområde, endringskode, sisteArbeidsgiverdag)
             VALUES (:fagsystemId, :mottaker, CAST(:fagomrade as oppdrag_fagområde), CAST(:endringskode as oppdrag_endringskode), :sisteArbeidsgiverdag)
+            ON CONFLICT DO NOTHING
         """
         return sessionOf(dataSource, returnGeneratedKey = true).use {
             it.run(

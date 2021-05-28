@@ -49,6 +49,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         val hendelseStatement = """
             INSERT INTO hendelse(id, fodselsnummer, data, type)
                 VALUES(?, ?, CAST(? as json), ?)
+            ON CONFLICT DO NOTHING
             """
         run(
             queryOf(
