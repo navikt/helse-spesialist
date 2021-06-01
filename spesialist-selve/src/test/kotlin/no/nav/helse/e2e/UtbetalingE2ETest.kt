@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -26,6 +27,18 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         assertEquals(3, utbetalinger().size)
+    }
+
+    @Test
+    fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
+        val ET_ORGNR = "1"
+        val ET_ANNET_ORGNR = "2"
+        vedtaksperiode(ET_ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        assertDoesNotThrow {
+            sendUtbetalingEndret("UTBETALING", GODKJENT, ET_ANNET_ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        }
+        assertEquals(0, utbetalinger().size)
+        assertEquals(1, feilendeMeldinger().size)
     }
 
     @Test
@@ -84,6 +97,14 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                 "fodselsnummer" to UNG_PERSON_FNR_2018.toLong(),
                 "orgnummer" to ORGNR.toLong()
             )).map { row -> row.long("utbetaling_id_ref") }.asList)
+        }
+    }
+
+    private fun feilendeMeldinger(): List<UUID> {
+        @Language("PostgreSQL")
+        val statement = "SELECT id FROM feilende_meldinger"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(statement).map { UUID.fromString(it.string("id")) }.asList)
         }
     }
 }

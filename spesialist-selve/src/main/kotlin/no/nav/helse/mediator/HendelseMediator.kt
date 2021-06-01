@@ -14,6 +14,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -41,10 +42,12 @@ internal class HendelseMediator(
     private val vedtakDao: VedtakDao,
     private val personDao: PersonDao,
     private val commandContextDao: CommandContextDao,
+    private val arbeidsgiverDao: ArbeidsgiverDao,
     private val hendelseDao: HendelseDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val saksbehandlerDao: SaksbehandlerDao,
+    private val feilendeMeldingerDao: FeilendeMeldingerDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {
@@ -283,6 +286,21 @@ internal class HendelseMediator(
         message: JsonMessage,
         context: MessageContext
     ) {
+        if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
+            log.warn("Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon", keyValue("hendelseId", message["@id"].asText()))
+            sikkerLogg.warn("Forstår ikke utbetaling_endret: fant ikke arbeidsgiver med {}, {}, {}, {}. Meldingen er lagret i feilende_meldinger",
+                keyValue("hendelseId", message["@id"].asText()),
+                keyValue("fødselsnummer", fødselsnummer),
+                keyValue("organisasjonsnummer", organisasjonsnummer),
+                keyValue("utbetalingId", message["utbetalingId"].asText())
+            )
+            feilendeMeldingerDao.lagre(
+                UUID.fromString(message["@id"].asText()),
+                message["@event_name"].asText(),
+                message.toJson()
+            )
+            return
+        }
         utfør(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
     }
 

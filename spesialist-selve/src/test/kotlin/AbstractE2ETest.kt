@@ -10,6 +10,7 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
@@ -98,6 +99,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val personApiDao = PersonApiDao(dataSource)
     private val varselDao = VarselDao(dataSource)
     private val personsnapshotDao = PersonsnapshotDao(dataSource)
+    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
 
     protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
 
@@ -147,11 +149,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveDao = oppgaveDao,
         vedtakDao = vedtakDao,
         personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
         commandContextDao = commandContextDao,
         hendelseDao = hendelseDao,
         tildelingDao = tildelingDao,
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
+        feilendeMeldingerDao = feilendeMeldingerDao,
         hendelsefabrikk = hendelsefabrikk,
         oppgaveMediator = oppgaveMediator
     )

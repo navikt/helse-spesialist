@@ -21,6 +21,7 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
+import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
@@ -139,6 +140,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
+    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
@@ -259,12 +261,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             rapidsConnection = rapidsConnection,
             oppgaveDao = oppgaveDao,
             personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             commandContextDao = commandContextDao,
             hendelseDao = hendelseDao,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
             saksbehandlerDao = saksbehandlerDao,
+            feilendeMeldingerDao = feilendeMeldingerDao,
             hendelsefabrikk = hendelsefabrikk,
             oppgaveMediator = oppgaveMediator
         )

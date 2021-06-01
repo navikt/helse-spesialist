@@ -7,6 +7,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -109,6 +110,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val opptegnelseApiDao = no.nav.helse.abonnement.OpptegnelseDao(dataSource)
     internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(dataSource)
+    internal val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
 
     internal fun testhendelse(
