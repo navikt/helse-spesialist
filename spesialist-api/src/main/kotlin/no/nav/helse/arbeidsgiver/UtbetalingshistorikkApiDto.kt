@@ -5,6 +5,7 @@ import no.nav.helse.arbeidsgiver.UtbetalingshistorikkElementDto
 import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 data class UtbetalingshistorikkElementApiDto(
@@ -31,10 +32,19 @@ data class UtbetalingshistorikkElementApiDto(
         val gjenståendeSykedager: Int?,
         val forbrukteSykedager: Int?,
         val arbeidsgiverNettoBeløp: Int,
+        val arbeidsgiverFagsystemId: String,
         val maksdato: LocalDate,
         val beregningId: UUID,
-        val utbetalingstidslinje: List<Utbetalingsdag>
-    )
+        val utbetalingstidslinje: List<Utbetalingsdag>,
+        val vurdering: Vurdering?
+    ) {
+        data class Vurdering(
+            val godkjent: Boolean,
+            val tidsstempel: LocalDateTime,
+            val automatisk: Boolean,
+            val ident: String
+        )
+    }
 
     data class Utbetalingsdag(
         val type: String,
@@ -81,8 +91,17 @@ data class UtbetalingshistorikkElementApiDto(
                                     gjenståendeSykedager = utbetaling.gjenståendeSykedager,
                                     forbrukteSykedager = utbetaling.forbrukteSykedager,
                                     arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverNettoBeløp,
+                                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverFagsystemId,
                                     maksdato = utbetaling.maksdato,
-                                    beregningId = utbetaling.beregningId
+                                    beregningId = utbetaling.beregningId,
+                                    vurdering = utbetaling.vurdering?.let { vurdering ->
+                                        Utbetaling.Vurdering(
+                                            godkjent = vurdering.godkjent,
+                                            tidsstempel = vurdering.tidsstempel,
+                                            automatisk = vurdering.automatisk,
+                                            ident = vurdering.ident
+                                        )
+                                    }
                                 )
                             })
                     }
