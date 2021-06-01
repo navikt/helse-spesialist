@@ -9,8 +9,10 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
@@ -60,6 +62,11 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         assertEquals(28.desember(2018), utbetaling.maksdato)
         assertEquals("UTBETALT", utbetaling.status)
         assertEquals("UTBETALING", utbetaling.type)
+        assertEquals("EN_FAGSYSTEMID", utbetaling.arbeidsgiverFagsystemId)
+        assertEquals(false, utbetaling.vurdering?.automatisk)
+        assertEquals(true, utbetaling.vurdering?.godkjent)
+        assertEquals("EN_IDENT", utbetaling.vurdering?.ident)
+        assertNotNull(utbetaling.vurdering?.tidsstempel)
 
     }
 
@@ -155,6 +162,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                         "gjenståendeSykedager": 237,
                         "forbrukteSykedager": 11,
                         "arbeidsgiverNettoBeløp":15741,
+                        "arbeidsgiverFagsystemId": "EN_FAGSYSTEMID",
                         "utbetalingstidslinje": [
                           {
                               "type": "NavDag",
@@ -164,7 +172,13 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                               "grad": 100.0,
                               "totalGrad": 100.0
                           }
-                        ]
+                        ],
+                        "vurdering": {
+                          "godkjent": true,
+                          "automatisk": false,
+                          "ident": "EN_IDENT",
+                          "tidsstempel": "${LocalDateTime.now()}"
+                        }
                       }
                     ]
                   }

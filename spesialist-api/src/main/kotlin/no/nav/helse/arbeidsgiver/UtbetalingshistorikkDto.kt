@@ -1,6 +1,7 @@
 package no.nav.helse.arbeidsgiver
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 data class UtbetalingshistorikkElementDto(
@@ -28,10 +29,19 @@ data class UtbetalingDto(
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
     val arbeidsgiverNettoBeløp: Int,
+    val arbeidsgiverFagsystemId: String,
     val maksdato: LocalDate,
     val beregningId: UUID,
-    val utbetalingstidslinje: List<UtbetalingsdagDto>
-)
+    val utbetalingstidslinje: List<UtbetalingsdagDto>,
+    val vurdering: VurderingDto?
+) {
+    data class VurderingDto(
+        val godkjent: Boolean,
+        val tidsstempel: LocalDateTime,
+        val automatisk: Boolean,
+        val ident: String
+    )
+}
 
 data class UtbetalingsdagDto(
     val type: String,
