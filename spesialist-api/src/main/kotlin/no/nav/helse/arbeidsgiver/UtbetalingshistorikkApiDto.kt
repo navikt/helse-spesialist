@@ -12,7 +12,8 @@ data class UtbetalingshistorikkElementApiDto(
     val beregningId: UUID,
     val beregnettidslinje: List<Sykdomstidslinjedag>,
     val hendelsetidslinje: List<Sykdomstidslinjedag>,
-    val utbetaling: Utbetaling
+    val utbetaling: Utbetaling,
+    val tidsstempel: LocalDateTime
 ) {
     data class Sykdomstidslinjedag(
         val dagen: LocalDate,
@@ -60,8 +61,9 @@ data class UtbetalingshistorikkElementApiDto(
                 return@map objectMapper.treeToValue(it, UtbetalingshistorikkElementDto::class.java)
                     .let { element ->
                         UtbetalingshistorikkElementApiDto(
-                            element.beregningId,
-                            element.beregnettidslinje.map { dag ->
+                            beregningId = element.beregningId,
+                            tidsstempel = element.tidsstempel,
+                            beregnettidslinje = element.beregnettidslinje.map { dag ->
                                 Sykdomstidslinjedag(
                                     dag.dagen,
                                     dag.type,
@@ -69,7 +71,7 @@ data class UtbetalingshistorikkElementApiDto(
                                     dag.grad
                                 )
                             },
-                            element.hendelsetidslinje.map { dag ->
+                            hendelsetidslinje = element.hendelsetidslinje.map { dag ->
                                 Sykdomstidslinjedag(
                                     dag.dagen,
                                     dag.type,
@@ -77,7 +79,7 @@ data class UtbetalingshistorikkElementApiDto(
                                     dag.grad
                                 )
                             },
-                            Utbetaling(
+                            utbetaling = Utbetaling(
                                 utbetalingstidslinje = element.utbetaling.utbetalingstidslinje.map { dag ->
                                     Utbetalingsdag(
                                         dag.type,
