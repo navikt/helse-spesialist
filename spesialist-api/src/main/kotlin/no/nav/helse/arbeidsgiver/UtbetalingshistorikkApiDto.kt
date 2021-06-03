@@ -12,7 +12,7 @@ data class UtbetalingshistorikkElementApiDto(
     val beregningId: UUID,
     val beregnettidslinje: List<Sykdomstidslinjedag>,
     val hendelsetidslinje: List<Sykdomstidslinjedag>,
-    val utbetalinger: List<Utbetaling>
+    val utbetaling: Utbetaling
 ) {
     data class Sykdomstidslinjedag(
         val dagen: LocalDate,
@@ -77,33 +77,32 @@ data class UtbetalingshistorikkElementApiDto(
                                     dag.grad
                                 )
                             },
-                            element.utbetalinger.map { utbetaling ->
-                                Utbetaling(
-                                    utbetalingstidslinje = utbetaling.utbetalingstidslinje.map { dag ->
-                                        Utbetalingsdag(
-                                            dag.type,
-                                            dag.inntekt,
-                                            dag.dato
-                                        )
-                                    },
-                                    type = utbetaling.type,
-                                    status = utbetaling.status,
-                                    gjenståendeSykedager = utbetaling.gjenståendeSykedager,
-                                    forbrukteSykedager = utbetaling.forbrukteSykedager,
-                                    arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverNettoBeløp,
-                                    arbeidsgiverFagsystemId = utbetaling.arbeidsgiverFagsystemId,
-                                    maksdato = utbetaling.maksdato,
-                                    beregningId = utbetaling.beregningId,
-                                    vurdering = utbetaling.vurdering?.let { vurdering ->
-                                        Utbetaling.Vurdering(
-                                            godkjent = vurdering.godkjent,
-                                            tidsstempel = vurdering.tidsstempel,
-                                            automatisk = vurdering.automatisk,
-                                            ident = vurdering.ident
-                                        )
-                                    }
-                                )
-                            })
+                            Utbetaling(
+                                utbetalingstidslinje = element.utbetaling.utbetalingstidslinje.map { dag ->
+                                    Utbetalingsdag(
+                                        dag.type,
+                                        dag.inntekt,
+                                        dag.dato
+                                    )
+                                },
+                                type = element.utbetaling.type,
+                                status = element.utbetaling.status,
+                                gjenståendeSykedager = element.utbetaling.gjenståendeSykedager,
+                                forbrukteSykedager = element.utbetaling.forbrukteSykedager,
+                                arbeidsgiverNettoBeløp = element.utbetaling.arbeidsgiverNettoBeløp,
+                                arbeidsgiverFagsystemId = element.utbetaling.arbeidsgiverFagsystemId,
+                                maksdato = element.utbetaling.maksdato,
+                                beregningId = element.utbetaling.beregningId,
+                                vurdering = element.utbetaling.vurdering?.let { vurdering ->
+                                    Utbetaling.Vurdering(
+                                        godkjent = vurdering.godkjent,
+                                        tidsstempel = vurdering.tidsstempel,
+                                        automatisk = vurdering.automatisk,
+                                        ident = vurdering.ident
+                                    )
+                                }
+                            )
+                        )
                     }
 
             }

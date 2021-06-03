@@ -13,6 +13,7 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
@@ -39,7 +40,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
         val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId))
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, medVurdering = true))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -49,11 +50,10 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
         assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
         val historikkElement = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first()
-        val utbetaling = historikkElement.utbetalinger.first()
+        val utbetaling = historikkElement.utbetaling
         assertEquals(beregningId, historikkElement.beregningId)
         assertEquals(2, historikkElement.beregnettidslinje.size)
         assertEquals(1, historikkElement.hendelsetidslinje.size)
-        assertEquals(1, historikkElement.utbetalinger.size)
         assertEquals(1, utbetaling.utbetalingstidslinje.size)
         assertEquals(beregningId, utbetaling.beregningId)
         assertEquals(237, utbetaling.gjenståendeSykedager)
@@ -67,7 +67,21 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         assertEquals(true, utbetaling.vurdering?.godkjent)
         assertEquals("EN_IDENT", utbetaling.vurdering?.ident)
         assertNotNull(utbetaling.vurdering?.tidsstempel)
+    }
 
+    @Test
+    fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil uten vurdering`() {
+        val beregningId = UUID.randomUUID()
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, medVurdering = false))
+
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        val utbetaling = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().utbetaling
+        assertNull(utbetaling.vurdering)
     }
 
     @Test
@@ -117,73 +131,73 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     }
 
     @Language("JSON")
-    private fun utbetalingshistorikk(beregningId: UUID) = objectMapper.readTree(
+    private fun utbetalingshistorikk(beregningId: UUID, medVurdering: Boolean = false) = objectMapper.readTree(
         """
                 [
-                  {
-                    "beregningId": "$beregningId",
-                    "beregnettidslinje": [
-                      {
-                        "dagen": "2018-01-01",
-                        "type": "Sykedag",
-                        "kilde": {
-                          "type": "SØKNAD",
-                          "kildeId": "${UUID.randomUUID()}"
-                        },
-                        "grad": 100.0
-                      },
-                      {
-                        "dagen": "2018-01-02",
-                        "type": "Sykedag",
-                        "kilde": {
-                          "type": "SØKNAD",
-                          "kildeId": "${UUID.randomUUID()}"
-                        },
-                        "grad": 100.0
-                      }
-                    ],
-                    "hendelsetidslinje": [
-                      {
-                        "dagen": "2018-01-01",
-                        "type": "Sykedag",
-                        "kilde": {
-                          "type": "SØKNAD",
-                          "kildeId": "${UUID.randomUUID()}"
-                        },
-                        "grad": 100.0
-                      }
-                    ],
-                    "utbetalinger": [
-                      {
+                    {
                         "beregningId": "$beregningId",
-                        "type": "UTBETALING",
-                        "maksdato": "2018-12-28",
-                        "status": "UTBETALT",
-                        "gjenståendeSykedager": 237,
-                        "forbrukteSykedager": 11,
-                        "arbeidsgiverNettoBeløp":15741,
-                        "arbeidsgiverFagsystemId": "EN_FAGSYSTEMID",
-                        "utbetalingstidslinje": [
-                          {
-                              "type": "NavDag",
-                              "inntekt": 1431,
-                              "dato": "2018-01-01",
-                              "utbetaling": 1431,
-                              "grad": 100.0,
-                              "totalGrad": 100.0
-                          }
+                        "beregnettidslinje": [
+                            {
+                                "dagen": "2018-01-01",
+                                "type": "Sykedag",
+                                "kilde": {
+                                    "type": "SØKNAD",
+                                    "kildeId": "${UUID.randomUUID()}"
+                                },
+                                "grad": 100.0
+                            },
+                            {
+                                "dagen": "2018-01-02",
+                                "type": "Sykedag",
+                                "kilde": {
+                                    "type": "SØKNAD",
+                                    "kildeId": "${UUID.randomUUID()}"
+                                },
+                                "grad": 100.0
+                            }
                         ],
-                        "vurdering": {
-                          "godkjent": true,
-                          "automatisk": false,
-                          "ident": "EN_IDENT",
-                          "tidsstempel": "${LocalDateTime.now()}"
+                        "hendelsetidslinje": [
+                            {
+                                "dagen": "2018-01-01",
+                                "type": "Sykedag",
+                                "kilde": {
+                                    "type": "SØKNAD",
+                                    "kildeId": "${UUID.randomUUID()}"
+                                },
+                                "grad": 100.0
+                            }
+                        ],
+                        "utbetaling": {
+                            "beregningId": "$beregningId",
+                            "type": "UTBETALING",
+                            "maksdato": "2018-12-28",
+                            "status": "UTBETALT",
+                            "gjenståendeSykedager": 237,
+                            "forbrukteSykedager": 11,
+                            "arbeidsgiverNettoBeløp": 15741,
+                            "arbeidsgiverFagsystemId": "EN_FAGSYSTEMID",
+                            "utbetalingstidslinje": [
+                                {
+                                    "type": "NavDag",
+                                    "inntekt": 1431,
+                                    "dato": "2018-01-01",
+                                    "utbetaling": 1431,
+                                    "grad": 100.0,
+                                    "totalGrad": 100.0
+                                }
+                            ],
+                            "vurdering": ${
+                                if (medVurdering) """{
+                                    "godkjent": true,
+                                    "automatisk": false,
+                                    "ident": "EN_IDENT",
+                                    "tidsstempel": "${LocalDateTime.now()}"
+                                }""" else null
+                            }
                         }
-                      }
-                    ]
-                  }
+                    }
                 ]
-            """.trimIndent()
+            """
     )
 
     @Language("JSON")
