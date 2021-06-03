@@ -52,6 +52,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val historikkElement = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first()
         val utbetaling = historikkElement.utbetaling
         assertEquals(beregningId, historikkElement.beregningId)
+        assertNotNull(historikkElement.tidsstempel)
         assertEquals(2, historikkElement.beregnettidslinje.size)
         assertEquals(1, historikkElement.hendelsetidslinje.size)
         assertEquals(1, utbetaling.utbetalingstidslinje.size)
@@ -167,6 +168,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                                 "grad": 100.0
                             }
                         ],
+                        "tidsstempel": "${LocalDateTime.now()}",
                         "utbetaling": {
                             "beregningId": "$beregningId",
                             "type": "UTBETALING",

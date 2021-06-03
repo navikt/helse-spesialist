@@ -8,7 +8,8 @@ data class UtbetalingshistorikkElementDto(
     val beregningId: UUID,
     val beregnettidslinje: List<SykdomstidslinjedagDto>,
     val hendelsetidslinje: List<SykdomstidslinjedagDto>,
-    val utbetaling: UtbetalingDto
+    val utbetaling: UtbetalingDto,
+    val tidsstempel: LocalDateTime
 )
 
 data class SykdomstidslinjedagDto(
