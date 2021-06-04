@@ -48,5 +48,9 @@ data class UtbetalingDto(
 data class UtbetalingsdagDto(
     val type: String,
     val inntekt: Int,
-    val dato: LocalDate
+    val dato: LocalDate,
+    val utbetaling: Int?,
+    val grad: Double?,
+    val totalGrad: Double?,
+    val begrunnelser: List<String>?
 )

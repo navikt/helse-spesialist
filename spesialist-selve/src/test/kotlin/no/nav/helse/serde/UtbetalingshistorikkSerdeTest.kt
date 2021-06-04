@@ -7,6 +7,7 @@ import no.nav.helse.desember
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
@@ -61,6 +62,15 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         assertEquals(true, utbetaling.vurdering?.godkjent)
         assertEquals("EN_IDENT", utbetaling.vurdering?.ident)
         assertNotNull(utbetaling.vurdering?.tidsstempel)
+        historikkElement.utbetaling.utbetalingstidslinje.first().let {
+            assertEquals(LocalDate.of(2018, 1, 1), it.dato)
+            assertEquals(100.0, it.grad)
+            assertEquals("NavDag", it.type)
+            assertEquals(100.0, it.totalGrad)
+            assertEquals(1431, it.utbetaling)
+            assertEquals(1431, it.inntekt)
+            assertEquals("EN_BEGRUNNELSE", it.begrunnelser?.first())
+        }
     }
 
     @Test
@@ -133,7 +143,10 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                                     "dato": "2018-01-01",
                                     "utbetaling": 1431,
                                     "grad": 100.0,
-                                    "totalGrad": 100.0
+                                    "totalGrad": 100.0,
+                                    "begrunnelser": [
+                                        "EN_BEGRUNNELSE"
+                                    ]
                                 }
                             ],
                             "vurdering": ${

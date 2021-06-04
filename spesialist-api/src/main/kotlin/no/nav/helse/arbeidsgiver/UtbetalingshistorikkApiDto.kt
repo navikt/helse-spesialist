@@ -48,7 +48,11 @@ data class UtbetalingshistorikkElementApiDto(
     data class Utbetalingsdag(
         val type: String,
         val inntekt: Int,
-        val dato: LocalDate
+        val dato: LocalDate,
+        val utbetaling: Int?,
+        val grad: Double?,
+        val totalGrad: Double?,
+        val begrunnelser: List<String>?
     )
 
     companion object {
@@ -60,26 +64,30 @@ data class UtbetalingshistorikkElementApiDto(
                         tidsstempel = element.tidsstempel,
                         beregnettidslinje = element.beregnettidslinje.map { dag ->
                             Sykdomstidslinjedag(
-                                dag.dagen,
-                                dag.type,
-                                Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
-                                dag.grad
+                                dagen = dag.dagen,
+                                type = dag.type,
+                                kilde = Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
+                                grad = dag.grad
                             )
                         },
                         hendelsetidslinje = element.hendelsetidslinje.map { dag ->
                             Sykdomstidslinjedag(
-                                dag.dagen,
-                                dag.type,
-                                Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
-                                dag.grad
+                                dagen = dag.dagen,
+                                type = dag.type,
+                                kilde = Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
+                                grad = dag.grad
                             )
                         },
                         utbetaling = Utbetaling(
                             utbetalingstidslinje = element.utbetaling.utbetalingstidslinje.map { dag ->
                                 Utbetalingsdag(
-                                    dag.type,
-                                    dag.inntekt,
-                                    dag.dato
+                                    type = dag.type,
+                                    inntekt = dag.inntekt,
+                                    dato = dag.dato,
+                                    utbetaling = dag.utbetaling,
+                                    grad = dag.grad,
+                                    totalGrad = dag.totalGrad,
+                                    begrunnelser = dag.begrunnelser
                                 )
                             },
                             type = element.utbetaling.type,
