@@ -8,7 +8,6 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
-import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -121,7 +120,7 @@ internal class VedtaksperiodeMediator(
                     overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder,
                     bransjer = bransjer,
-                    utbetalingshistorikk = if (REVURDERING_TOGGLE.enabled) mapUtbetalingshistorikk(it) else emptyList()
+                    utbetalingshistorikk = mapUtbetalingshistorikk(it)
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {
@@ -168,10 +167,6 @@ internal class VedtaksperiodeMediator(
             )
         }
 
-    private fun mapUtbetalingshistorikk(it: ArbeidsgiverDto) =
-        it.utbetalingshistorikk?.let { utbetalingshistorikk ->
-            UtbetalingshistorikkElementApiDto.toSpeilMap(utbetalingshistorikk)
-        } ?: emptyList()
-
+    private fun mapUtbetalingshistorikk(it: ArbeidsgiverDto) = UtbetalingshistorikkElementApiDto.toSpeilMap(it.utbetalingshistorikk)
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 }

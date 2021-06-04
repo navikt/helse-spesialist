@@ -735,7 +735,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
               "id": "${UUID.randomUUID()}",
               "aktivitetslogg": []
             }
-          ]
+          ],
+          "utbetalingshistorikk": []
         }
       ],
       "inntektsgrunnlag": {}

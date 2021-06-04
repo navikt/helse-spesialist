@@ -51,7 +51,8 @@ fun snapshotMedWarning(vedtaksperiodeId: UUID, orgnr: String = "orgnr") = """{
           "forlengelseFraInfotrygd": "NEI",
           "periodetype": "FØRSTEGANGSBEHANDLING"
         }
-      ]
+      ],
+      "utbetalingshistorikk": []
     }
   ]
 }
@@ -99,7 +100,8 @@ fun snapshotUtenWarnings(vedtaksperiodeId: UUID) = """{
           "forlengelseFraInfotrygd": "NEI",
           "periodetype": "FØRSTEGANGSBEHANDLING"
         }
-      ]
+      ],
+      "utbetalingshistorikk": []
     }
   ]
 }

@@ -4,9 +4,7 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import no.nav.helse.desember
-import no.nav.helse.mediator.FeatureToggle.REVURDERING_TOGGLE
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -28,13 +26,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     @BeforeEach
     fun setup() {
-        REVURDERING_TOGGLE.enable()
         every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        REVURDERING_TOGGLE.disable()
     }
 
     @Test
@@ -84,52 +76,6 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
         val utbetaling = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().utbetaling
         assertNull(utbetaling.vurdering)
-    }
-
-    @Test
-    fun `manglende utbetalingshistorikk mapper til tom utbetalingshistorikk til Speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
-        assertEquals(emptyList(), speilSnapshot.arbeidsgivere.first().utbetalingshistorikk)
-    }
-
-    @Test
-    fun `utbetalingshistorikk satt lik null mapper til tom utbetalingshistorikk til Speil`() {
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(null)
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
-        assertEquals(emptyList(), speilSnapshot.arbeidsgivere.last().utbetalingshistorikk)
-    }
-
-    @Test
-    fun `tom utbetalingshistorikk mapper til tom utbetalingshistorikk til Speil`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
-        assertEquals(emptyList(), speilSnapshot.arbeidsgivere.last().utbetalingshistorikk)
-    }
-
-
-    @Test
-    fun `mapper ikke ufullstending utbetalingshistorikk`() {
-        val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(ufullstendigUtbetalingshistorikk(beregningId))
-
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
-
-        assertEquals(0, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
     }
 
     @Language("JSON")
@@ -205,44 +151,6 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     )
 
     @Language("JSON")
-    private fun ufullstendigUtbetalingshistorikk(beregningId: UUID) = objectMapper.readTree(
-        """
-                [
-                  {
-                    "hendelsetidslinje": [
-                      {
-                        "dagen": "2018-01-01",
-                        "type": "Sykedag",
-                        "kilde": {
-                          "type": "SØKNAD",
-                          "kildeId": "${UUID.randomUUID()}"
-                        },
-                        "grad": 100.0
-                      }
-                    ],
-                    "utbetalinger": [
-                      {
-                        "beregningId": "$beregningId",
-                        "type": "UTBETALING",
-                        "maksdato": "2018-12-28",
-                        "utbetalingstidslinje": [
-                          {
-                              "type": "NavDag",
-                              "inntekt": 1431,
-                              "dato": "2018-01-01",
-                              "utbetaling": 1431,
-                              "grad": 100.0,
-                              "totalGrad": 100.0
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-            """.trimIndent()
-    )
-
-    @Language("JSON")
     private fun snapshotMedHistorikk(utbetalingshistorikk: JsonNode? = objectMapper.createArrayNode()) = """
         {
           "versjon": 1,
@@ -256,7 +164,8 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                 {
                   "id": "$VEDTAKSPERIODE_ID"
                 }
-              ]
+              ],
+              "utbetalingshistorikk": $utbetalingshistorikk
             },
             {
               "id": "${UUID.randomUUID()}",

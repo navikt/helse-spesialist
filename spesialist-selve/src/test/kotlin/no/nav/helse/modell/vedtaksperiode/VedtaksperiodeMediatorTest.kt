@@ -450,7 +450,8 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         {
           "id": "$VEDTAKSPERIODE_ID"
         }
-      ]
+      ],
+      "utbetalingshistorikk": []
     },
     {
       "id": "${UUID.randomUUID()}",
@@ -459,7 +460,8 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         {
           "id": "${UUID.randomUUID()}"
         }
-      ]
+      ],
+      "utbetalingshistorikk": []
     }
   ],
   "inntektsgrunnlag": [

@@ -36,11 +36,6 @@ object FeatureToggle {
         )
     } ?: fakeUnleash
 
-
-    val ARBEIDSFORHOLD_TOGGLE = Toggle("tbd.spesialist.arbeidsforhold")
-    val REVURDERING_TOGGLE = Toggle("tbd.revurdering")
-
-
     private val context = UnleashContext.builder()
         .environment(env)
         .build()

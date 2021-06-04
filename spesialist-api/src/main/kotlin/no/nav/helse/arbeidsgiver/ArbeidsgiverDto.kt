@@ -7,5 +7,5 @@ data class ArbeidsgiverDto(
     val organisasjonsnummer: String,
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
-    val utbetalingshistorikk: List<JsonNode>? = emptyList()
+    val utbetalingshistorikk: List<JsonNode>
 )

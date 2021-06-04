@@ -1,9 +1,6 @@
-import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import no.nav.helse.arbeidsgiver.UtbetalingshistorikkElementDto
 import no.nav.helse.objectMapper
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -55,67 +52,56 @@ data class UtbetalingshistorikkElementApiDto(
     )
 
     companion object {
-        private val log = LoggerFactory.getLogger(UtbetalingshistorikkElementApiDto::class.java)
-
-        fun toSpeilMap(utbetalingshistorikk: List<JsonNode>): List<UtbetalingshistorikkElementApiDto> = try {
+        fun toSpeilMap(utbetalingshistorikk: List<JsonNode>): List<UtbetalingshistorikkElementApiDto> =
             utbetalingshistorikk.map {
-                return@map objectMapper.treeToValue(it, UtbetalingshistorikkElementDto::class.java)
-                    .let { element ->
-                        UtbetalingshistorikkElementApiDto(
-                            beregningId = element.beregningId,
-                            tidsstempel = element.tidsstempel,
-                            beregnettidslinje = element.beregnettidslinje.map { dag ->
-                                Sykdomstidslinjedag(
-                                    dag.dagen,
-                                    dag.type,
-                                    Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
-                                    dag.grad
-                                )
-                            },
-                            hendelsetidslinje = element.hendelsetidslinje.map { dag ->
-                                Sykdomstidslinjedag(
-                                    dag.dagen,
-                                    dag.type,
-                                    Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
-                                    dag.grad
-                                )
-                            },
-                            utbetaling = Utbetaling(
-                                utbetalingstidslinje = element.utbetaling.utbetalingstidslinje.map { dag ->
-                                    Utbetalingsdag(
-                                        dag.type,
-                                        dag.inntekt,
-                                        dag.dato
-                                    )
-                                },
-                                type = element.utbetaling.type,
-                                status = element.utbetaling.status,
-                                gjenståendeSykedager = element.utbetaling.gjenståendeSykedager,
-                                forbrukteSykedager = element.utbetaling.forbrukteSykedager,
-                                arbeidsgiverNettoBeløp = element.utbetaling.arbeidsgiverNettoBeløp,
-                                arbeidsgiverFagsystemId = element.utbetaling.arbeidsgiverFagsystemId,
-                                maksdato = element.utbetaling.maksdato,
-                                beregningId = element.utbetaling.beregningId,
-                                tidsstempel = element.utbetaling.tidsstempel,
-                                vurdering = element.utbetaling.vurdering?.let { vurdering ->
-                                    Utbetaling.Vurdering(
-                                        godkjent = vurdering.godkjent,
-                                        tidsstempel = vurdering.tidsstempel,
-                                        automatisk = vurdering.automatisk,
-                                        ident = vurdering.ident
-                                    )
-                                }
+                return@map objectMapper.treeToValue(it, UtbetalingshistorikkElementDto::class.java).let { element ->
+                    UtbetalingshistorikkElementApiDto(
+                        beregningId = element.beregningId,
+                        tidsstempel = element.tidsstempel,
+                        beregnettidslinje = element.beregnettidslinje.map { dag ->
+                            Sykdomstidslinjedag(
+                                dag.dagen,
+                                dag.type,
+                                Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
+                                dag.grad
                             )
+                        },
+                        hendelsetidslinje = element.hendelsetidslinje.map { dag ->
+                            Sykdomstidslinjedag(
+                                dag.dagen,
+                                dag.type,
+                                Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
+                                dag.grad
+                            )
+                        },
+                        utbetaling = Utbetaling(
+                            utbetalingstidslinje = element.utbetaling.utbetalingstidslinje.map { dag ->
+                                Utbetalingsdag(
+                                    dag.type,
+                                    dag.inntekt,
+                                    dag.dato
+                                )
+                            },
+                            type = element.utbetaling.type,
+                            status = element.utbetaling.status,
+                            gjenståendeSykedager = element.utbetaling.gjenståendeSykedager,
+                            forbrukteSykedager = element.utbetaling.forbrukteSykedager,
+                            arbeidsgiverNettoBeløp = element.utbetaling.arbeidsgiverNettoBeløp,
+                            arbeidsgiverFagsystemId = element.utbetaling.arbeidsgiverFagsystemId,
+                            maksdato = element.utbetaling.maksdato,
+                            beregningId = element.utbetaling.beregningId,
+                            tidsstempel = element.utbetaling.tidsstempel,
+                            vurdering = element.utbetaling.vurdering?.let { vurdering ->
+                                Utbetaling.Vurdering(
+                                    godkjent = vurdering.godkjent,
+                                    tidsstempel = vurdering.tidsstempel,
+                                    automatisk = vurdering.automatisk,
+                                    ident = vurdering.ident
+                                )
+                            }
                         )
-                    }
-
+                    )
+                }
             }
-        } catch (e: JsonParseException) {
-            log.info("Ufullstendig sykdomshistorikk. Dette er forventet da vi har bygget ut historikkobjektet gradvis, men de burde bli borte etterhvert som tiden går")
-            emptyList()
-        } catch (e: MissingKotlinParameterException) {
-            log.info("Ufullstendig sykdomshistorikk. Dette er forventet da vi har bygget ut historikkobjektet gradvis, men de burde bli borte etterhvert som tiden går")
-            emptyList()
-        }
     }
 }
