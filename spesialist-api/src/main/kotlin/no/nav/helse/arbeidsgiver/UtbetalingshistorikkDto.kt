@@ -34,6 +34,7 @@ data class UtbetalingDto(
     val maksdato: LocalDate,
     val beregningId: UUID,
     val utbetalingstidslinje: List<UtbetalingsdagDto>,
+    val tidsstempel: LocalDateTime,
     val vurdering: VurderingDto?
 ) {
     data class VurderingDto(

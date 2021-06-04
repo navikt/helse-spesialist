@@ -37,6 +37,7 @@ data class UtbetalingshistorikkElementApiDto(
         val maksdato: LocalDate,
         val beregningId: UUID,
         val utbetalingstidslinje: List<Utbetalingsdag>,
+        val tidsstempel: LocalDateTime,
         val vurdering: Vurdering?
     ) {
         data class Vurdering(
@@ -95,6 +96,7 @@ data class UtbetalingshistorikkElementApiDto(
                                 arbeidsgiverFagsystemId = element.utbetaling.arbeidsgiverFagsystemId,
                                 maksdato = element.utbetaling.maksdato,
                                 beregningId = element.utbetaling.beregningId,
+                                tidsstempel = element.utbetaling.tidsstempel,
                                 vurdering = element.utbetaling.vurdering?.let { vurdering ->
                                     Utbetaling.Vurdering(
                                         godkjent = vurdering.godkjent,
