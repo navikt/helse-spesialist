@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.automatiseringsteller
+import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
@@ -22,6 +23,16 @@ internal class GodkjenningMediator(
         publiserVedtaksperiodeGodkjent(context, vedtaksperiodeId, fødselsnummer, behov)
     }
 
+    internal fun saksbehandlerAvvisning(
+        context: CommandContext,
+        behov: UtbetalingsgodkjenningMessage,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String
+    ) {
+        context.publiser(behov.toJson())
+        publiserVedtaksperiodeAvvist(context, vedtaksperiodeId, fødselsnummer, behov)
+
+    }
     internal fun automatiskUtbetaling(
         context: CommandContext,
         behov: UtbetalingsgodkjenningMessage,
@@ -50,4 +61,23 @@ internal class GodkjenningMediator(
             ).toJson()
         )
     }
+
+    private fun publiserVedtaksperiodeAvvist(
+        context: CommandContext,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        behov: UtbetalingsgodkjenningMessage
+    ) {
+        context.publiser(
+            VedtaksperiodeAvvist(
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
+                warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+                periodetype = requireNotNull(vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId)),
+                løsning = behov.løsning()
+            ).toJson()
+        )
+    }
+
+
 }

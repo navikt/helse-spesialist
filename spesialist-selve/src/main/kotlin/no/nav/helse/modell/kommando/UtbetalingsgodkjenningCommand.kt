@@ -29,7 +29,10 @@ internal class UtbetalingsgodkjenningCommand(
     override fun execute(context: CommandContext): Boolean {
         val behov = hendelseDao.finnUtbetalingsgodkjenningbehov(godkjenningsbehovhendelseId)
         behov.løs(godkjent, saksbehandlerIdent, epostadresse, godkjenttidspunkt, årsak, begrunnelser, kommentar)
-        godkjenningMediator.saksbehandlerUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer)
+        if(godkjent)
+            godkjenningMediator.saksbehandlerUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer)
+        else
+            godkjenningMediator.saksbehandlerAvvisning(context, behov, vedtaksperiodeId, fødselsnummer)
         log.info("sender svar på godkjenningsbehov")
         return true
     }

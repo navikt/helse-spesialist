@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger.utgående
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.standardfelter
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.WarningDto
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.*
@@ -10,7 +11,7 @@ import java.util.*
 internal class VedtaksperiodeAvvist(
     val vedtaksperiodeId: UUID,
     val fødselsnummer: String,
-    val warnings: List<Warning>,
+    val warnings: List<WarningDto>,
     val periodetype: Periodetype,
     val løsning: JsonNode
 ) {
@@ -21,7 +22,7 @@ internal class VedtaksperiodeAvvist(
             "periodetype" to periodetype.name,
             "saksbehandlerIdent" to løsning["Godkjenning"]["saksbehandlerIdent"].asText(),
             "saksbehandlerEpost" to løsning["Godkjenning"]["saksbehandlerEpost"].asText(),
-            "automatiskBehandling" to løsning["Godkjenning"]["automatisk"].asBoolean(),
+            "automatiskBehandling" to løsning["Godkjenning"]["automatiskBehandling"].asBoolean(),
             "årsak" to løsning["Godkjenning"]["årsak"].asText(),
             "begrunnelser" to løsning["Godkjenning"]["begrunnelser"].asText(),
             "kommentar" to løsning["Godkjenning"]["kommentar"].asText()
