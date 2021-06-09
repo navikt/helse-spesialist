@@ -566,6 +566,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
+    protected fun assertVedtaksperiodeAvvist(periodetype: String) {
+        testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
+            assertEquals(periodetype, it.path("periodetype").asText() )
+        }
+    }
+
     protected fun assertAutomatisertLøsning(godkjent: Boolean = true, block: (JsonNode) -> Unit = {}) {
         assertGodkjenningsbehovløsning(godkjent, "Automatisk behandlet") {
             assertTrue(it.path("automatiskBehandling").booleanValue())

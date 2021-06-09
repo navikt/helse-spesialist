@@ -1,11 +1,15 @@
 package no.nav.helse.modell.egenansatt
 
 import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.EgenAnsattløsning
+import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -20,8 +24,9 @@ internal class EgenAnsattCommandTest {
     }
 
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
+    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
 
-    private val command = EgenAnsattCommand(dao, "{}", VEDTAKSPERIODE_ID)
+    private val command = EgenAnsattCommand(dao, "{}", VEDTAKSPERIODE_ID, FNR, godkjenningMediator)
     private lateinit var context: CommandContext
 
 
@@ -52,9 +57,22 @@ internal class EgenAnsattCommandTest {
 
     @Test
     fun `sender løsning på godkjenning hvis bruker er egen ansatt`() {
+        every {
+            godkjenningMediator.lagVedtaksperiodeAvvist(
+                any(),
+                any(),
+                any()
+            )
+        } returns VedtaksperiodeAvvist(
+            UUID.randomUUID(),
+            "",
+            emptyList(),
+            Periodetype.FØRSTEGANGSBEHANDLING,
+            mockk(relaxed = true)
+        )
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, true))
         assertTrue(command.resume(context))
-        assertEquals(1, context.meldinger().size)
+        assertEquals(2, context.meldinger().size)
         assertFalse(
             objectMapper.readTree(context.meldinger().first())
                 .path("@løsning")
@@ -62,6 +80,7 @@ internal class EgenAnsattCommandTest {
                 .path("godkjent")
                 .booleanValue()
         )
+        assertTrue(context.meldinger().last().contains("vedtaksperiode_avvist"))
     }
 
     @Test

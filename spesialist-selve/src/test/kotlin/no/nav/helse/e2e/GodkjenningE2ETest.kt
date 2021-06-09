@@ -246,6 +246,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
+        assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING")
     }
 
     @Test

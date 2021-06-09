@@ -89,16 +89,16 @@ internal class VedtakDao(private val dataSource: DataSource) {
             session.run(queryOf(statement, type.name, inntektskilde.name, vedtakRef).asUpdate)
         }
 
-    internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype? =
+    internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype =
         sessionOf(dataSource).use { session ->
             val vedtakRef =
-                requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
+                checkNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
 
             @Language("PostgreSQL")
             val statement = "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = ?"
-            session.run(queryOf(statement, vedtakRef).map {
+            checkNotNull(session.run(queryOf(statement, vedtakRef).map {
                 enumValueOf<Periodetype>(it.string("type"))
-            }.asSingle)
+            }.asSingle)) { "Forventet å finne saksbehandleroppgavetype for vedtaksperiodeId $vedtaksperiodeId" }
         }
 
     internal fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =

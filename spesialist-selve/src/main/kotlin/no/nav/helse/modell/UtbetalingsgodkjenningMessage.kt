@@ -29,7 +29,26 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
         )
     }
 
-    internal fun løs(
+    internal fun godkjennManuelt(
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime,
+    ) {
+        løsManuelt(true, saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, null, null, null)
+    }
+
+    internal fun avvisManuelt(
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        godkjenttidspunkt: LocalDateTime,
+        årsak: String?,
+        begrunnelser: List<String>?,
+        kommentar: String?
+    ) {
+        løsManuelt(false, saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
+    }
+
+    private fun løsManuelt(
         godkjent: Boolean,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,

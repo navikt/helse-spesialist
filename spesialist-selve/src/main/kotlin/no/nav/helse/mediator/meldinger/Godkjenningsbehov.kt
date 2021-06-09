@@ -89,7 +89,8 @@ internal class Godkjenningsbehov(
             aktørId = aktørId,
             personDao = personDao,
             godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            godkjenningMediator = godkjenningMediator,
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = aktiveVedtaksperioder.orgnummere(),
@@ -120,7 +121,9 @@ internal class Godkjenningsbehov(
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
             godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            godkjenningMediator = godkjenningMediator,
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,

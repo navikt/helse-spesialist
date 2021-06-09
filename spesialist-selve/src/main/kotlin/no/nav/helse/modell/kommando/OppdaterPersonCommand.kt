@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.avvistPåGrunnAvUtlandTeller
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
@@ -14,7 +15,8 @@ internal class OppdaterPersonCommand(
     fødselsnummer: String,
     personDao: PersonDao,
     godkjenningsbehovJson: String,
-    vedtaksperiodeId: UUID
+    vedtaksperiodeId: UUID,
+    godkjenningMediator: GodkjenningMediator,
 ) : MacroCommand() {
     private companion object {
         private val log = LoggerFactory.getLogger(OppdaterPersonCommand::class.java)
@@ -22,7 +24,7 @@ internal class OppdaterPersonCommand(
 
     override val commands: List<Command> = listOf(
         OppdaterPersoninfoCommand(fødselsnummer, personDao),
-        OppdaterEnhetCommand(fødselsnummer, personDao, godkjenningsbehovJson, vedtaksperiodeId),
+        OppdaterEnhetCommand(fødselsnummer, personDao, godkjenningsbehovJson, vedtaksperiodeId, godkjenningMediator),
         OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao)
     )
 
@@ -71,7 +73,13 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private class OppdaterEnhetCommand(fødselsnummer: String, personDao: PersonDao, private val godkjenningsbehovJson: String, private val vedtaksperiodeId: UUID) : OppdaterCommand(fødselsnummer, personDao, "HentEnhet") {
+    private class OppdaterEnhetCommand(
+        fødselsnummer: String,
+        personDao: PersonDao,
+        private val godkjenningsbehovJson: String,
+        private val vedtaksperiodeId: UUID,
+        private val godkjenningMediator: GodkjenningMediator,
+    ) : OppdaterCommand(fødselsnummer, personDao, "HentEnhet") {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
             val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(5)
@@ -84,6 +92,7 @@ internal class OppdaterPersonCommand(
                 val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
                 behov.avvisAutomatisk(listOf("Utland"))
                 context.publiser(behov.toJson())
+                context.publiser(godkjenningMediator.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, behov).toJson())
                 avvistPåGrunnAvUtlandTeller.inc()
                 log.info("Automatisk avvisning for vedtaksperiode $vedtaksperiodeId")
             }

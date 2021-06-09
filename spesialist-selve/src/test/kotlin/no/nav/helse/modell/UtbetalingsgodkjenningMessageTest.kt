@@ -36,13 +36,13 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @Test
     fun `manuelt godkjent`() {
-        utbetalingMessage.løs(true, IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null)
+        utbetalingMessage.godkjennManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT)
         assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
     }
 
     @Test
     fun `manuelt avvist`() {
-        utbetalingMessage.løs(false, IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null)
+        utbetalingMessage.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null)
         assertIkkeGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
     }
 

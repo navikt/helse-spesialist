@@ -5,10 +5,13 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -32,7 +35,9 @@ internal class KlargjørPersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = KlargjørPersonCommand(FNR, AKTØR, dao, """{"@event_name": "behov"}""", UUID.randomUUID())
+    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
+    private val command =
+        KlargjørPersonCommand(FNR, AKTØR, dao, """{"@event_name": "behov"}""", UUID.randomUUID(), godkjenningMediator)
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -101,19 +106,25 @@ internal class KlargjørPersonCommandTest {
 
     @Test
     fun `sender løsning på godkjenning hvis bruker er utdatert og er tilknyttet utlandsenhet`() {
+        every { godkjenningMediator.lagVedtaksperiodeAvvist(any(), any(), any()) } returns vedtaksperiodeAvvist()
         personFinnes()
         altUtdatert()
         context.add(HentEnhetløsning(ENHET_UTLAND))
         context.add(mockk<HentPersoninfoløsning>(relaxed = true))
         context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
         assertTrue(command.execute(context))
-        assertEquals(1, context.meldinger().size)
+        assertEquals(2, context.meldinger().size)
         assertFalse(
             no.nav.helse.objectMapper.readTree(context.meldinger().first())
                 .path("@løsning")
                 .path("Godkjenning")
                 .path("godkjent")
                 .booleanValue()
+        )
+        val vedtaksperiodeAvvistMelding = context.meldinger().last()
+        assertEquals(
+            "vedtaksperiode_avvist",
+            objectMapper.readTree(vedtaksperiodeAvvistMelding).path("@event_name").asText()
         )
     }
 
@@ -130,17 +141,23 @@ internal class KlargjørPersonCommandTest {
 
     @Test
     fun `sender løsning på godkjenning hvis bruker er tilknyttet utlandsenhet`() {
+        every { godkjenningMediator.lagVedtaksperiodeAvvist(any(), any(), any()) } returns vedtaksperiodeAvvist()
         context.add(HentEnhetløsning(ENHET_UTLAND))
         context.add(mockk<HentPersoninfoløsning>(relaxed = true))
         context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
         assertTrue(command.execute(context))
-        assertEquals(1, context.meldinger().size)
+        assertEquals(2, context.meldinger().size)
         assertFalse(
-            no.nav.helse.objectMapper.readTree(context.meldinger().first())
+            objectMapper.readTree(context.meldinger().first())
                 .path("@løsning")
                 .path("Godkjenning")
                 .path("godkjent")
                 .booleanValue()
+        )
+        val vedtaksperiodeAvvistMelding = context.meldinger().last()
+        assertEquals(
+            "vedtaksperiode_avvist",
+            objectMapper.readTree(vedtaksperiodeAvvistMelding).path("@event_name").asText()
         )
     }
 
@@ -152,6 +169,14 @@ internal class KlargjørPersonCommandTest {
         assertTrue(command.execute(context))
         assertEquals(0, context.meldinger().size)
     }
+
+    private fun vedtaksperiodeAvvist() = VedtaksperiodeAvvist(
+        UUID.randomUUID(),
+        "",
+        emptyList(),
+        Periodetype.FØRSTEGANGSBEHANDLING,
+        mockk(relaxed = true)
+    )
 
     private fun assertHarBehov(forventetBehov: List<String>) {
         assertTrue(context.harBehov())

@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
@@ -21,7 +22,8 @@ internal class OppdaterPersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val command = OppdaterPersonCommand(FNR, dao, """{"@event_name": "behov"}""", UUID.randomUUID())
+    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
+    private val command = OppdaterPersonCommand(FNR, dao, """{"@event_name": "behov"}""", UUID.randomUUID(), godkjenningMediator)
     private lateinit var context: CommandContext
 
     @BeforeEach

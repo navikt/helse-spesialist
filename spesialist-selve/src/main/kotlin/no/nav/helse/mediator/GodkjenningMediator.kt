@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import no.nav.helse.automatiseringsteller
+import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
@@ -19,7 +20,17 @@ internal class GodkjenningMediator(
         fødselsnummer: String
     ) {
         context.publiser(behov.toJson())
-        publiserVedtaksperiodeGodkjent(context, vedtaksperiodeId, fødselsnummer, behov)
+        context.publiser(lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, behov).toJson())
+    }
+
+    internal fun saksbehandlerAvvisning(
+        context: CommandContext,
+        behov: UtbetalingsgodkjenningMessage,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String
+    ) {
+        context.publiser(behov.toJson())
+        context.publiser(lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, behov).toJson())
     }
 
     internal fun automatiskUtbetaling(
@@ -30,24 +41,32 @@ internal class GodkjenningMediator(
     ) {
         behov.godkjennAutomatisk()
         context.publiser(behov.toJson())
+        context.publiser(lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, behov).toJson())
         automatiseringsteller.inc()
-        publiserVedtaksperiodeGodkjent(context, vedtaksperiodeId, fødselsnummer, behov)
     }
 
-    private fun publiserVedtaksperiodeGodkjent(
-        context: CommandContext,
+    private fun lagVedtaksperiodeGodkjent(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         behov: UtbetalingsgodkjenningMessage
-    ) {
-        context.publiser(
-            VedtaksperiodeGodkjent(
-                vedtaksperiodeId = vedtaksperiodeId,
-                fødselsnummer = fødselsnummer,
-                warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
-                periodetype = requireNotNull(vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId)),
-                løsning = behov.løsning()
-            ).toJson()
-        )
-    }
+    ) = VedtaksperiodeGodkjent(
+        vedtaksperiodeId = vedtaksperiodeId,
+        fødselsnummer = fødselsnummer,
+        warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+        periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
+        løsning = behov.løsning()
+    )
+
+    internal fun lagVedtaksperiodeAvvist(
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        behov: UtbetalingsgodkjenningMessage
+    ) = VedtaksperiodeAvvist(
+        vedtaksperiodeId = vedtaksperiodeId,
+        fødselsnummer = fødselsnummer,
+        warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+        periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)
+            ?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
+        løsning = behov.løsning()
+    )
 }

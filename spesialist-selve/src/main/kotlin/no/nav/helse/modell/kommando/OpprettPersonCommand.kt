@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.avvistPåGrunnAvUtlandTeller
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
@@ -15,7 +16,8 @@ internal class OpprettPersonCommand(
     private val aktørId: String,
     private val personDao: PersonDao,
     private val godkjenningsbehovJson: String,
-    private val vedtaksperiodeId: UUID
+    private val vedtaksperiodeId: UUID,
+    private val godkjenningMediator: GodkjenningMediator,
 ) : Command {
 
     private companion object {
@@ -70,6 +72,7 @@ internal class OpprettPersonCommand(
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             behov.avvisAutomatisk(listOf("Utland"))
             context.publiser(behov.toJson())
+            context.publiser(godkjenningMediator.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, behov).toJson())
             avvistPåGrunnAvUtlandTeller.inc()
             logg.info("Automatisk avvisning for vedtaksperiode $vedtaksperiodeId")
         }
