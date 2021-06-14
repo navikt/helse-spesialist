@@ -1,5 +1,5 @@
 val junitJupiterVersion = "5.7.1"
-val ktorVersion = "1.5.1"
+val ktorVersion = "1.6.0"
 
 plugins {
     kotlin("jvm") version "1.5.10"
@@ -59,10 +59,10 @@ subprojects {
 
     tasks {
         compileKotlin {
-            kotlinOptions.jvmTarget = "15"
+            kotlinOptions.jvmTarget = "16"
         }
         compileTestKotlin {
-            kotlinOptions.jvmTarget = "15"
+            kotlinOptions.jvmTarget = "16"
         }
 
         withType<Test> {
