@@ -1,6 +1,5 @@
 package no.nav.helse
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
@@ -25,7 +24,10 @@ abstract class AbstractDatabaseTest {
             idleTimeout = 500001
             connectionTimeout = 1000
             maxLifetime = 600001
+            username = "test"
+            password = "test"
         }
+        val dataSource = HikariDataSource(hikariConfig)
 
         private fun getJdbcUrl(): String {
             fun standaloneDataSourceIsRunning(url: String): Boolean {
@@ -39,14 +41,6 @@ abstract class AbstractDatabaseTest {
                 }
             }
 
-            fun startEmbeddedPostgres(): EmbeddedPostgres {
-                val postgresPath = createTempDir()
-                return EmbeddedPostgres.builder()
-                    .setOverrideWorkingDirectory(postgresPath)
-                    .setDataDirectory(postgresPath.resolve("datadir"))
-                    .start()
-            }
-
             val urlStandaloneDatabase: String? = File(DATABASE_URL_FILE_PATH).let {
                 if (it.exists()) {
                     it.readText()
@@ -56,11 +50,9 @@ abstract class AbstractDatabaseTest {
             return if (urlStandaloneDatabase != null && standaloneDataSourceIsRunning(urlStandaloneDatabase)) {
                 urlStandaloneDatabase
             } else {
-                startEmbeddedPostgres().getJdbcUrl("postgres", "postgres")
+                PostgresContainer.instance.jdbcUrl
             }
         }
-
-        val dataSource = HikariDataSource(hikariConfig)
 
         init {
             Flyway.configure()
