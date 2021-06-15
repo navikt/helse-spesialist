@@ -1,9 +1,18 @@
 package no.nav.helse
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import org.testcontainers.containers.PostgreSQLContainer
 import java.io.File
 
 val DATABASE_URL_FILE_PATH = "${System.getProperty("java.io.tmpdir")}spesialist_standalone_db_url"
+
+object PostgresContainer {
+    val instance by lazy {
+        PostgreSQLContainer<Nothing>("postgres:12.1").apply {
+            start()
+        }
+    }
+}
 
 internal fun main() {
     val postgresPath = createTempDir()
