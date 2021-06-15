@@ -25,9 +25,10 @@ internal class Warning(
                 .map { Warning(it["melding"].asText(), WarningKilde.Spleis) }
     }
 
+    internal fun kanLagres(): Boolean = !melding.isBlank()
+
     internal fun lagre(warningDao: WarningDao, vedtakRef: Long) {
-        if (melding.isBlank()) return
-        warningDao.leggTilWarning(vedtakRef, melding, kilde)
+        if (kanLagres()) warningDao.leggTilWarning(vedtakRef, melding, kilde)
     }
 
     override fun equals(other: Any?): Boolean {
