@@ -1,5 +1,7 @@
 package no.nav.helse.person
 
+import kotliquery.Query
+import kotliquery.action.NullableResultQueryAction
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.vedtaksperiode.EnhetDto
@@ -34,5 +36,15 @@ class PersonApiDao(private val dataSource: DataSource) {
                 .map { row -> row.string("data") }
                 .asSingle
         )
+    }
+
+    fun finnesPersonMedFødselsnummer(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT 1 FROM person WHERE fodselsnummer=?;"
+        fun Query.exists(): NullableResultQueryAction<Boolean> = this.map { true }.asSingle
+        session.run(
+            queryOf(query, fødselsnummer.toLong())
+                .exists()
+        ) ?: false
     }
 }

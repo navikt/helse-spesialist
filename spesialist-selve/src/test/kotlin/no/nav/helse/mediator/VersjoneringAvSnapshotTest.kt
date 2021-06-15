@@ -4,6 +4,7 @@ import AbstractE2ETest
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -48,5 +49,12 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
 
         vedtaksperiodeMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+    }
+
+    @Test
+    fun `fnr finnes ikke`() {
+        val actual = vedtaksperiodeMediator.byggSpeilSnapshotForFnr("77889900")
+        assertNull(actual)
+        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot("77889900") }
     }
 }

@@ -55,6 +55,9 @@ internal class VedtaksperiodeMediator(
         }
 
     private fun byggSnapshot(fnr: String): PersonForSpeilDto? {
+        if (!personDao.finnesPersonMedFødselsnummer(fnr)) {
+            return null
+        }
         if (snapshotDao.utdatert(fnr)) {
             val nyttSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fnr)
             snapshotDao.lagre(fnr, nyttSnapshot)
@@ -134,7 +137,10 @@ internal class VedtaksperiodeMediator(
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())
                         risikovurdering?.let {
-                            vedtaksperiode.set<ObjectNode>("risikovurdering", objectMapper.convertValue(it, ObjectNode::class.java))
+                            vedtaksperiode.set<ObjectNode>(
+                                "risikovurdering",
+                                objectMapper.convertValue(it, ObjectNode::class.java)
+                            )
                         }
                         vedtaksperiode.set<ArrayNode>("varsler", objectMapper.convertValue<ArrayNode>(varsler))
                     }
@@ -167,6 +173,8 @@ internal class VedtaksperiodeMediator(
             )
         }
 
-    private fun mapUtbetalingshistorikk(it: ArbeidsgiverDto) = UtbetalingshistorikkElementApiDto.toSpeilMap(it.utbetalingshistorikk)
+    private fun mapUtbetalingshistorikk(it: ArbeidsgiverDto) =
+        UtbetalingshistorikkElementApiDto.toSpeilMap(it.utbetalingshistorikk)
+
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 }
