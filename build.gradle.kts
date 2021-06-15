@@ -42,7 +42,7 @@ allprojects {
         }
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-        testImplementation("com.opentable.components:otj-pg-embedded:0.13.3") //Oktober, 2019
+        testImplementation("com.opentable.components:otj-pg-embedded:0.13.4")
         testImplementation("io.mockk:mockk:1.10.6")
     }
 }
