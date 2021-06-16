@@ -11,6 +11,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -67,7 +68,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode som oppfyller krav blir automatisk godkjent og lagret`() {
         val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), onSuccessCallback)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING, onSuccessCallback)
 
         verify { automatiseringDaoMock.automatisert(any(), any(), any()) }
         verify { onSuccessCallback() }
@@ -81,7 +82,7 @@ internal class AutomatiseringTest {
                 WarningKilde.Spesialist
             )
         )
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
         verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }
         verify(exactly = 0) {
             plukkTilManuellMock()
@@ -91,54 +92,63 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode uten ok risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(false)
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode hvor bruker ikke er digital er ikke automatiserbar`() {
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns false
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med ukjent dkif-status er ikke automatiserbar`() {
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 1
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med _null_ åpne oppgaver er ikke automatiserbar`() {
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode med egen ansatt er ikke automatiserbar`() {
         every { egenAnsattDao.erEgenAnsatt(any()) } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `vedtaksperiode plukket ut til stikkprøve skal ikke automatisk godkjennes`() {
         every { plukkTilManuellMock() } returns true
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `person med flere arbeidsgivere skal ikke automatisk godkjennes`() {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.FLERE_ARBEIDSGIVERE
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID()) { fail("Denne skal ikke kalles") }
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
+    }
+
+    @Test
+    fun `periode til revurdering skal ikke automatisk godkjennes`() {
+        val hendelseId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, Utbetalingtype.REVURDERING) { fail("Denne skal ikke kalles") }
+        verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
     }
 }

@@ -9,6 +9,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -28,15 +29,25 @@ internal class Automatisering(
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
     }
 
-    internal fun utfør(fødselsnummer: String, vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID, onAutomatiserbar: () -> Unit) {
+    internal fun utfør(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        utbetalingId: UUID,
+        utbetalingtype: Utbetalingtype,
+        onAutomatiserbar: () -> Unit
+    ) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId)
 
         when {
-            problemer.isNotEmpty() ->
+            utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() ->
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             plukkTilManuell() -> {
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
-                logger.info("Automatisk godkjenning av {} avbrutt, sendes til manuell behandling", keyValue("vedtaksperiodeId", vedtaksperiodeId))
+                logger.info(
+                    "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
+                    keyValue("vedtaksperiodeId", vedtaksperiodeId)
+                )
             }
             else -> {
                 onAutomatiserbar()

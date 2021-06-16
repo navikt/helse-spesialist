@@ -15,9 +15,7 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val ORGNR = "222222222"
-        private const val ENHET_UTLAND = "2101"
         private const val SAKSBEHANDLERIDENT = "Z999999"
-        private const val AUTOMATISK_BEHANDLET = "Automatisk behandlet"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
 
         private val SAKSBEHANDLEROID = UUID.randomUUID()
@@ -62,6 +60,23 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
         )
         assertOppgavestatuser(1, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertOppgavetype(1, "REVURDERING")
+        assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
+    }
+
+    @Test
+    fun `revurdering av periode medfører oppgave selv om perioden ikke har warnings`() {
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+
+        val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        håndterGodkjenningsbehov(godkjenningsmeldingId1)
+        sendUtbetalingEndret("UTBETALING", Utbetalingsstatus.UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
+
+        val godkjenningsmeldingId2 = sendGodkjenningsbehov(orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID2, utbetalingtype = Utbetalingtype.REVURDERING)
+        håndterGodkjenningsbehov(godkjenningsmeldingId2)
+        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendUtbetalingEndret("REVURDERING", Utbetalingsstatus.UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID2)
+        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavetype(0, "REVURDERING")
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
     }
 

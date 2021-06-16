@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -29,6 +30,7 @@ internal class AutomatiseringCommandTest {
             hendelseId,
             automatisering,
             """{ "@event_name": "behov" }""",
+            Utbetalingtype.UTBETALING,
             GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true))
         )
 
@@ -43,7 +45,7 @@ internal class AutomatiseringCommandTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.utfør(any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -51,9 +53,9 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(),captureLambda())
+            automatisering.utfør(any(), any(), any(), any(), any(), captureLambda())
         } answers {
-            arg<() -> Unit>(4).invoke()
+            arg<() -> Unit>(5).invoke()
         }
 
         assertTrue(command.execute(context))
