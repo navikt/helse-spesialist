@@ -23,9 +23,9 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
         lagLinje(arbeidsgiverOppdragId, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
         val utbetalingIdId = lagUtbetalingId(arbeidsgiverOppdragId)
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, GODKJENT, LocalDateTime.now(), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, SENDT, LocalDateTime.now(), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, OVERFØRT, LocalDateTime.now(), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, GODKJENT, LocalDateTime.now().minusDays(3), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, SENDT, LocalDateTime.now().minusDays(2), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, OVERFØRT, LocalDateTime.now().minusDays(1), "{}")
         utbetalingDao.nyUtbetalingStatus(utbetalingIdId, UTBETALT, LocalDateTime.now(), "{}")
 
         val utbetalinger = utbetalingDao.findUtbetalinger(FNR)

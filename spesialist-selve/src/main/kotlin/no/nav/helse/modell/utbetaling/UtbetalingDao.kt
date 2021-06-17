@@ -165,7 +165,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
     fun findUtbetalinger(fødselsnummer: String): List<UtbetalingDto> {
         @Language("PostgreSQL")
         val query = """
-SELECT DISTINCT ON (ui.id) o.id as oppdrag_id, *
+SELECT DISTINCT ON (o.fagsystem_id) o.id as oppdrag_id, *
 FROM utbetaling_id ui
          JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
          JOIN oppdrag o ON ui.arbeidsgiver_fagsystem_id_ref = o.id
@@ -174,8 +174,8 @@ FROM utbetaling_id ui
          LEFT JOIN annullert_av_saksbehandler aas on u.annullert_av_saksbehandler_ref = aas.id
          LEFT JOIN saksbehandler s on aas.saksbehandler_ref = s.oid
          WHERE fodselsnummer = :fodselsnummer
-ORDER BY ui.id, u.id DESC
-        """.trimIndent()
+ORDER BY o.fagsystem_id, u.opprettet DESC
+        """
 
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
@@ -183,6 +183,7 @@ ORDER BY ui.id, u.id DESC
                     val linjer = findUtbetalingslinjer(session, row.long("oppdrag_id"))
 
                     UtbetalingDto(
+                        utbetalingId = UUID.fromString(row.string("utbetaling_id")),
                         type = row.string("type"),
                         status = Utbetalingsstatus.valueOf(row.string("status")),
                         arbeidsgiverOppdrag = UtbetalingDto.OppdragDto(
@@ -258,6 +259,7 @@ ORDER BY ui.id, u.id DESC
     }
 
     data class UtbetalingDto(
+        val utbetalingId: UUID,
         val type: String,
         val status: Utbetalingsstatus,
         val arbeidsgiverOppdrag: OppdragDto,

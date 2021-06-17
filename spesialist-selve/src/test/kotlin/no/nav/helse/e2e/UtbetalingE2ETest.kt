@@ -80,6 +80,17 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().type)
     }
 
+    @Test
+    fun `ved endringer i utbetalinger skal kun nyeste vises`() {
+        val nyUtbetalingId = UUID.randomUUID()
+        vedtaksperiode(utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = nyUtbetalingId)
+
+        assertEquals(1, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).size)
+        assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().utbetalingId)
+    }
+
     private fun utbetalinger(): List<Long> {
         @Language("PostgreSQL")
         val statement = """
