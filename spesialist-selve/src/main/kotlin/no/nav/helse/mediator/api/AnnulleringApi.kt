@@ -26,7 +26,9 @@ data class AnnulleringDto(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val fagsystemId: String,
-    val saksbehandlerIdent: String
+    val saksbehandlerIdent: String,
+    val begrunnelser: List<String> = emptyList(),
+    val kommentar: String?
 )
 
 

@@ -47,7 +47,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID
         )
 
-        val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123")
+        val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), null)
         val saksbehandler = Saksbehandler("kevders.chilleby@nav.no", UUID.randomUUID(), "Kevders Chilleby")
         håndterAnnullering(annulleringDto, saksbehandler)
 

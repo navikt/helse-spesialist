@@ -287,8 +287,12 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
-            log.warn("Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon", keyValue("hendelseId", message["@id"].asText()))
-            sikkerLogg.warn("Forstår ikke utbetaling_endret: fant ikke arbeidsgiver med {}, {}, {}, {}. Meldingen er lagret i feilende_meldinger",
+            log.warn(
+                "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",
+                keyValue("hendelseId", message["@id"].asText())
+            )
+            sikkerLogg.warn(
+                "Forstår ikke utbetaling_endret: fant ikke arbeidsgiver med {}, {}, {}, {}. Meldingen er lagret i feilende_meldinger",
                 keyValue("hendelseId", message["@id"].asText()),
                 keyValue("fødselsnummer", fødselsnummer),
                 keyValue("organisasjonsnummer", organisasjonsnummer),
@@ -343,10 +347,13 @@ internal class HendelseMediator(
                         mapOf(
                             "organisasjonsnummer" to organisasjonsnummer,
                             "aktørId" to aktørId,
-                            "saksbehandler" to saksbehandler.json().toMutableMap().apply { put("ident", annulleringDto.saksbehandlerIdent) },
-                            "fagsystemId" to fagsystemId
-                        )
-                    )
+                            "saksbehandler" to saksbehandler.json().toMutableMap()
+                                .apply { put("ident", annulleringDto.saksbehandlerIdent) },
+                            "fagsystemId" to fagsystemId,
+                            "begrunnelser" to (begrunnelser) as Any,
+                        ) + (kommentar?.let {
+                            mapOf<String, Any>("kommentar" to it)
+                        } ?: mapOf()))
                 }
             )
         }
