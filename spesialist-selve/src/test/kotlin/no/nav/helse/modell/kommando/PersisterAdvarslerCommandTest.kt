@@ -36,5 +36,5 @@ internal class PersisterAdvarslerCommandTest {
         }
     }
 
-    private fun List<String>.somWarnings() = map { Warning(it, WarningKilde.Spleis) }
+    private fun List<String>.somWarnings() = map { Warning.warning(it, WarningKilde.Spleis) }
 }

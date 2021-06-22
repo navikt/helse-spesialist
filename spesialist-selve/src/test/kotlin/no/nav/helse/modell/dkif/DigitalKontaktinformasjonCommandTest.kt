@@ -66,7 +66,7 @@ internal class DigitalKontaktinformasjonCommandTest {
 
     @Test
     fun `Lagrer warning ved analog person`() {
-        val forventetWarning = Warning(
+        val forventetWarning = Warning.warning(
             melding = "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
             kilde = WarningKilde.Spesialist
         )

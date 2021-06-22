@@ -52,7 +52,7 @@ internal class WarningDao(private val dataSource: DataSource) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
-        session.run(queryOf(statement, vedtakRef).map { Warning( melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+        session.run(queryOf(statement, vedtakRef).map { Warning.warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
     }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->

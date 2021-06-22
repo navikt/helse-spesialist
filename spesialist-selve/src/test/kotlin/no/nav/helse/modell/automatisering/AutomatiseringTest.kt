@@ -77,7 +77,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(
-            Warning(
+            Warning.warning(
                 "8.4 - Uenig i diagnose",
                 WarningKilde.Spesialist
             )

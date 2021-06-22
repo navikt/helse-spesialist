@@ -34,13 +34,13 @@ internal class RisikoCommand(
         if (løsning.arbeidsuførhetWarning()) {
             val melding =
                 "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning.warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
         if (løsning.faresignalWarning()) {
             val melding =
                 "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning.warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
 

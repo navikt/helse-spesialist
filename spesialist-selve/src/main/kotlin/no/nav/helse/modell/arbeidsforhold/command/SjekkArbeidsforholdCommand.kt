@@ -33,7 +33,7 @@ internal class SjekkArbeidsforholdCommand(
         if (aktiveArbeidsforhold.size > 1){
             val melding = "ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig."
             log.info("Legger til warning for arbeidsforholdId på vedtaksperiode $vedtaksperiodeId")
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning.warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
         return true

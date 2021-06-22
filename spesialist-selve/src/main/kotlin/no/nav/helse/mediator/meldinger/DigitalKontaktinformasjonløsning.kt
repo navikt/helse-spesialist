@@ -26,7 +26,7 @@ internal class DigitalKontaktinformasjonløsning(
             "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform"
         warningDao.leggTilWarning(
             vedtaksperiodeId,
-            Warning(
+            Warning.warning(
                 melding,
                 WarningKilde.Spesialist
             )
