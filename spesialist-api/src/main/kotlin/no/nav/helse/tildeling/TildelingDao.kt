@@ -1,7 +1,6 @@
 package no.nav.helse.tildeling
 
 import kotliquery.Row
-import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -10,21 +9,47 @@ import java.util.*
 import javax.sql.DataSource
 
 class TildelingDao(private val dataSource: DataSource) {
+
     fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
         sessionOf(dataSource).use {
-            it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil)
+            @Language("PostgreSQL")
+            val query = """
+                INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, gyldig_til)
+                VALUES (:oppgave_id_ref, :saksbehandler_ref, :gyldig_til);
+            """.trimIndent()
+            it.run(
+                queryOf(
+                    query, mapOf(
+                        "oppgave_id_ref" to oppgaveId,
+                        "saksbehandler_ref" to saksbehandleroid,
+                        "gyldig_til" to gyldigTil
+                    )
+                ).asUpdate
+            )
         }
     }
 
     fun slettTildeling(oppgaveId: Long) {
         sessionOf(dataSource).use { session ->
-            session.slettOppgavetildeling(oppgaveId)
+            @Language("PostgreSQL")
+            val query = """
+                DELETE
+                FROM tildeling
+                WHERE oppgave_id_ref = :oppgave_id_ref;
+            """.trimIndent()
+            session.run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
         }
     }
 
     fun fjernPåVent(oppgaveId: Long) {
         sessionOf(dataSource).use { session ->
-            session.fjernPåVent(oppgaveId)
+            @Language("PostgreSQL")
+            val query = """
+                UPDATE tildeling
+                SET på_vent = false
+                WHERE oppgave_id_ref = :oppgave_id_ref;
+            """.trimIndent()
+            session.run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
         }
     }
 
@@ -42,42 +67,17 @@ class TildelingDao(private val dataSource: DataSource) {
         it.run(queryOf(query, fødselsnummer.toLong()).map(::tildelingDto).asSingle)
     }
 
-    fun tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) =
-        sessionOf(dataSource).use { it.tildelOppgave(oppgaveId, saksbehandleroid, gyldigTil) }
-
     fun leggOppgavePåVent(oppgaveId: Long) {
-        sessionOf(dataSource).use {
-            it.leggOppgavePåVent(oppgaveId)
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+                UPDATE tildeling
+                SET på_vent = true
+                WHERE oppgave_id_ref = :oppgave_id_ref;
+            """.trimIndent()
+            session.run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate
+            )
         }
-    }
-
-    private fun Session.tildelOppgave(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
-        @Language("PostgreSQL")
-        val query =
-            "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, gyldig_til) VALUES(:oppgave_id_ref, :saksbehandler_ref, :gyldig_til);"
-        run(
-            queryOf(
-                query, mapOf(
-                    "oppgave_id_ref" to oppgaveId,
-                    "saksbehandler_ref" to saksbehandleroid,
-                    "gyldig_til" to gyldigTil
-                )
-            ).asUpdate
-        )
-    }
-
-    private fun Session.slettOppgavetildeling(oppgaveId: Long) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM tildeling WHERE oppgave_id_ref=:oppgave_id_ref;"
-        run(queryOf(query, mapOf(
-            "oppgave_id_ref" to oppgaveId)).asUpdate
-        )
-    }
-
-    private fun Session.fjernPåVent(oppgaveId: Long) {
-        @Language("PostgreSQL")
-        val query = "UPDATE tildeling SET på_vent = false WHERE oppgave_id_ref=:oppgave_id_ref;"
-        run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate)
     }
 
     private fun tildelingDto(it: Row) = TildelingApiDto(
@@ -86,18 +86,6 @@ class TildelingDao(private val dataSource: DataSource) {
         oid = UUID.fromString(it.string("oid")),
         navn = it.string("navn")
     )
-
-    private fun Session.leggOppgavePåVent(oppgaveId: Long) {
-        @Language("PostgreSQL")
-        val query = "UPDATE tildeling SET på_vent = true WHERE oppgave_id_ref = :oppgave_id_ref;"
-        run(
-            queryOf(
-                query, mapOf(
-                    "oppgave_id_ref" to oppgaveId,
-                )
-            ).asUpdate
-        )
-    }
 
     fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? = sessionOf(dataSource).use {
         @Language("PostgreSQL")

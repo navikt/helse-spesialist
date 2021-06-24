@@ -124,7 +124,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         epost: String = SAKSBEHANDLEREPOST
     ) {
         saksbehandlerDao.opprettSaksbehandler(oid, navn, epost)
-        tildelingDao.tildelOppgave(oppgaveId, oid)
+        tildelingDao.opprettTildeling(oppgaveId, oid)
     }
 
     private fun assertTildeling(oppgaveId: Long, saksbehandleroid: UUID?) {
