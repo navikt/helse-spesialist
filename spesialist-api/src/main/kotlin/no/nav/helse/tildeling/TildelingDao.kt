@@ -1,6 +1,7 @@
 package no.nav.helse.tildeling
 
 import kotliquery.Row
+import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -11,22 +12,27 @@ import javax.sql.DataSource
 class TildelingDao(private val dataSource: DataSource) {
 
     fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null): Boolean {
-        return sessionOf(dataSource).use {
+        return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
                 INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, gyldig_til)
-                VALUES (:oppgave_id_ref, :saksbehandler_ref, :gyldig_til)
-                ON CONFLICT DO NOTHING;
+                VALUES (:oppgave_id_ref, :saksbehandler_ref, :gyldig_til);
             """.trimIndent()
-            it.run(
-                queryOf(
-                    query, mapOf(
-                        "oppgave_id_ref" to oppgaveId,
-                        "saksbehandler_ref" to saksbehandleroid,
-                        "gyldig_til" to gyldigTil
+            session.transaction { tx ->
+                if (tx.tildelingForOppgave(oppgaveId) != null) false
+                else {
+                    tx.run(
+                        queryOf(
+                            query, mapOf(
+                                "oppgave_id_ref" to oppgaveId,
+                                "saksbehandler_ref" to saksbehandleroid,
+                                "gyldig_til" to gyldigTil
+                            )
+                        ).asUpdate
                     )
-                ).asUpdate
-            ) == 1
+                    true
+                }
+            }
         }
     }
 
@@ -76,7 +82,8 @@ class TildelingDao(private val dataSource: DataSource) {
                 SET på_vent = true
                 WHERE oppgave_id_ref = :oppgave_id_ref;
             """.trimIndent()
-            session.run(queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate
+            session.run(
+                queryOf(query, mapOf("oppgave_id_ref" to oppgaveId)).asUpdate
             )
         }
     }
@@ -88,7 +95,10 @@ class TildelingDao(private val dataSource: DataSource) {
         navn = it.string("navn")
     )
 
-    fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? = sessionOf(dataSource).use {
+    fun tildelingForOppgave(oppgaveId: Long): TildelingApiDto? =
+        sessionOf(dataSource).use { it.tildelingForOppgave(oppgaveId) }
+
+    private fun Session.tildelingForOppgave(oppgaveId: Long): TildelingApiDto? {
         @Language("PostgreSQL")
         val query = """
             SELECT s.oid, s.epost, s.navn, t.på_vent FROM tildeling t
@@ -97,6 +107,6 @@ class TildelingDao(private val dataSource: DataSource) {
             WHERE o.id = :oppgaveId
             AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
             """
-        it.run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
+        return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
     }
 }

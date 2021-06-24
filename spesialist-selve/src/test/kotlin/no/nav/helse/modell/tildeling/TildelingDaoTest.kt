@@ -39,6 +39,32 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `kan tildele oppgave på nytt etter at gyldig_til har gått ut`() {
+        nyPerson()
+        val saksbehandlerOid = UUID.randomUUID()
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "A", "a@nav.no")
+
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusMinutes(1))
+
+        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
+
+        assertTrue(tildelingNrToSuksess)
+    }
+
+    @Test
+    fun `kan ikke tildele oppgave når gyldig_til ikke har gått ut`() {
+        nyPerson()
+        val saksbehandlerOid = UUID.randomUUID()
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "A", "a@nav.no")
+
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().plusMinutes(1))
+
+        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
+
+        assertFalse(tildelingNrToSuksess)
+    }
+
+    @Test
     fun `henter saksbehandlerepost for tildeling med fødselsnummer`() {
         nyPerson()
         tildelTilSaksbehandler()
