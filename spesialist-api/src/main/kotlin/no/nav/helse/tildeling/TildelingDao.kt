@@ -10,12 +10,13 @@ import javax.sql.DataSource
 
 class TildelingDao(private val dataSource: DataSource) {
 
-    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
-        sessionOf(dataSource).use {
+    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null): Boolean {
+        return sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val query = """
                 INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, gyldig_til)
-                VALUES (:oppgave_id_ref, :saksbehandler_ref, :gyldig_til);
+                VALUES (:oppgave_id_ref, :saksbehandler_ref, :gyldig_til)
+                ON CONFLICT DO NOTHING;
             """.trimIndent()
             it.run(
                 queryOf(
@@ -25,7 +26,7 @@ class TildelingDao(private val dataSource: DataSource) {
                         "gyldig_til" to gyldigTil
                     )
                 ).asUpdate
-            )
+            ) == 1
         }
     }
 

@@ -24,6 +24,21 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `en saksbehandler kan ikke tildele seg en oppgave som allerede er tildelt`() {
+        nyPerson()
+        val saksbehandlerOid1 = UUID.randomUUID()
+        val saksbehandlerOid2 = UUID.randomUUID()
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid1, "A", "a@nav.no")
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid2, "B", "b@nav.no")
+
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid1)
+        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid2)
+
+        assertFalse(tildelingNrToSuksess)
+        assertTildeling(oppgaveId, saksbehandlerOid1)
+    }
+
+    @Test
     fun `henter saksbehandlerepost for tildeling med fødselsnummer`() {
         nyPerson()
         tildelTilSaksbehandler()
@@ -110,11 +125,11 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     fun `finn tildeling for oppgave`() {
         nyPerson()
         tildelTilSaksbehandler()
-        val tildeling = tildelingDao.tildelingForOppgave(this.oppgaveId)
-        assertEquals(SAKSBEHANDLER_OID, tildeling?.oid)
-        assertEquals(SAKSBEHANDLEREPOST, tildeling?.epost)
-        assertEquals(SAKSBEHANDLER_NAVN, tildeling?.navn)
-        assertEquals(false, tildeling?.påVent)
+        val tildeling = tildelingDao.tildelingForOppgave(this.oppgaveId)!!
+        assertEquals(SAKSBEHANDLER_OID, tildeling.oid)
+        assertEquals(SAKSBEHANDLEREPOST, tildeling.epost)
+        assertEquals(SAKSBEHANDLER_NAVN, tildeling.navn)
+        assertEquals(false, tildeling.påVent)
     }
 
     private fun tildelTilSaksbehandler(

@@ -26,8 +26,8 @@ class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null) {
-        tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
+    fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null): Boolean {
+        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
     }
 
     private fun nyOppgave(oppgave: Oppgave) {
