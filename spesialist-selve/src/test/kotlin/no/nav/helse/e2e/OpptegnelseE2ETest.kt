@@ -103,7 +103,8 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         saksbehandlerDao.opprettSaksbehandler(
             SAKSBEHANDLER_ID,
             "Saksbehandler Saksbehandlersen",
-            "saksbehandler@nav.no"
+            "saksbehandler@nav.no",
+            "Z999999"
         )
     }
 }

@@ -328,6 +328,7 @@ internal class HendelseMediator(
                 put("begrunnelse", overstyringMessage.begrunnelse)
                 put("saksbehandlerOid", overstyringMessage.saksbehandlerOid)
                 put("saksbehandlerNavn", overstyringMessage.saksbehandlerNavn)
+                put("saksbehandlerIdent", overstyringMessage.saksbehandlerIdent)
                 put("saksbehandlerEpost", overstyringMessage.saksbehandlerEpost)
             }
         ).also {

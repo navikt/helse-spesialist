@@ -10,7 +10,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
     fun finnOverstyring(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
-            SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn FROM overstyring o
+            SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
@@ -27,6 +27,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                     begrunnelse = overstyringRow.string("begrunnelse"),
                     timestamp = overstyringRow.localDateTime("tidspunkt"),
                     saksbehandlerNavn = overstyringRow.string("navn"),
+                    saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                     overstyrteDager = it.run(
                         queryOf(
                             "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id

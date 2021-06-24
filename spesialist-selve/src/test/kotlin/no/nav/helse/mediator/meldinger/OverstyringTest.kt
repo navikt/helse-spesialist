@@ -22,6 +22,7 @@ internal class OverstyringTest {
         private const val FØDSELSNUMMER = "12020052345"
         private val OID = UUID.randomUUID()
         private const val NAVN = "Saks Behandler"
+        private const val IDENT = "Z999999"
         private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
         private const val BEGRUNNELSE = "Begrunnelse"
@@ -71,6 +72,7 @@ internal class OverstyringTest {
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
         navn = NAVN,
+        ident = IDENT,
         epost = EPOST,
         orgnummer = ORGNUMMER,
         begrunnelse = BEGRUNNELSE,
@@ -89,7 +91,7 @@ internal class OverstyringTest {
     fun `Persisterer overstyring`() {
         overstyringMessage.execute(context)
 
-        verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST) }
+        verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
         verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
         verify(exactly = 1) {
             overstyringDao.persisterOverstyring(

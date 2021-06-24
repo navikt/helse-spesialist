@@ -29,13 +29,15 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
             val saksbehandlerreferanse = UUID.fromString(accessToken.payload.getClaim("oid").asString())
             val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
             val navn = accessToken.payload.getClaim("name").asString()
+            val ident = accessToken.payload.getClaim("NAVident").asString()
 
             withContext(Dispatchers.IO) {
                 tildelingMediator.tildelOppgaveTilSaksbehandler(
                     oppgaveId,
                     saksbehandlerreferanse,
                     epostadresse,
-                    navn
+                    navn,
+                    ident
                 )
             }
             call.respond(HttpStatusCode.OK)

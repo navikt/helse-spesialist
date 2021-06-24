@@ -9,7 +9,8 @@ data class OverstyringApiDto(
     val begrunnelse: String,
     val timestamp: LocalDateTime,
     val overstyrteDager: List<OverstyrtDagApiDto>,
-    val saksbehandlerNavn: String
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String?,
 )
 
 data class OverstyrtDagApiDto(

@@ -53,7 +53,12 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             "4321098765432", personinfoRef, "0301".toInt(), utbetalingerRef
         )
 
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Sara Saksbehandler", "sara.saksbehandler@nav.no")
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_OID,
+            "Sara Saksbehandler",
+            "sara.saksbehandler@nav.no",
+            "S999999"
+        )
 
         return personRef
     }

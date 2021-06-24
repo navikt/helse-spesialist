@@ -21,8 +21,11 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling annullert oppdaterer alle snapshots på personen`() {
-        val (oid, navn, epost) = Triple(UUID.randomUUID(), "en saksbehandler", "saksbehandler_epost")
-        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost)
+        val oid= UUID.randomUUID()
+        val navn = "en saksbehandler"
+        val epost = "saksbehandler_epost"
+        val ident = "Z999999"
+        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost, ident)
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UUID.randomUUID())
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2, snapshot = snapshotV2, utbetalingId = UUID.randomUUID())
 
@@ -48,7 +51,12 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         )
 
         val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), null)
-        val saksbehandler = Saksbehandler("kevders.chilleby@nav.no", UUID.randomUUID(), "Kevders Chilleby")
+        val saksbehandler = Saksbehandler(
+            "kevders.chilleby@nav.no",
+            UUID.randomUUID(),
+            "Kevders Chilleby",
+            "Z999999"
+        )
         håndterAnnullering(annulleringDto, saksbehandler)
 
         sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")

@@ -46,6 +46,7 @@ internal class HendelseMediatorTest {
     fun `publiserer annullering på rapid`() {
         val oid = UUID.randomUUID()
         val navn = "Siri Saksbehandler"
+        val ident = "Z999999"
         mediator.håndter(
             annulleringDto = AnnulleringDto(
                 aktørId = "X999999",
@@ -55,7 +56,7 @@ internal class HendelseMediatorTest {
                 saksbehandlerIdent = "X999999",
                 begrunnelser = listOf("En", "Toten", "Tre"),
                 kommentar = "Nittedal Tistedal Elverum",
-            ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn)
+            ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn, ident)
         )
         assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals(
@@ -73,6 +74,7 @@ internal class HendelseMediatorTest {
     fun `publiserer annullering på rapid tomme verdier`() {
         val oid = UUID.randomUUID()
         val navn = "Siri Saksbehandler"
+        val ident = "Z999999"
         mediator.håndter(
             annulleringDto = AnnulleringDto(
                 aktørId = "X999999",
@@ -82,7 +84,7 @@ internal class HendelseMediatorTest {
                 saksbehandlerIdent = "X999999",
                 begrunnelser = listOf(),
                 kommentar = null
-            ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn)
+            ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn, ident)
         )
         assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals(

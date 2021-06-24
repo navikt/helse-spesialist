@@ -16,10 +16,11 @@ internal class TildelingMediator(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,
         epostadresse: String,
-        navn: String
+        navn: String,
+        ident: String
     ) {
         //TODO: Dette burde gjøres ute i mediatoren
-        saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse)
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse, ident)
 
         val suksess = hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
         if (!suksess) {
