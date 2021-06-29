@@ -400,7 +400,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         saksbehandlerOid: UUID,
-        godkjent: Boolean
+        godkjent: Boolean,
+        begrunnelser: List<String>? = null,
+        kommentar: String? = null
     ): UUID {
         hendelseMediator.håndter(
             godkjenningDTO = GodkjenningDTO(
@@ -408,8 +410,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 godkjent,
                 saksbehandlerIdent,
                 if (godkjent) null else "årsak",
-                null,
-                null
+                begrunnelser,
+                kommentar
             ),
             epost = saksbehandlerEpost,
             oid = saksbehandlerOid
@@ -566,9 +568,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertVedtaksperiodeAvvist(periodetype: String) {
+    protected fun assertVedtaksperiodeAvvist(periodetype: String, begrunnelser: List<String>? = null, kommentar: String? =  null) {
         testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
             assertEquals(periodetype, it.path("periodetype").asText() )
+            assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText) )
+            assertEquals(kommentar, it.path("kommentar")?.asText() )
         }
     }
 

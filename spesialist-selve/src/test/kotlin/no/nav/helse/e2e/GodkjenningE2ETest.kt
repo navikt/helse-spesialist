@@ -227,8 +227,18 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        val begrunnelser = listOf("Fortjener ikke penger", "Skulker sannsynligvis")
+        val kommentar = "Jeg har tatt meg litt frihet i vurderingen"
         val løsningId =
-            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, false)
+            sendSaksbehandlerløsning(
+                OPPGAVEID,
+                SAKSBEHANDLERIDENT,
+                SAKSBEHANDLEREPOST,
+                SAKSBEHANDLEROID,
+                false,
+                begrunnelser,
+                kommentar
+            )
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
@@ -246,7 +256,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(løsningId, "NY", "FERDIG")
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(false, SAKSBEHANDLERIDENT)
-        assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING")
+        assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING", begrunnelser, kommentar)
     }
 
     @Test
