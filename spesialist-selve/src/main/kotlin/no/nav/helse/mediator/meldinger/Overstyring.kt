@@ -21,6 +21,7 @@ internal class Overstyring(
     oid: UUID,
     navn: String,
     epost: String,
+    ident: String,
     orgnummer: String,
     begrunnelse: String,
     overstyrteDager: List<OverstyringDagDto>,
@@ -34,6 +35,7 @@ internal class Overstyring(
             oid = oid,
             navn = navn,
             epost = epost,
+            ident = ident,
             saksbehandlerDao = saksbehandlerDao
         ),
         ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),

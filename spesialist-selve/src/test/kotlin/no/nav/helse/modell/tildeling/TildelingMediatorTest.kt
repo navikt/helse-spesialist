@@ -34,7 +34,8 @@ internal class TildelingMediatorTest {
                 oppgaveId = 1L,
                 saksbehandlerreferanse = eksisterendeTildeling.oid,
                 epostadresse = eksisterendeTildeling.epost,
-                navn = "navn"
+                navn = "navn",
+                ident = "Z999999"
             )
         }
     }

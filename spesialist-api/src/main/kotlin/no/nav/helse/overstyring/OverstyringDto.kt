@@ -13,6 +13,7 @@ data class OverstyringDto(
     val begrunnelse: String,
     val timestamp: LocalDateTime,
     val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String?,
     val overstyrteDager: List<OverstyringDagDto>
 )
 

@@ -10,19 +10,21 @@ class SaksbehandlerDao(private val dataSource: DataSource) {
     fun opprettSaksbehandler(
         oid: UUID,
         navn: String,
-        epost: String
+        epost: String,
+        ident: String,
     ) = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val opprettSaksbehandlerQuery = """
-            INSERT INTO saksbehandler(oid, navn, epost) VALUES (:oid, :navn, :epost)
+            INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)
             ON CONFLICT (oid)
-                DO UPDATE SET navn = :navn, epost = :epost
-                WHERE (saksbehandler.navn, saksbehandler.epost) IS DISTINCT FROM (excluded.navn, excluded.epost)
+                DO UPDATE SET navn = :navn, epost = :epost, ident = :ident
+                WHERE (saksbehandler.navn, saksbehandler.epost, saksbehandler.ident) IS DISTINCT FROM
+                    (excluded.navn, excluded.epost, excluded.ident)
         """
         it.run(
             queryOf(
                 opprettSaksbehandlerQuery,
-                mapOf<String, Any>("oid" to oid, "navn" to navn, "epost" to epost
+                mapOf<String, Any>("oid" to oid, "navn" to navn, "epost" to epost, "ident" to ident
                 )
             ).asUpdate
         )
@@ -35,7 +37,8 @@ class SaksbehandlerDao(private val dataSource: DataSource) {
             SaksbehandlerDto(
                 oid = oid,
                 navn = row.string("navn"),
-                epost = row.string("epost")
+                epost = row.string("epost"),
+                ident = row.string("ident"),
             )
         }.asSingle)
     }
@@ -47,7 +50,8 @@ class SaksbehandlerDao(private val dataSource: DataSource) {
             SaksbehandlerDto(
                 oid = UUID.fromString(row.string("oid")),
                 navn = row.string("navn"),
-                epost = row.string("epost")
+                epost = row.string("epost"),
+                ident = row.string("ident")
             )
         }.asSingle)
     }

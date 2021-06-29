@@ -102,11 +102,13 @@ internal fun Route.vedtaksperiodeApi(
         val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
         val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
         val saksbehandlerNavn = accessToken.payload.getClaim("name").asString()
+        val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
 
         val message = OverstyringRestDto(
             saksbehandlerEpost = epostadresse,
             saksbehandlerOid = oid,
             saksbehandlerNavn = saksbehandlerNavn,
+            saksbehandlerIdent = saksbehandlerIdent,
             organisasjonsnummer = overstyring.organisasjonsnummer,
             fødselsnummer = overstyring.fødselsnummer,
             aktørId = overstyring.aktørId,
@@ -139,6 +141,7 @@ data class OverstyringRestDto(
     val saksbehandlerEpost: String,
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String,
     val organisasjonsnummer: String,
     val fødselsnummer: String,
     val aktørId: String,

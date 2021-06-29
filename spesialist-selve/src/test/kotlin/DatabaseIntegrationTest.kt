@@ -73,6 +73,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal const val SAKSBEHANDLEREPOST = "sara.saksbehandler@nav.no"
         internal const val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
+        internal const val SAKSBEHANDLER_IDENT = "Z999999"
     }
 
     internal var personId: Long = -1
@@ -191,9 +192,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettSaksbehandler(
         saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
         navn: String = "SAKSBEHANDLER SAKSBEHANDLERSEN",
-        epost: String = "epost@nav.no"
+        epost: String = "epost@nav.no",
+        ident: String = "Z999999",
     ) {
-        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOID, navn, epost)
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOID, navn, epost, ident)
     }
 
     protected fun opprettArbeidsgiver(

@@ -58,7 +58,7 @@ internal class TildelingApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, SAKSBEHANDLER_OID, any(), any())
+            tildelingMediator.tildelOppgaveTilSaksbehandler(oppgavereferanse, SAKSBEHANDLER_OID, any(), any(), any())
         }
     }
 
@@ -83,7 +83,7 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `Gir feil hvis bruker forsøker å tildele en oppgave som allerede er tildelt`() {
         val tildeltFeil = OppgaveAlleredeTildelt(TildelingApiDto(epost = "annenSaksbehandler@nav.no", oid = UUID.randomUUID(), påVent = false, navn = "en annen saksbehandler"))
-        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any()) } throws tildeltFeil
+        every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any(), any()) } throws tildeltFeil
         val oppgavereferanse = nextLong()
         val response = runBlocking {
             client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {

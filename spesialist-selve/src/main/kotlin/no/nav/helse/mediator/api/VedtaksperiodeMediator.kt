@@ -107,6 +107,7 @@ internal class VedtaksperiodeMediator(
                             begrunnelse = overstyring.begrunnelse,
                             timestamp = overstyring.timestamp,
                             saksbehandlerNavn = overstyring.saksbehandlerNavn,
+                            saksbehandlerIdent = overstyring.saksbehandlerIdent,
                             overstyrteDager = overstyring.overstyrteDager.map { dag ->
                                 OverstyrtDagApiDto(
                                     dato = dag.dato,

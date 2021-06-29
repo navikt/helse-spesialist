@@ -527,7 +527,12 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `reserverer person ved godkjenning av oppgave`() {
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLEROID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLEROID,
+            "Navn Navnesen",
+            SAKSBEHANDLEREPOST,
+            SAKSBEHANDLERIDENT
+        )
 
         every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)

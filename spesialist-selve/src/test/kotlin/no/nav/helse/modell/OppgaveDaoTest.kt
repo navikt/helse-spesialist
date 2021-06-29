@@ -178,7 +178,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner oppgaver med tildeling`() {
         nyPerson()
         assertEquals(null, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST)
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
         assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
         assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)

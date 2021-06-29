@@ -22,6 +22,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val AKTØR_ID = "100000234234"
         private val OID = UUID.randomUUID()
         private const val SAKSBEHANDLER_NAVN = "Saks Behandler"
+        private const val SAKSBEHANDLER_IDENT = "Z999999"
         private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
         private const val BEGRUNNELSE = "Begrunnelse"
@@ -36,7 +37,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Finner opprettede overstyringer`() {
-        saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST)
+        saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ARBEIDSGIVER_NAVN, BRANSJER)
         val navn_ref = personDao.insertPersoninfo(PERSON_FORNAVN, null, PERSON_ETTERNAVN, PERSON_FØDSELSDATO, PERSON_KJØNN)
         val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
@@ -50,6 +51,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager)
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
     }
 
 }

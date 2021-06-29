@@ -9,6 +9,7 @@ internal class OpprettSaksbehandlerCommand(
     val oid: UUID,
     val navn: String,
     val epost: String,
+    val ident: String,
     val saksbehandlerDao: SaksbehandlerDao
 ) : Command {
     private companion object {
@@ -16,7 +17,7 @@ internal class OpprettSaksbehandlerCommand(
     }
     override fun execute(context: CommandContext): Boolean {
         logg.info("Lagrer saksbehandlerinformasjon for saksbehandler med {}", keyValue("oid", oid))
-        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost)
+        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost, ident)
         return true
     }
 }

@@ -420,6 +420,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     fun `saksbehandleroid på snapshot`() {
         val saksbehandlerOid = UUID.randomUUID()
         val saksbehandlerEpost = "saksbehandler@nav.no"
+        val saksbehandlerIdent = "Z999999"
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -428,7 +429,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendDigitalKontaktinformasjonløsning(godkjenningsmeldingId, true)
         sendÅpneGosysOppgaverløsning(godkjenningsmeldingId)
         sendRisikovurderingløsning(godkjenningsmeldingId, VEDTAKSPERIODE_ID, funn = funn, kanGodkjennesAutomatisk = false)
-        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Navn Navnesen", saksbehandlerEpost)
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Navn Navnesen", saksbehandlerEpost, saksbehandlerIdent)
         tildelingDao.opprettTildeling(testRapid.inspektør.oppgaveId(), saksbehandlerOid)
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
 

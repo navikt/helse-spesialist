@@ -67,6 +67,7 @@ internal interface IHendelsefabrikk {
         fødselsnummer: String,
         oid: UUID,
         navn: String,
+        ident: String,
         epost: String,
         orgnummer: String,
         begrunnelse: String,
