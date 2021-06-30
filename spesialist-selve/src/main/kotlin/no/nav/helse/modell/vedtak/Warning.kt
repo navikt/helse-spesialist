@@ -4,31 +4,21 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.person.SnapshotDto
 import java.util.*
 
-internal sealed class Warning (
-    private val melding: String,
-    private val kilde: WarningKilde
-) {
+internal class EmptyWarning internal constructor(private val kilde: WarningKilde): Warning("", kilde) {
+    override fun equals(other: Any?): Boolean = other is EmptyWarning && this.kilde == other.kilde
+    override fun hashCode(): Int = kilde.hashCode()
+}
+internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning(melding, kilde) {
+    override fun lagre(warningDao: WarningDao, vedtakRef: Long) = warningDao.leggTilWarning(vedtakRef, melding, kilde)
+    override fun equals(other: Any?) = other is ActualWarning && this.kilde == other.kilde && this.melding == other.melding
+    override fun hashCode(): Int  = 31 * melding.hashCode() + kilde.hashCode()
+}
+internal sealed class Warning(private val melding: String, private val kilde: WarningKilde) {
     internal companion object {
-        internal class EmptyWarning(private val kilde: WarningKilde): Warning("", kilde) {
-            override fun equals(other: Any?): Boolean = other is EmptyWarning && this.kilde == other.kilde
-            override fun hashCode(): Int = kilde.hashCode()
-        }
-        internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning(melding, kilde) {
-            override fun lagre(warningDao: WarningDao, vedtakRef: Long) {
-                if (melding.isBlank()) return
-                warningDao.leggTilWarning(vedtakRef, melding, kilde)
-            }
-            override fun equals(other: Any?) = other is ActualWarning && this.kilde == other.kilde && this.melding == other.melding
-            override fun hashCode(): Int  = 31 * melding.hashCode() + kilde.hashCode()
-        }
-
         fun meldinger(warnings: List<Warning>) = warnings.map { it.melding }
+        fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) = warnings.forEach { it.lagre(warningDao, vedtakRef) }
 
-        fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) {
-            warnings.forEach { it.lagre(warningDao, vedtakRef) }
-        }
         internal fun warning(melding: String, kilde: WarningKilde) = if (melding.isBlank()) EmptyWarning(kilde) else ActualWarning(melding, kilde)
-
         internal fun warnings(vedtaksperiodeId: UUID, snapshot: SnapshotDto) =
             snapshot.arbeidsgivere
                 .flatMap { it.vedtaksperioder }
@@ -39,7 +29,7 @@ internal sealed class Warning (
                 .map { ActualWarning(it["melding"].asText(), WarningKilde.Spleis) }
     }
 
-    internal open fun lagre(warningDao: WarningDao, vedtakRef: Long) {}
+    internal open fun lagre(warningDao: WarningDao, vedtakRef: Long): Any = Unit
     internal fun dto() = WarningDto(melding, kilde)
 }
 
