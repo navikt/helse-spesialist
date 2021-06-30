@@ -4,18 +4,18 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.person.SnapshotDto
 import java.util.*
 
-internal class EmptyWarning internal constructor(private val kilde: WarningKilde): Warning("", kilde) {
+internal class EmptyWarning internal constructor(private val kilde: WarningKilde): Warning("") {
     override fun equals(other: Any?): Boolean = other is EmptyWarning && this.kilde == other.kilde
     override fun hashCode(): Int = kilde.hashCode()
 }
-internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning(melding, kilde) {
+internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning(melding) {
     override fun lagre(warningDao: WarningDao, vedtakRef: Long) = warningDao.leggTilWarning(vedtakRef, melding, kilde)
     internal fun dto() = WarningDto(melding, kilde)
     override fun equals(other: Any?) = other is ActualWarning && this.kilde == other.kilde && this.melding == other.melding
     override fun hashCode(): Int  = 31 * melding.hashCode() + kilde.hashCode()
 }
 
-internal sealed class Warning(private val melding: String, private val kilde: WarningKilde) {
+internal sealed class Warning(private val melding: String) {
     internal companion object {
         fun meldinger(warnings: List<Warning>) = warnings.map { it.melding }
         fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) = warnings.forEach { it.lagre(warningDao, vedtakRef) }
