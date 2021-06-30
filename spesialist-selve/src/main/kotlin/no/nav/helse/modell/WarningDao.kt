@@ -40,7 +40,7 @@ internal class WarningDao(private val dataSource: DataSource) {
 
     internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: Warning) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
-        warning.lagre(this, vedtakRef)
+        when(warning) { is ActualWarning -> warning.lagre(this, vedtakRef) }
     }
 
     internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = sessionOf(dataSource).use  { session ->
