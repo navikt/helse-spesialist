@@ -13,11 +13,12 @@ internal class ActualWarning internal constructor(private val melding: String, p
     internal fun dto() = WarningDto(melding, kilde)
     override fun equals(other: Any?) = other is ActualWarning && this.kilde == other.kilde && this.melding == other.melding
     override fun hashCode(): Int  = 31 * melding.hashCode() + kilde.hashCode()
+    override fun toString(): String = melding
 }
 
 internal sealed class Warning(private val melding: String) {
     internal companion object {
-        fun meldinger(warnings: List<Warning>) = warnings.map { it.melding }
+        fun meldinger(warnings: List<Warning>) = warnings.filter { it is ActualWarning}.map { it.toString() }
         fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) = warnings.forEach { it.lagre(warningDao, vedtakRef) }
         internal fun warning(melding: String, kilde: WarningKilde) = if (melding.isBlank()) EmptyWarning(kilde) else ActualWarning(melding, kilde)
         internal fun warnings(vedtaksperiodeId: UUID, snapshot: SnapshotDto) =
