@@ -12,6 +12,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtak.ActualWarning
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -80,7 +81,7 @@ internal class AutomatiseringTest {
             Warning.warning(
                 "8.4 - Uenig i diagnose",
                 WarningKilde.Spesialist
-            )
+            ) as ActualWarning
         )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
         verify { automatiseringDaoMock.manuellSaksbehandling(any(), any(), any(), any()) }

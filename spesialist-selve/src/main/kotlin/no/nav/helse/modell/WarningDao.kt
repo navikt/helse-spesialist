@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.vedtak.ActualWarning
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.intellij.lang.annotations.Language
@@ -48,11 +49,14 @@ internal class WarningDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, melding, kilde.name, vedtakRef).asUpdate)
     }
 
-    internal fun finnWarnings(vedtaksperiodeId: UUID): List<Warning> = sessionOf(dataSource).use { session ->
+    internal fun finnWarnings(vedtaksperiodeId: UUID): List<ActualWarning> = sessionOf(dataSource).use { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
-        session.run(queryOf(statement, vedtakRef).map { Warning.warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+        session.run(queryOf(statement, vedtakRef)
+            .map { Warning.warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+            .filter { it is ActualWarning }
+            .map { it as ActualWarning }
     }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
