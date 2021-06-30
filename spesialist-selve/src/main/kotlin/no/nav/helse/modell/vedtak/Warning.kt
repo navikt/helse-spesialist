@@ -10,14 +10,15 @@ internal class EmptyWarning internal constructor(private val kilde: WarningKilde
 }
 internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning(melding, kilde) {
     override fun lagre(warningDao: WarningDao, vedtakRef: Long) = warningDao.leggTilWarning(vedtakRef, melding, kilde)
+    internal fun dto() = WarningDto(melding, kilde)
     override fun equals(other: Any?) = other is ActualWarning && this.kilde == other.kilde && this.melding == other.melding
     override fun hashCode(): Int  = 31 * melding.hashCode() + kilde.hashCode()
 }
+
 internal sealed class Warning(private val melding: String, private val kilde: WarningKilde) {
     internal companion object {
         fun meldinger(warnings: List<Warning>) = warnings.map { it.melding }
         fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) = warnings.forEach { it.lagre(warningDao, vedtakRef) }
-
         internal fun warning(melding: String, kilde: WarningKilde) = if (melding.isBlank()) EmptyWarning(kilde) else ActualWarning(melding, kilde)
         internal fun warnings(vedtaksperiodeId: UUID, snapshot: SnapshotDto) =
             snapshot.arbeidsgivere
@@ -28,9 +29,7 @@ internal sealed class Warning(private val melding: String, private val kilde: Wa
                 .filter { it["alvorlighetsgrad"].asText() == "W" }
                 .map { ActualWarning(it["melding"].asText(), WarningKilde.Spleis) }
     }
-
     internal open fun lagre(warningDao: WarningDao, vedtakRef: Long): Any = Unit
-    internal fun dto() = WarningDto(melding, kilde)
 }
 
 enum class WarningKilde { Spesialist, Spleis }
