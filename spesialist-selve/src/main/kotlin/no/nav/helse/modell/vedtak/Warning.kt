@@ -4,11 +4,8 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.person.SnapshotDto
 import java.util.*
 
-internal class EmptyWarning internal constructor(private val kilde: WarningKilde): Warning("") {
-    override fun equals(other: Any?): Boolean = other is EmptyWarning && this.kilde == other.kilde
-    override fun hashCode(): Int = kilde.hashCode()
-}
-internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning(melding) {
+internal object EmptyWarning: Warning()
+internal class ActualWarning internal constructor(private val melding: String, private val kilde: WarningKilde): Warning() {
     override fun lagre(warningDao: WarningDao, vedtakRef: Long) = warningDao.leggTilWarning(vedtakRef, melding, kilde)
     internal fun dto() = WarningDto(melding, kilde)
     override fun equals(other: Any?) = other is ActualWarning && this.kilde == other.kilde && this.melding == other.melding
@@ -16,11 +13,11 @@ internal class ActualWarning internal constructor(private val melding: String, p
     override fun toString(): String = melding
 }
 
-internal sealed class Warning(private val melding: String) {
+internal sealed class Warning {
     internal companion object {
         fun meldinger(warnings: List<Warning>) = warnings.filter { it is ActualWarning}.map { it.toString() }
         fun lagre(warningDao: WarningDao, warnings: List<Warning>, vedtakRef: Long) = warnings.forEach { it.lagre(warningDao, vedtakRef) }
-        internal fun warning(melding: String, kilde: WarningKilde) = if (melding.isBlank()) EmptyWarning(kilde) else ActualWarning(melding, kilde)
+        internal fun warning(melding: String, kilde: WarningKilde) = if (melding.isBlank()) EmptyWarning else ActualWarning(melding, kilde)
         internal fun warnings(vedtaksperiodeId: UUID, snapshot: SnapshotDto) =
             snapshot.arbeidsgivere
                 .flatMap { it.vedtaksperioder }
