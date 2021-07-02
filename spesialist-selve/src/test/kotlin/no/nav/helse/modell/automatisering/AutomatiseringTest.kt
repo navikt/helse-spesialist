@@ -14,6 +14,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.ActualWarning
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -78,7 +79,7 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(
-            Warning.warning(
+            warning(
                 "8.4 - Uenig i diagnose",
                 WarningKilde.Spesialist
             ) as ActualWarning

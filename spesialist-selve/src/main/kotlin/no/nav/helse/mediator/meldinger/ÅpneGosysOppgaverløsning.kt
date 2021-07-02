@@ -5,6 +5,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.warningteller
@@ -34,7 +35,7 @@ internal class ÅpneGosysOppgaverløsning(
             val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
             warningDao.leggTilWarning(
                 vedtaksperiodeId,
-                Warning.warning(melding, WarningKilde.Spesialist)
+                warning(melding, WarningKilde.Spesialist)
             )
             warningteller.labels("WARN", melding).inc()
         }
@@ -43,7 +44,7 @@ internal class ÅpneGosysOppgaverløsning(
             val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
             warningDao.leggTilWarning(
                 vedtaksperiodeId,
-                Warning.warning(melding, WarningKilde.Spesialist)
+                warning(melding, WarningKilde.Spesialist)
             )
             warningteller.labels("WARN", melding).inc()
         }

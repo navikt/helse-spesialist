@@ -4,6 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtak.ActualWarning
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.intellij.lang.annotations.Language
 import java.util.*
@@ -54,7 +55,7 @@ internal class WarningDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
         session.run(queryOf(statement, vedtakRef)
-            .map { Warning.warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+            .map { warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
             .filter { it is ActualWarning }
             .map { it as ActualWarning }
     }

@@ -7,6 +7,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.warningteller
 import java.util.*
@@ -34,13 +35,13 @@ internal class RisikoCommand(
         if (løsning.arbeidsuførhetWarning()) {
             val melding =
                 "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning.warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
         if (løsning.faresignalWarning()) {
             val melding =
                 "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning.warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
 

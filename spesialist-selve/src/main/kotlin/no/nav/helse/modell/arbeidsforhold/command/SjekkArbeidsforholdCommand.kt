@@ -5,6 +5,7 @@ import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.warningteller
@@ -33,7 +34,7 @@ internal class SjekkArbeidsforholdCommand(
         if (aktiveArbeidsforhold.size > 1){
             val melding = "ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Flere arbeidsforhold støttes ikke av systemet foreløpig."
             log.info("Legger til warning for arbeidsforholdId på vedtaksperiode $vedtaksperiodeId")
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning.warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(vedtaksperiodeId, warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
         return true
