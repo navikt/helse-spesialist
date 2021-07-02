@@ -10,14 +10,14 @@ internal class WarningTest {
 
     @Test
     fun `tomme advarsler er en egen, no-op type`() {
-        assertTrue { warning("", WarningKilde.Spleis) is EmptyWarning }
-        assertTrue { warning("     ", WarningKilde.Spleis) is EmptyWarning }
-        assertTrue { warning("\t", WarningKilde.Spleis) is EmptyWarning }
-        assertTrue { warning("\n", WarningKilde.Spleis) is EmptyWarning }
-        assertTrue { warning("\r\n", WarningKilde.Spleis) is EmptyWarning }
-        assertTrue { warning("${Typography.nbsp}", WarningKilde.Spleis) is EmptyWarning }
-        assertTrue { warning("\r\n.\t", WarningKilde.Spleis) is ActualWarning }
-        assertTrue { warning("Warning", WarningKilde.Spleis) is ActualWarning }
+        assertTrue { warning("", WarningKilde.Spleis) is NotAWarning }
+        assertTrue { warning("     ", WarningKilde.Spleis) is NotAWarning }
+        assertTrue { warning("\t", WarningKilde.Spleis) is NotAWarning }
+        assertTrue { warning("\n", WarningKilde.Spleis) is NotAWarning }
+        assertTrue { warning("\r\n", WarningKilde.Spleis) is NotAWarning }
+        assertTrue { warning("${Typography.nbsp}", WarningKilde.Spleis) is NotAWarning }
+        assertTrue { warning("\r\n.\t", WarningKilde.Spleis) is Warning }
+        assertTrue { warning("Warning", WarningKilde.Spleis) is Warning }
     }
 
     @Test

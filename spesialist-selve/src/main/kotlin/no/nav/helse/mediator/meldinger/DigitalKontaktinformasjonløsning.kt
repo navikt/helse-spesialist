@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
-import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.*

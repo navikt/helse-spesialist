@@ -2,8 +2,8 @@ package no.nav.helse.modell
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.vedtak.ActualWarning
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.MaybeWarning
 import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.intellij.lang.annotations.Language
@@ -11,7 +11,7 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class WarningDao(private val dataSource: DataSource) {
-    internal fun leggTilWarnings(vedtaksperiodeId: UUID, warnings: List<Warning>) {
+    internal fun leggTilWarnings(vedtaksperiodeId: UUID, warnings: List<MaybeWarning>) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
         Warning.lagre(this, warnings, vedtakRef)
     }
@@ -33,15 +33,15 @@ internal class WarningDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<Warning>) {
+    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<MaybeWarning>) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
         fjernWarnings(vedtakRef, WarningKilde.Spleis)
         Warning.lagre(this, warnings, vedtakRef)
     }
 
-    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: Warning) {
+    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: MaybeWarning) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
-        when(warning) { is ActualWarning -> warning.lagre(this, vedtakRef) }
+        when(warning) { is Warning -> warning.lagre(this, vedtakRef) }
     }
 
     internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = sessionOf(dataSource).use  { session ->
@@ -50,14 +50,14 @@ internal class WarningDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, melding, kilde.name, vedtakRef).asUpdate)
     }
 
-    internal fun finnWarnings(vedtaksperiodeId: UUID): List<ActualWarning> = sessionOf(dataSource).use { session ->
+    internal fun finnWarnings(vedtaksperiodeId: UUID): List<Warning> = sessionOf(dataSource).use { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
         session.run(queryOf(statement, vedtakRef)
             .map { warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
-            .filter { it is ActualWarning }
-            .map { it as ActualWarning }
+            .filter { it is Warning }
+            .map { it as Warning }
     }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->

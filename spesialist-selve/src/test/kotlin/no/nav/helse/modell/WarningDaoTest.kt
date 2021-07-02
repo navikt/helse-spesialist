@@ -1,7 +1,7 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
-import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.MaybeWarning
 import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,7 +45,7 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         assertWarnings((listOf(spesialistWarning) + testwarnings2), warningDao.finnWarnings(VEDTAKSPERIODE))
     }
 
-    private fun assertWarnings(expected: List<Warning>, result: List<Warning>) {
+    private fun assertWarnings(expected: List<MaybeWarning>, result: List<MaybeWarning>) {
         assertEquals(expected.size, result.size)
         assertEquals(expected, result)
     }
