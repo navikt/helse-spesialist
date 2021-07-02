@@ -56,7 +56,6 @@ internal class HendelseMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private var shutdown = false
     private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
 
     init {
@@ -377,10 +376,6 @@ internal class HendelseMediator(
             ).toJson()
         )
         sikkerLogg.info("Publiserte event for å be om siste versjon av person: ${oppdaterPersonsnapshotDto.fødselsnummer}")
-    }
-
-    fun shutdown() {
-        shutdown = true
     }
 
     private fun forbered() {

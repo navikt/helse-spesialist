@@ -275,11 +275,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     }
 
     fun start() = rapidsConnection.start()
-    fun stop() = rapidsConnection.stop()
-
-    override fun onShutdown(rapidsConnection: RapidsConnection) {
-        hendelseMediator.shutdown()
-    }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
