@@ -1,7 +1,9 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import no.nav.helse.modell.vedtak.MaybeWarning
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -12,8 +14,8 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        val testwarnings= listOf(Warning("Warning A", WarningKilde.Spleis), Warning("Warning B", WarningKilde.Spleis))
-        val testwarning = Warning("Warning C", WarningKilde.Spesialist)
+        val testwarnings= listOf(warning("Warning A", WarningKilde.Spleis), warning("Warning B", WarningKilde.Spleis)).filterIsInstance<Warning>()
+        val testwarning = warning("Warning C", WarningKilde.Spesialist) as Warning
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
         warningDao.leggTilWarning(VEDTAKSPERIODE, testwarning)
         assertWarnings(testwarnings + listOf(testwarning), warningDao.finnWarnings(VEDTAKSPERIODE))
@@ -24,9 +26,9 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        val testwarnings1= listOf(Warning("Warning A", WarningKilde.Spleis), Warning("Warning B", WarningKilde.Spleis))
+        val testwarnings1= listOf(warning("Warning A", WarningKilde.Spleis), warning("Warning B", WarningKilde.Spleis)).filterIsInstance<Warning>()
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
-        val testwarnings2= listOf(Warning("Warning C", WarningKilde.Spleis), Warning("Warning D", WarningKilde.Spleis))
+        val testwarnings2= listOf(warning("Warning C", WarningKilde.Spleis), warning("Warning D", WarningKilde.Spleis)).filterIsInstance<Warning>()
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings2)
         assertWarnings(testwarnings1 + testwarnings2, warningDao.finnWarnings(VEDTAKSPERIODE))
     }
@@ -36,15 +38,15 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        val spesialistWarning = Warning("Warning B", WarningKilde.Spesialist)
-        val testwarnings1= listOf(Warning("Warning A", WarningKilde.Spleis), spesialistWarning)
+        val spesialistWarning = warning("Warning B", WarningKilde.Spesialist)
+        val testwarnings1= listOf(warning("Warning A", WarningKilde.Spleis), spesialistWarning).filterIsInstance<Warning>()
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings1)
-        val testwarnings2= listOf(Warning("Warning C", WarningKilde.Spleis), Warning("Warning D", WarningKilde.Spleis))
+        val testwarnings2= listOf(warning("Warning C", WarningKilde.Spleis), warning("Warning D", WarningKilde.Spleis)).filterIsInstance<Warning>()
         warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, testwarnings2)
         assertWarnings((listOf(spesialistWarning) + testwarnings2), warningDao.finnWarnings(VEDTAKSPERIODE))
     }
 
-    private fun assertWarnings(expected: List<Warning>, result: List<Warning>) {
+    private fun assertWarnings(expected: List<MaybeWarning>, result: List<MaybeWarning>) {
         assertEquals(expected.size, result.size)
         assertEquals(expected, result)
     }

@@ -8,6 +8,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,10 +66,10 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
-        val forventetWarning = Warning(
+        val forventetWarning = warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist
-        )
+        ) as Warning
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
@@ -77,10 +78,10 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
-        val forventetWarning = Warning(
+        val forventetWarning = warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist
-        )
+        ) as Warning
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }

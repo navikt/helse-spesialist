@@ -8,6 +8,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,10 +67,10 @@ internal class DigitalKontaktinformasjonCommandTest {
 
     @Test
     fun `Lagrer warning ved analog person`() {
-        val forventetWarning = Warning(
+        val forventetWarning = warning(
             melding = "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
             kilde = WarningKilde.Spesialist
-        )
+        ) as Warning
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.lagre(any(), any(), any()) }

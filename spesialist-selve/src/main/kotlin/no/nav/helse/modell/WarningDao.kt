@@ -3,6 +3,8 @@ package no.nav.helse.modell
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.MaybeWarning
+import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.intellij.lang.annotations.Language
 import java.util.*
@@ -52,7 +54,10 @@ internal class WarningDao(private val dataSource: DataSource) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
-        session.run(queryOf(statement, vedtakRef).map { Warning( melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+        session.run(queryOf(statement, vedtakRef)
+            .map { warning(melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+            .filter { it is Warning }
+            .map { it as Warning }
     }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
