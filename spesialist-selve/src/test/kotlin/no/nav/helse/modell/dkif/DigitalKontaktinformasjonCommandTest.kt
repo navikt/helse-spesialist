@@ -70,7 +70,7 @@ internal class DigitalKontaktinformasjonCommandTest {
         val forventetWarning = warning(
             melding = "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
             kilde = WarningKilde.Spesialist
-        )
+        ) as Warning
         context.add(DigitalKontaktinformasjonløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.lagre(any(), any(), any()) }

@@ -5,6 +5,7 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.Warning.Companion.warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.BeforeEach
@@ -36,5 +37,5 @@ internal class PersisterAdvarslerCommandTest {
         }
     }
 
-    private fun List<String>.somWarnings() = map { warning(it, WarningKilde.Spleis) }
+    private fun List<String>.somWarnings() = map { warning(it, WarningKilde.Spleis) }.filterIsInstance<Warning>()
 }

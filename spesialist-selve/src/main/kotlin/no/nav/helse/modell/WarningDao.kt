@@ -11,7 +11,7 @@ import java.util.*
 import javax.sql.DataSource
 
 internal class WarningDao(private val dataSource: DataSource) {
-    internal fun leggTilWarnings(vedtaksperiodeId: UUID, warnings: List<MaybeWarning>) {
+    internal fun leggTilWarnings(vedtaksperiodeId: UUID, warnings: List<Warning>) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
         Warning.lagre(this, warnings, vedtakRef)
     }
@@ -33,15 +33,15 @@ internal class WarningDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<MaybeWarning>) {
+    internal fun oppdaterSpleisWarnings(vedtaksperiodeId: UUID, warnings: List<Warning>) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
         fjernWarnings(vedtakRef, WarningKilde.Spleis)
         Warning.lagre(this, warnings, vedtakRef)
     }
 
-    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: MaybeWarning) {
+    internal fun leggTilWarning(vedtaksperiodeId: UUID, warning: Warning) {
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return
-        when(warning) { is Warning -> warning.lagre(this, vedtakRef) }
+        warning.lagre(this, vedtakRef)
     }
 
     internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = sessionOf(dataSource).use  { session ->
