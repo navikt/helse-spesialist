@@ -4,10 +4,9 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
-import no.nav.helse.modell.vedtak.Warning.Companion.warning
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.*
-import no.nav.helse.warningteller
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -31,21 +30,11 @@ internal class ÅpneGosysOppgaverløsning(
 
     internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
         if (oppslagFeilet) {
-            val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
-            warningDao.leggTilWarning(
-                vedtaksperiodeId,
-                warning(melding, WarningKilde.Spesialist)
-            )
-            warningteller.labels("WARN", melding).inc()
+            Warning.leggTilAdvarsel("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", vedtaksperiodeId, WarningKilde.Spesialist, warningDao)
         }
 
         antall?.takeIf { it > 0 }?.also {
-            val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
-            warningDao.leggTilWarning(
-                vedtaksperiodeId,
-                warning(melding, WarningKilde.Spesialist)
-            )
-            warningteller.labels("WARN", melding).inc()
+            Warning.leggTilAdvarsel("Det finnes åpne oppgaver på sykepenger i Gosys", vedtaksperiodeId, WarningKilde.Spesialist, warningDao)
         }
     }
 

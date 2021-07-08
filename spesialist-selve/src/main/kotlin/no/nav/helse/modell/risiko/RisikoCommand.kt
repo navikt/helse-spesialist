@@ -6,9 +6,8 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtak.Warning.Companion.warning
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.warningteller
 import java.util.*
 
 internal class RisikoCommand(
@@ -32,16 +31,16 @@ internal class RisikoCommand(
         val løsning = context.get<Risikovurderingløsning>() ?: return false
         løsning.lagre(risikovurderingDao, vedtaksperiodeId)
         if (løsning.arbeidsuførhetWarning()) {
-            val melding =
-                "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
-            warningDao.leggTilWarning(vedtaksperiodeId, warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
+            Warning.leggTilAdvarsel(
+                "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden.",
+                vedtaksperiodeId, WarningKilde.Spesialist, warningDao
+            )
         }
         if (løsning.faresignalWarning()) {
-            val melding =
-                "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
-            warningDao.leggTilWarning(vedtaksperiodeId, warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
+            Warning.leggTilAdvarsel(
+                "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger.",
+                vedtaksperiodeId, WarningKilde.Spesialist, warningDao
+            )
         }
 
         return aktiveVedtaksperioder.alleHarRisikovurdering(risikovurderingDao)

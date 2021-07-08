@@ -3,10 +3,9 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
-import no.nav.helse.modell.vedtak.Warning.Companion.warning
+import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.*
-import no.nav.helse.warningteller
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -22,16 +21,12 @@ internal class DigitalKontaktinformasjonløsning(
 
     internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
         if (erDigital) return
-        val melding =
-            "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform"
-        warningDao.leggTilWarning(
+        Warning.leggTilAdvarsel(
+            "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
             vedtaksperiodeId,
-            warning(
-                melding,
-                WarningKilde.Spesialist
-            )
+            WarningKilde.Spesialist,
+            warningDao
         )
-        warningteller.labels("WARN", melding).inc()
     }
 
     internal class DigitalKontaktinformasjonRiver(

@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtak
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.person.SnapshotDto
+import no.nav.helse.warningteller
 import java.util.*
 
 internal sealed class MaybeWarning
@@ -14,6 +15,14 @@ internal class Warning internal constructor(private val melding: String, private
     override fun hashCode(): Int  = 31 * melding.hashCode() + kilde.hashCode()
     override fun toString(): String = melding
     companion object {
+        internal fun leggTilAdvarsel(tekst: String, vedtaksperiodeId: UUID, kilde: WarningKilde, dao: WarningDao) {
+            when(val w = warning(tekst, kilde)) {
+                is Warning -> {
+                    dao.leggTilWarning(vedtaksperiodeId, w)
+                    warningteller.labels("WARN", tekst).inc()
+                }
+            }
+        }
         internal fun warning(melding: String, kilde: WarningKilde) = if (melding.isBlank()) NotAWarning else Warning(melding, kilde)
         fun meldinger(warnings: List<MaybeWarning>) = warnings.filterIsInstance<Warning>().map { it.toString() }
         fun lagre(warningDao: WarningDao, warnings: List<MaybeWarning>, vedtakRef: Long) = warnings.forEach { when(it) { is Warning -> it.lagre(warningDao, vedtakRef) } }
