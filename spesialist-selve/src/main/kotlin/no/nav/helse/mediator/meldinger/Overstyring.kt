@@ -15,6 +15,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 
+/**
+ * Tar vare på overstyring fra saksbehandler og sletter den opprinnelige oppgaven i påvente av nytt
+ * godkjenningsbehov fra spleis.
+ *
+ * Det er primært spleis som håndterer dette eventet.
+ */
 internal class Overstyring(
     override val id: UUID,
     private val fødselsnummer: String,

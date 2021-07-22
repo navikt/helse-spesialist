@@ -22,6 +22,8 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         }
 
         internal fun behov() = behov.toMap()
+
+        override fun toString() = behov.keys.toString()
     }
 
     internal fun nyBehovgruppe() {
@@ -36,6 +38,9 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     internal fun behovsgrupper() = behovsgrupper.filter { it.size > 0 }.toList()
     internal fun meldinger() = meldinger.toList()
 
+    /**
+     * Publisere svar tilbake på rapid, typisk svar på godkjenningsbehov
+     */
     internal fun publiser(melding: String) {
         meldinger.add(melding)
     }

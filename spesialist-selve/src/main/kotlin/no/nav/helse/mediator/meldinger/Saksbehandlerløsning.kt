@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
+ */
 internal class Saksbehandlerløsning(
     override val id: UUID,
     private val fødselsnummer: String,

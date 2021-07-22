@@ -17,18 +17,19 @@ internal class BehovMediator(
         publiserBehov(hendelse, context, contextId)
     }
 
-    private fun publiser(hendelse: Hendelse, melding: String) {
-        rapidsConnection.publish(hendelse.fødselsnummer(), melding.also { sikkerLogg.info("sender {}", it) })
-    }
-
     private fun publiserMeldinger(hendelse: Hendelse, context: CommandContext) {
-        context.meldinger().forEach { melding -> publiser(hendelse, melding) }
+        context.meldinger().forEach { melding ->
+            sikkerLogg.info("Sender svar på ${hendelse.javaClass.simpleName}\n{}", melding)
+            rapidsConnection.publish(hendelse.fødselsnummer(), melding)
+        }
     }
 
     private fun publiserBehov(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         if (!context.harBehov()) return
         context.behovsgrupper().forEach { behovgruppe ->
-            publiser(hendelse, packet(hendelse, behovgruppe, contextId))
+            val packet = packet(hendelse, behovgruppe, contextId)
+            sikkerLogg.info("Sender behov for ${behovgruppe}\n{}", packet)
+            rapidsConnection.publish(hendelse.fødselsnummer(), packet)
         }
     }
 
