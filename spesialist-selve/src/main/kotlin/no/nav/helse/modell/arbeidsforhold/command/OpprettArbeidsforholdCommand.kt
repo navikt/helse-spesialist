@@ -46,6 +46,7 @@ internal class OpprettArbeidsforholdCommand(
         context.behov(
             "Arbeidsforhold", mapOf(
                 "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "fom" to LocalDate.now().minusYears(3),
                 "tom" to LocalDate.now()
