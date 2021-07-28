@@ -5,7 +5,6 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class OpprettArbeidsforholdCommand(
     private val aktørId: String,
@@ -45,11 +44,8 @@ internal class OpprettArbeidsforholdCommand(
         logg.info("Trenger mer informasjon for å opprette arbeidsforhold")
         context.behov(
             "Arbeidsforhold", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to LocalDate.now().minusYears(3),
-                "tom" to LocalDate.now()
             )
         )
         return false

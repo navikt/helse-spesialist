@@ -27,7 +27,6 @@ internal class OppdaterArbeidsforholdCommand(
                 logg.info("Arbeidsforhold allerede oppdatert")
                 true
             }
-
         }
     }
 
@@ -55,11 +54,8 @@ internal class OppdaterArbeidsforholdCommand(
         logg.info("Trenger mer informasjon for å oppdatere arbeidsforhold")
         context.behov(
             "Arbeidsforhold", mapOf(
-                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to LocalDate.now().minusYears(3),
-                "tom" to LocalDate.now()
             )
         )
         return false
