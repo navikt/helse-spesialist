@@ -58,6 +58,7 @@ internal interface IHendelsefabrikk {
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
+        orgnummereMedAktiveArbeidsforhold: List<String>,
         json: String
     ): Godkjenningsbehov
     fun godkjenning(json: String): Godkjenningsbehov

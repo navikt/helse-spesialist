@@ -78,6 +78,7 @@ internal class Hendelsefabrikk(
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
+        orgnummereMedAktiveArbeidsforhold: List<String>,
         json: String
     ): Godkjenningsbehov {
         return Godkjenningsbehov(
@@ -111,6 +112,7 @@ internal class Hendelsefabrikk(
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
+            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
             opptegnelseDao = opptegnelseDao
         )
     }
@@ -132,6 +134,7 @@ internal class Hendelsefabrikk(
             utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
             inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
             aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")),
+            orgnummereMedAktiveArbeidsforhold = jsonNode.path("orgnummereMedAktiveArbeidsforhold").takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             json = json
         )
     }

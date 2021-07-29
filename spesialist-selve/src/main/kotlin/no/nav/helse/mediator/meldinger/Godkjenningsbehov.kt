@@ -56,6 +56,7 @@ internal class Godkjenningsbehov(
     utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
+    orgnummereMedAktiveArbeidsforhold: List<String>,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -93,7 +94,7 @@ internal class Godkjenningsbehov(
             godkjenningMediator = godkjenningMediator,
         ),
         KlargjørArbeidsgiverCommand(
-            orgnummere = aktiveVedtaksperioder.orgnummere(),
+            orgnummere = (aktiveVedtaksperioder.orgnummere() + orgnummereMedAktiveArbeidsforhold).distinct(),
             arbeidsgiverDao = arbeidsgiverDao
         ),
         KlargjørArbeidsforholdCommand(
@@ -210,7 +211,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.aktiveVedtaksperioder"
                     )
                     it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
-                    it.interestedIn("Godkjenning.arbeidsforholdId")
+                    it.interestedIn("Godkjenning.arbeidsforholdId", "Godkjenning.orgnummereMedAktiveArbeidsforhold")
                 }
             }.register(this)
         }
@@ -246,6 +247,9 @@ internal class Godkjenningsbehov(
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),
+                orgnummereMedAktiveArbeidsforhold = packet["Godkjenning.orgnummereMedAktiveArbeidsforhold"]
+                    .takeUnless(JsonNode::isMissingOrNull)
+                    ?.map { it.asText() } ?: emptyList(),
                 context = context
             )
         }

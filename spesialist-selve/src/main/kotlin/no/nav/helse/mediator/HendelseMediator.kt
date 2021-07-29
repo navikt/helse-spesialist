@@ -202,6 +202,7 @@ internal class HendelseMediator(
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
+        orgnummereMedAktiveArbeidsforhold: List<String>,
         context: MessageContext
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
@@ -224,6 +225,7 @@ internal class HendelseMediator(
                 utbetalingtype,
                 inntektskilde,
                 aktiveVedtaksperioder,
+                orgnummereMedAktiveArbeidsforhold,
                 message.toJson()
             ), context
         )

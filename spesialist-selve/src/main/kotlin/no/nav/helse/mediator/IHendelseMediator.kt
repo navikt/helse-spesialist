@@ -68,6 +68,7 @@ internal interface IHendelseMediator {
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
+        orgnummereMedAktiveArbeidsforhold: List<String>,
         context: MessageContext
     )
 
