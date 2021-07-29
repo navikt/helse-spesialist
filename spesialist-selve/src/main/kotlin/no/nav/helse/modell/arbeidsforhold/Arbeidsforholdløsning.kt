@@ -83,14 +83,17 @@ internal class Arbeidsforholdløsning(
         }
 
         private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning =
-            Arbeidsforholdløsning(this["@løsning.$behov"].map { it.toArbeidsforholdløsning() })
+            this["@løsning.$behov"]
+                .takeUnless { it.isEmpty }
+                ?.map(::toArbeidsforholdløsning)
+                ?.let(::Arbeidsforholdløsning)
+                ?: error("Ingen arbeidsforhold i løsningen")
 
-        private fun JsonNode.toArbeidsforholdløsning(): Løsning = Løsning(
-            this["startdato"].asLocalDate(),
-            this["sluttdato"].asOptionalLocalDate(),
-            this["stillingstittel"].asText(),
-            this["stillingsprosent"].asInt()
+        private fun toArbeidsforholdløsning(løsning: JsonNode): Løsning = Løsning(
+            løsning["startdato"].asLocalDate(),
+            løsning["sluttdato"].asOptionalLocalDate(),
+            løsning["stillingstittel"].asText(),
+            løsning["stillingsprosent"].asInt()
         )
-
     }
 }

@@ -118,7 +118,7 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
             WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
               AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :organisasjonsnummer);
         """
-        requireNotNull(
+        checkNotNull(
             session.run(
                 queryOf(
                     query, mapOf(
@@ -129,6 +129,6 @@ class ArbeidsforholdDao(private val dataSource: DataSource) {
                     .map { row -> row.sqlDate("oppdatert").toLocalDate() }
                     .asSingle
             )
-        )
+        ) { "Forventer at OpprettArbeidsforholdCommand har lagt inn arbeidsforhold i databasen" }
     }
 }
