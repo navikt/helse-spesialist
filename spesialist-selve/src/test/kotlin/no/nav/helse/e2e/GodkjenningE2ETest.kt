@@ -603,6 +603,22 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertEquals(SAKSBEHANDLEREPOST, tildeling?.epost)
     }
 
+    @Test
+    fun `legger ved alle orgnummere på behov for Arbeidsgiverinformasjon`() {
+        val orgnummereMedAktiveArbeidsforhold = listOf("420")
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+        )
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+
+        val orgnummere = testRapid.inspektør.meldinger().last()["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
+        assertEquals(listOf(ORGNR) + orgnummereMedAktiveArbeidsforhold, orgnummere)
+    }
+
     private fun håndterGodkjenningsbehov(): UUID {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)

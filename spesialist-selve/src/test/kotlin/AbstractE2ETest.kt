@@ -206,6 +206,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 periodetype
             )
         ),
+        orgnummereMedAktiveArbeidsforhold: List<String> = emptyList(),
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
     ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
@@ -221,6 +222,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 aktiveVedtaksperioder = aktiveVedtaksperioder,
+                orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
                 utbetalingtype = utbetalingtype
             )
         )
