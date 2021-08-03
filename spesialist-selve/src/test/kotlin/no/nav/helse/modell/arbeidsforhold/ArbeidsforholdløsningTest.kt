@@ -52,6 +52,13 @@ internal class ArbeidsforholdløsningTest {
     }
 
     @Test
+    fun `mottar tom arbeidsgiverløsning`() {
+        rapid.sendTestMessage(meldingsfabrikk.lagArbeidsforholdløsning(løsning = listOf()))
+
+        verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }
+    }
+
+    @Test
     fun `oppretter løsning`() {
         val arbeidsforhold = Arbeidsforholdløsning(
             listOf(

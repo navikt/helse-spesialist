@@ -82,12 +82,14 @@ internal class Arbeidsforholdløsning(
             )
         }
 
-        private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning =
-            this["@løsning.$behov"]
-                .takeUnless { it.isEmpty }
-                ?.map(::toArbeidsforholdløsning)
-                ?.let(::Arbeidsforholdløsning)
-                ?: error("Ingen arbeidsforhold i løsningen")
+        private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning {
+            val løsninger = this["@løsning.$behov"].map(::toArbeidsforholdløsning)
+
+            if(løsninger.isEmpty()) {
+                sikkerLog.info("Ingen arbeidsforhold i løsningen")
+            }
+            return Arbeidsforholdløsning(løsninger)
+        }
 
         private fun toArbeidsforholdløsning(løsning: JsonNode): Løsning = Løsning(
             løsning["startdato"].asLocalDate(),

@@ -55,6 +55,13 @@ internal class ArbeidsforholdDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `oppdaterer tomt arbeidsforhold`() {
+        arbeidsforholdDao.insertArbeidsforhold(FNR, ORGNUMMER, STARTDATO, SLUTTDATO, STILLINGSTITTEL, STILLINGSPROSENT)
+        arbeidsforholdDao.oppdaterArbeidsforhold(FNR, ORGNUMMER, emptyList())
+        assertTrue(arbeidsforholdDao.findArbeidsforhold(FNR, ORGNUMMER).isEmpty())
+    }
+
+    @Test
     fun `finner arbeidsforhold`() {
         val fødselsnummer2 = "10273645893"
         val stillingstittel2 = "Slabberasmedarbeider"
