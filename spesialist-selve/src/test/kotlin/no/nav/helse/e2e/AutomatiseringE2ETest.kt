@@ -287,7 +287,10 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
         assertWarning(
-            "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden.",
+            """
+                Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes.
+                8-4 ikke ok
+            """.trimIndent(),
             VEDTAKSPERIODE_ID
         )
         assertWarning(

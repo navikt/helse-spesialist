@@ -31,13 +31,12 @@ internal class RisikoCommand(
     override fun resume(context: CommandContext): Boolean {
         val løsning = context.get<Risikovurderingløsning>() ?: return false
         løsning.lagre(risikovurderingDao, vedtaksperiodeId)
-        if (løsning.arbeidsuførhetWarning()) {
-            val melding =
-                "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes. Se forklaring på vilkårs-siden."
+        if (løsning.harArbeidsuførhetFunn()) {
+            val melding = løsning.arbeidsuførhetsmelding()
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
         }
-        if (løsning.faresignalWarning()) {
+        if (løsning.harFaresignalerFunn()) {
             val melding =
                 "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))

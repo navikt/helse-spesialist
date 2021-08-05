@@ -35,10 +35,18 @@ internal class Risikovurderingløsning(
         )
     }
 
-    internal fun arbeidsuførhetWarning() =
+    internal fun harArbeidsuførhetFunn() =
         !kanGodkjennesAutomatisk && løsning["funn"].any { it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
-    internal fun faresignalWarning() =
+    internal fun arbeidsuførhetsmelding(): String =
+        "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes." +
+            løsning["funn"]
+                .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
+                .map { it["beskrivelse"].asText() }
+                .takeIf { it.isNotEmpty() }
+                ?.let { "\n" + it.joinToString(" ") }
+
+    internal fun harFaresignalerFunn() =
         !kanGodkjennesAutomatisk && løsning["funn"].any { !it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
     internal class V2River(
