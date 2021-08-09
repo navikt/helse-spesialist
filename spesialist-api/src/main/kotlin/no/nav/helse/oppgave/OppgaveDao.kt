@@ -40,7 +40,7 @@ class OppgaveDao(private val dataSource: DataSource) {
                     CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
                     CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
                 opprettet ASC
-            LIMIT 1000;
+            LIMIT 2000;
     """
             session.run(
                 queryOf(query)
