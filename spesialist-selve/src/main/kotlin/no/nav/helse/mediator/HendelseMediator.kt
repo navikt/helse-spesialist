@@ -35,19 +35,21 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import javax.sql.DataSource
 
 internal class HendelseMediator(
+    private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
-    private val oppgaveDao: OppgaveDao,
-    private val vedtakDao: VedtakDao,
-    private val personDao: PersonDao,
-    private val commandContextDao: CommandContextDao,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val hendelseDao: HendelseDao,
-    private val tildelingDao: TildelingDao,
-    private val reservasjonDao: ReservasjonDao,
-    private val saksbehandlerDao: SaksbehandlerDao,
-    private val feilendeMeldingerDao: FeilendeMeldingerDao,
+    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val personDao: PersonDao = PersonDao(dataSource),
+    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
+    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
+    private val hendelseDao: HendelseDao = HendelseDao(dataSource),
+    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
+    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
+    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
+    private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {

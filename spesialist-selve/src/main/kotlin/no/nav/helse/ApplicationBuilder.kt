@@ -260,18 +260,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         rapidsConnection.register(this)
         hendelseMediator = HendelseMediator(
             rapidsConnection = rapidsConnection,
-            oppgaveDao = oppgaveDao,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            commandContextDao = commandContextDao,
-            hendelseDao = hendelseDao,
-            reservasjonDao = reservasjonDao,
-            tildelingDao = tildelingDao,
-            saksbehandlerDao = saksbehandlerDao,
-            feilendeMeldingerDao = feilendeMeldingerDao,
+            dataSource = dataSource,
+            oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk,
-            oppgaveMediator = oppgaveMediator
         )
     }
 

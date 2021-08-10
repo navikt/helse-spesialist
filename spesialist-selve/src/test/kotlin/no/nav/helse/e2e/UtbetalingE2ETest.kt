@@ -11,7 +11,6 @@ import java.util.*
 import kotlin.test.assertEquals
 
 internal class UtbetalingE2ETest : AbstractE2ETest() {
-    private val SNAPSHOTV1 = snapshot()
 
     private companion object {
         private const val ORGNR = "987654321"

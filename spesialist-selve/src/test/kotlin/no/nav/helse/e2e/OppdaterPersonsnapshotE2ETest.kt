@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
-    val ORGNR = "987654321"
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
     private val vedtaksperiodeId2: UUID = UUID.randomUUID()
     private val utbetalingId1: UUID = UUID.randomUUID()

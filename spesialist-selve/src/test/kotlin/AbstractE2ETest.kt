@@ -10,6 +10,7 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.e2e.OverstyringE2ETest
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -49,6 +50,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.snapshotMedWarning
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -60,6 +62,12 @@ import java.util.*
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
+    protected val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    protected val FØDSELSNUMMER = "12020052345"
+    protected val ORGNR = "222222222"
+    protected val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
+    protected val SNAPSHOTV1 = snapshotMedWarning(VEDTAKSPERIODE_ID)
+
     protected companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal const val AKTØR = "999999999"
@@ -68,7 +76,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             .registerModule(JavaTimeModule())
         internal val UTBETALING_ID = UUID.randomUUID()
         internal val UTBETALING_ID2 = UUID.randomUUID()
-
     }
 
     protected val oppgaveDao = OppgaveDao(dataSource)
@@ -109,8 +116,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
-    private val hendelsefabrikk = Hendelsefabrikk(
+    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
+    protected val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
         personDao = personDao,
         arbeidsgiverDao = ArbeidsgiverDao(dataSource),
@@ -146,18 +153,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     )
     private val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
-        oppgaveDao = oppgaveDao,
-        vedtakDao = vedtakDao,
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        commandContextDao = commandContextDao,
-        hendelseDao = hendelseDao,
-        tildelingDao = tildelingDao,
-        reservasjonDao = reservasjonDao,
-        saksbehandlerDao = saksbehandlerDao,
-        feilendeMeldingerDao = feilendeMeldingerDao,
+        dataSource = dataSource,
+        oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk,
-        oppgaveMediator = oppgaveMediator
     )
     internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
         personsnapshotDao = personsnapshotDao,
@@ -422,6 +420,45 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
         testRapid.sendTestMessage(løsning.toString())
         return UUID.fromString(løsning.path("@id").asText())
+    }
+
+    protected fun settOppBruker(): UUID {
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
+        val godkjenningsbehovId = sendGodkjenningsbehov(
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
+            LocalDate.of(2018, 1, 1),
+            LocalDate.of(2018, 1, 31),
+        )
+        sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsbehovId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsbehovId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        klargjørForGodkjenning(godkjenningsbehovId)
+        return godkjenningsbehovId
+    }
+
+    protected fun klargjørForGodkjenning(oppgaveId: UUID) {
+        sendEgenAnsattløsning(oppgaveId, false)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = oppgaveId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = oppgaveId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = oppgaveId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
     }
 
     protected fun sendUtbetalingEndret(

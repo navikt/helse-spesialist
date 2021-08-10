@@ -42,7 +42,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
 
     @BeforeEach
     fun setup() {
-        every { restClient.hentSpeilSpapshot(any()) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(any()) } returns TEST_SNAPSHOTV1
     }
 
     @Test
@@ -439,7 +439,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     }
 
     @Language("JSON")
-    private val SNAPSHOTV1 = """{
+    private val TEST_SNAPSHOTV1 = """{
   "versjon": 1,
   "aktørId": "$AKTØR",
   "fødselsnummer": "$FØDSELSNUMMER",

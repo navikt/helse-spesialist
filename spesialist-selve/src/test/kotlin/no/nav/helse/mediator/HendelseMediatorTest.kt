@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import AbstractE2ETest
 import io.mockk.mockk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
@@ -11,25 +12,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 
-internal class HendelseMediatorTest {
+internal class HendelseMediatorTest: AbstractE2ETest() {
 
-    private val testRapid = TestRapid()
+    //private val testRapid = TestRapid()
 
-    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val mediator = HendelseMediator(
         rapidsConnection = testRapid,
-        oppgaveDao = mockk(relaxed = true),
-        vedtakDao = mockk(relaxed = true),
-        personDao = mockk(relaxed = true),
-        arbeidsgiverDao = mockk(relaxed = true),
-        commandContextDao = mockk(relaxed = true),
-        hendelseDao = mockk(relaxed = true),
-        tildelingDao = mockk(relaxed = true),
-        reservasjonDao = mockk(relaxed = true),
-        saksbehandlerDao = mockk(relaxed = true),
-        feilendeMeldingerDao = mockk(relaxed = true),
+        dataSource = dataSource,
         oppgaveMediator = oppgaveMediator,
-        hendelsefabrikk = mockk(relaxed = true)
+        hendelsefabrikk = hendelsefabrikk,
     )
 
     @Test
@@ -38,6 +29,7 @@ internal class HendelseMediatorTest {
         val oid = UUID.randomUUID()
         val epost = "epost@nav.no"
         val saksbehandlerIdent = "saksbehandler"
+
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertEquals("saksbehandler_løsning", testRapid.inspektør.field(0, "@event_name").asText())
     }
