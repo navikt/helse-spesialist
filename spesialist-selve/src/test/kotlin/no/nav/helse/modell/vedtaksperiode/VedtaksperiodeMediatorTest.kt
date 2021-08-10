@@ -17,10 +17,6 @@ import kotlin.test.assertNotNull
 
 internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val FØDSELSNUMMER = "12020052345"
-        private const val AKTØR = "999999999"
-        private const val ORGNR = "222222222"
         private const val ORGNR2 = "13370420"
         private val ID = UUID.randomUUID()
     }

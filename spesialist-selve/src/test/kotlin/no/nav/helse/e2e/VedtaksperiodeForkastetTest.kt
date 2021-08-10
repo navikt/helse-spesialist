@@ -16,7 +16,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
 
     @Test
     fun `VedtaksperiodeForkastet oppdaterer ikke oppgave-tabellen dersom status er inaktiv`() {
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)
@@ -75,7 +75,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
         )
 
         sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId1, 1
+            godkjenningsmeldingId = godkjenningsmeldingId1, 1 // Dette trigger manuell saksbehandling
         )
 
         sendRisikovurderingløsning(
