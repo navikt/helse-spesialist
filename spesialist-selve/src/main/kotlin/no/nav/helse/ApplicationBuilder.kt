@@ -140,7 +140,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
-    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
