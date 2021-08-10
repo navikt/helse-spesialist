@@ -95,36 +95,6 @@ internal fun Route.vedtaksperiodeApi(
         call.respond(HttpStatusCode.Created, mapOf("status" to "OK"))
     }
 
-    post("/api/overstyr/dager") {
-        val overstyring = call.receive<OverstyringDTO>()
-
-        val accessToken = requireNotNull(call.principal<JWTPrincipal>())
-        val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-        val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
-        val saksbehandlerNavn = accessToken.payload.getClaim("name").asString()
-        val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
-
-        val message = OverstyringRestDto(
-            saksbehandlerEpost = epostadresse,
-            saksbehandlerOid = oid,
-            saksbehandlerNavn = saksbehandlerNavn,
-            saksbehandlerIdent = saksbehandlerIdent,
-            organisasjonsnummer = overstyring.organisasjonsnummer,
-            fødselsnummer = overstyring.fødselsnummer,
-            aktørId = overstyring.aktørId,
-            begrunnelse = overstyring.begrunnelse,
-            dager = overstyring.dager.map {
-                OverstyringRestDto.Dag(
-                    dato = it.dato,
-                    type = enumValueOf(it.type),
-                    grad = it.grad
-                )
-            }
-        )
-        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
-        call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
-    }
-
     post("/api/person/oppdater") {
         val personoppdateringDto = call.receive<OppdaterPersonsnapshotDto>()
         hendelseMediator.håndter(personoppdateringDto)

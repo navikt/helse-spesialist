@@ -2,6 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.snapshotMedWarning
@@ -16,46 +17,20 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     private companion object {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
-        private const val AKTØR = "999999999"
         private const val ORGNR = "222222222"
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private val SNAPSHOTV1 = snapshotMedWarning(VEDTAKSPERIODE_ID)
     }
 
+    private fun List<OppgaveDto>.ingenOppgaveMedId(id: String) = none { it.oppgavereferanse == id }
+    private fun assertIngenOppgaver(id: String) {
+        oppgaveDao.finnOppgaver(false).ingenOppgaveMedId(id)
+    }
+
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
-        val hendelseId = sendGodkjenningsbehov(
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            LocalDate.of(2018, 1, 1),
-            LocalDate.of(2018, 1, 31),
-        )
-        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = hendelseId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsning(
-            hendelseId = hendelseId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsning(hendelseId, false)
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = hendelseId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = hendelseId
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = hendelseId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        assertSaksbehandlerOppgaveOpprettet(hendelseId)
+        val originaltGodkjenningsbehov = settOppBruker()
+
         sendOverstyrteDager(
             ORGNR, SAKSBEHANDLER_EPOST, listOf(
                 OverstyringDagDto(
@@ -67,30 +42,60 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
 
         assertTrue(overstyringApiDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
-        assertTrue(oppgaveDao.finnOppgaver(false).none { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
+        val originalOppgaveId = testRapid.inspektør.oppgaveId(originaltGodkjenningsbehov)
+        assertIngenOppgaver(originalOppgaveId)
 
-        val hendelseId2 = sendGodkjenningsbehov(
+        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
             UTBETALING_ID,
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
-        sendEgenAnsattløsning(hendelseId2, false)
+
+        klargjørForGodkjenning(nyttGodkjenningsbehov)
+
+        val oppgave = oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER }
+        assertEquals(SAKSBEHANDLER_EPOST, oppgave!!.tildeling?.epost)
+    }
+
+    private fun klargjørForGodkjenning(oppgaveId: UUID) {
+        sendEgenAnsattløsning(oppgaveId, false)
         sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = hendelseId2,
+            godkjenningsmeldingId = oppgaveId,
             erDigital = true
         )
         sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = hendelseId2
+            godkjenningsmeldingId = oppgaveId
         )
         sendRisikovurderingløsning(
-            godkjenningsmeldingId = hendelseId2,
+            godkjenningsmeldingId = oppgaveId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val oppgave = oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER }
-        assertNotNull(oppgave)
-        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
+    }
+
+    private fun settOppBruker(): UUID {
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
+        val godkjenningsbehovId = sendGodkjenningsbehov(
+            ORGNR,
+            VEDTAKSPERIODE_ID,
+            UTBETALING_ID,
+            LocalDate.of(2018, 1, 1),
+            LocalDate.of(2018, 1, 31),
+        )
+        sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsbehovId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsbehovId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        klargjørForGodkjenning(godkjenningsbehovId)
+        return godkjenningsbehovId
     }
 
     @Test

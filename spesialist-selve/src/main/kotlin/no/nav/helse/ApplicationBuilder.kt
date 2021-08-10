@@ -245,6 +245,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             speilSnapshotRestClient = speilSnapshotRestClient
                         )
                     )
+                    overstyringApi(hendelseMediator)
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
