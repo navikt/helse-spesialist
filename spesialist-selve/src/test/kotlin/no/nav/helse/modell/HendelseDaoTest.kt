@@ -36,21 +36,21 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             oppgaveDao = oppgaveDao,
             commandContextDao = commandContextDao,
             snapshotDao = snapshotDao,
-            reservasjonDao = mockk(),
-            tildelingDao = mockk(),
-            saksbehandlerDao = mockk(),
-            overstyringDao = mockk(),
-            risikovurderingDao = mockk(),
-            digitalKontaktinformasjonDao = mockk(),
-            åpneGosysOppgaverDao = mockk(),
-            egenAnsattDao = mockk(),
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao,
+            risikovurderingDao = risikovurderingDao,
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            egenAnsattDao = egenAnsattDao,
             speilSnapshotRestClient = restClient,
             oppgaveMediator = mockk(),
             godkjenningMediator = mockk(relaxed = true),
             automatisering = mockk(relaxed = true),
-            arbeidsforholdDao = mockk(relaxed = true),
-            utbetalingDao = mockk(relaxed = true),
-            opptegnelseDao = mockk(relaxed = true)
+            arbeidsforholdDao = arbeidsforholdDao,
+            utbetalingDao = utbetalingDao,
+            opptegnelseDao = opptegnelseDao
         )
     }
 
