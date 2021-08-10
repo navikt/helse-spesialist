@@ -14,10 +14,6 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 private class RisikovurderingE2ETest : AbstractE2ETest() {
-    private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val ORGNR = "222222222"
-    }
 
     @Language("json")
     private val funn1 = objectMapper.readTree(
@@ -42,7 +38,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("RISK_QA", VEDTAKSPERIODE_ID)
@@ -50,7 +46,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter oppgave av type SØKNAD`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         godkjenningsoppgave(funn2, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
@@ -58,7 +54,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Venter på alle løsninger på utstedte risikobehov`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         godkjenningsoppgave(
             funn = funn2,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,

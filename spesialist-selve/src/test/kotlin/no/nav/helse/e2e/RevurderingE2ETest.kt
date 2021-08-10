@@ -13,21 +13,17 @@ import java.util.*
 internal class RevurderingE2ETest: AbstractE2ETest() {
 
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val ORGNR = "222222222"
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
 
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private val SNAPSHOT_MED_WARNINGS = snapshotMedWarning(VEDTAKSPERIODE_ID)
-        private val SNAPSHOT_UTEN_WARNINGS = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
 
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
@@ -65,7 +61,7 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
 
     @Test
     fun `revurdering av periode medfører oppgave selv om perioden ikke har warnings`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOT_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
 
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)

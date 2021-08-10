@@ -10,7 +10,6 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.e2e.OverstyringE2ETest
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -51,6 +50,7 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.snapshotMedWarning
+import no.nav.helse.snapshotUtenWarnings
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -64,13 +64,16 @@ import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val VEDTAKSPERIODE_ID = UUID.randomUUID()
     protected val FØDSELSNUMMER = "12020052345"
+    protected val AKTØR = "999999999"
     protected val ORGNR = "222222222"
     protected val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
-    protected val SNAPSHOTV1 = snapshotMedWarning(VEDTAKSPERIODE_ID)
+    protected val SNAPSHOTV1_MED_WARNINGS = snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
+    protected val SNAPSHOTV1_UTEN_WARNINGS = snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
+    protected fun snapshotv1UtenWarnings(vedtaksperiodeId:UUID = VEDTAKSPERIODE_ID, orgnr:String = ORGNR, fnr:String = FØDSELSNUMMER, aktørId:String = AKTØR) = snapshotUtenWarnings(vedtaksperiodeId, orgnr, fnr, aktørId)
+    protected fun snapshotv1MedWarnings(vedtaksperiodeId:UUID = VEDTAKSPERIODE_ID, orgnr:String = ORGNR, fnr:String = FØDSELSNUMMER, aktørId:String = AKTØR) = snapshotMedWarning(vedtaksperiodeId, orgnr, fnr, aktørId)
 
     protected companion object {
         internal const val UNG_PERSON_FNR_2018 = "12020052345"
-        internal const val AKTØR = "999999999"
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
@@ -174,6 +177,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     @BeforeEach
     internal fun resetTestSetup() {
         clearMocks(restClient)
+        clearMocks(speilSnapshotRestClient)
         testRapid.reset()
     }
 
@@ -423,7 +427,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun settOppBruker(): UUID {
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -716,7 +720,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun vedtaksperiode(
-        organisasjonsnummer: String = "987654321",
+        organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kanAutomatiseres: Boolean = false,
         snapshot: String = snapshot(),
@@ -773,11 +777,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     @Language("JSON")
     protected fun snapshot(versjon: Int = 1) = """{
       "versjon": $versjon,
-      "aktørId": "123456789101112",
-      "fødselsnummer": "12345612345",
+      "aktørId": "$AKTØR",
+      "fødselsnummer": "$FØDSELSNUMMER",
       "arbeidsgivere": [
         {
-          "organisasjonsnummer": "987654321",
+          "organisasjonsnummer": "$ORGNR",
           "id": "${UUID.randomUUID()}",
           "vedtaksperioder": [
             {

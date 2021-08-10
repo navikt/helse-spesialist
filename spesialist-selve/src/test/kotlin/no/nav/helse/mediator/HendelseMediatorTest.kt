@@ -1,20 +1,16 @@
 package no.nav.helse.mediator
 
 import AbstractE2ETest
-import io.mockk.mockk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
+import kotlin.test.assertTrue
 
 internal class HendelseMediatorTest: AbstractE2ETest() {
-
-    //private val testRapid = TestRapid()
 
     private val mediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -29,9 +25,10 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         val oid = UUID.randomUUID()
         val epost = "epost@nav.no"
         val saksbehandlerIdent = "saksbehandler"
-
+        settOppBruker()
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
-        assertEquals("saksbehandler_løsning", testRapid.inspektør.field(0, "@event_name").asText())
+        assertTrue(testRapid.inspektør.hendelser("saksbehandler_løsning").isNotEmpty())
+        assertEquals("AvventerSystem", testRapid.inspektør.hendelser("oppgave_oppdatert").last()["status"].asText())
     }
 
     @Test

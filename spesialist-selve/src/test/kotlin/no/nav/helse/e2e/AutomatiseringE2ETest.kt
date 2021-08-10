@@ -15,19 +15,16 @@ import kotlin.test.assertTrue
 
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val ORGNR = "222222222"
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `fatter automatisk vedtak`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -86,7 +83,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter automatisk vedtak ved infotrygdforlengelse`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -142,7 +139,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak ved warnings`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotMedWarning(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -208,7 +205,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
 
         @Language("json")
         val funn = objectMapper.readTree(
@@ -301,7 +298,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak når bruker er ikke-digital`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -367,7 +364,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fatter ikke automatisk vedtak når bruker har åpne oppgaver i gosys`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,

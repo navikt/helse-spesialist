@@ -12,17 +12,11 @@ import java.util.*
 import kotlin.test.assertEquals
 
 internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
-    private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val ORGNR = "222222222"
-        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
-    }
-
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `VedtaksperiodeForkastet oppdaterer ikke oppgave-tabellen dersom status er inaktiv`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)

@@ -27,7 +27,7 @@ internal class VedtaksperiodeForkastetTest {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private val CONTEXT = UUID.randomUUID()
         private const val FNR = "fnr"
-        private val SNAPSHOT = snapshotUtenWarnings(VEDTAKSPERIODE)
+        private val SNAPSHOT = snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE, orgnr = "heisann",fnr = FNR, aktørId = "asdf")
     }
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, "aktørid")

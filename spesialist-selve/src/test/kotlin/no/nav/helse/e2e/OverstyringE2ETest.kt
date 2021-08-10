@@ -61,7 +61,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns  snapshotMedWarning(VEDTAKSPERIODE_ID, ORGNR)
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,

@@ -21,7 +21,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_MED_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
@@ -32,7 +32,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
         val ET_ORGNR = "1"
         val ET_ANNET_ORGNR = "2"
-        vedtaksperiode(ET_ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        vedtaksperiode(ET_ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_MED_WARNINGS, UTBETALING_ID)
         assertDoesNotThrow {
             sendUtbetalingEndret("UTBETALING", GODKJENT, ET_ANNET_ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         }
@@ -42,7 +42,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling forkastet`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_MED_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret(
             "UTBETALING",
             FORKASTET,
@@ -65,7 +65,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger på totalbeløp på utbetaling`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1, UTBETALING_ID)
+        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_MED_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
         assertEquals(4000, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().totalbeløp)

@@ -20,14 +20,12 @@ import kotlin.test.assertEquals
 
 private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val ORGNR = "222222222"
         private val SAKSBEHANDLER_ID = UUID.randomUUID()
     }
 
     @Test
     fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
         @Language("json")
         val funn1 = objectMapper.readTree("""
             [{

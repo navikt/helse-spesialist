@@ -12,17 +12,11 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 
 internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
-    private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val ORGNR = "222222222"
-        private val SNAPSHOTV1 = snapshotUtenWarnings(VEDTAKSPERIODE_ID)
-    }
-
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -61,7 +55,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
         sendAvbrytSaksbehandling(UNG_PERSON_FNR_2018, VEDTAKSPERIODE_ID)
@@ -83,7 +77,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `tildeler andre rundes oppgave til saksbehandler`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
         val saksbehandlerOid = UUID.randomUUID()
 
         vedtaksperiodeTilGodkjenning()
@@ -99,7 +93,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1
+        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
         var godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,

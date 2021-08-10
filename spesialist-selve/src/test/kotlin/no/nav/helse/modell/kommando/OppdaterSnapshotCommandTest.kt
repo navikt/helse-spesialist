@@ -19,7 +19,7 @@ internal class OppdaterSnapshotCommandTest {
     private companion object {
         private val VEDTAKSPERIODE = UUID.randomUUID()
         private const val FNR = "fnr"
-        private val SNAPSHOT = snapshotMedWarning(VEDTAKSPERIODE)
+        private val SNAPSHOT = snapshotMedWarning(VEDTAKSPERIODE, "", "", "")
         private const val VEDTAK_REF = 1L
     }
 

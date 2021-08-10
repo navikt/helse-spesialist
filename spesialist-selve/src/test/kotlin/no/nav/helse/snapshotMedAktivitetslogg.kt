@@ -4,10 +4,10 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 
 @Language("json")
-fun snapshotMedWarning(vedtaksperiodeId: UUID, orgnr: String = "orgnr") = """{
+fun snapshotMedWarning(vedtaksperiodeId: UUID, orgnr: String, fnr: String, aktørId: String) = """{
   "versjon": 1,
-  "aktørId": "aktørId",
-  "fødselsnummer": "fnr",
+  "aktørId": "$aktørId",
+  "fødselsnummer": "$fnr",
   "arbeidsgivere": [
     {
       "organisasjonsnummer": "$orgnr",
@@ -59,13 +59,13 @@ fun snapshotMedWarning(vedtaksperiodeId: UUID, orgnr: String = "orgnr") = """{
 """
 
 @Language("json")
-fun snapshotUtenWarnings(vedtaksperiodeId: UUID) = """{
+fun snapshotUtenWarnings(vedtaksperiodeId: UUID, orgnr: String, fnr: String, aktørId: String) = """{
   "versjon": 1,
-  "aktørId": "aktørId",
-  "fødselsnummer": "fnr",
+  "aktørId": "$aktørId",
+  "fødselsnummer": "$fnr",
   "arbeidsgivere": [
     {
-      "organisasjonsnummer": "orgnr",
+      "organisasjonsnummer": "$orgnr",
       "id": "71ebda8a-4f65-7754-b3ca-bf243b85315d",
       "vedtaksperioder": [
         {

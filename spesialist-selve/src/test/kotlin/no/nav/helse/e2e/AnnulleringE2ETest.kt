@@ -29,7 +29,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2, snapshot = snapshotV2, utbetalingId = UUID.randomUUID())
 
         assertVedtak(vedtaksperiodeId2)
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotFinal
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendUtbetalingAnnullert(saksbehandlerEpost = epost)
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
@@ -38,7 +38,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Annullert av saksbehandler mappes til speil`() {
-        vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UUID.randomUUID())
+        vedtaksperiode(organisasjonsnummer = ORGNR, vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UUID.randomUUID())
 
         sendUtbetalingEndret(
             type = "UTBETALING",
@@ -49,7 +49,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID
         )
 
-        val annulleringDto = AnnulleringDto(AKTØR, UNG_PERSON_FNR_2018, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), null)
+        val annulleringDto = AnnulleringDto(AKTØR, FØDSELSNUMMER, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), null)
         val saksbehandler = Saksbehandler(
             "kevders.chilleby@nav.no",
             UUID.randomUUID(),
@@ -60,7 +60,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
         sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")
 
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
         val annullerAvSaksbehandler = speilSnapshot.utbetalinger.first().annullertAvSaksbehandler
 
         assertNotNull(annullerAvSaksbehandler?.annullertTidspunkt)

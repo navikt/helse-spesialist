@@ -44,7 +44,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `opprette vedtak`() {
-        every { restClient.hentSpeilSpapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID, ORGNR, FNR, "Aktørid")
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
@@ -53,7 +53,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `oppdatere vedtak`() {
-        every { restClient.hentSpeilSpapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID)
+        every { restClient.hentSpeilSpapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID, ORGNR, FNR, "Aktørid")
         val (_, _, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
         assertTrue(command.execute(context))
