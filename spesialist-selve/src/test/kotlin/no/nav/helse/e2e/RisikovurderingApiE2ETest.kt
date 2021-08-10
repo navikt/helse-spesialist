@@ -25,7 +25,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         @Language("json")
         val funn1 = objectMapper.readTree("""
             [{

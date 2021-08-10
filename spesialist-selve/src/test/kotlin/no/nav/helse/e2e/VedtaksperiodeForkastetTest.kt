@@ -16,7 +16,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
 
     @Test
     fun `VedtaksperiodeForkastet oppdaterer ikke oppgave-tabellen dersom status er inaktiv`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)
@@ -33,7 +33,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
 {
     "@event_name": "vedtaksperiode_forkastet",
     "@id": "${UUID.randomUUID()}",
-    "fødselsnummer": "$UNG_PERSON_FNR_2018",
+    "fødselsnummer": "$FØDSELSNUMMER",
     "vedtaksperiodeId": "$VEDTAKSPERIODE_ID"
 }"""
 

@@ -68,7 +68,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_MED_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
-        assertEquals(4000, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().totalbeløp)
+        assertEquals(4000, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().totalbeløp)
     }
 
     @Test
@@ -76,7 +76,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
-        assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().type)
+        assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().type)
     }
 
     @Test
@@ -86,8 +86,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = nyUtbetalingId)
 
-        assertEquals(1, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).size)
-        assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(UNG_PERSON_FNR_2018).single().utbetalingId)
+        assertEquals(1, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
+        assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().utbetalingId)
     }
 
     private fun utbetalinger(): List<Long> {
@@ -104,7 +104,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             """
         return sessionOf(dataSource).use  {
             it.run(queryOf(statement, mapOf(
-                "fodselsnummer" to UNG_PERSON_FNR_2018.toLong(),
+                "fodselsnummer" to FØDSELSNUMMER.toLong(),
                 "orgnummer" to ORGNR.toLong()
             )).map { row -> row.long("utbetaling_id_ref") }.asList)
         }

@@ -21,7 +21,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId1, snapshotV1, utbetalingId1)
         vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2)
 
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshotFinal
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendOppdaterPersonsnapshot()
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
@@ -34,7 +34,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 {
     "@event_name": "oppdater_personsnapshot",
     "@id": "${UUID.randomUUID()}",
-    "fødselsnummer": "$UNG_PERSON_FNR_2018"
+    "fødselsnummer": "$FØDSELSNUMMER"
 }"""
 
         testRapid.sendTestMessage(json)
@@ -42,7 +42,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 
     fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String, utbetalingId: UUID) {
 
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshot
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,

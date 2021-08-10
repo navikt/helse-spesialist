@@ -83,7 +83,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val enhetId = 1219
         val infoTrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(json["key"])
         personDao.insertPerson(
-            UNG_PERSON_FNR_2018,
+            FØDSELSNUMMER,
             AKTØR,
             navnId,
             enhetId,

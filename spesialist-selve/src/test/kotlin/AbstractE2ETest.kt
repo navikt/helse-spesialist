@@ -73,7 +73,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun snapshotv1MedWarnings(vedtaksperiodeId:UUID = VEDTAKSPERIODE_ID, orgnr:String = ORGNR, fnr:String = FØDSELSNUMMER, aktørId:String = AKTØR) = snapshotMedWarning(vedtaksperiodeId, orgnr, fnr, aktørId)
 
     protected companion object {
-        internal const val UNG_PERSON_FNR_2018 = "12020052345"
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
@@ -115,7 +114,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val testRapid = TestRapid()
 
-    protected val meldingsfabrikk = Testmeldingfabrikk(UNG_PERSON_FNR_2018, AKTØR)
+    protected val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
 
@@ -199,7 +198,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         periodeTom: LocalDate = LocalDate.now(),
         skjæringstidspunkt: LocalDate = LocalDate.now(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØR,
         aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
             Testmeldingfabrikk.AktivVedtaksperiodeJson(
@@ -472,7 +471,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
         forrigeStatus: Utbetalingsstatus = status,
-        fødselsnummer: String = UNG_PERSON_FNR_2018,
+        fødselsnummer: String = FØDSELSNUMMER,
         utbetalingId: UUID
     ) {
         @Language("JSON")
@@ -527,7 +526,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
       ]
     },
     "personOppdrag": {
-      "mottaker": "$UNG_PERSON_FNR_2018",
+      "mottaker": "$FØDSELSNUMMER",
       "fagområde": "SP",
       "endringskode": "NY",
       "fagsystemId": "$personFagsystemId",
@@ -544,7 +543,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             {
                 "@event_name": "utbetaling_annullert",
                 "@id": "${UUID.randomUUID()}",
-                "fødselsnummer": "$UNG_PERSON_FNR_2018",
+                "fødselsnummer": "$FØDSELSNUMMER",
                 "fagsystemId": "$fagsystemId",
                 "utbetalingId": "$UTBETALING_ID",
                 "annullertAvSaksbehandler": "${LocalDateTime.now()}",
@@ -726,7 +725,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshot: String = snapshot(),
         utbetalingId: UUID
     ): UUID {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns snapshot
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,

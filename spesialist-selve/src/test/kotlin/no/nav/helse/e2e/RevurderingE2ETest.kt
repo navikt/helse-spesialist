@@ -23,7 +23,7 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
 
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
 
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
@@ -61,7 +61,7 @@ internal class RevurderingE2ETest: AbstractE2ETest() {
 
     @Test
     fun `revurdering av periode medfører oppgave selv om perioden ikke har warnings`() {
-        every { restClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
 
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)

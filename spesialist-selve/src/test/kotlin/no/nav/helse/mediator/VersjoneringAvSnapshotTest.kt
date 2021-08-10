@@ -16,14 +16,14 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val gammelSnapshot = snapshot(-1)
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns nyttSnapshot
+        every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
-        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER)
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
 
         clearMocks(speilSnapshotRestClient)
-        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(UNG_PERSON_FNR_2018)
-        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER)
+        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
@@ -32,10 +32,10 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val gammelSnapshot = snapshot(-1)
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns nyttSnapshot
+        every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
         vedtaksperiodeMediator.byggSpeilSnapshotForAktørId(AKTØR)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
@@ -45,10 +45,10 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val gammelSnapshot = snapshot(-1)
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeid, snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) } returns nyttSnapshot
+        every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
         vedtaksperiodeMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(UNG_PERSON_FNR_2018) }
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
