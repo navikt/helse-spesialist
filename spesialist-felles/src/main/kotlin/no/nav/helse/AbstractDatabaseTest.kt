@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.postgresql.ds.PGSimpleDataSource
 import org.postgresql.util.PSQLException
 import java.io.File
+import java.nio.file.Files
 import java.util.*
 import javax.sql.DataSource
 
@@ -40,9 +41,9 @@ abstract class AbstractDatabaseTest {
             }
 
             fun startEmbeddedPostgres(): EmbeddedPostgres {
-                val postgresPath = createTempDir()
+                val postgresPath = Files.createTempDirectory("tmp")
                 return EmbeddedPostgres.builder()
-                    .setOverrideWorkingDirectory(postgresPath)
+                    .setOverrideWorkingDirectory(postgresPath.toFile())
                     .setDataDirectory(postgresPath.resolve("datadir"))
                     .start()
             }
