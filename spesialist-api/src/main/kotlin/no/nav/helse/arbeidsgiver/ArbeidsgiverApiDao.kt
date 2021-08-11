@@ -2,54 +2,33 @@ package no.nav.helse.arbeidsgiver
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
-import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-class ArbeidsgiverApiDao(private val dataSource: DataSource) {
+class ArbeidsgiverApiDao(dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun finnBransjer(orgnummer: String) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT ab.bransjer FROM arbeidsgiver a
+    fun finnBransjer(orgnummer: String) =
+        """ SELECT ab.bransjer FROM arbeidsgiver a
                 LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
-            WHERE a.orgnummer=?;
-        """
-        session.run(
-            queryOf(query, orgnummer.toLong()).map { row ->
-                row.stringOrNull("bransjer")
-                    ?.let { objectMapper.readValue<List<String>>(it) }
-                    ?.filter { it.isNotBlank() }
+            WHERE a.orgnummer=:orgnummer;
+        """.single(mapOf("orgnummer" to orgnummer.toLong())) { row ->
+            row.stringOrNull("bransjer")
+                ?.let { objectMapper.readValue<List<String>>(it) }
+                ?.filter { it.isNotBlank() }
+        } ?: emptyList()
 
-            }.asSingle
-        ) ?: emptyList()
-    }
-
-    fun finnNavn(orgnummer: String) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT an.navn FROM arbeidsgiver a
+    fun finnNavn(orgnummer: String) =
+        """ SELECT an.navn FROM arbeidsgiver a
                 JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
-            WHERE a.orgnummer=?;
-        """
-        session.run(
-            queryOf(query, orgnummer.toLong()).map { row ->
-                row.string("navn")
-            }.asSingle
-        )
-    }
+            WHERE a.orgnummer=:orgnummer;
+        """.single(mapOf("orgnummer" to orgnummer.toLong())) { row -> row.string("navn") }
 
-    fun finnArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
-            WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = ?)
-            AND person_ref = (SELECT id FROM person WHERE fodselsnummer = ?)
-        """
-        session.run(queryOf(statement, organisasjonsnummer.toInt(), fødselsnummer.toLong()).map { tilArbeidsforholdApiDto(organisasjonsnummer, it) }.asList)
-    }
+    fun finnArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String) =
+        """ SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
+            WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE orgnummer = :orgnummer)
+            AND person_ref = (SELECT id FROM person WHERE fodselsnummer = :fnr)
+        """.list(mapOf("orgnummer" to organisasjonsnummer.toLong(), "fnr" to fødselsnummer.toLong())) { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 
     private fun tilArbeidsforholdApiDto(organisasjonsnummer: String, row: Row) = ArbeidsforholdApiDto(
         organisasjonsnummer = organisasjonsnummer,

@@ -1,14 +1,12 @@
 package no.nav.helse.behandlingsstatistikk
 
 import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.vedtaksperiode.Periodetype
-import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import javax.sql.DataSource
 
-class BehandlingsstatistikkDao(private val dataSource: DataSource) {
+class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
 
     fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
         val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype()
@@ -36,57 +34,36 @@ class BehandlingsstatistikkDao(private val dataSource: DataSource) {
         )
     }
 
-    private fun tilGodkjenningPerPeriodetype() = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
+    private fun tilGodkjenningPerPeriodetype() =
+        """ SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
                  INNER JOIN vedtak v on o.vedtak_ref = v.id
                  INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type
-        """
-        session.run(queryOf(query).map { perPeriodetype(it) }.asList)
-    }
+        """.list { perPeriodetype(it) }
 
-    private fun tildeltPerPeriodetype() = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
+    private fun tildeltPerPeriodetype() =
+        """ SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
                  INNER JOIN vedtak v on o.vedtak_ref = v.id
                  INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
                  INNER JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type
-        """
-        session.run(queryOf(query).map { perPeriodetype(it) }.asList)
-    }
+        """.list { perPeriodetype(it) }
 
-    private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom
-        """
-        session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
-    })
+    private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(
+        """ SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom"""
+            .single(mapOf("fom" to fom)) { it.int("antall") } )
 
-    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(sessionOf(dataSource).use {session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT COUNT(1) as antall FROM automatisering a
+    private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(
+        """ SELECT COUNT(1) as antall FROM automatisering a
                 INNER JOIN vedtak v on a.vedtaksperiode_ref = v.id
             WHERE a.automatisert = true AND stikkprøve = false AND a.opprettet >= :fom
-        """
-        session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
-    })
+        """.single(mapOf("fom" to fom)) { it.int("antall")})
 
-    private fun antallAnnulleringer(fom: LocalDate) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
+    private fun antallAnnulleringer(fom: LocalDate) = requireNotNull("""
             SELECT COUNT(1) as antall FROM annullert_av_saksbehandler WHERE annullert_tidspunkt >= :fom
-        """
-        session.run(queryOf(query, mapOf("fom" to fom)).map { it.int("antall") }.asSingle)
-    })
+        """.single(mapOf("fom" to fom)) {it.int("antall")})
 
-    private fun perPeriodetype(row: Row) =
-        Periodetype.valueOf(row.string("periodetype")) to row.int("antall")
+    private fun perPeriodetype(row: Row) = Periodetype.valueOf(row.string("periodetype")) to row.int("antall")
 }

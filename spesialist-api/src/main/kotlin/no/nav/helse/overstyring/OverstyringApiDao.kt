@@ -7,7 +7,7 @@ import java.util.*
 import javax.sql.DataSource
 
 class OverstyringApiDao(private val dataSource: DataSource) {
-    fun finnOverstyring(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use {
+    fun finnOverstyring(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
@@ -16,7 +16,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
             WHERE p.fodselsnummer = ?AND a.orgnummer = ?
         """
-        it.run(
+        session.run(
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                 .map { overstyringRow ->
                 val id = overstyringRow.long("id")
@@ -28,7 +28,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                     timestamp = overstyringRow.localDateTime("tidspunkt"),
                     saksbehandlerNavn = overstyringRow.string("navn"),
                     saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
-                    overstyrteDager = it.run(
+                    overstyrteDager = session.run(
                         queryOf(
                             "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
                         ).map { overstyringDagRow ->

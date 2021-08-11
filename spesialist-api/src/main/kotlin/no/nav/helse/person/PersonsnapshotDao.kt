@@ -2,41 +2,28 @@ package no.nav.helse.person
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
-import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-class PersonsnapshotDao(private val dataSource: DataSource) {
-    fun finnPersonByFnr(fnr: String) = sessionOf(dataSource).use  { session ->
-        @Language("PostgreSQL")
-        val query = """
-            SELECT * FROM person AS p
+class PersonsnapshotDao(dataSource: DataSource): HelseDao(dataSource) {
+    fun finnPersonByFnr(fnr: String) =
+        """ SELECT * FROM person AS p
                 INNER JOIN person_info as pi ON pi.id = p.info_ref
                 INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
-            WHERE p.fodselsnummer = ?;
-        """
-        session.run(queryOf(query, fnr.toLong()).map(::tilPersonsnapshot).asSingle)
-    }
+            WHERE p.fodselsnummer = :fnr;
+        """.single(mapOf("fnr" to fnr.toLong())) { row ->tilPersonsnapshot(row) }
 
-    fun finnFnrByAktørId(aktørId: String) = sessionOf(dataSource).use {
-        @Language("PostgreSQL")
-        val query = "SELECT fodselsnummer FROM person WHERE aktor_id = ?"
+    fun finnFnrByAktørId(aktørId: String) =
+        """SELECT fodselsnummer FROM person WHERE aktor_id = :aktorId"""
+            .single(mapOf("aktorId" to aktørId.toLong()))  { it.long("fodselsnummer").toFødselsnummer() }
 
-        it.run(queryOf(query, aktørId.toLong()).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle)
-    }
-
-    fun finnFnrByVedtaksperiodeId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
-        @Language("PostgreSQL")
-        val query = """
-            SELECT fodselsnummer FROM person
+    fun finnFnrByVedtaksperiodeId(vedtaksperiodeId: UUID) =
+        """ SELECT fodselsnummer FROM person
                 INNER JOIN vedtak v on person.id = v.person_ref
-            WHERE v.vedtaksperiode_id = ?
-            """
-        it.run(queryOf(query, vedtaksperiodeId).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle)
-    }
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
+            """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("fodselsnummer").toFødselsnummer() }
 
     private fun tilPersonsnapshot(row: Row): Pair<PersonMetadataApiDto, SnapshotDto> {
         val person = PersonMetadataApiDto(

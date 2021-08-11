@@ -3,6 +3,7 @@ package no.nav.helse.oppgave
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.PersoninfoApiDto
@@ -14,7 +15,7 @@ import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-class OppgaveDao(private val dataSource: DataSource) {
+class OppgaveDao(private val dataSource: DataSource): HelseDao(dataSource) {
     fun finnOppgaver(inkluderRiskQaOppgaver: Boolean) =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA = if (inkluderRiskQaOppgaver) "" else "AND o.type != 'RISK_QA'"
@@ -50,49 +51,27 @@ class OppgaveDao(private val dataSource: DataSource) {
         }
 
     fun finnOppgaveId(vedtaksperiodeId: UUID) =
-        sessionOf(dataSource).use {
-            @Language("PostgreSQL")
-            val statement = """
-                SELECT id FROM oppgave
-                WHERE vedtak_ref =
-                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
-                AND status = 'AvventerSaksbehandler'::oppgavestatus
-                """
-            it.run(
-                queryOf(statement, vedtaksperiodeId)
-                    .map { it.long("id") }.asSingle
-            )
-        }
+        """ SELECT id FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
     fun finnOppgaveId(fødselsnummer: String) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                """
-                    SELECT o.id as oppgaveId
-                    FROM oppgave o
-                             JOIN vedtak v ON v.id = o.vedtak_ref
-                             JOIN person p ON v.person_ref = p.id
-                    WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
-                      AND p.fodselsnummer = :fodselsnummer;
-                """
-            session.run(
-                queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
-                    .map { it.long("oppgaveId") }.asSingle
-            )
-        }
+        """ SELECT o.id as oppgaveId
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
+              AND p.fodselsnummer = :fodselsnummer;
+        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }
 
-    fun finn(oppgaveId: Long) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
+    fun finn(oppgaveId: Long) =
+        """ SELECT o.type, o.status, v.vedtaksperiode_id, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE o.id = ?
-        """
-        session.run(
-            queryOf(statement, oppgaveId)
-                .map { row ->
+            WHERE o.id = :oppgaveId
+        """.single(mapOf("oppgaveId" to oppgaveId)) { row ->
                     Oppgave(
                         id = oppgaveId,
                         type = row.string("type"),
@@ -102,21 +81,14 @@ class OppgaveDao(private val dataSource: DataSource) {
                         ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                         ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
                     )
-                }.asSingle
-        )
-    }
+                }
 
-    fun finnAktive(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT o.id, o.type, o.status, o.utbetaling_id
+    fun finnAktive(vedtaksperiodeId: UUID) =
+        """ SELECT o.id, o.type, o.status, o.utbetaling_id
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE v.vedtaksperiode_id = ? AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
-        """
-        session.run(
-            queryOf(statement, vedtaksperiodeId)
-                .map { row ->
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
+        """.list(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { row ->
                     Oppgave(
                         id = row.long("id"),
                         type = row.string("type"),
@@ -124,21 +96,14 @@ class OppgaveDao(private val dataSource: DataSource) {
                         vedtaksperiodeId = vedtaksperiodeId,
                         utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
                     )
-                }.asList
-        )
-    }
+                }
 
-    fun finn(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
+    fun finn(utbetalingId: UUID) =
+        """ SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
-            WHERE utbetaling_id = ? AND o.status NOT IN ('Invalidert'::oppgavestatus)
-        """
-        session.run(
-            queryOf(statement, utbetalingId)
-                .map { row ->
+            WHERE utbetaling_id = :utbetalingId AND o.status NOT IN ('Invalidert'::oppgavestatus)
+        """.single(mapOf("utbetalingId" to utbetalingId)) { row ->
                     Oppgave(
                         id = row.long("id"),
                         type = row.string("type"),
@@ -148,25 +113,14 @@ class OppgaveDao(private val dataSource: DataSource) {
                         ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                         ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
                     )
-                }.asSingle
-        )
-    }
+                }
 
-    fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-            SELECT v.vedtaksperiode_id
+    fun finnVedtaksperiodeId(oppgaveId: Long) = requireNotNull(
+        """ SELECT v.vedtaksperiode_id
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
-            WHERE o.id = ?
-        """
-        session.run(
-            queryOf(
-                statement,
-                oppgaveId
-            ).map { row -> UUID.fromString(row.string("vedtaksperiode_id")) }.asSingle
-        )
-    })
+            WHERE o.id = :oppgaveId
+        """.single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("vedtaksperiode_id"))})
 
     fun opprettOppgave(commandContextId: UUID, oppgavetype: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
@@ -181,90 +135,51 @@ class OppgaveDao(private val dataSource: DataSource) {
         )
     }) { "Kunne ikke opprette oppgave" }
 
-    private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(sessionOf(dataSource).use {
-        @Language("PostgreSQL")
-        val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
-        it.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
-    }) { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
+    private fun vedtakRef(vedtaksperiodeId: UUID) = requireNotNull(
+        """SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId"""
+        .single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") })
+        { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
 
     fun updateOppgave(
         oppgaveId: Long,
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String? = null,
         oid: UUID? = null
-    ) = sessionOf(dataSource).use {
-        it.run(
-            queryOf(
-                "UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=?, ferdigstilt_av_oid=?, status=?::oppgavestatus WHERE id=?",
-                ferdigstiltAv,
-                oid,
-                oppgavestatus.name,
-                oppgaveId
-            ).asUpdate
-        )
-    }
+    ) = """UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId"""
+        .update(mapOf("ferdigstiltAv" to ferdigstiltAv,
+                "oid" to oid,
+                "oppgavestatus" to oppgavestatus.name,
+                "oppgaveId" to oppgaveId))
 
-    fun finnContextId(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
-        session.run(
-            queryOf("SELECT command_context_id FROM oppgave WHERE id = ?", oppgaveId)
-                .map { row -> UUID.fromString(row.string("command_context_id")) }.asSingle
-        )
-    })
+    fun finnContextId(oppgaveId: Long) = requireNotNull(
+        """SELECT command_context_id FROM oppgave WHERE id = :oppgaveId""".single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("command_context_id"))})
 
-    fun finnHendelseId(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement =
-            """SELECT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = ?)"""
-        session.run(
-            queryOf(statement, oppgaveId)
-                .map { row -> UUID.fromString(row.string("hendelse_id")) }.asSingle
-        )
-    })
+    fun finnHendelseId(oppgaveId: Long) = requireNotNull(
+        """SELECT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)"""
+            .single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("hendelse_id")) })
 
-    fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-                SELECT COUNT(1) AS oppgave_count FROM oppgave
-                WHERE utbetaling_id = ? AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-            """
-        session.run(queryOf(query, utbetalingId).map { it.int("oppgave_count") }.asSingle)
-    }) > 0
+    fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(
+        """ SELECT COUNT(1) AS oppgave_count FROM oppgave
+            WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
+        """.single(mapOf("utbetalingId" to utbetalingId)) { it.int("oppgave_count") }) > 0
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) =
-        requireNotNull(sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-                SELECT COUNT(1) AS oppgave_count FROM oppgave o
+        requireNotNull(
+            """ SELECT COUNT(1) AS oppgave_count FROM oppgave o
                 INNER JOIN vedtak v on o.vedtak_ref = v.id
-                WHERE v.vedtaksperiode_id = ? AND o.status = 'Ferdigstilt'::oppgavestatus
-            """
-            session.run(queryOf(query, vedtaksperiodeId).map { it.int("oppgave_count") }.asSingle)
-        }) > 0
+                WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'Ferdigstilt'::oppgavestatus
+            """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.int("oppgave_count") }) > 0
 
-    fun venterPåSaksbehandler(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-                SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=? AND status IN('AvventerSaksbehandler'::oppgavestatus) )
-            """
-        session.run(queryOf(query, oppgaveId).map { it.boolean(1) }.asSingle)
-    })
+    fun venterPåSaksbehandler(oppgaveId: Long) = requireNotNull(
+        """ SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus) )"""
+            .single(mapOf("oppgaveId" to oppgaveId)) { it.boolean(1) })
 
-    fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val statement = """
-                SELECT fodselsnummer from person
-                INNER JOIN vedtak v on person.id = v.person_ref
-                INNER JOIN oppgave o on v.id = o.vedtak_ref
-                WHERE o.id = ?
-            """
-
-        session.run(
-            queryOf(
-                statement,
-                oppgaveId
-            ).map { it.long("fodselsnummer").toFødselsnummer() }.asSingle
-        )
-    })
+    fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(
+        """ SELECT fodselsnummer from person
+            INNER JOIN vedtak v on person.id = v.person_ref
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = :oppgaveId
+        """.single(mapOf("oppgaveId" to oppgaveId))  { it.long("fodselsnummer").toFødselsnummer() })
 
     private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),
