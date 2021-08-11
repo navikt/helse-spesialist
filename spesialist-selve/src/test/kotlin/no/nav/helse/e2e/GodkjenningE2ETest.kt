@@ -6,10 +6,9 @@ import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgavestatus.*
-import no.nav.helse.snapshotMedWarning
-import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -94,6 +93,64 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertVedtak(VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `oppdaterer saksbehandleroppgavetype dersom påminnet godkjenningsbehov har endret inntektskilde til EN_ARBEIDSGIVER`() {
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
+        )
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+        assertVedtak(VEDTAKSPERIODE_ID)
+        assertInntektskilde(VEDTAKSPERIODE_ID, Inntektskilde.FLERE_ARBEIDSGIVERE)
+
+        sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
+        )
+
+        assertInntektskilde(VEDTAKSPERIODE_ID, Inntektskilde.EN_ARBEIDSGIVER)
     }
 
     @Test

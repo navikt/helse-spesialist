@@ -17,7 +17,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
         personRef: Long,
         arbeidsgiverRef: Long,
         speilSnapshotRef: Int
-    ) = sessionOf(dataSource).use  { session ->
+    ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref)
@@ -38,7 +38,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
     }
 
     internal fun oppdater(vedtakRef: Long, fom: LocalDate, tom: LocalDate, speilSnapshotRef: Int) =
-        sessionOf(dataSource).use  { session ->
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
                 UPDATE vedtak
@@ -57,7 +57,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use  { session ->
+    internal fun opprettKobling(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO vedtaksperiode_hendelse(vedtaksperiode_id, hendelse_ref) VALUES (?, ?)
@@ -68,20 +68,20 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun fjernKobling(vedtaksperiodeId: UUID, hendelseId: UUID) =
 
-        sessionOf(dataSource, returnGeneratedKey = true).use  { session ->
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val statement = "DELETE FROM vedtaksperiode_hendelse WHERE hendelse_ref = ? AND vedtaksperiode_id = ?"
             session.run(queryOf(statement, hendelseId, vedtaksperiodeId).asUpdate)
         }
 
-    internal fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
+    internal fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
         session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)
     }
 
     internal fun leggTilVedtaksperiodetype(vedtaksperiodeId: UUID, type: Periodetype, inntektskilde: Inntektskilde) =
-        sessionOf(dataSource).use  { session ->
+        sessionOf(dataSource).use { session ->
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@use
 
             @Language("PostgreSQL")
@@ -95,7 +95,7 @@ internal class VedtakDao(private val dataSource: DataSource) {
                 checkNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
 
             @Language("PostgreSQL")
-            val statement = "SELECT type FROM saksbehandleroppgavetype where vedtak_ref = ?"
+            val statement = "SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = ?"
             checkNotNull(session.run(queryOf(statement, vedtakRef).map {
                 enumValueOf<Periodetype>(it.string("type"))
             }.asSingle)) { "Forventet å finne saksbehandleroppgavetype for vedtaksperiodeId $vedtaksperiodeId" }
@@ -103,17 +103,30 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         sessionOf(dataSource).use { session ->
-            val vedtakRef =
-                requireNotNull(finnVedtakId(vedtaksperiodeId)) { "Finner ikke vedtakRef for $vedtaksperiodeId" }
-
             @Language("PostgreSQL")
-            val statement = "SELECT inntektskilde FROM saksbehandleroppgavetype where vedtak_ref = ?"
-            session.run(queryOf(statement, vedtakRef).map {
+            val statement =
+                "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)"
+            session.run(queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).map {
                 enumValueOf<Inntektskilde>(it.string("inntektskilde"))
             }.asSingle)
         }
 
-    internal fun erAutomatiskGodkjent(utbetalingId: UUID) = sessionOf(dataSource).use  { session ->
+    internal fun oppdaterInntektskilde(vedtaksperiodeId: UUID, inntektskilde: Inntektskilde) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                "UPDATE saksbehandleroppgavetype SET inntektskilde = :inntektskilde WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)"
+            session.run(
+                queryOf(
+                    statement, mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "inntektskilde" to inntektskilde.name
+                    )
+                ).asUpdate
+            )
+        }
+
+    internal fun erAutomatiskGodkjent(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT automatisert FROM automatisering WHERE utbetaling_id = ?;"
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)

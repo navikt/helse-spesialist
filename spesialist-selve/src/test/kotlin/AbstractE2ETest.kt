@@ -36,6 +36,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
@@ -200,6 +201,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØR,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
             Testmeldingfabrikk.AktivVedtaksperiodeJson(
                 orgnr,
@@ -222,6 +224,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 periodetype = periodetype,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
+                inntektskilde = inntektskilde,
                 aktiveVedtaksperioder = aktiveVedtaksperioder,
                 orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
                 utbetalingtype = utbetalingtype
@@ -643,6 +646,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }.also {
             assertEquals(tilstand.toList(), it)
+        }
+    }
+
+    protected fun assertInntektskilde(vedtaksperiodeId: UUID, vararg inntektskilde: Inntektskilde) {
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId
+                    )
+                ).map { it.string("inntektskilde") }.asList
+            )
+        }.also {
+            assertEquals(inntektskilde.map(Inntektskilde::name), it)
         }
     }
 

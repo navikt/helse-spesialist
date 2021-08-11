@@ -206,6 +206,12 @@ internal class HendelseMediator(
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
+
+            if (inntektskilde == Inntektskilde.EN_ARBEIDSGIVER && vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+                vedtakDao.oppdaterInntektskilde(vedtaksperiodeId, inntektskilde)
+                sikkerLogg.info("Bytter inntektskilde til ${inntektskilde.name} for vedtaksperiodeId=$vedtaksperiodeId, fnr=$fødselsnummer")
+            }
+
             return
         }
         utfør(
