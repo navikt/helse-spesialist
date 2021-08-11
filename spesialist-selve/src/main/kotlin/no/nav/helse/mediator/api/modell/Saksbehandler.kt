@@ -2,6 +2,7 @@ package no.nav.helse.mediator.api.modell
 
 import io.ktor.auth.jwt.*
 import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.saksbehandler.SaksbehandlerDto
 import java.util.*
 
 internal class Saksbehandler(
@@ -29,4 +30,6 @@ internal class Saksbehandler(
         "navn" to navn,
         "ident" to ident,
     )
+
+    fun toDto() = SaksbehandlerDto(oid = oid, navn = navn, epost = epostadresse, ident = ident)
 }

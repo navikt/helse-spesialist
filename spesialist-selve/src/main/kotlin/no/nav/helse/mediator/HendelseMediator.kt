@@ -3,10 +3,7 @@ package no.nav.helse.mediator
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.annulleringsteller
-import no.nav.helse.mediator.api.AnnulleringDto
-import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
-import no.nav.helse.mediator.api.OverstyringRestDto
+import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.CommandContextDao
@@ -320,8 +317,8 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
-    fun håndter(overstyringMessage: OverstyringRestDto) {
-        overstyringsteller.inc()
+    fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
+        overstyringsteller.labels("opplysningstype", "tidslinje").inc()
 
         val overstyring = JsonMessage.newMessage(
             standardfelter("overstyr_tidslinje", overstyringMessage.fødselsnummer).apply {
@@ -336,6 +333,26 @@ internal class HendelseMediator(
             }
         ).also {
             sikkerLogg.info("Publiserer overstyring:\n${it.toJson()}")
+        }
+
+        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
+    }
+
+    fun håndter(overstyringMessage: OverstyrInntektKafkaDto) {
+        overstyringsteller.labels("opplysningstype", "inntekt").inc()
+
+        val overstyring = JsonMessage.newMessage(
+            standardfelter("overstyr_inntekt", overstyringMessage.fødselsnummer).apply {
+                put("aktørId", overstyringMessage.aktørId)
+                put("organisasjonsnummer", overstyringMessage.organisasjonsnummer)
+                put("begrunnelse", overstyringMessage.begrunnelse)
+                put("saksbehandlerOid", overstyringMessage.saksbehandler.oid)
+                put("saksbehandlerNavn", overstyringMessage.saksbehandler.navn)
+                put("saksbehandlerIdent", overstyringMessage.saksbehandler.ident)
+                put("saksbehandlerEpost", overstyringMessage.saksbehandler.epost)
+            }
+        ).also {
+            sikkerLogg.info("Publiserer overstyring av inntekt:\n${it.toJson()}")
         }
 
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())

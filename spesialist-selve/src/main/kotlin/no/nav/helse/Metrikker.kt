@@ -10,7 +10,9 @@ private val histogram =
         .register()
 
 internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
+    .labelNames("opplysningstype", "type")
     .register()
+
 
 internal val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
     .register()

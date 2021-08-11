@@ -107,26 +107,6 @@ data class OppdaterPersonsnapshotDto(
     val fødselsnummer: String
 )
 
-data class OverstyringRestDto(
-    val saksbehandlerEpost: String,
-    val saksbehandlerOid: UUID,
-    val saksbehandlerNavn: String,
-    val saksbehandlerIdent: String,
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<Dag>
-) {
-    data class Dag(
-        val dato: LocalDate,
-        val type: Type,
-        val grad: Int?
-    ) {
-        enum class Type { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }
-    }
-}
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GodkjenningDTO(
     val oppgavereferanse: Long,
@@ -139,19 +119,4 @@ data class GodkjenningDTO(
     init {
         if (!godkjent) requireNotNull(årsak)
     }
-}
-
-@JsonIgnoreProperties
-class OverstyringDTO(
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyringdagDTO>
-) {
-    class OverstyringdagDTO(
-        val dato: LocalDate,
-        val type: String,
-        val grad: Int?
-    )
 }
