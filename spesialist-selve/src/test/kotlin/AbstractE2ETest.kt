@@ -153,7 +153,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao
     )
-    private val hendelseMediator = HendelseMediator(
+    internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
         dataSource = dataSource,
         oppgaveMediator = oppgaveMediator,

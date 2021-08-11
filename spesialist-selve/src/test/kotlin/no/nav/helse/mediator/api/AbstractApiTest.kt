@@ -12,6 +12,7 @@ import io.ktor.jackson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
@@ -39,13 +40,34 @@ abstract class AbstractApiTest {
 
     companion object {
         private val requiredGroup: UUID = UUID.randomUUID()
-        private const val clientId = "client_id"
-        private const val epostadresse = "sara.saksbehandler@nav.no";
-        private const val issuer = "https://jwt-provider-domain"
+        internal val clientId = "client_id"
+        private val epostadresse = "sara.saksbehandler@nav.no";
+        internal val issuer = "https://jwt-provider-domain"
         internal val jwtStub = JwtStub()
+        internal val azureAdConfig =
+            AzureAdAppConfig(
+                clientId = clientId,
+                issuer = issuer,
+                jwkProvider = jwtStub.getJwkProviderMock()
+            )
 
         fun HttpRequestBuilder.authentication(oid: UUID, group: String? = null) {
             header(
+                "Authorization",
+                "Bearer ${
+                    jwtStub.getToken(
+                        listOfNotNull(requiredGroup.toString(), group),
+                        oid.toString(),
+                        epostadresse,
+                        clientId,
+                        issuer
+                    )
+                }"
+            )
+        }
+
+        fun TestApplicationRequest.authentication(oid: UUID, group: String? = null) {
+            addHeader(
                 "Authorization",
                 "Bearer ${
                     jwtStub.getToken(
