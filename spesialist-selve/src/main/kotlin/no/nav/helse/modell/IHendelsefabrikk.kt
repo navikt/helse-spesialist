@@ -63,7 +63,7 @@ internal interface IHendelsefabrikk {
     ): Godkjenningsbehov
     fun godkjenning(json: String): Godkjenningsbehov
 
-    fun overstyring(
+    fun overstyringTidslinje(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -74,9 +74,24 @@ internal interface IHendelsefabrikk {
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
         json: String
-    ): Overstyring
-    fun overstyring(json: String): Overstyring
+    ): OverstyringTidslinje
 
+    fun overstyringTidslinje(json: String): OverstyringTidslinje
+
+    fun overstyringInntekt(json: String): OverstyringInntekt
+    fun overstyringInntekt(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        begrunnelse: String,
+        månedligInntekt: Double,
+        skjæringstidspunkt: LocalDate,
+        json: String
+    ): OverstyringInntekt
 
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
     fun utbetalingEndret(json: String): UtbetalingEndret

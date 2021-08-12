@@ -4,6 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -59,6 +60,43 @@ internal class OverstyringDao(private val dataSource: DataSource) {
                     )
                 }
             }
+        }
+    }
+
+    fun persisterOverstyringInntekt(
+        hendelseId: UUID,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        begrunnelse: String,
+        saksbehandlerRef: UUID,
+        månedligInntekt: Double,
+        skjæringstidspunkt: LocalDate
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring_inntekt(hendelse_ref, person_ref, arbeidsgiver_ref, saksbehandler_ref, begrunnelse, manedlig_inntekt, skjaeringstidspunkt)
+                SELECT :hendelse_id, p.id, ag.id, :saksbehandler_ref, :begrunnelse, :manedlig_inntekt, :skjaeringstidspunkt
+                FROM arbeidsgiver ag,
+                     person p
+                WHERE p.fodselsnummer = :fodselsnummer
+                  AND ag.orgnummer = :orgnr
+            """.trimIndent()
+            session.run(
+                queryOf(
+                    opprettOverstyringQuery,
+                    mapOf(
+                        "hendelse_id" to hendelseId,
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnr" to organisasjonsnummer.toLong(),
+                        "saksbehandler_ref" to saksbehandlerRef,
+                        "begrunnelse" to begrunnelse,
+                        "manedlig_inntekt" to månedligInntekt,
+                        "skjaeringstidspunkt" to skjæringstidspunkt
+
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
         }
     }
 

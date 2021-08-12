@@ -21,7 +21,7 @@ import java.util.*
  *
  * Det er primært spleis som håndterer dette eventet.
  */
-internal class Overstyring(
+internal class OverstyringTidslinje(
     override val id: UUID,
     private val fødselsnummer: String,
     oid: UUID,
@@ -45,7 +45,7 @@ internal class Overstyring(
             saksbehandlerDao = saksbehandlerDao
         ),
         ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),
-        PersisterOverstyringCommand(
+        PersisterOverstyringTidslinjeCommand(
             oid = oid,
             eventId = id,
             fødselsnummer = fødselsnummer,
@@ -60,7 +60,7 @@ internal class Overstyring(
     override fun fødselsnummer() = fødselsnummer
     override fun toJson() = json
 
-    internal class OverstyringRiver(
+    internal class OverstyringTidslinjeRiver(
         rapidsConnection: RapidsConnection,
         private val mediator: HendelseMediator
     ) : River.PacketListener {
@@ -91,7 +91,7 @@ internal class Overstyring(
                 keyValue("hendelseId", hendelseId),
                 keyValue("hendelse", packet.toJson())
             )
-            mediator.overstyring(packet, hendelseId, packet["fødselsnummer"].asText(), context)
+            mediator.overstyringTidslinje(packet, hendelseId, packet["fødselsnummer"].asText(), context)
         }
     }
 }

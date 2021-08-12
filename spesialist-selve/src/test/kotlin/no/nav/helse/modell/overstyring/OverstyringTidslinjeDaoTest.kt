@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
-internal class OverstyringDaoTest : DatabaseIntegrationTest() {
+internal class OverstyringTidslinjeDaoTest : DatabaseIntegrationTest() {
 
     companion object {
         private const val PERSON_FORNAVN = "Per"
@@ -43,7 +43,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         personDao.insertPerson(FØDSELSNUMMER, AKTØR_ID, navn_ref, 420, infotrygdutbetaling_ref)
         overstyringDao.persisterOverstyring(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID)
-        val hentetOverstyring = overstyringApiDao.finnOverstyring(FØDSELSNUMMER, ORGNUMMER).first()
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)

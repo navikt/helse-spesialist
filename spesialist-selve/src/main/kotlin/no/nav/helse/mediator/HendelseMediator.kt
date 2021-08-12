@@ -66,7 +66,8 @@ internal class HendelseMediator(
             Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
-            Overstyring.OverstyringRiver(it, this)
+            OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
+            OverstyringInntekt.OverstyringInntektRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
@@ -270,13 +271,22 @@ internal class HendelseMediator(
         )
     }
 
-    override fun overstyring(
+    override fun overstyringTidslinje(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
         context: MessageContext
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.overstyring(message.toJson()), context)
+        utfør(fødselsnummer, hendelsefabrikk.overstyringTidslinje(message.toJson()), context)
+    }
+
+    override fun overstyringInntekt(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        context: MessageContext
+    ) {
+        utfør(fødselsnummer, hendelsefabrikk.overstyringInntekt(message.toJson()), context)
     }
 
     override fun utbetalingAnnullert(

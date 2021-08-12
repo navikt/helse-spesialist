@@ -191,7 +191,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun overstyring(
+    override fun overstyringTidslinje(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -202,7 +202,7 @@ internal class Hendelsefabrikk(
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
         json: String
-    ) = Overstyring(
+    ) = OverstyringTidslinje(
         id = id,
         fødselsnummer = fødselsnummer,
         oid = oid,
@@ -218,9 +218,38 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao
     )
 
-    override fun overstyring(json: String): Overstyring {
+    override fun overstyringInntekt(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        begrunnelse: String,
+        månedligInntekt: Double,
+        skjæringstidspunkt: LocalDate,
+        json: String
+    ) = OverstyringInntekt(
+        id = id,
+        fødselsnummer = fødselsnummer,
+        oid = oid,
+        navn = navn,
+        ident = ident,
+        epost = epost,
+        orgnummer = orgnummer,
+        begrunnelse = begrunnelse,
+        månedligInntekt = månedligInntekt,
+        skjæringstidspunkt = skjæringstidspunkt,
+        reservasjonDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
+        overstyringDao = overstyringDao,
+        json = json
+    )
+
+    override fun overstyringTidslinje(json: String): OverstyringTidslinje {
         val jsonNode = mapper.readTree(json)
-        return overstyring(
+        return overstyringTidslinje(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
@@ -230,6 +259,23 @@ internal class Hendelsefabrikk(
             orgnummer = jsonNode.path("organisasjonsnummer").asText(),
             begrunnelse = jsonNode.path("begrunnelse").asText(),
             overstyrteDager = jsonNode.path("dager").toOverstyrteDagerDto(),
+            json = json
+        )
+    }
+
+    override fun overstyringInntekt(json: String): OverstyringInntekt {
+        val jsonNode = mapper.readTree(json)
+        return overstyringInntekt(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
+            navn = jsonNode.path("saksbehandlerNavn").asText(),
+            ident = jsonNode.path("saksbehandlerIdent").asText(),
+            epost = jsonNode.path("saksbehandlerEpost").asText(),
+            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
+            begrunnelse = jsonNode.path("begrunnelse").asText(),
+            månedligInntekt = jsonNode.path("månedligInntekt").asDouble(),
+            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
             json = json
         )
     }

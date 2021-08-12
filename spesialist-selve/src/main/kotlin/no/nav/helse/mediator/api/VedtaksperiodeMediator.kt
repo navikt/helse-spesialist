@@ -100,7 +100,7 @@ internal class VedtaksperiodeMediator(
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
                 val navn = arbeidsgiverDao.finnNavn(it.organisasjonsnummer)
                 val bransjer = arbeidsgiverDao.finnBransjer(it.organisasjonsnummer)
-                val overstyringer = overstyringDao.finnOverstyring(personMetadata.fødselsnummer, it.organisasjonsnummer)
+                val overstyringer = overstyringDao.finnOverstyringerAvTidslinjer(personMetadata.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
                         OverstyringApiDto(
                             hendelseId = overstyring.hendelseId,

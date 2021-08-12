@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
-internal class OverstyringApiTest : AbstractE2ETest() {
+internal class OverstyringTidslinjeApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {

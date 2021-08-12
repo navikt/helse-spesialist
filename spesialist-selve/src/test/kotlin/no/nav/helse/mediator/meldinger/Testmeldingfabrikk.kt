@@ -425,7 +425,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
-    fun lagOverstyring(
+    fun lagOverstyringTidslinje(
         id: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         dager: List<OverstyringDagDto> = emptyList(),
@@ -443,6 +443,29 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "saksbehandlerOid" to saksbehandlerOid,
             "saksbehandlerNavn" to saksbehandlerNavn,
             "saksbehandlerEpost" to saksbehandlerEpost
+        )
+    )
+
+    fun lagOverstyringInntekt(
+        id: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String = "orgnr",
+        begrunnelse: String = "begrunnelse",
+        saksbehandlerOid: UUID = UUID.randomUUID(),
+        saksbehandlerNavn: String = "saksbehandler",
+        saksbehandlerEpost: String = "saksbehandler@nav.no",
+        månedligInntekt: Double = 25000.0,
+        skjæringstidspunkt: LocalDate
+    ) = nyHendelse(
+        id, "overstyr_inntekt", mapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "begrunnelse" to begrunnelse,
+            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerNavn" to saksbehandlerNavn,
+            "saksbehandlerEpost" to saksbehandlerEpost,
+            "månedligInntekt" to månedligInntekt,
+            "skjæringstidspunkt" to skjæringstidspunkt
         )
     )
 

@@ -22,3 +22,15 @@ data class OverstyringDagDto(
     val type: Dagtype,
     val grad: Int?
 )
+
+data class OverstyringInntektDto(
+    val hendelseId: UUID,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val begrunnelse: String,
+    val timestamp: LocalDateTime,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String?,
+    val måndeligInntekt: Double,
+    val skjæringstidspunkt: LocalDate
+)

@@ -2,10 +2,10 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.januar
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
-import no.nav.helse.snapshotMedWarning
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -34,7 +34,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
 
-        assertTrue(overstyringApiDao.finnOverstyring(FØDSELSNUMMER, ORGNR).isNotEmpty())
+        assertTrue(overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNR).isNotEmpty())
         val originalOppgaveId = testRapid.inspektør.oppgaveId(originaltGodkjenningsbehov)
         assertIngenOppgaver(originalOppgaveId)
 
@@ -50,6 +50,30 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         val oppgave = oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER }
         assertEquals(SAKSBEHANDLER_EPOST, oppgave!!.tildeling?.epost)
+    }
+
+    @Test
+    fun `saksbehandler overstyrer inntekt`() {
+        val godkjenningsbehovId = settOppBruker()
+        sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar)
+
+        assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
+
+        assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
+
+        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            periodeFom = 1.januar,
+            periodeTom = 31.januar,
+            skjæringstidspunkt = 1.januar
+        )
+
+        klargjørForGodkjenning(nyttGodkjenningsbehov)
+
+        val oppgave = requireNotNull(oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER })
+        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
     @Test

@@ -10,6 +10,7 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -68,10 +69,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val AKTØR = "999999999"
     protected val ORGNR = "222222222"
     protected val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
-    protected val SNAPSHOTV1_MED_WARNINGS = snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
-    protected val SNAPSHOTV1_UTEN_WARNINGS = snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
-    protected fun snapshotv1UtenWarnings(vedtaksperiodeId:UUID = VEDTAKSPERIODE_ID, orgnr:String = ORGNR, fnr:String = FØDSELSNUMMER, aktørId:String = AKTØR) = snapshotUtenWarnings(vedtaksperiodeId, orgnr, fnr, aktørId)
-    protected fun snapshotv1MedWarnings(vedtaksperiodeId:UUID = VEDTAKSPERIODE_ID, orgnr:String = ORGNR, fnr:String = FØDSELSNUMMER, aktørId:String = AKTØR) = snapshotMedWarning(vedtaksperiodeId, orgnr, fnr, aktørId)
+    protected val SNAPSHOTV1_MED_WARNINGS =
+        snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
+    protected val SNAPSHOTV1_UTEN_WARNINGS =
+        snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
+
+    protected fun snapshotv1UtenWarnings(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        orgnr: String = ORGNR,
+        fnr: String = FØDSELSNUMMER,
+        aktørId: String = AKTØR
+    ) = snapshotUtenWarnings(vedtaksperiodeId, orgnr, fnr, aktørId)
+
+    protected fun snapshotv1MedWarnings(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        orgnr: String = ORGNR,
+        fnr: String = FØDSELSNUMMER,
+        aktørId: String = AKTØR
+    ) = snapshotMedWarning(vedtaksperiodeId, orgnr, fnr, aktørId)
 
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
@@ -256,7 +271,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun håndterAnnullering(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler){
+    protected fun håndterAnnullering(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
         hendelseMediator.håndter(annulleringDto, saksbehandler)
     }
 
@@ -310,11 +325,28 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
-                meldingsfabrikk.lagOverstyring(
+                meldingsfabrikk.lagOverstyringTidslinje(
                     id = id,
                     dager = dager,
                     organisasjonsnummer = orgnr,
                     saksbehandlerEpost = saksbehandlerEpost
+                )
+            )
+        }
+
+    protected fun sendOverstyrtInntekt(
+        orgnr: String = ORGNR,
+        månedligInntekt: Double = 25000.0,
+        skjæringstidspunkt: LocalDate
+    ): UUID =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOverstyringInntekt(
+                    id = id,
+                    organisasjonsnummer = orgnr,
+                    månedligInntekt = månedligInntekt,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    saksbehandlerEpost = SAKSBEHANDLER_EPOST
                 )
             )
         }
@@ -434,8 +466,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             ORGNR,
             VEDTAKSPERIODE_ID,
             UTBETALING_ID,
-            LocalDate.of(2018, 1, 1),
-            LocalDate.of(2018, 1, 31),
+            1.januar,
+            31.januar,
         )
         sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -540,7 +572,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(json)
     }
 
-    protected fun sendUtbetalingAnnullert(fagsystemId: String = "ASDJ12IA312KLS", saksbehandlerEpost: String = "saksbehandler_epost") {
+    protected fun sendUtbetalingAnnullert(
+        fagsystemId: String = "ASDJ12IA312KLS",
+        saksbehandlerEpost: String = "saksbehandler_epost"
+    ) {
         @Language("JSON")
         val json = """
             {
@@ -591,11 +626,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun contextId(hendelseId: UUID): UUID {
         return sessionOf(dataSource).use { session ->
-            requireNotNull(session.run(
-                queryOf("SELECT context_id FROM command_context WHERE hendelse_id = ?",
-                    hendelseId
-                ).map { UUID.fromString(it.string("context_id")) }.asSingle
-            ))
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        "SELECT context_id FROM command_context WHERE hendelse_id = ?",
+                        hendelseId
+                    ).map { UUID.fromString(it.string("context_id")) }.asSingle
+                )
+            )
         }
     }
 
@@ -613,11 +651,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertVedtaksperiodeAvvist(periodetype: String, begrunnelser: List<String>? = null, kommentar: String? =  null) {
+    protected fun assertVedtaksperiodeAvvist(
+        periodetype: String,
+        begrunnelser: List<String>? = null,
+        kommentar: String? = null
+    ) {
         testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
-            assertEquals(periodetype, it.path("periodetype").asText() )
-            assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText) )
-            assertEquals(kommentar, it.path("kommentar")?.asText() )
+            assertEquals(periodetype, it.path("periodetype").asText())
+            assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText))
+            assertEquals(kommentar, it.path("kommentar")?.asText())
         }
     }
 

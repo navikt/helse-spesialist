@@ -67,7 +67,7 @@ internal class OverstyringTest {
         opptegnelseDao = mockk(relaxed = true)
     )
 
-    private val overstyringMessage = hendelsefabrikk.overstyring(
+    private val overstyringMessage = hendelsefabrikk.overstyringTidslinje(
         id = ID,
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
