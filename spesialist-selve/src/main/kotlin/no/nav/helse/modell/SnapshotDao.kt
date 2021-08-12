@@ -9,15 +9,16 @@ import javax.sql.DataSource
 
 internal class SnapshotDao(private val dataSource: DataSource) {
 
-    fun lagre(fødselsnummer: String, snapshot: String) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        session.transaction { tx ->
-            val personRef = tx.finnPersonRef(fødselsnummer)
-            val versjon = objectMapper.readTree(snapshot)["versjon"].asInt()
-            if (versjon > tx.finnGlobalVersjon())
-                tx.oppdaterGlobalVersjon(versjon)
-            tx.lagre(personRef, snapshot, versjon)
+    fun lagre(fødselsnummer: String, snapshot: String) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.transaction { tx ->
+                val personRef = tx.finnPersonRef(fødselsnummer)
+                val versjon = objectMapper.readTree(snapshot)["versjon"].asInt()
+                if (versjon > tx.finnGlobalVersjon())
+                    tx.oppdaterGlobalVersjon(versjon)
+                tx.lagre(personRef, snapshot, versjon)
+            }
         }
-    }
 
     fun utdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         session.transaction { tx ->
@@ -76,5 +77,22 @@ internal class SnapshotDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = "UPDATE global_snapshot_versjon SET versjon = ?, sist_endret = now() WHERE id = 1"
         this.run(queryOf(statement, versjon).asExecute)
+    }
+
+    internal fun settSnapshotVersjon(fødselsnummer: String, versjon: Int) {
+        @Language("PostgreSQL")
+        val statement = """
+            UPDATE speil_snapshot SET versjon = :versjon WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+        """
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    statement, mapOf(
+                        "versjon" to versjon,
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
+                ).asUpdate
+            )
+        }
     }
 }

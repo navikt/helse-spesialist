@@ -6,10 +6,7 @@ import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.IHendelsefabrikk
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -40,6 +37,7 @@ internal class HendelseMediator(
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
@@ -209,7 +207,8 @@ internal class HendelseMediator(
 
             if (inntektskilde == Inntektskilde.EN_ARBEIDSGIVER && vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE) {
                 vedtakDao.oppdaterInntektskilde(vedtaksperiodeId, inntektskilde)
-                sikkerLogg.info("Bytter inntektskilde til ${inntektskilde.name} for vedtaksperiodeId=$vedtaksperiodeId, fnr=$fødselsnummer")
+                snapshotDao.settSnapshotVersjon(fødselsnummer, 0)
+                sikkerLogg.info("Bytter inntektskilde til ${inntektskilde.name} for vedtaksperiodeId=$vedtaksperiodeId, fnr=$fødselsnummer. Setter også snapshotversjon til 0")
             }
 
             return
