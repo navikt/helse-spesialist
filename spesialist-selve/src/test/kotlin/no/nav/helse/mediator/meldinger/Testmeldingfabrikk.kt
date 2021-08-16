@@ -453,6 +453,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         saksbehandlerOid: UUID = UUID.randomUUID(),
         saksbehandlerNavn: String = "saksbehandler",
         saksbehandlerEpost: String = "saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent",
         månedligInntekt: Double = 25000.0,
         skjæringstidspunkt: LocalDate
     ) = nyHendelse(
@@ -462,6 +463,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "organisasjonsnummer" to organisasjonsnummer,
             "begrunnelse" to begrunnelse,
             "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerIdent" to saksbehandlerident,
             "saksbehandlerNavn" to saksbehandlerNavn,
             "saksbehandlerEpost" to saksbehandlerEpost,
             "månedligInntekt" to månedligInntekt,

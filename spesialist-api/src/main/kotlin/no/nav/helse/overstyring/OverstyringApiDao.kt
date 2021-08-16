@@ -55,7 +55,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
                 INNER JOIN hendelse h ON h.id = o.hendelse_ref
-            WHERE p.fodselsnummer = ?AND a.orgnummer = ?
+            WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
             it.run(
                 queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())

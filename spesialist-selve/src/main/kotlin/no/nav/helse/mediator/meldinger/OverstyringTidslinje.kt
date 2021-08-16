@@ -67,6 +67,8 @@ internal class OverstyringTidslinje(
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+        // TODO: her verfiserer vi ikke at vi tar inn saksbehandler -> så vi dytter potensielt tomme strings inn i basen.. Skriv test
+
         init {
             River(rapidsConnection).apply {
                 validate {

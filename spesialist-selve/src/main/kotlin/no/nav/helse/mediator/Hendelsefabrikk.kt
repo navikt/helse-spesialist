@@ -128,13 +128,17 @@ internal class Hendelsefabrikk(
             periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-            arbeidsforholdId = jsonNode.path("Godkjenning").path("arbeidsforholdId").takeUnless(JsonNode::isMissingOrNull)?.asText(),
+            arbeidsforholdId = jsonNode.path("Godkjenning").path("arbeidsforholdId")
+                .takeUnless(JsonNode::isMissingOrNull)?.asText(),
             skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
             periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
             utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
             inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
-            aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")),
-            orgnummereMedAktiveArbeidsforhold = jsonNode.path("Godkjenning").path("orgnummereMedAktiveArbeidsforhold").takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
+            aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(
+                jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")
+            ),
+            orgnummereMedAktiveArbeidsforhold = jsonNode.path("Godkjenning").path("orgnummereMedAktiveArbeidsforhold")
+                .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             json = json
         )
     }

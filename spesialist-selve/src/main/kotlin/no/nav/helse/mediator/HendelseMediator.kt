@@ -22,6 +22,7 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
@@ -286,7 +287,19 @@ internal class HendelseMediator(
         fødselsnummer: String,
         context: MessageContext
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.overstyringInntekt(message.toJson()), context)
+        utfør(fødselsnummer, hendelsefabrikk.overstyringInntekt(
+            id = UUID.fromString(message["@id"].asText()),
+            fødselsnummer = message["fødselsnummer"].asText(),
+            oid = UUID.fromString(message["saksbehandlerOid"].asText()),
+            navn = message["saksbehandlerNavn"].asText(),
+            ident = message["saksbehandlerIdent"].asText(),
+            epost = message["saksbehandlerEpost"].asText(),
+            orgnummer = message["organisasjonsnummer"].asText(),
+            begrunnelse = message["begrunnelse"].asText(),
+            månedligInntekt = message["månedligInntekt"].asDouble(),
+            skjæringstidspunkt = message["skjæringstidspunkt"].asLocalDate(),
+            json = message.toJson()
+        ), context)
     }
 
     override fun utbetalingAnnullert(

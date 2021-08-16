@@ -6,6 +6,7 @@ import no.nav.helse.januar
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -55,7 +56,18 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     @Test
     fun `saksbehandler overstyrer inntekt`() {
         val godkjenningsbehovId = settOppBruker()
-        sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar)
+        val hendelseId = sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar)
+
+        val overstyringer = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR)
+        assertEquals(1, overstyringer.size)
+        assertEquals(FØDSELSNUMMER, overstyringer.first().fødselsnummer)
+        assertEquals(ORGNR, overstyringer.first().organisasjonsnummer)
+        assertEquals(hendelseId, overstyringer.first().hendelseId)
+        assertEquals("saksbehandlerIdent", overstyringer.first().saksbehandlerIdent)
+        assertEquals("saksbehandler", overstyringer.first().saksbehandlerNavn)
+        assertEquals(25000.0,overstyringer.first().måndeligInntekt)
+        assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
+        assertEquals("begrunnelse", overstyringer.first().begrunnelse)
 
         assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
 

@@ -77,7 +77,12 @@ internal class OverstyringInntekt(
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")
                     it.requireKey("månedligInntekt")
+                    it.requireKey("begrunnelse")
                     it.requireKey("skjæringstidspunkt")
+                    it.requireKey("saksbehandlerIdent")
+                    it.requireKey("saksbehandlerOid")
+                    it.requireKey("saksbehandlerNavn")
+                    it.requireKey("saksbehandlerEpost")
                     it.requireKey("@id")
                 }
             }.register(this)
