@@ -13,11 +13,13 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
+import no.nav.helse.rapids_rivers.asLocalDate
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
-internal class OverstyringTidslinjeApiTest : AbstractE2ETest() {
+internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
@@ -42,7 +44,12 @@ internal class OverstyringTidslinjeApiTest : AbstractE2ETest() {
             )
             with(handleRequest(HttpMethod.Post, "/api/overstyr/dager") {
                 addHeader(HttpHeaders.ContentType, "application/json")
-                authentication(UUID.randomUUID())
+                authentication(
+                    oid = SAKSBEHANDLER_OID,
+                    epost = SAKSBEHANDLER_EPOST,
+                    navn = SAKSBEHANDLER_NAVN,
+                    ident = SAKSBEHANDLER_IDENT
+                )
                 setBody(objectMapper.writeValueAsString(overstyring))
             }) {
                 assertEquals(HttpStatusCode.OK, response.status())
@@ -73,11 +80,29 @@ internal class OverstyringTidslinjeApiTest : AbstractE2ETest() {
             )
             with(handleRequest(HttpMethod.Post, "/api/overstyr/inntekt") {
                 addHeader(HttpHeaders.ContentType, "application/json")
-                authentication(UUID.randomUUID())
+                authentication(
+                    oid = SAKSBEHANDLER_OID,
+                    epost = SAKSBEHANDLER_EPOST,
+                    navn = SAKSBEHANDLER_NAVN,
+                    ident = SAKSBEHANDLER_IDENT
+                )
                 setBody(objectMapper.writeValueAsString(overstyring))
             }) {
                 assertEquals(HttpStatusCode.OK, response.status())
+
                 assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
+                val event = testRapid.inspektør.hendelser("overstyr_inntekt").first()
+
+                assertNotNull(event["@id"].asText())
+                assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+                assertEquals(SAKSBEHANDLER_OID, event["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+                assertEquals(SAKSBEHANDLER_NAVN, event["saksbehandlerNavn"].asText())
+                assertEquals(SAKSBEHANDLER_IDENT, event["saksbehandlerIdent"].asText())
+                assertEquals(SAKSBEHANDLER_EPOST, event["saksbehandlerEpost"].asText())
+                assertEquals(ORGNR, event["organisasjonsnummer"].asText())
+                assertEquals("en begrunnelse", event["begrunnelse"].asText())
+                assertEquals(25000.0, event["månedligInntekt"].asDouble())
+                assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
             }
         }
         FeatureToggle.Toggle("overstyr_inntekt").disable()
@@ -104,7 +129,12 @@ internal class OverstyringTidslinjeApiTest : AbstractE2ETest() {
             )
             with(handleRequest(HttpMethod.Post, "/api/overstyr/inntekt") {
                 addHeader(HttpHeaders.ContentType, "application/json")
-                authentication(UUID.randomUUID())
+                authentication(
+                    oid = SAKSBEHANDLER_OID,
+                    epost = SAKSBEHANDLER_EPOST,
+                    navn = SAKSBEHANDLER_NAVN,
+                    ident = SAKSBEHANDLER_IDENT
+                )
                 setBody(objectMapper.writeValueAsString(overstyring))
             }) {
                 assertEquals(HttpStatusCode.NotImplemented, response.status())

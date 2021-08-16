@@ -386,6 +386,8 @@ internal class HendelseMediator(
                 put("saksbehandlerNavn", overstyringMessage.saksbehandler.navn)
                 put("saksbehandlerIdent", overstyringMessage.saksbehandler.ident)
                 put("saksbehandlerEpost", overstyringMessage.saksbehandler.epost)
+                put("månedligInntekt", overstyringMessage.månedligInntekt)
+                put("skjæringstidspunkt", overstyringMessage.skjæringstidspunkt)
             }
         ).also {
             sikkerLogg.info("Publiserer overstyring av inntekt:\n${it.toJson()}")

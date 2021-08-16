@@ -68,18 +68,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val FØDSELSNUMMER = "12020052345"
     protected val AKTØR = "999999999"
     protected val ORGNR = "222222222"
-    protected val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
+
+    protected val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
+    protected val SAKSBEHANDLER_OID = UUID.randomUUID()
+    protected val SAKSBEHANDLER_IDENT = "X999999"
+    protected val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
+
     protected val SNAPSHOTV1_MED_WARNINGS =
         snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
     protected val SNAPSHOTV1_UTEN_WARNINGS =
         snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
-
-    protected fun snapshotv1UtenWarnings(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        orgnr: String = ORGNR,
-        fnr: String = FØDSELSNUMMER,
-        aktørId: String = AKTØR
-    ) = snapshotUtenWarnings(vedtaksperiodeId, orgnr, fnr, aktørId)
 
     protected fun snapshotv1MedWarnings(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,

@@ -66,16 +66,18 @@ abstract class AbstractApiTest {
             )
         }
 
-        fun TestApplicationRequest.authentication(oid: UUID, group: String? = null) {
+        fun TestApplicationRequest.authentication(oid: UUID, epost: String = epostadresse, navn:String, ident:String, group: String? = null) {
             addHeader(
                 "Authorization",
                 "Bearer ${
                     jwtStub.getToken(
-                        listOfNotNull(requiredGroup.toString(), group),
-                        oid.toString(),
-                        epostadresse,
-                        clientId,
-                        issuer
+                        groups = listOfNotNull(requiredGroup.toString(), group),
+                        oid = oid.toString(),
+                        epostadresse = epost,
+                        clientId = clientId,
+                        issuer = issuer,
+                        navn = navn,
+                        navIdent = ident
                     )
                 }"
             )
