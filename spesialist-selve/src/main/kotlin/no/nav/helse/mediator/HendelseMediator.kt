@@ -295,19 +295,21 @@ internal class HendelseMediator(
         json: String,
         context: MessageContext
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.overstyringInntekt(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            oid = oid,
-            navn = navn,
-            ident = ident,
-            epost = epost,
-            orgnummer = orgnummer,
-            begrunnelse = begrunnelse,
-            månedligInntekt = månedligInntekt,
-            skjæringstidspunkt = skjæringstidspunkt,
-            json = json
-        ), context)
+        utfør(
+            fødselsnummer, hendelsefabrikk.overstyringInntekt(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+                epost = epost,
+                orgnummer = orgnummer,
+                begrunnelse = begrunnelse,
+                månedligInntekt = månedligInntekt,
+                skjæringstidspunkt = skjæringstidspunkt,
+                json = json
+            ), context
+        )
     }
 
     override fun utbetalingAnnullert(

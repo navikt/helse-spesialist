@@ -31,6 +31,6 @@ data class OverstyringInntektDto(
     val timestamp: LocalDateTime,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
-    val måndeligInntekt: Double,
+    val månedligInntekt: Double,
     val skjæringstidspunkt: LocalDate
 )

@@ -68,7 +68,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             timestamp = overstyringRow.localDateTime("tidspunkt"),
                             saksbehandlerNavn = overstyringRow.string("navn"),
                             saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
-                            måndeligInntekt = overstyringRow.double("manedlig_inntekt"),
+                            månedligInntekt = overstyringRow.double("manedlig_inntekt"),
                             skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt")
                         )
                     }.asList

@@ -3,10 +3,10 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.januar
+import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -55,6 +55,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer inntekt`() {
+        FeatureToggle.Toggle("overstyr_inntekt").enable()
         val godkjenningsbehovId = settOppBruker()
         val hendelseId = sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar)
 
@@ -65,7 +66,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(hendelseId, overstyringer.first().hendelseId)
         assertEquals("saksbehandlerIdent", overstyringer.first().saksbehandlerIdent)
         assertEquals("saksbehandler", overstyringer.first().saksbehandlerNavn)
-        assertEquals(25000.0,overstyringer.first().måndeligInntekt)
+        assertEquals(25000.0,overstyringer.first().månedligInntekt)
         assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
         assertEquals("begrunnelse", overstyringer.first().begrunnelse)
 
@@ -86,6 +87,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         val oppgave = requireNotNull(oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER })
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
+        FeatureToggle.Toggle("overstyr_inntekt").disable()
     }
 
     @Test
