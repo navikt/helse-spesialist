@@ -4,10 +4,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.*
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
@@ -99,7 +96,21 @@ internal class OverstyringInntekt(
                 keyValue("hendelseId", hendelseId),
                 keyValue("hendelse", packet.toJson())
             )
-            mediator.overstyringInntekt(packet, hendelseId, packet["fødselsnummer"].asText(), context)
+
+            mediator.overstyringInntekt(
+                id = UUID.fromString(packet["@id"].asText()),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
+                navn = packet["saksbehandlerNavn"].asText(),
+                ident = packet["saksbehandlerIdent"].asText(),
+                epost = packet["saksbehandlerEpost"].asText(),
+                orgnummer = packet["organisasjonsnummer"].asText(),
+                begrunnelse = packet["begrunnelse"].asText(),
+                månedligInntekt = packet["månedligInntekt"].asDouble(),
+                skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
+                json = packet.toJson(),
+                context = context
+            )
         }
     }
 }

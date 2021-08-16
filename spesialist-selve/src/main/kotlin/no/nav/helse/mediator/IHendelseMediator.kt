@@ -73,7 +73,21 @@ internal interface IHendelseMediator {
     )
 
     fun overstyringTidslinje(message: JsonMessage, id: UUID, fødselsnummer: String, context: MessageContext)
-    fun overstyringInntekt(message: JsonMessage, id: UUID, fødselsnummer: String, context: MessageContext)
+
+    fun overstyringInntekt(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        begrunnelse: String,
+        månedligInntekt: Double,
+        skjæringstidspunkt: LocalDate,
+        json: String,
+        context: MessageContext
+    )
 
     fun utbetalingEndret(
         fødselsnummer: String,
@@ -96,4 +110,5 @@ internal interface IHendelseMediator {
         message: JsonMessage,
         context: MessageContext
     )
+
 }

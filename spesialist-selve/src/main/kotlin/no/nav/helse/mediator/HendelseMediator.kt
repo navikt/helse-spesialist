@@ -282,23 +282,31 @@ internal class HendelseMediator(
     }
 
     override fun overstyringInntekt(
-        message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        begrunnelse: String,
+        månedligInntekt: Double,
+        skjæringstidspunkt: LocalDate,
+        json: String,
         context: MessageContext
     ) {
         utfør(fødselsnummer, hendelsefabrikk.overstyringInntekt(
-            id = UUID.fromString(message["@id"].asText()),
-            fødselsnummer = message["fødselsnummer"].asText(),
-            oid = UUID.fromString(message["saksbehandlerOid"].asText()),
-            navn = message["saksbehandlerNavn"].asText(),
-            ident = message["saksbehandlerIdent"].asText(),
-            epost = message["saksbehandlerEpost"].asText(),
-            orgnummer = message["organisasjonsnummer"].asText(),
-            begrunnelse = message["begrunnelse"].asText(),
-            månedligInntekt = message["månedligInntekt"].asDouble(),
-            skjæringstidspunkt = message["skjæringstidspunkt"].asLocalDate(),
-            json = message.toJson()
+            id = id,
+            fødselsnummer = fødselsnummer,
+            oid = oid,
+            navn = navn,
+            ident = ident,
+            epost = epost,
+            orgnummer = orgnummer,
+            begrunnelse = begrunnelse,
+            månedligInntekt = månedligInntekt,
+            skjæringstidspunkt = skjæringstidspunkt,
+            json = json
         ), context)
     }
 
