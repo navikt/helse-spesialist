@@ -59,8 +59,17 @@ internal class Hendelsefabrikk(
     private val utbetalingDao: UtbetalingDao,
     private val opptegnelseDao: OpptegnelseDao
 ) : IHendelsefabrikk {
-    private companion object {
+    internal companion object {
         private val mapper = jacksonObjectMapper()
+
+        fun JsonNode.toOverstyrteDagerDto() =
+            map {
+                OverstyringDagDto(
+                    dato = it.path("dato").asLocalDate(),
+                    type = enumValueOf(it.path("type").asText()),
+                    grad = it.path("grad").asInt()
+                )
+            }
     }
 
     override fun godkjenning(
@@ -284,14 +293,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    private fun JsonNode.toOverstyrteDagerDto() =
-        map {
-            OverstyringDagDto(
-                dato = it.path("dato").asLocalDate(),
-                type = enumValueOf(it.path("type").asText()),
-                grad = it.path("grad").asInt()
-            )
-        }
+
 
     override fun vedtaksperiodeEndret(
         id: UUID,

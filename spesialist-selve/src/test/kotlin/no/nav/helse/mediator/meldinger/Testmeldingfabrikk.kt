@@ -432,7 +432,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         begrunnelse: String = "begrunnelse",
         saksbehandlerOid: UUID = UUID.randomUUID(),
         saksbehandlerNavn: String = "saksbehandler",
-        saksbehandlerEpost: String = "saksbehandler@nav.no"
+        saksbehandlerEpost: String = "saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent"
     ) = nyHendelse(
         id, "overstyr_tidslinje", mapOf(
             "aktørId" to aktørId,
@@ -441,6 +442,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "dager" to dager,
             "begrunnelse" to begrunnelse,
             "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerIdent" to saksbehandlerident,
             "saksbehandlerNavn" to saksbehandlerNavn,
             "saksbehandlerEpost" to saksbehandlerEpost
         )

@@ -4,6 +4,7 @@ import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import java.time.LocalDate
@@ -72,7 +73,17 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
-    fun overstyringTidslinje(message: JsonMessage, id: UUID, fødselsnummer: String, context: MessageContext)
+    fun overstyringTidslinje(id: UUID,
+                             fødselsnummer: String,
+                             oid: UUID,
+                             navn: String,
+                             ident: String,
+                             epost: String,
+                             orgnummer: String,
+                             begrunnelse: String,
+                             overstyrteDager: List<OverstyringDagDto>,
+                             json: String,
+                             context: MessageContext)
 
     fun overstyringInntekt(
         id: UUID,

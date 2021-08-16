@@ -18,6 +18,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -273,12 +274,30 @@ internal class HendelseMediator(
     }
 
     override fun overstyringTidslinje(
-        message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        begrunnelse: String,
+        overstyrteDager: List<OverstyringDagDto>,
+        json: String,
         context: MessageContext
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.overstyringTidslinje(message.toJson()), context)
+        utfør(fødselsnummer, hendelsefabrikk.overstyringTidslinje(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            oid = oid,
+            navn = navn,
+            ident = ident,
+            epost = epost,
+            orgnummer = orgnummer,
+            begrunnelse = begrunnelse,
+            overstyrteDager = overstyrteDager,
+            json = json
+        ), context)
     }
 
     override fun overstyringInntekt(
