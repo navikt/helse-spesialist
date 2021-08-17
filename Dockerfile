@@ -1,4 +1,4 @@
-FROM navikt/java:15
+FROM navikt/java:16
 
 COPY spesialist-selve/build/libs/*.jar ./
 

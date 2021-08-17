@@ -18,11 +18,11 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
 
         return BehandlingsstatistikkDto(
             oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(
-                totalt = tilGodkjenningPerPeriodetype.sumBy { (_, antall) -> antall },
+                totalt = tilGodkjenningPerPeriodetype.sumOf { (_, antall) -> antall },
                 perPeriodetype = tilGodkjenningPerPeriodetype
             ),
             tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(
-                totalt = tildeltPerPeriodetype.sumBy { (_, antall) -> antall },
+                totalt = tildeltPerPeriodetype.sumOf { (_, antall) -> antall },
                 perPeriodetype = tildeltPerPeriodetype
             ),
             fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(

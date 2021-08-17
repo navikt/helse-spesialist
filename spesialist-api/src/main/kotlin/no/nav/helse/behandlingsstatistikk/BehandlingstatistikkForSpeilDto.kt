@@ -52,7 +52,7 @@ data class BehandlingstatistikkForSpeilDto(
         private fun List<Pair<Periodetype, Int>>.toPerPeriodetypeForSpeil() =
             groupBy { toPeriodetypeForSpeil(it.first) }
             .map { (key, value) ->
-                PerPeriodetype(key, value.sumBy { it.second })
+                PerPeriodetype(key, value.sumOf { it.second })
             }
 
         private fun toPeriodetypeForSpeil(periodetype: Periodetype) = when (periodetype) {

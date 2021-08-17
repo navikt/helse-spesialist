@@ -197,7 +197,7 @@ ORDER BY o.fagsystem_id, u.opprettet DESC
                                 saksbehandlerNavn = row.string("navn")
                             )
                         },
-                        totalbeløp = linjer.sumBy { it.totalbeløp ?: 0 }
+                        totalbeløp = linjer.sumOf { it.totalbeløp ?: 0 }
                     )
                 }
                 .asList)

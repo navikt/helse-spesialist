@@ -1,27 +1,27 @@
-val junitJupiterVersion = "5.7.1"
-val ktorVersion = "1.5.1"
+val junitJupiterVersion = "5.7.2"
+val ktorVersion = "1.6.2"
 
 plugins {
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version "1.5.21"
 }
 
 allprojects {
     group = "no.nav.helse"
 
     repositories {
-        jcenter()
+        mavenCentral()
         maven("https://jitpack.io")
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation("com.github.navikt:rapids-and-rivers:20210617121814-3e67e4d")
+        implementation("com.github.navikt:rapids-and-rivers:2021.07.08-10.12.37eff53b5c39")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
         implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
-        implementation("com.zaxxer:HikariCP:4.0.2")
+        implementation("com.zaxxer:HikariCP:5.0.0")
         implementation("no.nav:vault-jdbc:1.3.7")
-        implementation("org.flywaydb:flyway-core:7.5.4")
+        implementation("org.flywaydb:flyway-core:7.13.0")
         implementation("com.github.seratch:kotliquery:1.3.1") //April, 2019
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
@@ -32,8 +32,9 @@ allprojects {
             exclude(group = "junit")
         }
 
-        implementation("no.finn.unleash:unleash-client-java:4.1.0")
+        implementation("no.finn.unleash:unleash-client-java:4.4.0")
 
+        testImplementation("org.jetbrains.kotlin:kotlin-test:1.5.21")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
@@ -42,8 +43,8 @@ allprojects {
         }
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-        testImplementation("com.opentable.components:otj-pg-embedded:0.13.3") //Oktober, 2019
-        testImplementation("io.mockk:mockk:1.10.6")
+        testImplementation("com.opentable.components:otj-pg-embedded:0.13.4")
+        testImplementation("io.mockk:mockk:1.12.0")
     }
 }
 
@@ -59,10 +60,10 @@ subprojects {
 
     tasks {
         compileKotlin {
-            kotlinOptions.jvmTarget = "15"
+            kotlinOptions.jvmTarget = "16"
         }
         compileTestKotlin {
-            kotlinOptions.jvmTarget = "15"
+            kotlinOptions.jvmTarget = "16"
         }
 
         withType<Test> {
@@ -73,7 +74,7 @@ subprojects {
         }
 
         withType<Wrapper> {
-            gradleVersion = "6.8.3"
+            gradleVersion = "7.1.1"
         }
     }
 }
