@@ -81,8 +81,7 @@ class TildelingDao(private val dataSource: DataSource): HelseDao(dataSource) {
         val query = """
             SELECT s.oid, s.epost, s.navn, t.på_vent FROM tildeling t
                 INNER JOIN saksbehandler s on s.oid = t.saksbehandler_ref
-                INNER JOIN oppgave o on t.oppgave_id_ref = o.id
-            WHERE o.id = :oppgaveId
+            WHERE t.oppgave_id_ref = :oppgaveId
             AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
             """
         return run(queryOf(query, mapOf("oppgaveId" to oppgaveId)).map(::tildelingDto).asSingle)
