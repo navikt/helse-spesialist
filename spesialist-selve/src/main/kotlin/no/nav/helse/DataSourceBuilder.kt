@@ -1,6 +1,9 @@
 package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
+import io.micrometer.core.instrument.Clock
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import org.flywaydb.core.Flyway
 import java.time.Duration
@@ -28,7 +31,11 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
         maxLifetime = idleTimeout * 5
         connectionTimeout = Duration.ofSeconds(5).toMillis()
         leakDetectionThreshold = Duration.ofSeconds(5).toMillis()
-        metricRegistry = CollectorRegistry.defaultRegistry
+        metricRegistry = PrometheusMeterRegistry(
+            PrometheusConfig.DEFAULT,
+            CollectorRegistry.defaultRegistry,
+            Clock.SYSTEM
+        )
     }
     private val hikariMigrationConfig = HikariConfig().apply {
         jdbcUrl = dbUrl
