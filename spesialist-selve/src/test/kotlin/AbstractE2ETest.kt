@@ -39,6 +39,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
@@ -123,6 +124,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val varselDao = VarselDao(dataSource)
     private val personsnapshotDao = PersonsnapshotDao(dataSource)
     private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
+    protected val notatDao = NotatDao(dataSource)
 
     protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
 

@@ -21,7 +21,6 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
-import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
@@ -43,6 +42,8 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.notat.NotatDao
+import no.nav.helse.notat.NotatMediator
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -112,6 +113,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
+    private lateinit var notatMediator: NotatMediator
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -141,6 +143,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
+    private val notatDao = NotatDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
@@ -250,6 +253,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
+                    notaterApi(notatMediator)
                 }
             }
             adminApi(hendelseMediator)
@@ -263,6 +267,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk,
         )
+        notatMediator = NotatMediator(notatDao)
     }
 
     fun start() = rapidsConnection.start()

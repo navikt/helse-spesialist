@@ -3,8 +3,10 @@ package no.nav.helse
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.person.PersonsnapshotDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -26,6 +28,8 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
     protected val personsnapshotDao: PersonsnapshotDao = PersonsnapshotDao(dataSource)
     protected val arbeidsgiverApiDao: ArbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao: RisikovurderingApiDao = RisikovurderingApiDao(dataSource)
+    protected val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource)
+    protected val notatDao: NotatDao = NotatDao(dataSource)
 
     protected fun nyVedtaksperiode() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         val (id, fom, tom) = PERIODE
@@ -86,6 +90,16 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         @Language("PostgreSQL")
         val statement = "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?)"
         requireNotNull(session.run(queryOf(statement, ORGANISASJONSNUMMER.toLong(), navnid, bransjeid).asUpdateAndReturnGeneratedKey))
+    }
+
+    protected fun saksbehandler(
+        oid: UUID = UUID.randomUUID(),
+        navn: String = "Jan Banan",
+        epost: String = "janne.banan@nav.no",
+        ident: String = "Y12123"
+    ): UUID {
+        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost, ident)
+        return oid
     }
 
     private fun arbeidsforhold(personid: Long, arbeidsgiverid: Long) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
