@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.raw
 import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -231,7 +230,6 @@ internal class Godkjenningsbehov(
                 "Mottok godkjenningsbehov med {}, {}",
                 keyValue("hendelseId", hendelseId),
                 keyValue("hendelse", packet.toJson()),
-                raw("hendelse_json", packet.toJson()),
             )
             mediator.godkjenningsbehov(
                 message = packet,
