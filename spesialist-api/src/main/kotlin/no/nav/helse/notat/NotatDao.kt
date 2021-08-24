@@ -23,17 +23,19 @@ class NotatDao(private val dataSource: DataSource) {
         )).asUpdate)
     }
 
-    fun finnNotater(oppgave_ref: Int) = sessionOf(dataSource).use { session ->
+    fun finnNotater(oppgave_refs: List<Int>) = sessionOf(dataSource).use { session ->
+        val questionMarks = oppgave_refs.map { "?" }.joinToString()
+        val values = oppgave_refs.toTypedArray()
         @Language("PostgreSQL")
         val statement = """
                 SELECT * FROM notat n
                 JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-                WHERE oppgave_ref = ?
+                WHERE oppgave_ref in ($questionMarks)
                 """
         session.run(
-            queryOf(statement, oppgave_ref)
+            queryOf(statement, *values)
                 .map (::notatDto).asList
-        )
+        ).groupBy{ it.oppgaveRef }
     }
 
     companion object {

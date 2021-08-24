@@ -35,16 +35,20 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
         }
     }
 
-    get("/api/notater/{oppgave_ref}") {
-        val oppgave_ref = call.parameters["oppgave_ref"]
-        if (oppgave_ref == null) {
+    get("/api/notater") {
+        val oppgaveRefs = call.request.queryParameters
+            .entries()
+            .filter { it.key == "oppgave_ref" }
+            .flatMap { it.value }
+            .map { it.toInt() }
+
+        if (oppgaveRefs.isNotEmpty()) {
+            val notater = withContext(Dispatchers.IO) { mediator.finn(oppgaveRefs) }
+            call.respond(notater)
+        } else {
             call.respond(HttpStatusCode.BadRequest, "oppgave_ref er ikke oppgitt")
-            log.warn("GET - oppgavereferanse er null i path parameter")
-            return@get
+            log.warn("GET - oppgavereferanser mangler i path parameter")
         }
 
-        val notater = withContext(Dispatchers.IO) { mediator.finn(oppgave_ref.toInt()) }
-        call.respond(notater)
     }
-
 }
