@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -97,7 +98,8 @@ internal class TildelingApiTest : AbstractApiTest() {
         assertEquals(HttpStatusCode.Conflict, response.status)
         val feilDto = runBlocking { response.receive<FeilDto>() }
         assertEquals( "oppgave_er_allerede_tildelt", feilDto.feilkode)
-        assertEquals("en annen saksbehandler", feilDto.kontekst["tildeltTil"])
+        val tildeling = objectMapper.valueToTree<JsonNode>(feilDto.kontekst["tildeling"])
+        assertEquals("en annen saksbehandler", tildeling["navn"].asText())
         assertEquals("spesialist", feilDto.kildesystem)
     }
 

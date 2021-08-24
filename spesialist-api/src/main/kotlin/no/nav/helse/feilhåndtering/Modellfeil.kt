@@ -25,7 +25,6 @@ abstract class Modellfeil protected constructor() : RuntimeException() {
 
 class OppgaveAlleredeTildelt(tildeling: TildelingApiDto) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf(
-        "tildeltTil" to tildeling.navn,
         "tildeling" to tildeling
     )
 
