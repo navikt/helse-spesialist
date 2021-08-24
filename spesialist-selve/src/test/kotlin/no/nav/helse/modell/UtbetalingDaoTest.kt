@@ -9,7 +9,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import kotlin.test.assertEquals
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
@@ -22,11 +21,11 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         val arbeidsgiverOppdragId = lagOppdrag(fagsystemId)
 
         lagLinje(arbeidsgiverOppdragId, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
-        val utbetalingIdId = lagUtbetalingId(arbeidsgiverOppdragId)
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, GODKJENT, LocalDateTime.now().minusDays(3), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, SENDT, LocalDateTime.now().minusDays(2), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, OVERFØRT, LocalDateTime.now().minusDays(1), "{}")
-        utbetalingDao.nyUtbetalingStatus(utbetalingIdId, UTBETALT, LocalDateTime.now(), "{}")
+        val utbetalingId = lagUtbetalingId(arbeidsgiverOppdragId)
+        utbetalingDao.nyUtbetalingStatus(utbetalingId, GODKJENT, LocalDateTime.now().minusDays(3), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingId, SENDT, LocalDateTime.now().minusDays(2), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingId, OVERFØRT, LocalDateTime.now().minusDays(1), "{}")
+        utbetalingDao.nyUtbetalingStatus(utbetalingId, UTBETALT, LocalDateTime.now(), "{}")
 
         val utbetalinger = utbetalingDao.findUtbetalinger(FNR)
         assertEquals(1, utbetalinger.size)
@@ -59,42 +58,4 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
             totalbeløp = null
         )), utbetaling.arbeidsgiverOppdrag.linjer)
     }
-
-    private fun lagOppdrag(fagsystemId: String = fagsystemId()) =
-        utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", "NY", LocalDate.now().plusDays(169))!!
-
-    private fun lagUtbetalingId(arbeidsgiverOppdragId: Long): Long {
-        val personOppdragId = utbetalingDao.nyttOppdrag(fagsystemId(), FNR, "SPREF", "NY", LocalDate.now().plusDays(169))!!
-        val utbetalingIdId = utbetalingDao.opprettUtbetalingId(
-            utbetalingId = UUID.randomUUID(),
-            fødselsnummer = FNR,
-            orgnummer = ORGNUMMER,
-            type = "UTBETALING",
-            opprettet = LocalDateTime.now(),
-            arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
-            personFagsystemIdRef = personOppdragId
-        )
-        return utbetalingIdId
-    }
-
-    private fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate) {
-        utbetalingDao.nyLinje(
-            oppdragId = oppdrag,
-            endringskode = "NY",
-            klassekode = "SPREFAG-IOP",
-            statuskode = null,
-            datoStatusFom = null,
-            fom = fom,
-            tom = tom,
-            dagsats = 1200,
-            totalbeløp = null,
-            lønn = 3000,
-            grad = 100.0,
-            delytelseId = 1,
-            refDelytelseId = null,
-            refFagsystemId = null
-        )
-    }
-
-    fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
 }

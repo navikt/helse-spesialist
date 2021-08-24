@@ -36,6 +36,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -118,9 +119,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         hendelseId: UUID = HENDELSE_ID,
         vedtaksperiodeId: UUID? = VEDTAKSPERIODE,
         fødselsnummer: String = FNR,
-        type: String = "GODKJENNING"
+        type: String = "GODKJENNING",
+        json: String = "{}"
     ) = TestHendelse(hendelseId, vedtaksperiodeId, fødselsnummer).also {
-        lagreHendelse(it.id, it.fødselsnummer(), type)
+        lagreHendelse(it.id, it.fødselsnummer(), type, json)
     }
 
     protected fun godkjenningsbehov(
@@ -137,7 +139,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         type: String,
         json: String = "{}"
     ) {
-        sessionOf(dataSource).use  {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "INSERT INTO hendelse(id, fodselsnummer, data, type) VALUES(?, ?, ?::json, ?)",
@@ -155,7 +157,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         else automatiseringDao.manuellSaksbehandling(listOf("Dårlig ånde"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
     }
 
-    protected fun nyPerson(periodetype: Periodetype = FØRSTEGANGSBEHANDLING, inntektskilde: Inntektskilde = EN_ARBEIDSGIVER) {
+    protected fun nyPerson(
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
+    ) {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(periodetype = periodetype, inntektskilde = inntektskilde)
@@ -241,6 +246,65 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    protected fun lagOppdrag(fagsystemId: String = fagsystemId()) =
+        utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", "NY", LocalDate.now().plusDays(169))!!
+
+    protected fun lagUtbetalingId(arbeidsgiverOppdragId: Long): Long {
+        val personOppdragId =
+            utbetalingDao.nyttOppdrag(fagsystemId(), FNR, "SPREF", "NY", LocalDate.now().plusDays(169))!!
+        val utbetalingId = utbetalingDao.opprettUtbetalingId(
+            utbetalingId = UUID.randomUUID(),
+            fødselsnummer = FNR,
+            orgnummer = ORGNUMMER,
+            type = "UTBETALING",
+            opprettet = LocalDateTime.now(),
+            arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
+            personFagsystemIdRef = personOppdragId
+        )
+        return utbetalingId
+    }
+
+    protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate) {
+        utbetalingDao.nyLinje(
+            oppdragId = oppdrag,
+            endringskode = "NY",
+            klassekode = "SPREFAG-IOP",
+            statuskode = null,
+            datoStatusFom = null,
+            fom = fom,
+            tom = tom,
+            dagsats = 1200,
+            totalbeløp = null,
+            lønn = 3000,
+            grad = 100.0,
+            delytelseId = 1,
+            refDelytelseId = null,
+            refFagsystemId = null
+        )
+    }
+
+    protected fun hentUtbetalingMedUtbetalingId(utbetalingIdRef: Long): String? {
+        @Language("PostgreSQL")
+        val statement = "SELECT data FROM utbetaling WHERE utbetaling_id_ref = ? LIMIT 1;"
+        return sessionOf(dataSource).use {
+            it.run(queryOf(statement, utbetalingIdRef).map {
+                it.string("data")
+            }.asSingle)
+        }
+    }
+
+    protected fun hentHendelse(hendelseId: UUID): String? {
+        @Language("PostgreSQL")
+        val statement = "SELECT data FROM hendelse WHERE id = ? LIMIT 1;"
+        return sessionOf(dataSource).use {
+            it.run(queryOf(statement, hendelseId).map {
+                it.string("data")
+            }.asSingle)
+        }
+    }
+
+    protected fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
+
     protected data class Persondata(
         val personId: Long,
         val personinfoId: Long,
@@ -267,5 +331,4 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
       ],
       "inntektsgrunnlag": {}
       }"""
-
 }
