@@ -59,7 +59,12 @@ class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    fun lagreOgTildelOppgaver(hendelseId: UUID, fødselsnummer: String, contextId: UUID, messageContext: MessageContext) {
+    fun lagreOgTildelOppgaver(
+        hendelseId: UUID,
+        fødselsnummer: String,
+        contextId: UUID,
+        messageContext: MessageContext
+    ) {
         lagreOppgaver(hendelseId, contextId, messageContext) { tildelOppgaver(fødselsnummer) }
     }
 
@@ -68,7 +73,9 @@ class OppgaveMediator(
     }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnAktive(vedtaksperiodeId).forEach(::avbryt)
+        oppgaveDao.finnAktive(vedtaksperiodeId).onEach(::avbryt).also { oppgaver ->
+            log.info("Har avbrutt oppgave(r) ${oppgaver.joinToString()} for vedtaksperiode $vedtaksperiodeId")
+        }
     }
 
     fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
@@ -106,7 +113,12 @@ class OppgaveMediator(
         }
     }
 
-    private fun lagreOppgaver(hendelseId: UUID, contextId: UUID, messageContext: MessageContext, doAlso: () -> Unit = {}) {
+    private fun lagreOppgaver(
+        hendelseId: UUID,
+        contextId: UUID,
+        messageContext: MessageContext,
+        doAlso: () -> Unit = {}
+    ) {
         if (oppgaver.size > 1) log.info("Oppgaveliste har ${oppgaver.size} oppgaver, hendelsesId: $hendelseId og contextId: $contextId")
 
         oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId) }
