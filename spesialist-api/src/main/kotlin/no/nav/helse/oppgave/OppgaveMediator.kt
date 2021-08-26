@@ -73,9 +73,12 @@ class OppgaveMediator(
     }
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnAktive(vedtaksperiodeId).onEach(::avbryt).also { oppgaver ->
-            log.info("Har avbrutt oppgave(r) ${oppgaver.joinToString()} for vedtaksperiode $vedtaksperiodeId")
-        }
+        oppgaveDao.finnAktive(vedtaksperiodeId)
+            .takeIf { it.isNotEmpty() }
+            ?.onEach(::avbryt)
+            ?.also { oppgaver ->
+                log.info("Har avbrutt oppgave(r) ${oppgaver.joinToString()} for vedtaksperiode $vedtaksperiodeId")
+            }
     }
 
     fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
