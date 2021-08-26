@@ -40,6 +40,7 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
                     ident
                 )
             }
+            log.info("Oppgave $oppgaveId er tildelt til $ident")
             call.respond(HttpStatusCode.OK)
         }
     }
