@@ -85,8 +85,8 @@ internal class Arbeidsforholdløsning(
         private fun JsonMessage.toArbeidsforholdløsninger(): Arbeidsforholdløsning {
             val løsninger = this["@løsning.$behov"].map(::toArbeidsforholdløsning)
 
-            if(løsninger.isEmpty()) {
-                sikkerLog.info("Ingen arbeidsforhold i løsningen")
+            if (løsninger.isEmpty()) {
+                sikkerLog.info("Ingen arbeidsforhold i løsningen.\n${this.toJson()}")
             }
             return Arbeidsforholdløsning(løsninger)
         }
