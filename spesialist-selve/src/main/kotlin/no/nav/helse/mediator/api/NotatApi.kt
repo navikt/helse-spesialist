@@ -18,36 +18,39 @@ private val log = LoggerFactory.getLogger("NotatApi")
 
 internal fun Route.notaterApi(mediator: NotatMediator) {
 
-    post("/api/notater/{oppgave_ref}") {
+    post("/api/notater/{vedtaksperiode_id}") {
         val notat = call.receive<NotatDto>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
         val saksbehandler_oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
 
-        val oppgave_ref = call.parameters["oppgave_ref"]
-        if (oppgave_ref == null) {
-            call.respond(HttpStatusCode.BadRequest, "oppgave_ref er ikke oppgitt")
-            log.warn("POST - oppgavereferanse er null i path parameter")
+        val vedtaksperiodeId = UUID.fromString(call.parameters["vedtaksperiode_id"])
+        if (vedtaksperiodeId == null) {
+            call.respond(HttpStatusCode.BadRequest, "vedtaksperiode_id er ikke oppgitt")
+            log.warn("POST - vedtaksperiode_id er null i path parameter. Saksbehandler OID: $saksbehandler_oid")
             return@post
         }
         withContext(Dispatchers.IO) {
-            mediator.lagre(oppgave_ref.toInt(), notat, saksbehandler_oid)
+            mediator.lagre(vedtaksperiodeId, notat, saksbehandler_oid)
         }
     }
 
     get("/api/notater") {
-        val oppgaveRefs = call.request.queryParameters
+        val vedtaksperiodeIds = call.request.queryParameters
             .entries()
-            .filter { it.key == "oppgave_ref" }
+            .filter { it.key == "vedtaksperiode_id" }
             .flatMap { it.value }
-            .map { it.toInt() }
+            .map(UUID::fromString)
 
-        if (oppgaveRefs.isNotEmpty()) {
-            val notater = withContext(Dispatchers.IO) { mediator.finn(oppgaveRefs) }
+        if (vedtaksperiodeIds.isNotEmpty()) {
+            val notater = withContext(Dispatchers.IO) { mediator.finn(vedtaksperiodeIds) }
             call.respond(notater)
         } else {
-            call.respond(HttpStatusCode.BadRequest, "oppgave_ref er ikke oppgitt")
-            log.warn("GET - oppgavereferanser mangler i path parameter")
+            val accessToken = checkNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+            val saksbehandler_oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+
+            call.respond(HttpStatusCode.BadRequest, "vedtaksperiode_id er ikke oppgitt")
+            log.warn("GET - vedtaksperiode_id mangler i path parameter. Saksbehandler OID: $saksbehandler_oid")
         }
 
     }

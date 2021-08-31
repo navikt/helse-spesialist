@@ -14,24 +14,25 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `finner flere notater tilhørende samme oppgave`() {
+    fun `finner flere notater tilhørende samme vedtaksperiode`() {
         //given
         val saksbehandler_oid = saksbehandler()
-        val oppgave_id = 1
+        nyVedtaksperiode()
+        val vedtaksperiodeId = PERIODE.first
         val tekster = listOf("Banan eple kake", "Eple kake banan")
 
         //when
-        notatDao.opprettNotat(oppgave_id, tekster[0], saksbehandler_oid)
-        notatDao.opprettNotat(oppgave_id, tekster[1], saksbehandler_oid)
+        notatDao.opprettNotat(vedtaksperiodeId, tekster[0], saksbehandler_oid)
+        notatDao.opprettNotat(vedtaksperiodeId, tekster[1], saksbehandler_oid)
 
-        val notater = notatDao.finnNotater(listOf(oppgave_id))
+        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
 
         //then
         assertEquals(1, notater.size)
-        assertEquals(2, notater[oppgave_id]?.size)
+        assertEquals(2, notater[vedtaksperiodeId]?.size)
 
-        assertNotEquals(notater[oppgave_id]?.get(0)?.tekst, notater[oppgave_id]?.get(1)?.tekst)
-        notater[oppgave_id]?.forEach { notat ->
+        assertNotEquals(notater[vedtaksperiodeId]?.get(0)?.tekst, notater[vedtaksperiodeId]?.get(1)?.tekst)
+        notater[vedtaksperiodeId]?.forEach { notat ->
             assertEquals(saksbehandler_oid, notat.saksbehandlerOid)
             assertTrue(tekster.contains(notat.tekst))
         }
@@ -39,7 +40,9 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `lagre notat`() {
-        val rowsAffected = notatDao.opprettNotat(1, "tekst", UUID.randomUUID())
+        nyVedtaksperiode()
+        val vedtaksperiodeId = PERIODE.first
+        val rowsAffected = notatDao.opprettNotat(vedtaksperiodeId, "tekst", UUID.randomUUID())
         assertEquals(1, rowsAffected)
     }
 

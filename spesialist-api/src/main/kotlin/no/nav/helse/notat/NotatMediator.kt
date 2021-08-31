@@ -6,10 +6,10 @@ class NotatMediator(
     private val notatDao: NotatDao,
 ) {
 
-    fun lagre(oppgave_ref: Int, notat: NotatDto, saksbehandler_oid: UUID) =
-        notatDao.opprettNotat(oppgave_ref, notat.tekst, saksbehandler_oid)
+    fun lagre(vedtaksperiodeId: UUID, notat: NotatDto, saksbehandler_oid: UUID) =
+        notatDao.opprettNotat(vedtaksperiodeId, notat.tekst, saksbehandler_oid)
 
-    fun finn(oppgave_refs: List<Int>) =
-        notatDao.finnNotater(oppgave_refs)
+    fun finn(vedtaksperiodeIds: List<UUID>) =
+        notatDao.finnNotater(vedtaksperiodeIds)
 
 }
