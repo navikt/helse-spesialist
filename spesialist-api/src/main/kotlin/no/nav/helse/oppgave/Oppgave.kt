@@ -1,6 +1,7 @@
 package no.nav.helse.oppgave
 
 import no.nav.helse.rapids_rivers.JsonMessage
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
@@ -26,12 +27,21 @@ class Oppgave private constructor(
     }
 
     companion object {
+        private val log = LoggerFactory.getLogger(this::class.java)
+
         fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("SØKNAD", vedtaksperiodeId, utbetalingId)
         fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId, utbetalingId)
         fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("REVURDERING", vedtaksperiodeId, utbetalingId)
         fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("RISK_QA", vedtaksperiodeId, utbetalingId)
         private fun oppgave(type: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
+
+        fun List<Oppgave>.loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
+            if (isNotEmpty()) {
+                val oppgaveIds = map(Oppgave::id).joinToString()
+                log.info("Har avbrutt oppgave(r) $oppgaveIds for vedtaksperiode $vedtaksperiodeId")
+            }
+        }
 
         fun lagMelding(
             oppgaveId: Long,

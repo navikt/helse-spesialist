@@ -1,5 +1,6 @@
 package no.nav.helse.oppgave
 
+import no.nav.helse.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -74,11 +75,8 @@ class OppgaveMediator(
 
     fun avbrytOppgaver(vedtaksperiodeId: UUID) {
         oppgaveDao.finnAktive(vedtaksperiodeId)
-            .takeIf { it.isNotEmpty() }
-            ?.onEach(::avbryt)
-            ?.also { oppgaver ->
-                log.info("Har avbrutt oppgave(r) ${oppgaver.joinToString()} for vedtaksperiode $vedtaksperiodeId")
-            }
+            .also { it.loggOppgaverAvbrutt(vedtaksperiodeId) }
+            .map(::avbryt)
     }
 
     fun avventerSystem(oppgaveId: Long, saksbehandlerIdent: String, oid: UUID) {
