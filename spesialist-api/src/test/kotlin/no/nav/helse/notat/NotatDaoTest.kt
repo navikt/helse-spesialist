@@ -4,7 +4,6 @@ import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class NotatDaoTest: DatabaseIntegrationTest() {
 
@@ -41,8 +40,11 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre notat`() {
         nyVedtaksperiode()
+        val oid = saksbehandler()
         val vedtaksperiodeId = PERIODE.first
-        val rowsAffected = notatDao.opprettNotat(vedtaksperiodeId, "tekst", UUID.randomUUID())
+
+        val rowsAffected = notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
+
         assertEquals(1, rowsAffected)
     }
 

@@ -30,10 +30,10 @@ class NotatDao(private val dataSource: DataSource) {
                 SELECT * FROM notat n
                 JOIN saksbehandler s on s.oid = n.saksbehandler_oid
                 WHERE vedtaksperiode_id in ($questionMarks)
-                """
+        """
         session.run(
             queryOf(statement, *values)
-                .map (::notatDto).asList
+                .map(::notatDto).asList
         ).groupBy{ it.vedtaksperiodeId }
     }
 
@@ -42,7 +42,7 @@ class NotatDao(private val dataSource: DataSource) {
             id = it.int("id"),
             tekst = it.string("tekst"),
             opprettet = it.localDateTime("opprettet"),
-            saksbehandlerOid = UUID.fromString(it.string("saksbehandler_oid")),
+            saksbehandlerOid = UUID.fromString(it.string("oid")),
             saksbehandlerNavn = it.string("navn"),
             saksbehandlerEpost = it.string("epost"),
             vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
