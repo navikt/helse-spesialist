@@ -9,7 +9,6 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.notat.NotatDto
 import no.nav.helse.notat.NotatMediator
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -19,7 +18,7 @@ private val log = LoggerFactory.getLogger("NotatApi")
 internal fun Route.notaterApi(mediator: NotatMediator) {
 
     post("/api/notater/{vedtaksperiode_id}") {
-        val notat = call.receive<NotatDto>()
+        val notat = call.receive<NotatApiDto>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
         val saksbehandler_oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
@@ -31,7 +30,7 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
             return@post
         }
         withContext(Dispatchers.IO) {
-            mediator.lagre(vedtaksperiodeId, notat, saksbehandler_oid)
+            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandler_oid)
         }
     }
 
@@ -55,3 +54,8 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
 
     }
 }
+
+data class NotatApiDto(
+    val tekst: String
+)
+
