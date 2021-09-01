@@ -1,22 +1,14 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.application.*
-import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
-import io.ktor.features.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.notat.NotatDto
 import no.nav.helse.notat.NotatMediator
-import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -25,24 +17,22 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.test.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)
-internal class NotatApiTest {
+internal class NotatApiTest: AbstractApiTest() {
     private val httpPort = ServerSocket(0).use { it.localPort }
-    private val notatMediator = mockk<NotatMediator>(relaxed = true)
+    private lateinit var notatMediator: NotatMediator
 
     private val vedtaksperiodeId1 = "8624dbae-0c42-445b-a869-a3023e6ca3f7"
     private val vedtaksperiodeId2 = "8042174b-5ab5-425f-b427-e7905cb8bea9"
+    private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
     @BeforeAll
     fun setup() {
-        embeddedServer(Netty, port = httpPort) {
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            routing {
-                notaterApi(notatMediator)
-            }
-        }.also {
-            it.start(wait = false)
+        notatMediator = mockk<NotatMediator>(relaxed = true)
+        setupServer {
+            notaterApi(notatMediator)
         }
 
         val periode_1_id = UUID.fromString(vedtaksperiodeId1)
@@ -67,20 +57,45 @@ internal class NotatApiTest {
         )
     }
 
-
-    private val client = HttpClient {
-        defaultRequest {
-            host = "localhost"
-            port = httpPort
+    @Test
+    fun `post av notat`() {
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/notater/$vedtaksperiodeId1") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = mapOf("tekst" to "en-tekst")
+                authentication(SAKSBEHANDLER_OID)
+            }
         }
-        install(JsonFeature) {
-            serializer = JacksonSerializer(jackson = objectMapper)
+
+        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
+        verify(exactly = 1) {
+            notatMediator.lagre(UUID.fromString(vedtaksperiodeId1), "en-tekst", SAKSBEHANDLER_OID)
         }
     }
 
     @Test
+    fun `manglende vedtaksperiode på post gir trøbbel`() {
+        val response = runBlocking {
+            client.post<HttpResponse>("/api/notater/null") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                body = mapOf("tekst" to "en-tekst")
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+        kotlin.test.assertEquals(
+            response.status,
+            HttpStatusCode.InternalServerError,
+            "HTTP response burde gi Internal Server Error, fikk ${response.status}"
+        )
+    }
+
+    @Test
     fun `flere query params med samme navn er lov`() = runBlocking{
-        val response = client.get<Map<UUID, List<NotatDto>>>("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2")
+        val response = client.get<Map<UUID, List<NotatDto>>>("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
+            authentication(SAKSBEHANDLER_OID)
+        }
         assertEquals(2, response.size)
     }
 

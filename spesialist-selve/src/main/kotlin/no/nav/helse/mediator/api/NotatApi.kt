@@ -32,6 +32,7 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
         withContext(Dispatchers.IO) {
             mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandler_oid)
         }
+        call.respond(HttpStatusCode.OK)
     }
 
     get("/api/notater") {
