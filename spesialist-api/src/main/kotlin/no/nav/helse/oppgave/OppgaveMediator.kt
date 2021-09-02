@@ -1,5 +1,7 @@
 package no.nav.helse.oppgave
 
+import no.nav.helse.SaksbehandlerType
+import no.nav.helse.hentedeOppgaverTeller
 import no.nav.helse.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -19,7 +21,10 @@ class OppgaveMediator(
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun hentOppgaver(inkluderRiskQaOppgaver: Boolean) = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver)
+    fun hentOppgaver(saksbehandlerType: SaksbehandlerType) =
+        oppgaveDao.finnOppgaver(saksbehandlerType == SaksbehandlerType.SUPER).also {
+            hentedeOppgaverTeller.labels(saksbehandlerType.type).inc(it.size.toDouble())
+        }
 
     fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
 

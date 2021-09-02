@@ -9,30 +9,34 @@ private val histogram =
         .labelNames("measurement", "duration")
         .register()
 
-internal val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
+val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
     .labelNames("opplysningstype", "type")
     .register()
 
 
-internal val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
+val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
     .register()
 
-internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
+val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
     .register()
 
-internal val avvistPåGrunnAvEgenAnsattTeller =
+val avvistPåGrunnAvEgenAnsattTeller =
     Counter.build("avvist_egen_ansatt", "Teller antall avvisninger på grunn av egen ansatt")
         .register()
 
-internal val avvistPåGrunnAvUtlandTeller =
+val avvistPåGrunnAvUtlandTeller =
     Counter.build("avvist_utland", "Teller antall avvisninger på grunn av tilhørighet til utlandsenhet")
         .register()
 
-internal val warningteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
+val warningteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
     .labelNames("alvorlighetsgrad", "melding")
     .register()
 
-internal fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
+val hentedeOppgaverTeller = Counter.build("hentede_oppgaver", "Teller antall oppgaver hentet fra Spesialist")
+    .labelNames("saksbehandlerType")
+    .register()
+
+fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
     val result: T
     val start = System.nanoTime()
     try {

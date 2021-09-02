@@ -10,6 +10,8 @@ import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.SaksbehandlerType.SUPER
+import no.nav.helse.SaksbehandlerType.VANLIG
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.OppgavereferanseDto
 import java.util.*
@@ -21,8 +23,8 @@ internal fun Route.oppgaveApi(
     val gruppeIdForRiskSaksbehandlere = UUID.fromString(riskSupersaksbehandlergruppe)
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
-            val erRiskSupersaksbehandler = getGrupper().contains(gruppeIdForRiskSaksbehandlere)
-            oppgaveMediator.hentOppgaver(erRiskSupersaksbehandler)
+            val saksbehandlerType = if (getGrupper().contains(gruppeIdForRiskSaksbehandlere)) SUPER else VANLIG
+            oppgaveMediator.hentOppgaver(saksbehandlerType)
         }
         call.respond(saksbehandlerOppgaver)
     }
