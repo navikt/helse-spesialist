@@ -3,28 +3,28 @@ package no.nav.helse.notat
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
-class NotatDao(private val dataSource: DataSource) {
+class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun opprettNotat(vedtaksperiodeId: UUID, tekst: String, saksbehandler_oid: UUID) = sessionOf(dataSource).use  { session ->
-        @Language("PostgreSQL")
-        val statement = """
-                INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid)
-                VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid);
-        """
-        session.run(queryOf(statement, mapOf(
-            "vedtaksperiode_id" to vedtaksperiodeId,
-            "tekst" to tekst,
-            "saksbehandler_oid" to saksbehandler_oid
-        )).asUpdate)
-    }
+    fun opprettNotat(vedtaksperiodeId: UUID, tekst: String, saksbehandler_oid: UUID) =
+        """ INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid)
+            VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid);
+        """.update(
+            mapOf(
+                "vedtaksperiode_id" to vedtaksperiodeId,
+                "tekst" to tekst,
+                "saksbehandler_oid" to saksbehandler_oid
+            )
+        )
 
     fun finnNotater(vedtaksperiodeIds: List<UUID>) = sessionOf(dataSource).use { session ->
         val questionMarks = vedtaksperiodeIds.joinToString { "?" }
         val values = vedtaksperiodeIds.toTypedArray()
+
         @Language("PostgreSQL")
         val statement = """
                 SELECT * FROM notat n
@@ -34,8 +34,14 @@ class NotatDao(private val dataSource: DataSource) {
         session.run(
             queryOf(statement, *values)
                 .map(::notatDto).asList
-        ).groupBy{ it.vedtaksperiodeId }
+        ).groupBy { it.vedtaksperiodeId }
     }
+
+    fun feilregistrer(notatId: Int, saksbehandler_oid: UUID) =
+        """ UPDATE notat
+            SET feilregistrert = true
+            WHERE notat.id = :notatId AND notat.saksbehandler_oid = :saksbehandler_oid;
+        """.update(mapOf("notatId" to notatId, "saksbehandler_oid" to saksbehandler_oid))
 
     companion object {
         fun notatDto(it: Row) = NotatDto(
@@ -46,6 +52,7 @@ class NotatDao(private val dataSource: DataSource) {
             saksbehandlerNavn = it.string("navn"),
             saksbehandlerEpost = it.string("epost"),
             vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
+            feilregistrert = it.boolean("feilregistrert")
         )
     }
 }

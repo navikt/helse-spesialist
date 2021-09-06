@@ -12,5 +12,6 @@ data class NotatDto(
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
     val saksbehandlerEpost: String,
-    val vedtaksperiodeId: UUID
+    val vedtaksperiodeId: UUID,
+    val feilregistrert: Boolean
 )

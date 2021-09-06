@@ -52,7 +52,23 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
             call.respond(HttpStatusCode.BadRequest, "vedtaksperiode_id er ikke oppgitt")
             log.warn("GET - vedtaksperiode_id mangler i path parameter. Saksbehandler OID: $saksbehandler_oid")
         }
+    }
 
+    put("/api/notater/{vedtaksperiode_id}/feilregistrer/{notat_id}") {
+        val notatId = call.parameters["notat_id"]!!.let {
+            requireNotNull(it.toIntOrNull()) { "$it er ugyldig notat_id i path parameter" }
+        }
+        val vedtaksperiodeId =  call.parameters["vedtaksperiode_id"]!!.let {
+            requireNotNull(UUID.fromString(it)) { "$it er ugyldig vedtaksperiode_id i path parameter" }
+        }
+
+        val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+        val saksbehandler_oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+
+        withContext(Dispatchers.IO) {
+            mediator.feilregistrer(notatId, saksbehandler_oid)
+        }
+        call.respond(HttpStatusCode.OK)
     }
 }
 

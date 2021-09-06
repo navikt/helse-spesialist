@@ -27,6 +27,7 @@ internal class NotatApiTest: AbstractApiTest() {
     private val vedtaksperiodeId1 = "8624dbae-0c42-445b-a869-a3023e6ca3f7"
     private val vedtaksperiodeId2 = "8042174b-5ab5-425f-b427-e7905cb8bea9"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
+    private val notatId = 1
 
     @BeforeAll
     fun setup() {
@@ -45,7 +46,8 @@ internal class NotatApiTest: AbstractApiTest() {
                 saksbehandlerOid = UUID.randomUUID(),
                 saksbehandlerNavn = "per",
                 saksbehandlerEpost = "noen@example.com",
-                vedtaksperiodeId = periode_1_id)),
+                vedtaksperiodeId = periode_1_id,
+                feilregistrert = false)),
             periode_2_id to listOf(NotatDto(
                 id = 2,
                 tekst = "sup?",
@@ -53,7 +55,8 @@ internal class NotatApiTest: AbstractApiTest() {
                 saksbehandlerOid = UUID.randomUUID(),
                 saksbehandlerNavn = "per",
                 saksbehandlerEpost = "noen@example.com",
-                vedtaksperiodeId = periode_2_id))
+                vedtaksperiodeId = periode_2_id,
+                feilregistrert = false))
         )
     }
 
@@ -71,6 +74,21 @@ internal class NotatApiTest: AbstractApiTest() {
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
             notatMediator.lagre(UUID.fromString(vedtaksperiodeId1), "en-tekst", SAKSBEHANDLER_OID)
+        }
+    }
+
+    @Test
+    fun `feilregistrering av notat`() {
+        val response = runBlocking {
+            client.put<HttpResponse>("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
+                accept(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+
+        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
+        verify(exactly = 1) {
+            notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)
         }
     }
 

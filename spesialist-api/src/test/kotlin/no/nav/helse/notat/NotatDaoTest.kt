@@ -48,4 +48,21 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
         assertEquals(1, rowsAffected)
     }
 
+    @Test
+    fun `feilregistrer notat`() {
+        nyVedtaksperiode()
+        val oid = saksbehandler()
+        val vedtaksperiodeId = PERIODE.first
+
+        notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
+        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+
+        val notatId = notater[vedtaksperiodeId]?.get(0)!!.id
+        notatDao.feilregistrer(notatId, oid)
+
+        val feilregistrerteNotater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+
+        assertTrue(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert)
+    }
+
 }

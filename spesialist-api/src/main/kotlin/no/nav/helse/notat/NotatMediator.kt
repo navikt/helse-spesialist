@@ -12,4 +12,6 @@ class NotatMediator(
     fun finn(vedtaksperiodeIds: List<UUID>) =
         notatDao.finnNotater(vedtaksperiodeIds)
 
+    fun feilregistrer(notatId: Int, saksbehandler_oid: UUID) = notatDao.feilregistrer(notatId, saksbehandler_oid)
+
 }
