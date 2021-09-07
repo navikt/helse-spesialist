@@ -45,7 +45,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun feilregistrer(notatId: Int, saksbehandler_oid: UUID) =
         """ UPDATE notat
-            SET feilregistrert = true
+            SET feilregistrert = true, feilregistrert_tidspunkt = now()
             WHERE notat.id = :notatId
         """.update(mapOf("notatId" to notatId, "saksbehandler_oid" to saksbehandler_oid))
 
@@ -58,7 +58,8 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             saksbehandlerNavn = it.string("navn"),
             saksbehandlerEpost = it.string("epost"),
             vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-            feilregistrert = it.boolean("feilregistrert")
+            feilregistrert = it.boolean("feilregistrert"),
+            feilregistrert_tidspunkt = it.localDateTimeOrNull("feilregistrert_tidspunkt"),
         )
     }
 }

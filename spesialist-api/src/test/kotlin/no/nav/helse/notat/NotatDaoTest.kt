@@ -63,6 +63,7 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
         val feilregistrerteNotater = notatDao.finnNotater(listOf(vedtaksperiodeId))
 
         assertTrue(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert)
+        assertNotNull(feilregistrerteNotater[vedtaksperiodeId]?.get(0)!!.feilregistrert_tidspunkt)
     }
 
 }

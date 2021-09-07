@@ -124,7 +124,8 @@ internal class NotatApiTest: AbstractApiTest() {
                 saksbehandlerNavn = "per",
                 saksbehandlerEpost = "noen@example.com",
                 vedtaksperiodeId = periode_1_id,
-                feilregistrert = false)),
+                feilregistrert = false,
+                feilregistrert_tidspunkt = null)),
             periode_2_id to listOf(NotatDto(
                 id = 2,
                 tekst = "sup?",
@@ -133,7 +134,8 @@ internal class NotatApiTest: AbstractApiTest() {
                 saksbehandlerNavn = "per",
                 saksbehandlerEpost = "noen@example.com",
                 vedtaksperiodeId = periode_2_id,
-                feilregistrert = false))
+                feilregistrert = false,
+                feilregistrert_tidspunkt = null))
         )
         val response = client.get<Map<UUID, List<NotatDto>>>("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
             authentication(SAKSBEHANDLER_OID)

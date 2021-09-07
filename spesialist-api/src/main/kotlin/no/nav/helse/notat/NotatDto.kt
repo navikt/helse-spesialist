@@ -13,5 +13,6 @@ data class NotatDto(
     val saksbehandlerNavn: String,
     val saksbehandlerEpost: String,
     val vedtaksperiodeId: UUID,
-    val feilregistrert: Boolean
+    val feilregistrert: Boolean,
+    val feilregistrert_tidspunkt: LocalDateTime?
 )
