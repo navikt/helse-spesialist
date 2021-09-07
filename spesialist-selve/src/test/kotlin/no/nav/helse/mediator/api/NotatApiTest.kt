@@ -3,6 +3,7 @@ package no.nav.helse.mediator.api
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -11,6 +12,7 @@ import no.nav.helse.notat.NotatDto
 import no.nav.helse.notat.NotatMediator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -35,29 +37,11 @@ internal class NotatApiTest: AbstractApiTest() {
         setupServer {
             notaterApi(notatMediator)
         }
+    }
 
-        val periode_1_id = UUID.fromString(vedtaksperiodeId1)
-        val periode_2_id = UUID.fromString(vedtaksperiodeId2)
-        every { notatMediator.finn(listOf(periode_1_id, periode_2_id)) } returns mapOf(
-            periode_1_id to listOf(NotatDto(
-                id = 1,
-                tekst = "yo!",
-                opprettet = LocalDateTime.now(),
-                saksbehandlerOid = UUID.randomUUID(),
-                saksbehandlerNavn = "per",
-                saksbehandlerEpost = "noen@example.com",
-                vedtaksperiodeId = periode_1_id,
-                feilregistrert = false)),
-            periode_2_id to listOf(NotatDto(
-                id = 2,
-                tekst = "sup?",
-                opprettet = LocalDateTime.now(),
-                saksbehandlerOid = UUID.randomUUID(),
-                saksbehandlerNavn = "per",
-                saksbehandlerEpost = "noen@example.com",
-                vedtaksperiodeId = periode_2_id,
-                feilregistrert = false))
-        )
+    @BeforeEach
+    fun set() {
+        clearMocks(notatMediator)
     }
 
     @Test
@@ -79,6 +63,7 @@ internal class NotatApiTest: AbstractApiTest() {
 
     @Test
     fun `feilregistrering av notat`() {
+        every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)} returns true
         val response = runBlocking {
             client.put<HttpResponse>("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
                 accept(ContentType.Application.Json)
@@ -93,6 +78,23 @@ internal class NotatApiTest: AbstractApiTest() {
     }
 
     @Test
+    fun `feilregistrering av annen saksbehandler sitt originale notat`() {
+        every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)} returns false
+        val response = runBlocking {
+            client.put<HttpResponse>("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
+                accept(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+
+        assertEquals(
+            response.status,
+            HttpStatusCode.BadRequest,
+            "HTTP response burde gi Forbidden, fikk ${response.status}"
+        )
+    }
+
+    @Test
     fun `manglende vedtaksperiode på post gir trøbbel`() {
         val response = runBlocking {
             client.post<HttpResponse>("/api/notater/null") {
@@ -102,7 +104,7 @@ internal class NotatApiTest: AbstractApiTest() {
                 authentication(SAKSBEHANDLER_OID)
             }
         }
-        kotlin.test.assertEquals(
+        assertEquals(
             response.status,
             HttpStatusCode.InternalServerError,
             "HTTP response burde gi Internal Server Error, fikk ${response.status}"
@@ -111,6 +113,28 @@ internal class NotatApiTest: AbstractApiTest() {
 
     @Test
     fun `flere query params med samme navn er lov`() = runBlocking{
+        val periode_1_id = UUID.fromString(vedtaksperiodeId1)
+        val periode_2_id = UUID.fromString(vedtaksperiodeId2)
+        every { notatMediator.finn(listOf(periode_1_id, periode_2_id)) } returns mapOf(
+            periode_1_id to listOf(NotatDto(
+                id = 1,
+                tekst = "yo!",
+                opprettet = LocalDateTime.now(),
+                saksbehandlerOid = SAKSBEHANDLER_OID,
+                saksbehandlerNavn = "per",
+                saksbehandlerEpost = "noen@example.com",
+                vedtaksperiodeId = periode_1_id,
+                feilregistrert = false)),
+            periode_2_id to listOf(NotatDto(
+                id = 2,
+                tekst = "sup?",
+                opprettet = LocalDateTime.now(),
+                saksbehandlerOid = SAKSBEHANDLER_OID,
+                saksbehandlerNavn = "per",
+                saksbehandlerEpost = "noen@example.com",
+                vedtaksperiodeId = periode_2_id,
+                feilregistrert = false))
+        )
         val response = client.get<Map<UUID, List<NotatDto>>>("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
             authentication(SAKSBEHANDLER_OID)
         }
