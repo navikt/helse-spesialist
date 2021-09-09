@@ -23,6 +23,8 @@ internal class LagreAnnulleringCommand(
             .oid
         val annulleringId = utbetalingDao.nyAnnullering(annullertTidspunkt, saksbehandlerOid)
 
-        return utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
+        utbetalingDao.leggTilAnnullertAvSaksbehandler(utbetalingId, annulleringId)
+
+        return true
     }
 }

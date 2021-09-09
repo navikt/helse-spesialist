@@ -237,7 +237,7 @@ ORDER BY o.fagsystem_id, u.opprettet DESC
             .asList)
     }
 
-    fun leggTilAnnullertAvSaksbehandler(utbetalingId: UUID, annullertAvSaksbehandlerRef: Long): Boolean {
+    fun leggTilAnnullertAvSaksbehandler(utbetalingId: UUID, annullertAvSaksbehandlerRef: Long) {
         val utbetalingIdRef = finnUtbetalingIdRef(utbetalingId)
         @Language("PostgreSQL")
         val query = """
@@ -246,7 +246,7 @@ ORDER BY o.fagsystem_id, u.opprettet DESC
             WHERE utbetaling_id_ref = :utbetalingIdRef
         """
 
-        return sessionOf(dataSource).use {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     query, mapOf(
