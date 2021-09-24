@@ -96,64 +96,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `oppdaterer saksbehandleroppgavetype dersom påminnet godkjenningsbehov har endret inntektskilde til EN_ARBEIDSGIVER`() {
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
-        )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
-        sendDigitalKontaktinformasjonløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erDigital = true
-        )
-        sendÅpneGosysOppgaverløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId
-        )
-        sendRisikovurderingløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
-        assertTilstand(
-            godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
-        )
-        assertVedtak(VEDTAKSPERIODE_ID)
-        assertInntektskilde(VEDTAKSPERIODE_ID, Inntektskilde.FLERE_ARBEIDSGIVERE)
-
-        sendGodkjenningsbehov(
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            utbetalingId = UTBETALING_ID,
-            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
-        )
-
-        assertInntektskilde(VEDTAKSPERIODE_ID, Inntektskilde.EN_ARBEIDSGIVER)
-    }
-
-    @Test
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)

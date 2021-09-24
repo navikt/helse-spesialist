@@ -691,21 +691,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun assertInntektskilde(vedtaksperiodeId: UUID, vararg inntektskilde: Inntektskilde) {
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).map { it.string("inntektskilde") }.asList
-            )
-        }.also {
-            assertEquals(inntektskilde.map(Inntektskilde::name), it)
-        }
-    }
-
     protected fun assertOppgaver(antall: Int) {
         val oppgaver = testRapid.inspektør.oppgaver()
         assertEquals(antall, oppgaver.size)
