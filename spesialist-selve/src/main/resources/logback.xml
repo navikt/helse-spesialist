@@ -6,7 +6,7 @@
 
     <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d{MMM dd yyyy HH:mm:ss.SSS zzz} CEF:0|Spesialist|Sporingslogg|1.0|audit:oppslag|Sporingslogg|%level|%msg%n</pattern>
+            <pattern>%d{MMM dd yyyy HH:mm:ss.SSS zzz} %level CEF:0|Spesialist|Sporingslogg|1.0|audit:oppslag|Sporingslogg|%level|%msg%n</pattern>
         </layout>
 
         <syslogConfig class="org.productivity.java.syslog4j.impl.net.tcp.TCPNetSyslogConfig">
