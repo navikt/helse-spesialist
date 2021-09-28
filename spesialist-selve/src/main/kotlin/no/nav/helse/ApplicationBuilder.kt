@@ -216,12 +216,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
-                    auditLog.info(
-                        "Bruker=\"${
-                            principal.payload.getClaim("NAVident")
-                                .asString()
-                        }\" gjør kall mot url=\"${call.request.uri}\""
-                    )
+                    val navIdent = principal.payload.getClaim("NAVident").asString()
+                    auditLog.info("end=${System.currentTimeMillis()} suid=$navIdent url=${call.request.uri}")
                 }
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
