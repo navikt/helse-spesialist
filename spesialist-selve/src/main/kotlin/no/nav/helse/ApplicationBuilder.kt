@@ -69,6 +69,7 @@ const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+private val personIdRegex = "\\d{11,13}".toRegex()
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
     private val dataSourceBuilder = DataSourceBuilder(System.getenv())
@@ -216,8 +217,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
+                    val url = call.request.uri
                     val navIdent = principal.payload.getClaim("NAVident").asString()
-                    auditLog.info("end=${System.currentTimeMillis()} suid=$navIdent url=${call.request.uri}")
+                    (personIdRegex.find(url)?.value ?: call.request.header("fodselsnummer"))?.also { personId ->
+                        auditLog.info("end=${System.currentTimeMillis()} suid=$navIdent duid=$personId request=$url")
+                    }
                 }
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
