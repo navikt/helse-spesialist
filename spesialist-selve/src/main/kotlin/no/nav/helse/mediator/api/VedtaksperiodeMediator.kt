@@ -124,7 +124,8 @@ internal class VedtaksperiodeMediator(
                     overstyringer = overstyringer,
                     vedtaksperioder = it.vedtaksperioder,
                     bransjer = bransjer,
-                    utbetalingshistorikk = mapUtbetalingshistorikk(it)
+                    utbetalingshistorikk = mapUtbetalingshistorikk(it),
+                    generasjoner = it.generasjoner
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {
@@ -169,8 +170,8 @@ internal class VedtaksperiodeMediator(
                 utbetalinger = utbetalinger,
                 arbeidsforhold = arbeidsforhold,
                 inntektsgrunnlag = speilSnapshot.inntektsgrunnlag,
-                erPåVent = tildeling?.påVent ?: false,
-                tildeling = tildeling
+                tildeling = tildeling,
+                vilkårsgrunnlagHistorikk = speilSnapshot.vilkårsgrunnlagHistorikk
             )
         }
 

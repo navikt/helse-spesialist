@@ -9,5 +9,6 @@ data class SnapshotDto(
     val fødselsnummer: String,
     val dødsdato: LocalDate?,
     val arbeidsgivere: List<ArbeidsgiverDto>,
-    val inntektsgrunnlag: JsonNode
+    val inntektsgrunnlag: JsonNode,
+    val vilkårsgrunnlagHistorikk: JsonNode?
 )

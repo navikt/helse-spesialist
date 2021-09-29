@@ -35,7 +35,6 @@ data class PersonForSpeilDto(
     val enhet: EnhetDto,
     val arbeidsforhold: List<ArbeidsforholdApiDto>,
     val inntektsgrunnlag: JsonNode,
-    @Deprecated("erstattes av eget tildelingsobjekt")
-    val erPåVent: Boolean,
+    val vilkårsgrunnlagHistorikk: JsonNode?,
     val tildeling: TildelingApiDto?
 )
