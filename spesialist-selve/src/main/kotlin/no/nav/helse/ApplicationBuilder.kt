@@ -217,10 +217,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             intercept(ApplicationCallPipeline.Call) {
                 call.principal<JWTPrincipal>()?.let { principal ->
-                    val url = call.request.uri
+                    val uri = call.request.uri
                     val navIdent = principal.payload.getClaim("NAVident").asString()
-                    (personIdRegex.find(url)?.value ?: call.request.header("fodselsnummer"))?.also { personId ->
-                        auditLog.info("end=${System.currentTimeMillis()} suid=$navIdent duid=$personId request=$url")
+                    (personIdRegex.find(uri)?.value ?: call.request.header("fodselsnummer"))?.also { personId ->
+                        auditLog.info("end=${System.currentTimeMillis()} suid=$navIdent duid=$personId request=${uri.substring(0, uri.length.coerceAtMost(70))}")
                     }
                 }
             }
