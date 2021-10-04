@@ -9,7 +9,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
-import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
@@ -605,7 +604,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 "fagsystemId": "$fagsystemId",
                 "utbetalingId": "$UTBETALING_ID",
                 "annullertAvSaksbehandler": "${LocalDateTime.now()}",
-                "saksbehandlerEpost": "$saksbehandlerEpost"
+                "saksbehandlerEpost": "$saksbehandlerEpost",
+                "gjelderSisteSkjæringstidspunkt": true
             }"""
 
         testRapid.sendTestMessage(json)

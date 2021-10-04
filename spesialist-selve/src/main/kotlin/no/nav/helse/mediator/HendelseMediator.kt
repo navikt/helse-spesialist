@@ -23,7 +23,6 @@ import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
@@ -430,6 +429,7 @@ internal class HendelseMediator(
                                 .apply { put("ident", annulleringDto.saksbehandlerIdent) },
                             "fagsystemId" to fagsystemId,
                             "begrunnelser" to (begrunnelser) as Any,
+                            "gjelderSisteSkjæringstidspunkt" to annulleringDto.gjelderSisteSkjæringstidspunkt,
                         ) + (kommentar?.let {
                             mapOf<String, Any>("kommentar" to it)
                         } ?: mapOf()))

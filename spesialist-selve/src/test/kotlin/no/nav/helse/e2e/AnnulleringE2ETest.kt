@@ -49,7 +49,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID
         )
 
-        val annulleringDto = AnnulleringDto(AKTØR, FØDSELSNUMMER, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), null)
+        val annulleringDto = AnnulleringDto(AKTØR, FØDSELSNUMMER, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), true, null)
         val saksbehandler = Saksbehandler(
             "kevders.chilleby@nav.no",
             UUID.randomUUID(),
@@ -61,9 +61,9 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")
 
         val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
-        val annullerAvSaksbehandler = speilSnapshot.utbetalinger.first().annullertAvSaksbehandler
+        val annullertAvSaksbehandler = speilSnapshot.utbetalinger.first().annullertAvSaksbehandler
 
-        assertNotNull(annullerAvSaksbehandler?.annullertTidspunkt)
-        assertEquals("Kevders Chilleby", annullerAvSaksbehandler?.saksbehandlerNavn)
+        assertNotNull(annullertAvSaksbehandler?.annullertTidspunkt)
+        assertEquals("Kevders Chilleby", annullertAvSaksbehandler?.saksbehandlerNavn)
     }
 }

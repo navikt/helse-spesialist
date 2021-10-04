@@ -45,6 +45,7 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
                 saksbehandlerIdent = "X999999",
                 begrunnelser = listOf("En", "Toten", "Tre"),
                 kommentar = "Nittedal Tistedal Elverum",
+                gjelderSisteSkjæringstidspunkt = true
             ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn, ident)
         )
         assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())
@@ -53,6 +54,7 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
             testRapid.inspektør.field(0, "saksbehandler")["epostaddresse"].asText()
         )
         assertEquals("X999999", testRapid.inspektør.field(0, "saksbehandler")["ident"].asText())
+        assertEquals(true, testRapid.inspektør.field(0, "gjelderSisteSkjæringstidspunkt").asBoolean())
         assertEquals(oid.toString(), testRapid.inspektør.field(0, "saksbehandler")["oid"].asText())
         assertEquals(navn, testRapid.inspektør.field(0, "saksbehandler")["navn"].asText())
         assertEquals("Nittedal Tistedal Elverum", testRapid.inspektør.field(0, "kommentar").asText())
@@ -72,7 +74,8 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
                 fagsystemId = "foo",
                 saksbehandlerIdent = "X999999",
                 begrunnelser = listOf(),
-                kommentar = null
+                kommentar = null,
+                gjelderSisteSkjæringstidspunkt = true
             ), Saksbehandler("siri.saksbehandler@nav.no", oid, navn, ident)
         )
         assertEquals("annullering", testRapid.inspektør.field(0, "@event_name").asText())
