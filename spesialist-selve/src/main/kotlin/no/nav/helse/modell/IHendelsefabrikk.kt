@@ -76,6 +76,9 @@ internal interface IHendelsefabrikk {
         json: String
     ): OverstyringTidslinje
 
+    fun revurderingAvvist(json:String): RevurderingAvvist
+    fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist
+
     fun overstyringTidslinje(json: String): OverstyringTidslinje
 
     fun overstyringInntekt(json: String): OverstyringInntekt

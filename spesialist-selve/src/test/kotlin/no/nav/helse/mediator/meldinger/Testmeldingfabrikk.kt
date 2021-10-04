@@ -546,6 +546,17 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagRevurderingAvvist(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
+        errors: List<String>
+    ) = nyHendelse(
+        id, "revurdering_avvist", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "errors" to errors
+        )
+    )
+
     fun lagAvbrytSaksbehandling(
         id: UUID = UUID.randomUUID(),
         fødselsnummer: String = "12020052345",

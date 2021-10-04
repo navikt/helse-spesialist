@@ -9,6 +9,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.abonnement.AbonnementDao
+import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
@@ -322,14 +323,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun sendOverstyrteDager(orgnr: String, saksbehandlerEpost: String, dager: List<OverstyringDagDto>): UUID =
+    protected fun sendOverstyrteDager(
+        dager: List<OverstyringDagDto>,
+        orgnr: String = ORGNR,
+        saksbehandlerEpost: String = SAKSBEHANDLER_EPOST,
+        saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
+        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT
+    ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyringTidslinje(
                     id = id,
                     dager = dager,
                     organisasjonsnummer = orgnr,
-                    saksbehandlerEpost = saksbehandlerEpost
+                    saksbehandlerEpost = saksbehandlerEpost,
+                    saksbehandlerOid = saksbehandlerOid,
+                    saksbehandlerident = saksbehandlerIdent,
                 )
             )
         }
@@ -347,6 +356,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     månedligInntekt = månedligInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
                     saksbehandlerEpost = SAKSBEHANDLER_EPOST
+                )
+            )
+        }
+
+    protected fun sendRevurderingAvvist(fødselsnummer: String, errors: List<String>) =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagRevurderingAvvist(
+                    id = id,
+                    fødselsnummer = fødselsnummer,
+                    errors = errors
                 )
             )
         }

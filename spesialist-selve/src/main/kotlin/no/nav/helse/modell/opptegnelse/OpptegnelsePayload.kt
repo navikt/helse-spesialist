@@ -18,3 +18,9 @@ internal data class GodkjenningsbehovPayload(private val hendelseId: UUID) : Opp
     """.trimIndent()
 }
 
+internal data class RevurderingAvvistPayload(private val hendelseId: UUID, private val errors: List<String>) :
+    OpptegnelsePayload() {
+    override fun toJson() = """
+        { "hendelseId": "$hendelseId", "errors": ${errors.map{ "\"$it\""}} }
+    """.trimIndent()
+}

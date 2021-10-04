@@ -231,6 +231,22 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao
     )
 
+    override fun overstyringTidslinje(json: String): OverstyringTidslinje {
+        val jsonNode = mapper.readTree(json)
+        return overstyringTidslinje(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
+            navn = jsonNode.path("saksbehandlerNavn").asText(),
+            ident = jsonNode.path("saksbehandlerIdent").asText(),
+            epost = jsonNode.path("saksbehandlerEpost").asText(),
+            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
+            begrunnelse = jsonNode.path("begrunnelse").asText(),
+            overstyrteDager = jsonNode.path("dager").toOverstyrteDagerDto(),
+            json = json
+        )
+    }
+
     override fun overstyringInntekt(
         id: UUID,
         fødselsnummer: String,
@@ -259,22 +275,6 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao,
         json = json
     )
-
-    override fun overstyringTidslinje(json: String): OverstyringTidslinje {
-        val jsonNode = mapper.readTree(json)
-        return overstyringTidslinje(
-            id = UUID.fromString(jsonNode.path("@id").asText()),
-            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
-            navn = jsonNode.path("saksbehandlerNavn").asText(),
-            ident = jsonNode.path("saksbehandlerIdent").asText(),
-            epost = jsonNode.path("saksbehandlerEpost").asText(),
-            orgnummer = jsonNode.path("organisasjonsnummer").asText(),
-            begrunnelse = jsonNode.path("begrunnelse").asText(),
-            overstyrteDager = jsonNode.path("dager").toOverstyrteDagerDto(),
-            json = json
-        )
-    }
 
     override fun overstyringInntekt(json: String): OverstyringInntekt {
         val jsonNode = mapper.readTree(json)
@@ -441,5 +441,20 @@ internal class Hendelsefabrikk(
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao
         )
+    }
+
+    override fun revurderingAvvist(json: String): RevurderingAvvist {
+        val jsonNode = mapper.readTree(json)
+        return RevurderingAvvist(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            errors = jsonNode["errors"].map { it.asText() },
+            json = json,
+            opptegnelseDao = opptegnelseDao
+        )
+    }
+
+    override fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist {
+        return RevurderingAvvist(UUID.randomUUID(), fødselsnummer, errors, json, opptegnelseDao)
     }
 }

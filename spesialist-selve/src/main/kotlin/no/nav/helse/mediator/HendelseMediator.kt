@@ -78,6 +78,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
+            RevurderingAvvist.River(it, this)
         }
     }
 
@@ -365,6 +366,10 @@ internal class HendelseMediator(
 
     override fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
+    }
+
+    fun revurderingAvvist(fødselsnummer: String, error: List<String>, json:String, context: MessageContext) {
+        utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {

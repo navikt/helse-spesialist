@@ -26,7 +26,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val originaltGodkjenningsbehov = settOppBruker()
 
         sendOverstyrteDager(
-            ORGNR, SAKSBEHANDLER_EPOST, listOf(
+            listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,
@@ -66,7 +66,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(hendelseId, overstyringer.first().hendelseId)
         assertEquals("saksbehandlerIdent", overstyringer.first().saksbehandlerIdent)
         assertEquals("saksbehandler", overstyringer.first().saksbehandlerNavn)
-        assertEquals(25000.0,overstyringer.first().månedligInntekt)
+        assertEquals(25000.0, overstyringer.first().månedligInntekt)
         assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
         assertEquals("begrunnelse", overstyringer.first().begrunnelse)
 
@@ -119,7 +119,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             erDigital = true
         )
         sendOverstyrteDager(
-            ORGNR, SAKSBEHANDLER_EPOST, listOf(
+            listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,
