@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.abonnement.OpptegnelseType
+import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -47,9 +48,15 @@ internal class RevurderingAvvist(
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             sikkerLogg.info("Mottok melding om revurdering avvist")
-            val fødselsnummer = packet["fødselsnummer"].asText()
-            val errors = packet["errors"].map { it.asText() }
-            mediator.revurderingAvvist(fødselsnummer, errors, packet.toJson(), context)
+
+            if(FeatureToggle.Toggle("tbd.revurdering_avvist").enabled) {
+                val fødselsnummer = packet["fødselsnummer"].asText()
+                val errors = packet["errors"].map { it.asText() }
+                mediator.revurderingAvvist(fødselsnummer, errors, packet.toJson(), context)
+            } else {
+                sikkerLogg.info("ignorerer avvist_revurdering pga featuretoggle")
+            }
+
         }
     }
 
