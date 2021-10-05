@@ -33,7 +33,8 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
         val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, medVurdering = true))
+        val vilkårsgrunnlagHistorikkId = UUID.randomUUID()
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, vilkårsgrunnlagHistorikkId, medVurdering = true))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -45,6 +46,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         val historikkElement = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first()
         val utbetaling = historikkElement.utbetaling
         assertEquals(beregningId, historikkElement.beregningId)
+        assertEquals(vilkårsgrunnlagHistorikkId, historikkElement.vilkårsgrunnlagHistorikkId)
         assertNotNull(historikkElement.tidsstempel)
         assertNotNull(historikkElement.utbetaling.tidsstempel)
         assertEquals(2, historikkElement.beregnettidslinje.size)
@@ -76,7 +78,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil uten vurdering`() {
         val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, medVurdering = false))
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, UUID.randomUUID(), medVurdering = false))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -89,7 +91,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     }
 
     @Language("JSON")
-    private fun utbetalingshistorikk(beregningId: UUID, medVurdering: Boolean = false) = objectMapper.readTree(
+    private fun utbetalingshistorikk(beregningId: UUID, vilkårsgrunnlagHistorikkId: UUID, medVurdering: Boolean = false) = objectMapper.readTree(
         """
                 [
                     {
@@ -125,6 +127,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                                 "grad": 100.0
                             }
                         ],
+                        "vilkårsgrunnlagHistorikkId": "$vilkårsgrunnlagHistorikkId",
                         "tidsstempel": "${LocalDateTime.now()}",
                         "utbetaling": {
                             "beregningId": "$beregningId",
@@ -150,13 +153,13 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                                 }
                             ],
                             "vurdering": ${
-                                if (medVurdering) """{
+            if (medVurdering) """{
                                     "godkjent": true,
                                     "automatisk": false,
                                     "ident": "EN_IDENT",
                                     "tidsstempel": "${LocalDateTime.now()}"
                                 }""" else null
-                            }
+        }
                         }
                     }
                 ]

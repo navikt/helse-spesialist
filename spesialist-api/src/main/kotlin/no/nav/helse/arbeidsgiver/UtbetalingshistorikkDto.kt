@@ -6,6 +6,7 @@ import java.util.*
 
 data class UtbetalingshistorikkElementDto(
     val beregningId: UUID,
+    val vilkårsgrunnlagHistorikkId: UUID,
     val beregnettidslinje: List<SykdomstidslinjedagDto>,
     val hendelsetidslinje: List<SykdomstidslinjedagDto>,
     val utbetaling: UtbetalingDto,

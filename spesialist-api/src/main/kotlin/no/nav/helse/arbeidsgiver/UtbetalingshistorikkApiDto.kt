@@ -7,6 +7,7 @@ import java.util.*
 
 data class UtbetalingshistorikkElementApiDto(
     val beregningId: UUID,
+    val vilkårsgrunnlagHistorikkId: UUID,
     val beregnettidslinje: List<Sykdomstidslinjedag>,
     val hendelsetidslinje: List<Sykdomstidslinjedag>,
     val utbetaling: Utbetaling,
@@ -61,6 +62,7 @@ data class UtbetalingshistorikkElementApiDto(
                 return@map objectMapper.treeToValue(it, UtbetalingshistorikkElementDto::class.java).let { element ->
                     UtbetalingshistorikkElementApiDto(
                         beregningId = element.beregningId,
+                        vilkårsgrunnlagHistorikkId = element.vilkårsgrunnlagHistorikkId,
                         tidsstempel = element.tidsstempel,
                         beregnettidslinje = element.beregnettidslinje.map { dag ->
                             Sykdomstidslinjedag(
