@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.abonnement.OpptegnelseType
-import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgavestatus
@@ -119,8 +118,6 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fanger opp og informerer saksbehandler om avvist revurdering`() {
-        FeatureToggle.Toggle("tbd.revurdering_avvist").enable()
-
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
 
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
@@ -136,8 +133,6 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         assertEquals(OpptegnelseType.REVURDERING_AVVIST, opptegnelser.first().type)
         assertEquals(AKTØR.toLong(), opptegnelser.first().aktørId)
         assertTrue(opptegnelser.first().payload.contains("Revurderingen er åpenbart helt feil"))
-
-        FeatureToggle.Toggle("tbd.revurdering_avvist").disable()
     }
 
     private fun håndterGodkjenningsbehov(godkjenningsmeldingId: UUID) {
