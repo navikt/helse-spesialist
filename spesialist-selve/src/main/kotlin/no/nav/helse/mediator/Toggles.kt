@@ -16,7 +16,7 @@ object FeatureToggle {
     class Toggle(private val toggleName: String) {
         val enabled get() = unleash.isEnabled(toggleName, context).also {
             log.info("er $toggleName enabled, mon tro?")
-            log.info(context.toString())
+            log.info("context environment: ${context.environment}")
             log.info("enabled? $it")
         }
         fun enable() = enable(toggleName)
@@ -26,9 +26,11 @@ object FeatureToggle {
     class ByClusterStrategy : Strategy {
         override fun getName() = "byCluster"
 
-        override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
+        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
             val clusterName = System.getenv("NAIS_CLUSTER_NAME") ?: "NO_CLUSTER_NAME"
-            return parameters?.get("cluster")?.split(",")?.any { it.contains(clusterName, ignoreCase = true) } ?: false
+            log.info("line 31: clustername = $clusterName")
+            log.info(parameters.toString())
+            return parameters["cluster"]?.split(",")?.any { it.contains(clusterName, ignoreCase = true) } ?: false
         }
     }
 
