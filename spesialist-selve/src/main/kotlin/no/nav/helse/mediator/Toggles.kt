@@ -6,13 +6,19 @@ import no.finn.unleash.Unleash
 import no.finn.unleash.UnleashContext
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 const val OVERSTYR_INNTEKT = "tbd.overstyr_inntekt"
-
+private val log = LoggerFactory.getLogger("FeatureToggle")
 object FeatureToggle {
 
     class Toggle(private val toggleName: String) {
-        val enabled get() = unleash.isEnabled(toggleName, context)
+        val enabled get() = unleash.isEnabled(toggleName, context).also {
+            log.info("er $toggleName enabled, mon tro?")
+            log.info(context.toString())
+            log.info("enabled? $it")
+        }
         fun enable() = enable(toggleName)
         fun disable() = disable(toggleName)
     }
