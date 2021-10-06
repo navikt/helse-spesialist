@@ -4,6 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeatureToggle
+import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -55,7 +56,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer inntekt`() {
-        FeatureToggle.Toggle("overstyr_inntekt").enable()
+        FeatureToggle.Toggle(OVERSTYR_INNTEKT).enable()
         val godkjenningsbehovId = settOppBruker()
         val hendelseId = sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar)
 
@@ -87,7 +88,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         val oppgave = requireNotNull(oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER })
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
-        FeatureToggle.Toggle("overstyr_inntekt").disable()
+        FeatureToggle.Toggle(OVERSTYR_INNTEKT).disable()
     }
 
     @Test
