@@ -74,4 +74,4 @@ spec:
     - name: SPESIALIST_OID
       value: be87b958-4ff0-405d-80b5-f47e836f0a0e
     - name: UNLEASH_URL
-      value: https://unleash.nais.io/api
+      value: https://unleash.nais.io/api/

@@ -13,27 +13,30 @@ object FeatureToggle {
 
     class Toggle(private val toggleName: String) {
         val enabled get() = unleash.isEnabled(toggleName, context)
-        fun <R> ifEnabled(ifTrue: () -> R, ifFalse: () -> R) = if (enabled) ifTrue() else ifFalse()
         fun enable() = enable(toggleName)
         fun disable() = disable(toggleName)
     }
 
-    class ByEnvironmentStrategy() : Strategy {
-        override fun getName() = "byEnvironmentParam"
+    class ByClusterStrategy : Strategy {
+        override fun getName() = "byCluster"
 
-        override fun isEnabled(parameters: MutableMap<String, String>?) =
-            parameters?.get("environment")?.split(",")?.map { it.trim() }?.contains(env) == true
+        override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
+            val clusterName = System.getenv("NAIS_CLUSTER_NAME") ?: "NO_CLUSTER_NAME"
+            return parameters?.get("cluster")?.split(",")?.any { it.equals(clusterName, ignoreCase = true) } ?: false
+        }
     }
 
     private val env = System.getenv("NAIS_CLUSTER_NAME") ?: "test"
     private val fakeUnleash = FakeUnleash()
-    private val unleash: Unleash = System.getenv("UNLEASH_URL")?.let {
+    private val unleash: Unleash = System.getenv("UNLEASH_URL")?.let { unleashUrl: String ->
         DefaultUnleash(
             UnleashConfig.builder()
                 .appName(System.getenv("NAIS_APP_NAME"))
-                .unleashAPI(it)
+                .environment(env)
+                .instanceId(System.getenv("NAIS_APP_NAME"))
+                .unleashAPI(unleashUrl)
                 .build(),
-            ByEnvironmentStrategy()
+            ByClusterStrategy()
         )
     } ?: fakeUnleash
 

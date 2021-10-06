@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.*
@@ -88,7 +89,7 @@ internal class OverstyringInntekt(
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
-            if (FeatureToggle.Toggle("overstyr_inntekt").enabled) {
+            if (FeatureToggle.Toggle(OVERSTYR_INNTEKT).enabled) {
                 logg.info(
                     "Mottok overstyring av inntekt med {}",
                     keyValue("eventId", hendelseId)
