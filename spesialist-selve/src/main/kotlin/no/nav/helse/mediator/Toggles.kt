@@ -22,7 +22,7 @@ object FeatureToggle {
 
         override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
             val clusterName = System.getenv("NAIS_CLUSTER_NAME") ?: "NO_CLUSTER_NAME"
-            return parameters?.get("cluster")?.split(",")?.any { it.equals(clusterName, ignoreCase = true) } ?: false
+            return parameters?.get("cluster")?.split(",")?.any { it.contains(clusterName, ignoreCase = true) } ?: false
         }
     }
 
