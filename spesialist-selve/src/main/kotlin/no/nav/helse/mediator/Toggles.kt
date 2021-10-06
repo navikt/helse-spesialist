@@ -10,15 +10,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 const val OVERSTYR_INNTEKT = "tbd.overstyr_inntekt"
-private val log = LoggerFactory.getLogger("FeatureToggle")
 object FeatureToggle {
 
     class Toggle(private val toggleName: String) {
-        val enabled get() = unleash.isEnabled(toggleName, context).also {
-            log.info("er $toggleName enabled, mon tro?")
-            log.info("context environment: ${context.environment}")
-            log.info("enabled? $it")
-        }
+        val enabled get() = unleash.isEnabled(toggleName, context)
         fun enable() = enable(toggleName)
         fun disable() = disable(toggleName)
     }
@@ -28,8 +23,6 @@ object FeatureToggle {
 
         override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
             val clusterName = System.getenv("NAIS_CLUSTER_NAME") ?: "NO_CLUSTER_NAME"
-            log.info("line 31: clustername = $clusterName")
-            log.info(parameters.toString())
             return parameters["cluster"]?.split(",")?.any { it.contains(clusterName, ignoreCase = true) } ?: false
         }
     }
