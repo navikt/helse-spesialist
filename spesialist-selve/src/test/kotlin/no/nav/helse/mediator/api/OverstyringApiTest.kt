@@ -11,6 +11,7 @@ import io.ktor.server.testing.*
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeatureToggle
+import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -60,7 +61,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt`() {
-        FeatureToggle.Toggle("overstyr_inntekt").enable()
+        FeatureToggle.Toggle(OVERSTYR_INNTEKT).enable()
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             azureAdAppAuthentication(azureAdConfig)
@@ -105,7 +106,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
             }
         }
-        FeatureToggle.Toggle("overstyr_inntekt").disable()
+        FeatureToggle.Toggle(OVERSTYR_INNTEKT).disable()
     }
 
     @Test

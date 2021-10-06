@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.saksbehandler.SaksbehandlerDto
 import java.time.LocalDate
@@ -50,7 +51,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
 
     post("/api/overstyr/inntekt") {
-        if (FeatureToggle.Toggle("overstyr_inntekt").enabled) {
+        if (FeatureToggle.Toggle(OVERSTYR_INNTEKT).enabled) {
             val overstyring = call.receive<OverstyrInntektDTO>()
 
             val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))

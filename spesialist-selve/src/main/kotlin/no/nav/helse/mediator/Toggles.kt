@@ -7,6 +7,7 @@ import no.finn.unleash.UnleashContext
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
 
+const val OVERSTYR_INNTEKT = "tbd.overstyr_inntekt"
 
 object FeatureToggle {
 
