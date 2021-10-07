@@ -1,7 +1,7 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-    name: spesialist-scaling
+    name: spesialist
     namespace: tbd
 spec:
     scaleTargetRef:
