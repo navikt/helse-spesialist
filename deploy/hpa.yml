@@ -11,15 +11,15 @@ spec:
     minReplicas: 2
     maxReplicas: 6
     metrics:
-        -   type: External
-            external:
-                metric:
-                    name: kafka_consumergroup_group_lag
-                    selector:
-                        matchLabels:
-                            topic: tbd.rapid.v1
-                            group: tbd-spesialist-v1
-                target:
-                    type: AverageValue
-                    averageValue: 10000
+    - type: External
+      external:
+          metric:
+              name: kafka_consumergroup_group_lag
+              selector:
+                  matchLabels:
+                      topic: tbd.rapid.v1
+                      group: tbd-spesialist-v1
+          target:
+              type: AverageValue
+              averageValue: 10000
 
