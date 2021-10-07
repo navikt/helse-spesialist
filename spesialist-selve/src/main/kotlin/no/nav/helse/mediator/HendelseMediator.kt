@@ -302,6 +302,7 @@ internal class HendelseMediator(
         epost: String,
         orgnummer: String,
         begrunnelse: String,
+        forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         json: String,
@@ -317,6 +318,7 @@ internal class HendelseMediator(
                 epost = epost,
                 orgnummer = orgnummer,
                 begrunnelse = begrunnelse,
+                forklaring = forklaring,
                 månedligInntekt = månedligInntekt,
                 skjæringstidspunkt = skjæringstidspunkt,
                 json = json
@@ -395,19 +397,7 @@ internal class HendelseMediator(
     fun håndter(overstyringMessage: OverstyrInntektKafkaDto) {
         overstyringsteller.labels("opplysningstype", "inntekt").inc()
 
-        val overstyring = JsonMessage.newMessage(
-            standardfelter("overstyr_inntekt", overstyringMessage.fødselsnummer).apply {
-                put("aktørId", overstyringMessage.aktørId)
-                put("organisasjonsnummer", overstyringMessage.organisasjonsnummer)
-                put("begrunnelse", overstyringMessage.begrunnelse)
-                put("saksbehandlerOid", overstyringMessage.saksbehandler.oid)
-                put("saksbehandlerNavn", overstyringMessage.saksbehandler.navn)
-                put("saksbehandlerIdent", overstyringMessage.saksbehandler.ident)
-                put("saksbehandlerEpost", overstyringMessage.saksbehandler.epost)
-                put("månedligInntekt", overstyringMessage.månedligInntekt)
-                put("skjæringstidspunkt", overstyringMessage.skjæringstidspunkt)
-            }
-        ).also {
+        val overstyring = overstyringMessage.somKafkaMessage().also {
             sikkerLogg.info("Publiserer overstyring av inntekt:\n${it.toJson()}")
         }
 

@@ -76,6 +76,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
+                forklaring = "en forklaring",
                 månedligInntekt = 25000.0,
                 skjæringstidspunkt = 1.januar
             )
@@ -102,6 +103,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 assertEquals(SAKSBEHANDLER_EPOST, event["saksbehandlerEpost"].asText())
                 assertEquals(ORGNR, event["organisasjonsnummer"].asText())
                 assertEquals("en begrunnelse", event["begrunnelse"].asText())
+                assertEquals("en forklaring", event["forklaring"].asText())
                 assertEquals(25000.0, event["månedligInntekt"].asDouble())
                 assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
             }
@@ -125,6 +127,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
+                forklaring = "en forklaring",
                 månedligInntekt = 25000.0,
                 skjæringstidspunkt = 1.januar
             )

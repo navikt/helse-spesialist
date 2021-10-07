@@ -29,6 +29,7 @@ internal class OverstyringInntekt(
     ident: String,
     orgnummer: String,
     begrunnelse: String,
+    forklaring: String,
     månedligInntekt: Double,
     skjæringstidspunkt: LocalDate,
     private val json: String,
@@ -51,6 +52,7 @@ internal class OverstyringInntekt(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
             begrunnelse = begrunnelse,
+            forklaring = forklaring,
             månedligInntekt = månedligInntekt,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyringDao = overstyringDao
@@ -77,6 +79,7 @@ internal class OverstyringInntekt(
                     it.requireKey("organisasjonsnummer")
                     it.requireKey("månedligInntekt")
                     it.requireKey("begrunnelse")
+                    it.requireKey("forklaring")
                     it.requireKey("skjæringstidspunkt")
                     it.requireKey("saksbehandlerIdent")
                     it.requireKey("saksbehandlerOid")
@@ -109,6 +112,7 @@ internal class OverstyringInntekt(
                     epost = packet["saksbehandlerEpost"].asText(),
                     orgnummer = packet["organisasjonsnummer"].asText(),
                     begrunnelse = packet["begrunnelse"].asText(),
+                    forklaring = packet["forklaring"].asText(),
                     månedligInntekt = packet["månedligInntekt"].asDouble(),
                     skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
                     json = packet.toJson(),

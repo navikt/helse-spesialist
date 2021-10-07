@@ -256,6 +256,7 @@ internal class Hendelsefabrikk(
         epost: String,
         orgnummer: String,
         begrunnelse: String,
+        forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         json: String
@@ -268,6 +269,7 @@ internal class Hendelsefabrikk(
         epost = epost,
         orgnummer = orgnummer,
         begrunnelse = begrunnelse,
+        forklaring = forklaring,
         månedligInntekt = månedligInntekt,
         skjæringstidspunkt = skjæringstidspunkt,
         reservasjonDao = reservasjonDao,
@@ -287,6 +289,7 @@ internal class Hendelsefabrikk(
             epost = jsonNode.path("saksbehandlerEpost").asText(),
             orgnummer = jsonNode.path("organisasjonsnummer").asText(),
             begrunnelse = jsonNode.path("begrunnelse").asText(),
+            forklaring = jsonNode.path("forklaring").asText(),
             månedligInntekt = jsonNode.path("månedligInntekt").asDouble(),
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
             json = json

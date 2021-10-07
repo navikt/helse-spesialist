@@ -28,6 +28,7 @@ data class OverstyringInntektDto(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val begrunnelse: String,
+    val forklaring: String,
     val timestamp: LocalDateTime,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,

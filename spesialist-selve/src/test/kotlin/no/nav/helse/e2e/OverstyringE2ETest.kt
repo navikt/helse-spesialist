@@ -58,7 +58,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer inntekt`() {
         FeatureToggle.Toggle(OVERSTYR_INNTEKT).enable()
         val godkjenningsbehovId = settOppBruker()
-        val hendelseId = sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar)
+        val hendelseId = sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar, forklaring = "vår egen forklaring")
 
         val overstyringer = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR)
         assertEquals(1, overstyringer.size)
@@ -70,6 +70,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(25000.0, overstyringer.first().månedligInntekt)
         assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
         assertEquals("begrunnelse", overstyringer.first().begrunnelse)
+        assertEquals("vår egen forklaring", overstyringer.first().forklaring)
 
         assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
 

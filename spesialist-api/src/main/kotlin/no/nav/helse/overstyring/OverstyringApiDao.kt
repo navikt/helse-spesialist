@@ -65,6 +65,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                             begrunnelse = overstyringRow.string("begrunnelse"),
+                            forklaring = overstyringRow.string("forklaring"),
                             timestamp = overstyringRow.localDateTime("tidspunkt"),
                             saksbehandlerNavn = overstyringRow.string("navn"),
                             saksbehandlerIdent = overstyringRow.stringOrNull("ident"),

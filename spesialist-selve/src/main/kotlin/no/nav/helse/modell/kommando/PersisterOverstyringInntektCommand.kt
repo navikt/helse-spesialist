@@ -10,6 +10,7 @@ internal class PersisterOverstyringInntektCommand(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val begrunnelse: String,
+    private val forklaring: String,
     private val månedligInntekt: Double,
     private val skjæringstidspunkt: LocalDate,
     private val overstyringDao: OverstyringDao
@@ -20,6 +21,7 @@ internal class PersisterOverstyringInntektCommand(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             begrunnelse = begrunnelse,
+            forklaring = forklaring,
             saksbehandlerRef = oid,
             månedligInntekt = månedligInntekt,
             skjæringstidspunkt = skjæringstidspunkt

@@ -14,6 +14,8 @@ import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.mediator.api.modell.Saksbehandler
+import no.nav.helse.mediator.standardfelter
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.saksbehandler.SaksbehandlerDto
 import java.time.LocalDate
 import java.util.*
@@ -62,6 +64,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
                 aktørId = overstyring.aktørId,
                 saksbehandler = saksbehandler.toDto(),
                 begrunnelse = overstyring.begrunnelse,
+                forklaring = overstyring.forklaring,
                 månedligInntekt = overstyring.månedligInntekt,
                 skjæringstidspunkt = overstyring.skjæringstidspunkt
             )
@@ -114,6 +117,7 @@ data class OverstyrInntektDTO(
     val fødselsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
+    val forklaring: String,
     val månedligInntekt: Double,
     val skjæringstidspunkt: LocalDate
 )
@@ -124,6 +128,22 @@ data class OverstyrInntektKafkaDto(
     val organisasjonsnummer: String,
     val aktørId: String,
     val begrunnelse: String,
+    val forklaring: String,
     val månedligInntekt: Double,
     val skjæringstidspunkt: LocalDate
-)
+) {
+    fun somKafkaMessage() = JsonMessage.newMessage(
+        standardfelter("overstyr_inntekt", fødselsnummer).apply {
+            put("aktørId", aktørId)
+            put("organisasjonsnummer", organisasjonsnummer)
+            put("begrunnelse", begrunnelse)
+            put("forklaring", forklaring)
+            put("saksbehandlerOid", saksbehandler.oid)
+            put("saksbehandlerNavn", saksbehandler.navn)
+            put("saksbehandlerIdent", saksbehandler.ident)
+            put("saksbehandlerEpost", saksbehandler.epost)
+            put("månedligInntekt", månedligInntekt)
+            put("skjæringstidspunkt", skjæringstidspunkt)
+        }
+    )
+}

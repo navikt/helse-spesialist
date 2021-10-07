@@ -94,6 +94,7 @@ internal interface IHendelseMediator {
         epost: String,
         orgnummer: String,
         begrunnelse: String,
+        forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         json: String,

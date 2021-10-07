@@ -345,7 +345,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun sendOverstyrtInntekt(
         orgnr: String = ORGNR,
         månedligInntekt: Double = 25000.0,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        forklaring: String = "testforklaring"
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -354,7 +355,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     organisasjonsnummer = orgnr,
                     månedligInntekt = månedligInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
-                    saksbehandlerEpost = SAKSBEHANDLER_EPOST
+                    saksbehandlerEpost = SAKSBEHANDLER_EPOST,
+                    forklaring = forklaring
                 )
             )
         }
