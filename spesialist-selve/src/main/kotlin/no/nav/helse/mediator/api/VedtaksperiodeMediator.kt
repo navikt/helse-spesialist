@@ -13,9 +13,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.overstyring.OverstyringApiDto
-import no.nav.helse.overstyring.OverstyrtDagApiDto
+import no.nav.helse.overstyring.*
 import no.nav.helse.person.*
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
@@ -102,7 +100,7 @@ internal class VedtaksperiodeMediator(
                 val bransjer = arbeidsgiverDao.finnBransjer(it.organisasjonsnummer)
                 val overstyringer = overstyringDao.finnOverstyringerAvTidslinjer(personMetadata.fødselsnummer, it.organisasjonsnummer)
                     .map { overstyring ->
-                        OverstyringApiDto(
+                        OverstyringApiDagerDto(
                             hendelseId = overstyring.hendelseId,
                             begrunnelse = overstyring.begrunnelse,
                             timestamp = overstyring.timestamp,
@@ -116,7 +114,20 @@ internal class VedtaksperiodeMediator(
                                 )
                             }
                         )
-                    }
+                    } + overstyringDao.finnOverstyringerAvInntekt(personMetadata.fødselsnummer, it.organisasjonsnummer).map { overstyring ->
+                    OverstyringApiInntektDto(
+                        hendelseId = overstyring.hendelseId,
+                        begrunnelse = overstyring.begrunnelse,
+                        timestamp = overstyring.timestamp,
+                        saksbehandlerNavn = overstyring.saksbehandlerNavn,
+                        saksbehandlerIdent = overstyring.saksbehandlerIdent,
+                        overstyrtInntekt = OverstyrtInntektApiDto(
+                            forklaring = overstyring.forklaring,
+                            månedligInntekt = overstyring.månedligInntekt,
+                            skjæringstidspunkt = overstyring.skjæringstidspunkt
+                        )
+                    )
+                }
                 ArbeidsgiverApiDto(
                     organisasjonsnummer = it.organisasjonsnummer,
                     navn = navn ?: "Ikke tilgjengelig",

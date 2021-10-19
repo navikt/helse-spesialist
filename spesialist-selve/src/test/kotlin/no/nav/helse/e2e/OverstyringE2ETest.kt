@@ -7,6 +7,8 @@ import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
+import no.nav.helse.overstyring.OverstyringApiDagerDto
+import no.nav.helse.overstyring.OverstyringApiInntektDto
 import no.nav.helse.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -58,7 +60,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer inntekt`() {
         FeatureToggle.Toggle(OVERSTYR_INNTEKT).enable()
         val godkjenningsbehovId = settOppBruker()
-        val hendelseId = sendOverstyrtInntekt(månedligInntekt = 25000.0, skjæringstidspunkt = 1.januar, forklaring = "vår egen forklaring")
+        val hendelseId = sendOverstyrtInntekt(
+            månedligInntekt = 25000.0,
+            skjæringstidspunkt = 1.januar,
+            forklaring = "vår egen forklaring"
+        )
 
         val overstyringer = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR)
         assertEquals(1, overstyringer.size)
@@ -94,6 +100,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
+        FeatureToggle.Toggle(OVERSTYR_INNTEKT).enable()
         val hendelseId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -129,6 +136,12 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 )
             )
         )
+        sendOverstyrtInntekt(
+            orgnr = ORGNR,
+            månedligInntekt = 15000.0,
+            skjæringstidspunkt = LocalDate.now(),
+            forklaring = "forklaring"
+        )
 
         val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
@@ -156,8 +169,10 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val snapshot = vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER)
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere.first().overstyringer
-        assertEquals(1, overstyringer.size)
-        assertEquals(1, overstyringer.first().overstyrteDager.size)
+        assertEquals(2, overstyringer.size)
+        assertEquals(1, (overstyringer.first() as OverstyringApiDagerDto).overstyrteDager.size)
+        assertEquals(15000.0, (overstyringer.last() as OverstyringApiInntektDto).overstyrtInntekt.månedligInntekt)
+        FeatureToggle.Toggle(OVERSTYR_INNTEKT).disable()
     }
 
     private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
