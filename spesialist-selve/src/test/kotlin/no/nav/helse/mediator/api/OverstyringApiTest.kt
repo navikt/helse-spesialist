@@ -10,8 +10,6 @@ import io.ktor.routing.*
 import io.ktor.server.testing.*
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
-import no.nav.helse.mediator.FeatureToggle
-import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -61,7 +59,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt`() {
-        FeatureToggle.Toggle(OVERSTYR_INNTEKT).enable()
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             azureAdAppAuthentication(azureAdConfig)
@@ -106,42 +103,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 assertEquals("en forklaring", event["forklaring"].asText())
                 assertEquals(25000.0, event["månedligInntekt"].asDouble())
                 assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
-            }
-        }
-        FeatureToggle.Toggle(OVERSTYR_INNTEKT).disable()
-    }
-
-    @Test
-    fun `overstyr inntekt er togglet av`() {
-        withTestApplication({
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-            azureAdAppAuthentication(azureAdConfig)
-            routing {
-                authenticate("oidc") {
-                    overstyringApi(hendelseMediator)
-                }
-            }
-        }) {
-            val overstyring = OverstyrInntektDTO(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                forklaring = "en forklaring",
-                månedligInntekt = 25000.0,
-                skjæringstidspunkt = 1.januar
-            )
-            with(handleRequest(HttpMethod.Post, "/api/overstyr/inntekt") {
-                addHeader(HttpHeaders.ContentType, "application/json")
-                authentication(
-                    oid = SAKSBEHANDLER_OID,
-                    epost = SAKSBEHANDLER_EPOST,
-                    navn = SAKSBEHANDLER_NAVN,
-                    ident = SAKSBEHANDLER_IDENT
-                )
-                setBody(objectMapper.writeValueAsString(overstyring))
-            }) {
-                assertEquals(HttpStatusCode.NotImplemented, response.status())
             }
         }
     }

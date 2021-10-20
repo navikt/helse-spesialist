@@ -6,10 +6,7 @@ import no.finn.unleash.Unleash
 import no.finn.unleash.UnleashContext
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
-const val OVERSTYR_INNTEKT = "tbd.overstyr_inntekt"
 object FeatureToggle {
 
     class Toggle(private val toggleName: String) {

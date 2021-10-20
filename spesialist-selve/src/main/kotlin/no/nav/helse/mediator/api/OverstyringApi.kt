@@ -10,9 +10,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.standardfelter
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -51,28 +49,24 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
-
     post("/api/overstyr/inntekt") {
-        if (FeatureToggle.Toggle(OVERSTYR_INNTEKT).enabled) {
-            val overstyring = call.receive<OverstyrInntektDTO>()
+        val overstyring = call.receive<OverstyrInntektDTO>()
 
-            val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-            val message = OverstyrInntektKafkaDto(
-                organisasjonsnummer = overstyring.organisasjonsnummer,
-                fødselsnummer = overstyring.fødselsnummer,
-                aktørId = overstyring.aktørId,
-                saksbehandler = saksbehandler.toDto(),
-                begrunnelse = overstyring.begrunnelse,
-                forklaring = overstyring.forklaring,
-                månedligInntekt = overstyring.månedligInntekt,
-                skjæringstidspunkt = overstyring.skjæringstidspunkt
-            )
-            withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
-            call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
-        } else {
-            call.respond(HttpStatusCode.NotImplemented, "Featuren er skrudd av")
-        }
+        val message = OverstyrInntektKafkaDto(
+            organisasjonsnummer = overstyring.organisasjonsnummer,
+            fødselsnummer = overstyring.fødselsnummer,
+            aktørId = overstyring.aktørId,
+            saksbehandler = saksbehandler.toDto(),
+            begrunnelse = overstyring.begrunnelse,
+            forklaring = overstyring.forklaring,
+            månedligInntekt = overstyring.månedligInntekt,
+            skjæringstidspunkt = overstyring.skjæringstidspunkt
+        )
+        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
+        call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
+
     }
 }
 

@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.OVERSTYR_INNTEKT
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.*
@@ -92,43 +91,31 @@ internal class OverstyringInntekt(
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
-            if (FeatureToggle.Toggle(OVERSTYR_INNTEKT).enabled) {
-                logg.info(
-                    "Mottok overstyring av inntekt med {}",
-                    keyValue("eventId", hendelseId)
-                )
-                sikkerLogg.info(
-                    "Mottok overstyring av inntekt med {}, {}",
-                    keyValue("hendelseId", hendelseId),
-                    keyValue("hendelse", packet.toJson())
-                )
+            logg.info(
+                "Mottok overstyring av inntekt med {}",
+                keyValue("eventId", hendelseId)
+            )
+            sikkerLogg.info(
+                "Mottok overstyring av inntekt med {}, {}",
+                keyValue("hendelseId", hendelseId),
+                keyValue("hendelse", packet.toJson())
+            )
 
-                mediator.overstyringInntekt(
-                    id = UUID.fromString(packet["@id"].asText()),
-                    fødselsnummer = packet["fødselsnummer"].asText(),
-                    oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
-                    navn = packet["saksbehandlerNavn"].asText(),
-                    ident = packet["saksbehandlerIdent"].asText(),
-                    epost = packet["saksbehandlerEpost"].asText(),
-                    orgnummer = packet["organisasjonsnummer"].asText(),
-                    begrunnelse = packet["begrunnelse"].asText(),
-                    forklaring = packet["forklaring"].asText(),
-                    månedligInntekt = packet["månedligInntekt"].asDouble(),
-                    skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
-                    json = packet.toJson(),
-                    context = context
-                )
-            } else {
-                logg.info(
-                    "Mottok overstyring av inntekt med {}, men er togglet av",
-                    keyValue("eventId", hendelseId)
-                )
-                sikkerLogg.info(
-                    "Mottok overstyring av inntekt med {}, men er togglet av. {}",
-                    keyValue("hendelseId", hendelseId),
-                    keyValue("hendelse", packet.toJson())
-                )
-            }
+            mediator.overstyringInntekt(
+                id = UUID.fromString(packet["@id"].asText()),
+                fødselsnummer = packet["fødselsnummer"].asText(),
+                oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
+                navn = packet["saksbehandlerNavn"].asText(),
+                ident = packet["saksbehandlerIdent"].asText(),
+                epost = packet["saksbehandlerEpost"].asText(),
+                orgnummer = packet["organisasjonsnummer"].asText(),
+                begrunnelse = packet["begrunnelse"].asText(),
+                forklaring = packet["forklaring"].asText(),
+                månedligInntekt = packet["månedligInntekt"].asDouble(),
+                skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
+                json = packet.toJson(),
+                context = context
+            )
         }
     }
 }
