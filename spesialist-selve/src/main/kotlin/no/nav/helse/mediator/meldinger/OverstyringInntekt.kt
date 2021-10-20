@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.FeatureToggle
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.overstyring.OverstyringDao

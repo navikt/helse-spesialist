@@ -32,8 +32,6 @@ allprojects {
             exclude(group = "junit")
         }
 
-        implementation("no.finn.unleash:unleash-client-java:4.4.0")
-
         testImplementation("org.jetbrains.kotlin:kotlin-test:1.5.21")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
