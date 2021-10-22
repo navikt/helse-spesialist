@@ -54,7 +54,12 @@ class OpptegnelseApiTest : AbstractApiTest() {
             sekvensnummer = 1,
             type= OpptegnelseType.UTBETALING_ANNULLERING_OK,
             payload = """{ "test": "2" }""")
-        val expected = listOf(oppdatering1, oppdatering2)
+        val oppdatering3 = OpptegnelseDto(
+            aktørId=12,
+            sekvensnummer = 2,
+            type= OpptegnelseType.REVURDERING_FERDIGBEHANDLET,
+            payload = """{ "test": "3" }""")
+        val expected = listOf(oppdatering1, oppdatering2, oppdatering3)
 
         every { opptegnelseMediator.hentAbonnerteOpptegnelser(any(), any()) } returns expected
 

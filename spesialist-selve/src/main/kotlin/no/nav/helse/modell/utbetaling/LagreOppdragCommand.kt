@@ -5,9 +5,8 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.opptegnelse.UtbetalingPayload
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.godkjenteStatuser
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -116,19 +115,20 @@ internal class LagreOppdragCommand(
     }
 
     private fun lagOpptegnelse() {
-        if (type == "ANNULLERING") {
-            val opptegnelseType: OpptegnelseType = when (status) {
-                UTBETALING_FEILET -> {
-                    OpptegnelseType.UTBETALING_ANNULLERING_FEILET
-                }
-                ANNULLERT -> {
-                    OpptegnelseType.UTBETALING_ANNULLERING_OK
-                }
-                else -> return
+        val opptegnelseType: OpptegnelseType = when {
+            type == "ANNULLERING" && status == UTBETALING_FEILET -> {
+                OpptegnelseType.UTBETALING_ANNULLERING_FEILET
             }
-
-            opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), opptegnelseType)
+            type == "ANNULLERING" && status == ANNULLERT -> {
+                OpptegnelseType.UTBETALING_ANNULLERING_OK
+            }
+            type == "REVURDERING" && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
+                OpptegnelseType.REVURDERING_FERDIGBEHANDLET
+            }
+            else -> return
         }
+
+        opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), opptegnelseType)
     }
 
     override fun resume(context: CommandContext) = true
