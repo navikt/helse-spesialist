@@ -31,7 +31,7 @@ internal class SjekkArbeidsforholdCommand(
             .filter { it.startdato <= skjæringstidspunkt }
             .filter { it.sluttdato == null || it.sluttdato > skjæringstidspunkt }
         if (aktiveArbeidsforhold.size > 1){
-            val melding = "ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Systemet har foreløpig begrenset støtte i forhold til dette."
+            val melding = "ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Systemet har foreløpig begrenset støtte for dette."
             log.info("Legger til warning for arbeidsforholdId på vedtaksperiode $vedtaksperiodeId")
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
             warningteller.labels("WARN", melding).inc()
