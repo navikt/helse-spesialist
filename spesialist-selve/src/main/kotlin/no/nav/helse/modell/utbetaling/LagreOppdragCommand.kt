@@ -16,7 +16,7 @@ internal class LagreOppdragCommand(
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val utbetalingId: UUID,
-    private val type: String,
+    private val type: Utbetalingtype,
     private val status: Utbetalingsstatus,
     private val forrigeStatus: Utbetalingsstatus,
     private val opprettet: LocalDateTime,
@@ -85,10 +85,10 @@ internal class LagreOppdragCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
+        lagOpptegnelse()
         if (status !in godkjenteStatuser && forrigeStatus !in godkjenteStatuser) return true
         log.info("lagrer utbetaling $utbetalingId med status $status")
         lagre()
-        lagOpptegnelse()
         return true
     }
 
@@ -116,13 +116,13 @@ internal class LagreOppdragCommand(
 
     private fun lagOpptegnelse() {
         val opptegnelseType: OpptegnelseType = when {
-            type == "ANNULLERING" && status == UTBETALING_FEILET -> {
+            type == Utbetalingtype.ANNULLERING && status == UTBETALING_FEILET -> {
                 OpptegnelseType.UTBETALING_ANNULLERING_FEILET
             }
-            type == "ANNULLERING" && status == ANNULLERT -> {
+            type == Utbetalingtype.ANNULLERING && status == ANNULLERT -> {
                 OpptegnelseType.UTBETALING_ANNULLERING_OK
             }
-            type == "REVURDERING" && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
+            type == Utbetalingtype.REVURDERING && status in listOf(UTBETALT, GODKJENT_UTEN_UTBETALING, OVERFØRT) -> {
                 OpptegnelseType.REVURDERING_FERDIGBEHANDLET
             }
             else -> return

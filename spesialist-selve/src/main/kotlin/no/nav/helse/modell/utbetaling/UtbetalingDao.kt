@@ -49,7 +49,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
         utbetalingId: UUID,
         fødselsnummer: String,
         orgnummer: String,
-        type: String,
+        type: Utbetalingtype,
         opprettet: LocalDateTime,
         arbeidsgiverFagsystemIdRef: Long,
         personFagsystemIdRef: Long
@@ -77,7 +77,7 @@ internal class UtbetalingDao(private val dataSource: DataSource) {
                             "utbetalingId" to utbetalingId,
                             "fodselsnummer" to fødselsnummer.toLong(),
                             "orgnummer" to orgnummer.toLong(),
-                            "type" to type,
+                            "type" to type.toString(),
                             "opprettet" to opprettet,
                             "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,
                             "personFagsystemIdRef" to personFagsystemIdRef

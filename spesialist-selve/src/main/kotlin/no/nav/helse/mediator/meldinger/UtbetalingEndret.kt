@@ -49,7 +49,7 @@ internal class UtbetalingEndret(
             fødselsnummer,
             orgnummer,
             utbetalingId,
-            type,
+            Utbetalingtype.valueOf(type),
             gjeldendeStatus,
             forrigeStatus,
             opprettet,
