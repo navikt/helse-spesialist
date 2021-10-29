@@ -14,7 +14,7 @@ spec:
     - type: External
       external:
           metric:
-              name: kafka_consumergroup_group_topic_sum_lag
+              name: kafka_consumergroup_group_lag
               selector:
                   matchLabels:
                       topic: tbd.rapid.v1
