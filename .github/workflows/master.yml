@@ -74,5 +74,5 @@ jobs:
               env:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: prod-fss
-                  RESOURCE: deploy/prod.yml
+                  RESOURCE: deploy/prod.yml,deploy/hpa.yml
                   IMAGE: ${{ needs.set_version.outputs.image }}
