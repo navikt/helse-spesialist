@@ -21,5 +21,5 @@ spec:
                       group: tbd-spesialist-v1
           target:
               type: AverageValue
-              averageValue: 10000
+              averageValue: 8000
 
