@@ -1,22 +1,11 @@
 package no.nav.helse
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import java.io.File
-import java.nio.file.Files
-
-val DATABASE_URL_FILE_PATH = "${System.getProperty("java.io.tmpdir")}spesialist_standalone_db_url"
+import org.testcontainers.containers.PostgreSQLContainer
 
 internal fun main() {
-    val postgresPath = Files.createTempDirectory("tmp")
-    val embeddedPostgres = EmbeddedPostgres.builder()
-        .setOverrideWorkingDirectory(postgresPath.toFile())
-        .setDataDirectory(postgresPath.resolve("datadir"))
-        .start()
+    val postgres = PostgreSQLContainer<Nothing>("postgres:13").also { it.start() }
 
-    embeddedPostgres.getJdbcUrl("postgres", "postgres").let { jdbcUrl ->
-        File(DATABASE_URL_FILE_PATH).writeText(jdbcUrl)
-        println("Url ($jdbcUrl) er skrevet til $DATABASE_URL_FILE_PATH")
-    }
+    println("${postgres.jdbcUrl} startet")
 
     while (true) {
         Thread.sleep(1000)
