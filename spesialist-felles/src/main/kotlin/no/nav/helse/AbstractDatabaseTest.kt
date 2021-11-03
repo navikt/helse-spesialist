@@ -1,6 +1,5 @@
 package no.nav.helse
 
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
@@ -8,60 +7,26 @@ import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
-import org.postgresql.ds.PGSimpleDataSource
-import org.postgresql.util.PSQLException
-import java.io.File
-import java.nio.file.Files
+import org.testcontainers.containers.PostgreSQLContainer
 import java.util.*
 import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
     companion object {
+        private val postgres = PostgreSQLContainer<Nothing>("postgres:13").also { it.start() }
 
-        private val hikariConfig = HikariConfig().apply {
-            jdbcUrl = Companion.getJdbcUrl()
-            maximumPoolSize = 5
-            minimumIdle = 1
-            idleTimeout = 500001
-            connectionTimeout = 1000
-            maxLifetime = 600001
-        }
-
-        private fun getJdbcUrl(): String {
-            fun standaloneDataSourceIsRunning(url: String): Boolean {
-                val dataSource = PGSimpleDataSource()
-                dataSource.setUrl(url)
-                return try {
-                    dataSource.connection
-                    true
-                } catch (e: PSQLException) {
-                    false
-                }
-            }
-
-            fun startEmbeddedPostgres(): EmbeddedPostgres {
-                val postgresPath = Files.createTempDirectory("tmp")
-                return EmbeddedPostgres.builder()
-                    .setOverrideWorkingDirectory(postgresPath.toFile())
-                    .setDataDirectory(postgresPath.resolve("datadir"))
-                    .start()
-            }
-
-            val urlStandaloneDatabase: String? = File(DATABASE_URL_FILE_PATH).let {
-                if (it.exists()) {
-                    it.readText()
-                } else null
-            }
-
-            return if (urlStandaloneDatabase != null && standaloneDataSourceIsRunning(urlStandaloneDatabase)) {
-                urlStandaloneDatabase
-            } else {
-                startEmbeddedPostgres().getJdbcUrl("postgres", "postgres")
-            }
-        }
-
-        val dataSource = HikariDataSource(hikariConfig)
+        val dataSource =
+            HikariDataSource(HikariConfig().apply {
+                jdbcUrl = postgres.jdbcUrl
+                username = postgres.username
+                password = postgres.password
+                maximumPoolSize = 5
+                minimumIdle = 1
+                idleTimeout = 500001
+                connectionTimeout = 10000
+                maxLifetime = 600001
+            })
 
         init {
             Flyway.configure()

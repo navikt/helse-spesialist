@@ -2,15 +2,9 @@ package no.nav.helse.notat
 
 import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class NotatDaoTest: DatabaseIntegrationTest() {
-
-    @BeforeEach
-    fun setup() {
-        resetDatabase()
-    }
 
     @Test
     fun `finner flere notater tilhørende samme vedtaksperiode`() {
