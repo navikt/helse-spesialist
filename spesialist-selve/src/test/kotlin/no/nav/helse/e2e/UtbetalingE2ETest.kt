@@ -87,6 +87,16 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().utbetalingId)
     }
 
+    @Test
+    fun `forstår utbetaling til bruker`() {
+        val nyUtbetalingId = UUID.randomUUID()
+        vedtaksperiode(utbetalingId = nyUtbetalingId)
+        sendPersonUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, utbetalingId = nyUtbetalingId)
+
+        assertEquals(1, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
+        assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().utbetalingId)
+    }
+
     private fun utbetalinger(): List<Long> {
         @Language("PostgreSQL")
         val statement = """

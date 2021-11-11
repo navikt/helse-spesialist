@@ -593,6 +593,62 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(json)
     }
 
+    protected fun sendPersonUtbetalingEndret(
+        type: String,
+        status: Utbetalingsstatus,
+        orgnr: String,
+        arbeidsgiverFagsystemId: String = "DFGKJDWOAWODOAWOW",
+        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
+        forrigeStatus: Utbetalingsstatus = status,
+        fødselsnummer: String = FØDSELSNUMMER,
+        utbetalingId: UUID
+    ) {
+        @Language("JSON")
+        val json = """
+{
+    "@event_name": "utbetaling_endret",
+    "@id": "${UUID.randomUUID()}",
+    "@opprettet": "${LocalDateTime.now()}",
+    "utbetalingId": "$utbetalingId",
+    "fødselsnummer": "$fødselsnummer",
+    "type": "$type",
+    "forrigeStatus": "$forrigeStatus",
+    "gjeldendeStatus": "$status",
+    "organisasjonsnummer": "$orgnr",
+    "arbeidsgiverOppdrag": {
+      "mottaker": "$orgnr",
+      "fagområde": "SP",
+      "endringskode": "NY",
+      "fagsystemId": "$arbeidsgiverFagsystemId",
+      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
+      "linjer": []
+    },
+    "personOppdrag": {
+      "mottaker": "$FØDSELSNUMMER",
+      "fagområde": "SP",
+      "endringskode": "NY",
+      "fagsystemId": "$personFagsystemId",
+      "linjer": [{
+          "fom": "${LocalDate.now()}",
+          "tom": "${LocalDate.now()}",
+          "dagsats": 2000,
+          "totalbeløp": 2000,
+          "lønn": 2000,
+          "grad": 100.00,
+          "refFagsystemId": "asdfg",
+          "delytelseId": 2,
+          "refDelytelseId": 1,
+          "datoStatusFom": null,
+          "endringskode": "NY",
+          "klassekode": "SPATORD",
+          "statuskode": null
+        }]
+    }
+}"""
+
+        testRapid.sendTestMessage(json)
+    }
+
     protected fun sendUtbetalingAnnullert(
         fagsystemId: String = "ASDJ12IA312KLS",
         saksbehandlerEpost: String = "saksbehandler_epost"
