@@ -53,6 +53,9 @@ data class UtbetalingshistorikkElementApiDto(
         val inntekt: Int,
         val dato: LocalDate,
         val utbetaling: Int?,
+        val personbeløp: Int,
+        val arbeidsgiverbeløp: Int,
+        val refusjonsbeløp: Int?,
         val grad: Double?,
         val totalGrad: Double?,
         val begrunnelser: List<String>?
@@ -89,6 +92,9 @@ data class UtbetalingshistorikkElementApiDto(
                                     inntekt = dag.inntekt,
                                     dato = dag.dato,
                                     utbetaling = dag.utbetaling,
+                                    personbeløp = dag.personbeløp,
+                                    arbeidsgiverbeløp = dag.arbeidsgiverbeløp,
+                                    refusjonsbeløp = dag.refusjonsbeløp,
                                     grad = dag.grad,
                                     totalGrad = dag.totalGrad,
                                     begrunnelser = dag.begrunnelser

@@ -17,10 +17,6 @@ import kotlin.test.assertNull
 internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     private companion object {
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private const val FØDSELSNUMMER = "12020052345"
-        private const val AKTØR = "999999999"
-        private const val ORGNR = "222222222"
         private const val ORGNR2 = "13370420"
         private val ID = UUID.randomUUID()
     }
@@ -71,7 +67,10 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
             assertEquals(100.0, it.grad)
             assertEquals("NavDag", it.type)
             assertEquals(100.0, it.totalGrad)
-            assertEquals(1431, it.utbetaling)
+            assertEquals(1000, it.utbetaling)
+            assertEquals(1000, it.refusjonsbeløp)
+            assertEquals(1000, it.arbeidsgiverbeløp)
+            assertEquals(431, it.personbeløp)
             assertEquals(1431, it.inntekt)
             assertEquals("EN_BEGRUNNELSE", it.begrunnelser?.first())
         }
@@ -148,7 +147,10 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                                     "type": "NavDag",
                                     "inntekt": 1431,
                                     "dato": "2018-01-01",
-                                    "utbetaling": 1431,
+                                    "utbetaling": 1000,
+                                    "arbeidsgiverbeløp": 1000,
+                                    "personbeløp": 431,
+                                    "refusjonsbeløp": 1000,
                                     "grad": 100.0,
                                     "totalGrad": 100.0,
                                     "begrunnelser": [

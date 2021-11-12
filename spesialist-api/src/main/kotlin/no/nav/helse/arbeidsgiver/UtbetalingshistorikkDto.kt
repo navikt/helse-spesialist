@@ -53,6 +53,9 @@ data class UtbetalingsdagDto(
     val inntekt: Int,
     val dato: LocalDate,
     val utbetaling: Int?,
+    val personbeløp: Int,
+    val arbeidsgiverbeløp: Int,
+    val refusjonsbeløp: Int?,
     val grad: Double?,
     val totalGrad: Double?,
     val begrunnelser: List<String>?
