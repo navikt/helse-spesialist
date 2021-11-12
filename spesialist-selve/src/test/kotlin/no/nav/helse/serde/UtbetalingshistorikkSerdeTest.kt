@@ -55,11 +55,13 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         assertEquals(beregningId, utbetaling.beregningId)
         assertEquals(237, utbetaling.gjenståendeSykedager)
         assertEquals(11, utbetaling.forbrukteSykedager)
-        assertEquals(15741, utbetaling.arbeidsgiverNettoBeløp)
+        assertEquals(10000, utbetaling.arbeidsgiverNettoBeløp)
+        assertEquals(12000, utbetaling.personNettoBeløp)
         assertEquals(28.desember(2018), utbetaling.maksdato)
         assertEquals("UTBETALT", utbetaling.status)
         assertEquals("UTBETALING", utbetaling.type)
-        assertEquals("EN_FAGSYSTEMID", utbetaling.arbeidsgiverFagsystemId)
+        assertEquals("EN_ARBEIDSGIVER_FAGSYSTEMID", utbetaling.arbeidsgiverFagsystemId)
+        assertEquals("EN_PERSON_FAGSYSTEMID", utbetaling.personFagsystemId)
         assertEquals(false, utbetaling.vurdering?.automatisk)
         assertEquals(true, utbetaling.vurdering?.godkjent)
         assertEquals("EN_IDENT", utbetaling.vurdering?.ident)
@@ -136,8 +138,10 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                             "status": "UTBETALT",
                             "gjenståendeSykedager": 237,
                             "forbrukteSykedager": 11,
-                            "arbeidsgiverNettoBeløp": 15741,
-                            "arbeidsgiverFagsystemId": "EN_FAGSYSTEMID",
+                            "arbeidsgiverNettoBeløp": 10000,
+                            "arbeidsgiverFagsystemId": "EN_ARBEIDSGIVER_FAGSYSTEMID",
+                            "personNettoBeløp": 12000,
+                            "personFagsystemId": "EN_PERSON_FAGSYSTEMID",
                             "tidsstempel": "${LocalDateTime.now()}",
                             "utbetalingstidslinje": [
                                 {
