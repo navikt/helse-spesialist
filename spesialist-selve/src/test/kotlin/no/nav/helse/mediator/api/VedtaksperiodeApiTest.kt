@@ -31,7 +31,7 @@ import java.util.*
 internal class VedtaksperiodeApiTest {
 
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
-    private val vedtaksperiodeMediator: VedtaksperiodeMediator = mockk(relaxed = true)
+    private val personMediator: PersonMediator = mockk(relaxed = true)
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
@@ -40,7 +40,7 @@ internal class VedtaksperiodeApiTest {
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
-        every { vedtaksperiodeMediator.erAktivOppgave(any()) } returns true
+        every { personMediator.erAktivOppgave(any()) } returns true
 
         val response = runBlocking {
             client.post<HttpResponse>("/api/vedtak") {
@@ -54,7 +54,7 @@ internal class VedtaksperiodeApiTest {
 
     @Test
     fun `en vedtaksperiode kan kun godkjennes en gang`() {
-        every { vedtaksperiodeMediator.erAktivOppgave(any()) } returns false
+        every { personMediator.erAktivOppgave(any()) } returns false
 
         val response = runBlocking {
             client.post<HttpResponse>("/api/vedtak") {
@@ -143,7 +143,7 @@ internal class VedtaksperiodeApiTest {
             azureAdAppAuthentication(azureConfig)
             routing {
                 authenticate("oidc") {
-                    vedtaksperiodeApi(vedtaksperiodeMediator, hendelseMediator, KODE7_SAKSBEHANDLER_GROUP)
+                    personApi(personMediator, hendelseMediator, KODE7_SAKSBEHANDLER_GROUP)
                 }
             }
         }.also {
@@ -158,7 +158,7 @@ internal class VedtaksperiodeApiTest {
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(vedtaksperiodeMediator, hendelseMediator)
+        clearMocks(personMediator, hendelseMediator)
     }
 
 }

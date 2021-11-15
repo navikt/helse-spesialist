@@ -36,7 +36,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
         val historikkElement = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first()
@@ -85,10 +85,23 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         val utbetaling = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().utbetaling
         assertNull(utbetaling.vurdering)
+    }
+
+    @Test
+    fun `mapper generasjoner`() {
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedGenerasjoner()
+
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+
+        assertNotNull(speilSnapshot.arbeidsgivere.first().generasjoner)
     }
 
     @Language("JSON")
@@ -198,6 +211,55 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
                 }
               ],
               "utbetalingshistorikk": $utbetalingshistorikk
+            }
+          ],
+          "inntektsgrunnlag": [
+            {
+              "skjæringstidspunkt": "2018-01-01",
+              "sykepengegrunnlag": 581298.0
+            }
+          ]
+        }
+        """
+
+    @Language("JSON")
+    private fun snapshotMedGenerasjoner() = """
+        {
+          "versjon": 1,
+          "aktørId": "$AKTØR",
+          "fødselsnummer": "$FØDSELSNUMMER",
+          "arbeidsgivere": [
+            {
+              "id": "$ID",
+              "organisasjonsnummer": "$ORGNR",
+              "vedtaksperioder": [
+                {
+                  "id": "$VEDTAKSPERIODE_ID"
+                }
+              ],
+              "utbetalingshistorikk": [],
+              "generasjoner": [
+                {
+                  "id": "${UUID.randomUUID()}",
+                  "perioder": []
+                }
+              ]
+            },
+            {
+              "id": "${UUID.randomUUID()}",
+              "organisasjonsnummer": "$ORGNR2",
+              "vedtaksperioder": [
+                {
+                  "id": "${UUID.randomUUID()}"
+                }
+              ],
+              "utbetalingshistorikk": [],
+              "generasjoner": [
+                {
+                  "id": "${UUID.randomUUID()}",
+                  "perioder": []
+                }
+              ]
             }
           ],
           "inntektsgrunnlag": [

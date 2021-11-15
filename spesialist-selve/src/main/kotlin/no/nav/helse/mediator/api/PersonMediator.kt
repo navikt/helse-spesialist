@@ -24,7 +24,7 @@ import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.vedtaksperiode.VarselDao
 import java.util.*
 
-internal class VedtaksperiodeMediator(
+internal class PersonMediator(
     private val personsnapshotDao: PersonsnapshotDao,
     private val varselDao: VarselDao,
     private val personDao: PersonApiDao,

@@ -161,7 +161,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         // TODO: bør ikke koble seg på daoer i E2E
         assertTrue(oppgaveDao.finnOppgaver(false).any { it.fødselsnummer == FØDSELSNUMMER })
 
-        val snapshot = vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
+        val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere.first().overstyringer
         assertEquals(2, overstyringer.size)

@@ -17,7 +17,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.VedtaksperiodeMediator
+import no.nav.helse.mediator.api.PersonMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
@@ -175,7 +175,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk,
     )
-    internal val vedtaksperiodeMediator = VedtaksperiodeMediator(
+    internal val personMediator = PersonMediator(
         personsnapshotDao = personsnapshotDao,
         varselDao = varselDao,
         personDao = personApiDao,

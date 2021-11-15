@@ -18,11 +18,11 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
-        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
 
         clearMocks(speilSnapshotRestClient)
-        vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
         verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
@@ -34,7 +34,7 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
-        vedtaksperiodeMediator.byggSpeilSnapshotForAktørId(AKTØR, false)
+        personMediator.byggSpeilSnapshotForAktørId(AKTØR, false)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
@@ -47,13 +47,13 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeid, snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
-        vedtaksperiodeMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid, false)
+        personMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid, false)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
     fun `fnr finnes ikke`() {
-        val actual = vedtaksperiodeMediator.byggSpeilSnapshotForFnr("77889900", false)
+        val actual = personMediator.byggSpeilSnapshotForFnr("77889900", false)
         assertNull(actual)
         verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot("77889900") }
     }

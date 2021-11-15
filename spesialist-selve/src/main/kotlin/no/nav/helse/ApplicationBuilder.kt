@@ -232,8 +232,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             routing {
                 authenticate("oidc") {
                     oppgaveApi(oppgaveMediator, env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
-                    vedtaksperiodeApi(
-                        vedtaksperiodeMediator = VedtaksperiodeMediator(
+                    personApi(
+                        personMediator = PersonMediator(
                             personsnapshotDao = personsnapshotDao,
                             snapshotDao = snapshotDao,
                             varselDao = varselDao,

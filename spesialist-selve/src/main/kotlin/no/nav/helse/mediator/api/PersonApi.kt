@@ -15,18 +15,18 @@ import no.nav.helse.mediator.HendelseMediator
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal fun Route.vedtaksperiodeApi(
-    vedtaksperiodeMediator: VedtaksperiodeMediator,
+internal fun Route.personApi(
+    personMediator: PersonMediator,
     hendelseMediator: HendelseMediator,
     kode7Saksbehandlergruppe: String
 ) {
-    val log = LoggerFactory.getLogger("VedtaksperiodeApi")
+    val log = LoggerFactory.getLogger("PersonApi")
     val kode7SaksbehandlergruppeID = UUID.fromString(kode7Saksbehandlergruppe)
 
     get("/api/person/{vedtaksperiodeId}") {
         val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
         val speilSnapshot = withContext(Dispatchers.IO) {
-            vedtaksperiodeMediator
+            personMediator
                 .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!), kanSeKode7)
         }
         if (speilSnapshot == null) {
@@ -42,7 +42,7 @@ internal fun Route.vedtaksperiodeApi(
             return@get
         }
         val speilSnapshot = withContext(Dispatchers.IO) {
-            vedtaksperiodeMediator
+            personMediator
                 .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!, kanSeKode7)
         }
         if (speilSnapshot == null) {
@@ -58,7 +58,7 @@ internal fun Route.vedtaksperiodeApi(
             return@get
         }
         val speilSnapshot = withContext(Dispatchers.IO) {
-            vedtaksperiodeMediator
+            personMediator
                 .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!, kanSeKode7)
         }
         if (speilSnapshot == null) {
@@ -87,7 +87,7 @@ internal fun Route.vedtaksperiodeApi(
         }
 
         val erAktivOppgave =
-            withContext(Dispatchers.IO) { vedtaksperiodeMediator.erAktivOppgave(godkjenning.oppgavereferanse) }
+            withContext(Dispatchers.IO) { personMediator.erAktivOppgave(godkjenning.oppgavereferanse) }
         if (!erAktivOppgave) {
             call.respondText(
                 "Dette vedtaket har ingen aktiv saksbehandleroppgave. Dette betyr vanligvis at oppgaven allerede er fullført.",
