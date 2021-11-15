@@ -2,7 +2,7 @@ val junitJupiterVersion = "5.7.2"
 val ktorVersion = "1.6.2"
 
 plugins {
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.31"
 }
 
 allprojects {
@@ -76,7 +76,7 @@ subprojects {
         }
 
         withType<Wrapper> {
-            gradleVersion = "7.1.1"
+            gradleVersion = "7.3"
         }
     }
 }
