@@ -29,6 +29,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
@@ -66,6 +67,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         internal const val ETTERNAVN = "Nordmann"
         internal val FØDSELSDATO = LocalDate.EPOCH
         internal val KJØNN = Kjønn.Kvinne
+        internal val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
         internal const val ENHET = "0301"
 
         internal val FOM = LocalDate.of(2018, 1, 1)
@@ -183,7 +185,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettPerson(fødselsnummer: String = FNR, aktørId: String = AKTØR): Persondata {
-        val personinfoId = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
+        val personinfoId = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)

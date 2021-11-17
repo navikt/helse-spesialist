@@ -3,6 +3,7 @@ package no.nav.helse.modell.person
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -13,14 +14,14 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre personinfo`() {
-        personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
-        assertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN)
+        personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+        assertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
     }
 
     @Test
     fun `ingen mellomnavn`() {
-        personDao.insertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN)
-        assertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN)
+        personDao.insertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+        assertPersoninfo(FORNAVN, null, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
     }
 
     @Test
@@ -49,8 +50,9 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         val nyttEtternavn = "SVENSKE"
         val nyFødselsdato = LocalDate.of(1990, 12, 31)
         val nyttKjønn = Kjønn.Mann
-        personDao.updatePersoninfo(FNR, nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn)
-        assertPersoninfo(nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn)
+        val nyAdressebeskyttelse = Adressebeskyttelse.Fortrolig
+        personDao.updatePersoninfo(FNR, nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
+        assertPersoninfo(nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
     }
 
     @Test
@@ -80,12 +82,13 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         forventetMellomnavn: String?,
         forventetEtternavn: String?,
         forventetFødselsdato: LocalDate,
-        forventetKjønn: Kjønn
+        forventetKjønn: Kjønn,
+        forventetAdressebeskyttelse: Adressebeskyttelse
     ) {
         val personinfo = personinfo()
         assertEquals(1, personinfo.size)
         personinfo.first()
-            .assertEquals(forventetNavn, forventetMellomnavn, forventetEtternavn, forventetFødselsdato, forventetKjønn)
+            .assertEquals(forventetNavn, forventetMellomnavn, forventetEtternavn, forventetFødselsdato, forventetKjønn, forventetAdressebeskyttelse)
     }
 
     private fun infotrygdUtbetalinger() =
@@ -116,14 +119,15 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     private fun personinfo() =
         sessionOf(dataSource).use { session ->
             session.run(
-                queryOf("SELECT fornavn, mellomnavn, etternavn, fodselsdato, kjonn FROM person_info")
+                queryOf("SELECT fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse FROM person_info")
                     .map { row ->
                         Personinfo(
                             row.string("fornavn"),
                             row.stringOrNull("mellomnavn"),
                             row.string("etternavn"),
                             row.localDate("fodselsdato"),
-                            enumValueOf(row.string("kjonn"))
+                            enumValueOf(row.string("kjonn")),
+                            enumValueOf(row.string("adressebeskyttelse"))
                         )
                     }
                     .asList
@@ -165,20 +169,23 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         private val mellomnavn: String?,
         private val etternavn: String,
         private val fødselsdato: LocalDate,
-        private val kjønn: Kjønn
+        private val kjønn: Kjønn,
+        private val adressebeskyttelse: Adressebeskyttelse
     ) {
         fun assertEquals(
             forventetNavn: String,
             forventetMellomnavn: String?,
             forventetEtternavn: String?,
             forventetFødselsdato: LocalDate,
-            forventetKjønn: Kjønn
+            forventetKjønn: Kjønn,
+            forventetAdressebeskyttelse: Adressebeskyttelse
         ) {
             assertEquals(forventetNavn, fornavn)
             assertEquals(forventetMellomnavn, mellomnavn)
             assertEquals(forventetEtternavn, etternavn)
             assertEquals(forventetFødselsdato, fødselsdato)
             assertEquals(forventetKjønn, kjønn)
+            assertEquals(forventetAdressebeskyttelse, adressebeskyttelse)
         }
     }
 }

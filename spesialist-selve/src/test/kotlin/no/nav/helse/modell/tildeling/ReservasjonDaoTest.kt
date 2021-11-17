@@ -3,6 +3,7 @@ package no.nav.helse.modell.tildeling
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -45,7 +46,8 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
             "Mellomnavn",
             "Nordmann",
             LocalDate.EPOCH,
-            Kjønn.Kvinne
+            Kjønn.Kvinne,
+            Adressebeskyttelse.Ugradert
         )
         val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val personRef = personDao.insertPerson(

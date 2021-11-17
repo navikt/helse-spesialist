@@ -24,6 +24,14 @@ data class PersonMetadataApiDto(
 
 enum class Kjønn { Mann, Kvinne, Ukjent }
 
+enum class Adressebeskyttelse {
+    Ugradert,
+    Fortrolig,
+    StrengtFortrolig,
+    StrengtFortroligUtland,
+    Ukjent
+}
+
 data class PersonForSpeilDto(
     val utbetalinger: List<UtbetalingApiDto>,
     val aktørId: String,

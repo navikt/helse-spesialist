@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
@@ -37,12 +38,13 @@ internal class PersonDao(private val dataSource: DataSource) {
         mellomnavn: String?,
         etternavn: String,
         fødselsdato: LocalDate,
-        kjønn: Kjønn
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn)
-            VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn));
+            INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+            VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
         """
         requireNotNull(
             session.run(
@@ -53,7 +55,8 @@ internal class PersonDao(private val dataSource: DataSource) {
                         "mellomnavn" to mellomnavn,
                         "etternavn" to etternavn,
                         "fodselsdato" to fødselsdato,
-                        "kjonn" to kjønn.name
+                        "kjonn" to kjønn.name,
+                        "adressebeskyttelse" to adressebeskyttelse.name
                     )
                 ).asUpdateAndReturnGeneratedKey
             )
@@ -66,11 +69,12 @@ internal class PersonDao(private val dataSource: DataSource) {
         mellomnavn: String?,
         etternavn: String,
         fødselsdato: LocalDate,
-        kjønn: Kjønn
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val personinfoQuery = """
-            UPDATE person_info SET fornavn=:fornavn, mellomnavn=:mellomnavn, etternavn=:etternavn, fodselsdato=:fodselsdato, kjonn=CAST(:kjonn as person_kjonn)
+            UPDATE person_info SET fornavn=:fornavn, mellomnavn=:mellomnavn, etternavn=:etternavn, fodselsdato=:fodselsdato, kjonn=CAST(:kjonn as person_kjonn), adressebeskyttelse=:adressebeskyttelse
             WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=:fodselsnummer);
         """
         session.run(
@@ -82,7 +86,8 @@ internal class PersonDao(private val dataSource: DataSource) {
                     "etternavn" to etternavn,
                     "fodselsdato" to fødselsdato,
                     "kjonn" to kjønn.name,
-                    "fodselsnummer" to fødselsnummer.toLong()
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "adressebeskyttelse" to adressebeskyttelse.name
                 )
             ).asUpdate
         )

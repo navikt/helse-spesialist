@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
@@ -18,7 +19,7 @@ internal class HentPersoninfoløsning(
 ) {
 
     internal fun lagre(personDao: PersonDao): Long =
-        personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn)
+        personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn, Adressebeskyttelse.Ugradert)
 
     internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
         personDao.updatePersoninfo(
@@ -27,7 +28,8 @@ internal class HentPersoninfoløsning(
             mellomnavn = mellomnavn,
             etternavn = etternavn,
             fødselsdato = fødselsdato,
-            kjønn = kjønn
+            kjønn = kjønn,
+            adressebeskyttelse = Adressebeskyttelse.Ugradert
         )
 
     internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {

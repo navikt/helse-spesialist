@@ -10,6 +10,7 @@ import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.abonnement.opptegnelseApi
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -82,7 +83,8 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
             "Mellomnavn",
             "Rex",
             LocalDate.now().minusYears(20),
-            Kjønn.Ukjent
+            Kjønn.Ukjent,
+            Adressebeskyttelse.Ugradert
         )
         val string = """{ "node": "1234" }"""
         val json = JsonMessage(string, MessageProblems(string))
