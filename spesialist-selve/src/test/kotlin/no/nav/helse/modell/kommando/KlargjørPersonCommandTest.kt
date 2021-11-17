@@ -62,7 +62,7 @@ internal class KlargjørPersonCommandTest {
         personFinnes()
         altUtdatert()
         assertFalse(command.execute(context))
-        assertHarBehov(listOf("HentPersoninfo"))
+        assertHarBehov(listOf("HentPersoninfoV2"))
     }
 
     @Test

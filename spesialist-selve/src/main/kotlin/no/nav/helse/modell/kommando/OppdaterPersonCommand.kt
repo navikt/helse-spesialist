@@ -59,7 +59,7 @@ internal class OppdaterPersonCommand(
         }
     }
 
-    private class OppdaterPersoninfoCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao, "HentPersoninfo") {
+    private class OppdaterPersoninfoCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao, "HentPersoninfoV2") {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
             val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer)
             return sistOppdatert > LocalDate.now().minusDays(14)

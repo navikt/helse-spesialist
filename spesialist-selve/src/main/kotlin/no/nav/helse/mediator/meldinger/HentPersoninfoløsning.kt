@@ -37,27 +37,27 @@ internal class HentPersoninfoløsning(
                 .apply {  validate {
                     it.demandValue("@event_name", "behov")
                     it.demandValue("@final", true)
-                    it.demandAll("@behov", listOf("HentPersoninfo"))
+                    it.demandAll("@behov", listOf("HentPersoninfoV2"))
                     it.requireKey("@id", "contextId", "hendelseId")
-                    it.requireKey("@løsning.HentPersoninfo.fornavn", "@løsning.HentPersoninfo.etternavn",
-                        "@løsning.HentPersoninfo.fødselsdato", "@løsning.HentPersoninfo.kjønn")
-                    it.interestedIn("@løsning.HentPersoninfo.mellomnavn")
+                    it.requireKey("@løsning.HentPersoninfoV2.fornavn", "@løsning.HentPersoninfoV2.etternavn",
+                        "@løsning.HentPersoninfoV2.fødselsdato", "@løsning.HentPersoninfoV2.kjønn")
+                    it.interestedIn("@løsning.HentPersoninfoV2.mellomnavn")
                 }
                 }.register(this)
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
-            sikkerLog.error("forstod ikke HentPersoninfo:\n${problems.toExtendedReport()}")
+            sikkerLog.error("forstod ikke HentPersoninfoV2:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())
-            val fornavn = packet["@løsning.HentPersoninfo.fornavn"].asText()
-            val mellomnavn = packet["@løsning.HentPersoninfo.mellomnavn"].takeUnless(JsonNode::isMissingOrNull)?.asText()
-            val etternavn = packet["@løsning.HentPersoninfo.etternavn"].asText()
-            val fødselsdato = packet["@løsning.HentPersoninfo.fødselsdato"].asLocalDate()
-            val kjønn = Kjønn.valueOf(packet["@løsning.HentPersoninfo.kjønn"].textValue())
+            val fornavn = packet["@løsning.HentPersoninfoV2.fornavn"].asText()
+            val mellomnavn = packet["@løsning.HentPersoninfoV2.mellomnavn"].takeUnless(JsonNode::isMissingOrNull)?.asText()
+            val etternavn = packet["@løsning.HentPersoninfoV2.etternavn"].asText()
+            val fødselsdato = packet["@løsning.HentPersoninfoV2.fødselsdato"].asLocalDate()
+            val kjønn = Kjønn.valueOf(packet["@løsning.HentPersoninfoV2.kjønn"].textValue())
             mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentPersoninfoløsning(
                 fornavn,
                 mellomnavn,

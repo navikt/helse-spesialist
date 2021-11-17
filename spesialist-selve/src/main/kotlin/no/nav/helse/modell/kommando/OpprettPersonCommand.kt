@@ -49,7 +49,7 @@ internal class OpprettPersonCommand(
     // ha trengt å bedt om det som faktisk manglet
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
         logg.info("Trenger mer informasjon for å opprette person")
-        context.behov("HentPersoninfo")
+        context.behov("HentPersoninfoV2")
         context.behov("HentEnhet")
         context.behov("HentInfotrygdutbetalinger", mapOf(
             "historikkFom" to LocalDate.now().minusYears(3),

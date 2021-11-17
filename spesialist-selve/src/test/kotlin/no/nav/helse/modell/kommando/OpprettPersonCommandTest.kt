@@ -93,7 +93,7 @@ internal class OpprettPersonCommandTest {
 
     private fun assertHarBehov() {
         assertTrue(context.harBehov())
-        assertEquals(listOf("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger"), context.behov().keys.toList())
+        assertEquals(listOf("HentPersoninfoV2", "HentEnhet", "HentInfotrygdutbetalinger"), context.behov().keys.toList())
         verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
     }
 

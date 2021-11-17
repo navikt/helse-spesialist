@@ -49,7 +49,7 @@ internal class OppdaterPersonCommandTest {
         utdatertPersoninfo()
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
-        assertEquals(listOf("HentPersoninfo"), context.behov().keys.toList())
+        assertEquals(listOf("HentPersoninfoV2"), context.behov().keys.toList())
     }
 
     @Test

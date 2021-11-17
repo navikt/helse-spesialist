@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgavestatus.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -40,7 +39,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertHendelse(godkjenningsmeldingId)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT")
-        assertBehov("HentPersoninfo", "HentEnhet", "HentInfotrygdutbetalinger")
+        assertBehov("HentPersoninfoV2", "HentEnhet", "HentInfotrygdutbetalinger")
         assertIkkeVedtak(VEDTAKSPERIODE_ID)
     }
 

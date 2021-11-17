@@ -156,7 +156,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         nyHendelse(
             id, "behov", mapOf(
                 "@final" to true,
-                "@behov" to listOf("HentEnhet", "HentPersoninfo", "HentInfotrygdutbetalinger"),
+                "@behov" to listOf("HentEnhet", "HentPersoninfoV2", "HentInfotrygdutbetalinger"),
                 "hendelseId" to "$hendelseId",
                 "contextId" to "$contextId",
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
@@ -179,7 +179,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                         )
                     ),
                     "HentEnhet" to enhet,
-                    "HentPersoninfo" to mapOf(
+                    "HentPersoninfoV2" to mapOf(
                         "fornavn" to "Kari",
                         "mellomnavn" to "",
                         "etternavn" to "Nordmann",
@@ -254,7 +254,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         nyHendelse(
             id, "behov", mapOf(
                 "@final" to true,
-                "@behov" to listOf("HentPersoninfo"),
+                "@behov" to listOf("HentPersoninfoV2"),
                 "hendelseId" to "$hendelseId",
                 "contextId" to "$contextId",
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
@@ -262,7 +262,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "aktørId" to aktørId,
                 "orgnummer" to organisasjonsnummer,
                 "@løsning" to mapOf(
-                    "HentPersoninfo" to mapOf(
+                    "HentPersoninfoV2" to mapOf(
                         "fornavn" to "Kari",
                         "mellomnavn" to "",
                         "etternavn" to "Nordmann",
