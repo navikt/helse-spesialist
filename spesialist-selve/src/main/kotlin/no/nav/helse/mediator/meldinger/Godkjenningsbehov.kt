@@ -29,6 +29,7 @@ import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -73,7 +74,8 @@ internal class Godkjenningsbehov(
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
-    opptegnelseDao: OpptegnelseDao
+    opptegnelseDao: OpptegnelseDao,
+    utbetalingDao: UtbetalingDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettKoblingTilHendelseCommand(
@@ -117,7 +119,9 @@ internal class Godkjenningsbehov(
             arbeidsgiverDao = arbeidsgiverDao,
             snapshotDao = snapshotDao,
             vedtakDao = vedtakDao,
-            warningDao = warningDao
+            warningDao = warningDao,
+            utbetalingId = utbetalingId,
+            utbetalingDao = utbetalingDao
         ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,

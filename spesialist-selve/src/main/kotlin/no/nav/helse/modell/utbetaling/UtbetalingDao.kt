@@ -258,6 +258,29 @@ ORDER BY o.fagsystem_id, u.opprettet DESC
         }
     }
 
+    internal fun opprettKobling(vedtaksperiodeId: UUID, utbetalingId: UUID) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id) VALUES (?, ?)
+            ON CONFLICT DO NOTHING
+        """
+        session.run(queryOf(statement, vedtaksperiodeId, utbetalingId).asUpdate)
+    }
+
+    internal fun fjernKobling(vedtaksperiodeId: UUID, utbetalingId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "DELETE FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ? AND vedtaksperiode_id = ?"
+            session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
+        }
+
+    fun harVærtTilGodkjenning(utbetalingId: UUID): Boolean =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "SELECT COUNT(1) FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ?"
+            session.run(queryOf(statement, utbetalingId).map { it.int(1) > 0 }.asSingle)!!
+        }
+
     data class UtbetalingDto(
         val utbetalingId: UUID,
         val type: String,

@@ -5,6 +5,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -24,7 +25,9 @@ internal class KlargjørVedtaksperiodeCommand(
     arbeidsgiverDao: ArbeidsgiverDao,
     snapshotDao: SnapshotDao,
     vedtakDao: VedtakDao,
-    warningDao: WarningDao
+    warningDao: WarningDao,
+    utbetalingId: UUID,
+    utbetalingDao: UtbetalingDao
 ) : MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettVedtakCommand(
@@ -40,6 +43,7 @@ internal class KlargjørVedtaksperiodeCommand(
             vedtakDao,
             warningDao,
         ),
-        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, inntektskilde, vedtakDao)
+        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, inntektskilde, vedtakDao),
+        OpprettKoblingTilUtbetalingCommand(vedtaksperiodeId, utbetalingId, utbetalingDao)
     )
 }
