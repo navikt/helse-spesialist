@@ -104,6 +104,8 @@ internal interface IHendelseMediator {
     fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,
+        utbetalingId: UUID,
+        utbetalingType : Utbetalingtype,
         message: JsonMessage,
         context: MessageContext
     )

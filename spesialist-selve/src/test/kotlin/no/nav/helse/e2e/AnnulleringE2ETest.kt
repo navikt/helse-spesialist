@@ -38,7 +38,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Annullert av saksbehandler mappes til speil`() {
-        vedtaksperiode(organisasjonsnummer = ORGNR, vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UUID.randomUUID())
+        vedtaksperiode(organisasjonsnummer = ORGNR, vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UTBETALING_ID)
 
         sendUtbetalingEndret(
             type = "UTBETALING",

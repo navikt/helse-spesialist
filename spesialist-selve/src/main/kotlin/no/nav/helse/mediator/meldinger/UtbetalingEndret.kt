@@ -89,15 +89,17 @@ internal class UtbetalingEndret(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            val id = UUID.fromString(packet["utbetalingId"].asText())
+            val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
             val orgnummer = packet["organisasjonsnummer"].asText()
+            val utbetalingType : Utbetalingtype = Utbetalingtype.valueOf(packet["type"].asText())
+
             sikkerLogg.info(
                 "Mottok utbetalt event for {}, {}",
                 keyValue("fødselsnummer", fødselsnummer),
-                keyValue("utbetalingId", id)
+                keyValue("utbetalingId", utbetalingId)
             )
-            mediator.utbetalingEndret(fødselsnummer, orgnummer, packet, context)
+            mediator.utbetalingEndret(fødselsnummer, orgnummer, utbetalingId, utbetalingType, packet, context)
         }
     }
 }

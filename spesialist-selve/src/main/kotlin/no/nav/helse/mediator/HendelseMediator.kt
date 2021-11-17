@@ -11,6 +11,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -37,6 +38,7 @@ internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
@@ -336,9 +338,15 @@ internal class HendelseMediator(
     override fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,
+        utbetalingId: UUID,
+        utbetalingtype: Utbetalingtype,
         message: JsonMessage,
         context: MessageContext
     ) {
+        if (utbetalingtype == Utbetalingtype.UTBETALING && !utbetalingDao.harVærtTilGodkjenning(utbetalingId)) {
+            sikkerLogg.info("Ignorerer utbetaling_endret for {}, har ikke vært til godkjenning", keyValue("utbetalingId", utbetalingId))
+            return
+        }
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
             log.warn(
                 "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",

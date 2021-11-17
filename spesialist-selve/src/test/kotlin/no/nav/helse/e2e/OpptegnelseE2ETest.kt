@@ -23,9 +23,11 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Ved abonnering får du et nytt abonnement`() {
+        val utbetalingId = UUID.randomUUID()
         setupPerson()
         setupArbeidsgiver()
         setupSaksbehandler()
+        setupUtbetalingIdKopling(utbetalingId)
 
         val respons =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
@@ -40,6 +42,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         assertEquals(HttpStatusCode.OK, respons.status)
 
         testRapid.sendTestMessage(meldingsfabrikk.lagUtbetalingEndret(
+            utbetalingId = utbetalingId,
             type = "ANNULLERING",
             status = "UTBETALING_FEILET"
         ))
@@ -67,6 +70,10 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
                 }
 
         assertEquals(0, oppdateringer.size)
+    }
+
+    private fun setupUtbetalingIdKopling(utbetalingId : UUID) {
+        utbetalingDao.opprettKobling(UUID.randomUUID(), utbetalingId)
     }
 
     private fun setupPerson() {

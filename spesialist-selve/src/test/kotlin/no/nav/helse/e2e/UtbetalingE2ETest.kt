@@ -18,7 +18,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        settOppBruker()
         sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
@@ -29,12 +29,45 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
         val ET_ORGNR = "1"
         val ET_ANNET_ORGNR = "2"
-        vedtaksperiode(ET_ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
         assertDoesNotThrow {
             sendUtbetalingEndret("UTBETALING", GODKJENT, ET_ANNET_ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         }
         assertEquals(0, utbetalinger().size)
         assertEquals(1, feilendeMeldinger().size)
+    }
+
+    @Test
+    fun `lagrer utbetaling etter utbetaling_endret når utbetalingen har vært til godkjenning og vi kjenner arbeidsgiver`() {
+        settOppBruker()
+        assertDoesNotThrow {
+            sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        }
+        assertEquals(1, utbetalinger().size)
+        assertEquals(0, feilendeMeldinger().size)
+    }
+
+    @Test
+    fun `lagrer utbetaling med annen type enn UTBETALING, forventer ikke at utbetalingen har vært til godkjenning`(){
+        settOppBruker()
+        assertDoesNotThrow {
+            sendUtbetalingEndret("FERIEPENGER", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
+            sendUtbetalingEndret("ETTERUTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
+            sendUtbetalingEndret("ANNULLERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
+            sendUtbetalingEndret("REVURDERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
+        }
+        assertEquals(4, utbetalinger().size)
+        assertEquals(0, feilendeMeldinger().size)
+    }
+
+    @Test
+    fun `ignorerer utbetaling_endret når utbetalingen er av type UTBETALING og ikke har vært til godkjenning`() {
+
+        assertDoesNotThrow {
+            sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        }
+        assertEquals(0, utbetalinger().size)
+        assertEquals(0, feilendeMeldinger().size)
     }
 
     @Test
@@ -80,6 +113,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `ved endringer i utbetalinger skal kun nyeste vises`() {
         val nyUtbetalingId = UUID.randomUUID()
         vedtaksperiode(utbetalingId = UTBETALING_ID)
+        vedtaksperiode(utbetalingId = nyUtbetalingId)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = nyUtbetalingId)
 
