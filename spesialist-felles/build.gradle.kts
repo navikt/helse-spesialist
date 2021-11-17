@@ -9,6 +9,4 @@ dependencies {
     implementation("io.mockk:mockk:1.12.0")
 
     implementation("org.testcontainers:postgresql:$testcontainersVersion")
-    implementation("org.testcontainers:testcontainers:$testcontainersVersion")
-    implementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
 }
