@@ -15,11 +15,12 @@ internal class HentPersoninfoløsning(
     private val mellomnavn: String?,
     private val etternavn: String,
     private val fødselsdato: LocalDate,
-    private val kjønn: Kjønn
+    private val kjønn: Kjønn,
+    private val adressebeskyttelse: Adressebeskyttelse
 ) {
 
     internal fun lagre(personDao: PersonDao): Long =
-        personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn, Adressebeskyttelse.Ugradert)
+        personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn, adressebeskyttelse)
 
     internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
         personDao.updatePersoninfo(
@@ -29,7 +30,7 @@ internal class HentPersoninfoløsning(
             etternavn = etternavn,
             fødselsdato = fødselsdato,
             kjønn = kjønn,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert
+            adressebeskyttelse = adressebeskyttelse
         )
 
     internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
@@ -42,7 +43,7 @@ internal class HentPersoninfoløsning(
                     it.demandAll("@behov", listOf("HentPersoninfoV2"))
                     it.requireKey("@id", "contextId", "hendelseId")
                     it.requireKey("@løsning.HentPersoninfoV2.fornavn", "@løsning.HentPersoninfoV2.etternavn",
-                        "@løsning.HentPersoninfoV2.fødselsdato", "@løsning.HentPersoninfoV2.kjønn")
+                        "@løsning.HentPersoninfoV2.fødselsdato", "@løsning.HentPersoninfoV2.kjønn", "@løsning.HentPersoninfoV2.adressebeskyttelse")
                     it.interestedIn("@løsning.HentPersoninfoV2.mellomnavn")
                 }
                 }.register(this)
@@ -60,12 +61,15 @@ internal class HentPersoninfoløsning(
             val etternavn = packet["@løsning.HentPersoninfoV2.etternavn"].asText()
             val fødselsdato = packet["@løsning.HentPersoninfoV2.fødselsdato"].asLocalDate()
             val kjønn = Kjønn.valueOf(packet["@løsning.HentPersoninfoV2.kjønn"].textValue())
+            val adressebeskyttelse = Adressebeskyttelse.valueOf(packet["@løsning.HentPersoninfoV2.adressebeskyttelse"].textValue())
+
             mediator.løsning(hendelseId, contextId, UUID.fromString(packet["@id"].asText()), HentPersoninfoløsning(
                 fornavn,
                 mellomnavn,
                 etternavn,
                 fødselsdato,
-                kjønn
+                kjønn,
+                adressebeskyttelse
             ), context)
         }
     }

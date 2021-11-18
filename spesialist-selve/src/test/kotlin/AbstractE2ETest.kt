@@ -307,7 +307,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         orgnr: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
-        enhet: String = "0301"
+        enhet: String = "0301",
+        adressebeskyttelse: String = "Ugradert"
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -317,7 +318,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     contextId,
                     vedtaksperiodeId,
                     orgnr,
-                    enhet
+                    enhet,
+                    adressebeskyttelse
                 )
             )
         }
@@ -767,6 +769,18 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }.also {
             assertEquals(tilstand.toList(), it)
         }
+    }
+
+    protected fun assertAdressebeskyttelse(fnr: String, expected: String) {
+        val adressebeskyttelse = sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    "SELECT adressebeskyttelse FROM person_info pi JOIN person ON info_ref = pi.id WHERE fodselsnummer = ?",
+                    fnr.toLong()
+                ).map { it.string("adressebeskyttelse") }.asSingle
+            )
+        }
+        assertEquals(expected, adressebeskyttelse)
     }
 
     protected fun assertOppgaver(antall: Int) {

@@ -10,6 +10,7 @@ import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +28,7 @@ internal class OpprettPersonCommandTest {
         private const val ENHET_OSLO = "0301"
         private val FØDSELSDATO = LocalDate.EPOCH
         private val KJØNN = Kjønn.Kvinne
+        private val ADRESSEBESKYTTELSE = Adressebeskyttelse.Fortrolig
 
         private val objectMapper = jacksonObjectMapper()
     }
@@ -51,13 +53,18 @@ internal class OpprettPersonCommandTest {
 
     @Test
     fun `oppretter person`() {
+        val personinfoId = 4691337L
+        every { dao.insertPersoninfo(any(), any(), any(), any(), any(), any()) } returns personinfoId
+
         personFinnesIkke()
-        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN))
+        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(HentEnhetløsning(ENHET_OSLO))
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, any(), any(), any()) }
+
+        verify(exactly = 1) { dao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
+        verify(exactly = 1) { dao.insertPerson(FNR, AKTØR, personinfoId, any(), any()) }
     }
 
     @Test
@@ -70,7 +77,7 @@ internal class OpprettPersonCommandTest {
     @Test
     fun `kan ikke opprette person med bare personinfo`() {
         personFinnesIkke()
-        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Kvinne))
+        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, Kjønn.Kvinne, Adressebeskyttelse.StrengtFortroligUtland))
         assertFalse(command.execute(context))
         assertHarBehov()
     }

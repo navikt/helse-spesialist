@@ -17,13 +17,13 @@ internal class HentEnhetløsning(private val enhetNr: String) {
         personDao: PersonDao,
         fødselsnummer: String,
         aktørId: String,
-        navnId: Long,
+        personinfoId: Long,
         infotrygdutbetalingerId: Long
     ) =
         personDao.insertPerson(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            navnId = navnId,
+            personinfoId = personinfoId,
             enhetId = enhetNr.toInt(),
             infotrygdutbetalingerId = infotrygdutbetalingerId
         )

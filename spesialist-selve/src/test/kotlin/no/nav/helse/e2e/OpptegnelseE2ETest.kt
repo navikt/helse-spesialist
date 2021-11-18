@@ -78,7 +78,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
     }
 
     private fun setupPerson() {
-        val navnId = personDao.insertPersoninfo(
+        val personinfoId = personDao.insertPersoninfo(
             "Harald",
             "Mellomnavn",
             "Rex",
@@ -94,7 +94,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         personDao.insertPerson(
             FØDSELSNUMMER,
             AKTØR,
-            navnId,
+            personinfoId,
             enhetId,
             infoTrygdutbetalingerId
         )

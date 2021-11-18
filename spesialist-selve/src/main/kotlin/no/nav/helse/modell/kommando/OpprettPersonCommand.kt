@@ -65,7 +65,7 @@ internal class OpprettPersonCommand(
         context: CommandContext
     ): Boolean {
         logg.info("Oppretter person")
-        val navnId: Long = personinfo.lagre(personDao)
+        val personinfoId: Long = personinfo.lagre(personDao)
         val infotrygdutbetalingerId: Long = infotrygdutbetalinger.lagre(personDao)
 
         if (enhet.tilhørerUtlandEnhet()) {
@@ -77,7 +77,7 @@ internal class OpprettPersonCommand(
             logg.info("Automatisk avvisning for vedtaksperiode $vedtaksperiodeId")
         }
 
-        enhet.lagrePerson(personDao, fødselsnummer, aktørId, navnId, infotrygdutbetalingerId)
+        enhet.lagrePerson(personDao, fødselsnummer, aktørId, personinfoId, infotrygdutbetalingerId)
         return true
     }
 }

@@ -151,7 +151,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
-        enhet: String = "0301"
+        enhet: String = "0301",
+        adressebeskyttelse: String = "Ugradert"
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -184,7 +185,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                         "mellomnavn" to "",
                         "etternavn" to "Nordmann",
                         "fødselsdato" to "1970-01-01",
-                        "kjønn" to "Kvinne"
+                        "kjønn" to "Kvinne",
+                        "adressebeskyttelse" to "$adressebeskyttelse"
                     )
                 )
             )
@@ -267,7 +269,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                         "mellomnavn" to "",
                         "etternavn" to "Nordmann",
                         "fødselsdato" to "1970-01-01",
-                        "kjønn" to "Kvinne"
+                        "kjønn" to "Kvinne",
+                        "adressebeskyttelse" to "Ugradert"
                     )
                 )
             )

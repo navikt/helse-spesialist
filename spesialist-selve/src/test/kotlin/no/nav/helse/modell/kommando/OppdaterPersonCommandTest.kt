@@ -9,6 +9,8 @@ import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -19,6 +21,12 @@ import java.util.*
 internal class OppdaterPersonCommandTest {
     private companion object {
         private const val FNR = "12345678911"
+        private const val FORNAVN = "LITEN"
+        private const val MELLOMNAVN = "STOR"
+        private const val ETTERNAVN = "TRANFLASKE"
+        private val FØDSELSDATO = LocalDate.EPOCH
+        private val KJØNN = Kjønn.Ukjent
+        private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
@@ -55,10 +63,12 @@ internal class OppdaterPersonCommandTest {
     @Test
     fun `oppdatere personinfo`() {
         utdatertPersoninfo()
-        val løsning = mockk<HentPersoninfoløsning>(relaxed = true)
+        val løsning = HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
         context.add(løsning)
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
+        verify(exactly = 1) { dao.updatePersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
+
     }
 
     @Test

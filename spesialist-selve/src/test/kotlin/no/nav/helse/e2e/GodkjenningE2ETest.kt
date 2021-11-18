@@ -8,6 +8,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgavestatus.*
+import no.nav.helse.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -23,6 +24,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         private const val AUTOMATISK_BEHANDLET = "Automatisk behandlet"
         private const val SAKSBEHANDLEREPOST = "saksbehandler@nav.no"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
+        private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
 
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
@@ -259,7 +261,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             SNAPSHOTV1_UTEN_WARNINGS
         )
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -608,6 +614,23 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         val orgnummere = testRapid.inspektør.meldinger().last()["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
         assertEquals(listOf(ORGNR) + orgnummereMedAktiveArbeidsforhold, orgnummere)
+    }
+
+    @Test
+    fun `legger til riktig felt for adressebeskyttelse i Personinfo`() {
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
+        sendPersoninfoløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID, adressebeskyttelse = ADRESSEBESKYTTELSE.name
+        )
+
+        assertAdressebeskyttelse(FØDSELSNUMMER, ADRESSEBESKYTTELSE.name)
     }
 
     private fun håndterGodkjenningsbehov(): UUID {

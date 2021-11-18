@@ -12,6 +12,7 @@ import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -30,6 +31,7 @@ internal class KlargjørPersonCommandTest {
         private const val ENHET_UTLAND = "2101"
         private val FØDSELSDATO = LocalDate.EPOCH
         private val KJØNN = Kjønn.Kvinne
+        private val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
 
         private val objectMapper = jacksonObjectMapper()
     }
@@ -49,7 +51,7 @@ internal class KlargjørPersonCommandTest {
     @Test
     fun `oppretter person`() {
         personFinnesIkke()
-        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN))
+        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(HentEnhetløsning(ENHET_OSLO))
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))

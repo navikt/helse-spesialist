@@ -208,14 +208,14 @@ internal class PersonDao(private val dataSource: DataSource) {
     internal fun insertPerson(
         fødselsnummer: String,
         aktørId: String,
-        navnId: Long,
+        personinfoId: Long,
         enhetId: Int,
         infotrygdutbetalingerId: Long
     ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
-            VALUES(:fodselsnummer, :aktorId, :navnId, :enhetId, :infotrygdutbetalingerId);
+            VALUES(:fodselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId);
         """
         session.run(
             queryOf(
@@ -223,7 +223,7 @@ internal class PersonDao(private val dataSource: DataSource) {
                 mapOf(
                     "fodselsnummer" to fødselsnummer.toLong(),
                     "aktorId" to aktørId.toLong(),
-                    "navnId" to navnId,
+                    "personinfoId" to personinfoId,
                     "enhetId" to enhetId,
                     "infotrygdutbetalingerId" to infotrygdutbetalingerId
                 )
