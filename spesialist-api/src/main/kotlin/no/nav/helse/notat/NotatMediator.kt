@@ -1,6 +1,5 @@
 package no.nav.helse.notat
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -30,8 +29,7 @@ class NotatMediator(
             return false
         }
         notatDao.feilregistrer(notatId, saksbehandler_oid)
-        sikkerLogg.info("notat med id=${notatId} ble feilregistrert: {}",
-            keyValue("notat", notat),)
+        sikkerLogg.info("notat med id=${notatId} ble feilregistrert: {}", notat)
         return true
     }
 }

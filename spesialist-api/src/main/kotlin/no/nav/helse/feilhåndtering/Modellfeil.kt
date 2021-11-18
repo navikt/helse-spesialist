@@ -34,12 +34,12 @@ class OppgaveAlleredeTildelt(tildeling: TildelingApiDto) : Modellfeil() {
     override fun logger() {
         logg.info(
             "Returnerer {} for {}",
-            keyValue("httpkode", httpkode),
+            keyValue("httpkode", "${httpkode.value}"),
             keyValue("melding", melding)
         )
         sikkerLogg.info(
             "Returnerer {} for {}, tildelingsinfo=$eksternKontekst",
-            keyValue("httpkode", httpkode.value),
+            keyValue("httpkode", "${httpkode.value}"),
             keyValue("melding", melding)
         )
     }
@@ -52,7 +52,7 @@ class OppgaveIkkeTildelt(private val oppgaveId: Long): Modellfeil() {
     override fun logger() {
         logg.info(
             "Returnerer {} for {} for oppgaveId=$oppgaveId",
-            keyValue("httpkode", httpkode.value),
+            keyValue("httpkode", "${httpkode.value}"),
             keyValue("melding", melding)
         )
     }
