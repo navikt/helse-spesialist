@@ -14,7 +14,11 @@ import javax.sql.DataSource
 abstract class AbstractDatabaseTest {
 
     companion object {
-        private val postgres = PostgreSQLContainer<Nothing>("postgres:13").also { it.start() }
+        private val postgres = PostgreSQLContainer<Nothing>("postgres:13").apply {
+            withReuse(true)
+            withLabel("app-navn", "spesialist")
+            start()
+        }
 
         val dataSource =
             HikariDataSource(HikariConfig().apply {
