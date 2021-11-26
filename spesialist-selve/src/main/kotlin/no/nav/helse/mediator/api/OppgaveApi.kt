@@ -29,7 +29,7 @@ internal fun Route.oppgaveApi(
                 .also { oppgaveliste ->
                     val riskoppgaver = oppgaveliste.filter { it.oppgavetype == "RISK_QA" }
                     val riskOppgaverLiggerKronologiske = riskoppgaver
-                        .zipWithNext { a, b -> a.opprettet <= b.opprettet }.all { it }
+                        .zipWithNext { a, b -> a.opprettet >= b.opprettet }.all { it }
                     if (!riskOppgaverLiggerKronologiske) sikkerLogg.info("Risk-oppgaver som ikke ligger kronologisk\n{}",
                     riskoppgaver.map { it.opprettet })
                 }
