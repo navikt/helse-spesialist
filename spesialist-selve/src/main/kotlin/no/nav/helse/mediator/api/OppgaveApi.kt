@@ -12,7 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.OppgavereferanseDto
+import org.slf4j.LoggerFactory
 import java.util.*
+
+private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
 internal fun Route.oppgaveApi(
     oppgaveMediator: OppgaveMediator,
@@ -23,6 +26,13 @@ internal fun Route.oppgaveApi(
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
             val erRiskSupersaksbehandler = getGrupper().contains(gruppeIdForRiskSaksbehandlere)
             oppgaveMediator.hentOppgaver(erRiskSupersaksbehandler)
+                .also { oppgaveliste ->
+                    val riskoppgaver = oppgaveliste.filter { it.oppgavetype == "RISK_QA" }
+                    val riskOppgaverLiggerKronologiske = riskoppgaver
+                        .zipWithNext { a, b -> a.opprettet <= b.opprettet }.all { it }
+                    if (!riskOppgaverLiggerKronologiske) sikkerLogg.info("Risk-oppgaver som ikke ligger kronologisk\n{}",
+                    riskoppgaver.map { it.opprettet })
+                }
         }
         call.respond(saksbehandlerOppgaver)
     }
