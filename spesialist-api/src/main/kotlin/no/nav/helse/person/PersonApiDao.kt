@@ -17,9 +17,9 @@ class PersonApiDao(dataSource: DataSource): HelseDao(dataSource) {
     fun finnesPersonMedFødselsnummer(fødselsnummer: String) =
         """ SELECT 1 FROM person WHERE fodselsnummer = :fodselsnummer """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { true }  ?: false
 
-    fun personErKode7(fnr: String) =
+    fun personHarAdressebeskyttelse(fødselsnummer: String, adressebeskyttelse: Adressebeskyttelse) =
         """SELECT 1 FROM person p JOIN person_info pi ON p.info_ref = pi.id
             WHERE p.fodselsnummer = :fodselsnummer
-            AND pi.adressebeskyttelse = '${Adressebeskyttelse.Fortrolig.name}'
-        """.list(mapOf("fodselsnummer" to fnr.toLong())) { it }.isNotEmpty()
+            AND pi.adressebeskyttelse = '${adressebeskyttelse.name}'
+        """.list(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it }.isNotEmpty()
 }

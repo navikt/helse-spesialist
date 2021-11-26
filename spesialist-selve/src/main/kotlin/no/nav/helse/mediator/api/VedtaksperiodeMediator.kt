@@ -37,9 +37,9 @@ internal class VedtaksperiodeMediator(
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
-    fun byggSpeilSnapshotForFnr(fnr: String, kanSeKode7: Boolean) =
+    fun byggSpeilSnapshotForFnr(fødselsnummer: String, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            byggSnapshot(fnr, kanSeKode7)
+            byggSnapshot(fødselsnummer, kanSeKode7)
         }
 
     fun byggSpeilSnapshotForAktørId(aktørId: String, kanSeKode7: Boolean) =
@@ -52,18 +52,25 @@ internal class VedtaksperiodeMediator(
             personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7 ) }
         }
 
-    private fun byggSnapshot(fnr: String, kanSeKode7: Boolean): PersonForSpeilDto? {
-        if (!personDao.finnesPersonMedFødselsnummer(fnr)) {
+    private fun byggSnapshot(fødselsnummer: String, kanSeKode7: Boolean): PersonForSpeilDto? {
+        if (!personDao.finnesPersonMedFødselsnummer(fødselsnummer)) {
             return null
         }
-        if(personDao.personErKode7(fnr) && !kanSeKode7) {
+
+        val personErKode7 = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
+        if(personErKode7 && !kanSeKode7) {
             return null
         }
-        if (snapshotDao.utdatert(fnr)) {
-            val nyttSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fnr)
-            snapshotDao.lagre(fnr, nyttSnapshot)
+
+        if(!personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert) && !personErKode7) {
+            return null
         }
-        return personsnapshotDao.finnPersonByFnr(fnr)?.let(::byggSpeilSnapshot)
+
+        if (snapshotDao.utdatert(fødselsnummer)) {
+            val nyttSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
+            snapshotDao.lagre(fødselsnummer, nyttSnapshot)
+        }
+        return personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
     }
 
     private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataApiDto, SnapshotDto>) =

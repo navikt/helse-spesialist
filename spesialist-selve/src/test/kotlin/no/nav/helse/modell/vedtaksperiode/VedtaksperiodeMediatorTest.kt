@@ -459,6 +459,33 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
+    @Test
+    fun `Ingen saksbehandler skal kunne søke opp personer med strengt fortrolig adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.StrengtFortrolig)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+
+        vedtak(Adressebeskyttelse.StrengtFortrolig)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
+    @Test
+    fun `Ingen saksbehandler skal kunne søke opp personer med strengt fortrolig utland adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.StrengtFortroligUtland)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+
+        vedtak(Adressebeskyttelse.StrengtFortroligUtland)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
+    @Test
+    fun `Ingen saksbehandler skal kunne søke opp personer med ukjent adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.Ukjent)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+
+        vedtak(Adressebeskyttelse.Ukjent)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
 
     private fun vedtak(adressebeskyttelse: Adressebeskyttelse) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
@@ -479,8 +506,6 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
     }
-
-
 
     @Language("JSON")
     private val TEST_SNAPSHOTV1 = """{
