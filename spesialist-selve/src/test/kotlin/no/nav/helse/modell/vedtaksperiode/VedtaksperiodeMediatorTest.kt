@@ -6,6 +6,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
@@ -55,7 +56,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertTrue(
             speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("risikovurdering").isMissingOrNull()
@@ -76,7 +77,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertFalse(speilSnapshot.inntektsgrunnlag.isNull)
         assertEquals(speilSnapshot.inntektsgrunnlag.first()["skjæringstidspunkt"].textValue(), "2018-01-01")
@@ -113,7 +114,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             funn = funn
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         val risikovurdering = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("risikovurdering")
 
@@ -157,7 +158,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             kanGodkjennesAutomatisk = false,
             funn = funn
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         val varsler = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("varsler")
 
@@ -185,7 +186,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         val varsler = speilSnapshot.arbeidsgivere.first().vedtaksperioder.first().path("varsler")
 
@@ -216,13 +217,13 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         val arbeidsgiverFagsystemId = "JHKSDA3412SFHJKA489KASDJL"
 
         sendUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-        val speilSnapshot1 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot1 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
         assertEquals(1, speilSnapshot1.utbetalinger.size)
         val utbetaling1 = speilSnapshot1.utbetalinger.first()
         assertEquals("OVERFØRT", utbetaling1.status)
 
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-        val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
         val utbetaling2 = speilSnapshot2.utbetalinger.first()
         assertEquals("UTBETALT", utbetaling2.status)
         assertEquals("UTBETALING", utbetaling2.type)
@@ -281,9 +282,9 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
 
-        val speilSnapshot1 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(fødselsnummer1))
+        val speilSnapshot1 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(fødselsnummer1, false))
         assertEquals(1, speilSnapshot1.utbetalinger.size)
-        val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(fødselsnummer2))
+        val speilSnapshot2 = assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(fødselsnummer2, false))
         assertEquals(0, speilSnapshot2.utbetalinger.size)
     }
 
@@ -328,7 +329,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         arbeidsforholdløsning[0].also {
             assertEquals(it.stillingstittel, speilSnapshot.arbeidsforhold[0].stillingstittel)
@@ -372,7 +373,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertEquals(bransjer, speilSnapshot.arbeidsgivere.first().bransjer)
     }
@@ -407,7 +408,7 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertEquals("Eliteserien", speilSnapshot.arbeidsgivere.last().navn)
     }
@@ -427,12 +428,59 @@ internal class VedtaksperiodeMediatorTest : AbstractE2ETest() {
         sendRisikovurderingløsning(godkjenningsmeldingId, VEDTAKSPERIODE_ID, funn = funn, kanGodkjennesAutomatisk = false)
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Navn Navnesen", saksbehandlerEpost, saksbehandlerIdent)
         tildelingDao.opprettTildeling(testRapid.inspektør.oppgaveId(), saksbehandlerOid)
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertEquals(saksbehandlerOid, speilSnapshot.tildeling?.oid)
         assertEquals(saksbehandlerEpost, speilSnapshot.tildeling?.epost)
         assertEquals(false, speilSnapshot.tildeling?.påVent)
     }
+
+    @Test
+    fun `Saksbehandler uten tilgang til kode 7 - får ikke speilsnapshot for person med fortrolig adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.Fortrolig)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
+    @Test
+    fun `Saksbehandler uten tilgang til kode 7 - kan se speilsnapshot uten fortrolig adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.Ugradert)
+        assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
+    @Test
+    fun `Saksbehandler med tilgang til kode 7 - kan se speilsnapshot for person med fortrolig adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.Fortrolig)
+        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
+    @Test
+    fun `Saksbehandler med tilgang til kode 7 - kan se speilsnapshot uten fortrolig adressebeskyttelse`(){
+        vedtak(Adressebeskyttelse.Ugradert)
+        assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    }
+
+
+    private fun vedtak(adressebeskyttelse: Adressebeskyttelse) {
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            adressebeskyttelse = adressebeskyttelse.name
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+    }
+
+
 
     @Language("JSON")
     private val TEST_SNAPSHOTV1 = """{

@@ -36,7 +36,6 @@ internal class OppgaveApiTest {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             routing {
                 oppgaveApi(oppgaveMediator, UUID.randomUUID().toString())
-                direkteOppgaveApi(oppgaveMediator)
             }
         }.also {
             it.start(wait = false)

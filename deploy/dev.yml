@@ -69,6 +69,8 @@ spec:
       value: postgresql/preprod-fss/
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: 1119ba1f-3b10-4598-a47b-16568c379114
+    - name: KODE7_SAKSBEHANDLER_GROUP
+      value: c21e58b6-d838-4cb0-919a-398cd40117e3
     - name: SPLEIS_CLIENT_ID
       value: api://dev-fss.tbd.spleis-api/.default
     - name: SPESIALIST_OID

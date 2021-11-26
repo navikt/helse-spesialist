@@ -184,8 +184,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
 
-    protected fun opprettPerson(fødselsnummer: String = FNR, aktørId: String = AKTØR): Persondata {
-        val personinfoId = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
+    protected fun opprettPerson(fødselsnummer: String = FNR, aktørId: String = AKTØR, adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert): Persondata {
+        val personinfoId = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
         val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)

@@ -14,6 +14,7 @@ import io.ktor.jackson.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.pipeline.*
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.abonnement.opptegnelseApi
@@ -232,7 +233,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("oidc") {
                     oppgaveApi(oppgaveMediator, env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
                     vedtaksperiodeApi(
-                        hendelseMediator = hendelseMediator,
                         vedtaksperiodeMediator = VedtaksperiodeMediator(
                             personsnapshotDao = personsnapshotDao,
                             snapshotDao = snapshotDao,
@@ -245,7 +245,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             risikovurderingApiDao = risikovurderingApiDao,
                             utbetalingDao = utbetalingDao,
                             speilSnapshotRestClient = speilSnapshotRestClient
-                        )
+                        ),
+                        hendelseMediator = hendelseMediator,
+                        env.getValue("KODE7_SAKSBEHANDLER_GROUP")
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
@@ -287,4 +289,9 @@ fun Application.installErrorHandling() {
             call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
         }
     }
+}
+
+internal fun PipelineContext<Unit, ApplicationCall>.getGrupper(): List<UUID> {
+    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+    return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
 }

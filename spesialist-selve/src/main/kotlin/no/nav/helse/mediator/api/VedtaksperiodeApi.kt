@@ -10,21 +10,24 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.getGrupper
 import no.nav.helse.mediator.HendelseMediator
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.*
 
 internal fun Route.vedtaksperiodeApi(
     vedtaksperiodeMediator: VedtaksperiodeMediator,
-    hendelseMediator: HendelseMediator
+    hendelseMediator: HendelseMediator,
+    kode7Saksbehandlergruppe: String
 ) {
     val log = LoggerFactory.getLogger("VedtaksperiodeApi")
+    val kode7SaksbehandlergruppeID = UUID.fromString(kode7Saksbehandlergruppe)
 
     get("/api/person/{vedtaksperiodeId}") {
+        val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
         val speilSnapshot = withContext(Dispatchers.IO) {
             vedtaksperiodeMediator
-                .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!))
+                .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!), kanSeKode7)
         }
         if (speilSnapshot == null) {
             call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
@@ -33,13 +36,14 @@ internal fun Route.vedtaksperiodeApi(
         call.respond(speilSnapshot)
     }
     get("/api/person/aktorId/{aktørId}") {
+        val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
         call.parameters["aktørId"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "AktørId må være numerisk")
             return@get
         }
         val speilSnapshot = withContext(Dispatchers.IO) {
             vedtaksperiodeMediator
-                .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!)
+                .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!, kanSeKode7)
         }
         if (speilSnapshot == null) {
             call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
@@ -48,13 +52,14 @@ internal fun Route.vedtaksperiodeApi(
         call.respond(speilSnapshot)
     }
     get("/api/person/fnr/{fødselsnummer}") {
+        val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
         call.parameters["fødselsnummer"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")
             return@get
         }
         val speilSnapshot = withContext(Dispatchers.IO) {
             vedtaksperiodeMediator
-                .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!)
+                .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!, kanSeKode7)
         }
         if (speilSnapshot == null) {
             call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")

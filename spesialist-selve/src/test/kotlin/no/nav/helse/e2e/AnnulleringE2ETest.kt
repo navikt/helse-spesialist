@@ -60,7 +60,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
         sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")
 
-        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
         val annullertAvSaksbehandler = speilSnapshot.utbetalinger.first().annullertAvSaksbehandler
 
         assertNotNull(annullertAvSaksbehandler?.annullertTidspunkt)

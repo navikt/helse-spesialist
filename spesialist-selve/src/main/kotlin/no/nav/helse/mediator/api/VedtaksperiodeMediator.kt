@@ -37,23 +37,26 @@ internal class VedtaksperiodeMediator(
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
-    fun byggSpeilSnapshotForFnr(fnr: String) =
+    fun byggSpeilSnapshotForFnr(fnr: String, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            byggSnapshot(fnr)
+            byggSnapshot(fnr, kanSeKode7)
         }
 
-    fun byggSpeilSnapshotForAktørId(aktørId: String) =
+    fun byggSpeilSnapshotForAktørId(aktørId: String, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            personsnapshotDao.finnFnrByAktørId(aktørId)?.let(::byggSnapshot)
+            personsnapshotDao.finnFnrByAktørId(aktørId)?.let { byggSnapshot(it, kanSeKode7 ) }
         }
 
-    fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID) =
+    fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let(::byggSnapshot)
+            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7 ) }
         }
 
-    private fun byggSnapshot(fnr: String): PersonForSpeilDto? {
+    private fun byggSnapshot(fnr: String, kanSeKode7: Boolean): PersonForSpeilDto? {
         if (!personDao.finnesPersonMedFødselsnummer(fnr)) {
+            return null
+        }
+        if(personDao.personErKode7(fnr) && !kanSeKode7) {
             return null
         }
         if (snapshotDao.utdatert(fnr)) {

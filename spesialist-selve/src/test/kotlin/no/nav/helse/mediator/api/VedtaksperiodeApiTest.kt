@@ -35,6 +35,8 @@ internal class VedtaksperiodeApiTest {
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
+    private val FØDSELSNUMMER = "20046913337"
+    private val KODE7_SAKSBEHANDLER_GROUP = "c21e58b6-d838-4cb0-919a-398cd40117e3"
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
@@ -64,12 +66,41 @@ internal class VedtaksperiodeApiTest {
         assertEquals(HttpStatusCode.Conflict, response.status)
     }
 
-    private fun HttpRequestBuilder.authentication(oid: UUID) {
+    @Test
+    fun `en person med fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
+        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
+        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
+
+
+        val response = runBlocking {
+            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+        assertEquals(HttpStatusCode.NotFound, response.status)
+    }
+
+    @Test
+    fun `en person med fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
+        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
+        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
+
+        val response = runBlocking {
+            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP))
+            }
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    private fun HttpRequestBuilder.authentication(oid: UUID, groups: Collection<String> = emptyList()) {
         header(
             "Authorization",
             "Bearer ${
                 jwtStub.getToken(
-                    emptyList(),
+                    groups,
                     oid.toString(),
                     "epostadresse",
                     clientId,
@@ -112,7 +143,7 @@ internal class VedtaksperiodeApiTest {
             azureAdAppAuthentication(azureConfig)
             routing {
                 authenticate("oidc") {
-                    vedtaksperiodeApi(vedtaksperiodeMediator, hendelseMediator)
+                    vedtaksperiodeApi(vedtaksperiodeMediator, hendelseMediator, KODE7_SAKSBEHANDLER_GROUP)
                 }
             }
         }.also {
@@ -129,4 +160,5 @@ internal class VedtaksperiodeApiTest {
     fun tearDownEach() {
         clearMocks(vedtaksperiodeMediator, hendelseMediator)
     }
+
 }

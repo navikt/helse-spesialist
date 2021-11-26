@@ -4,6 +4,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.notat.NotatDao
+import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.person.PersonApiDao
 import no.nav.helse.person.PersonsnapshotDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
@@ -24,12 +26,13 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         val ARBEIDSFORHOLD = Quadruple(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
     }
 
-    protected val varselDao: VarselDao = VarselDao(dataSource)
-    protected val personsnapshotDao: PersonsnapshotDao = PersonsnapshotDao(dataSource)
-    protected val arbeidsgiverApiDao: ArbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    protected val risikovurderingApiDao: RisikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource)
-    protected val notatDao: NotatDao = NotatDao(dataSource)
+    protected val varselDao = VarselDao(dataSource)
+    protected val personsnapshotDao = PersonsnapshotDao(dataSource)
+    protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
+    protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
+    protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
+    protected val notatDao = NotatDao(dataSource)
+    protected val personApiDao = PersonApiDao(dataSource)
 
     protected fun nyVedtaksperiode() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         val (id, fom, tom) = PERIODE
@@ -55,8 +58,8 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         }
     }
 
-    private fun person() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val personinfoid = personinfo()
+    protected fun person(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        val personinfoid = personinfo(adressebeskyttelse)
         val infotrygdutbetalingerid = infotrygdutbetalinger()
         @Language("PostgreSQL")
         val statement = "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?)"
@@ -67,10 +70,10 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         ))
     }
 
-    private fun personinfo() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    private fun personinfo(adressebeskyttelse: Adressebeskyttelse) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         val (fornavn, mellomnavn, etternavn) = NAVN
         @Language("PostgreSQL")
-        val statement = "INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn) VALUES(?, ?, ?, ?::date, ?::person_kjonn)"
+        val statement = "INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) VALUES(?, ?, ?, ?::date, ?::person_kjonn, ?)"
         requireNotNull(session.run(
             queryOf(
                 statement,
@@ -78,7 +81,8 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
                 mellomnavn,
                 etternavn,
                 LocalDate.of(1970, 1, 1),
-                "Ukjent"
+                "Ukjent",
+                adressebeskyttelse.name
             ).asUpdateAndReturnGeneratedKey
         ))
     }
