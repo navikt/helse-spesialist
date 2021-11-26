@@ -39,7 +39,7 @@ class OppgaveDao(private val dataSource: DataSource): HelseDao(dataSource) {
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                     CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
-                    CASE WHEN sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
+                    CASE WHEN o.type = 'RISK_QA' OR sot.type = 'FORLENGELSE' OR sot.type = 'INFOTRYGDFORLENGELSE' THEN 0 ELSE 1 END,
                 opprettet ASC
             LIMIT 4000;
     """

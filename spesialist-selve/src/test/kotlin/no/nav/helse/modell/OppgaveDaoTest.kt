@@ -100,26 +100,39 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `sorterer RISK_QA-oppgaver først, så forlengelser, så resten`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
 
-        val v2 = UUID.randomUUID()
-        val v3 = UUID.randomUUID()
-        val v4 = UUID.randomUUID()
-        opprettVedtaksperiode(vedtaksperiodeId = v2, periodetype = Periodetype.OVERGANG_FRA_IT)
-        opprettOppgave(vedtaksperiodeId = v2, oppgavetype = "RISK_QA")
+        fun opprettVedtaksperiodeOgOppgave(periodetype: Periodetype, oppgavetype: String = OPPGAVETYPE) {
+            val randomUUID = UUID.randomUUID()
+            opprettVedtaksperiode(vedtaksperiodeId = randomUUID, periodetype = periodetype)
+            opprettOppgave(vedtaksperiodeId = randomUUID, oppgavetype = oppgavetype)
+        }
 
-        opprettVedtaksperiode(vedtaksperiodeId = v3, periodetype = Periodetype.INFOTRYGDFORLENGELSE)
-        opprettOppgave(vedtaksperiodeId = v3)
+        opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING)
+        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE, "RISK_QA")
+        opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING, "RISK_QA")
+        opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, "RISK_QA")
+        opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE)
+        opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE, "RISK_QA")
+        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE)
 
-        opprettVedtaksperiode(vedtaksperiodeId = v4, periodetype = Periodetype.FORLENGELSE)
-        opprettOppgave(vedtaksperiodeId = v4)
-
-        val oppgaver = oppgaveDao.finnOppgaver(true)
-        assertEquals("RISK_QA", oppgaver[0].oppgavetype)
-        assertEquals(PeriodetypeForApi.INFOTRYGDFORLENGELSE, oppgaver[1].type)
-        assertEquals(PeriodetypeForApi.FORLENGELSE, oppgaver[2].type)
-        assertEquals(PeriodetypeForApi.FØRSTEGANGSBEHANDLING, oppgaver[3].type)
+        val oppgaver = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver = true)
+        oppgaver.filter { it.oppgavetype == "RISK_QA" }.let { riskoppgaver ->
+            assertTrue(riskoppgaver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
+                "Oops, skulle ha vært sortert stigende , men er det ikke: $riskoppgaver"
+            }
+        }
+        listOf(
+            "RISK_QA" to PeriodetypeForApi.FORLENGELSE,
+            "RISK_QA" to PeriodetypeForApi.FØRSTEGANGSBEHANDLING,
+            "RISK_QA" to PeriodetypeForApi.OVERGANG_FRA_IT,
+            "RISK_QA" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
+            "SØKNAD" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
+            "SØKNAD" to PeriodetypeForApi.FORLENGELSE,
+            "SØKNAD" to PeriodetypeForApi.FØRSTEGANGSBEHANDLING,
+        ).let { ønsketRekkefølge ->
+            assertEquals(ønsketRekkefølge.map { it.first }, oppgaver.map { it.oppgavetype })
+            assertEquals(ønsketRekkefølge.map { it.second }, oppgaver.map { it.type })
+        }
     }
 
     @Test
