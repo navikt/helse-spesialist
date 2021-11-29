@@ -99,7 +99,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER))
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
 
         assertNotNull(speilSnapshot.arbeidsgivere.first().generasjoner)
     }

@@ -438,52 +438,52 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     @Test
     fun `Saksbehandler uten tilgang til kode 7 - får ikke speilsnapshot for person med fortrolig adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.Fortrolig)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
     @Test
     fun `Saksbehandler uten tilgang til kode 7 - kan se speilsnapshot uten fortrolig adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.Ugradert)
-        assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
     @Test
     fun `Saksbehandler med tilgang til kode 7 - kan se speilsnapshot for person med fortrolig adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.Fortrolig)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
     @Test
     fun `Saksbehandler med tilgang til kode 7 - kan se speilsnapshot uten fortrolig adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.Ugradert)
-        assertNotNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
     @Test
     fun `Ingen saksbehandler skal kunne søke opp personer med strengt fortrolig adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.StrengtFortrolig)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
 
         vedtak(Adressebeskyttelse.StrengtFortrolig)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
     @Test
     fun `Ingen saksbehandler skal kunne søke opp personer med strengt fortrolig utland adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.StrengtFortroligUtland)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
 
         vedtak(Adressebeskyttelse.StrengtFortroligUtland)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
     @Test
     fun `Ingen saksbehandler skal kunne søke opp personer med ukjent adressebeskyttelse`(){
         vedtak(Adressebeskyttelse.Ukjent)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
 
         vedtak(Adressebeskyttelse.Ukjent)
-        assertNull(vedtaksperiodeMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
     }
 
 

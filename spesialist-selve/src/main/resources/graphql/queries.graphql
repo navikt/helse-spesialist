@@ -1,0 +1,174 @@
+fragment detailedDag on GraphQLDag {
+    begrunnelser,
+    dato,
+    grad,
+    kilde {
+        id,
+        type
+    },
+    sykdomsdagtype,
+    utbetalingsdagtype,
+    utbetalingsinfo {
+        arbeidsgiverbelop,
+        inntekt,
+        personbelop,
+        refusjonsbelop,
+        totalGrad,
+        utbetaling
+    }
+}
+
+fragment detailedUberegnetPeriode on GraphQLUberegnetPeriode {
+    behandlingstype,
+    erForkastet,
+    fom,
+    id,
+    inntektstype,
+    opprettet,
+    periodetype,
+    tidslinje {
+        ...detailedDag
+    },
+    tom
+}
+
+fragment detailedPeriode on GraphQLBeregnetPeriode {
+    aktivitetslogg {
+        alvorlighetsgrad,
+        melding,
+        tidsstempel,
+        vedtaksperiodeId
+    },
+    behandlingstype,
+    beregningId,
+    erForkastet,
+    fom,
+    forbrukteSykedager,
+    gjenstaendeSykedager,
+    hendelser {
+        ... on GraphQLInntektsmelding {
+            beregnetInntekt,
+            id,
+            mottattDato,
+            type
+        },
+        ... on GraphQLSoknadArbeidsgiver {
+            fom,
+            id,
+            rapportertDato,
+            sendtArbeidsgiver,
+            tom,
+            type
+        },
+        ... on GraphQLSoknadNav {
+            fom,
+            id,
+            rapportertDato,
+            sendtNav,
+            tom,
+            type
+        },
+        ... on GraphQLSykmelding {
+            fom,
+            id,
+            rapportertDato,
+            tom,
+            type
+        }
+    },
+    id,
+    inntektstype,
+    maksdato,
+    opprettet,
+    periodetype,
+    periodevilkar {
+        alder {
+            alderSisteSykedag,
+            oppfylt
+        },
+        soknadsfrist {
+            oppfylt,
+            sendtNav,
+            soknadFom,
+            soknadTom
+        },
+        sykepengedager {
+            forbrukteSykedager,
+            gjenstaendeSykedager,
+            maksdato,
+            oppfylt,
+            skjaeringstidspunkt
+        }
+    }
+    simulering {
+        perioder {
+            fom,
+            tom,
+            utbetalinger {
+                detaljer {
+                    antallSats,
+                    belop,
+                    faktiskFom,
+                    faktiskTom,
+                    klassekode,
+                    klassekodeBeskrivelse,
+                    konto,
+                    refunderesOrgNr,
+                    sats,
+                    tilbakeforing,
+                    typeSats,
+                    uforegrad,
+                    utbetalingstype
+                },
+                feilkonto,
+                forfall,
+                utbetalesTilId,
+                utbetalesTilNavn
+            }
+        },
+        totalbelop
+    }
+    skjaeringstidspunkt,
+    tidslinje {
+        ...detailedDag
+    },
+    tom,
+    utbetaling {
+        arbeidsgiverFagsystemId,
+        arbeidsgiverNettoBelop,
+        personFagsystemId,
+        personNettoBelop,
+        status,
+        type,
+        vurdering {
+            automatisk,
+            godkjent,
+            ident,
+            tidsstempel
+        }
+    },
+    vilkarsgrunnlaghistorikkId
+}
+
+
+query HentEldreGenerasjoner($fnr: String!) {
+    person(fnr: $fnr) {
+        arbeidsgivere {
+            organisasjonsnummer,
+            generasjonerSlice(from: 1) {
+                perioder {
+                    ... on GraphQLBeregnetPeriode {
+                        __typename,
+                        id,
+                        ...detailedPeriode
+                    }
+                    ... on GraphQLUberegnetPeriode {
+                        __typename,
+                        id,
+                        ...detailedUberegnetPeriode
+                    }
+                }
+            }
+        }
+    }
+}

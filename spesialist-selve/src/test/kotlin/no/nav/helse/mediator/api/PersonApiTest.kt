@@ -28,7 +28,7 @@ import java.net.ServerSocket
 import java.util.*
 
 @TestInstance(PER_CLASS)
-internal class VedtaksperiodeApiTest {
+internal class PersonApiTest {
 
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val personMediator: PersonMediator = mockk(relaxed = true)
@@ -68,8 +68,8 @@ internal class VedtaksperiodeApiTest {
 
     @Test
     fun `en person med fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
-        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
-        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
 
 
         val response = runBlocking {
@@ -83,8 +83,8 @@ internal class VedtaksperiodeApiTest {
 
     @Test
     fun `en person med fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
-        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
-        every { vedtaksperiodeMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
             client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {

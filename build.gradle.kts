@@ -1,5 +1,7 @@
 val junitJupiterVersion = "5.7.2"
 val ktorVersion = "1.6.2"
+val kGraphQLVersion = "0.17.14"
+val graphqlKotlinVersion = "5.2.0"
 
 plugins {
     kotlin("jvm") version "1.5.31"
@@ -33,6 +35,14 @@ allprojects {
         }
 
         implementation("no.finn.unleash:unleash-client-java:4.4.0")
+
+        implementation("com.apurebase:kgraphql:$kGraphQLVersion")
+        implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
+        implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
+        implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion")
+        implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
+            exclude("com.expediagroup:graphql-kotlin-client-serialization")
+        }
 
         testImplementation("org.jetbrains.kotlin:kotlin-test:1.5.21")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
