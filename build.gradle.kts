@@ -1,10 +1,10 @@
-val junitJupiterVersion = "5.7.2"
-val ktorVersion = "1.6.2"
+val junitJupiterVersion = "5.8.1"
+val ktorVersion = "1.6.6"
 val kGraphQLVersion = "0.17.14"
 val graphqlKotlinVersion = "5.2.0"
 
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
 }
 
 allprojects {
@@ -18,13 +18,13 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation("com.github.navikt:rapids-and-rivers:2021.07.08-10.12.37eff53b5c39")
+        implementation("com.github.navikt:rapids-and-rivers:2021.11.29-21.57.443e21ff5a6c")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
         implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
         implementation("com.zaxxer:HikariCP:5.0.0")
         implementation("no.nav:vault-jdbc:1.3.7")
-        implementation("org.flywaydb:flyway-core:7.13.0")
-        implementation("com.github.seratch:kotliquery:1.3.1") //April, 2019
+        implementation("org.flywaydb:flyway-core:8.1.0")
+        implementation("com.github.seratch:kotliquery:1.6.0") //April, 2019
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
         implementation("io.ktor:ktor-client-jackson:$ktorVersion")
