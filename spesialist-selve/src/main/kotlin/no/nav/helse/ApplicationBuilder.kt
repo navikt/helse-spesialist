@@ -234,8 +234,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("oidc") {
                     oppgaveApi(
                         oppgaveMediator = oppgaveMediator,
-                        riskSupersaksbehandlergruppe = UUID.fromString(env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP")),
-                        kode7Saksbehandlergruppe = UUID.fromString(env.getValue("KODE7_SAKSBEHANDLER_GROUP"))
+                        riskSupersaksbehandlergruppe = env.riskGruppeId(),
+                        kode7Saksbehandlergruppe = env.kode7GruppeId()
                     )
                     personApi(
                         personMediator = PersonMediator(
@@ -252,7 +252,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             speilSnapshotRestClient = speilSnapshotRestClient
                         ),
                         hendelseMediator = hendelseMediator,
-                        UUID.fromString(env.getValue("KODE7_SAKSBEHANDLER_GROUP"))
+                        kode7Saksbehandlergruppe = env.kode7GruppeId()
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
@@ -300,3 +300,6 @@ internal fun PipelineContext<Unit, ApplicationCall>.getGrupper(): List<UUID> {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
 }
+
+private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue("KODE7_SAKSBEHANDLER_GROUP"))
+private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
