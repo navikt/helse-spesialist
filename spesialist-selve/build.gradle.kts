@@ -19,10 +19,16 @@ val graphqlIntrospectSchema by tasks.getting(GraphQLIntrospectSchemaTask::class)
 }
 
 val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
+    val baseDir = "${project.projectDir}/src/main/resources/graphql"
+
     serializer.set(GraphQLSerializer.KOTLINX)
     packageName.set("no.nav.helse.mediator.graphql")
     schemaFile.set(graphqlIntrospectSchema.outputFile)
-    queryFiles.from(listOf(File("${project.projectDir}/src/main/resources/graphql/queries.graphql")))
+    queryFiles.from(listOf(
+        File("$baseDir/hentEldreGenerasjoner.graphql"),
+        File("$baseDir/hentSnapshot.graphql"))
+    )
+
     dependsOn("graphqlIntrospectSchema")
 }
 

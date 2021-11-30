@@ -22,7 +22,6 @@ fragment detailedUberegnetPeriode on GraphQLUberegnetPeriode {
     behandlingstype,
     erForkastet,
     fom,
-    id,
     inntektstype,
     opprettet,
     periodetype,
@@ -76,7 +75,6 @@ fragment detailedPeriode on GraphQLBeregnetPeriode {
             type
         }
     },
-    id,
     inntektstype,
     maksdato,
     opprettet,
@@ -149,7 +147,6 @@ fragment detailedPeriode on GraphQLBeregnetPeriode {
     },
     vilkarsgrunnlaghistorikkId
 }
-
 
 query HentEldreGenerasjoner($fnr: String!) {
     person(fnr: $fnr) {
