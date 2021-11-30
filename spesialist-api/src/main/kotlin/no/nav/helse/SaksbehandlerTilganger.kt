@@ -2,7 +2,7 @@ package no.nav.helse
 
 import java.util.*
 
-class Saksbehandler(
+class SaksbehandlerTilganger(
     private val gruppetilganger: List<UUID>,
     private val kode7Saksbehandlergruppe: UUID,
     private val riskSaksbehandlergruppe: UUID

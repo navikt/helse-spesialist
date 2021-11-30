@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -10,6 +11,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavestatus.*
+import no.nav.helse.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -75,7 +77,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgaver`() {
         nyPerson()
-        val oppgaver = oppgaveDao.finnOppgaver(false)
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
         assertEquals(oppgaveId.toString(), oppgave.oppgavereferanse)
@@ -88,12 +90,67 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = "RISK_QA")
 
-        val oppgaver = oppgaveDao.finnOppgaver(true)
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.isNotEmpty())
         val oppgave = oppgaver.first()
         assertEquals("RISK_QA", oppgave.oppgavetype)
         assertEquals(oppgaveId.toString(), oppgave.oppgavereferanse)
-        assertTrue(oppgaveDao.finnOppgaver(false).isEmpty())
+        assertTrue(oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).isEmpty())
+    }
+
+    @Test
+    fun `ekskluder kode-7 oppgaver for vanlige saksbehandlere`() {
+        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
+
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+        assertTrue(oppgaver.isEmpty())
+    }
+
+    @Test
+    fun `inkluder kode-7 oppgaver bare for noen utvalgte saksbehandlere`() {
+        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
+
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_KODE7)
+        assertTrue(oppgaver.isNotEmpty())
+    }
+
+    @Test
+    fun `ekskluder oppgaver med strengt fortrolig som adressebeskyttelse for alle saksbehandlere`() {
+        opprettPerson(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
+
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_KODE7)
+        assertTrue(oppgaver.isEmpty())
+    }
+
+    @Test
+    fun `ekskluder oppgaver med strengt fortrolig utland som adressebeskyttelse for alle saksbehandlere`() {
+        opprettPerson(adressebeskyttelse = Adressebeskyttelse.StrengtFortroligUtland)
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
+
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_KODE7)
+        assertTrue(oppgaver.isEmpty())
+    }
+
+    @Test
+    fun `ekskluder oppgaver med ukjent som adressebeskyttelse for alle saksbehandlere`() {
+        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Ukjent)
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
+
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_KODE7)
+        assertTrue(oppgaver.isEmpty())
     }
 
     @Test
@@ -115,7 +172,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE, "RISK_QA")
         opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE)
 
-        val oppgaver = oppgaveDao.finnOppgaver(inkluderRiskQaOppgaver = true)
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         oppgaver.filter { it.oppgavetype == "RISK_QA" }.let { riskoppgaver ->
             assertTrue(riskoppgaver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
                 "Oops, skulle ha vært sortert stigende , men er det ikke: $riskoppgaver"
@@ -139,7 +196,15 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `finner oppgave`() {
         nyPerson()
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = UTBETALING_ID), oppgave)
+        assertEquals(
+            Oppgave(
+                oppgaveId,
+                OPPGAVETYPE,
+                AvventerSaksbehandler,
+                VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID
+            ), oppgave
+        )
     }
 
     @Test
@@ -147,10 +212,26 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
-        val oppgaveId = insertOppgave(utbetalingId = utbetalingId, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
+        opprettVedtaksperiode(
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
+        )
+        val oppgaveId = insertOppgave(
+            utbetalingId = utbetalingId,
+            commandContextId = CONTEXT_ID,
+            vedtakRef = vedtakId,
+            oppgavetype = OPPGAVETYPE
+        )
         val oppgave = oppgaveDao.finn(utbetalingId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = utbetalingId), oppgave)
+        assertEquals(
+            Oppgave(
+                oppgaveId,
+                OPPGAVETYPE,
+                AvventerSaksbehandler,
+                VEDTAKSPERIODE,
+                utbetalingId = utbetalingId
+            ), oppgave
+        )
     }
 
     @Test
@@ -158,7 +239,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
+        opprettVedtaksperiode(
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
+        )
         insertOppgave(
             utbetalingId = utbetalingId,
             commandContextId = CONTEXT_ID,
@@ -174,10 +258,21 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `kan hente oppgave selv om utbetalingId mangler`() {
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode(periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde = Inntektskilde.EN_ARBEIDSGIVER)
-        val oppgaveId = insertOppgave(utbetalingId = null, commandContextId = CONTEXT_ID, vedtakRef = vedtakId, oppgavetype = OPPGAVETYPE)
+        opprettVedtaksperiode(
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER
+        )
+        val oppgaveId = insertOppgave(
+            utbetalingId = null,
+            commandContextId = CONTEXT_ID,
+            vedtakRef = vedtakId,
+            oppgavetype = OPPGAVETYPE
+        )
         val oppgave = oppgaveDao.finn(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null), oppgave)
+        assertEquals(
+            Oppgave(oppgaveId, OPPGAVETYPE, AvventerSaksbehandler, VEDTAKSPERIODE, utbetalingId = null),
+            oppgave
+        )
     }
 
     @Test
@@ -190,13 +285,32 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner oppgaver med tildeling`() {
         nyPerson()
-        assertEquals(null, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
-        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, "Navn Navnesen", SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+        assertEquals(
+            null,
+            oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+                .first().tildeling?.epost
+        )
+        saksbehandlerDao.opprettSaksbehandler(
+            SAKSBEHANDLER_OID,
+            "Navn Navnesen",
+            SAKSBEHANDLEREPOST,
+            SAKSBEHANDLER_IDENT
+        )
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
-        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
-        assertEquals(SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(false).first().tildeling?.epost)
-        assertEquals(false, oppgaveDao.finnOppgaver(false).first().tildeling?.påVent)
-        assertEquals(SAKSBEHANDLER_OID, oppgaveDao.finnOppgaver(false).first().tildeling?.oid)
+        assertEquals(
+            SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().tildeling?.epost
+        )
+        assertEquals(
+            SAKSBEHANDLEREPOST, oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().tildeling?.epost
+        )
+        assertEquals(
+            false,
+            oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
+                .first().tildeling?.påVent
+        )
+        assertEquals(
+            SAKSBEHANDLER_OID, oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().tildeling?.oid
+        )
     }
 
     @Test
@@ -275,16 +389,16 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `henter fødselsnummeret til personen en oppgave gjelder for`(){
+    fun `henter fødselsnummeret til personen en oppgave gjelder for`() {
         nyPerson()
         val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
         assertEquals(fødselsnummer, FNR)
     }
 
     @Test
-    fun `en oppgave har riktig oppgavetype og inntektskilde`(){
+    fun `en oppgave har riktig oppgavetype og inntektskilde`() {
         nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
-        val oppgaver = oppgaveDao.finnOppgaver(true)
+        val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertEquals(PeriodetypeForApi.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
         assertEquals(InntektskildeForApi.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
     }

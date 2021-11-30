@@ -19,7 +19,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     private fun List<OppgaveDto>.ingenOppgaveMedId(id: String) = none { it.oppgavereferanse == id }
     private fun assertIngenOppgaver(id: String) {
-        oppgaveDao.finnOppgaver(false).ingenOppgaveMedId(id)
+        oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).ingenOppgaveMedId(id)
     }
 
     @Test
@@ -50,7 +50,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         klargjørForGodkjenning(nyttGodkjenningsbehov)
 
-        val oppgave = oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER }
+        val oppgave =
+            oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).find { it.fødselsnummer == FØDSELSNUMMER }
         assertEquals(SAKSBEHANDLER_EPOST, oppgave!!.tildeling?.epost)
     }
 
@@ -90,7 +91,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         klargjørForGodkjenning(nyttGodkjenningsbehov)
 
-        val oppgave = requireNotNull(oppgaveDao.finnOppgaver(false).find { it.fødselsnummer == FØDSELSNUMMER })
+        val oppgave = requireNotNull(oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
+            .find { it.fødselsnummer == FØDSELSNUMMER })
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
@@ -159,7 +161,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
 
         // TODO: bør ikke koble seg på daoer i E2E
-        assertTrue(oppgaveDao.finnOppgaver(false).any { it.fødselsnummer == FØDSELSNUMMER })
+        assertTrue(
+            oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fødselsnummer == FØDSELSNUMMER })
 
         val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
         assertNotNull(snapshot)
@@ -170,7 +173,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
-        val saksbehandlerOppgaver = oppgaveDao.finnOppgaver(false)
+        val saksbehandlerOppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
         assertEquals(
             1,
             saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size

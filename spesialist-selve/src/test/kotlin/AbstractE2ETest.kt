@@ -7,10 +7,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.*
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -52,8 +51,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.snapshotMedWarning
-import no.nav.helse.snapshotUtenWarnings
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -74,6 +71,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val SAKSBEHANDLER_OID = UUID.randomUUID()
     protected val SAKSBEHANDLER_IDENT = "X999999"
     protected val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
+    protected val SAKSBEHANDLERTILGANGER_UTEN_TILGANGER =
+        SaksbehandlerTilganger(
+            gruppetilganger = emptyList(),
+            kode7Saksbehandlergruppe = UUID.randomUUID(),
+            riskSaksbehandlergruppe = UUID.randomUUID()
+        )
 
     protected val SNAPSHOTV1_MED_WARNINGS =
         snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)

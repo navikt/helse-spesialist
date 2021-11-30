@@ -129,7 +129,7 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusDays(1))
         assertNull(tildelingDao.tildelingForOppgave(oppgaveId))
         assertNull(tildelingDao.tildelingForPerson(FNR))
-        oppgaveDao.finnOppgaver(false).also { oppgaver ->
+        oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).also { oppgaver ->
             assertTrue(oppgaver.isNotEmpty())
             assertTrue(oppgaver.none { it.tildeling?.epost == saksbehandlerEpost })
         }

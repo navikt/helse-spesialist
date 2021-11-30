@@ -232,7 +232,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             installGraphQLApi()
             routing {
                 authenticate("oidc") {
-                    oppgaveApi(oppgaveMediator, env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
+                    oppgaveApi(
+                        oppgaveMediator = oppgaveMediator,
+                        riskSupersaksbehandlergruppe = env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"),
+                        kode7Saksbehandlergruppe = env.getValue("KODE7_SAKSBEHANDLER_GROUP")
+                    )
                     personApi(
                         personMediator = PersonMediator(
                             personsnapshotDao = personsnapshotDao,

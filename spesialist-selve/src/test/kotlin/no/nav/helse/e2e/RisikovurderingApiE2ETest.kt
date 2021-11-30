@@ -27,32 +27,33 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
         every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         @Language("json")
-        val funn1 = objectMapper.readTree("""
+        val funn1 = objectMapper.readTree(
+            """
             [{
                 "kategori": ["8-4"],
                 "beskrivelse": "ny sjekk ikke ok",
                 "kreverSupersaksbehandler": true
             }]
-        """)
-        val funn2 = objectMapper.readTree("""
+        """
+        )
+        val funn2 = objectMapper.readTree(
+            """
             [{
                 "kategori": ["8-4"],
                 "beskrivelse": "8-4 ikke ok",
                 "kreverSupersaksbehandler": false
             }]
-        """)
+        """
+        )
         godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID, UTBETALING_ID)
         godkjenningsoppgave(funn2, UUID.randomUUID(), UTBETALING_ID2)
 
         val riskQaGruppe = UUID.randomUUID().toString()
+        val kode7Gruppe = UUID.randomUUID().toString()
         val respons =
             AbstractApiTest.TestServer {
                 oppgaveApi(
-                    OppgaveMediator(
-                        oppgaveDao,
-                        tildelingDao,
-                        reservasjonDao
-                    ), riskQaGruppe
+                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao), riskQaGruppe, kode7Gruppe
                 )
             }
                 .withAuthenticatedServer {
@@ -71,7 +72,11 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         assertEquals(listOf("RISK_QA", "SØKNAD"), json.map { it["oppgavetype"].asText() })
     }
 
-    fun godkjenningsoppgave(funn: JsonNode, vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID, utbetalingId: UUID = UTBETALING_ID) {
+    fun godkjenningsoppgave(
+        funn: JsonNode,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UTBETALING_ID
+    ) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             vedtaksperiodeId,

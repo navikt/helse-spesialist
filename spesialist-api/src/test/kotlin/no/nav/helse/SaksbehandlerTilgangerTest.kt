@@ -4,51 +4,51 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class SaksbehandlerTest {
+internal class SaksbehandlerTilgangerTest {
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
     private val riskSaksbehandlergruppe = UUID.randomUUID()
 
     @Test
     fun `uten gruppetilhørighet har man ingen tilganger`() {
-        val saksbehandler = Saksbehandler(
+        val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe
         )
-        assertFalse(saksbehandler.harTilgangTilKode7Oppgaver())
-        assertFalse(saksbehandler.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
     }
 
     @Test
     fun `med kode7-gruppetilgang skal man kunne løse kode7-oppgaver`() {
-        val saksbehandler = Saksbehandler(
+        val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(kode7Saksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe
         )
-        assertTrue(saksbehandler.harTilgangTilKode7Oppgaver())
-        assertFalse(saksbehandler.harTilgangTilRiskOppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
     }
 
     @Test
     fun `med risk-gruppetilgang skal man kunne løse risk-oppgaver`() {
-        val saksbehandler = Saksbehandler(
+        val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(riskSaksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe
         )
-        assertFalse(saksbehandler.harTilgangTilKode7Oppgaver())
-        assertTrue(saksbehandler.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
     }
 
     @Test
     fun `med alle gruppetilganger skal man kunne løse alle oppgaver`() {
-        val saksbehandler = Saksbehandler(
+        val saksbehandlerTilganger = SaksbehandlerTilganger(
             gruppetilganger = listOf(riskSaksbehandlergruppe, kode7Saksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe
         )
-        assertTrue(saksbehandler.harTilgangTilKode7Oppgaver())
-        assertTrue(saksbehandler.harTilgangTilRiskOppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
     }
 }

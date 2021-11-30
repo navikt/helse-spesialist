@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
@@ -79,6 +80,24 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         internal const val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
         internal const val SAKSBEHANDLER_IDENT = "Z999999"
     }
+
+    private val KODE7_GRUPPE_ID = UUID.randomUUID()
+    private val RISK_GRUPPE_ID = UUID.randomUUID()
+    protected val SAKSBEHANDLERTILGANGER_MED_INGEN = SaksbehandlerTilganger(
+        gruppetilganger = emptyList(),
+        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
+        riskSaksbehandlergruppe = RISK_GRUPPE_ID
+    )
+    protected val SAKSBEHANDLERTILGANGER_MED_KODE7 = SaksbehandlerTilganger(
+        gruppetilganger = listOf(KODE7_GRUPPE_ID),
+        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
+        riskSaksbehandlergruppe = RISK_GRUPPE_ID
+    )
+    protected val SAKSBEHANDLERTILGANGER_MED_RISK = SaksbehandlerTilganger(
+        gruppetilganger = listOf(RISK_GRUPPE_ID),
+        kode7Saksbehandlergruppe = KODE7_GRUPPE_ID,
+        riskSaksbehandlergruppe = RISK_GRUPPE_ID
+    )
 
     internal var personId: Long = -1
         private set
