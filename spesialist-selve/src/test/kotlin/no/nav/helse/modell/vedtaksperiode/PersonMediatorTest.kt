@@ -243,7 +243,13 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         val vedtaksperiodeId1 = UUID.randomUUID()
 
         val godkjenningsmeldingId1 =
-            sendGodkjenningsbehov(orgnr1, vedtaksperiodeId1, fødselsnummer = fødselsnummer1, aktørId = aktørId1, utbetalingId = UTBETALING_ID)
+            sendGodkjenningsbehov(
+                orgnr1,
+                vedtaksperiodeId1,
+                fødselsnummer = fødselsnummer1,
+                aktørId = aktørId1,
+                utbetalingId = UTBETALING_ID
+            )
         sendPersoninfoløsning(godkjenningsmeldingId1, orgnr1, vedtaksperiodeId1)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId1,
@@ -269,7 +275,13 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         val orgnr2 = "876543219"
         val vedtaksperiodeId2 = UUID.randomUUID()
         val godkjenningsmeldingId2 =
-            sendGodkjenningsbehov(orgnr2, vedtaksperiodeId2, fødselsnummer = fødselsnummer2, aktørId = aktørId2, utbetalingId = UTBETALING_ID)
+            sendGodkjenningsbehov(
+                orgnr2,
+                vedtaksperiodeId2,
+                fødselsnummer = fødselsnummer2,
+                aktørId = aktørId2,
+                utbetalingId = UTBETALING_ID
+            )
         sendPersoninfoløsning(godkjenningsmeldingId2, orgnr2, vedtaksperiodeId2)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId2,
@@ -379,7 +391,7 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Mapper arbeidsgiverinfo for flere arbeidsgivere`()  {
+    fun `Mapper arbeidsgiverinfo for flere arbeidsgivere`() {
         val aktiveVedtaksperioder = listOf(
             Testmeldingfabrikk.AktivVedtaksperiodeJson(
                 ORGNR,
@@ -393,7 +405,12 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             )
         )
         val godkjenningsmeldingId =
-            sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, aktiveVedtaksperioder = aktiveVedtaksperioder, utbetalingId = UTBETALING_ID)
+            sendGodkjenningsbehov(
+                ORGNR,
+                VEDTAKSPERIODE_ID,
+                aktiveVedtaksperioder = aktiveVedtaksperioder,
+                utbetalingId = UTBETALING_ID
+            )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -425,7 +442,12 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
         sendDigitalKontaktinformasjonløsning(godkjenningsmeldingId, true)
         sendÅpneGosysOppgaverløsning(godkjenningsmeldingId)
-        sendRisikovurderingløsning(godkjenningsmeldingId, VEDTAKSPERIODE_ID, funn = funn, kanGodkjennesAutomatisk = false)
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId,
+            VEDTAKSPERIODE_ID,
+            funn = funn,
+            kanGodkjennesAutomatisk = false
+        )
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "Navn Navnesen", saksbehandlerEpost, saksbehandlerIdent)
         tildelingDao.opprettTildeling(testRapid.inspektør.oppgaveId(), saksbehandlerOid)
         val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
@@ -436,56 +458,63 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Saksbehandler uten tilgang til kode 7 - får ikke speilsnapshot for person med fortrolig adressebeskyttelse`(){
-        vedtak(Adressebeskyttelse.Fortrolig)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
-    }
-
-    @Test
-    fun `Saksbehandler uten tilgang til kode 7 - kan se speilsnapshot uten fortrolig adressebeskyttelse`(){
+    fun `Ugradert adressebeskyttelse - alle saksbehandlere kan søke opp personer`() {
         vedtak(Adressebeskyttelse.Ugradert)
         assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+
+        vedtak(Adressebeskyttelse.Ugradert)
+        assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
     }
 
     @Test
-    fun `Saksbehandler med tilgang til kode 7 - kan se speilsnapshot for person med fortrolig adressebeskyttelse`(){
+    fun `Fortrolig adressebeskyttelse - kun saksbehandler med egen tilgang til kode 7 søke opp personer`() {
         vedtak(Adressebeskyttelse.Fortrolig)
         assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+
+        vedtak(Adressebeskyttelse.Fortrolig)
+        assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
     }
 
     @Test
-    fun `Saksbehandler med tilgang til kode 7 - kan se speilsnapshot uten fortrolig adressebeskyttelse`(){
+    fun `Strengt fortrolig adressebeskyttelse - ingen saksbehandlere skal kunne søke opp personer`() {
+        vedtak(Adressebeskyttelse.StrengtFortrolig)
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+
+        vedtak(Adressebeskyttelse.StrengtFortrolig)
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+    }
+
+    @Test
+    fun `Strengt fortrolig utland adressebeskyttelse - ingen saksbehandlere skal kunne søke opp personer`() {
+        vedtak(Adressebeskyttelse.StrengtFortroligUtland)
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+
+        vedtak(Adressebeskyttelse.StrengtFortroligUtland)
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+    }
+
+    @Test
+    fun `Ukjent adressbeskyttelse - ingen saksbehandlere skal kunne søke opp personer`() {
+        vedtak(Adressebeskyttelse.Ukjent)
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+
+        vedtak(Adressebeskyttelse.Ukjent)
+        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+    }
+
+    @Test
+    fun `Ugradert adressebeskyttelse mappes til speil`() {
         vedtak(Adressebeskyttelse.Ugradert)
-        assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+        assertEquals(Adressebeskyttelse.Ugradert, speilSnapshot.personinfo.adressebeskyttelse)
     }
 
     @Test
-    fun `Ingen saksbehandler skal kunne søke opp personer med strengt fortrolig adressebeskyttelse`(){
-        vedtak(Adressebeskyttelse.StrengtFortrolig)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
-
-        vedtak(Adressebeskyttelse.StrengtFortrolig)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
+    fun `Fortrolig adressebeskyttelse mappes til speil`() {
+        vedtak(Adressebeskyttelse.Fortrolig)
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
+        assertEquals(Adressebeskyttelse.Fortrolig, speilSnapshot.personinfo.adressebeskyttelse)
     }
-
-    @Test
-    fun `Ingen saksbehandler skal kunne søke opp personer med strengt fortrolig utland adressebeskyttelse`(){
-        vedtak(Adressebeskyttelse.StrengtFortroligUtland)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
-
-        vedtak(Adressebeskyttelse.StrengtFortroligUtland)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
-    }
-
-    @Test
-    fun `Ingen saksbehandler skal kunne søke opp personer med ukjent adressebeskyttelse`(){
-        vedtak(Adressebeskyttelse.Ukjent)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true))
-
-        vedtak(Adressebeskyttelse.Ukjent)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false))
-    }
-
 
     private fun vedtak(adressebeskyttelse: Adressebeskyttelse) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)

@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.PersoninfoApiDto
 import no.nav.helse.tildeling.TildelingApiDto
@@ -27,7 +28,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             @Language("PostgreSQL")
             val query = """
             SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
-                   pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent
+                   pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -40,7 +41,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             $eventuellEkskluderingAvRiskQA
             $gyldigeAdressebeskyttelser
-                GROUP BY o.id, o.opprettet, s.oid, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, p.aktor_id, p.fodselsnummer, sot.type, sot.inntektskilde, e.id, e.navn, t.saksbehandler_ref, t.på_vent
+                GROUP BY o.id, o.opprettet, s.oid, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type, sot.inntektskilde, e.id, e.navn, t.saksbehandler_ref, t.på_vent
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                     CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
@@ -215,7 +216,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             it.stringOrNull("mellomnavn"),
             it.string("etternavn"),
             it.localDateOrNull("fodselsdato"),
-            it.stringOrNull("kjonn")?.let(Kjønn::valueOf)
+            it.stringOrNull("kjonn")?.let(Kjønn::valueOf),
+            it.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf)
         ),
         aktørId = it.long("aktor_id").toString(),
         fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),

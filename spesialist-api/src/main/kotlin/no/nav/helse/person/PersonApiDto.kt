@@ -13,7 +13,8 @@ data class PersoninfoApiDto(
     val mellomnavn: String?,
     val etternavn: String,
     val fødselsdato: LocalDate?,
-    val kjønn: Kjønn?
+    val kjønn: Kjønn?,
+    val adressebeskyttelse: Adressebeskyttelse
 )
 
 data class PersonMetadataApiDto(
