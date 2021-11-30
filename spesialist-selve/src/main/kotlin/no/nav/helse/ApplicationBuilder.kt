@@ -234,8 +234,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("oidc") {
                     oppgaveApi(
                         oppgaveMediator = oppgaveMediator,
-                        riskSupersaksbehandlergruppe = env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"),
-                        kode7Saksbehandlergruppe = env.getValue("KODE7_SAKSBEHANDLER_GROUP")
+                        riskSupersaksbehandlergruppe = UUID.fromString(env.getValue("RISK_SUPERSAKSBEHANDLER_GROUP")),
+                        kode7Saksbehandlergruppe = UUID.fromString(env.getValue("KODE7_SAKSBEHANDLER_GROUP"))
                     )
                     personApi(
                         personMediator = PersonMediator(
@@ -252,7 +252,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             speilSnapshotRestClient = speilSnapshotRestClient
                         ),
                         hendelseMediator = hendelseMediator,
-                        env.getValue("KODE7_SAKSBEHANDLER_GROUP")
+                        UUID.fromString(env.getValue("KODE7_SAKSBEHANDLER_GROUP"))
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))

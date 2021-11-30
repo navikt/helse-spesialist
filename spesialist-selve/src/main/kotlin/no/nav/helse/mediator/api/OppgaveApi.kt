@@ -12,17 +12,15 @@ import java.util.*
 
 internal fun Route.oppgaveApi(
     oppgaveMediator: OppgaveMediator,
-    riskSupersaksbehandlergruppe: String,
-    kode7Saksbehandlergruppe: String
+    riskSupersaksbehandlergruppe: UUID,
+    kode7Saksbehandlergruppe: UUID
 ) {
-    val gruppeIdForKode7Saksbehandler = UUID.fromString(kode7Saksbehandlergruppe)
-    val gruppeIdForRiskSaksbehandlere = UUID.fromString(riskSupersaksbehandlergruppe)
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
             oppgaveMediator.hentOppgaver(saksbehandlerTilganger = SaksbehandlerTilganger(
                 gruppetilganger = getGrupper(),
-                kode7Saksbehandlergruppe = gruppeIdForKode7Saksbehandler,
-                riskSaksbehandlergruppe = gruppeIdForRiskSaksbehandlere
+                kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+                riskSaksbehandlergruppe = riskSupersaksbehandlergruppe
             ))
         }
         call.respond(saksbehandlerOppgaver)

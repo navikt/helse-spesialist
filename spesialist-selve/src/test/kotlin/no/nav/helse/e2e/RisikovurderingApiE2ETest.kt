@@ -48,8 +48,8 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID, UTBETALING_ID)
         godkjenningsoppgave(funn2, UUID.randomUUID(), UTBETALING_ID2)
 
-        val riskQaGruppe = UUID.randomUUID().toString()
-        val kode7Gruppe = UUID.randomUUID().toString()
+        val riskQaGruppe = UUID.randomUUID()
+        val kode7Gruppe = UUID.randomUUID()
         val respons =
             AbstractApiTest.TestServer {
                 oppgaveApi(
@@ -60,7 +60,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
                     it.get<HttpResponse>("/api/oppgaver") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
-                        authentication(SAKSBEHANDLER_ID, riskQaGruppe)
+                        authentication(SAKSBEHANDLER_ID, riskQaGruppe.toString())
                     }
                 }
 

@@ -56,8 +56,8 @@ internal class OppgaveApiTest {
                 authenticate("oidc") {
                     oppgaveApi(
                         oppgaveMediator = oppgaveMediator,
-                        riskSupersaksbehandlergruppe = UUID.randomUUID().toString(),
-                        kode7Saksbehandlergruppe = UUID.randomUUID().toString()
+                        riskSupersaksbehandlergruppe = UUID.randomUUID(),
+                        kode7Saksbehandlergruppe = UUID.randomUUID()
                     )
                 }
             }

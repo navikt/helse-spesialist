@@ -36,7 +36,7 @@ internal class PersonApiTest {
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
     private val FØDSELSNUMMER = "20046913337"
-    private val KODE7_SAKSBEHANDLER_GROUP = "c21e58b6-d838-4cb0-919a-398cd40117e3"
+    private val KODE7_SAKSBEHANDLER_GROUP = UUID.randomUUID()
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
@@ -89,7 +89,7 @@ internal class PersonApiTest {
         val response = runBlocking {
             client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
                 contentType(ContentType.Application.Json)
-                authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP))
+                authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP.toString()))
             }
         }
         assertEquals(HttpStatusCode.OK, response.status)

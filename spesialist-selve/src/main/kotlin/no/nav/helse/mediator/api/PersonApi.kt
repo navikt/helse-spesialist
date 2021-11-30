@@ -18,13 +18,12 @@ import java.util.*
 internal fun Route.personApi(
     personMediator: PersonMediator,
     hendelseMediator: HendelseMediator,
-    kode7Saksbehandlergruppe: String
+    kode7Saksbehandlergruppe: UUID
 ) {
     val log = LoggerFactory.getLogger("PersonApi")
-    val kode7SaksbehandlergruppeID = UUID.fromString(kode7Saksbehandlergruppe)
 
     get("/api/person/{vedtaksperiodeId}") {
-        val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
+        val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
         val speilSnapshot = withContext(Dispatchers.IO) {
             personMediator
                 .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!), kanSeKode7)
@@ -36,7 +35,7 @@ internal fun Route.personApi(
         call.respond(speilSnapshot)
     }
     get("/api/person/aktorId/{aktørId}") {
-        val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
+        val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
         call.parameters["aktørId"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "AktørId må være numerisk")
             return@get
@@ -52,7 +51,7 @@ internal fun Route.personApi(
         call.respond(speilSnapshot)
     }
     get("/api/person/fnr/{fødselsnummer}") {
-        val kanSeKode7 = getGrupper().contains(kode7SaksbehandlergruppeID)
+        val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
         call.parameters["fødselsnummer"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")
             return@get
