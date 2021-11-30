@@ -96,15 +96,4 @@ internal class OppgaveApiTest {
         }
     }
 
-    @Test
-    fun `returnerer 200 og tom liste hvis den ikke finner noen tilgjengelige oppgaver`() {
-        every { oppgaveMediator.hentOppgaver(any()) } returns emptyList()
-        val response = runBlocking {
-            client.get<HttpResponse>("/api/oppgaver") {
-                contentType(ContentType.Application.Json)
-                authentication(oid = UUID.randomUUID(), group = KODE7_SAKSBEHANDLER_GROUP)
-            }
-        }
-        assertEquals(HttpStatusCode.OK, response.status)
-    }
 }
