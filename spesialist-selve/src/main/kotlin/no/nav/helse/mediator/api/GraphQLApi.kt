@@ -17,6 +17,7 @@ internal fun Application.installGraphQLApi() {
             query("person") {
                 resolver { fnr: String ->
                     // Opprett et personobjekt og populer med data fra databasen.
+                    fnr
                 }
             }
         }
