@@ -231,7 +231,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun lagUtbetalingAnnullertEvent(
         id: UUID = UUID.randomUUID(),
         fødselsnummer: String = "123456789",
-        fagsystemId: UUID = UUID.randomUUID(),
+        arbeidsgiverFagsystemId: UUID = UUID.randomUUID(),
+        personFagsystemId: UUID? = null,
         utbetalingId: UUID = UUID.randomUUID(),
         annullertAvSaksbehandler: LocalDate = LocalDate.now(),
         saksbehandlerEpost: String = "saksbehandler_epost"
@@ -239,11 +240,11 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         nyHendelse(
             id, "utbetaling_annullert", mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "fagsystemId" to fagsystemId.toString(),
+                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId.toString(),
                 "utbetalingId" to utbetalingId.toString(),
-                "annullertAvSaksbehandler" to annullertAvSaksbehandler.toString(),
-                "saksbehandlerEpost" to saksbehandlerEpost
-            )
+                "tidspunkt" to annullertAvSaksbehandler.toString(),
+                "epost" to saksbehandlerEpost
+            ).let { if (personFagsystemId != null) it.plus("personFagsystemId" to personFagsystemId) else it }
         )
 
     fun lagHentPersoninfoløsning(

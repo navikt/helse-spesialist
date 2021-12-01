@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.*
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.Command
@@ -62,11 +62,11 @@ internal class UtbetalingAnnullert(
                     it.requireKey(
                         "@id",
                         "fødselsnummer",
-                        "fagsystemId",
                         "utbetalingId",
-                        "annullertAvSaksbehandler",
-                        "saksbehandlerEpost"
+                        "tidspunkt",
+                        "epost"
                     )
+                    it.interestedIn("arbeidsgiverFagsystemId", "personFagsystemId")
                 }
             }.register(this)
         }
@@ -77,11 +77,17 @@ internal class UtbetalingAnnullert(
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val id = UUID.fromString(packet["@id"].asText())
-            val fagsystemId = packet["fagsystemId"].asText()
+            val arbeidsgiverFagsystemId = packet["arbeidsgiverFagsystemId"].takeUnless { it.isMissingOrNull() }?.asText()
+            val personFagsystemId = packet["personFagsystemId"].takeUnless { it.isMissingOrNull() }?.asText()
+
+            val logInfo = mutableListOf(keyValue("eventId", id)).also {
+                if (arbeidsgiverFagsystemId != null) it.add(keyValue("arbeidsgiverFagsystemId", arbeidsgiverFagsystemId))
+                if (personFagsystemId != null) it.add(keyValue("personFagsystemId", personFagsystemId))
+            }
+
             log.info(
                 "Mottok utbetaling annullert {}, {}",
-                StructuredArguments.keyValue("fagsystemId", fagsystemId),
-                StructuredArguments.keyValue("eventId", id)
+                *logInfo.toTypedArray()
             )
             mediator.utbetalingAnnullert(packet, context)
         }

@@ -655,7 +655,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun sendUtbetalingAnnullert(
-        fagsystemId: String = "ASDJ12IA312KLS",
+        arbeidsgiverFagsystemId: String = "ASDJ12IA312KLS",
+        personFagsystemId: String = "BSDJ12IA312KLS",
         saksbehandlerEpost: String = "saksbehandler_epost"
     ) {
         @Language("JSON")
@@ -664,11 +665,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 "@event_name": "utbetaling_annullert",
                 "@id": "${UUID.randomUUID()}",
                 "fødselsnummer": "$FØDSELSNUMMER",
-                "fagsystemId": "$fagsystemId",
+                "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                "personFagsystemId": "$personFagsystemId",
                 "utbetalingId": "$UTBETALING_ID",
-                "annullertAvSaksbehandler": "${LocalDateTime.now()}",
-                "saksbehandlerEpost": "$saksbehandlerEpost",
-                "gjelderSisteSkjæringstidspunkt": true
+                "tidspunkt": "${LocalDateTime.now()}",
+                "epost": "$saksbehandlerEpost"
             }"""
 
         testRapid.sendTestMessage(json)
