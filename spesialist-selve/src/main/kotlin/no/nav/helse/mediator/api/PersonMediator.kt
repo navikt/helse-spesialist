@@ -22,6 +22,7 @@ import no.nav.helse.utbetaling.OppdragApiDto
 import no.nav.helse.utbetaling.UtbetalingApiDto
 import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.vedtaksperiode.VarselDao
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class PersonMediator(
@@ -37,6 +38,8 @@ internal class PersonMediator(
     private val snapshotDao: SnapshotDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
+    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+
     fun byggSpeilSnapshotForFnr(fødselsnummer: String, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
             byggSnapshot(fødselsnummer, kanSeKode7)
@@ -59,6 +62,7 @@ internal class PersonMediator(
 
         val personErKode7 = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
         if(personErKode7 && !kanSeKode7) {
+            sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
             return null
         }
 
