@@ -86,7 +86,7 @@ internal class UtbetalingAnnullert(
             }
 
             log.info(
-                "Mottok utbetaling annullert {}, {}",
+                "Mottok utbetaling annullert ${logInfo.joinToString(transform = {"{}"})}",
                 *logInfo.toTypedArray()
             )
             mediator.utbetalingAnnullert(packet, context)
