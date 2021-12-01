@@ -77,6 +77,12 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         person().first().assertInfotrygdUtbetalingerRef(id)
     }
 
+    @Test
+    fun `finner adressebeskyttelse for person`() {
+        opprettPerson(fødselsnummer = FNR, adressebeskyttelse = Adressebeskyttelse.Fortrolig)
+        assertEquals(Adressebeskyttelse.Fortrolig, personDao.findPersoninfoAdressebeskyttelse(FNR))
+    }
+
     private fun assertPersoninfo(
         forventetNavn: String,
         forventetMellomnavn: String?,

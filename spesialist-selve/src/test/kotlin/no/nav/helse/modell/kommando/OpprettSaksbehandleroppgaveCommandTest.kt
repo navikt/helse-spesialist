@@ -11,6 +11,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.reservasjon.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -64,5 +65,13 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { automatisering.erStikkprøve(VEDTAKSPERIODE_ID, any()) } returns true
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.stikkprøve(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
+    }
+
+    @Test
+    fun `oppretter oppgave med egen oppgavetype for fortrlig adressebeskyttelse`() {
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { personDao.findPersoninfoAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.fortroligAdressebeskyttelse(VEDTAKSPERIODE_ID, UTBETALING_ID))}
     }
 }

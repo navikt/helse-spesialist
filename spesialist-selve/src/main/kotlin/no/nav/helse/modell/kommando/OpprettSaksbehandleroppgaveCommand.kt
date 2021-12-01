@@ -8,6 +8,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -34,9 +35,16 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (tilhørerUtlandsenhet) return true
 
         val oppgave = when {
+            harFortroligAdressebeskyttelse -> Oppgave.fortroligAdressebeskyttelse(vedtaksperiodeId, utbetalingId)
             utbetalingtype == Utbetalingtype.REVURDERING -> Oppgave.revurdering(vedtaksperiodeId, utbetalingId)
-            automatisering.erStikkprøve(vedtaksperiodeId, hendelseId) -> Oppgave.stikkprøve(vedtaksperiodeId, utbetalingId)
-            risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(vedtaksperiodeId, utbetalingId)
+            automatisering.erStikkprøve(vedtaksperiodeId, hendelseId) -> Oppgave.stikkprøve(
+                vedtaksperiodeId,
+                utbetalingId
+            )
+            risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(
+                vedtaksperiodeId,
+                utbetalingId
+            )
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave på utbetalingId $utbetalingId og vedtaksperiodeId $vedtaksperiodeId")
@@ -44,6 +52,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
         return true
     }
 
+    private val harFortroligAdressebeskyttelse get() =
+        personDao.findPersoninfoAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
     private val erEgenAnsatt get() = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
     private val tilhørerUtlandsenhet get() = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
 }
