@@ -83,6 +83,23 @@ internal class CommandContextDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun contextOpprettetTidspunkt(
+        contextId: UUID,
+    ) = sessionOf(dataSource).use { session ->
+        checkNotNull(
+            session.run(
+                queryOf(
+                    "SELECT min(opprettet) AS context_opprettet FROM command_context WHERE context_id = ?",
+                    contextId,
+                ).map {
+                    it.localDateTime("context_opprettet")
+                }.asSingle
+            )
+        ) {
+            "Det fins ikke noen command_context for contextId $contextId"
+        }
+    }
+
     fun finnSuspendert(id: UUID) = finnSiste(id)?.takeIf { it.first == SUSPENDERT }?.let { (_, dto) ->
         CommandContext(id, dto.sti)
     }

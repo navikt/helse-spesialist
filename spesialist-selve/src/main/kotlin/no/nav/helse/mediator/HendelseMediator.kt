@@ -30,6 +30,8 @@ import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalDateTime.now
+import java.time.temporal.ChronoUnit.SECONDS
 import java.util.*
 import javax.sql.DataSource
 
@@ -516,8 +518,10 @@ internal class HendelseMediator(
         ) {
             try {
                 log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
-                if (context.utfør(commandContextDao, hendelse)) log.info("kommando er utført ferdig")
-                else log.info("${hendelse::class.simpleName} er suspendert")
+                if (context.utfør(commandContextDao, hendelse)) {
+                    log.info("kommando er utført ferdig. Det skjedde ca {}s etter at kommandoen ble startet",
+                        SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now()))
+                } else log.info("${hendelse::class.simpleName} er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
                 oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
             } catch (err: Exception) {
