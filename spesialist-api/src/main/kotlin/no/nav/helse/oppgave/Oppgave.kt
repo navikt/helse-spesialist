@@ -33,7 +33,7 @@ class Oppgave private constructor(
         fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId, utbetalingId)
         fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("REVURDERING", vedtaksperiodeId, utbetalingId)
         fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("RISK_QA", vedtaksperiodeId, utbetalingId)
-        fun fortroligAdressebeskyttelse(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("FORTROLIG_ADRESSEBESKYTTELSE", vedtaksperiodeId, utbetalingId)
+        fun fortroligAdressebeskyttelse(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("FORTROLIG_ADRESSE", vedtaksperiodeId, utbetalingId)
 
         private fun oppgave(type: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)

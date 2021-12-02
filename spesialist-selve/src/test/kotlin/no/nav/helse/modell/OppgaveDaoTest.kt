@@ -3,7 +3,6 @@ package no.nav.helse.modell
 import DatabaseIntegrationTest
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -42,6 +41,24 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgave().first().assertEquals(
             LocalDate.now(),
             OPPGAVETYPE,
+            OPPGAVESTATUS,
+            null,
+            null,
+            vedtakId,
+            CONTEXT_ID
+        )
+    }
+
+    @Test
+    fun `lagre oppgave med fortrolig adressebeskyttelse`() {
+        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE")
+        assertEquals(1, oppgave().size)
+        oppgave().first().assertEquals(
+            LocalDate.now(),
+            "FORTROLIG_ADRESSE",
             OPPGAVESTATUS,
             null,
             null,
