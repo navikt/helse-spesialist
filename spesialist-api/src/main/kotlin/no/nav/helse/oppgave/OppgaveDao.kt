@@ -80,7 +80,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.single(mapOf("oppgaveId" to oppgaveId)) { row ->
             Oppgave(
                 id = oppgaveId,
-                type = row.string("type"),
+                type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
                 vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
                 utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
@@ -97,7 +97,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.list(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { row ->
             Oppgave(
                 id = row.long("id"),
-                type = row.string("type"),
+                type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
@@ -112,7 +112,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.single(mapOf("utbetalingId" to utbetalingId)) { row ->
             Oppgave(
                 id = row.long("id"),
-                type = row.string("type"),
+                type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
                 vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
                 utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
@@ -128,7 +128,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WHERE o.id = :oppgaveId
         """.single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("vedtaksperiode_id")) })
 
-    fun opprettOppgave(commandContextId: UUID, oppgavetype: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+    fun opprettOppgave(commandContextId: UUID, oppgavetype: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
             val vedtakRef = vedtakRef(vedtaksperiodeId)
 
@@ -140,7 +140,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             it.run(
                 queryOf(
                     query,
-                    oppgavetype,
+                    oppgavetype.name,
                     AvventerSaksbehandler.name,
                     null,
                     null,

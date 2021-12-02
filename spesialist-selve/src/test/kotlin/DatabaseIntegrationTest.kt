@@ -29,6 +29,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
@@ -54,7 +55,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         internal val UTBETALING_ID = UUID.randomUUID()
 
-        internal const val OPPGAVETYPE = "SØKNAD"
+        internal val OPPGAVETYPE = Oppgavetype.SØKNAD
         internal val OPPGAVESTATUS = Oppgavestatus.AvventerSaksbehandler
 
         internal const val ORGNUMMER = "123456789"
@@ -257,7 +258,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        oppgavetype: String = OPPGAVETYPE,
+        oppgavetype: Oppgavetype = OPPGAVETYPE,
         utbetalingId: UUID = UTBETALING_ID
     ) {
         oppgaveId = oppgaveDao.opprettOppgave(

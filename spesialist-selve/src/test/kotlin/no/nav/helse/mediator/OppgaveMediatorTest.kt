@@ -7,10 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.*
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
@@ -35,8 +32,8 @@ internal class OppgaveMediatorTest {
         private val OPPGAVE_ID = nextLong()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
-        private const val OPPGAVETYPE_SØKNAD = "SØKNAD"
-        private const val OPPGAVETYPE_STIKKPRØVE = "STIKKPRØVE"
+        private val OPPGAVETYPE_SØKNAD = Oppgavetype.SØKNAD
+        private val OPPGAVETYPE_STIKKPRØVE = Oppgavetype.STIKKPRØVE
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)

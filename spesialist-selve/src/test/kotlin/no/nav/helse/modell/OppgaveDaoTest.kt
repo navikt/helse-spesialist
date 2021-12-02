@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavestatus.*
+import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -54,11 +55,11 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = "FORTROLIG_ADRESSE")
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = Oppgavetype.FORTROLIG_ADRESSE)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
-            "FORTROLIG_ADRESSE",
+            Oppgavetype.FORTROLIG_ADRESSE,
             OPPGAVESTATUS,
             null,
             null,
@@ -105,7 +106,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
-        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = "RISK_QA")
+        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE, oppgavetype = Oppgavetype.RISK_QA)
 
         val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.isNotEmpty())
@@ -175,18 +176,18 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
 
-        fun opprettVedtaksperiodeOgOppgave(periodetype: Periodetype, oppgavetype: String = OPPGAVETYPE) {
+        fun opprettVedtaksperiodeOgOppgave(periodetype: Periodetype, oppgavetype: Oppgavetype = OPPGAVETYPE) {
             val randomUUID = UUID.randomUUID()
             opprettVedtaksperiode(vedtaksperiodeId = randomUUID, periodetype = periodetype)
             opprettOppgave(vedtaksperiodeId = randomUUID, oppgavetype = oppgavetype)
         }
 
         opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING)
-        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE, "RISK_QA")
-        opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING, "RISK_QA")
-        opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, "RISK_QA")
+        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE, Oppgavetype.RISK_QA)
+        opprettVedtaksperiodeOgOppgave(Periodetype.FØRSTEGANGSBEHANDLING, Oppgavetype.RISK_QA)
+        opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, Oppgavetype.RISK_QA)
         opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE)
-        opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE, "RISK_QA")
+        opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE, Oppgavetype.RISK_QA)
         opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE)
 
         val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
@@ -425,7 +426,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
                 OppgaveAssertions(
                     oppdatert = it.localDate("oppdatert"),
-                    type = it.string("type"),
+                    type = enumValueOf(it.string("type")),
                     status = enumValueOf(it.string("status")),
                     ferdigstiltAv = it.stringOrNull("ferdigstilt_av"),
                     ferdigstiltAvOid = it.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString),
@@ -437,7 +438,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     private fun insertOppgave(
         commandContextId: UUID,
-        oppgavetype: String,
+        oppgavetype: Oppgavetype,
         vedtakRef: Long? = null,
         utbetalingId: UUID?,
         status: Oppgavestatus = AvventerSaksbehandler
@@ -448,7 +449,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 INSERT INTO oppgave(oppdatert, type, status, ferdigstilt_av, ferdigstilt_av_oid, vedtak_ref, command_context_id, utbetaling_id)
                 VALUES (now(), CAST(? as oppgavetype), CAST(? as oppgavestatus), ?, ?, ?, ?, ?);
             """,
-                oppgavetype,
+                oppgavetype.name,
                 status.name,
                 null,
                 null,
@@ -461,7 +462,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     private class OppgaveAssertions(
         private val oppdatert: LocalDate,
-        private val type: String,
+        private val type: Oppgavetype,
         private val status: Oppgavestatus,
         private val ferdigstiltAv: String?,
         private val ferdigstiltAvOid: UUID?,
@@ -470,7 +471,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     ) {
         fun assertEquals(
             forventetOppdatert: LocalDate,
-            forventetType: String,
+            forventetType: Oppgavetype,
             forventetStatus: Oppgavestatus,
             forventetFerdigstilAv: String?,
             forventetFerdigstilAvOid: UUID?,

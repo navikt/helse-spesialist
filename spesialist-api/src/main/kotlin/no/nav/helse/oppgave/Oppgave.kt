@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 class Oppgave private constructor(
-    private val type: String,
+    private val type: Oppgavetype,
     private var status: Oppgavestatus,
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID?
@@ -15,7 +15,7 @@ class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null
     private var ferdigstiltAvOid: UUID? = null
 
-    constructor(id: Long, type: String, status: Oppgavestatus, vedtaksperiodeId: UUID, ferdigstiltAvIdent: String? = null, ferdigstiltAvOid: UUID? = null, utbetalingId: UUID?) : this(
+    constructor(id: Long, type: Oppgavetype, status: Oppgavestatus, vedtaksperiodeId: UUID, ferdigstiltAvIdent: String? = null, ferdigstiltAvOid: UUID? = null, utbetalingId: UUID?) : this(
         type,
         status,
         vedtaksperiodeId,
@@ -29,13 +29,13 @@ class Oppgave private constructor(
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
 
-        fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("SØKNAD", vedtaksperiodeId, utbetalingId)
-        fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("STIKKPRØVE", vedtaksperiodeId, utbetalingId)
-        fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("REVURDERING", vedtaksperiodeId, utbetalingId)
-        fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("RISK_QA", vedtaksperiodeId, utbetalingId)
-        fun fortroligAdressebeskyttelse(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave("FORTROLIG_ADRESSE", vedtaksperiodeId, utbetalingId)
+        fun søknad(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.SØKNAD, vedtaksperiodeId, utbetalingId)
+        fun stikkprøve(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.STIKKPRØVE, vedtaksperiodeId, utbetalingId)
+        fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.REVURDERING, vedtaksperiodeId, utbetalingId)
+        fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.RISK_QA, vedtaksperiodeId, utbetalingId)
+        fun fortroligAdressebeskyttelse(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.FORTROLIG_ADRESSE, vedtaksperiodeId, utbetalingId)
 
-        private fun oppgave(type: String, vedtaksperiodeId: UUID, utbetalingId: UUID) =
+        private fun oppgave(type: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
 
         fun List<Oppgave>.loggOppgaverAvbrutt(vedtaksperiodeId: UUID) {
@@ -74,7 +74,7 @@ class Oppgave private constructor(
             contextId: UUID,
             oppgaveId: Long,
             status: Oppgavestatus,
-            type: String,
+            type: Oppgavetype,
             fødselsnummer: String,
             ferdigstiltAvIdent: String? = null,
             ferdigstiltAvOid: UUID? = null,
@@ -88,7 +88,7 @@ class Oppgave private constructor(
                     "contextId" to contextId,
                     "oppgaveId" to oppgaveId,
                     "status" to status.name,
-                    "type" to type,
+                    "type" to type.name,
                     "fødselsnummer" to fødselsnummer
                 ).apply {
                     ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
@@ -137,4 +137,8 @@ class Oppgave private constructor(
     override fun hashCode(): Int {
         return Objects.hash(id, type, vedtaksperiodeId)
     }
+}
+
+enum class Oppgavetype {
+    SØKNAD, STIKKPRØVE, RISK_QA, REVURDERING, FORTROLIG_ADRESSE
 }

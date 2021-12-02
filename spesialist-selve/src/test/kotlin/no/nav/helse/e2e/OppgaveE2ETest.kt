@@ -5,6 +5,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavestatus.*
+import no.nav.helse.oppgave.Oppgavetype
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -45,7 +46,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
         val oppgave = oppgaveDao.finn(UTBETALING_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
-        assertOppgavedetaljer(oppgave, Ferdigstilt, "SØKNAD", "ident", oid, UTBETALING_ID, godkjenningsbehov, VEDTAKSPERIODE_ID)
+        assertOppgavedetaljer(oppgave, Ferdigstilt, Oppgavetype.SØKNAD, "ident", oid, UTBETALING_ID, godkjenningsbehov, VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -84,7 +85,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         assertHendelse(behov)
     }
 
-    private fun assertOppgavedetaljer(oppgave: Oppgave?, status: Oppgavestatus, type: String, ferdigstiltAv: String, ferdigstiltAvOid: UUID, utbetalingId: UUID, hendelseId: UUID, vedtaksperiodeId: UUID) {
+    private fun assertOppgavedetaljer(oppgave: Oppgave?, status: Oppgavestatus, type: Oppgavetype, ferdigstiltAv: String, ferdigstiltAvOid: UUID, utbetalingId: UUID, hendelseId: UUID, vedtaksperiodeId: UUID) {
         assertEquals(Oppgave(testRapid.inspektør.oppgaveId(hendelseId).toLong(), type, status, vedtaksperiodeId, ferdigstiltAv, ferdigstiltAvOid, utbetalingId), oppgave)
     }
 }

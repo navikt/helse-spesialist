@@ -3,10 +3,7 @@ package no.nav.helse.modell
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.*
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,7 +15,7 @@ import kotlin.random.Random
 
 internal class OppgaveTest {
     private companion object {
-        private const val OPPGAVETYPE = "SØKNAD"
+        private val OPPGAVETYPE = Oppgavetype.SØKNAD
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()

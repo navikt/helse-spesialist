@@ -4,10 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,7 +16,7 @@ internal class FerdigstillOppgaveCommandTest {
         private const val IDENT = "Z999999"
         private val OID = UUID.randomUUID()
         private const val OPPGAVE_ID = 1L
-        private val oppgave = Oppgave(OPPGAVE_ID, "Et navn", Oppgavestatus.AvventerSaksbehandler, UUID.randomUUID(), utbetalingId = UUID.randomUUID())
+        private val oppgave = Oppgave(OPPGAVE_ID, Oppgavetype.SØKNAD, Oppgavestatus.AvventerSaksbehandler, UUID.randomUUID(), utbetalingId = UUID.randomUUID())
     }
     private val mediator = mockk<OppgaveMediator>(relaxed = true)
     private val dao = mockk<OppgaveDao>(relaxed = true)
