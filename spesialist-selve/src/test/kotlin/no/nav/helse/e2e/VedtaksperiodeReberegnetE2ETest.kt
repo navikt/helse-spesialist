@@ -5,7 +5,6 @@ import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.snapshotUtenWarnings
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
