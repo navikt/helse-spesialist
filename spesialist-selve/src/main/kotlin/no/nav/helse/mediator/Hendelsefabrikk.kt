@@ -297,7 +297,18 @@ internal class Hendelsefabrikk(
         )
     }
 
+    override fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
+        AdressebeskyttelseEndret(id, fødselsnummer, json, personDao)
 
+    override fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
+        val jsonNode = mapper.readTree(json)
+        return AdressebeskyttelseEndret(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            json = json,
+            personDao = personDao
+        )
+    }
 
     override fun vedtaksperiodeEndret(
         id: UUID,

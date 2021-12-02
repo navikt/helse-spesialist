@@ -20,6 +20,13 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
+    fun adressebeskyttelseEndret(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        context: MessageContext
+    )
+
     fun vedtaksperiodeForkastet(
         message: JsonMessage,
         id: UUID,

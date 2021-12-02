@@ -17,6 +17,13 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         const val OSLO = "0301"
     }
 
+    fun lagAdressebeskyttelseEndret(
+        id: UUID = UUID.randomUUID()
+    ) = nyHendelse(id, "adressebeskyttelse_endret", mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId
+    ))
+
     fun lagVedtaksperiodeEndret(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -186,7 +193,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                         "etternavn" to "Nordmann",
                         "fødselsdato" to "1970-01-01",
                         "kjønn" to "Kvinne",
-                        "adressebeskyttelse" to "$adressebeskyttelse"
+                        "adressebeskyttelse" to adressebeskyttelse
                     )
                 )
             )
@@ -251,8 +258,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr"
+        adressebeskyttelse: String = "Ugradert"
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -260,10 +266,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@behov" to listOf("HentPersoninfoV2"),
                 "hendelseId" to "$hendelseId",
                 "contextId" to "$contextId",
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "fødselsnummer" to fødselsnummer,
                 "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
                 "@løsning" to mapOf(
                     "HentPersoninfoV2" to mapOf(
                         "fornavn" to "Kari",
@@ -271,7 +275,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                         "etternavn" to "Nordmann",
                         "fødselsdato" to "1970-01-01",
                         "kjønn" to "Kvinne",
-                        "adressebeskyttelse" to "Ugradert"
+                        "adressebeskyttelse" to adressebeskyttelse
                     )
                 )
             )

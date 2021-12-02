@@ -71,6 +71,7 @@ internal class HendelseMediator(
             Arbeidsforholdløsning.ArbeidsforholdRiver(it, this)
             VedtaksperiodeForkastet.VedtaksperiodeForkastetRiver(it, this)
             VedtaksperiodeEndret.VedtaksperiodeEndretRiver(it, this)
+            AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
             OverstyringInntekt.OverstyringInntektRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
@@ -160,6 +161,15 @@ internal class HendelseMediator(
         val rawJson = objectMapper.writeValueAsString(melding)
         sikkerLogg.info("Manuell publisering av melding for fnr=${fnr}, melding=${rawJson}")
         rapidsConnection.publish(fnr, rawJson)
+    }
+
+    override fun adressebeskyttelseEndret(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        context: MessageContext
+    ) {
+        utfør(fødselsnummer, hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
     }
 
     override fun vedtaksperiodeEndret(

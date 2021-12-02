@@ -96,6 +96,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         hendelsefabrikk: IHendelsefabrikk
     ): Hendelse =
         when (hendelsetype) {
+            ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)
             VEDTAKSPERIODE_ENDRET -> hendelsefabrikk.vedtaksperiodeEndret(json)
             VEDTAKSPERIODE_FORKASTET -> hendelsefabrikk.vedtaksperiodeForkastet(json)
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
@@ -110,6 +111,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
+        is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
         is VedtaksperiodeEndret -> VEDTAKSPERIODE_ENDRET
         is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
         is Godkjenningsbehov -> GODKJENNING
@@ -125,7 +127,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     private enum class Hendelsetype {
-        VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
+        ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, REVURDERING_AVVIST
     }

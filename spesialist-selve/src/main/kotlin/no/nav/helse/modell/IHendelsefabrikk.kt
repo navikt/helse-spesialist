@@ -5,11 +5,22 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.person.Adressebeskyttelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 internal interface IHendelsefabrikk {
+    fun adressebeskyttelseEndret(
+        id: UUID,
+        fødselsnummer: String,
+        json: String
+    ): AdressebeskyttelseEndret
+
+    fun adressebeskyttelseEndret(
+        json: String
+    ): AdressebeskyttelseEndret
+
     fun vedtaksperiodeEndret(
         id: UUID,
         vedtaksperiodeId: UUID,

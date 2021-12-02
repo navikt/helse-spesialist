@@ -209,6 +209,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, vedtaksperiodeId, orgnr))
     }
 
+    protected fun sendAdressebeskyttelseEndret(): UUID = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(meldingsfabrikk.lagAdressebeskyttelseEndret(id))
+    }
+
     protected fun sendGodkjenningsbehov(
         orgnr: String,
         vedtaksperiodeId: UUID,
@@ -301,6 +305,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     vedtaksperiodeId = vedtaksperiodeId,
                     organisasjonsnummer = orgnr,
                     løsning
+                )
+            )
+        }
+
+    protected fun sendHentPersoninfoLøsning(
+        hendelseId: UUID,
+        contextId: UUID = testRapid.inspektør.contextId(),
+        adressebeskyttelse: String = "Ugradert"
+    ): UUID =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagHentPersoninfoløsning(
+                    id,
+                    hendelseId,
+                    contextId,
+                    adressebeskyttelse
                 )
             )
         }
@@ -956,8 +976,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             .path("@løsning").path(behov)
 
     protected fun TestRapid.RapidInspector.contextId(): UUID =
-        hendelser("behov")
-            .last { it.hasNonNull("contextId") }
+        (hendelser("behov")
+            .lastOrNull { it.hasNonNull("contextId") } ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
             .path("contextId")
             .asText()
             .let { UUID.fromString(it) }
