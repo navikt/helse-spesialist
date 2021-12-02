@@ -7,7 +7,8 @@ import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
     private val fødselsnummer: String,
-    private val personDao: PersonDao
+    private val personDao: PersonDao,
+    private val force: Boolean
 ) : Command {
     private companion object {
         private const val behov = "HentPersoninfoV2"
@@ -15,7 +16,7 @@ internal class OppdaterPersoninfoCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (erOppdatert(personDao, fødselsnummer)) return ignorer()
+        if (erOppdatert(personDao, fødselsnummer) && !force) return ignorer()
         return behandle(context, personDao, fødselsnummer)
     }
 

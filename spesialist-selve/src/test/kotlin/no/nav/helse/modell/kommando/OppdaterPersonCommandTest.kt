@@ -53,25 +53,6 @@ internal class OppdaterPersonCommandTest {
     }
 
     @Test
-    fun `trenger personinfo`() {
-        utdatertPersoninfo()
-        assertFalse(command.execute(context))
-        assertTrue(context.harBehov())
-        assertEquals(listOf("HentPersoninfoV2"), context.behov().keys.toList())
-    }
-
-    @Test
-    fun `oppdatere personinfo`() {
-        utdatertPersoninfo()
-        val løsning = HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE)
-        context.add(løsning)
-        assertTrue(command.execute(context))
-        verify(exactly = 1) { løsning.oppdater(dao, FNR) }
-        verify(exactly = 1) { dao.updatePersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
-
-    }
-
-    @Test
     fun `trenger enhet`() {
         utdatertEnhet()
         assertFalse(command.execute(context))
@@ -120,12 +101,6 @@ internal class OppdaterPersonCommandTest {
         verify(exactly = 1) { personinfo.oppdater(dao, FNR) }
         verify(exactly = 1) { enhet.oppdater(dao, FNR) }
         verify(exactly = 1) { utbetalinger.oppdater(dao, FNR) }
-    }
-
-    private fun utdatertPersoninfo() {
-        every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now().minusYears(1)
-        every { dao.findEnhetSistOppdatert(FNR) } returns LocalDate.now()
-        every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
     }
 
     private fun utdatertEnhet() {
