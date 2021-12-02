@@ -4,7 +4,6 @@ import no.nav.helse.avvistPåGrunnAvUtlandTeller
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
@@ -56,20 +55,6 @@ internal class OppdaterPersonCommand(
             log.info("trenger oppdatert $behov")
             context.behov(behov, parametere)
             return false
-        }
-    }
-
-    private class OppdaterPersoninfoCommand(fødselsnummer: String, personDao: PersonDao) : OppdaterCommand(fødselsnummer, personDao, "HentPersoninfoV2") {
-        override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
-            val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer)
-            return sistOppdatert > LocalDate.now().minusDays(14)
-        }
-
-        override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {
-            val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
-            log.info("oppdaterer personinfo")
-            personinfo.oppdater(personDao, fødselsnummer)
-            return true
         }
     }
 
