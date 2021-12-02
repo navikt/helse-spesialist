@@ -421,6 +421,19 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertEquals(InntektskildeForApi.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
     }
 
+    @Test
+    fun `oppretter oppgaver med riktig oppgavetype for alle oppgavetype-verdier`() {
+        Oppgavetype.values().forEach {
+            assertDoesNotThrow({
+                insertOppgave(
+                    commandContextId = UUID.randomUUID(),
+                    oppgavetype = it,
+                    utbetalingId = null
+                )
+            }, "Oppgavetype-enumen mangler verdien $it. Kjør migrering: ALTER TYPE oppgavetype ADD VALUE '$it';")
+        }
+    }
+
     private fun oppgave() =
         sessionOf(dataSource).use {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
