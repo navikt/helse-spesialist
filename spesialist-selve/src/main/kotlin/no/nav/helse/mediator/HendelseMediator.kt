@@ -562,10 +562,10 @@ internal class HendelseMediator(
 
         fun fortsett(mediator: HendelseMediator, message: String, context: MessageContext) {
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
-            sikkerLogg.info(
+            /*sikkerLogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                     "Innkommende melding:\n\t$message"
-            )
+            )*/
             mediator.utfør(hendelse, commandContext, contextId, context)
         }
     }
