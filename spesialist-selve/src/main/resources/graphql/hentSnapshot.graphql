@@ -178,7 +178,7 @@ query HentSnapshot($fnr: String!) {
     person(fnr: $fnr) {
         aktorId,
         arbeidsgivere {
-            generasjon(index: 0) {
+            generasjoner {
                 id,
                 perioder {
                     ... on GraphQLBeregnetPeriode {
@@ -192,9 +192,6 @@ query HentSnapshot($fnr: String!) {
                         ...detailedUberegnetPeriode
                     }
                 }
-            },
-            generasjonerSlice(from: 1) {
-                id
             }
         },
         dodsdato,

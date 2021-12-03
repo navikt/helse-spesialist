@@ -5,6 +5,7 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -22,6 +23,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private val graphQLClient = mockk<SpleisGraphQLClient>(relaxed = true)
     private lateinit var hendelsefabrikk: IHendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
 
@@ -35,6 +37,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             warningDao = warningDao,
             oppgaveDao = oppgaveDao,
             commandContextDao = commandContextDao,
+            speilSnapshotDao = speilSnapshotDao,
             snapshotDao = snapshotDao,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
@@ -45,6 +48,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
             speilSnapshotRestClient = restClient,
+            spleisGraphQLClient = graphQLClient,
             oppgaveMediator = mockk(),
             godkjenningMediator = mockk(relaxed = true),
             automatisering = mockk(relaxed = true),

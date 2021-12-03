@@ -1,19 +1,14 @@
 package no.nav.helse.modell.kommando
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class OppdaterSnapshotCommand(
-    private val speilSnapshotRestClient: SpeilSnapshotRestClient,
+    private val spleisGraphQLClient: SpleisGraphQLClient,
     private val vedtakDao: VedtakDao,
-    private val warningDao: WarningDao,
     private val snapshotDao: SnapshotDao,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String
@@ -35,11 +30,9 @@ internal class OppdaterSnapshotCommand(
 
     private fun oppdaterSnapshot(): Boolean {
         log.info("oppdaterer snapshot for $vedtaksperiodeId")
-        return speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer).let { snapshot ->
-            snapshotDao.lagre(fødselsnummer, snapshot)
-            log.info("oppdaterer warnings for $vedtaksperiodeId")
-            warningDao.oppdaterSpleisWarnings(vedtaksperiodeId, Warning.warnings(vedtaksperiodeId, objectMapper.readValue(snapshot)))
+        return spleisGraphQLClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
+            snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
             true
-        }
+        } ?: false
     }
 }

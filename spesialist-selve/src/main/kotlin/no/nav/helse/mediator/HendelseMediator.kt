@@ -42,7 +42,6 @@ internal class HendelseMediator(
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
-    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
@@ -121,7 +120,7 @@ internal class HendelseMediator(
                 put("saksbehandlerident", godkjenningDTO.saksbehandlerIdent)
                 put("saksbehandleroid", oid)
                 put("saksbehandlerepost", epost)
-                put("godkjenttidspunkt", LocalDateTime.now())
+                put("godkjenttidspunkt", now())
                 godkjenningDTO.årsak?.let { put("årsak", it) }
                 godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
                 godkjenningDTO.kommentar?.let { put("kommentar", it) }
@@ -351,11 +350,11 @@ internal class HendelseMediator(
         fødselsnummer: String,
         organisasjonsnummer: String,
         utbetalingId: UUID,
-        utbetalingtype: Utbetalingtype,
+        utbetalingType: Utbetalingtype,
         message: JsonMessage,
         context: MessageContext
     ) {
-        if (utbetalingtype == Utbetalingtype.UTBETALING && !utbetalingDao.harVærtTilGodkjenning(utbetalingId)) {
+        if (utbetalingType == Utbetalingtype.UTBETALING && !utbetalingDao.harVærtTilGodkjenning(utbetalingId)) {
             sikkerLogg.info("Ignorerer utbetaling_endret for {}, har ikke vært til godkjenning", keyValue("utbetalingId", utbetalingId))
             return
         }
@@ -573,7 +572,7 @@ internal class HendelseMediator(
 
 internal fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf<String, Any>(
     "@event_name" to hendelsetype,
-    "@opprettet" to LocalDateTime.now(),
+    "@opprettet" to now(),
     "@id" to UUID.randomUUID(),
     "fødselsnummer" to fødselsnummer
 )

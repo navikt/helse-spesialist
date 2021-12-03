@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -23,7 +23,7 @@ internal class KlargjørVedtaksperiodeCommand(
     inntektskilde: Inntektskilde,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
-    snapshotDao: SnapshotDao,
+    speilSnapshotDao: SpeilSnapshotDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
     utbetalingId: UUID,
@@ -39,7 +39,7 @@ internal class KlargjørVedtaksperiodeCommand(
             periodeTom,
             personDao,
             arbeidsgiverDao,
-            snapshotDao,
+            speilSnapshotDao,
             vedtakDao,
             warningDao,
         ),
