@@ -164,7 +164,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertTrue(
             oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fødselsnummer == FØDSELSNUMMER })
 
-        val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
+        val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere.first().overstyringer
         assertEquals(2, overstyringer.size)

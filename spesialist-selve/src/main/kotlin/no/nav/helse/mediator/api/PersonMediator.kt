@@ -8,6 +8,8 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -47,34 +49,38 @@ internal class PersonMediator(
 
     fun byggSpeilSnapshotForAktørId(aktørId: String, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            personsnapshotDao.finnFnrByAktørId(aktørId)?.let { byggSnapshot(it, kanSeKode7 ) }
+            personsnapshotDao.finnFnrByAktørId(aktørId)?.let { byggSnapshot(it, kanSeKode7) }
+                ?: SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
     fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7 ) }
+            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7) }
+                ?: SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
-    private fun byggSnapshot(fødselsnummer: String, kanSeKode7: Boolean): PersonForSpeilDto? {
+    private fun byggSnapshot(fødselsnummer: String, kanSeKode7: Boolean): SnapshotResponse {
         if (!personDao.finnesPersonMedFødselsnummer(fødselsnummer)) {
-            return null
+            return SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
         val personErKode7 = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
-        if(personErKode7 && !kanSeKode7) {
+        if (personErKode7 && !kanSeKode7) {
             sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
-            return null
+            return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
         }
 
-        if(!personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert) && !personErKode7) {
-            return null
+        if (!personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert) && !personErKode7) {
+            return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
         }
 
         if (snapshotDao.utdatert(fødselsnummer)) {
             val nyttSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
             snapshotDao.lagre(fødselsnummer, nyttSnapshot)
         }
-        return personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
+        val snapshot = personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
+        return if (snapshot != null) SnapshotResponse(snapshot, SnapshotTilstand.OK)
+        else SnapshotResponse(null, FINNES_IKKE)
     }
 
     private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataApiDto, SnapshotDto>) =
@@ -112,36 +118,40 @@ internal class PersonMediator(
             val arbeidsgivere = speilSnapshot.arbeidsgivere.map {
                 val navn = arbeidsgiverDao.finnNavn(it.organisasjonsnummer)
                 val bransjer = arbeidsgiverDao.finnBransjer(it.organisasjonsnummer)
-                val overstyringer = overstyringDao.finnOverstyringerAvTidslinjer(personMetadata.fødselsnummer, it.organisasjonsnummer)
-                    .map { overstyring ->
-                        OverstyringApiDagerDto(
+                val overstyringer =
+                    overstyringDao.finnOverstyringerAvTidslinjer(personMetadata.fødselsnummer, it.organisasjonsnummer)
+                        .map { overstyring ->
+                            OverstyringApiDagerDto(
+                                hendelseId = overstyring.hendelseId,
+                                begrunnelse = overstyring.begrunnelse,
+                                timestamp = overstyring.timestamp,
+                                saksbehandlerNavn = overstyring.saksbehandlerNavn,
+                                saksbehandlerIdent = overstyring.saksbehandlerIdent,
+                                overstyrteDager = overstyring.overstyrteDager.map { dag ->
+                                    OverstyrtDagApiDto(
+                                        dato = dag.dato,
+                                        dagtype = dag.type,
+                                        grad = dag.grad
+                                    )
+                                }
+                            )
+                        } + overstyringDao.finnOverstyringerAvInntekt(
+                        personMetadata.fødselsnummer,
+                        it.organisasjonsnummer
+                    ).map { overstyring ->
+                        OverstyringApiInntektDto(
                             hendelseId = overstyring.hendelseId,
                             begrunnelse = overstyring.begrunnelse,
                             timestamp = overstyring.timestamp,
                             saksbehandlerNavn = overstyring.saksbehandlerNavn,
                             saksbehandlerIdent = overstyring.saksbehandlerIdent,
-                            overstyrteDager = overstyring.overstyrteDager.map { dag ->
-                                OverstyrtDagApiDto(
-                                    dato = dag.dato,
-                                    dagtype = dag.type,
-                                    grad = dag.grad
-                                )
-                            }
+                            overstyrtInntekt = OverstyrtInntektApiDto(
+                                forklaring = overstyring.forklaring,
+                                månedligInntekt = overstyring.månedligInntekt,
+                                skjæringstidspunkt = overstyring.skjæringstidspunkt
+                            )
                         )
-                    } + overstyringDao.finnOverstyringerAvInntekt(personMetadata.fødselsnummer, it.organisasjonsnummer).map { overstyring ->
-                    OverstyringApiInntektDto(
-                        hendelseId = overstyring.hendelseId,
-                        begrunnelse = overstyring.begrunnelse,
-                        timestamp = overstyring.timestamp,
-                        saksbehandlerNavn = overstyring.saksbehandlerNavn,
-                        saksbehandlerIdent = overstyring.saksbehandlerIdent,
-                        overstyrtInntekt = OverstyrtInntektApiDto(
-                            forklaring = overstyring.forklaring,
-                            månedligInntekt = overstyring.månedligInntekt,
-                            skjæringstidspunkt = overstyring.skjæringstidspunkt
-                        )
-                    )
-                }
+                    }
                 ArbeidsgiverApiDto(
                     organisasjonsnummer = it.organisasjonsnummer,
                     navn = navn ?: "Ikke tilgjengelig",
@@ -204,4 +214,15 @@ internal class PersonMediator(
         UtbetalingshistorikkElementApiDto.toSpeilMap(it.utbetalingshistorikk)
 
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
+
+    internal class SnapshotResponse(
+        val snapshot: PersonForSpeilDto?,
+        val tilstand: SnapshotTilstand) {
+
+        enum class SnapshotTilstand {
+            FINNES_IKKE,
+            INGEN_TILGANG,
+            OK
+        }
+    }
 }

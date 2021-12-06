@@ -53,7 +53,7 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
 
     @Test
     fun `fnr finnes ikke`() {
-        val actual = personMediator.byggSpeilSnapshotForFnr("77889900", false)
+        val actual = personMediator.byggSpeilSnapshotForFnr("77889900", false).snapshot
         assertNull(actual)
         verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot("77889900") }
     }

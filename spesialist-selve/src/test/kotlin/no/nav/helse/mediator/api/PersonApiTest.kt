@@ -20,6 +20,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.INGEN_TILGANG
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,21 +72,22 @@ internal class PersonApiTest {
     @Test
     fun `en person med fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
-        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
-
-
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns SnapshotResponse(
+            null,
+            INGEN_TILGANG
+        )
         val response = runBlocking {
             client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
             }
         }
-        assertEquals(HttpStatusCode.NotFound, response.status)
+        assertEquals(HttpStatusCode.Forbidden, response.status)
     }
 
     @Test
     fun `en person med fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
-        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns null
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
