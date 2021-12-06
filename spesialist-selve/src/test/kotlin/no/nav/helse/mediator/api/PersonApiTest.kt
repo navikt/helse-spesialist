@@ -39,6 +39,7 @@ internal class PersonApiTest {
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
     private val FØDSELSNUMMER = "20046913337"
+    private val AKTØRID = "01017011111111"
     private val KODE7_SAKSBEHANDLER_GROUP = UUID.randomUUID()
 
     @Test
@@ -70,7 +71,7 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `en person med fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
+    fun `en person med fnr som har fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns SnapshotResponse(
             null,
@@ -86,12 +87,42 @@ internal class PersonApiTest {
     }
 
     @Test
-    fun `en person med fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
+    fun `en person med aktørId som har fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false)) } returns SnapshotResponse(
+            null,
+            INGEN_TILGANG
+        )
+        val response = runBlocking {
+            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }
+        assertEquals(HttpStatusCode.Forbidden, response.status)
+    }
+
+    @Test
+    fun `en person med fnr som har fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
             client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP.toString()))
+            }
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `en person med aktørId som har fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true)) } returns mockk(relaxed = true)
+
+        val response = runBlocking {
+            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP.toString()))
             }
