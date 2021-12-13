@@ -7,6 +7,20 @@ import no.finn.unleash.UnleashContext
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
 
+abstract class Toggle(internal var enabled: Boolean) {
+    private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
+
+    internal fun enable() {
+        enabled = true
+    }
+
+    internal fun disable() {
+        enabled = false
+    }
+
+    object GraphQLApi : Toggle("GRAPHQL_ENABLED")
+}
+
 object FeatureToggle {
 
     class Toggle(private val toggleName: String) {

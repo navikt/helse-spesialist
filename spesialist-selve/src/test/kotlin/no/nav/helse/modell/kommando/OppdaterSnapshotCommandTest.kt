@@ -5,11 +5,13 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -38,11 +40,18 @@ internal class OppdaterSnapshotCommandTest {
     private val spleisGraphQLClient = mockk<SpleisGraphQLClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
-    private val command = OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
+    private val command =
+        OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
 
     @BeforeEach
     fun setup() {
         clearMocks(vedtakDao, snapshotDao, spleisGraphQLClient)
+        Toggle.GraphQLApi.enable()
+    }
+
+    @AfterEach
+    fun cleanup() {
+        Toggle.GraphQLApi.disable()
     }
 
     @Test

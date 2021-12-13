@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -19,6 +20,9 @@ internal class OppdaterSnapshotCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
+        if (!Toggle.GraphQLApi.enabled) {
+            return true
+        }
         if (null == vedtakDao.finnVedtakId(vedtaksperiodeId)) return ignorer()
         return oppdaterSnapshot()
     }
