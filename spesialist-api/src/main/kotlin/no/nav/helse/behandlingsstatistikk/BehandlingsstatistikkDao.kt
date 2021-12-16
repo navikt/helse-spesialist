@@ -35,11 +35,10 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
     }
 
     private fun tilGodkjenningPerPeriodetype() =
-        """ SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
-                 INNER JOIN vedtak v on o.vedtak_ref = v.id
-                 INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
+        """ SELECT sot.type AS periodetype, COUNT(distinct o.id) AS antall FROM oppgave o
+              INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
-            GROUP BY s.type
+            GROUP BY sot.type
         """.list { perPeriodetype(it) }
 
     private fun tildeltPerPeriodetype() =
