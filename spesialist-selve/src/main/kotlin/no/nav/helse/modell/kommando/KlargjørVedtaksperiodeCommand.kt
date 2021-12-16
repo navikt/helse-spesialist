@@ -1,5 +1,7 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -14,6 +16,7 @@ import java.util.*
 
 internal class KlargjørVedtaksperiodeCommand(
     speilSnapshotRestClient: SpeilSnapshotRestClient,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
     fødselsnummer: String,
     organisasjonsnummer: String,
     vedtaksperiodeId: UUID,
@@ -24,6 +27,7 @@ internal class KlargjørVedtaksperiodeCommand(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     speilSnapshotDao: SpeilSnapshotDao,
+    snapshotDao: SnapshotDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
     utbetalingId: UUID,
@@ -32,6 +36,7 @@ internal class KlargjørVedtaksperiodeCommand(
     override val commands: List<Command> = listOf(
         OpprettVedtakCommand(
             speilSnapshotRestClient,
+            speilSnapshotGraphQLClient,
             fødselsnummer,
             organisasjonsnummer,
             vedtaksperiodeId,
@@ -40,6 +45,7 @@ internal class KlargjørVedtaksperiodeCommand(
             personDao,
             arbeidsgiverDao,
             speilSnapshotDao,
+            snapshotDao,
             vedtakDao,
             warningDao,
         ),

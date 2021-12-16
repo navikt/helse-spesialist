@@ -5,12 +5,10 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SpeilSnapshotDao
-import no.nav.helse.modell.VedtakDao
-import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsforhold.command.SjekkArbeidsforholdCommand
@@ -64,6 +62,7 @@ internal class Godkjenningsbehov(
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
     speilSnapshotDao: SpeilSnapshotDao,
+    snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
@@ -71,6 +70,7 @@ internal class Godkjenningsbehov(
     egenAnsattDao: EgenAnsattDao,
     arbeidsforholdDao: ArbeidsforholdDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
@@ -108,6 +108,7 @@ internal class Godkjenningsbehov(
         ),
         KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -118,6 +119,7 @@ internal class Godkjenningsbehov(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             speilSnapshotDao = speilSnapshotDao,
+            snapshotDao = snapshotDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             utbetalingId = utbetalingId,
@@ -246,7 +248,8 @@ internal class Godkjenningsbehov(
                 skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
                 utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
-                arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
+                arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)
+                    ?.asText(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),

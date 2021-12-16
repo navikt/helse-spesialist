@@ -16,6 +16,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -55,6 +56,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
         sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
@@ -77,6 +79,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `tildeler andre rundes oppgave til saksbehandler`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         val saksbehandlerOid = UUID.randomUUID()
 
         vedtaksperiodeTilGodkjenning()
@@ -93,6 +96,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         var godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,

@@ -24,6 +24,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         every { restClient.hentSpeilSnapshot(any()) } returns snapshotMedHistorikk()
+        every { graphqlClient.hentSnapshot(any()) } returns graphQLSnapshot()
     }
 
     @Test

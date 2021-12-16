@@ -16,6 +16,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
     @Test
     fun `VedtaksperiodeForkastet oppdaterer ikke oppgave-tabellen dersom status er inaktiv`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)

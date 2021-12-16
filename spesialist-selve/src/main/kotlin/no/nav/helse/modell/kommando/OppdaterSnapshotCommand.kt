@@ -1,14 +1,14 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class OppdaterSnapshotCommand(
-    private val spleisGraphQLClient: SpleisGraphQLClient,
+    private val speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
     private val vedtaksperiodeId: UUID,
@@ -34,7 +34,7 @@ internal class OppdaterSnapshotCommand(
 
     private fun oppdaterSnapshot(): Boolean {
         log.info("oppdaterer snapshot for $vedtaksperiodeId")
-        return spleisGraphQLClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
+        return speilSnapshotGraphQLClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
             snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
             true
         } ?: false

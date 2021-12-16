@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -27,11 +27,11 @@ internal class VedtaksperiodeEndret(
     speilSnapshotDao: SpeilSnapshotDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     snapshotDao: SnapshotDao,
-    spleisGraphQLClient: SpleisGraphQLClient
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSpeilSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, speilSnapshotDao, vedtaksperiodeId, fødselsnummer),
-        OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
+        OppdaterSnapshotCommand(speilSnapshotGraphQLClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     )
 
     override fun fødselsnummer() = fødselsnummer

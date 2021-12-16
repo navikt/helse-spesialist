@@ -10,7 +10,6 @@ import no.nav.helse.overstyring.OverstyringApiInntektDto
 import no.nav.helse.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -106,6 +105,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,
@@ -170,14 +170,5 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(2, overstyringer.size)
         assertEquals(1, (overstyringer.first() as OverstyringApiDagerDto).overstyrteDager.size)
         assertEquals(15000.0, (overstyringer.last() as OverstyringApiInntektDto).overstyrtInntekt.månedligInntekt)
-    }
-
-    private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
-        val saksbehandlerOppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-        assertEquals(
-            1,
-            saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size
-        )
-        assertTrue(saksbehandlerOppgaver.any { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
     }
 }

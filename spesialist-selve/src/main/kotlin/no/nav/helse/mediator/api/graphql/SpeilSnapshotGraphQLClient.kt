@@ -12,7 +12,7 @@ import no.nav.helse.AccessTokenClient
 import no.nav.helse.mediator.graphql.HentSnapshot
 import java.util.*
 
-internal class SpleisGraphQLClient(
+internal class SpeilSnapshotGraphQLClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
     private val spleisClientId: String,

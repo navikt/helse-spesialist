@@ -19,9 +19,18 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        opprettGraphQLSnapshot()
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId, graphQLSnapshotId)
         assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        vedtak().first().assertEquals(
+            forventetVedtaksperiodeId = VEDTAKSPERIODE,
+            forventetFom = FOM,
+            forventetTom = TOM,
+            forventetPersonRef = personId,
+            forventetArbeidsgiverRef = arbeidsgiverId,
+            forventetSnapshotRef = snapshotId,
+            forventetGraphQLSnapshotRef = graphQLSnapshotId
+        )
     }
 
     @Test
@@ -29,11 +38,23 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        opprettGraphQLSnapshot()
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId, graphQLSnapshotId)
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
         val nySnapshotRef = speilSnapshotDao.lagre(FNR, snapshot())
-        assertThrows<PSQLException> { vedtakDao.opprett(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef) }
+        val nyGraphQLSnapshotRef = snapshotDao.lagre(FNR, graphQLSnapshot())
+        assertThrows<PSQLException> {
+            vedtakDao.opprett(
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                fom = nyFom,
+                tom = nyTom,
+                personRef = personId,
+                arbeidsgiverRef = arbeidsgiverId,
+                speilSnapshotRef = nySnapshotRef,
+                graphQLSnapshotRef = nyGraphQLSnapshotRef
+            )
+        }
     }
 
     @Test
@@ -41,13 +62,24 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
+        opprettGraphQLSnapshot()
         opprettVedtaksperiode()
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
         val nySnapshotRef = speilSnapshotDao.lagre(FNR, snapshot())
+        val nyGraphQLSnapshotRef = snapshotDao.lagre(FNR, graphQLSnapshot())
         vedtakDao.oppdater(vedtakId, nyFom, nyTom, nySnapshotRef)
         assertEquals(1, vedtak().size)
-        vedtak().first().assertEquals(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef)
+        vedtak().first()
+            .assertEquals(
+                forventetVedtaksperiodeId = VEDTAKSPERIODE,
+                forventetFom = nyFom,
+                forventetTom = nyTom,
+                forventetPersonRef = personId,
+                forventetArbeidsgiverRef = arbeidsgiverId,
+                forventetSnapshotRef = nySnapshotRef,
+                forventetGraphQLSnapshotRef = nyGraphQLSnapshotRef
+            )
     }
 
     @Test
@@ -92,8 +124,10 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(nyVedtaksperiode)
         speilSnapshotDao.lagre(FNR, newJson)
         val vedtak = vedtak()
-        assertTrue(vedtak.all { finnSnapshot(it.snapshotRef) == newJson },
-            "Alle snapshots på person skal matche den nye jsonen")
+        assertTrue(
+            vedtak.all { finnSnapshot(it.snapshotRef) == newJson },
+            "Alle snapshots på person skal matche den nye jsonen"
+        )
     }
 
     @Test
@@ -118,22 +152,23 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         assertTrue(vedtakDao.erAutomatiskGodkjent(UTBETALING_ID))
     }
 
-    private fun finnKobling(hendelseId: UUID) = sessionOf(dataSource).use  {
+    private fun finnKobling(hendelseId: UUID) = sessionOf(dataSource).use {
         it.run(
             queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
                 .map { row -> UUID.fromString(row.string(1)) }.asSingle
         )
     }
 
-    private fun vedtak() = sessionOf(dataSource).use  {
-        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref FROM vedtak").map { row ->
+    private fun vedtak() = sessionOf(dataSource).use {
+        it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref, snapshot_ref FROM vedtak").map { row ->
             Vedtak(
                 UUID.fromString(row.string("vedtaksperiode_id")),
                 row.localDate("fom"),
                 row.localDate("tom"),
                 row.long("person_ref"),
                 row.long("arbeidsgiver_ref"),
-                row.int("speil_snapshot_ref")
+                row.int("speil_snapshot_ref"),
+                row.int("snapshot_ref")
             )
         }.asList)
     }
@@ -144,19 +179,34 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         private val tom: LocalDate,
         private val personRef: Long,
         private val arbeidsgiverRef: Long,
-        val snapshotRef: Int
+        val snapshotRef: Int,
+        val graphQLSnapshotRef: Int,
     ) {
-        fun assertEquals(forventetVedtaksperiodeId: UUID, forventetFom: LocalDate, forventetTom: LocalDate, forventetPersonRef: Long, forventetArbeidsgiverRef: Long, forventetSnapshotRef: Int) {
+        fun assertEquals(
+            forventetVedtaksperiodeId: UUID,
+            forventetFom: LocalDate,
+            forventetTom: LocalDate,
+            forventetPersonRef: Long,
+            forventetArbeidsgiverRef: Long,
+            forventetSnapshotRef: Int,
+            forventetGraphQLSnapshotRef: Int
+        ) {
             assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
             assertEquals(forventetFom, fom)
             assertEquals(forventetTom, tom)
             assertEquals(forventetPersonRef, personRef)
             assertEquals(forventetArbeidsgiverRef, arbeidsgiverRef)
             assertEquals(forventetSnapshotRef, snapshotRef)
+            assertEquals(forventetGraphQLSnapshotRef, graphQLSnapshotRef)
         }
     }
 
-    private fun finnSnapshot(snapshotRef: Int) = sessionOf(dataSource).use  {
-        it.run(queryOf("SELECT data FROM speil_snapshot WHERE id = ?", snapshotRef).map { it.string("data") }.asSingle)
+    private fun finnSnapshot(snapshotRef: Int) = sessionOf(dataSource).use { session ->
+        session.run(
+            queryOf(
+                "SELECT data FROM speil_snapshot WHERE id = ?",
+                snapshotRef
+            ).map { it.string("data") }.asSingle
+        )
     }
 }

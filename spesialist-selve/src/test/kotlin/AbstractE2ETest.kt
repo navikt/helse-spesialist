@@ -1,3 +1,4 @@
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -10,15 +11,17 @@ import kotliquery.sessionOf
 import no.nav.helse.*
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.PersonMediator
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.api.modell.Saksbehandler
+import no.nav.helse.mediator.graphql.HentSnapshot
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -39,7 +42,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
@@ -81,6 +83,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val SNAPSHOTV1_MED_WARNINGS =
         snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
+
     protected val SNAPSHOTV1_UTEN_WARNINGS =
         snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
 
@@ -106,30 +109,27 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val commandContextDao = CommandContextDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     protected val risikovurderingDao = RisikovurderingDao(dataSource)
-    protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
-    protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    private val automatiseringDao = AutomatiseringDao(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
-    protected val overstyringDao = OverstyringDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
-    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
-    protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
+    private val automatiseringDao = AutomatiseringDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
+    private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
+    private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
+    private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
+    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
+    private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     private val varselDao = VarselDao(dataSource)
     private val personsnapshotDao = PersonsnapshotDao(dataSource)
-    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
-    protected val notatDao = NotatDao(dataSource)
-    protected val snapshotDao = SnapshotDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
 
     protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
 
@@ -138,7 +138,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    protected val graphqlClient = mockk<SpleisGraphQLClient>(relaxed = true)
+    protected val graphqlClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
 
     protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
@@ -160,6 +160,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         egenAnsattDao = egenAnsattDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestClient = restClient,
+        speilSnapshotGraphQLClient = graphqlClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         automatisering = Automatisering(
@@ -175,7 +176,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsforholdDao = arbeidsforholdDao,
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
-        spleisGraphQLClient = graphqlClient
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -513,6 +513,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun settOppBruker(): UUID {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         val godkjenningsbehovId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -892,6 +893,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingId: UUID
     ): UUID {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -960,6 +962,26 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
       "inntektsgrunnlag": {}
       }"""
 
+    protected fun graphQLSnapshot(versjon: Int = 1) = object :
+        GraphQLClientResponse<HentSnapshot.Result> {
+        override val data = HentSnapshot.Result(
+            person = GraphQLPerson(
+                aktorId = AKTØR,
+                arbeidsgivere = listOf(
+                    GraphQLArbeidsgiver(
+                        organisasjonsnummer = ORGNR,
+                        generasjoner = emptyList()
+                    )
+                ),
+                dodsdato = null,
+                fodselsnummer = FØDSELSNUMMER,
+                inntektsgrunnlag = emptyList(),
+                versjon = versjon,
+                vilkarsgrunnlaghistorikk = emptyList()
+            )
+        )
+    }
+
     protected fun TestRapid.RapidInspector.meldinger() =
         (0 until size).map { index -> message(index) }
 
@@ -982,7 +1004,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun TestRapid.RapidInspector.contextId(): UUID =
         (hendelser("behov")
-            .lastOrNull { it.hasNonNull("contextId") } ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
+            .lastOrNull { it.hasNonNull("contextId") }
+            ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
             .path("contextId")
             .asText()
             .let { UUID.fromString(it) }

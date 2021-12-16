@@ -22,6 +22,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2)
 
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         sendOppdaterPersonsnapshot()
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
@@ -41,8 +42,8 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     }
 
     fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String, utbetalingId: UUID) {
-
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,

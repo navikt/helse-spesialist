@@ -2,7 +2,7 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -54,7 +54,7 @@ internal class Hendelsefabrikk(
     private val snapshotDao: SnapshotDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient,
-    private val spleisGraphQLClient: SpleisGraphQLClient,
+    private val speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
     private val oppgaveMediator: OppgaveMediator,
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
@@ -113,6 +113,7 @@ internal class Hendelsefabrikk(
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             speilSnapshotDao = speilSnapshotDao,
+            snapshotDao = snapshotDao,
             commandContextDao = commandContextDao,
             risikovurderingDao = risikovurderingDao,
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -120,6 +121,7 @@ internal class Hendelsefabrikk(
             egenAnsattDao = egenAnsattDao,
             arbeidsforholdDao = arbeidsforholdDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
@@ -329,7 +331,7 @@ internal class Hendelsefabrikk(
             speilSnapshotDao = speilSnapshotDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             snapshotDao = snapshotDao,
-            spleisGraphQLClient = spleisGraphQLClient
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient
         )
     }
 

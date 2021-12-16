@@ -30,6 +30,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
         assertVedtak(vedtaksperiodeId2)
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
         sendUtbetalingAnnullert(saksbehandlerEpost = epost)
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)

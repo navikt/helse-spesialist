@@ -178,6 +178,7 @@ query HentSnapshot($fnr: String!) {
     person(fnr: $fnr) {
         aktorId,
         arbeidsgivere {
+            organisasjonsnummer,
             generasjoner {
                 id,
                 perioder {

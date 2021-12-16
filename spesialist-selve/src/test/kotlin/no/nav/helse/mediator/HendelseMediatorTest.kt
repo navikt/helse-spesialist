@@ -25,8 +25,9 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         val epost = "epost@nav.no"
         val saksbehandlerIdent = "saksbehandler"
         settOppBruker()
-        val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
-        mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
+        oppgaveDao.finnOppgaveId(FØDSELSNUMMER)?.let { oppgavereferanse ->
+            mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
+        }
         assertTrue(testRapid.inspektør.hendelser("saksbehandler_løsning").isNotEmpty())
         assertEquals("AvventerSystem", testRapid.inspektør.hendelser("oppgave_oppdatert").last()["status"].asText())
     }
