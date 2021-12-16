@@ -10,6 +10,7 @@ plugins {
 dependencies {
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
+    testImplementation(project(":testkode"))
 }
 
 val graphqlIntrospectSchema by tasks.getting(GraphQLIntrospectSchemaTask::class) {
