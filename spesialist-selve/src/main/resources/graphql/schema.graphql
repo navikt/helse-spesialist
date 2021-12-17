@@ -95,7 +95,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   opprettet: LocalDateTime!
   periodetype: GraphQLPeriodetype!
   periodevilkar: GraphQLPeriodevilkar!
-  simulering: GraphQLSimulering
   skjaeringstidspunkt: LocalDate!
   soknaderArbeidsgiver: [GraphQLSoknadArbeidsgiver!]!
   soknaderNav: [GraphQLSoknadNav!]!

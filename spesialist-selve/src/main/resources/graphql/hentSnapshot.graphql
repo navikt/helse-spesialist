@@ -98,34 +98,6 @@ fragment detailedPeriode on GraphQLBeregnetPeriode {
             skjaeringstidspunkt
         }
     }
-    simulering {
-        perioder {
-            fom,
-            tom,
-            utbetalinger {
-                detaljer {
-                    antallSats,
-                    belop,
-                    faktiskFom,
-                    faktiskTom,
-                    klassekode,
-                    klassekodeBeskrivelse,
-                    konto,
-                    refunderesOrgNr,
-                    sats,
-                    tilbakeforing,
-                    typeSats,
-                    uforegrad,
-                    utbetalingstype
-                },
-                feilkonto,
-                forfall,
-                utbetalesTilId,
-                utbetalesTilNavn
-            }
-        },
-        totalbelop
-    }
     skjaeringstidspunkt,
     tidslinje {
         ...detailedDag
