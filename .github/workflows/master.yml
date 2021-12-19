@@ -48,7 +48,7 @@ jobs:
                   ORG_GRADLE_PROJECT_githubUser: x-access-token
                   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  args: --project-name=spesialist-selve --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
+                  args: --debug --project-name=spesialist-selve --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
                   command: monitor
 
     deployDev:
