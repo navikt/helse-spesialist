@@ -211,6 +211,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             installErrorHandling()
             install(CallLogging) {
+                disableDefaultColors()
                 logger = httpTraceLog
                 level = Level.INFO
                 callIdMdc("callId")
