@@ -4,15 +4,13 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.*
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.*
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.*
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
 import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vergemal.Vergemål
 import no.nav.helse.oppgave.Oppgavestatus.*
 import no.nav.helse.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -693,6 +691,62 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val løsning = testRapid.inspektør.løsning("Godkjenning")
         assertFalse(løsning["godkjent"].booleanValue())
         assertEquals("Vergemål", løsning["begrunnelser"].first().asText())
+    }
+
+    @Test
+    fun `avbryter saksbehandling og avvise godkjenning pga vergemål og egen ansatt`() = Toggle.VergemålToggle.enable {
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(godkjenningsmeldingId, true)
+        sendVergemålløsning(
+            godkjenningsmeldingId, vergemål = VergemålJson(
+                vergemål = listOf(
+                    Vergemål(
+                        voksen
+                    )
+                )
+            )
+        )
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+        assertEquals(1, testRapid.inspektør.hendelser("behov")
+            .filter { it.hasNonNull("@løsning") }
+            .filter { it.path("@behov")
+                    .map(JsonNode::asText).contains("Godkjenning")
+            }.size)
     }
 
     private fun håndterGodkjenningsbehov(): UUID {
