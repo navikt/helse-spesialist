@@ -43,6 +43,7 @@ internal class AutomatiskAvisningCommand(
                 godkjenningMediator.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, behov).toJson()
             )
             logg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
+            sikkerLogg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
         }
         return true
     }
