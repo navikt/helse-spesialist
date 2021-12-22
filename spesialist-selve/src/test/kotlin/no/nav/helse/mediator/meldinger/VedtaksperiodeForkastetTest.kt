@@ -63,7 +63,8 @@ internal class VedtaksperiodeForkastetTest {
             automatisering = mockk(relaxed = true),
             arbeidsforholdDao = mockk(relaxed = true),
             utbetalingDao = mockk(relaxed = true),
-            opptegnelseDao = mockk(relaxed = true)
+            opptegnelseDao = mockk(relaxed = true),
+            vergemålDao = mockk(relaxed = true)
         )
     private val context = CommandContext(CONTEXT)
     private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.vedtaksperiodeForkastet(

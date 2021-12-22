@@ -11,6 +11,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -21,6 +22,7 @@ internal class Automatisering(
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val egenAnsattDao: EgenAnsattDao,
+    private val vergemålDao: VergemålDao,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val plukkTilManuell: PlukkTilManuell
@@ -63,6 +65,7 @@ internal class Automatisering(
         val warnings = warningDao.finnWarnings(vedtaksperiodeId)
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
+        val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
@@ -75,6 +78,7 @@ internal class Automatisering(
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false
             },
             validering("Bruker er ansatt i Nav") { erEgenAnsatt == false || erEgenAnsatt == null },
+            validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
         )

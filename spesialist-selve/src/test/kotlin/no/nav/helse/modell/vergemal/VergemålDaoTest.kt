@@ -3,9 +3,8 @@ package no.nav.helse.modell.vergemal
 import DatabaseIntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFalse
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class VergemålDaoTest: DatabaseIntegrationTest() {
 
@@ -17,14 +16,11 @@ class VergemålDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `lagre og les ut vergemål`() {
         vergemålDao.lagre(FNR, Vergemål(harVergemål = true, harFremtidsfullmakter = false, harFullmakter = false))
-        val vergemål = requireNotNull(vergemålDao.hentVergemål(FNR))
-        assertTrue(vergemål.harVergemål)
-        assertFalse(vergemål.harFremtidsfullmakter)
-        assertFalse(vergemål.harFullmakter)
+        assertEquals(true, vergemålDao.harVergemål(FNR))
     }
 
     @Test
     fun `ikke vergemål om vi ikke har gjort noe oppslag`() {
-        assertNull(vergemålDao.hentVergemål(FNR))
+        assertNull(vergemålDao.harVergemål(FNR))
     }
 }

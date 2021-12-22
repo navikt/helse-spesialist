@@ -43,6 +43,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.notat.NotatDao
 import no.nav.helse.notat.NotatMediator
 import no.nav.helse.oppgave.OppgaveDao
@@ -146,6 +147,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val abonnementDao = AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
+    private val vergemålDao = VergemålDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
@@ -192,10 +194,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,
             vedtakDao = vedtakDao,
-            plukkTilManuell = plukkTilManuell
+            plukkTilManuell = plukkTilManuell,
+            vergemålDao = vergemålDao
         ),
         utbetalingDao = utbetalingDao,
-        opptegnelseDao = opptegnelseDao
+        opptegnelseDao = opptegnelseDao,
+        vergemålDao = vergemålDao
     )
 
     private val rapidsConnection =

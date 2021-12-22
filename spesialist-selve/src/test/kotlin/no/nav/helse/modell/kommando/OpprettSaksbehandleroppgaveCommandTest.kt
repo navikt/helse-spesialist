@@ -9,6 +9,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.person.Adressebeskyttelse
@@ -32,6 +33,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private lateinit var context: CommandContext
     private val command = OpprettSaksbehandleroppgaveCommand(
         fødselsnummer = FNR,
@@ -43,7 +45,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UUID.randomUUID(),
-        utbetalingtype = Utbetalingtype.UTBETALING
+        utbetalingtype = Utbetalingtype.UTBETALING,
+        vergemålDao = vergemålDao
     )
 
     @BeforeEach

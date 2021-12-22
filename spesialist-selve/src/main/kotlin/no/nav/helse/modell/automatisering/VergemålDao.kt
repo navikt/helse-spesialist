@@ -48,7 +48,7 @@ class VergemålDao(val dataSource: DataSource) {
         }
     }
 
-    fun hentVergemål(fødselsnummer: String): Vergemål? {
+    fun harVergemål(fødselsnummer: String): Boolean? {
         @Language("PostgreSQL")
         val query = """
             SELECT har_vergemal, har_fremtidsfullmakter, har_fullmakter
@@ -68,8 +68,9 @@ class VergemålDao(val dataSource: DataSource) {
                         it.boolean("har_vergemal"),
                         it.boolean("har_fremtidsfullmakter"),
                         it.boolean("har_fullmakter"),
-                    ) }
+                    ).harVergemål }
                     .asSingle
+
             )
         }
     }

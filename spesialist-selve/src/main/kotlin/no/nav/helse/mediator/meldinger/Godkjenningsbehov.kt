@@ -35,6 +35,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.VergemålCommand
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.automatisering.AutomatiskAvisningCommand
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.*
@@ -71,6 +73,7 @@ internal class Godkjenningsbehov(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     egenAnsattDao: EgenAnsattDao,
     arbeidsforholdDao: ArbeidsforholdDao,
+    vergemålDao: VergemålDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
@@ -123,6 +126,13 @@ internal class Godkjenningsbehov(
         ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
+        ),
+        VergemålCommand(
+            vergemålDao = vergemålDao,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            godkjenningMediator = godkjenningMediator,
+            godkjenningsbehovJson = json
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -179,7 +189,8 @@ internal class Godkjenningsbehov(
             egenAnsattDao = egenAnsattDao,
             hendelseId = id,
             personDao = personDao,
-            risikovurderingDao = risikovurderingDao
+            risikovurderingDao = risikovurderingDao,
+            vergemålDao = vergemålDao
         ),
         OpprettOpptegnelseCommand(
             opptegnelseDao = opptegnelseDao,

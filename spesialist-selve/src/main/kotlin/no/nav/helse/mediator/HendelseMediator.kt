@@ -76,6 +76,7 @@ internal class HendelseMediator(
             OverstyringInntekt.OverstyringInntektRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
+            Vergemålløsning.VergemålRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
             UtbetalingAnnullert.UtbetalingAnnullertRiver(it, this)
