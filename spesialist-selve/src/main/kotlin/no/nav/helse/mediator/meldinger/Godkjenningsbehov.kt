@@ -35,6 +35,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.AutomatiskAvisningCommand
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -90,10 +91,7 @@ internal class Godkjenningsbehov(
         KlargjørPersonCommand(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            personDao = personDao,
-            godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId,
-            godkjenningMediator = godkjenningMediator,
+            personDao = personDao
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = (aktiveVedtaksperioder.orgnummere() + orgnummereMedAktiveArbeidsforhold).distinct(),
@@ -125,10 +123,6 @@ internal class Godkjenningsbehov(
         ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
-            godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            godkjenningMediator = godkjenningMediator,
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -156,6 +150,14 @@ internal class Godkjenningsbehov(
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao
+        ),
+        AutomatiskAvisningCommand(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            egenAnsattDao = egenAnsattDao,
+            personDao = personDao,
+            godkjenningsbehovJson = json,
+            godkjenningMediator = godkjenningMediator
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,

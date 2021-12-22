@@ -34,8 +34,7 @@ internal class OpprettPersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
-    private val command = OpprettPersonCommand(FNR, AKTØR, dao, """{"@event_name": "behov"}""", UUID.randomUUID(), godkjenningMediator)
+    private val command = OpprettPersonCommand(FNR, AKTØR, dao)
     private lateinit var context: CommandContext
 
     @BeforeEach

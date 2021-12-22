@@ -26,7 +26,7 @@ internal class EgenAnsattCommandTest {
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
     private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
 
-    private val command = EgenAnsattCommand(dao, "{}", VEDTAKSPERIODE_ID, FNR, godkjenningMediator)
+    private val command = EgenAnsattCommand(dao)
     private lateinit var context: CommandContext
 
 
@@ -52,41 +52,6 @@ internal class EgenAnsattCommandTest {
     fun `lagrer løsning ved resume`() {
         context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
         assertTrue(command.resume(context))
-        verify(exactly = 1) { dao.lagre(any(), any(), any()) }
-    }
-
-    @Test
-    fun `sender løsning på godkjenning hvis bruker er egen ansatt`() {
-        every {
-            godkjenningMediator.lagVedtaksperiodeAvvist(
-                any(),
-                any(),
-                any()
-            )
-        } returns VedtaksperiodeAvvist(
-            UUID.randomUUID(),
-            "",
-            emptyList(),
-            Periodetype.FØRSTEGANGSBEHANDLING,
-            mockk(relaxed = true)
-        )
-        context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, true))
-        assertTrue(command.resume(context))
-        assertEquals(2, context.meldinger().size)
-        assertFalse(
-            objectMapper.readTree(context.meldinger().first())
-                .path("@løsning")
-                .path("Godkjenning")
-                .path("godkjent")
-                .booleanValue()
-        )
-        assertTrue(context.meldinger().last().contains("vedtaksperiode_avvist"))
-    }
-
-    @Test
-    fun `sender ikke løsning på godkjenning hvis bruker ikke er egen ansatt`() {
-        context.add(EgenAnsattløsning(LocalDateTime.now(), FNR, false))
-        assertTrue(command.resume(context))
-        assertEquals(0, context.meldinger().size)
+        verify(exactly = 1) { dao.lagre(FNR, false, any()) }
     }
 }

@@ -37,9 +37,8 @@ internal class KlargjørPersonCommandTest {
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)
-    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
     private val command =
-        KlargjørPersonCommand(FNR, AKTØR, dao, """{"@event_name": "behov"}""", UUID.randomUUID(), godkjenningMediator)
+        KlargjørPersonCommand(FNR, AKTØR, dao)
     private lateinit var context: CommandContext
 
     @BeforeEach
@@ -107,30 +106,6 @@ internal class KlargjørPersonCommandTest {
     }
 
     @Test
-    fun `sender løsning på godkjenning hvis bruker er utdatert og er tilknyttet utlandsenhet`() {
-        every { godkjenningMediator.lagVedtaksperiodeAvvist(any(), any(), any()) } returns vedtaksperiodeAvvist()
-        personFinnes()
-        altUtdatert()
-        context.add(HentEnhetløsning(ENHET_UTLAND))
-        context.add(mockk<HentPersoninfoløsning>(relaxed = true))
-        context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
-        assertTrue(command.execute(context))
-        assertEquals(2, context.meldinger().size)
-        assertFalse(
-            no.nav.helse.objectMapper.readTree(context.meldinger().first())
-                .path("@løsning")
-                .path("Godkjenning")
-                .path("godkjent")
-                .booleanValue()
-        )
-        val vedtaksperiodeAvvistMelding = context.meldinger().last()
-        assertEquals(
-            "vedtaksperiode_avvist",
-            objectMapper.readTree(vedtaksperiodeAvvistMelding).path("@event_name").asText()
-        )
-    }
-
-    @Test
     fun `sender ikke løsning på godkjenning hvis bruker er utdatert og ikke er tilknyttet utlandsenhet`() {
         personFinnes()
         altUtdatert()
@@ -139,28 +114,6 @@ internal class KlargjørPersonCommandTest {
         context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
         assertTrue(command.execute(context))
         assertEquals(0, context.meldinger().size)
-    }
-
-    @Test
-    fun `sender løsning på godkjenning hvis bruker er tilknyttet utlandsenhet`() {
-        every { godkjenningMediator.lagVedtaksperiodeAvvist(any(), any(), any()) } returns vedtaksperiodeAvvist()
-        context.add(HentEnhetløsning(ENHET_UTLAND))
-        context.add(mockk<HentPersoninfoløsning>(relaxed = true))
-        context.add(mockk<HentInfotrygdutbetalingerløsning>(relaxed = true))
-        assertTrue(command.execute(context))
-        assertEquals(2, context.meldinger().size)
-        assertFalse(
-            objectMapper.readTree(context.meldinger().first())
-                .path("@løsning")
-                .path("Godkjenning")
-                .path("godkjent")
-                .booleanValue()
-        )
-        val vedtaksperiodeAvvistMelding = context.meldinger().last()
-        assertEquals(
-            "vedtaksperiode_avvist",
-            objectMapper.readTree(vedtaksperiodeAvvistMelding).path("@event_name").asText()
-        )
     }
 
     @Test
