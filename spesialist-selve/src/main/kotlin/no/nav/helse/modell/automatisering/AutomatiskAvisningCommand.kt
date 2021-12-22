@@ -1,4 +1,4 @@
-package no.nav.helse.modell.vergemal
+package no.nav.helse.modell.automatisering
 
 import no.nav.helse.avvistPåGrunnAvEgenAnsattTeller
 import no.nav.helse.avvistPåGrunnAvUtlandTeller
