@@ -17,6 +17,7 @@ internal class AutomatiskAvisningCommand(
     val vedtaksperiodeId: UUID,
     val egenAnsattDao: EgenAnsattDao,
     val personDao: PersonDao,
+    val vergemålDao: VergemålDao,
     val godkjenningsbehovJson: String,
     val godkjenningMediator: GodkjenningMediator,
 ) : Command {
@@ -28,12 +29,15 @@ internal class AutomatiskAvisningCommand(
     override fun execute(context: CommandContext): Boolean {
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
+        val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
 
-        if (erEgenAnsatt || tilhørerEnhetUtland) {
+        if (erEgenAnsatt || tilhørerEnhetUtland || underVergemål) {
             val årsaker = mutableListOf<String>()
             if (erEgenAnsatt) årsaker.add("Egen ansatt")
                 .also { avvistPåGrunnAvEgenAnsattTeller.inc() }
             if (tilhørerEnhetUtland) årsaker.add("Utland")
+                .also { avvistPåGrunnAvUtlandTeller.inc() }
+            if (underVergemål) årsaker.add("Vergemål")
                 .also { avvistPåGrunnAvUtlandTeller.inc() }
 
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)

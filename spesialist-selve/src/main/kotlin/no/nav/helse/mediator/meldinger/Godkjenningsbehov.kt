@@ -129,10 +129,6 @@ internal class Godkjenningsbehov(
         ),
         VergemålCommand(
             vergemålDao = vergemålDao,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            godkjenningMediator = godkjenningMediator,
-            godkjenningsbehovJson = json
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -166,6 +162,7 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,
+            vergemålDao = vergemålDao,
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator
         ),
