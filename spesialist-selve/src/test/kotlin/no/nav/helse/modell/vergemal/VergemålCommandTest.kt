@@ -39,7 +39,7 @@ class VergemålCommandTest {
     }
 
     @Test
-    fun `Toggle va - ber ikke om informasjon om vergemål`() = Toggle.VergemålToggle.disable {
+    fun `Toggle av - ber ikke om informasjon om vergemål`() = Toggle.VergemålToggle.disable {
         Assertions.assertTrue(command.execute(context))
         Assertions.assertTrue(context.behov().keys.toList().isEmpty())
     }

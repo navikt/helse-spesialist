@@ -9,6 +9,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
