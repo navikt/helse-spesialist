@@ -5,6 +5,7 @@ import com.expediagroup.graphql.client.serializer.defaultGraphQLSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.delay
@@ -47,17 +48,26 @@ internal class SpeilSnapshotGraphQLClient(
             StructuredArguments.keyValue("fødselsnummer", fnr)
         )
         execute(request)
-    } catch (e: IOException) {
-        if (retries > 0) {
-            delay(retryInterval)
-            execute(request, fnr, retries - 1)
-        } else {
-            sikkerLogg.error("Gir opp etter ${this.retries} forsøk på å hente graphql-snapshot for fødselsnummer: $fnr", e)
-            throw e
+    } catch (e: Exception) {
+        when (e) {
+            is ServerResponseException,
+            is IOException -> {
+                if (retries > 0) {
+                    delay(retryInterval)
+                    execute(request, fnr, retries - 1)
+                } else {
+                    sikkerLogg.error(
+                        "Gir opp etter ${this.retries} forsøk på å hente graphql-snapshot for fødselsnummer: $fnr",
+                        e
+                    )
+                    throw e
+                }
+            }
+            else -> {
+                sikkerLogg.error("Kunne ikke hente graphql-snapshot for $fnr", e)
+                throw e
+            }
         }
-    } catch (e: RuntimeException) {
-        sikkerLogg.error("Kunne ikke hente graphql-snapshot for $fnr", e)
-        throw e
     }
 
     private suspend fun <T : Any> execute(request: GraphQLClientRequest<T>): GraphQLClientResponse<T> {
