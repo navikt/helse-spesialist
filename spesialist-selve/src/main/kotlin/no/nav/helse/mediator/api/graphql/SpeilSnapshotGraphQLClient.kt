@@ -64,7 +64,7 @@ internal class SpeilSnapshotGraphQLClient(
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
-        val response = httpClient.post<String>("http://spleis-api.tbd.svc.nais.local/graphql") {
+        val response = httpClient.post<String>("https://spleis-api.dev-fss-pub.nais.io/graphql") {
             header("Authorization", "Bearer $accessToken")
             header("callId", callId)
             contentType(ContentType.Application.Json)
