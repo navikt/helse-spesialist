@@ -16,14 +16,14 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val gammelSnapshot = snapshot(-1)
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
+        every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
         personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
 
         clearMocks(speilSnapshotRestClient)
         personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
-        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
@@ -32,10 +32,10 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val gammelSnapshot = snapshot(-1)
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
+        every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
         personMediator.byggSpeilSnapshotForAktørId(AKTØR, false)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
@@ -45,16 +45,16 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val gammelSnapshot = snapshot(-1)
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeid, snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
+        every { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
         personMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid, false)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSpapshot(FØDSELSNUMMER) }
     }
 
     @Test
     fun `fnr finnes ikke`() {
         val actual = personMediator.byggSpeilSnapshotForFnr("77889900", false).snapshot
         assertNull(actual)
-        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSnapshot("77889900") }
+        verify(exactly = 0) { speilSnapshotRestClient.hentSpeilSpapshot("77889900") }
     }
 }

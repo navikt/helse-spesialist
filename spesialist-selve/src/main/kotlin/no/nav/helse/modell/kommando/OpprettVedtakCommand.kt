@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.modell.SpeilSnapshotDao
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -22,7 +22,7 @@ internal class OpprettVedtakCommand(
     private val periodeTom: LocalDate,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val speilSnapshotDao: SpeilSnapshotDao,
+    private val snapshotDao: SnapshotDao,
     private val vedtakDao: VedtakDao,
     private val warningDao: WarningDao
 ) : Command {
@@ -37,8 +37,8 @@ internal class OpprettVedtakCommand(
 
     private fun oppdater(vedtakRef: Long): Boolean {
         log.info("Henter oppdatert snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val snapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
-        val snapshotId = speilSnapshotDao.lagre(fødselsnummer, snapshot)
+        val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
+        val snapshotId = snapshotDao.lagre(fødselsnummer, snapshot)
         oppdaterWarnings(snapshot)
 
         log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
@@ -53,8 +53,8 @@ internal class OpprettVedtakCommand(
 
     private fun opprett(): Boolean {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val snapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
-        val snapshotId = speilSnapshotDao.lagre(fødselsnummer, snapshot)
+        val snapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
+        val snapshotId = snapshotDao.lagre(fødselsnummer, snapshot)
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer))
         log.info("Oppretter vedtak for vedtaksperiode: $vedtaksperiodeId for person=$personRef, arbeidsgiver=$arbeidsgiverRef")

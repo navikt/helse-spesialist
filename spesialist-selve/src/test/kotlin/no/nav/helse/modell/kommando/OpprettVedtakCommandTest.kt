@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.modell.SpeilSnapshotDao
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -30,21 +30,21 @@ internal class OpprettVedtakCommandTest {
     private lateinit var context: CommandContext
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
-    private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
+    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val command = OpprettVedtakCommand(restClient, FNR, ORGNR, VEDTAKSPERIODE_ID, FOM, TOM, personDao, arbeidsgiverDao, speilSnapshotDao, vedtakDao, warningDao)
+    private val command = OpprettVedtakCommand(restClient, FNR, ORGNR, VEDTAKSPERIODE_ID, FOM, TOM, personDao, arbeidsgiverDao, snapshotDao, vedtakDao, warningDao)
 
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(personDao, arbeidsgiverDao, speilSnapshotDao, vedtakDao)
+        clearMocks(personDao, arbeidsgiverDao, snapshotDao, vedtakDao)
     }
 
     @Test
     fun `opprette vedtak`() {
-        every { restClient.hentSpeilSnapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID, ORGNR, FNR, "Aktørid")
+        every { restClient.hentSpeilSpapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID, ORGNR, FNR, "Aktørid")
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
@@ -53,7 +53,7 @@ internal class OpprettVedtakCommandTest {
 
     @Test
     fun `oppdatere vedtak`() {
-        every { restClient.hentSpeilSnapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID, ORGNR, FNR, "Aktørid")
+        every { restClient.hentSpeilSpapshot(FNR) } returns snapshotUtenWarnings(VEDTAKSPERIODE_ID, ORGNR, FNR, "Aktørid")
         val (_, _, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
         assertTrue(command.execute(context))
@@ -66,7 +66,7 @@ internal class OpprettVedtakCommandTest {
         val snapshotRef = 3
         every { personDao.findPersonByFødselsnummer(FNR) } returns personRef
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returns arbeidsgiverRef
-        every { speilSnapshotDao.lagre(any(), any()) } returns snapshotRef
+        every { snapshotDao.lagre(any(), any()) } returns snapshotRef
         return Triple(personRef, arbeidsgiverRef, snapshotRef)
     }
 }

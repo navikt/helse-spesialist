@@ -32,7 +32,7 @@ internal class SpeilSnapshotRestClientTest {
         enqueue(
             { respond("JSON") }
         )
-        assertEquals("JSON", snapshotClient.hentSpeilSnapshot("1234567891"))
+        assertEquals("JSON", snapshotClient.hentSpeilSpapshot("1234567891"))
         coVerify(exactly = 1) { accessTokenClient.hentAccessToken(any()) }
     }
 
@@ -46,7 +46,7 @@ internal class SpeilSnapshotRestClientTest {
             { throw IOException() },
             { respond("JSON") }
         )
-        assertEquals("JSON", snapshotClient.hentSpeilSnapshot("1234567891"))
+        assertEquals("JSON", snapshotClient.hentSpeilSpapshot("1234567891"))
         coVerify(exactly = 5) { accessTokenClient.hentAccessToken(any()) }
     }
 
@@ -60,7 +60,7 @@ internal class SpeilSnapshotRestClientTest {
             { throw IOException() },
             { throw IOException() }
         )
-        assertThrows<IOException> { snapshotClient.hentSpeilSnapshot("1234567891") }
+        assertThrows<IOException> { snapshotClient.hentSpeilSpapshot("1234567891") }
         coVerify(exactly = 5) { accessTokenClient.hentAccessToken(any()) }
     }
 

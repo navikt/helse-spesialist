@@ -2,15 +2,12 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
-import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -24,14 +21,11 @@ internal class VedtaksperiodeEndret(
     private val json: String,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
-    speilSnapshotDao: SpeilSnapshotDao,
-    speilSnapshotRestClient: SpeilSnapshotRestClient,
     snapshotDao: SnapshotDao,
-    spleisGraphQLClient: SpleisGraphQLClient
+    speilSnapshotRestClient: SpeilSnapshotRestClient
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSpeilSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, speilSnapshotDao, vedtaksperiodeId, fødselsnummer),
-        OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
+        OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
     )
 
     override fun fødselsnummer() = fødselsnummer

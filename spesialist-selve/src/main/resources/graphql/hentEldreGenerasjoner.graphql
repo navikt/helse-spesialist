@@ -148,38 +148,11 @@ fragment detailedPeriode on GraphQLBeregnetPeriode {
     vilkarsgrunnlaghistorikkId
 }
 
-fragment grunnlag on GraphQLVilkarsgrunnlag {
-    inntekter {
-        arbeidsgiver,
-        omregnetArsinntekt {
-            belop,
-            inntekterFraAOrdningen {
-                maned,
-                sum
-            },
-            kilde,
-            manedsbelop
-        },
-        sammenligningsgrunnlag {
-            belop,
-            inntekterFraAOrdningen {
-                maned,
-                sum
-            }
-        }
-    },
-    omregnetArsinntekt,
-    sammenligningsgrunnlag,
-    skjaeringstidspunkt,
-    sykepengegrunnlag
-}
-
-query HentSnapshot($fnr: String!) {
+query HentEldreGenerasjoner($fnr: String!) {
     person(fnr: $fnr) {
-        aktorId,
         arbeidsgivere {
-            generasjon(index: 0) {
-                id,
+            organisasjonsnummer,
+            generasjonerSlice(from: 1) {
                 perioder {
                     ... on GraphQLBeregnetPeriode {
                         __typename,
@@ -191,63 +164,6 @@ query HentSnapshot($fnr: String!) {
                         id,
                         ...detailedUberegnetPeriode
                     }
-                }
-            },
-            generasjonerSlice(from: 1) {
-                id
-            }
-        },
-        dodsdato,
-        fodselsnummer,
-        inntektsgrunnlag {
-            avviksprosent,
-            grunnbelop,
-            inntekter {
-                arbeidsgiver,
-                omregnetArsinntekt {
-                    belop,
-                    inntekterFraAOrdningen {
-                        maned,
-                        sum
-                    },
-                    kilde,
-                    manedsbelop
-                },
-                sammenligningsgrunnlag {
-                    belop,
-                    inntekterFraAOrdningen {
-                        maned,
-                        sum
-                    }
-                }
-            },
-            maksUtbetalingPerDag,
-            omregnetArsinntekt,
-            oppfyllerKravOmMinstelonn,
-            sammenligningsgrunnlag,
-            skjaeringstidspunkt,
-            sykepengegrunnlag
-        },
-        versjon,
-        vilkarsgrunnlaghistorikk {
-            id,
-            grunnlag {
-                ... on GraphQLInfotrygdVilkarsgrunnlag {
-                    __typename,
-                    vilkarsgrunnlagtype,
-                    ...grunnlag,
-                },
-                ... on GraphQLSpleisVilkarsgrunnlag {
-                    __typename,
-                    vilkarsgrunnlagtype,
-                    antallOpptjeningsdagerErMinst,
-                    avviksprosent,
-                    grunnbelop,
-                    oppfyllerKravOmMedlemskap,
-                    oppfyllerKravOmMinstelonn,
-                    oppfyllerKravOmOpptjening,
-                    opptjeningFra,
-                    ...grunnlag
                 }
             }
         }

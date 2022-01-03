@@ -23,14 +23,14 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     @BeforeEach
     fun setup() {
-        every { restClient.hentSpeilSnapshot(any()) } returns snapshotMedHistorikk()
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk()
     }
 
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil`() {
         val beregningId = UUID.randomUUID()
         val vilkårsgrunnlagHistorikkId = UUID.randomUUID()
-        every { restClient.hentSpeilSnapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, vilkårsgrunnlagHistorikkId, medVurdering = true))
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, vilkårsgrunnlagHistorikkId, medVurdering = true))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -79,7 +79,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
     @Test
     fun `mapper utbetalingshistorikk fra Spleis til utbetalingshistorikk til Speil uten vurdering`() {
         val beregningId = UUID.randomUUID()
-        every { restClient.hentSpeilSnapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, UUID.randomUUID(), medVurdering = false))
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedHistorikk(utbetalingshistorikk(beregningId, UUID.randomUUID(), medVurdering = false))
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -93,7 +93,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
 
     @Test
     fun `mapper generasjoner`() {
-        every { restClient.hentSpeilSnapshot(any()) } returns snapshotMedGenerasjoner()
+        every { restClient.hentSpeilSpapshot(any()) } returns snapshotMedGenerasjoner()
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)

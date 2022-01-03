@@ -7,7 +7,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -49,13 +48,11 @@ internal class SaksbehandlerløsningTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val graphQLClient = mockk<SpleisGraphQLClient>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
         personDao = personDao,
@@ -64,7 +61,6 @@ internal class SaksbehandlerløsningTest {
         warningDao = warningDao,
         oppgaveDao = oppgaveDao,
         commandContextDao = commandContextDao,
-        speilSnapshotDao = speilSnapshotDao,
         snapshotDao = snapshotDao,
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
@@ -75,13 +71,12 @@ internal class SaksbehandlerløsningTest {
         åpneGosysOppgaverDao = mockk(relaxed = true),
         egenAnsattDao = mockk(),
         speilSnapshotRestClient = restClient,
-        spleisGraphQLClient = graphQLClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         automatisering = mockk(relaxed = true),
         arbeidsforholdDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),
-        opptegnelseDao = mockk(relaxed = true),
+        opptegnelseDao = mockk(relaxed = true)
     )
 
     private val godkjenningsbehov = UtbetalingsgodkjenningMessage(GODKJENNINGSBEHOV_JSON)

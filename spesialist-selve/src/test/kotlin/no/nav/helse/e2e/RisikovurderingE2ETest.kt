@@ -37,7 +37,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("RISK_QA", VEDTAKSPERIODE_ID)
@@ -45,7 +45,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter oppgave av type SØKNAD`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         godkjenningsoppgave(funn2, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
@@ -53,7 +53,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Venter på alle løsninger på utstedte risikobehov`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         godkjenningsoppgave(
             funn = funn2,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,

@@ -116,7 +116,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    internal val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
     internal val warningDao = WarningDao(dataSource)
@@ -236,7 +235,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettSnapshot(personBlob: String = snapshot()) {
-        snapshotId = speilSnapshotDao.lagre(FNR, personBlob)
+        snapshotId = snapshotDao.lagre(FNR, personBlob)
     }
 
     protected fun opprettVedtaksperiode(
