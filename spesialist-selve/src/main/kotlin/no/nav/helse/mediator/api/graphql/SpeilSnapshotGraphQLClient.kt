@@ -72,6 +72,9 @@ internal class SpeilSnapshotGraphQLClient(
 
     private suspend fun <T : Any> execute(request: GraphQLClientRequest<T>): GraphQLClientResponse<T> {
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
+
+        sikkerLogg.debug("accessToken: $accessToken")
+
         val callId = UUID.randomUUID().toString()
 
         val response = httpClient.post<String>("https://spleis-api.dev-fss-pub.nais.io/graphql") {
@@ -80,6 +83,8 @@ internal class SpeilSnapshotGraphQLClient(
             contentType(ContentType.Application.Json)
             body = serializer.serialize(request)
         }
+
+        sikkerLogg.debug("response: $response")
 
         return serializer.deserialize(response, request.responseType())
     }
