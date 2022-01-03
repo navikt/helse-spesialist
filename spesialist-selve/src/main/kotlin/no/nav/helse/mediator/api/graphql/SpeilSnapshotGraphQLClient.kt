@@ -43,7 +43,7 @@ internal class SpeilSnapshotGraphQLClient(
         retries: Int
     ): GraphQLClientResponse<T> = try {
         sikkerLogg.info(
-            "Henter nytt speil-snapshot for {}",
+            "Henter nytt graphql-snapshot for {}",
             StructuredArguments.keyValue("fødselsnummer", fnr)
         )
         execute(request)
@@ -52,7 +52,7 @@ internal class SpeilSnapshotGraphQLClient(
             delay(retryInterval)
             execute(request, fnr, retries - 1)
         } else {
-            sikkerLogg.error("Gir opp etter ${this.retries} forsøk på å hente snapshot for fødselsnummer: $fnr", e)
+            sikkerLogg.error("Gir opp etter ${this.retries} forsøk på å hente graphql-snapshot for fødselsnummer: $fnr", e)
             throw e
         }
     } catch (e: RuntimeException) {
