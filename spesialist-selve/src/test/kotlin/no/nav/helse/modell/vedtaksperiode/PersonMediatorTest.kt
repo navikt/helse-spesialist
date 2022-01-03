@@ -40,7 +40,6 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         every { restClient.hentSpeilSnapshot(any()) } returns TEST_SNAPSHOTV1
-        every { graphqlClient.hentSnapshot(any()) } returns graphQLSnapshot()
     }
 
     @Test

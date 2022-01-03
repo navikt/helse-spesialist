@@ -6,10 +6,7 @@ import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.IHendelsefabrikk
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -295,20 +292,18 @@ internal class HendelseMediator(
         json: String,
         context: MessageContext
     ) {
-        utfør(
-            fødselsnummer, hendelsefabrikk.overstyringTidslinje(
-                id = id,
-                fødselsnummer = fødselsnummer,
-                oid = oid,
-                navn = navn,
-                ident = ident,
-                epost = epost,
-                orgnummer = orgnummer,
-                begrunnelse = begrunnelse,
-                overstyrteDager = overstyrteDager,
-                json = json
-            ), context
-        )
+        utfør(fødselsnummer, hendelsefabrikk.overstyringTidslinje(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            oid = oid,
+            navn = navn,
+            ident = ident,
+            epost = epost,
+            orgnummer = orgnummer,
+            begrunnelse = begrunnelse,
+            overstyrteDager = overstyrteDager,
+            json = json
+        ), context)
     }
 
     override fun overstyringInntekt(
@@ -360,10 +355,7 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         if (utbetalingType == Utbetalingtype.UTBETALING && !utbetalingDao.harVærtTilGodkjenning(utbetalingId)) {
-            sikkerLogg.info(
-                "Ignorerer utbetaling_endret for {}, har ikke vært til godkjenning",
-                keyValue("utbetalingId", utbetalingId)
-            )
+            sikkerLogg.info("Ignorerer utbetaling_endret for {}, har ikke vært til godkjenning", keyValue("utbetalingId", utbetalingId))
             return
         }
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
@@ -396,7 +388,7 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
-    fun revurderingAvvist(fødselsnummer: String, error: List<String>, json: String, context: MessageContext) {
+    fun revurderingAvvist(fødselsnummer: String, error: List<String>, json:String, context: MessageContext) {
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
@@ -536,10 +528,8 @@ internal class HendelseMediator(
             try {
                 log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) {
-                    log.info(
-                        "kommando er utført ferdig. Det skjedde ca {}s etter at kommandoen ble startet",
-                        SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
-                    )
+                    log.info("kommando er utført ferdig. Det skjedde ca {}s etter at kommandoen ble startet",
+                        SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now()))
                 } else log.info("${hendelse::class.simpleName} er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
                 oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)

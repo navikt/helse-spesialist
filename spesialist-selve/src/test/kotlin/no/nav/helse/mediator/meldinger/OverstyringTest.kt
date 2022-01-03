@@ -60,7 +60,7 @@ internal class OverstyringTest {
         åpneGosysOppgaverDao = mockk(),
         egenAnsattDao = mockk(),
         speilSnapshotRestClient = mockk(),
-        speilSnapshotGraphQLClient = mockk(),
+        spleisGraphQLClient = mockk(),
         oppgaveMediator = mockk(),
         godkjenningMediator = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),

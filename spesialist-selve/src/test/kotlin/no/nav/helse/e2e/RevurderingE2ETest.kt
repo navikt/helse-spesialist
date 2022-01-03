@@ -29,13 +29,11 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
     }
 
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot()
 
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)

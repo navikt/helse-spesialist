@@ -4,9 +4,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.graphQLSnapshot
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.modell.*
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -37,7 +36,7 @@ internal class VedtaksperiodeForkastetTest {
     private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val graphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
+    private val graphQLClient = mockk<SpleisGraphQLClient>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val testhendelsefabrikk =
@@ -60,7 +59,7 @@ internal class VedtaksperiodeForkastetTest {
             åpneGosysOppgaverDao = mockk(),
             egenAnsattDao = mockk(),
             speilSnapshotRestClient = restClient,
-            speilSnapshotGraphQLClient = graphQLClient,
+            spleisGraphQLClient = graphQLClient,
             oppgaveMediator = oppgaveMediator,
             godkjenningMediator = mockk(relaxed = true),
             automatisering = mockk(relaxed = true),
@@ -84,9 +83,7 @@ internal class VedtaksperiodeForkastetTest {
     @Test
     fun `avbryter kommandoer og oppdaterer snapshot`() {
         every { restClient.hentSpeilSnapshot(FNR) } returns SNAPSHOT
-        every { graphQLClient.hentSnapshot(FNR) } returns graphQLSnapshot("orgnr", FNR, "aktør")
         every { speilSnapshotDao.lagre(FNR, SNAPSHOT) } returns 1
-        every { snapshotDao.lagre(FNR, any()) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { speilSnapshotDao.lagre(FNR, SNAPSHOT) }

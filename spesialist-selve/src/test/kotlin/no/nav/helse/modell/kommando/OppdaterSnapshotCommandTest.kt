@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.SnapshotDao
@@ -37,15 +37,15 @@ internal class OppdaterSnapshotCommandTest {
 
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
-    private val speilSnapshotGraphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
+    private val spleisGraphQLClient = mockk<SpleisGraphQLClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
     private val command =
-        OppdaterSnapshotCommand(speilSnapshotGraphQLClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
+        OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR)
 
     @BeforeEach
     fun setup() {
-        clearMocks(vedtakDao, snapshotDao, speilSnapshotGraphQLClient)
+        clearMocks(vedtakDao, snapshotDao, spleisGraphQLClient)
         Toggle.GraphQLApi.enable()
     }
 
@@ -58,7 +58,7 @@ internal class OppdaterSnapshotCommandTest {
     fun `ignorer vedtaksperioder som ikke finnes`() {
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns null
         assertTrue(command.execute(context))
-        verify(exactly = 0) { speilSnapshotGraphQLClient.hentSnapshot(FNR) }
+        verify(exactly = 0) { spleisGraphQLClient.hentSnapshot(FNR) }
         verify(exactly = 0) { snapshotDao.lagre(FNR, any()) }
     }
 
@@ -69,12 +69,12 @@ internal class OppdaterSnapshotCommandTest {
 
     private fun test(block: () -> Unit) {
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns 1L
-        every { speilSnapshotGraphQLClient.hentSnapshot(FNR) } returns object : GraphQLClientResponse<HentSnapshot.Result> {
+        every { spleisGraphQLClient.hentSnapshot(FNR) } returns object : GraphQLClientResponse<HentSnapshot.Result> {
             override val data get() = HentSnapshot.Result(person = PERSON)
         }
         every { snapshotDao.lagre(FNR, PERSON) } returns 1
         block()
-        verify(exactly = 1) { speilSnapshotGraphQLClient.hentSnapshot(FNR) }
+        verify(exactly = 1) { spleisGraphQLClient.hentSnapshot(FNR) }
         verify(exactly = 1) { snapshotDao.lagre(FNR, PERSON) }
     }
 
