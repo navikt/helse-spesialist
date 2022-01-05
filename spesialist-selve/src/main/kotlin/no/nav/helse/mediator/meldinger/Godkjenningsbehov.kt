@@ -37,7 +37,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.modell.automatisering.AutomatiskAvisningCommand
+import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -157,7 +157,7 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao
         ),
-        AutomatiskAvisningCommand(
+        AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             egenAnsattDao = egenAnsattDao,

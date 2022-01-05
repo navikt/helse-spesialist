@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import no.nav.helse.avvistPåGrunnAvEgenAnsattTeller
 import no.nav.helse.avvistPåGrunnAvUtlandTeller
+import no.nav.helse.avvistPåGrunnAvVergemålTeller
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -13,7 +14,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
-internal class AutomatiskAvisningCommand(
+internal class AutomatiskAvvisningCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val egenAnsattDao: EgenAnsattDao,
@@ -39,7 +40,7 @@ internal class AutomatiskAvisningCommand(
             if (tilhørerEnhetUtland) årsaker.add("Utland")
                 .also { avvistPåGrunnAvUtlandTeller.inc() }
             if (underVergemål) årsaker.add("Vergemål")
-                .also { avvistPåGrunnAvUtlandTeller.inc() }
+                .also { avvistPåGrunnAvVergemålTeller.inc() }
 
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             behov.avvisAutomatisk(årsaker.toList())
