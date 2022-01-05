@@ -36,7 +36,6 @@ query HentSnapshot($fnr: String!) {
                     __typename,
                     behandlingstype,
                     erForkastet,
-                    id,
                     fom,
                     tom,
                     inntektstype,
@@ -63,9 +62,11 @@ query HentSnapshot($fnr: String!) {
                     },
                     ... on GraphQLUberegnetPeriode {
                         __typename,
+                        id,
                     }
                     ... on GraphQLBeregnetPeriode {
                         __typename,
+                        id,
                         aktivitetslogg {
                             alvorlighetsgrad,
                             melding,
@@ -185,14 +186,13 @@ query HentSnapshot($fnr: String!) {
         vilkarsgrunnlaghistorikk {
             id,
             grunnlag {
+                vilkarsgrunnlagtype,
+                ...grunnlag,
                 ... on GraphQLInfotrygdVilkarsgrunnlag {
                     __typename,
-                    vilkarsgrunnlagtype,
-                    ...grunnlag,
                 },
                 ... on GraphQLSpleisVilkarsgrunnlag {
                     __typename,
-                    vilkarsgrunnlagtype,
                     antallOpptjeningsdagerErMinst,
                     avviksprosent,
                     grunnbelop,
@@ -200,7 +200,6 @@ query HentSnapshot($fnr: String!) {
                     oppfyllerKravOmMinstelonn,
                     oppfyllerKravOmOpptjening,
                     opptjeningFra,
-                    ...grunnlag
                 }
             }
         }

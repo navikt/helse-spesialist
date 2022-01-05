@@ -1,10 +1,12 @@
-import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer
+import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
+val graphQLKotlinVersion = "5.3.1"
+
 plugins {
     kotlin("plugin.serialization") version "1.5.31"
-    id("com.expediagroup.graphql") version "5.2.0"
+    id("com.expediagroup.graphql") version "5.3.1"
 }
 
 dependencies {
@@ -25,7 +27,7 @@ graphqlIntrospectSchema.enabled = false
 val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
     val baseDir = "${project.projectDir}/src/main/resources/graphql"
 
-    serializer.set(GraphQLSerializer.KOTLINX)
+    serializer.set(JACKSON)
     packageName.set("no.nav.helse.mediator.graphql")
     schemaFile.set(graphqlIntrospectSchema.outputFile)
     queryFiles.from(
