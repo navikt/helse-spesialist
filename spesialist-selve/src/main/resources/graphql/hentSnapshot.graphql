@@ -1,124 +1,3 @@
-fragment detailedDag on GraphQLDag {
-    begrunnelser,
-    dato,
-    grad,
-    kilde {
-        id,
-        type
-    },
-    sykdomsdagtype,
-    utbetalingsdagtype,
-    utbetalingsinfo {
-        arbeidsgiverbelop,
-        inntekt,
-        personbelop,
-        refusjonsbelop,
-        totalGrad,
-        utbetaling
-    }
-}
-
-fragment detailedUberegnetPeriode on GraphQLUberegnetPeriode {
-    behandlingstype,
-    erForkastet,
-    fom,
-    inntektstype,
-    opprettet,
-    periodetype,
-    tidslinje {
-        ...detailedDag
-    },
-    tom
-}
-
-fragment detailedPeriode on GraphQLBeregnetPeriode {
-    aktivitetslogg {
-        alvorlighetsgrad,
-        melding,
-        tidsstempel,
-        vedtaksperiodeId
-    },
-    behandlingstype,
-    beregningId,
-    erForkastet,
-    fom,
-    forbrukteSykedager,
-    gjenstaendeSykedager,
-    hendelser {
-        ... on GraphQLInntektsmelding {
-            beregnetInntekt,
-            id,
-            mottattDato,
-            type
-        },
-        ... on GraphQLSoknadArbeidsgiver {
-            fom,
-            id,
-            rapportertDato,
-            sendtArbeidsgiver,
-            tom,
-            type
-        },
-        ... on GraphQLSoknadNav {
-            fom,
-            id,
-            rapportertDato,
-            sendtNav,
-            tom,
-            type
-        },
-        ... on GraphQLSykmelding {
-            fom,
-            id,
-            rapportertDato,
-            tom,
-            type
-        }
-    },
-    inntektstype,
-    maksdato,
-    opprettet,
-    periodetype,
-    periodevilkar {
-        alder {
-            alderSisteSykedag,
-            oppfylt
-        },
-        soknadsfrist {
-            oppfylt,
-            sendtNav,
-            soknadFom,
-            soknadTom
-        },
-        sykepengedager {
-            forbrukteSykedager,
-            gjenstaendeSykedager,
-            maksdato,
-            oppfylt,
-            skjaeringstidspunkt
-        }
-    }
-    skjaeringstidspunkt,
-    tidslinje {
-        ...detailedDag
-    },
-    tom,
-    utbetaling {
-        arbeidsgiverFagsystemId,
-        arbeidsgiverNettoBelop,
-        personFagsystemId,
-        personNettoBelop,
-        status,
-        type,
-        vurdering {
-            automatisk,
-            godkjent,
-            ident,
-            tidsstempel
-        }
-    },
-    vilkarsgrunnlaghistorikkId
-}
 
 fragment grunnlag on GraphQLVilkarsgrunnlag {
     inntekter {
@@ -154,15 +33,119 @@ query HentSnapshot($fnr: String!) {
             generasjoner {
                 id,
                 perioder {
-                    ... on GraphQLBeregnetPeriode {
-                        __typename,
-                        id,
-                        ...detailedPeriode
-                    }
+                    __typename,
+                    behandlingstype,
+                    erForkastet,
+                    id,
+                    fom,
+                    tom,
+                    inntektstype,
+                    opprettet,
+                    periodetype,
+                    tidslinje {
+                        begrunnelser,
+                        dato,
+                        grad,
+                        kilde {
+                            id,
+                            type
+                        },
+                        sykdomsdagtype,
+                        utbetalingsdagtype,
+                        utbetalingsinfo {
+                            arbeidsgiverbelop,
+                            inntekt,
+                            personbelop,
+                            refusjonsbelop,
+                            totalGrad,
+                            utbetaling
+                        }
+                    },
                     ... on GraphQLUberegnetPeriode {
                         __typename,
-                        id,
-                        ...detailedUberegnetPeriode
+                    }
+                    ... on GraphQLBeregnetPeriode {
+                        __typename,
+                        aktivitetslogg {
+                            alvorlighetsgrad,
+                            melding,
+                            tidsstempel,
+                            vedtaksperiodeId
+                        },
+                        beregningId,
+                        forbrukteSykedager,
+                        gjenstaendeSykedager,
+                        hendelser {
+                            ... on GraphQLInntektsmelding {
+                                __typename,
+                                beregnetInntekt,
+                                id,
+                                mottattDato,
+                                type
+                            },
+                            ... on GraphQLSoknadArbeidsgiver {
+                                __typename,
+                                fom,
+                                id,
+                                rapportertDato,
+                                sendtArbeidsgiver,
+                                tom,
+                                type
+                            },
+                            ... on GraphQLSoknadNav {
+                                __typename,
+                                fom,
+                                id,
+                                rapportertDato,
+                                sendtNav,
+                                tom,
+                                type
+                            },
+                            ... on GraphQLSykmelding {
+                                __typename,
+                                fom,
+                                id,
+                                rapportertDato,
+                                tom,
+                                type
+                            }
+                        },
+                        maksdato,
+                        periodevilkar {
+                            alder {
+                                alderSisteSykedag,
+                                oppfylt
+                            },
+                            soknadsfrist {
+                                oppfylt,
+                                sendtNav,
+                                soknadFom,
+                                soknadTom
+                            },
+                            sykepengedager {
+                                forbrukteSykedager,
+                                gjenstaendeSykedager,
+                                maksdato,
+                                oppfylt,
+                                skjaeringstidspunkt
+                            }
+                        }
+                        skjaeringstidspunkt,
+                        utbetaling {
+                            arbeidsgiverFagsystemId,
+                            arbeidsgiverNettoBelop,
+                            personFagsystemId,
+                            personNettoBelop,
+                            status,
+                            type,
+                            vurdering {
+                                automatisk,
+                                godkjent,
+                                ident,
+                                tidsstempel
+                            }
+                        },
+                        vilkarsgrunnlaghistorikkId
                     }
                 }
             }

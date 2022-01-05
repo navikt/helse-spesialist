@@ -18,6 +18,12 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
 
+private data class GraphQLRequestBody(
+    val query: String,
+    val variables: Any?,
+    val operationName: String?,
+)
+
 internal class SpeilSnapshotGraphQLClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
@@ -72,20 +78,25 @@ internal class SpeilSnapshotGraphQLClient(
 
     private suspend fun <T : Any> execute(request: GraphQLClientRequest<T>): GraphQLClientResponse<T> {
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
-
-        sikkerLogg.debug("accessToken: $accessToken")
-
         val callId = UUID.randomUUID().toString()
 
-        val response = httpClient.post<String>("https://spleis-api.dev-fss-pub.nais.io/graphql") {
+        val response = httpClient.post<String>("http://spleis-api.tbd.svc.nais.local/graphql") {
             header("Authorization", "Bearer $accessToken")
             header("callId", callId)
             contentType(ContentType.Application.Json)
-            body = serializer.serialize(request)
+            body = GraphQLRequestBody(
+                query = request.query,
+                variables = request.variables,
+                operationName = request.operationName,
+            )
         }
 
-        sikkerLogg.debug("response: $response")
+        val graphQLResponse = serializer.deserialize(response, request.responseType())
 
-        return serializer.deserialize(response, request.responseType())
+        if (graphQLResponse.errors !== null) {
+            sikkerLogg.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
+        }
+
+        return graphQLResponse
     }
 }
