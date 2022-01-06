@@ -21,6 +21,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -57,7 +58,8 @@ internal class Hendelsefabrikk(
     private val automatisering: Automatisering,
     private val arbeidsforholdDao: ArbeidsforholdDao,
     private val utbetalingDao: UtbetalingDao,
-    private val opptegnelseDao: OpptegnelseDao
+    private val opptegnelseDao: OpptegnelseDao,
+    private val vergemålDao: VergemålDao
 ) : IHendelsefabrikk {
     internal companion object {
         private val mapper = jacksonObjectMapper()
@@ -116,6 +118,7 @@ internal class Hendelsefabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
             arbeidsforholdDao = arbeidsforholdDao,
+            vergemålDao = vergemålDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,

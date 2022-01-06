@@ -35,6 +35,9 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.VergemålCommand
+import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -70,6 +73,7 @@ internal class Godkjenningsbehov(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     egenAnsattDao: EgenAnsattDao,
     arbeidsforholdDao: ArbeidsforholdDao,
+    vergemålDao: VergemålDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
@@ -90,10 +94,7 @@ internal class Godkjenningsbehov(
         KlargjørPersonCommand(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
-            personDao = personDao,
-            godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId,
-            godkjenningMediator = godkjenningMediator,
+            personDao = personDao
         ),
         KlargjørArbeidsgiverCommand(
             orgnummere = (aktiveVedtaksperioder.orgnummere() + orgnummereMedAktiveArbeidsforhold).distinct(),
@@ -125,10 +126,9 @@ internal class Godkjenningsbehov(
         ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
-            godkjenningsbehovJson = json,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            godkjenningMediator = godkjenningMediator,
+        ),
+        VergemålCommand(
+            vergemålDao = vergemålDao,
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
@@ -157,6 +157,15 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao
         ),
+        AutomatiskAvvisningCommand(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            egenAnsattDao = egenAnsattDao,
+            personDao = personDao,
+            vergemålDao = vergemålDao,
+            godkjenningsbehovJson = json,
+            godkjenningMediator = godkjenningMediator
+        ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -177,7 +186,8 @@ internal class Godkjenningsbehov(
             egenAnsattDao = egenAnsattDao,
             hendelseId = id,
             personDao = personDao,
-            risikovurderingDao = risikovurderingDao
+            risikovurderingDao = risikovurderingDao,
+            vergemålDao = vergemålDao
         ),
         OpprettOpptegnelseCommand(
             opptegnelseDao = opptegnelseDao,

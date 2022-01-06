@@ -50,7 +50,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             automatisering = mockk(relaxed = true),
             arbeidsforholdDao = arbeidsforholdDao,
             utbetalingDao = utbetalingDao,
-            opptegnelseDao = opptegnelseDao
+            opptegnelseDao = opptegnelseDao,
+            vergemålDao = vergemålDao
         )
     }
 

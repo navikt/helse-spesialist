@@ -27,6 +27,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavetype
@@ -137,6 +138,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val utbetalingDao = UtbetalingDao(dataSource)
     internal val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
+    internal val vergemålDao = VergemålDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

@@ -16,6 +16,7 @@ import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.VergemålDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -34,6 +35,7 @@ internal class AutomatiseringTest {
     private val personDaoMock = mockk<PersonDao>(relaxed = true)
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val plukkTilManuellMock = mockk<PlukkTilManuell>()
+    private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
 
     private val automatisering =
         Automatisering(
@@ -45,7 +47,8 @@ internal class AutomatiseringTest {
             egenAnsattDao = egenAnsattDao,
             personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
-            plukkTilManuell = plukkTilManuellMock
+            plukkTilManuell = plukkTilManuellMock,
+            vergemålDao = vergemålDaoMock
         )
 
     companion object {
@@ -150,5 +153,11 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, Utbetalingtype.REVURDERING) { fail("Denne skal ikke kalles") }
         verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+    }
+
+    @Test
+    fun `periode med vergemål skal ikke automatisk godkjennes`() {
+        every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 }

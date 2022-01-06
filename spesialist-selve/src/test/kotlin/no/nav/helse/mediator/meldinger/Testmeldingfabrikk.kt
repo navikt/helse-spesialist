@@ -5,6 +5,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.Vergemål
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
@@ -19,10 +20,12 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
 
     fun lagAdressebeskyttelseEndret(
         id: UUID = UUID.randomUUID()
-    ) = nyHendelse(id, "adressebeskyttelse_endret", mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId
-    ))
+    ) = nyHendelse(
+        id, "adressebeskyttelse_endret", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
 
     fun lagVedtaksperiodeEndret(
         id: UUID = UUID.randomUUID(),
@@ -378,6 +381,25 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagVergemålløsning(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        vergemål: VergemålJson
+    ): String = nyHendelse(
+        id,
+        "behov", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "@final" to true,
+            "@behov" to listOf("Vergemål"),
+            "contextId" to contextId,
+            "hendelseId" to hendelseId,
+            "@løsning" to mapOf(
+                "Vergemål" to vergemål.toBody()
+            )
+        )
+    )
+
     fun lagÅpneGosysOppgaverløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
@@ -587,7 +609,11 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@opprettet" to LocalDateTime.now()
     )
 
-    data class AktivVedtaksperiodeJson(val orgnummer: String, val vedtaksperiodeId: UUID, val periodetype: Periodetype) {
+    data class AktivVedtaksperiodeJson(
+        val orgnummer: String,
+        val vedtaksperiodeId: UUID,
+        val periodetype: Periodetype
+    ) {
         fun toBody() = mapOf(
             "orgnummer" to orgnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,
@@ -605,5 +631,39 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "navn" to navn,
             "bransjer" to bransjer
         )
+    }
+
+    data class VergemålJson(
+        val vergemål: List<Vergemål> = emptyList(),
+        val fremtidsfullmakter: List<Vergemål> = emptyList(),
+        val fullmakter: List<Fullmakt> = emptyList()
+    ) {
+        fun toBody() = mapOf(
+            "vergemål" to vergemål,
+            "fremtidsfullmakter" to fremtidsfullmakter,
+            "fullmakter" to fullmakter,
+        )
+
+        data class Vergemål(
+            val type: VergemålType
+        )
+
+        data class Fullmakt(
+            val områder: List<Område>,
+            val gyldigFraOgMed: LocalDate,
+            val gyldigTilOgMed: LocalDate
+        )
+
+        enum class Område { Alle, Syk, Sym, Annet }
+        enum class VergemålType {
+            ensligMindreaarigAsylsoeker,
+            ensligMindreaarigFlyktning,
+            voksen,
+            midlertidigForVoksen,
+            mindreaarig,
+            midlertidigForMindreaarig,
+            forvaltningUtenforVergemaal,
+            stadfestetFremtidsfullmakt
+        }
     }
 }

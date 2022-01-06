@@ -24,6 +24,10 @@ internal val avvistPåGrunnAvEgenAnsattTeller =
     Counter.build("avvist_egen_ansatt", "Teller antall avvisninger på grunn av egen ansatt")
         .register()
 
+internal val avvistPåGrunnAvVergemålTeller =
+    Counter.build("avvist_vergemal", "Teller antall avvisninger på grunn av vergemål")
+        .register()
+
 internal val avvistPåGrunnAvUtlandTeller =
     Counter.build("avvist_utland", "Teller antall avvisninger på grunn av tilhørighet til utlandsenhet")
         .register()

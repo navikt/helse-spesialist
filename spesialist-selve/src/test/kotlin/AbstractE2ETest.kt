@@ -19,6 +19,9 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.PersonMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.*
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.*
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -38,6 +41,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vergemal.Vergemål
+import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
@@ -128,6 +133,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val personsnapshotDao = PersonsnapshotDao(dataSource)
     private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
+    protected val vergemålDao = VergemålDao(dataSource)
 
     protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
 
@@ -166,11 +172,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,
-            vedtakDao = vedtakDao
+            vedtakDao = vedtakDao,
+            vergemålDao = vergemålDao
         ) { false },
         arbeidsforholdDao = arbeidsforholdDao,
         utbetalingDao = utbetalingDao,
-        opptegnelseDao = opptegnelseDao
+        opptegnelseDao = opptegnelseDao,
+        vergemålDao = vergemålDao
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -224,8 +232,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØR,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
-            Testmeldingfabrikk.AktivVedtaksperiodeJson(
+        aktiveVedtaksperioder: List<AktivVedtaksperiodeJson> = listOf(
+            AktivVedtaksperiodeJson(
                 orgnr,
                 vedtaksperiodeId,
                 periodetype
@@ -261,7 +269,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         contextId: UUID = testRapid.inspektør.contextId(),
         navn: String = "En arbeidsgiver",
         bransjer: List<String> = listOf("En bransje", "En annen bransje"),
-        ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -474,6 +482,23 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     godkjenningsmeldingId,
                     contextId,
                     erEgenAnsatt
+                )
+            )
+        }
+    }
+
+    protected fun sendVergemålløsning(
+        godkjenningsmeldingId: UUID,
+        vergemål: VergemålJson = VergemålJson(),
+        contextId: UUID = testRapid.inspektør.contextId()
+    ) {
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagVergemålløsning(
+                    id,
+                    godkjenningsmeldingId,
+                    contextId,
+                    vergemål
                 )
             )
         }
