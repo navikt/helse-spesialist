@@ -244,7 +244,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureConfig)
             basicAuthentication(env.getValue("ADMIN_SECRET"))
-            installGraphQLApi()
+            installGraphQLApi(
+                snapshotDao = snapshotDao,
+                personApiDao = personApiDao,
+                tildelingDao = tildelingDao,
+                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                overstyringApiDao = overstyringApiDao
+            )
             routing {
                 authenticate("oidc") {
                     oppgaveApi(

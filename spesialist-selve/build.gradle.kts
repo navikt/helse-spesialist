@@ -10,6 +10,7 @@ plugins {
 }
 
 dependencies {
+    implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
     testImplementation(project(":testkode"))

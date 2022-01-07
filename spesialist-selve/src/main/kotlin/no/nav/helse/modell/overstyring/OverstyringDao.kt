@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-internal class OverstyringDao(private val dataSource: DataSource) {
+class OverstyringDao(private val dataSource: DataSource) {
     fun persisterOverstyring(
         hendelseId: UUID,
         fødselsnummer: String,

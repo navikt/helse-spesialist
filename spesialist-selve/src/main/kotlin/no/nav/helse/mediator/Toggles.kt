@@ -19,6 +19,7 @@ abstract class Toggle(internal var enabled: Boolean) {
     }
 
     object GraphQLApi : Toggle("GRAPHQL_ENABLED")
+    object GraphQLPlayground : Toggle("GRAPHQL_PLAYGROUND_ENABLED")
 }
 
 object FeatureToggle {
