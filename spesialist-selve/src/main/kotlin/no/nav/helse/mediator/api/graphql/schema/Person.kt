@@ -4,9 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLInntektsgrunnlag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
@@ -17,10 +15,6 @@ import no.nav.helse.tildeling.TildelingDao
 import java.time.format.DateTimeFormatter
 
 enum class Kjonn { Mann, Kvinne, Ukjent }
-
-typealias Inntektsgrunnlag = GraphQLInntektsgrunnlag
-
-typealias Vilkarsgrunnlaghistorikk = GraphQLVilkarsgrunnlaghistorikk
 
 data class Infotrygdutbetaling(
     val fom: String,
@@ -114,7 +108,8 @@ data class Person(
         personApiDao.finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    fun inntektsgrunnlag(): List<Inntektsgrunnlag> = snapshot.inntektsgrunnlag
+    fun inntektsgrunnlag(): List<Inntektsgrunnlag> = snapshot.inntektsgrunnlag.map { it.tilInntektsgrunnlag() }
 
-    fun vilkarsgrunnlaghistorikk(): List<Vilkarsgrunnlaghistorikk> = snapshot.vilkarsgrunnlaghistorikk
+    fun vilkarsgrunnlaghistorikk(): List<Vilkarsgrunnlaghistorikk> =
+        snapshot.vilkarsgrunnlaghistorikk.map { it.tilVilkarsgrunnlaghistorikk() }
 }
