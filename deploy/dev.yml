@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-      - https://spesialist.dev-fss-pub.nais.io
+      - https://spesialist.dev.intern.nav.no
   strategy:
     type: Recreate
   liveness:
