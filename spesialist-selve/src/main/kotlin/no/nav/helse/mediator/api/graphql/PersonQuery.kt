@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api.graphql
 
 import com.expediagroup.graphql.server.operations.Query
+import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import io.ktor.features.*
@@ -18,6 +19,7 @@ class PersonQuery(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao
 ) : Query {
+
     fun person(fnr: String): DataFetcherResult<Person?> {
         val person = snapshotDao.hentSnapshotMedMetadata(fnr)?.let { (personinfo, snapshot) ->
             Person(
@@ -30,16 +32,17 @@ class PersonQuery(
             )
         }
 
-        val error = if (person == null) GraphqlErrorException.newErrorException()
-            .cause(NotFoundException())
-            .message("Finner ikke snapshot for person med fødselsnummer $fnr")
-            .extensions(mapOf("code" to 404, "field" to "person"))
-            .build() else null
-
-        return DataFetcherResult.newResult<Person?>()
-            .data(person)
-            .error(error)
-            .build()
+        return if (person == null) {
+            DataFetcherResult.newResult<Person?>().error(getError(fnr)).build()
+        } else {
+            DataFetcherResult.newResult<Person?>().data(person).build()
+        }
     }
+
+    private fun getError(fnr: String): GraphQLError = GraphqlErrorException.newErrorException()
+        .cause(NotFoundException())
+        .message("Finner ikke snapshot for person med fødselsnummer $fnr")
+        .extensions(mapOf("code" to 404, "field" to "person"))
+        .build()
 
 }

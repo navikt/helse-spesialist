@@ -11,7 +11,6 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.ContextFactory
 import no.nav.helse.mediator.api.graphql.RequestParser
 import no.nav.helse.mediator.api.graphql.SchemaBuilder
-import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.objectMapper
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -61,11 +60,3 @@ private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: 
     Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
         ?.replace("\${graphQLEndpoint}", graphQLEndpoint)?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
         ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
-
-private class SnapshotResponse(
-    val snapshot: Person?, val tilstand: Tilstand
-) {
-    enum class Tilstand {
-        FINNES_IKKE, INGEN_TILGANG, OK
-    }
-}
