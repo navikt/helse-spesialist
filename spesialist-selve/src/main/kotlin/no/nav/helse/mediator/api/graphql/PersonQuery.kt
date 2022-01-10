@@ -38,7 +38,13 @@ class PersonQuery(
             }
         }
 
-        val person = snapshotDao.hentSnapshotMedMetadata(fnr)?.let { (personinfo, snapshot) ->
+        val snapshot = try {
+            snapshotDao.hentSnapshotMedMetadata(fnr)
+        } catch (e: Exception) {
+            return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
+        }
+
+        val person = snapshot?.let { (personinfo, snapshot) ->
             Person(
                 snapshot = snapshot,
                 personinfo = personinfo,
@@ -64,6 +70,12 @@ class PersonQuery(
         val erUgradert = personApiDao.personHarAdressebeskyttelse(fnr, Adressebeskyttelse.Ugradert)
         return (!kanSeKode7 && erFortrolig) || (!erFortrolig && !erUgradert)
     }
+
+    private fun getSnapshotValidationError(): GraphQLError = GraphqlErrorException.newErrorException()
+        .cause(NotFoundException())
+        .message("Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.")
+        .extensions(mapOf("code" to 501, "field" to "person"))
+        .build()
 
     private fun getNotFoundError(fnr: String): GraphQLError = GraphqlErrorException.newErrorException()
         .cause(NotFoundException())
