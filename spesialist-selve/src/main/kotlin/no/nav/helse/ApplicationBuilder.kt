@@ -210,6 +210,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             install(CORS) {
                 header(HttpHeaders.AccessControlAllowOrigin)
                 host("speil.nais.adeo.no", listOf("https"))
+                host("spesialist.dev.intern.nav.no", listOf("https"))
             }
             install(CallId) {
                 generate {
