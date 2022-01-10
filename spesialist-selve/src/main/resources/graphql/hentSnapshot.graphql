@@ -60,6 +60,7 @@ query HentSnapshot($fnr: String!) {
                             utbetaling
                         }
                     },
+                    vedtaksperiodeId,
                     ... on GraphQLUberegnetPeriode {
                         __typename,
                         id,

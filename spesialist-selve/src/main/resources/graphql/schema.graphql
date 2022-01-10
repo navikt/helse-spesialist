@@ -41,6 +41,7 @@ interface GraphQLTidslinjeperiode {
   periodetype: GraphQLPeriodetype!
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
+  vedtaksperiodeId: UUID!
 }
 
 interface GraphQLVilkarsgrunnlag {
@@ -102,6 +103,7 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
   utbetaling: GraphQLUtbetaling!
+  vedtaksperiodeId: UUID!
   vilkarsgrunnlaghistorikkId: UUID!
 }
 
@@ -278,11 +280,13 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   periodetype: GraphQLPeriodetype!
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
+  vedtaksperiodeId: UUID!
 }
 
 type GraphQLUtbetaling {
   arbeidsgiverFagsystemId: String!
   arbeidsgiverNettoBelop: Int!
+  id: UUID!
   personFagsystemId: String!
   personNettoBelop: Int!
   status: String!
