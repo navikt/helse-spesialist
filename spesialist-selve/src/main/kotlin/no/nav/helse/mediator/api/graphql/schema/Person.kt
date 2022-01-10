@@ -11,7 +11,9 @@ import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.objectMapper
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.vedtaksperiode.VarselDao
 import java.time.format.DateTimeFormatter
 
 enum class Kjonn { Mann, Kvinne, Ukjent }
@@ -57,7 +59,9 @@ data class Person(
     private val personApiDao: PersonApiDao,
     private val tildelingDao: TildelingDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    private val overstyringApiDao: OverstyringApiDao
+    private val overstyringApiDao: OverstyringApiDao,
+    private val risikovurderingApiDao: RisikovurderingApiDao,
+    private val varselDao: VarselDao
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -100,7 +104,9 @@ data class Person(
             fødselsnummer = snapshot.fodselsnummer,
             overstyringApiDao = overstyringApiDao,
             generasjoner = it.generasjoner,
-            arbeidsgiverApiDao = arbeidsgiverApiDao
+            arbeidsgiverApiDao = arbeidsgiverApiDao,
+            risikovurderingApiDao = risikovurderingApiDao,
+            varselDao = varselDao
         )
     }
 

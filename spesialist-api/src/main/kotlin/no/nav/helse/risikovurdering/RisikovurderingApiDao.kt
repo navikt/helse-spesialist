@@ -8,12 +8,12 @@ import java.util.*
 import javax.sql.DataSource
 
 class RisikovurderingApiDao(dataSource: DataSource): HelseDao(dataSource) {
-    fun finnRisikovurdering(vedtaksperiodeId: UUID) =
+    fun finnRisikovurdering(vedtaksperiodeId: UUID): RisikovurderingApiDto? =
         """SELECT data FROM risikovurdering_2021 WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC LIMIT 1"""
             .single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { objectMapper.readTree(it.string("data")) }
             ?.let { data -> RisikovurderingApiDto(funn = data["funn"].toList(), kontrollertOk = data["kontrollertOk"].toList()) }
 
-    private fun JsonNode.toList() = objectMapper.readValue(
+    private fun JsonNode.toList(): List<JsonNode> = objectMapper.readValue(
         traverse(),
         object : TypeReference<List<JsonNode>>() {}
     )

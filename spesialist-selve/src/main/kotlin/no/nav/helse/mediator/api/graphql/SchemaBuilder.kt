@@ -8,14 +8,19 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.vedtaksperiode.VarselDao
 
-class SchemaBuilder(
+internal class SchemaBuilder(
     val snapshotDao: SnapshotDao,
     val personApiDao: PersonApiDao,
     val tildelingDao: TildelingDao,
     val arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    val overstyringApiDao: OverstyringApiDao
+    val overstyringApiDao: OverstyringApiDao,
+    val risikovurderingApiDao: RisikovurderingApiDao,
+    val varselDao: VarselDao,
+    val snapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -33,7 +38,10 @@ class SchemaBuilder(
                         personApiDao = personApiDao,
                         tildelingDao = tildelingDao,
                         arbeidsgiverApiDao = arbeidsgiverApiDao,
-                        overstyringApiDao = overstyringApiDao
+                        overstyringApiDao = overstyringApiDao,
+                        risikovurderingApiDao = risikovurderingApiDao,
+                        varselDao = varselDao,
+                        snapshotGraphQLClient = snapshotGraphQLClient
                     )
                 )
             )

@@ -1,6 +1,8 @@
 package no.nav.helse.mediator.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
@@ -8,6 +10,9 @@ import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.mediator.graphql.hentsnapshot.*
+import no.nav.helse.objectMapper
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.vedtaksperiode.VarselDao
 
 enum class Behandlingstype { BEHANDLET, UBEREGNET, VENTER }
 
@@ -50,6 +55,16 @@ data class Aktivitet(
     val vedtaksperiodeId: UUID
 )
 
+data class Faresignal(
+    val beskrivelse: String,
+    val kategori: List<String>
+)
+
+data class Risikovurdering(
+    val funn: List<Faresignal>?,
+    val kontrollertOk: List<Faresignal>
+)
+
 interface Periode {
     fun behandlingstype(): Behandlingstype
     fun erForkastet(): Boolean
@@ -58,7 +73,8 @@ interface Periode {
     fun inntektstype(): Inntektstype
     fun opprettet(): LocalDateTime
     fun periodetype(): Periodetype
-    fun tidslinje(): List<String>
+    fun tidslinje(): List<Dag>
+    fun vedtaksperiodeId(): UUID
 
     @GraphQLIgnore
     fun behandlingstype(periode: GraphQLTidslinjeperiode): Behandlingstype = when (periode.behandlingstype) {
@@ -97,7 +113,7 @@ interface Periode {
     }
 
     @GraphQLIgnore
-    fun tidslinje(periode: GraphQLTidslinjeperiode): List<String> = emptyList()
+    fun tidslinje(periode: GraphQLTidslinjeperiode): List<Dag> = periode.tidslinje.map { it.tilDag() }
 }
 
 data class UberegnetPeriode(
@@ -111,13 +127,16 @@ data class UberegnetPeriode(
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): LocalDateTime = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
-    override fun tidslinje(): List<String> = tidslinje(periode)
+    override fun tidslinje(): List<Dag> = tidslinje(periode)
+    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 }
 
 
 data class BeregnetPeriode(
     val id: UUID,
-    private val periode: GraphQLBeregnetPeriode
+    private val periode: GraphQLBeregnetPeriode,
+    private val risikovurderingApiDao: RisikovurderingApiDao,
+    private val varselDao: VarselDao
 ) : Periode {
     override fun behandlingstype(): Behandlingstype = behandlingstype(periode)
     override fun erForkastet(): Boolean = erForkastet(periode)
@@ -126,7 +145,8 @@ data class BeregnetPeriode(
     override fun inntektstype(): Inntektstype = inntektstype(periode)
     override fun opprettet(): LocalDateTime = opprettet(periode)
     override fun periodetype(): Periodetype = periodetype(periode)
-    override fun tidslinje(): List<String> = tidslinje(periode)
+    override fun tidslinje(): List<Dag> = tidslinje(periode)
+    override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
     fun aktivitetslogg(): List<Aktivitet> = periode.aktivitetslogg.map {
         Aktivitet(
@@ -175,4 +195,19 @@ data class BeregnetPeriode(
     }
 
     fun vilkarsgrunnlaghistorikkId(): UUID = periode.vilkarsgrunnlaghistorikkId
+
+    fun risikovurdering(): Risikovurdering? =
+        risikovurderingApiDao.finnRisikovurdering(vedtaksperiodeId().java())?.let { vurdering ->
+            Risikovurdering(
+                funn = vurdering.funn.tilFaresignaler(),
+                kontrollertOk = vurdering.kontrollertOk.tilFaresignaler()
+            )
+        }
+
+    fun varsler(): List<String> = varselDao.finnVarsler(vedtaksperiodeId().java())
 }
+
+private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =
+    map { objectMapper.readValue(it.traverse(), object : TypeReference<Faresignal>() {}) }
+
+private fun UUID.java() = java.util.UUID.fromString(this)

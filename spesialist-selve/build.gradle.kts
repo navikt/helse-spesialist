@@ -37,7 +37,9 @@ val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
         )
     )
 
-//    dependsOn("graphqlIntrospectSchema")
+    if (graphqlIntrospectSchema.enabled) {
+        dependsOn("graphqlIntrospectSchema")
+    }
 }
 
 tasks {

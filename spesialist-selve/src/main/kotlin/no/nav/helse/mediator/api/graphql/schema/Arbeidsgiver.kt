@@ -11,6 +11,8 @@ import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringDto
 import no.nav.helse.overstyring.OverstyringInntektDto
+import no.nav.helse.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.vedtaksperiode.VarselDao
 import java.time.format.DateTimeFormatter
 
 data class Arbeidsforhold(
@@ -37,9 +39,9 @@ data class Dagoverstyring(
     override val begrunnelse: String,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
-    val dager: List<Dag>,
+    val dager: List<OverstyrtDag>,
 ) : Overstyring {
-    data class Dag(
+    data class OverstyrtDag(
         val dato: LocalDate,
         val type: Dagtype,
         val grad: Int?
@@ -51,9 +53,9 @@ data class Inntektoverstyring(
     override val begrunnelse: String,
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
-    val inntekt: Inntekt,
+    val inntekt: OverstyrtInntekt,
 ) : Overstyring {
-    data class Inntekt(
+    data class OverstyrtInntekt(
         val forklaring: String,
         val manedligInntekt: Double,
         val skjaeringstidspunkt: LocalDateTime
@@ -67,7 +69,9 @@ data class Arbeidsgiver(
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
     private val overstyringApiDao: OverstyringApiDao,
-    private val arbeidsgiverApiDao: ArbeidsgiverApiDao
+    private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
+    private val risikovurderingApiDao: RisikovurderingApiDao,
+    private val varselDao: VarselDao
 ) {
     fun generasjoner(): List<Generasjon> = generasjoner.map { generasjon ->
         Generasjon(
@@ -75,7 +79,12 @@ data class Arbeidsgiver(
             perioder = generasjon.perioder.map {
                 when (it) {
                     is GraphQLUberegnetPeriode -> UberegnetPeriode(id = it.id, periode = it)
-                    is GraphQLBeregnetPeriode -> BeregnetPeriode(id = it.id, periode = it)
+                    is GraphQLBeregnetPeriode -> BeregnetPeriode(
+                        id = it.id,
+                        periode = it,
+                        risikovurderingApiDao = risikovurderingApiDao,
+                        varselDao = varselDao
+                    )
                     else -> throw Exception("Ukjent tidslinjeperiode")
                 }
             }
@@ -88,14 +97,15 @@ data class Arbeidsgiver(
             overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
                 .map { it.tilInntektoverstyring() }
 
-    fun arbeidsforhold(): List<Arbeidsforhold> = arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
-        Arbeidsforhold(
-            stillingstittel = it.stillingstittel,
-            stillingsprosent = it.stillingsprosent,
-            startdato = it.startdato.format(DateTimeFormatter.ISO_DATE),
-            sluttdato = it.sluttdato?.format(DateTimeFormatter.ISO_DATE)
-        )
-    }
+    fun arbeidsforhold(): List<Arbeidsforhold> =
+        arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
+            Arbeidsforhold(
+                stillingstittel = it.stillingstittel,
+                stillingsprosent = it.stillingsprosent,
+                startdato = it.startdato.format(DateTimeFormatter.ISO_DATE),
+                sluttdato = it.sluttdato?.format(DateTimeFormatter.ISO_DATE)
+            )
+        }
 }
 
 private fun OverstyringDto.tilDagoverstyring() = Dagoverstyring(
@@ -107,7 +117,7 @@ private fun OverstyringDto.tilDagoverstyring() = Dagoverstyring(
         ident = saksbehandlerIdent
     ),
     dager = overstyrteDager.map { dag ->
-        Dagoverstyring.Dag(
+        Dagoverstyring.OverstyrtDag(
             dato = dag.dato.format(DateTimeFormatter.ISO_DATE),
             type = dag.type,
             grad = dag.grad
@@ -123,7 +133,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
         navn = saksbehandlerNavn,
         ident = saksbehandlerIdent
     ),
-    inntekt = Inntektoverstyring.Inntekt(
+    inntekt = Inntektoverstyring.OverstyrtInntekt(
         forklaring = forklaring,
         manedligInntekt = månedligInntekt,
         skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE_TIME)
