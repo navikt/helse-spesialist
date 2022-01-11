@@ -8,7 +8,9 @@ import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.graphQLSnapshot
 import no.nav.helse.mediator.FeilendeMeldingerDao
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -106,6 +108,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal var arbeidsgiverId: Long = -1
         private set
     internal var snapshotId: Int = -1
+        private set
+    internal var graphQLSnapshotId: Int = -1
         private set
     internal var vedtakId: Long = -1
         private set
@@ -241,6 +245,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         snapshotId = speilSnapshotDao.lagre(FNR, personBlob)
     }
 
+    protected fun opprettGraphQLSnapshot(person: GraphQLPerson = graphQLSnapshot(FNR, AKTØR).data!!.person!!) {
+        graphQLSnapshotId = snapshotDao.lagre(FNR, person)
+    }
+
     protected fun opprettVedtaksperiode(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
@@ -249,7 +257,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
     ): Long {
         opprettSnapshot()
-        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
+        opprettGraphQLSnapshot()
+        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId, snapshotId)
             .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
             ?.also {
                 vedtakId = it

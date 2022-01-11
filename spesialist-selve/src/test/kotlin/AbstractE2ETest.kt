@@ -17,12 +17,10 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.PersonMediator
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.*
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.*
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -42,7 +40,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vergemal.Vergemål
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
@@ -144,7 +141,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    protected val graphqlClient = mockk<SpleisGraphQLClient>(relaxed = true)
+    protected val graphqlClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
 
     protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
@@ -166,6 +163,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         egenAnsattDao = egenAnsattDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestClient = restClient,
+        speilSnapshotGraphQLClient = graphqlClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         automatisering = Automatisering(
@@ -183,8 +181,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
         vergemålDao = vergemålDao,
-        opptegnelseDao = opptegnelseDao,
-        spleisGraphQLClient = graphqlClient
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -1008,7 +1004,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun TestRapid.RapidInspector.contextId(): UUID =
         (hendelser("behov")
-            .lastOrNull { it.hasNonNull("contextId") } ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
+            .lastOrNull { it.hasNonNull("contextId") }
+            ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
             .path("contextId")
             .asText()
             .let { UUID.fromString(it) }

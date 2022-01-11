@@ -82,5 +82,7 @@ spec:
       value: https://unleash.nais.io/api/
     - name: OPPSLAG_VERGEMAL
       value: "true"
+    - name: GRAPHQL_ENABLED
+      value: "true"
     - name: GRAPHQL_PLAYGROUND_ENABLED
       value: "true"

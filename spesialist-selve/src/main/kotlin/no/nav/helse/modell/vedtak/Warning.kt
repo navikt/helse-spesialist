@@ -1,5 +1,7 @@
 package no.nav.helse.modell.vedtak
 
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.person.SnapshotDto
 import java.util.*
@@ -23,6 +25,16 @@ internal class Warning(
                 .flatten()
                 .filter { it["alvorlighetsgrad"].asText() == "W" }
                 .map { Warning(it["melding"].asText(), WarningKilde.Spleis) }
+
+        internal fun graphQLWarnings(vedtaksperiodeId: UUID, person: GraphQLPerson) =
+            person.arbeidsgivere
+                .flatMap { it.generasjoner }
+                .flatMap { it.perioder }
+                .filter { UUID.fromString(it.vedtaksperiodeId) == vedtaksperiodeId }
+                .filterIsInstance<GraphQLBeregnetPeriode>()
+                .flatMap { it.aktivitetslogg }
+                .filter { it.alvorlighetsgrad == "W" }
+                .map { Warning(it.melding, WarningKilde.Spleis) }
     }
 
     internal fun lagre(warningDao: WarningDao, vedtakRef: Long) {

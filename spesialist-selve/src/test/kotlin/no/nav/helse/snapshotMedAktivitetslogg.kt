@@ -1,5 +1,8 @@
 package no.nav.helse
 
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import no.nav.helse.mediator.graphql.HentSnapshot
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import java.util.*
 
@@ -106,3 +109,18 @@ fun snapshotUtenWarnings(vedtaksperiodeId: UUID, orgnr: String, fnr: String, akt
   ]
 }
 """
+
+fun graphQLSnapshot(fnr: String, aktørId: String): GraphQLClientResponse<HentSnapshot.Result> =
+    object : GraphQLClientResponse<HentSnapshot.Result> {
+        override val data = HentSnapshot.Result(
+            GraphQLPerson(
+                aktorId = aktørId,
+                fodselsnummer = fnr,
+                arbeidsgivere = emptyList(),
+                dodsdato = null,
+                inntektsgrunnlag = emptyList(),
+                versjon = 1,
+                vilkarsgrunnlaghistorikk = emptyList()
+            )
+        )
+    }

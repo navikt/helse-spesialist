@@ -26,7 +26,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.*
-import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -109,7 +109,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         accessTokenClient = accessTokenClient,
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
     )
-    private val spleisGraphQLClient = SpleisGraphQLClient(
+    private val speilSnapshotGraphQLClient = SpeilSnapshotGraphQLClient(
         httpClient = spleisClient,
         accessTokenClient = accessTokenClient,
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
@@ -190,7 +190,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         arbeidsforholdDao = arbeidsforholdDao,
         snapshotDao = snapshotDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
-        spleisGraphQLClient = spleisGraphQLClient,
+        speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         automatisering = Automatisering(
