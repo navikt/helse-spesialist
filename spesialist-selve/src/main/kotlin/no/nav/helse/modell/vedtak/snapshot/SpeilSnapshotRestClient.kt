@@ -23,13 +23,13 @@ class SpeilSnapshotRestClient(
         val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    internal fun hentSpeilSpapshot(fnr: String): String {
+    internal fun hentSpeilSnapshot(fnr: String): String {
         return runBlocking {
-            hentSpeilSpapshot(fnr, 5)
+            hentSpeilSnapshot(fnr, 5)
         }
     }
 
-    private suspend fun hentSpeilSpapshot(fnr: String, retries: Int): String = try {
+    private suspend fun hentSpeilSnapshot(fnr: String, retries: Int): String = try {
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
         sikkerLogg.info(
@@ -57,7 +57,7 @@ class SpeilSnapshotRestClient(
             throw e
         } else {
             delay(retryInterval)
-            hentSpeilSpapshot(fnr, retries - 1)
+            hentSpeilSnapshot(fnr, retries - 1)
         }
     } catch (e: RuntimeException) {
         sikkerLogg.error(

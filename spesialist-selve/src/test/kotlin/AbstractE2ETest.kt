@@ -17,6 +17,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.PersonMediator
+import no.nav.helse.mediator.api.graphql.SpleisGraphQLClient
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.*
@@ -117,7 +118,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val hendelseDao = HendelseDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
-    protected val snapshotDao = SnapshotDao(dataSource)
+    protected val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
@@ -133,6 +134,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val personsnapshotDao = PersonsnapshotDao(dataSource)
     private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
+    protected val snapshotDao = SnapshotDao(dataSource)
     protected val vergemålDao = VergemålDao(dataSource)
 
     protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
@@ -142,6 +144,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    protected val graphqlClient = mockk<SpleisGraphQLClient>(relaxed = true)
 
     protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
@@ -152,7 +155,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         warningDao = warningDao,
         oppgaveDao = oppgaveDao,
         commandContextDao = commandContextDao,
-        snapshotDao = SnapshotDao(dataSource),
+        speilSnapshotDao = SpeilSnapshotDao(dataSource),
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
         saksbehandlerDao = saksbehandlerDao,
@@ -161,6 +164,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
+        snapshotDao = snapshotDao,
         speilSnapshotRestClient = restClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
@@ -178,7 +182,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         arbeidsforholdDao = arbeidsforholdDao,
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
-        vergemålDao = vergemålDao
+        vergemålDao = vergemålDao,
+        opptegnelseDao = opptegnelseDao,
+        spleisGraphQLClient = graphqlClient
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -196,7 +202,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         tildelingDao = tildelingDao,
         risikovurderingApiDao = risikovurderingApiDao,
         utbetalingDao = utbetalingDao,
-        snapshotDao = snapshotDao,
+        speilSnapshotDao = speilSnapshotDao,
         speilSnapshotRestClient = speilSnapshotRestClient
     )
 
@@ -532,7 +538,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun settOppBruker(): UUID {
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -911,7 +917,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshot: String = snapshot(),
         utbetalingId: UUID
     ): UUID {
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns snapshot
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,

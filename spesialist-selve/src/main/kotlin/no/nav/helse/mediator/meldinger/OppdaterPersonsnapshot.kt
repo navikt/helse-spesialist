@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotUtenÅLagreWarningsCommand
@@ -18,12 +18,12 @@ internal class OppdaterPersonsnapshot(
     private val fødselsnummer: String,
     private val json: String,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    snapshotDao: SnapshotDao
+    speilSnapshotDao: SpeilSnapshotDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
-            snapshotDao = snapshotDao,
+            speilSnapshotDao = speilSnapshotDao,
             fødselsnummer = fødselsnummer
         )
     )

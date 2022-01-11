@@ -8,7 +8,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -66,7 +66,7 @@ internal class Godkjenningsbehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
-    snapshotDao: SnapshotDao,
+    speilSnapshotDao: SpeilSnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
     digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
@@ -118,7 +118,7 @@ internal class Godkjenningsbehov(
             inntektskilde = inntektskilde,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            snapshotDao = snapshotDao,
+            speilSnapshotDao = speilSnapshotDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             utbetalingId = utbetalingId,

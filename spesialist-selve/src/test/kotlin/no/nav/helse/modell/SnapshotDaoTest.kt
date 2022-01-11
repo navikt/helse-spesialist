@@ -14,7 +14,7 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
     fun `lagre snapshot`() {
         val snapshot = snapshot()
         opprettPerson()
-        snapshotDao.lagre(FNR, snapshot)
+        speilSnapshotDao.lagre(FNR, snapshot)
         assertEquals(1, finnAlleSnapshot().size)
         assertEquals(snapshot, finnAlleSnapshot().first().first)
         assertEquals(LocalDate.now(), finnAlleSnapshot().first().second)
@@ -25,8 +25,8 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
         val snapshot = snapshot(1)
         val nyttSnapshot = snapshot(2)
         opprettPerson()
-        snapshotDao.lagre(FNR, snapshot)
-        snapshotDao.lagre(FNR, nyttSnapshot)
+        speilSnapshotDao.lagre(FNR, snapshot)
+        speilSnapshotDao.lagre(FNR, nyttSnapshot)
 
         val alleSnapshots = finnAlleSnapshot()
         assertEquals(1, alleSnapshots.size)
