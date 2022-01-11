@@ -78,9 +78,9 @@ internal class OpprettVedtakCommand(
         val restApiSnapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
         val restApiSnapshotId = speilSnapshotDao.lagre(fødselsnummer, restApiSnapshot)
         val graphQLApiSnapshot = speilSnapshotGraphQLClient.hentSnapshot(fødselsnummer)
-        val graphQLApiSnapshotId = graphQLApiSnapshot.data?.person?.let {
+        val graphQLApiSnapshotId = if (Toggle.GraphQLApi.enabled) graphQLApiSnapshot.data?.person?.let {
             snapshotDao.lagre(fødselsnummer, it)
-        }
+        } else null
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
         val arbeidsgiverRef = requireNotNull(arbeidsgiverDao.findArbeidsgiverByOrgnummer(orgnummer))
         log.info("Oppretter vedtak for vedtaksperiode: $vedtaksperiodeId for person=$personRef, arbeidsgiver=$arbeidsgiverRef")
@@ -94,8 +94,10 @@ internal class OpprettVedtakCommand(
             snapshotRef = graphQLApiSnapshotId
         )
         oppdaterWarnings(restApiSnapshot)
-        graphQLApiSnapshot.data?.person?.let {
-            oppdaterWarnings(it)
+        if (Toggle.GraphQLApi.enabled) {
+            graphQLApiSnapshot.data?.person?.let {
+                oppdaterWarnings(it)
+            }
         }
         return true
     }

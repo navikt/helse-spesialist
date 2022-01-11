@@ -81,7 +81,7 @@ internal class OpprettVedtakCommandTest {
                 personRef,
                 arbeidsgiverRef,
                 snapshotRef,
-                snapshotRef
+                null
             )
         }
     }

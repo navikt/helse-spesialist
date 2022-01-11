@@ -258,7 +258,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long {
         opprettSnapshot()
         opprettGraphQLSnapshot()
-        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId, snapshotId)
+        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId, graphQLSnapshotId)
             .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
             ?.also {
                 vedtakId = it

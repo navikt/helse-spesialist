@@ -135,6 +135,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val vergemålDao = VergemålDao(dataSource)
 
     protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
+    protected val speilSnapshotGraphQLClient = mockk<SpeilSnapshotGraphQLClient>()
 
     protected val testRapid = TestRapid()
 

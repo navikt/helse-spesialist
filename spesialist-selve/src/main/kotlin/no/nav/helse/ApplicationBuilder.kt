@@ -68,7 +68,6 @@ import java.util.*
 import kotlin.random.Random.Default.nextInt
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
-const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")

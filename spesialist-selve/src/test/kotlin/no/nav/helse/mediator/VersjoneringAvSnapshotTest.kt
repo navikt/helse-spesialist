@@ -4,6 +4,7 @@ import AbstractE2ETest
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.verify
+import no.nav.helse.graphQLSnapshot
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -17,6 +18,7 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
+        every { speilSnapshotGraphQLClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, "1234")
 
         personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
@@ -33,6 +35,7 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
+        every { speilSnapshotGraphQLClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, "1234")
 
         personMediator.byggSpeilSnapshotForAktørId(AKTØR, false)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
@@ -46,6 +49,7 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
         val nyttSnapshot = snapshot(2)
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeid, snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
+        every { speilSnapshotGraphQLClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, "1234")
 
         personMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid, false)
         verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
