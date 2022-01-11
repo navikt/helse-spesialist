@@ -22,5 +22,6 @@ data class ArbeidsgiverApiDto(
     val overstyringer: List<OverstyringApiDto>,
     val bransjer: List<String>,
     val utbetalingshistorikk: List<UtbetalingshistorikkElementApiDto>,
-    val generasjoner: JsonNode?
+    val generasjoner: JsonNode?,
+    val ghostPerioder: List<JsonNode>?
 )

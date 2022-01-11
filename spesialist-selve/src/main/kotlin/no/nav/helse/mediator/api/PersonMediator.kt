@@ -160,7 +160,8 @@ internal class PersonMediator(
                     vedtaksperioder = it.vedtaksperioder,
                     bransjer = bransjer,
                     utbetalingshistorikk = mapUtbetalingshistorikk(it),
-                    generasjoner = it.generasjoner
+                    generasjoner = it.generasjoner,
+                    ghostPerioder = it.ghostPerioder
                 )
             }
             measureAsHistogram("byggSpeilSnapshot_behovForVedtaksperiode_akkumulert") {

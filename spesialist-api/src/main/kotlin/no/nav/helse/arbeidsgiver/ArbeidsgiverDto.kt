@@ -8,5 +8,6 @@ data class ArbeidsgiverDto(
     val id: UUID,
     val vedtaksperioder: List<JsonNode>,
     val utbetalingshistorikk: List<JsonNode>,
-    val generasjoner: JsonNode?
+    val generasjoner: JsonNode?,
+    val ghostPerioder: List<JsonNode>?
 )
