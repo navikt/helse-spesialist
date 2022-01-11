@@ -215,6 +215,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             install(CORS) {
                 header(HttpHeaders.AccessControlAllowOrigin)
                 host("speil.nais.adeo.no", listOf("https"))
+                host("spesialist.dev.intern.nav.no", listOf("https"))
             }
             install(CallId) {
                 generate {
@@ -249,7 +250,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureConfig)
             basicAuthentication(env.getValue("ADMIN_SECRET"))
-            installGraphQLApi()
+            graphQLApi(
+                snapshotDao = snapshotDao,
+                personApiDao = personApiDao,
+                tildelingDao = tildelingDao,
+                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                overstyringApiDao = overstyringApiDao,
+                risikovurderingApiDao = risikovurderingApiDao,
+                varselDao = varselDao,
+                kode7Saksbehandlergruppe = env.kode7GruppeId(),
+                snapshotGraphQLClient = speilSnapshotGraphQLClient
+            )
             routing {
                 authenticate("oidc") {
                     oppgaveApi(

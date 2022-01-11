@@ -1,15 +1,16 @@
 package no.nav.helse.modell
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
+import java.time.LocalDate
 import javax.sql.DataSource
 
-internal class SnapshotDao(private val dataSource: DataSource) {
-
+class SnapshotDao(private val dataSource: DataSource) {
     fun lagre(fødselsnummer: String, snapshot: GraphQLPerson) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { tx ->
@@ -29,6 +30,34 @@ internal class SnapshotDao(private val dataSource: DataSource) {
             versjonForSnapshot?.let { it < sisteGjeldendeVersjon } ?: true
         }
     }
+
+    fun hentSnapshotMedMetadata(fødselsnummer: String): Pair<PersoninfoDto, GraphQLPerson>? =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                """ SELECT * FROM person AS p
+                    INNER JOIN person_info as pi ON pi.id = p.info_ref
+                    INNER JOIN snapshot AS s ON s.person_ref = p.id
+                WHERE p.fodselsnummer = :fnr;
+            """
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf("fnr" to fødselsnummer.toLong())
+                ).map { row ->
+                    val personinfo = PersoninfoDto(
+                        fornavn = row.string("fornavn"),
+                        mellomnavn = row.stringOrNull("mellomnavn"),
+                        etternavn = row.string("etternavn"),
+                        fødselsdato = row.localDateOrNull("fodselsdato"),
+                        kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf),
+                        adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf)
+                    )
+                    val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
+                    personinfo to snapshot
+                }.asSingle
+            )
+        }
 
     private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon: Int): Int {
         @Language("PostgreSQL")
@@ -79,4 +108,23 @@ internal class SnapshotDao(private val dataSource: DataSource) {
         val statement = "UPDATE global_snapshot_versjon SET versjon = ?, sist_endret = now() WHERE id = 1"
         this.run(queryOf(statement, versjon).asExecute)
     }
+}
+
+data class PersoninfoDto(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+    val fødselsdato: LocalDate?,
+    val kjønn: Kjønn?,
+    val adressebeskyttelse: Adressebeskyttelse
+)
+
+enum class Kjønn { Mann, Kvinne, Ukjent }
+
+enum class Adressebeskyttelse {
+    Ugradert,
+    Fortrolig,
+    StrengtFortrolig,
+    StrengtFortroligUtland,
+    Ukjent
 }

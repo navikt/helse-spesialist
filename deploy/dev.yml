@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+      - https://spesialist.dev.intern.nav.no
   strategy:
     type: Recreate
   liveness:
@@ -79,4 +81,6 @@ spec:
     - name: UNLEASH_URL
       value: https://unleash.nais.io/api/
     - name: OPPSLAG_VERGEMAL
+      value: "true"
+    - name: GRAPHQL_PLAYGROUND_ENABLED
       value: "true"

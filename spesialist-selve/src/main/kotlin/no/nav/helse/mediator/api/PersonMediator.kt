@@ -64,13 +64,15 @@ internal class PersonMediator(
             return SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
-        val personErKode7 = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
-        if (personErKode7 && !kanSeKode7) {
+        val erFortrolig = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
+        if (erFortrolig && !kanSeKode7) {
             sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
             return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
         }
 
-        if (!personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert) && !personErKode7) {
+        val erUgradert = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert)
+        val erUkjentEllerStrengtFortrolig = !erFortrolig && !erUgradert
+        if (erUkjentEllerStrengtFortrolig) {
             return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
         }
 
