@@ -5,6 +5,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
@@ -57,7 +58,9 @@ internal class OppdaterSnapshotCommandTest {
 
     @Test
     fun `lagrer snapshot`() {
+        Toggle.GraphQLApi.enable()
         test { assertTrue(command.execute(context)) }
+        Toggle.GraphQLApi.disable()
     }
 
     private fun test(block: () -> Unit) {

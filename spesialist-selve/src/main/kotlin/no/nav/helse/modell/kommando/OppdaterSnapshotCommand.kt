@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -32,6 +33,7 @@ internal class OppdaterSnapshotCommand(
     }
 
     private fun oppdaterSnapshot(): Boolean {
+        if (!Toggle.GraphQLApi.enabled) return true
         log.info("oppdaterer snapshot for $vedtaksperiodeId")
         return speilSnapshotGraphQLClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
             snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
