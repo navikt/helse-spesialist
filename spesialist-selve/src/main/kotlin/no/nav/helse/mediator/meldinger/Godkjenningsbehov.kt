@@ -135,6 +135,8 @@ internal class Godkjenningsbehov(
         ),
         VergemålCommand(
             vergemålDao = vergemålDao,
+            warningDao = warningDao,
+            vedtaksperiodeId = vedtaksperiodeId
         ),
         DigitalKontaktinformasjonCommand(
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,

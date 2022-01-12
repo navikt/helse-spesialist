@@ -1,13 +1,10 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.graphQLSnapshot
-import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
@@ -711,7 +708,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val godkjenning = testRapid.inspektør.løsning("Godkjenning")
         assertTrue(godkjenning["godkjent"].booleanValue())
         assertFalse(godkjenning["automatiskBehandling"].booleanValue())
-        assertWarning("Personen er registrert med fullmakt", VEDTAKSPERIODE_ID)
+        assertWarning("Registert fullmakt på personen.", VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -728,7 +725,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val godkjenning = testRapid.inspektør.løsning("Godkjenning")
         assertTrue(godkjenning["godkjent"].booleanValue())
         assertFalse(godkjenning["automatiskBehandling"].booleanValue())
-        assertWarning("Personen er registrert med fremtidsfullmakt", VEDTAKSPERIODE_ID)
+        assertWarning("Registert fullmakt på personen.", VEDTAKSPERIODE_ID)
     }
 
     @Test
