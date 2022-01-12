@@ -20,6 +20,8 @@ import no.nav.helse.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
@@ -688,6 +690,46 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             assertFalse(testRapid.inspektør.behov().contains("Vergemål"))
             assertNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
         }
+
+    @Test
+    fun `sendes til saksbehandler for godkjenning ved fullmakt`() = Toggle.VergemålToggle.enable {
+        håndterVergeflyt(
+            VergemålJson(
+                fullmakter = listOf(
+                    VergemålJson.Fullmakt(
+                        områder = listOf(VergemålJson.Område.Syk),
+                        gyldigTilOgMed = LocalDate.now(),
+                        gyldigFraOgMed = LocalDate.now()
+                    )
+                )
+            )
+        )
+        assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
+        assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
+        assertThrows<NoSuchElementException> { testRapid.inspektør.løsning("Godkjenning") }
+        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        val godkjenning = testRapid.inspektør.løsning("Godkjenning")
+        assertTrue(godkjenning["godkjent"].booleanValue())
+        assertFalse(godkjenning["automatiskBehandling"].booleanValue())
+        assertWarning("Personen er registrert med fullmakt", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `sendes til saksbehandler for godkjenning ved fremtidsfullmakt`() = Toggle.VergemålToggle.enable {
+        håndterVergeflyt(
+            VergemålJson(
+                fremtidsfullmakter = listOf(Vergemål(voksen))
+            )
+        )
+        assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
+        assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
+        assertThrows<NoSuchElementException> { testRapid.inspektør.løsning("Godkjenning") }
+        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        val godkjenning = testRapid.inspektør.løsning("Godkjenning")
+        assertTrue(godkjenning["godkjent"].booleanValue())
+        assertFalse(godkjenning["automatiskBehandling"].booleanValue())
+        assertWarning("Personen er registrert med fremtidsfullmakt", VEDTAKSPERIODE_ID)
+    }
 
     @Test
     fun `avbryter saksbehandling og avvise godkjenning pga vergemål og egen ansatt`() = Toggle.VergemålToggle.enable {
