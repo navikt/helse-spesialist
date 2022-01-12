@@ -27,13 +27,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val query = """
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, COUNT(DISTINCT w.melding) as antall_varsler, o.opprettet, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
-                   pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+                   pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
+                   (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref) AS antall_varsler
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
-                LEFT JOIN warning w ON w.vedtak_ref = v.id
                 LEFT JOIN enhet e ON p.enhet_ref = e.id
                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
@@ -41,7 +41,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
             $eventuellEkskluderingAvRiskQA
             $gyldigeAdressebeskyttelser
-                GROUP BY o.id, o.opprettet, s.oid, s.epost, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato, pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type, sot.inntektskilde, e.id, e.navn, t.saksbehandler_ref, t.på_vent
                 ORDER BY
                     CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                     CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,

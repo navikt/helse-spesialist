@@ -105,8 +105,19 @@ internal class VedtakDao(private val dataSource: DataSource) {
             val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@use
 
             @Language("PostgreSQL")
-            val statement = "INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (?, ?, ?)"
-            session.run(queryOf(statement, type.name, inntektskilde.name, vedtakRef).asUpdate)
+            val statement = """
+                INSERT INTO saksbehandleroppgavetype (type, inntektskilde, vedtak_ref) VALUES (:type, :inntektskilde, :vedtak_ref)
+                ON CONFLICT (vedtak_ref) DO UPDATE SET type = :type, inntektskilde = :inntektskilde
+            """
+            session.run(
+                queryOf(
+                    statement, mapOf(
+                        "type" to type.name,
+                        "inntektskilde" to inntektskilde.name,
+                        "vedtak_ref" to vedtakRef,
+                    )
+                ).asUpdate
+            )
         }
 
     internal fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype =
