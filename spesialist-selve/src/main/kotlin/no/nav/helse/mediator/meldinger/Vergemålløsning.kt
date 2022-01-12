@@ -15,8 +15,6 @@ internal class Vergemålløsning(
         vergemålDao.lagre(fødselsnummer, vergemål)
     }
 
-    fun brukerUnderVergemål(): Boolean = vergemål.harVergemål
-
     internal class VergemålRiver(
         rapidsConnection: RapidsConnection,
         private val hendelseMediator: HendelseMediator
