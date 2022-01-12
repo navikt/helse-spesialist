@@ -2,12 +2,15 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -21,11 +24,28 @@ internal class VedtaksperiodeEndret(
     private val json: String,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
+    speilSnapshotDao: SpeilSnapshotDao,
+    speilSnapshotRestClient: SpeilSnapshotRestClient,
     snapshotDao: SnapshotDao,
-    speilSnapshotRestClient: SpeilSnapshotRestClient
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, snapshotDao, vedtaksperiodeId, fødselsnummer)
+        OppdaterSpeilSnapshotCommand(
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            vedtakDao = vedtakDao,
+            warningDao = warningDao,
+            speilSnapshotDao = speilSnapshotDao,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer
+        ),
+        OppdaterSnapshotCommand(
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            vedtakDao = vedtakDao,
+            snapshotDao = snapshotDao,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            warningDao = warningDao
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer

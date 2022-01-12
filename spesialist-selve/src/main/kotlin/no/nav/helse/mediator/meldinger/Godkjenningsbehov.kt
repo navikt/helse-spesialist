@@ -5,10 +5,12 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
+import no.nav.helse.modell.*
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -66,6 +68,7 @@ internal class Godkjenningsbehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
+    speilSnapshotDao: SpeilSnapshotDao,
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
@@ -75,6 +78,7 @@ internal class Godkjenningsbehov(
     arbeidsforholdDao: ArbeidsforholdDao,
     vergemålDao: VergemålDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
@@ -109,6 +113,7 @@ internal class Godkjenningsbehov(
         ),
         KlargjørVedtaksperiodeCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -118,11 +123,12 @@ internal class Godkjenningsbehov(
             inntektskilde = inntektskilde,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
+            speilSnapshotDao = speilSnapshotDao,
             snapshotDao = snapshotDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             utbetalingId = utbetalingId,
-            utbetalingDao = utbetalingDao
+            utbetalingDao = utbetalingDao,
         ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,

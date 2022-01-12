@@ -1,6 +1,8 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -14,6 +16,7 @@ import java.util.*
 
 internal class KlargjørVedtaksperiodeCommand(
     speilSnapshotRestClient: SpeilSnapshotRestClient,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
     fødselsnummer: String,
     organisasjonsnummer: String,
     vedtaksperiodeId: UUID,
@@ -23,6 +26,7 @@ internal class KlargjørVedtaksperiodeCommand(
     inntektskilde: Inntektskilde,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
+    speilSnapshotDao: SpeilSnapshotDao,
     snapshotDao: SnapshotDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
@@ -31,19 +35,30 @@ internal class KlargjørVedtaksperiodeCommand(
 ) : MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettVedtakCommand(
-            speilSnapshotRestClient,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
-            periodeFom,
-            periodeTom,
-            personDao,
-            arbeidsgiverDao,
-            snapshotDao,
-            vedtakDao,
-            warningDao,
+            speilSnapshotRestClient = speilSnapshotRestClient,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            fødselsnummer = fødselsnummer,
+            orgnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            speilSnapshotDao = speilSnapshotDao,
+            snapshotDao = snapshotDao,
+            vedtakDao = vedtakDao,
+            warningDao = warningDao,
         ),
-        PersisterVedtaksperiodetypeCommand(vedtaksperiodeId, vedtaksperiodetype, inntektskilde, vedtakDao),
-        OpprettKoblingTilUtbetalingCommand(vedtaksperiodeId, utbetalingId, utbetalingDao)
+        PersisterVedtaksperiodetypeCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodetype = vedtaksperiodetype,
+            inntektskilde = inntektskilde,
+            vedtakDao = vedtakDao
+        ),
+        OpprettKoblingTilUtbetalingCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            utbetalingDao = utbetalingDao
+        )
     )
 }

@@ -29,7 +29,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2, snapshot = snapshotV2, utbetalingId = UUID.randomUUID())
 
         assertVedtak(vedtaksperiodeId2)
-        every { restClient.hentSpeilSpapshot(FØDSELSNUMMER) } returns snapshotFinal
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendUtbetalingAnnullert(saksbehandlerEpost = epost)
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)

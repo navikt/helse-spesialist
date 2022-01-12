@@ -26,6 +26,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.*
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -67,7 +68,6 @@ import java.util.*
 import kotlin.random.Random.Default.nextInt
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
-const val azureMountPath: String = "/var/run/secrets/nais.io/azure"
 private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
@@ -108,7 +108,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         accessTokenClient = accessTokenClient,
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
     )
-
+    private val speilSnapshotGraphQLClient = SpeilSnapshotGraphQLClient(
+        httpClient = spleisClient,
+        accessTokenClient = accessTokenClient,
+        spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
+    )
     private val azureConfig = AzureAdAppConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
         issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
@@ -135,7 +139,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val overstyringDao = OverstyringDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
+    private val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
@@ -147,6 +151,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val abonnementDao = AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
@@ -171,7 +176,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         vedtakDao = vedtakDao,
         warningDao = warningDao,
         commandContextDao = commandContextDao,
-        snapshotDao = snapshotDao,
+        speilSnapshotDao = speilSnapshotDao,
         oppgaveDao = oppgaveDao,
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
@@ -182,7 +187,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
         arbeidsforholdDao = arbeidsforholdDao,
+        snapshotDao = snapshotDao,
         speilSnapshotRestClient = speilSnapshotRestClient,
+        speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
         automatisering = Automatisering(
@@ -207,6 +214,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             install(CORS) {
                 header(HttpHeaders.AccessControlAllowOrigin)
                 host("speil.nais.adeo.no", listOf("https"))
+                host("spesialist.dev.intern.nav.no", listOf("https"))
             }
             install(CallId) {
                 generate {
@@ -226,7 +234,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     val uri = call.request.uri
                     val navIdent = principal.payload.getClaim("NAVident").asString()
                     (personIdRegex.find(uri)?.value ?: call.request.header("fodselsnummer"))?.also { personId ->
-                        auditLog.info("end=${System.currentTimeMillis()} suid=$navIdent duid=$personId request=${uri.substring(0, uri.length.coerceAtMost(70))}")
+                        auditLog.info(
+                            "end=${System.currentTimeMillis()} suid=$navIdent duid=$personId request=${
+                                uri.substring(
+                                    0,
+                                    uri.length.coerceAtMost(70)
+                                )
+                            }"
+                        )
                     }
                 }
             }
@@ -234,7 +249,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureConfig)
             basicAuthentication(env.getValue("ADMIN_SECRET"))
-            installGraphQLApi()
+            graphQLApi(
+                snapshotDao = snapshotDao,
+                personApiDao = personApiDao,
+                tildelingDao = tildelingDao,
+                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                overstyringApiDao = overstyringApiDao,
+                risikovurderingApiDao = risikovurderingApiDao,
+                varselDao = varselDao,
+                kode7Saksbehandlergruppe = env.kode7GruppeId(),
+                snapshotGraphQLClient = speilSnapshotGraphQLClient
+            )
             routing {
                 authenticate("oidc") {
                     oppgaveApi(
@@ -245,7 +270,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     personApi(
                         personMediator = PersonMediator(
                             personsnapshotDao = personsnapshotDao,
-                            snapshotDao = snapshotDao,
+                            speilSnapshotDao = speilSnapshotDao,
                             varselDao = varselDao,
                             personDao = personApiDao,
                             arbeidsgiverDao = arbeidsgiverApiDao,

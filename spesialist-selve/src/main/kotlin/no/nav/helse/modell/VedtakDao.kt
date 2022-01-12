@@ -16,12 +16,13 @@ internal class VedtakDao(private val dataSource: DataSource) {
         tom: LocalDate,
         personRef: Long,
         arbeidsgiverRef: Long,
-        speilSnapshotRef: Int
+        speilSnapshotRef: Int,
+        snapshotRef: Int?
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref)
-            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :speil_snapshot_ref);
+            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, speil_snapshot_ref, snapshot_ref)
+            VALUES (:vedtaksperiode_id, :fom, :tom, :person_ref, :arbeidsgiver_ref, :speil_snapshot_ref, :snapshot_ref);
         """
         session.run(
             queryOf(
@@ -31,7 +32,8 @@ internal class VedtakDao(private val dataSource: DataSource) {
                     "tom" to tom,
                     "person_ref" to personRef,
                     "arbeidsgiver_ref" to arbeidsgiverRef,
-                    "speil_snapshot_ref" to speilSnapshotRef
+                    "speil_snapshot_ref" to speilSnapshotRef,
+                    "snapshot_ref" to snapshotRef
                 )
             ).asUpdate
         )
@@ -52,6 +54,24 @@ internal class VedtakDao(private val dataSource: DataSource) {
                         "fom" to fom,
                         "tom" to tom,
                         "speil_snapshot_ref" to speilSnapshotRef
+                    )
+                ).asUpdate
+            )
+        }
+
+    internal fun oppdaterGraphQLSnapshot(vedtakRef: Long, snapshotRef: Int) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+                UPDATE vedtak
+                SET snapshot_ref = :snapshot_ref
+                WHERE id = :vedtak_ref
+            """
+            session.run(
+                queryOf(
+                    query, mapOf(
+                        "vedtak_ref" to vedtakRef,
+                        "snapshot_ref" to snapshotRef
                     )
                 ).asUpdate
             )

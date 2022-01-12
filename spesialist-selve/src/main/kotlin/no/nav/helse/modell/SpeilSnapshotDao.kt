@@ -1,24 +1,22 @@
 package no.nav.helse.modell
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import javax.sql.DataSource
 
-class SnapshotDao(private val dataSource: DataSource) {
-    fun lagre(fødselsnummer: String, snapshot: GraphQLPerson) =
+internal class SpeilSnapshotDao(private val dataSource: DataSource) {
+
+    fun lagre(fødselsnummer: String, snapshot: String) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { tx ->
                 val personRef = tx.finnPersonRef(fødselsnummer)
-                val versjon = snapshot.versjon
+                val versjon = objectMapper.readTree(snapshot)["versjon"].asInt()
                 if (versjon > tx.finnGlobalVersjon())
                     tx.oppdaterGlobalVersjon(versjon)
-                tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
+                tx.lagre(personRef, snapshot, versjon)
             }
         }
 
@@ -31,50 +29,22 @@ class SnapshotDao(private val dataSource: DataSource) {
         }
     }
 
-    fun hentSnapshotMedMetadata(fødselsnummer: String): Pair<PersoninfoDto, GraphQLPerson>? =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                """ SELECT * FROM person AS p
-                    INNER JOIN person_info as pi ON pi.id = p.info_ref
-                    INNER JOIN snapshot AS s ON s.person_ref = p.id
-                WHERE p.fodselsnummer = :fnr;
-            """
-            session.run(
-                queryOf(
-                    statement,
-                    mapOf("fnr" to fødselsnummer.toLong())
-                ).map { row ->
-                    val personinfo = PersoninfoDto(
-                        fornavn = row.string("fornavn"),
-                        mellomnavn = row.stringOrNull("mellomnavn"),
-                        etternavn = row.string("etternavn"),
-                        fødselsdato = row.localDateOrNull("fodselsdato"),
-                        kjønn = row.stringOrNull("kjonn")?.let(Kjønn::valueOf),
-                        adressebeskyttelse = row.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf)
-                    )
-                    val snapshot = objectMapper.readValue<GraphQLPerson>(row.string("data"))
-                    personinfo to snapshot
-                }.asSingle
-            )
-        }
-
     private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon: Int): Int {
         @Language("PostgreSQL")
         val statement = """
-            INSERT INTO snapshot(data, versjon, person_ref)
-                VALUES(CAST(:snapshot as json), :versjon, :person_ref)
+            INSERT INTO speil_snapshot(person_ref, data, versjon)
+                VALUES(:person_ref, CAST(:snapshot as json), :versjon)
             ON CONFLICT(person_ref) DO UPDATE
-                SET data = CAST(:snapshot as json), versjon = :versjon;
+                SET data = CAST(:snapshot as json), sist_endret = now(), versjon = :versjon;
         """
         return requireNotNull(
             run(
                 queryOf(
                     statement,
                     mapOf(
+                        "person_ref" to personRef,
                         "snapshot" to snapshot,
-                        "versjon" to versjon,
-                        "person_ref" to personRef
+                        "versjon" to versjon
                     )
                 ).asUpdateAndReturnGeneratedKey
             )
@@ -84,7 +54,7 @@ class SnapshotDao(private val dataSource: DataSource) {
     private fun TransactionalSession.finnSnapshotVersjon(fødselsnummer: String): Int? {
         @Language("PostgreSQL")
         val statement = """
-            SELECT versjon FROM snapshot s
+            SELECT versjon FROM speil_snapshot s
                 INNER JOIN person p on p.id = s.person_ref
             WHERE p.fodselsnummer = ?
         """
@@ -108,23 +78,21 @@ class SnapshotDao(private val dataSource: DataSource) {
         val statement = "UPDATE global_snapshot_versjon SET versjon = ?, sist_endret = now() WHERE id = 1"
         this.run(queryOf(statement, versjon).asExecute)
     }
-}
 
-data class PersoninfoDto(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
-    val fødselsdato: LocalDate?,
-    val kjønn: Kjønn?,
-    val adressebeskyttelse: Adressebeskyttelse
-)
-
-enum class Kjønn { Mann, Kvinne, Ukjent }
-
-enum class Adressebeskyttelse {
-    Ugradert,
-    Fortrolig,
-    StrengtFortrolig,
-    StrengtFortroligUtland,
-    Ukjent
+    internal fun settSnapshotVersjon(fødselsnummer: String, versjon: Int) {
+        @Language("PostgreSQL")
+        val statement = """
+            UPDATE speil_snapshot SET versjon = :versjon WHERE person_ref = (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer)
+        """
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    statement, mapOf(
+                        "versjon" to versjon,
+                        "fodselsnummer" to fødselsnummer.toLong()
+                    )
+                ).asUpdate
+            )
+        }
+    }
 }

@@ -10,7 +10,7 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
@@ -37,7 +37,7 @@ internal class PersonMediator(
     private val tildelingDao: TildelingDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val utbetalingDao: UtbetalingDao,
-    private val snapshotDao: SnapshotDao,
+    private val speilSnapshotDao: SpeilSnapshotDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
@@ -64,19 +64,21 @@ internal class PersonMediator(
             return SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
-        val personErKode7 = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
-        if (personErKode7 && !kanSeKode7) {
+        val erFortrolig = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
+        if (erFortrolig && !kanSeKode7) {
             sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
             return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
         }
 
-        if (!personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert) && !personErKode7) {
+        val erUgradert = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert)
+        val erUkjentEllerStrengtFortrolig = !erFortrolig && !erUgradert
+        if (erUkjentEllerStrengtFortrolig) {
             return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
         }
 
-        if (snapshotDao.utdatert(fødselsnummer)) {
-            val nyttSnapshot = speilSnapshotRestClient.hentSpeilSpapshot(fødselsnummer)
-            snapshotDao.lagre(fødselsnummer, nyttSnapshot)
+        if (speilSnapshotDao.utdatert(fødselsnummer)) {
+            val nyttSnapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
+            speilSnapshotDao.lagre(fødselsnummer, nyttSnapshot)
         }
         val snapshot = personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
         return if (snapshot != null) SnapshotResponse(snapshot, SnapshotTilstand.OK)

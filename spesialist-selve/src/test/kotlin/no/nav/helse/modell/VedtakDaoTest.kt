@@ -19,7 +19,8 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        opprettGraphQLSnapshot()
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId, null)
         assertEquals(1, vedtak().size)
         vedtak().first().assertEquals(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
     }
@@ -29,11 +30,12 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
-        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId)
+        opprettGraphQLSnapshot()
+        vedtakDao.opprett(VEDTAKSPERIODE, FOM, TOM, personId, arbeidsgiverId, snapshotId, null)
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.lagre(FNR, snapshot())
-        assertThrows<PSQLException> { vedtakDao.opprett(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef) }
+        val nySnapshotRef = speilSnapshotDao.lagre(FNR, snapshot())
+        assertThrows<PSQLException> { vedtakDao.opprett(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef, null) }
     }
 
     @Test
@@ -41,10 +43,11 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettSnapshot()
+        opprettGraphQLSnapshot()
         opprettVedtaksperiode()
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
-        val nySnapshotRef = snapshotDao.lagre(FNR, snapshot())
+        val nySnapshotRef = speilSnapshotDao.lagre(FNR, snapshot())
         vedtakDao.oppdater(vedtakId, nyFom, nyTom, nySnapshotRef)
         assertEquals(1, vedtak().size)
         vedtak().first().assertEquals(VEDTAKSPERIODE, nyFom, nyTom, personId, arbeidsgiverId, nySnapshotRef)
@@ -90,7 +93,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettVedtaksperiode(nyVedtaksperiode)
-        snapshotDao.lagre(FNR, newJson)
+        speilSnapshotDao.lagre(FNR, newJson)
         val vedtak = vedtak()
         assertTrue(vedtak.all { finnSnapshot(it.snapshotRef) == newJson },
             "Alle snapshots på person skal matche den nye jsonen")
@@ -156,7 +159,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun finnSnapshot(snapshotRef: Int) = sessionOf(dataSource).use  {
-        it.run(queryOf("SELECT data FROM speil_snapshot WHERE id = ?", snapshotRef).map { it.string("data") }.asSingle)
+    private fun finnSnapshot(snapshotRef: Int) = sessionOf(dataSource).use  { session ->
+        session.run(queryOf("SELECT data FROM speil_snapshot WHERE id = ?", snapshotRef).map { it.string("data") }.asSingle)
     }
 }

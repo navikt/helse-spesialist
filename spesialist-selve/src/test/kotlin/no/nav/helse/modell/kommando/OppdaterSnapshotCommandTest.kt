@@ -1,61 +1,74 @@
 package no.nav.helse.modell.kommando
 
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.graphql.HentSnapshot
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.snapshotMedWarning
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.assertTrue
 
 internal class OppdaterSnapshotCommandTest {
 
     private companion object {
-        private val VEDTAKSPERIODE = UUID.randomUUID()
         private const val FNR = "fnr"
-        private val SNAPSHOT = snapshotMedWarning(VEDTAKSPERIODE, "", "", "")
-        private const val VEDTAK_REF = 1L
+        private const val AKTØR = "9999999999"
+
+        private val VEDTAKSPERIODE = UUID.randomUUID()
+        private val PERSON = GraphQLPerson(
+            aktorId = AKTØR,
+            arbeidsgivere = emptyList(),
+            dodsdato = null,
+            fodselsnummer = FNR,
+            inntektsgrunnlag = emptyList(),
+            versjon = 1,
+            vilkarsgrunnlaghistorikk = emptyList()
+        )
     }
 
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
-    private val warningDao = mockk<WarningDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
-    private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
+    private val warningDao = mockk<WarningDao>(relaxed = true)
+    private val spleisGraphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
-    private val command = OppdaterSnapshotCommand(restClient, vedtakDao, warningDao, snapshotDao, VEDTAKSPERIODE, FNR)
+    private val command = OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR, warningDao)
 
     @BeforeEach
     fun setup() {
-        clearMocks(vedtakDao, snapshotDao, restClient)
+        clearMocks(vedtakDao, snapshotDao, spleisGraphQLClient)
     }
 
     @Test
-    fun `ignorerer vedtaksperioder som ikke finnes`() {
+    fun `ignorer vedtaksperioder som ikke finnes`() {
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns null
         assertTrue(command.execute(context))
-        verify(exactly = 0) { restClient.hentSpeilSpapshot(FNR) }
+        verify(exactly = 0) { spleisGraphQLClient.hentSnapshot(FNR) }
         verify(exactly = 0) { snapshotDao.lagre(FNR, any()) }
     }
 
     @Test
     fun `lagrer snapshot`() {
         test { assertTrue(command.execute(context)) }
-        verify(exactly = 1) { warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, any()) }
     }
 
     private fun test(block: () -> Unit) {
-        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns VEDTAK_REF
-        every { restClient.hentSpeilSpapshot(FNR) } returns SNAPSHOT
-        every { snapshotDao.lagre(FNR, SNAPSHOT) } returns 1
+        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns 1L
+        every { spleisGraphQLClient.hentSnapshot(FNR) } returns object : GraphQLClientResponse<HentSnapshot.Result> {
+            override val data get() = HentSnapshot.Result(person = PERSON)
+        }
+        every { snapshotDao.lagre(FNR, PERSON) } returns 1
         block()
-        verify(exactly = 1) { restClient.hentSpeilSpapshot(FNR) }
-        verify(exactly = 1) { snapshotDao.lagre(FNR, SNAPSHOT) }
+        verify(exactly = 1) { spleisGraphQLClient.hentSnapshot(FNR) }
+        verify(exactly = 1) { snapshotDao.lagre(FNR, PERSON) }
     }
+
 }
