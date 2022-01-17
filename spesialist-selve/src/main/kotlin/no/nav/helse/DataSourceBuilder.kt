@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
@@ -42,7 +43,7 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
         maximumPoolSize = 1
     }
 
-    fun getDataSource() =
+    fun getDataSource(): HikariDataSource =
         createDataSource(hikariConfig, vaultMountPath, Role.User.asRole(databaseName))
 
     fun migrate() {
@@ -59,7 +60,7 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
             .migrate()
 
     enum class Role {
-        Admin, User, ReadOnly;
+        Admin, User;
 
         fun asRole(databaseName: String) = "$databaseName-${name.lowercase()}"
     }
