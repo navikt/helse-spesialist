@@ -944,6 +944,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             erEgenAnsatt = false,
             contextId = contextId(godkjenningsmeldingId)
         )
+        //sendVergemålløsning(
+        //    godkjenningsmeldingId = godkjenningsmeldingId
+        //)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true,
