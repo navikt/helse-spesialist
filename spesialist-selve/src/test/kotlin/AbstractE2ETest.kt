@@ -560,6 +560,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun klargjørForGodkjenning(oppgaveId: UUID) {
         sendEgenAnsattløsning(oppgaveId, false)
+        sendVergemålløsning(
+            godkjenningsmeldingId = oppgaveId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = oppgaveId,
             erDigital = true
