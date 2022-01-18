@@ -50,6 +50,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -64,6 +67,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -109,6 +113,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -123,6 +130,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -165,6 +173,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -187,6 +198,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -245,6 +257,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -269,6 +284,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -324,6 +340,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = false
@@ -346,6 +365,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -390,6 +410,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -414,6 +437,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
