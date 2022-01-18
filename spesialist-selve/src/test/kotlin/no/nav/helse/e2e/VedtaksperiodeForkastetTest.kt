@@ -67,6 +67,9 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId1,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId1
+        )
 
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId1,

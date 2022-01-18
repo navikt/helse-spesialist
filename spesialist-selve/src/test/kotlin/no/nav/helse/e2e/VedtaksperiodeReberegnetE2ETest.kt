@@ -36,12 +36,16 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
 
         sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
 
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -62,6 +66,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -113,12 +118,17 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+
 
         sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
 
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -133,6 +143,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -171,6 +182,10 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId1,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId1
+        )
+
 
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId1,
