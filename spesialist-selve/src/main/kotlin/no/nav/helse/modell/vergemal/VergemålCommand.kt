@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vergemal
 
 import no.nav.helse.mediator.meldinger.Vergemålløsning
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
@@ -18,14 +17,9 @@ internal class VergemålCommand(
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
-        return if (Toggle.VergemålToggle.enabled) {
-            logg.info("Trenger informasjon om vergemål og fullmakter")
-            context.behov("Vergemål")
-            false
-        } else {
-            logg.info("Lar være å slå opp på vergemål (togglet av)")
-            true
-        }
+        logg.info("Trenger informasjon om vergemål og fullmakter")
+        context.behov("Vergemål")
+        return false
     }
 
     override fun resume(context: CommandContext): Boolean {

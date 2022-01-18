@@ -79,5 +79,3 @@ spec:
       value: "200"
     - name: UNLEASH_URL
       value: https://unleash.nais.io/api
-    - name: OPPSLAG_VERGEMAL
-      value: "true"

@@ -122,6 +122,4 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
             }
         }
     }
-
-    object VergemålToggle : Toggle("OPPSLAG_VERGEMAL")
 }
