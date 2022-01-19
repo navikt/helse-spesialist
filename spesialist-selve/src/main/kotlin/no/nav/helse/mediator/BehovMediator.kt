@@ -19,7 +19,7 @@ internal class BehovMediator(
 
     private fun publiserMeldinger(hendelse: Hendelse, context: CommandContext) {
         context.meldinger().forEach { melding ->
-            sikkerLogg.info("Sender svar på ${hendelse.javaClass.simpleName}\n{}", melding)
+            sikkerLogg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}\n{}", melding)
             rapidsConnection.publish(hendelse.fødselsnummer(), melding)
         }
     }
