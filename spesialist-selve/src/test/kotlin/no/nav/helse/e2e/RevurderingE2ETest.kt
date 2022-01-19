@@ -151,6 +151,9 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true

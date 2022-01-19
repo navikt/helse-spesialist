@@ -120,6 +120,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsning(hendelseId, false)
+        sendVergemålløsning(
+            godkjenningsmeldingId = hendelseId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId,
             erDigital = true
@@ -148,6 +151,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         sendEgenAnsattløsning(hendelseId2, false)
+        sendVergemålløsning(
+            godkjenningsmeldingId = hendelseId2
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = hendelseId2,
             erDigital = true

@@ -2,7 +2,6 @@ package no.nav.helse.modell.vergemal
 
 import io.mockk.*
 import no.nav.helse.mediator.meldinger.Vergemålløsning
-import no.nav.helse.modell.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.behov
@@ -42,19 +41,13 @@ class VergemålCommandTest {
     }
 
     @Test
-    fun `Toggle på - ber om informasjon om vergemål`() = Toggle.VergemålToggle.enable {
+    fun `Toggle på - ber om informasjon om vergemål`() {
         assertFalse(command.execute(context))
         assertEquals(listOf("Vergemål"), context.behov().keys.toList())
     }
 
     @Test
-    fun `Toggle av - ber ikke om informasjon om vergemål`() = Toggle.VergemålToggle.disable {
-        assertTrue(command.execute(context))
-        assertTrue(context.behov().keys.toList().isEmpty())
-    }
-
-    @Test
-    fun `gjør ingen behandling om vi mangler løsning ved resume`() = Toggle.VergemålToggle.enable {
+    fun `gjør ingen behandling om vi mangler løsning ved resume`() {
         assertFalse(command.resume(context))
         verify(exactly = 0) { vergemålDao.lagre(any(), any()) }
     }

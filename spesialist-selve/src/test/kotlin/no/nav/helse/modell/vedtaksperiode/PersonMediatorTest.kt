@@ -102,6 +102,9 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -144,6 +147,9 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
+        )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -334,6 +340,9 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -377,6 +386,9 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
+        )
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -440,6 +452,9 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendVergemålløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
         sendDigitalKontaktinformasjonløsning(godkjenningsmeldingId, true)
         sendÅpneGosysOppgaverløsning(godkjenningsmeldingId)
         sendRisikovurderingløsning(
