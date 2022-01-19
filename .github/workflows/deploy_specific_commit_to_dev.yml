@@ -28,7 +28,7 @@ jobs:
                   ref: ${{ needs.set_version.outputs.tag }}
             - uses: actions/setup-java@v1
               with:
-                  java-version: '16.x'
+                  java-version: '17.x'
             - name: test and build
               run: ./gradlew build
               env:
