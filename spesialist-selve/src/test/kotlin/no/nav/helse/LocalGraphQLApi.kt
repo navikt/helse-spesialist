@@ -1,5 +1,6 @@
 package no.nav.helse
 
+import TestToggles.enable
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*

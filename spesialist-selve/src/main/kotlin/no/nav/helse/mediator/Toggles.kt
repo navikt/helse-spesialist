@@ -1,15 +1,9 @@
 package no.nav.helse.mediator
 
-abstract class Toggle(internal var enabled: Boolean) {
+abstract class Toggle(var _enabled: Boolean) {
     private constructor(key: String, default: Boolean = false) : this(System.getenv()[key]?.toBoolean() ?: default)
 
-    internal fun enable() {
-        enabled = true
-    }
-
-    internal fun disable() {
-        enabled = false
-    }
+    internal val enabled get() = _enabled
 
     object GraphQLApi : Toggle("GRAPHQL_ENABLED")
     object GraphQLPlayground : Toggle("GRAPHQL_PLAYGROUND_ENABLED")

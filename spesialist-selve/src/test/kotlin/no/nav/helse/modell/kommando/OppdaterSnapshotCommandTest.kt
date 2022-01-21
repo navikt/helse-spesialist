@@ -1,5 +1,7 @@
 package no.nav.helse.modell.kommando
 
+import TestToggles.disable
+import TestToggles.enable
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.mockk.clearMocks
 import io.mockk.every
