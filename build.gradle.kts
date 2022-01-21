@@ -34,8 +34,6 @@ allprojects {
             exclude(group = "junit")
         }
 
-        implementation("no.finn.unleash:unleash-client-java:4.4.1")
-
         implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
         implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion")
         implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
