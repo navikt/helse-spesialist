@@ -82,3 +82,5 @@ spec:
       value: "true"
     - name: GRAPHQL_PLAYGROUND_ENABLED
       value: "true"
+    - name: OVERSTYR_ARBEIDSFORHOLD
+      value: "true"

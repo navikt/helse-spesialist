@@ -7,4 +7,5 @@ abstract class Toggle(var _enabled: Boolean) {
 
     object GraphQLApi : Toggle("GRAPHQL_ENABLED")
     object GraphQLPlayground : Toggle("GRAPHQL_PLAYGROUND_ENABLED")
+    object OverstyrArbeidsforhold : Toggle("OVERSTYR_ARBEIDSFORHOLD")
 }

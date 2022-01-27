@@ -11,6 +11,7 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.standardfelter
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -66,7 +67,29 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
         )
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
+    }
 
+    post("/api/overstyr/arbeidsforhold") {
+        if (Toggle.OverstyrArbeidsforhold.enabled) {
+            val overstyring = call.receive<OverstyrArbeidsforholdDto>()
+
+            val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+
+            val message = OverstyrArbeidsforholdKafkaDto(
+                saksbehandler = saksbehandler.toDto(),
+                organisasjonsnummer = overstyring.organisasjonsnummer,
+                fødselsnummer = overstyring.fødselsnummer,
+                aktørId = overstyring.aktørId,
+                begrunnelse = overstyring.begrunnelse,
+                forklaring = overstyring.forklaring,
+                skjæringstidspunkt = overstyring.skjæringstidspunkt,
+                overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold
+            )
+            withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
+            call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
+        } else {
+            call.respond(HttpStatusCode.NotImplemented, "Featuren er skrudd av")
+        }
     }
 }
 
@@ -138,6 +161,47 @@ data class OverstyrInntektKafkaDto(
             put("saksbehandlerEpost", saksbehandler.epost)
             put("månedligInntekt", månedligInntekt)
             put("skjæringstidspunkt", skjæringstidspunkt)
+        }
+    )
+}
+
+data class OverstyrArbeidsforholdDto(
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val aktørId: String,
+    val begrunnelse: String,
+    val forklaring: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
+) {
+    data class ArbeidsforholdOverstyrt(
+        val orgnummer: String,
+        val erAktivt: Boolean
+    )
+}
+
+data class OverstyrArbeidsforholdKafkaDto(
+    val saksbehandler: SaksbehandlerDto,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val aktørId: String,
+    val begrunnelse: String,
+    val forklaring: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
+) {
+    fun somKafkaMessage() = JsonMessage.newMessage(
+        standardfelter("overstyr_arbeidsforhold", fødselsnummer).apply {
+            put("aktørId", aktørId)
+            put("organisasjonsnummer", organisasjonsnummer)
+            put("begrunnelse", begrunnelse)
+            put("forklaring", forklaring)
+            put("saksbehandlerOid", saksbehandler.oid)
+            put("saksbehandlerNavn", saksbehandler.navn)
+            put("saksbehandlerIdent", saksbehandler.ident)
+            put("saksbehandlerEpost", saksbehandler.epost)
+            put("skjæringstidspunkt", skjæringstidspunkt)
+            put("overstyrteArbeidsforhold", overstyrteArbeidsforhold)
         }
     )
 }

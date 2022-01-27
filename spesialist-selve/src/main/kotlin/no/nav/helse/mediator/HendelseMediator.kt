@@ -458,6 +458,16 @@ internal class HendelseMediator(
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
+    fun håndter(overstyringMessage: OverstyrArbeidsforholdKafkaDto) {
+        overstyringsteller.labels("opplysningstype", "arbeidsforhold").inc()
+
+        val overstyring = overstyringMessage.somKafkaMessage().also {
+            sikkerLogg.info("Publiserer overstyring av arbeidsforhold:\n${it.toJson()}")
+        }
+
+        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
+    }
+
     internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
         annulleringsteller.inc()
         saksbehandler.persister(saksbehandlerDao)
