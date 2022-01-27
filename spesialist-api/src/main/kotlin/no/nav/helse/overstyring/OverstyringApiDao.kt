@@ -76,7 +76,35 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             )
         }
 
-    fun finnOverstyringerAvArbeidsforhold(fødselsnummer: String, orgnummer: String): List<OverstyringArbeidsforholdDto> {
-        return emptyList()
+    fun finnOverstyringerAvArbeidsforhold(
+        fødselsnummer: String,
+        orgnummer: String
+    ): List<OverstyringArbeidsforholdDto> = sessionOf(dataSource).use {
+        @Language("PostgreSQL")
+        val finnOverstyringQuery = """
+            SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring_arbeidsforhold o
+                INNER JOIN person p ON p.id = o.person_ref
+                INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
+                INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
+                INNER JOIN hendelse h ON h.id = o.hendelse_ref
+            WHERE p.fodselsnummer = ? AND a.orgnummer = ?
+        """
+        it.run(
+            queryOf(finnOverstyringQuery, fødselsnummer.toLong(), orgnummer.toLong())
+                .map { overstyringRow ->
+                    OverstyringArbeidsforholdDto(
+                        hendelseId = UUID.fromString(overstyringRow.string("hendelse_ref")),
+                        fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
+                        organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
+                        begrunnelse = overstyringRow.string("begrunnelse"),
+                        forklaring = overstyringRow.string("forklaring"),
+                        timestamp = overstyringRow.localDateTime("tidspunkt"),
+                        saksbehandlerNavn = overstyringRow.string("navn"),
+                        saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
+                        erAktivt = overstyringRow.boolean("er_aktivt"),
+                        skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt")
+                    )
+                }.asList
+        )
     }
 }

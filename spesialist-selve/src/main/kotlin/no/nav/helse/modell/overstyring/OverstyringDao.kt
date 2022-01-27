@@ -110,9 +110,34 @@ class OverstyringDao(private val dataSource: DataSource) {
         forklaring: String,
         erAktivt: Boolean,
         skjæringstidspunkt: LocalDate,
-        oid: UUID
+        saksbehandlerRef: UUID
     ) {
-        // må implementeres
-    }
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring_arbeidsforhold(hendelse_ref, person_ref, arbeidsgiver_ref, saksbehandler_ref, begrunnelse, forklaring, er_aktivt, skjaeringstidspunkt)
+                SELECT :hendelse_id, p.id, ag.id, :saksbehandler_ref, :begrunnelse, :forklaring, :er_aktivt, :skjaeringstidspunkt
+                FROM arbeidsgiver ag,
+                     person p
+                WHERE p.fodselsnummer = :fodselsnummer
+                  AND ag.orgnummer = :orgnr
+            """.trimIndent()
+            session.run(
+                queryOf(
+                    opprettOverstyringQuery,
+                    mapOf(
+                        "hendelse_id" to hendelseId,
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnr" to orgnummer.toLong(),
+                        "saksbehandler_ref" to saksbehandlerRef,
+                        "begrunnelse" to begrunnelse,
+                        "forklaring" to forklaring,
+                        "er_aktivt" to erAktivt,
+                        "skjaeringstidspunkt" to skjæringstidspunkt
 
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
+        }
+    }
 }

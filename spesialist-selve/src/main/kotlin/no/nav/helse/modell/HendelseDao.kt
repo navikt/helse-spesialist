@@ -102,6 +102,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyringTidslinje(json)
             OVERSTYRING_INNTEKT -> hendelsefabrikk.overstyringInntekt(json)
+            OVERSTYRING_ARBEIDSFORHOLD -> TODO()
             SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
             UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
@@ -117,6 +118,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is Godkjenningsbehov -> GODKJENNING
         is OverstyringTidslinje -> OVERSTYRING
         is OverstyringInntekt -> OVERSTYRING_INNTEKT
+        is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
         is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
@@ -129,6 +131,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
     private enum class Hendelsetype {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
-        VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, REVURDERING_AVVIST
+        VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST
     }
 }

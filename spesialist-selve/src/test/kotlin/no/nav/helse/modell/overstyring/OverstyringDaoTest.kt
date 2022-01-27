@@ -1,10 +1,10 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
+import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.person.Kjønn
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -62,10 +62,10 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
     }
 
-    @Disabled
     @Test
     fun `Finner opprettede arbeidsforholdoverstyringer`() {
         opprettPerson()
+        hendelseDao.opprett(OverstyringArbeidsforhold(ID, FØDSELSNUMMER, "{}"))
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
             FØDSELSNUMMER,
