@@ -97,7 +97,7 @@ internal class OverstyringTest {
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
         verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
         verify(exactly = 1) {
-            overstyringDao.persisterOverstyring(
+            overstyringDao.persisterOverstyringTidslinje(
                 hendelseId = ID,
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNUMMER,

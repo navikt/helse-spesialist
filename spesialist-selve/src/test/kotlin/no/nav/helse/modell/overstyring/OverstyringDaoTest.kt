@@ -4,12 +4,13 @@ import DatabaseIntegrationTest
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.person.Kjønn
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
 
-internal class OverstyringTidslinjeDaoTest : DatabaseIntegrationTest() {
+internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
     companion object {
         private const val PERSON_FORNAVN = "Per"
@@ -19,6 +20,8 @@ internal class OverstyringTidslinjeDaoTest : DatabaseIntegrationTest() {
         private const val ARBEIDSGIVER_NAVN = "Skrue Mc Duck"
         private val ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
+        private const val ER_AKTIVT = false
+        private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
         private const val AKTØR_ID = "100000234234"
         private val OID = UUID.randomUUID()
         private const val SAKSBEHANDLER_NAVN = "Saks Behandler"
@@ -26,6 +29,7 @@ internal class OverstyringTidslinjeDaoTest : DatabaseIntegrationTest() {
         private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
         private const val BEGRUNNELSE = "Begrunnelse"
+        private const val FORKLARING = "Forklaring"
         private val OVERSTYRTE_DAGER = listOf(
             OverstyringDagDto(
                 dato = LocalDate.of(2020, 1, 1),
@@ -35,14 +39,18 @@ internal class OverstyringTidslinjeDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    @Test
-    fun `Finner opprettede overstyringer`() {
+    private fun opprettPerson() {
         saksbehandlerDao.opprettSaksbehandler(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ARBEIDSGIVER_NAVN, BRANSJER)
         val navn_ref = personDao.insertPersoninfo(PERSON_FORNAVN, null, PERSON_ETTERNAVN, PERSON_FØDSELSDATO, PERSON_KJØNN, ADRESSEBESKYTTELSE)
         val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         personDao.insertPerson(FØDSELSNUMMER, AKTØR_ID, navn_ref, 420, infotrygdutbetaling_ref)
-        overstyringDao.persisterOverstyring(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID)
+    }
+
+    @Test
+    fun `Finner opprettede tidslinjeoverstyringer`() {
+        opprettPerson()
+        overstyringDao.persisterOverstyringTidslinje(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
@@ -54,4 +62,30 @@ internal class OverstyringTidslinjeDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
     }
 
+    @Disabled
+    @Test
+    fun `Finner opprettede arbeidsforholdoverstyringer`() {
+        opprettPerson()
+        overstyringDao.persisterOverstyringArbeidsforhold(
+            ID,
+            FØDSELSNUMMER,
+            ORGNUMMER,
+            BEGRUNNELSE,
+            FORKLARING,
+            ER_AKTIVT,
+            SKJÆRINGSTIDSPUNKT,
+            OID
+        )
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvArbeidsforhold(FØDSELSNUMMER, ORGNUMMER).single()
+
+        assertEquals(ID, hentetOverstyring.hendelseId)
+        assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
+        assertEquals(FORKLARING, hentetOverstyring.forklaring)
+        assertEquals(ER_AKTIVT, hentetOverstyring.erAktivt)
+        assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
+        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
+        assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
+        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
+    }
 }

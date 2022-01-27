@@ -9,7 +9,7 @@ import java.util.*
 import javax.sql.DataSource
 
 class OverstyringDao(private val dataSource: DataSource) {
-    fun persisterOverstyring(
+    fun persisterOverstyringTidslinje(
         hendelseId: UUID,
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -100,6 +100,19 @@ class OverstyringDao(private val dataSource: DataSource) {
                 ).asUpdateAndReturnGeneratedKey
             )
         }
+    }
+
+    fun persisterOverstyringArbeidsforhold(
+        hendelseId: UUID,
+        fødselsnummer: String,
+        orgnummer: String,
+        begrunnelse: String,
+        forklaring: String,
+        erAktivt: Boolean,
+        skjæringstidspunkt: LocalDate,
+        oid: UUID
+    ) {
+        // må implementeres
     }
 
 }

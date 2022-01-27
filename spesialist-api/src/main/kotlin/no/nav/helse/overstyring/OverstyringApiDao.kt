@@ -75,4 +75,8 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                     }.asList
             )
         }
+
+    fun finnOverstyringerAvArbeidsforhold(fødselsnummer: String, orgnummer: String): List<OverstyringArbeidsforholdDto> {
+        return emptyList()
+    }
 }

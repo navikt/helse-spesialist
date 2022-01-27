@@ -14,7 +14,7 @@ internal class PersisterOverstyringTidslinjeCommand(
     private val overstyringDao: OverstyringDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        overstyringDao.persisterOverstyring(
+        overstyringDao.persisterOverstyringTidslinje(
             hendelseId = eventId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

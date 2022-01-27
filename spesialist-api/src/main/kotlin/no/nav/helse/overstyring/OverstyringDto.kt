@@ -35,3 +35,16 @@ data class OverstyringInntektDto(
     val månedligInntekt: Double,
     val skjæringstidspunkt: LocalDate
 )
+
+data class OverstyringArbeidsforholdDto(
+    val hendelseId: UUID,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val begrunnelse: String,
+    val forklaring: String,
+    val timestamp: LocalDateTime,
+    val saksbehandlerNavn: String,
+    val saksbehandlerIdent: String?,
+    val erAktivt: Boolean,
+    val skjæringstidspunkt: LocalDate
+)
