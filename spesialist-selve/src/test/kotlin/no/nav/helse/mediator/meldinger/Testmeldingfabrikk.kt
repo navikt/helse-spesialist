@@ -505,6 +505,33 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagOverstyringArbeidsforhold(
+        id: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String = "orgnr",
+        begrunnelse: String = "begrunnelse",
+        forklaring: String = "forklaring",
+        saksbehandlerOid: UUID = UUID.randomUUID(),
+        saksbehandlerNavn: String = "saksbehandler",
+        saksbehandlerEpost: String = "saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent",
+        erAktivt: Boolean = false,
+        skjæringstidspunkt: LocalDate
+    ) = nyHendelse(
+        id, "overstyr_arbeidsforhold", mapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "begrunnelse" to begrunnelse,
+            "forklaring" to forklaring,
+            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerIdent" to saksbehandlerident,
+            "saksbehandlerNavn" to saksbehandlerNavn,
+            "saksbehandlerEpost" to saksbehandlerEpost,
+            "erAktivt" to erAktivt,
+            "skjæringstidspunkt" to skjæringstidspunkt
+        )
+    )
+
     fun lagOppdragLinje(
         endringskode: String = "NY", // [NY, UENDR, ENDR]
         klassekode: String = "SPREFAG-IOP",

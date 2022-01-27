@@ -65,7 +65,23 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede arbeidsforholdoverstyringer`() {
         opprettPerson()
-        hendelseDao.opprett(OverstyringArbeidsforhold(ID, FØDSELSNUMMER, "{}"))
+        hendelseDao.opprett(OverstyringArbeidsforhold(
+            id = ID,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            orgnummer = ORGNUMMER,
+            erAktivt = ER_AKTIVT,
+            begrunnelse = BEGRUNNELSE,
+            forklaring = FORKLARING,
+            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao
+        ))
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
             FØDSELSNUMMER,

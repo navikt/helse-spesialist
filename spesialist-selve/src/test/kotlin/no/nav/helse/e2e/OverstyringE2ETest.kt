@@ -8,6 +8,7 @@ import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringApiDagerDto
 import no.nav.helse.overstyring.OverstyringApiInntektDto
 import no.nav.helse.overstyring.OverstyringDagDto
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -94,6 +95,22 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val oppgave = requireNotNull(oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
             .find { it.fødselsnummer == FØDSELSNUMMER })
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
+    }
+
+    @Test
+    fun `saksbehandler overstyrer arbeidsforhold`() {
+        val godkjenningsbehovId = settOppBruker()
+        val hendelseId = sendOverstyrtArbeidsforhold(
+            orgnr = ORGNR,
+            erAktivt = false,
+            skjæringstidspunkt = 1.januar,
+        )
+
+        val overstyringer = overstyringApiDao.finnOverstyringerAvArbeidsforhold(
+            fødselsnummer = FØDSELSNUMMER,
+            orgnummer = ORGNR
+        )
+        assertEquals(1, overstyringer.size)
     }
 
     @Test

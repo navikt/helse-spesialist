@@ -108,6 +108,22 @@ internal interface IHendelsefabrikk {
         json: String
     ): OverstyringInntekt
 
+    fun overstyringArbeidsforhold(json: String): OverstyringArbeidsforhold
+    fun overstyringArbeidsforhold(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        erAktivt: Boolean,
+        begrunnelse: String,
+        forklaring: String,
+        skjæringstidspunkt: LocalDate,
+        json: String
+    ): OverstyringArbeidsforhold
+
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
     fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot

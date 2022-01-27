@@ -73,6 +73,7 @@ internal class HendelseMediator(
             AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
             OverstyringInntekt.OverstyringInntektRiver(it, this)
+            OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
@@ -334,6 +335,39 @@ internal class HendelseMediator(
                 begrunnelse = begrunnelse,
                 forklaring = forklaring,
                 månedligInntekt = månedligInntekt,
+                skjæringstidspunkt = skjæringstidspunkt,
+                json = json
+            ), context
+        )
+    }
+
+    override fun overstyringArbeidsforhold(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        erAktivt: Boolean,
+        begrunnelse: String,
+        forklaring: String,
+        skjæringstidspunkt: LocalDate,
+        json: String,
+        context: MessageContext
+    ) {
+        utfør(
+            fødselsnummer, hendelsefabrikk.overstyringArbeidsforhold(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+                epost = epost,
+                orgnummer = orgnummer,
+                erAktivt = erAktivt,
+                begrunnelse = begrunnelse,
+                forklaring = forklaring,
                 skjæringstidspunkt = skjæringstidspunkt,
                 json = json
             ), context

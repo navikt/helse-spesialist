@@ -397,6 +397,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
 
+    protected fun sendOverstyrtArbeidsforhold(
+        orgnr: String = ORGNR,
+        erAktivt: Boolean = false,
+        skjæringstidspunkt: LocalDate,
+    ): UUID =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOverstyringArbeidsforhold(
+                    organisasjonsnummer = orgnr,
+                    erAktivt = erAktivt,
+                    skjæringstidspunkt = skjæringstidspunkt
+                )
+            )
+        }
+
+
     protected fun sendRevurderingAvvist(fødselsnummer: String, errors: List<String>) =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(

@@ -108,6 +108,22 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
+    fun overstyringArbeidsforhold(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        erAktivt: Boolean,
+        begrunnelse: String,
+        forklaring: String,
+        skjæringstidspunkt: LocalDate,
+        json: String,
+        context: MessageContext
+    )
+
     fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,

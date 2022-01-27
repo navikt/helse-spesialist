@@ -102,7 +102,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyringTidslinje(json)
             OVERSTYRING_INNTEKT -> hendelsefabrikk.overstyringInntekt(json)
-            OVERSTYRING_ARBEIDSFORHOLD -> TODO()
+            OVERSTYRING_ARBEIDSFORHOLD -> hendelsefabrikk.overstyringArbeidsforhold(json)
             SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
             UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
