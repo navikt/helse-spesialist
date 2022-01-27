@@ -1,6 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -28,6 +29,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val SAKSBEHANDLER_IDENT = "Z999999"
         private const val EPOST = "saks.behandler@nav.no"
         private const val ORGNUMMER = "987654321"
+        private const val GHOST_ORGNUMMER = "123412"
         private const val BEGRUNNELSE = "Begrunnelse"
         private const val FORKLARING = "Forklaring"
         private val OVERSTYRTE_DAGER = listOf(
@@ -72,11 +74,16 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLEREPOST,
             ident = SAKSBEHANDLER_IDENT,
-            orgnummer = ORGNUMMER,
-            erAktivt = ER_AKTIVT,
-            begrunnelse = BEGRUNNELSE,
-            forklaring = FORKLARING,
+            organisasjonsnummer = ORGNUMMER,
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            overstyrteArbeidsforhold = listOf(
+                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                    orgnummer = GHOST_ORGNUMMER,
+                    erAktivt = ER_AKTIVT,
+                    begrunnelse = BEGRUNNELSE,
+                    forklaring = FORKLARING
+                )
+            ),
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,

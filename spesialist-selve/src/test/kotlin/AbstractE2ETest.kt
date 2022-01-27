@@ -16,6 +16,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.PersonMediator
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.api.modell.Saksbehandler
@@ -69,6 +70,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val FØDSELSNUMMER = "12020052345"
     protected val AKTØR = "999999999"
     protected val ORGNR = "222222222"
+    protected val ORGNR_GHOST = "666"
 
     protected val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_OID = UUID.randomUUID()
@@ -398,16 +400,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
 
     protected fun sendOverstyrtArbeidsforhold(
-        orgnr: String = ORGNR,
-        erAktivt: Boolean = false,
         skjæringstidspunkt: LocalDate,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
     ): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyringArbeidsforhold(
-                    organisasjonsnummer = orgnr,
-                    erAktivt = erAktivt,
-                    skjæringstidspunkt = skjæringstidspunkt
+                    organisasjonsnummer = ORGNR,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    overstyrteArbeidsforhold = overstyrteArbeidsforhold
                 )
             )
         }
@@ -550,7 +551,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return UUID.fromString(løsning.path("@id").asText())
     }
 
-    protected fun settOppBruker(): UUID {
+
+    protected fun settOppBruker(orgnummereMedAktiveArbeidsforhold: List<String> = emptyList()): UUID {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
             ORGNR,
@@ -558,12 +560,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             UTBETALING_ID,
             1.januar,
             31.januar,
+            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsbehovId,
             orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            ekstraArbeidsgivere = orgnummereMedAktiveArbeidsforhold.map {
+                ArbeidsgiverinformasjonJson(
+                    orgnummer = it,
+                    navn = "ghost",
+                    bransjer = listOf("bransje")
+                )
+            }
         )
         sendArbeidsforholdløsning(
             hendelseId = godkjenningsbehovId,

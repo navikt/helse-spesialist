@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -115,10 +116,8 @@ internal interface IHendelseMediator {
         navn: String,
         ident: String,
         epost: String,
-        orgnummer: String,
-        erAktivt: Boolean,
-        begrunnelse: String,
-        forklaring: String,
+        organisasjonsnummer: String,
+        overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         json: String,
         context: MessageContext

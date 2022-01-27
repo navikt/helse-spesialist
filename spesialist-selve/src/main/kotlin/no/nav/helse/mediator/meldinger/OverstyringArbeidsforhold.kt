@@ -2,12 +2,12 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.modell.kommando.*
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
-import no.nav.helse.modell.kommando.PersisterOverstyringInntektCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.*
@@ -25,10 +25,8 @@ internal class OverstyringArbeidsforhold(
     navn: String,
     epost: String,
     ident: String,
-    orgnummer: String,
-    erAktivt: Boolean,
-    begrunnelse: String,
-    forklaring: String,
+    organisasjonsnummer: String,
+    overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
     skjæringstidspunkt: LocalDate,
     private val json: String,
     reservasjonDao: ReservasjonDao,
@@ -48,14 +46,11 @@ internal class OverstyringArbeidsforhold(
             oid = oid,
             eventId = id,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = orgnummer,
-            erAktivt = erAktivt,
-            begrunnelse = begrunnelse,
-            forklaring = forklaring,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyringDao = overstyringDao
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao)
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, organisasjonsnummer, saksbehandlerDao)
     )
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
@@ -74,17 +69,24 @@ internal class OverstyringArbeidsforhold(
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")
-                    it.requireKey("erAktivt")
-                    it.requireKey("begrunnelse")
-                    it.requireKey("forklaring")
                     it.requireKey("skjæringstidspunkt")
                     it.requireKey("saksbehandlerIdent")
                     it.requireKey("saksbehandlerOid")
                     it.requireKey("saksbehandlerNavn")
                     it.requireKey("saksbehandlerEpost")
                     it.requireKey("@id")
+                    it.requireArray("overstyrteArbeidsforhold") {
+                        requireKey("orgnummer")
+                        requireKey("erAktivt")
+                        requireKey("begrunnelse")
+                        requireKey("forklaring")
+                    }
                 }
             }.register(this)
+        }
+
+        override fun onError(problems: MessageProblems, context: MessageContext) {
+            super.onError(problems, context)
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
@@ -106,10 +108,15 @@ internal class OverstyringArbeidsforhold(
                 navn = packet["saksbehandlerNavn"].asText(),
                 ident = packet["saksbehandlerIdent"].asText(),
                 epost = packet["saksbehandlerEpost"].asText(),
-                orgnummer = packet["organisasjonsnummer"].asText(),
-                erAktivt = packet["erAktivt"].asBoolean(),
-                begrunnelse = packet["begrunnelse"].asText(),
-                forklaring = packet["forklaring"].asText(),
+                organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+                overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"].map {
+                    OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                        it["orgnummer"].asText(),
+                        it["erAktivt"].asBoolean(),
+                        it["begrunnelse"].asText(),
+                        it["forklaring"].asText()
+                    )
+                },
                 skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
                 json = packet.toJson(),
                 context = context

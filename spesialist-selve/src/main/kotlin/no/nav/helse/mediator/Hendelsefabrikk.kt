@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
@@ -294,10 +295,8 @@ internal class Hendelsefabrikk(
         navn: String,
         ident: String,
         epost: String,
-        orgnummer: String,
-        erAktivt: Boolean,
-        begrunnelse: String,
-        forklaring: String,
+        organisasjonsnummer: String,
+        overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         json: String
     ) = OverstyringArbeidsforhold (
@@ -307,10 +306,8 @@ internal class Hendelsefabrikk(
         navn = navn,
         ident = ident,
         epost = epost,
-        orgnummer = orgnummer,
-        erAktivt = erAktivt,
-        begrunnelse = begrunnelse,
-        forklaring = forklaring,
+        organisasjonsnummer = organisasjonsnummer,
+        overstyrteArbeidsforhold = overstyrteArbeidsforhold,
         skjæringstidspunkt = skjæringstidspunkt,
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,

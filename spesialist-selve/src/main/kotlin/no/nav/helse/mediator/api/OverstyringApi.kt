@@ -80,8 +80,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
                 organisasjonsnummer = overstyring.organisasjonsnummer,
                 fødselsnummer = overstyring.fødselsnummer,
                 aktørId = overstyring.aktørId,
-                begrunnelse = overstyring.begrunnelse,
-                forklaring = overstyring.forklaring,
                 skjæringstidspunkt = overstyring.skjæringstidspunkt,
                 overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold
             )
@@ -169,14 +167,14 @@ data class OverstyrArbeidsforholdDto(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val aktørId: String,
-    val begrunnelse: String,
-    val forklaring: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
 ) {
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
-        val erAktivt: Boolean
+        val erAktivt: Boolean,
+        val begrunnelse: String,
+        val forklaring: String
     )
 }
 
@@ -185,8 +183,6 @@ data class OverstyrArbeidsforholdKafkaDto(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val aktørId: String,
-    val begrunnelse: String,
-    val forklaring: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
 ) {
@@ -194,8 +190,6 @@ data class OverstyrArbeidsforholdKafkaDto(
         standardfelter("overstyr_arbeidsforhold", fødselsnummer).apply {
             put("aktørId", aktørId)
             put("organisasjonsnummer", organisasjonsnummer)
-            put("begrunnelse", begrunnelse)
-            put("forklaring", forklaring)
             put("saksbehandlerOid", saksbehandler.oid)
             put("saksbehandlerNavn", saksbehandler.navn)
             put("saksbehandlerIdent", saksbehandler.ident)

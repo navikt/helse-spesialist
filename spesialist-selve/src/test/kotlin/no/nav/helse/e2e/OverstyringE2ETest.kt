@@ -3,12 +3,12 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import no.nav.helse.januar
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringApiDagerDto
 import no.nav.helse.overstyring.OverstyringApiInntektDto
 import no.nav.helse.overstyring.OverstyringDagDto
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -99,18 +99,40 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer arbeidsforhold`() {
-        val godkjenningsbehovId = settOppBruker()
-        val hendelseId = sendOverstyrtArbeidsforhold(
-            orgnr = ORGNR,
-            erAktivt = false,
+        val godkjenningsbehovId = settOppBruker(orgnummereMedAktiveArbeidsforhold = listOf(ORGNR_GHOST))
+        sendOverstyrtArbeidsforhold(
             skjæringstidspunkt = 1.januar,
+            overstyrteArbeidsforhold = listOf(
+                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                    orgnummer = ORGNR_GHOST,
+                    erAktivt = false,
+                    begrunnelse = "begrunnelse",
+                    forklaring = "forklaring"
+                )
+            )
         )
 
         val overstyringer = overstyringApiDao.finnOverstyringerAvArbeidsforhold(
             fødselsnummer = FØDSELSNUMMER,
-            orgnummer = ORGNR
+            orgnummer = ORGNR_GHOST
         )
         assertEquals(1, overstyringer.size)
+        assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
+
+        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            periodeFom = 1.januar,
+            periodeTom = 31.januar,
+            skjæringstidspunkt = 1.januar
+        )
+
+        klargjørForGodkjenning(nyttGodkjenningsbehov)
+
+        val oppgave = requireNotNull(oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
+            .find { it.fødselsnummer == FØDSELSNUMMER })
+        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
     @Test

@@ -76,12 +76,12 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                forklaring = "en forklaring",
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = listOf(OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
-                    orgnummer = "et orgnr",
-                    erAktivt = false
+                    orgnummer = "6667",
+                    erAktivt = false,
+                    begrunnelse = "en begrunnelse",
+                    forklaring = "en forklaring"
                 ))
             )
             with(handleRequest(HttpMethod.Post, "/api/overstyr/arbeidsforhold") {
@@ -106,10 +106,10 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 assertEquals(SAKSBEHANDLER_IDENT, event["saksbehandlerIdent"].asText())
                 assertEquals(SAKSBEHANDLER_EPOST, event["saksbehandlerEpost"].asText())
                 assertEquals(ORGNR, event["organisasjonsnummer"].asText())
-                assertEquals("en begrunnelse", event["begrunnelse"].asText())
-                assertEquals("en forklaring", event["forklaring"].asText())
                 assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
-                assertEquals("et orgnr", event["overstyrteArbeidsforhold"].toList().single()["orgnummer"].asText())
+                assertEquals("en begrunnelse", event["overstyrteArbeidsforhold"].toList().single()["begrunnelse"].asText())
+                assertEquals("en forklaring", event["overstyrteArbeidsforhold"].toList().single()["forklaring"].asText())
+                assertEquals("6667", event["overstyrteArbeidsforhold"].toList().single()["orgnummer"].asText())
                 assertEquals(false, event["overstyrteArbeidsforhold"].toList().single()["orgnummer"].asBoolean())
             }
         }

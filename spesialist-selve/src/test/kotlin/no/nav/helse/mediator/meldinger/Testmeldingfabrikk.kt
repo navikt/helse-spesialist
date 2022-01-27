@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -507,28 +508,24 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
 
     fun lagOverstyringArbeidsforhold(
         id: UUID = UUID.randomUUID(),
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         organisasjonsnummer: String = "orgnr",
-        begrunnelse: String = "begrunnelse",
-        forklaring: String = "forklaring",
         saksbehandlerOid: UUID = UUID.randomUUID(),
         saksbehandlerNavn: String = "saksbehandler",
-        saksbehandlerEpost: String = "saksbehandler@nav.no",
+        saksbehandlerEpost: String = "sara.saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        erAktivt: Boolean = false,
         skjæringstidspunkt: LocalDate
     ) = nyHendelse(
         id, "overstyr_arbeidsforhold", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
-            "begrunnelse" to begrunnelse,
-            "forklaring" to forklaring,
             "saksbehandlerOid" to saksbehandlerOid,
             "saksbehandlerIdent" to saksbehandlerident,
             "saksbehandlerNavn" to saksbehandlerNavn,
             "saksbehandlerEpost" to saksbehandlerEpost,
-            "erAktivt" to erAktivt,
-            "skjæringstidspunkt" to skjæringstidspunkt
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold
         )
     )
 

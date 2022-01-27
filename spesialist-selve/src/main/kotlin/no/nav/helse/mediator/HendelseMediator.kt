@@ -348,10 +348,8 @@ internal class HendelseMediator(
         navn: String,
         ident: String,
         epost: String,
-        orgnummer: String,
-        erAktivt: Boolean,
-        begrunnelse: String,
-        forklaring: String,
+        organisasjonsnummer: String,
+        overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         json: String,
         context: MessageContext
@@ -364,15 +362,15 @@ internal class HendelseMediator(
                 navn = navn,
                 ident = ident,
                 epost = epost,
-                orgnummer = orgnummer,
-                erAktivt = erAktivt,
-                begrunnelse = begrunnelse,
-                forklaring = forklaring,
+                organisasjonsnummer = organisasjonsnummer,
+                overstyrteArbeidsforhold = overstyrteArbeidsforhold,
                 skjæringstidspunkt = skjæringstidspunkt,
                 json = json
             ), context
         )
     }
+
+
 
     override fun utbetalingAnnullert(
         message: JsonMessage,
