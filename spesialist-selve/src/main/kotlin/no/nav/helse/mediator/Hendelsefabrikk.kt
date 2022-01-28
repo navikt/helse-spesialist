@@ -316,7 +316,26 @@ internal class Hendelsefabrikk(
     )
 
     override fun overstyringArbeidsforhold(json: String): OverstyringArbeidsforhold {
-        TODO("Not yet implemented")
+        val jsonNode = mapper.readTree(json)
+        return overstyringArbeidsforhold(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
+            navn = jsonNode.path("saksbehandlerNavn").asText(),
+            ident = jsonNode.path("saksbehandlerIdent").asText(),
+            epost = jsonNode.path("saksbehandlerEpost").asText(),
+            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
+            overstyrteArbeidsforhold = jsonNode.path("overstyrteArbeidsforhold").map {
+                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                    it["orgnummer"].asText(),
+                    it["erAktivt"].asBoolean(),
+                    it["begrunnelse"].asText(),
+                    it["forklaring"].asText()
+                )
+            },
+            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
+            json = json
+        )
     }
 
     override fun overstyringInntekt(json: String): OverstyringInntekt {

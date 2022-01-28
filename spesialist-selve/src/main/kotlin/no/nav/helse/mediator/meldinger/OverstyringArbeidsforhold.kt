@@ -85,10 +85,6 @@ internal class OverstyringArbeidsforhold(
             }.register(this)
         }
 
-        override fun onError(problems: MessageProblems, context: MessageContext) {
-            super.onError(problems, context)
-        }
-
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
             logg.info(
