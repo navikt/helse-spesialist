@@ -121,7 +121,10 @@ class OppgaveMediator(
         messageContext: MessageContext,
         doAlso: () -> Unit = {}
     ) {
-        if (oppgaver.size > 1) log.info("Oppgaveliste har ${oppgaver.size} oppgaver, hendelsesId: $hendelseId og contextId: $contextId")
+        if (oppgaver.size > 1) log.info("""
+            Oppgaveliste har ${oppgaver.size} oppgaver (hendelsesId: $hendelseId og contextId: $contextId):
+            ${oppgaver.joinToString()}
+        """.trimIndent())
 
         oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId) }
         doAlso()

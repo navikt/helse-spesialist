@@ -137,6 +137,10 @@ class Oppgave private constructor(
     override fun hashCode(): Int {
         return Objects.hash(id, type, vedtaksperiodeId)
     }
+
+    override fun toString(): String {
+        return "Oppgave(type=$type, status=$status, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+    }
 }
 
 enum class Oppgavetype {
