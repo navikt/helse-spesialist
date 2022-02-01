@@ -172,7 +172,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `sorterer RISK_QA-oppgaver først, så forlengelser, så resten`() {
+    fun `sorterer STIKKPRØVE-oppgaver først, så RISK_QA, så resten, eldste først`() {
         opprettPerson()
         opprettArbeidsgiver()
 
@@ -188,7 +188,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, Oppgavetype.RISK_QA)
         opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE)
         opprettVedtaksperiodeOgOppgave(Periodetype.INFOTRYGDFORLENGELSE, Oppgavetype.RISK_QA)
-        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE)
+        opprettVedtaksperiodeOgOppgave(Periodetype.FORLENGELSE, Oppgavetype.STIKKPRØVE)
+        opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, Oppgavetype.STIKKPRØVE)
 
         val oppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         oppgaver.filter { it.oppgavetype == "RISK_QA" }.let { riskoppgaver ->
@@ -196,14 +197,20 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
                 "Oops, skulle ha vært sortert stigende , men er det ikke: $riskoppgaver"
             }
         }
+        oppgaver.filter { it.oppgavetype == "STIKKPRØVER" }.let { stikkprøver ->
+            assertTrue(stikkprøver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
+                "Oops, skulle ha vært sortert stigende , men er det ikke: $stikkprøver"
+            }
+        }
         listOf(
+            "STIKKPRØVE" to PeriodetypeForApi.FORLENGELSE,
+            "STIKKPRØVE" to PeriodetypeForApi.OVERGANG_FRA_IT,
             "RISK_QA" to PeriodetypeForApi.FORLENGELSE,
             "RISK_QA" to PeriodetypeForApi.FØRSTEGANGSBEHANDLING,
             "RISK_QA" to PeriodetypeForApi.OVERGANG_FRA_IT,
             "RISK_QA" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
-            "SØKNAD" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
-            "SØKNAD" to PeriodetypeForApi.FORLENGELSE,
             "SØKNAD" to PeriodetypeForApi.FØRSTEGANGSBEHANDLING,
+            "SØKNAD" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
         ).let { ønsketRekkefølge ->
             assertEquals(ønsketRekkefølge.map { it.first }, oppgaver.map { it.oppgavetype })
             assertEquals(ønsketRekkefølge.map { it.second }, oppgaver.map { it.type })
