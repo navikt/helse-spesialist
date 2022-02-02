@@ -56,6 +56,7 @@ internal class VedtaksperiodeForkastet(
                     it.demandValue("@event_name", "vedtaksperiode_forkastet")
                     it.require("@id", ::uuid)
                     it.require("vedtaksperiodeId", ::uuid)
+                    it.interestedIn("aktørId")
                     it.requireKey("fødselsnummer")
                 }
             }.register(this)
@@ -68,6 +69,10 @@ internal class VedtaksperiodeForkastet(
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
+            if (packet["aktørId"].asText() == "1000063751749") {
+                log.info("Ignorerer vedtaksperiode_forkastet for aktørId ${packet["aktørId"].asText()}")
+                return
+            }
             log.info(
                 "Mottok vedtaksperiode endret {}, {}",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
