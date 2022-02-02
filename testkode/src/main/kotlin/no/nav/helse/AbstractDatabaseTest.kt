@@ -30,6 +30,7 @@ abstract class AbstractDatabaseTest {
                 idleTimeout = 500001
                 connectionTimeout = 10000
                 maxLifetime = 600001
+                initializationFailTimeout = 5000
             })
 
         init {

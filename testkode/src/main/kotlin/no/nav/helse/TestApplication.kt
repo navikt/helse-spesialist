@@ -40,6 +40,7 @@ class TestApplication(private val port: Int = randomPort()) {
             idleTimeout = 10001
             connectionTimeout = 1000
             maxLifetime = 30001
+            initializationFailTimeout = 5000
         })
 
         flyway = Flyway
