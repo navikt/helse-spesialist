@@ -92,8 +92,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val spleisClient = HttpClient(Apache) {
         install(JsonFeature) { serializer = JacksonSerializer() }
         engine {
-            socketTimeout = 30_000
-            connectTimeout = 30_000
+            socketTimeout = 120_000
+            connectTimeout = 1_000
             connectionRequestTimeout = 40_000
         }
     }
