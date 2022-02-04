@@ -153,6 +153,22 @@ internal class PersonMediator(
                                 skjæringstidspunkt = overstyring.skjæringstidspunkt
                             )
                         )
+                    } + overstyringDao.finnOverstyringerAvArbeidsforhold(
+                        personMetadata.fødselsnummer,
+                        it.organisasjonsnummer
+                    ).map { overstyring ->
+                        OverstyringApiArbeidsforholdDto(
+                            hendelseId = overstyring.hendelseId,
+                            begrunnelse = overstyring.begrunnelse,
+                            timestamp = overstyring.timestamp,
+                            saksbehandlerNavn = overstyring.saksbehandlerNavn,
+                            saksbehandlerIdent = overstyring.saksbehandlerIdent,
+                            overstyrtArbeidsforhold = OverstyrtArbeidsforholdApiDto(
+                                forklaring = overstyring.forklaring,
+                                deaktivert = !overstyring.erAktivt,
+                                skjæringstidspunkt = overstyring.skjæringstidspunkt
+                            )
+                        )
                     }
                 ArbeidsgiverApiDto(
                     organisasjonsnummer = it.organisasjonsnummer,

@@ -5,10 +5,7 @@ import io.mockk.every
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.oppgave.OppgaveDto
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringApiDagerDto
-import no.nav.helse.overstyring.OverstyringApiInntektDto
-import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -181,6 +178,16 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             skjæringstidspunkt = LocalDate.now(),
             forklaring = "forklaring"
         )
+        sendOverstyrtArbeidsforhold(
+            skjæringstidspunkt = LocalDate.of(2018, 1, 1),
+            overstyrteArbeidsforhold = listOf(
+                OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                    orgnummer = ORGNR,
+                    erAktivt = false,
+                    begrunnelse = "begrunnelse",
+                    forklaring = "forklaring"
+                ))
+        )
 
         val hendelseId2 = sendGodkjenningsbehov(
             ORGNR,
@@ -212,9 +219,10 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere.first().overstyringer
-        assertEquals(2, overstyringer.size)
+        assertEquals(3, overstyringer.size)
         assertEquals(1, (overstyringer.first() as OverstyringApiDagerDto).overstyrteDager.size)
-        assertEquals(15000.0, (overstyringer.last() as OverstyringApiInntektDto).overstyrtInntekt.månedligInntekt)
+        assertEquals(15000.0, (overstyringer[1] as OverstyringApiInntektDto).overstyrtInntekt.månedligInntekt)
+        assertEquals(true, (overstyringer[2] as OverstyringApiArbeidsforholdDto).overstyrtArbeidsforhold.deaktivert)
     }
 
     private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {

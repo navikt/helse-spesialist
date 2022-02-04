@@ -35,6 +35,17 @@ data class OverstyringApiInntektDto(
     override var type: OverstyringType = OverstyringType.Inntekt
 }
 
+data class OverstyringApiArbeidsforholdDto(
+    override var hendelseId: UUID,
+    override var begrunnelse: String,
+    override var timestamp: LocalDateTime,
+    override var saksbehandlerNavn: String,
+    override var saksbehandlerIdent: String?,
+    val overstyrtArbeidsforhold: OverstyrtArbeidsforholdApiDto,
+): OverstyringApiDto() {
+    override var type: OverstyringType = OverstyringType.Arbeidsforhold
+}
+
 data class OverstyrtDagApiDto(
     val dato: LocalDate,
     val dagtype: Dagtype,
@@ -47,6 +58,12 @@ data class OverstyrtInntektApiDto(
     val skjæringstidspunkt: LocalDate
 )
 
+data class OverstyrtArbeidsforholdApiDto(
+    val forklaring: String,
+    val deaktivert: Boolean,
+    val skjæringstidspunkt: LocalDate
+)
+
 enum class OverstyringType {
-    Dager, Inntekt
+    Dager, Inntekt, Arbeidsforhold
 }
