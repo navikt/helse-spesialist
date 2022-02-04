@@ -4,6 +4,7 @@ import no.nav.helse.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 internal class PersonApiDaoTest : DatabaseIntegrationTest() {
 
@@ -35,5 +36,11 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
     fun `person med ukjent adressebeskyttelse er (kanskje) ikke kode 7`() {
         person(adressebeskyttelse = Adressebeskyttelse.Ukjent)
         assertFalse(personApiDao.personHarAdressebeskyttelse(FØDSELSNUMMER, Adressebeskyttelse.Fortrolig))
+    }
+
+    @Test
+    fun `henter fødselsnummer for person med gitt aktørId`() {
+        person()
+        assertEquals(FØDSELSNUMMER, personApiDao.finnFødselsnummer(AKTØRID.toLong()))
     }
 }

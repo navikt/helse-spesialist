@@ -5,7 +5,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import io.ktor.features.*
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.SnapshotDao
@@ -27,19 +26,27 @@ class PersonQuery(
     private val snapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) : Query {
 
-    fun person(fnr: String, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
-        if (isForbidden(fnr, env)) {
-            return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fnr)).build()
+    fun person(fnr: String? = null, aktorId: String? = null, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
+        if (fnr == null && aktorId == null) {
+            return DataFetcherResult.newResult<Person?>().error(getBadRequestError()).build()
         }
 
-        if (snapshotDao.utdatert(fnr)) {
-            snapshotGraphQLClient.hentSnapshot(fnr).data?.person?.let {
-                snapshotDao.lagre(fnr, it)
+        val fødselsnummer = fnr
+            ?: aktorId?.let { personApiDao.finnFødselsnummer(it.toLong()) }
+            ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError()).build()
+
+        if (isForbidden(fødselsnummer, env)) {
+            return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
+        }
+
+        if (snapshotDao.utdatert(fødselsnummer)) {
+            snapshotGraphQLClient.hentSnapshot(fødselsnummer).data?.person?.let {
+                snapshotDao.lagre(fødselsnummer, it)
             }
         }
 
         val snapshot = try {
-            snapshotDao.hentSnapshotMedMetadata(fnr)
+            snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
         } catch (e: Exception) {
             return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
         }
@@ -58,7 +65,7 @@ class PersonQuery(
         }
 
         return if (person == null) {
-            DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
+            DataFetcherResult.newResult<Person?>().error(getNotFoundError(fødselsnummer)).build()
         } else {
             DataFetcherResult.newResult<Person?>().data(person).build()
         }
@@ -72,21 +79,23 @@ class PersonQuery(
     }
 
     private fun getSnapshotValidationError(): GraphQLError = GraphqlErrorException.newErrorException()
-        .cause(NotFoundException())
         .message("Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.")
         .extensions(mapOf("code" to 501, "field" to "person"))
         .build()
 
-    private fun getNotFoundError(fnr: String): GraphQLError = GraphqlErrorException.newErrorException()
-        .cause(NotFoundException())
+    private fun getNotFoundError(fnr: String? = null): GraphQLError = GraphqlErrorException.newErrorException()
         .message("Finner ikke snapshot for person med fødselsnummer $fnr")
         .extensions(mapOf("code" to 404, "field" to "person"))
         .build()
 
     private fun getForbiddenError(fnr: String): GraphQLError = GraphqlErrorException.newErrorException()
-        .cause(NotFoundException())
         .message("Har ikke tilgang til person med fødselsnummer $fnr")
         .extensions(mapOf("code" to 403, "field" to "person"))
+        .build()
+
+    private fun getBadRequestError(): GraphQLError = GraphqlErrorException.newErrorException()
+        .message("Requesten mangler både fødselsnummer og aktørId")
+        .extensions(mapOf("code" to 400))
         .build()
 
 }

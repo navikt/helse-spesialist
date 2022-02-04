@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.getGrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.INGEN_TILGANG
 import org.slf4j.LoggerFactory
@@ -29,7 +28,10 @@ internal fun Route.personApi(
         val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
         val snapshotResponse = withContext(Dispatchers.IO) {
             personMediator
-                .byggSpeilSnapshotForVedtaksperiodeId(UUID.fromString(call.parameters["vedtaksperiodeId"]!!), kanSeKode7)
+                .byggSpeilSnapshotForVedtaksperiodeId(
+                    UUID.fromString(call.parameters["vedtaksperiodeId"]!!),
+                    kanSeKode7
+                )
         }
         if (snapshotResponse.tilstand == INGEN_TILGANG) {
             call.respond(HttpStatusCode.Forbidden, "Har ikke tilgang til denne vedtaksperioden")

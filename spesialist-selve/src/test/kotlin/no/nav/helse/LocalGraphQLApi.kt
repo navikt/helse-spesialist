@@ -41,6 +41,7 @@ fun main() = runBlocking {
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
         every { personApiDao.personHarAdressebeskyttelse(any(), no.nav.helse.person.Adressebeskyttelse.Ugradert) } returns true
         every { personApiDao.finnEnhet(any()) } returns EnhetDto("1234", "Bømlo")
+        every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson.fodselsnummer
 
         install(ContentNegotiation) {
             register(
