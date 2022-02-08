@@ -77,3 +77,5 @@ spec:
       value: 5cc46653-7c6c-4c5e-b617-baf648452ad4
     - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering
       value: "200"
+    - name: GRAPHQL_ENABLED
+      value: "true"
