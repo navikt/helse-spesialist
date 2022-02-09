@@ -4,10 +4,13 @@ import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import graphql.GraphQL
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
+import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.ContextFactory
 import no.nav.helse.mediator.api.graphql.RequestParser
 import no.nav.helse.mediator.api.graphql.SchemaBuilder
@@ -52,18 +55,28 @@ internal fun Application.graphQLApi(
     )
 
     routing {
-        post("graphql") {
-            val result = server.execute(call.request)
-
-            if (result != null) {
-                val json = objectMapper.writeValueAsString(result)
-                call.respond(json)
+        if (Toggle.GraphQLPlayground.enabled) {
+            routes(server)
+        } else {
+            authenticate("oidc") {
+                routes(server)
             }
         }
+    }
+}
 
-        get("playground") {
-            call.respondText(buildPlaygroundHtml("graphql", "subscriptions"), ContentType.Text.Html)
+private fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
+    post("graphql") {
+        val result = server.execute(call.request)
+
+        if (result != null) {
+            val json = objectMapper.writeValueAsString(result)
+            call.respond(json)
         }
+    }
+
+    get("playground") {
+        call.respondText(buildPlaygroundHtml("graphql", "subscriptions"), ContentType.Text.Html)
     }
 }
 
