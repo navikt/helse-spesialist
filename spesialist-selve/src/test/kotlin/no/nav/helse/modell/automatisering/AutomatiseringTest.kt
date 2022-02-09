@@ -54,6 +54,7 @@ internal class AutomatiseringTest {
     companion object {
         private const val fødselsnummer = "12345678910"
         private val vedtaksperiodeId = UUID.randomUUID()
+        private val utbetalingId = UUID.randomUUID()
     }
 
     @BeforeEach
@@ -159,5 +160,19 @@ internal class AutomatiseringTest {
     fun `periode med vergemål skal ikke automatisk godkjennes`() {
         every { vergemålDaoMock.harVergemål(fødselsnummer) } returns true
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
+    }
+
+    @Test
+    fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
+        every { personDaoMock.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId) } returns PersonDao.Utbetalingen(
+            utbetalingId,11000, 0)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
+    }
+
+    @Test
+    fun `periode med delvis refusjon skal ikke automatisk godkjennes`() {
+        every { personDaoMock.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId) } returns PersonDao.Utbetalingen(
+            utbetalingId,11000, 11000)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 }

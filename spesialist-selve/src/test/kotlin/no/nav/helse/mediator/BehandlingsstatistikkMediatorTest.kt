@@ -7,10 +7,10 @@ import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto.BehandlingerDto
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto.OppgavestatistikkDto
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkType
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
-import no.nav.helse.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -26,19 +26,23 @@ internal class BehandlingsstatistikkMediatorTest {
                 oppgaverTilGodkjenning = OppgavestatistikkDto(
                     totalt = 34,
                     perPeriodetype = listOf(
-                        Periodetype.FØRSTEGANGSBEHANDLING to 10,
-                        Periodetype.FORLENGELSE to 9,
-                        Periodetype.INFOTRYGDFORLENGELSE to 8,
-                        Periodetype.OVERGANG_FRA_IT to 7
+                        BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING to 10,
+                        BehandlingsstatistikkType.FORLENGELSE to 9,
+                        BehandlingsstatistikkType.INFOTRYGDFORLENGELSE to 8,
+                        BehandlingsstatistikkType.OVERGANG_FRA_IT to 7,
+                        BehandlingsstatistikkType.UTBETALING_TIL_SYKMELDT to 6,
+                        BehandlingsstatistikkType.DELVIS_REFUSJON to 5
                     )
                 ),
                 tildelteOppgaver = OppgavestatistikkDto(
                     totalt = 34,
                     perPeriodetype = listOf(
-                        Periodetype.FØRSTEGANGSBEHANDLING to 10,
-                        Periodetype.FORLENGELSE to 9,
-                        Periodetype.INFOTRYGDFORLENGELSE to 8,
-                        Periodetype.OVERGANG_FRA_IT to 7
+                        BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING to 10,
+                        BehandlingsstatistikkType.FORLENGELSE to 9,
+                        BehandlingsstatistikkType.INFOTRYGDFORLENGELSE to 8,
+                        BehandlingsstatistikkType.OVERGANG_FRA_IT to 7,
+                        BehandlingsstatistikkType.UTBETALING_TIL_SYKMELDT to 6,
+                        BehandlingsstatistikkType.DELVIS_REFUSJON to 5
                     )
                 ),
                 fullførteBehandlinger = BehandlingerDto(
@@ -57,11 +61,15 @@ internal class BehandlingsstatistikkMediatorTest {
         assertEquals(10, eksternDto.antallOppgaverTilGodkjenning.perPeriodetype[FØRSTEGANGSBEHANDLING])
         assertEquals(17, eksternDto.antallOppgaverTilGodkjenning.perPeriodetype[FORLENGELSE])
         assertEquals(7, eksternDto.antallOppgaverTilGodkjenning.perPeriodetype[OVERGANG_FRA_IT])
+        assertEquals(6, eksternDto.antallOppgaverTilGodkjenning.perPeriodetype[UTBETALING_TIL_SYKMELDT])
+        assertEquals(5, eksternDto.antallOppgaverTilGodkjenning.perPeriodetype[DELVIS_REFUSJON])
 
         assertEquals(34, eksternDto.antallTildelteOppgaver.totalt)
         assertEquals(10, eksternDto.antallTildelteOppgaver.perPeriodetype[FØRSTEGANGSBEHANDLING])
         assertEquals(17, eksternDto.antallTildelteOppgaver.perPeriodetype[FORLENGELSE])
         assertEquals(7, eksternDto.antallTildelteOppgaver.perPeriodetype[OVERGANG_FRA_IT])
+        assertEquals(6, eksternDto.antallTildelteOppgaver.perPeriodetype[UTBETALING_TIL_SYKMELDT])
+        assertEquals(5, eksternDto.antallTildelteOppgaver.perPeriodetype[DELVIS_REFUSJON])
 
         assertEquals(10, eksternDto.fullførteBehandlinger.totalt)
         assertEquals(8, eksternDto.fullførteBehandlinger.annulleringer)

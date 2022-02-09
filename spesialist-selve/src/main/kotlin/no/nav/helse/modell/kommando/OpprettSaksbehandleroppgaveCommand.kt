@@ -37,6 +37,10 @@ internal class OpprettSaksbehandleroppgaveCommand(
         if (harVergemål) return true
         if (tilhørerUtlandsenhet) return true
 
+        val utbetalingTilSykmeldt =
+            (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) == 0
+        val delvisRefusjon = (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) != 0
+
         val oppgave = when {
             harFortroligAdressebeskyttelse -> Oppgave.fortroligAdressebeskyttelse(vedtaksperiodeId, utbetalingId)
             utbetalingtype == Utbetalingtype.REVURDERING -> Oppgave.revurdering(vedtaksperiodeId, utbetalingId)
@@ -48,6 +52,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
                 vedtaksperiodeId,
                 utbetalingId
             )
+            utbetalingTilSykmeldt -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
+            delvisRefusjon -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave på utbetalingId $utbetalingId og vedtaksperiodeId $vedtaksperiodeId")
@@ -60,4 +66,5 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val erEgenAnsatt get() = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
     private val harVergemål get() = vergemålDao.harVergemål(fødselsnummer) ?: false
     private val tilhørerUtlandsenhet get() = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
+    private val vedtaksperiodensUtbetaling get () = personDao.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId)
 }

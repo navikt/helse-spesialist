@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
+import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkType as BehandlingsstatistikkTypeForApi
 
 internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
 
@@ -26,7 +26,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, dto.tildelteOppgaver.perPeriodetype.size)
         assertEquals(1, dto.oppgaverTilGodkjenning.totalt)
         assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype.size)
-        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[PeriodetypeForApi.FØRSTEGANGSBEHANDLING])
+        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[BehandlingsstatistikkTypeForApi.FØRSTEGANGSBEHANDLING])
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         tildelingDao.opprettTildeling(oppgaveId, SAKSBEHANDLER_OID)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(1, dto.tildelteOppgaver.totalt)
-        assertEquals(1, dto.tildelteOppgaver.perPeriodetype[PeriodetypeForApi.FØRSTEGANGSBEHANDLING])
+        assertEquals(1, dto.tildelteOppgaver.perPeriodetype[BehandlingsstatistikkTypeForApi.FØRSTEGANGSBEHANDLING])
     }
 
     @Test
@@ -77,8 +77,8 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         nyVedtaksperiode(Periodetype.FORLENGELSE)
         val dto = behandlingsstatistikkDao.oppgavestatistikk(NOW)
         assertEquals(2, dto.oppgaverTilGodkjenning.totalt)
-        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[PeriodetypeForApi.FØRSTEGANGSBEHANDLING])
-        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[PeriodetypeForApi.FORLENGELSE])
+        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[BehandlingsstatistikkTypeForApi.FØRSTEGANGSBEHANDLING])
+        assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype[BehandlingsstatistikkTypeForApi.FORLENGELSE])
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class BehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         assertEquals(1, dto.oppgaverTilGodkjenning.perPeriodetype.size)
     }
 
-    private operator fun List<Pair<PeriodetypeForApi, Int>>.get(type: PeriodetypeForApi) = this.first { it.first == type }.second
+    private operator fun List<Pair<BehandlingsstatistikkTypeForApi, Int>>.get(type: BehandlingsstatistikkTypeForApi) = this.first { it.first == type }.second
 
     private fun nyPersonMedAutomatiskVedtak(periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING, inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER) {
         godkjenningsbehov()

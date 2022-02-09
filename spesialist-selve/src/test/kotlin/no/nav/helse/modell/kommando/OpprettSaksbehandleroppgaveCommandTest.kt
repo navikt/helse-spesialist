@@ -44,7 +44,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         hendelseId = hendelseId,
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
-        utbetalingId = UUID.randomUUID(),
+        utbetalingId = UTBETALING_ID,
         utbetalingtype = Utbetalingtype.UTBETALING,
         vergemålDao = vergemålDao
     )
@@ -76,5 +76,29 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { personDao.findPersoninfoAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.fortroligAdressebeskyttelse(VEDTAKSPERIODE_ID, UTBETALING_ID))}
+    }
+
+    @Test
+    fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
+            utbetalingId = UTBETALING_ID,
+            personNettoBeløp = 11000,
+            arbeidsgiverNettoBeløp = 0
+        )
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID))}
+    }
+
+    @Test
+    fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() {
+        every { reservasjonDao.hentReservasjonFor(FNR) } returns null
+        every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
+            utbetalingId = UTBETALING_ID,
+            personNettoBeløp = 11000,
+            arbeidsgiverNettoBeløp = 11000
+        )
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID))}
     }
 }

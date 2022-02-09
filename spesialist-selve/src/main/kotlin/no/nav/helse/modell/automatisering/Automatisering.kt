@@ -39,7 +39,7 @@ internal class Automatisering(
         utbetalingtype: Utbetalingtype,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
 
         when {
             utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() ->
@@ -58,7 +58,7 @@ internal class Automatisering(
         }
     }
 
-    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID): List<String> {
+    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID, utbetalingId: UUID): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
@@ -69,6 +69,10 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
+        val vedtaksperiodensUtbetaling = personDao.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId)
+        val utbetalingTilSykmeldt =
+            (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) == 0
+        val delvisRefusjon = (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) != 0
 
         return valider(
             risikovurdering,
@@ -81,6 +85,8 @@ internal class Automatisering(
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
+            validering("Utbetaling til sykmeldt") { !utbetalingTilSykmeldt },
+            validering("Delvis refusjon") { !delvisRefusjon },
         )
     }
 

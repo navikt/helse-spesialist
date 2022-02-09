@@ -2,7 +2,7 @@ package no.nav.helse.behandlingsstatistikk
 
 import kotliquery.Row
 import no.nav.helse.HelseDao
-import no.nav.helse.vedtaksperiode.Periodetype
+import no.nav.helse.oppgave.Oppgavetype
 import java.time.LocalDate
 import javax.sql.DataSource
 
@@ -19,7 +19,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
         return BehandlingsstatistikkDto(
             oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(
                 totalt = tilGodkjenningPerPeriodetype.sumOf { (_, antall) -> antall },
-                perPeriodetype = tilGodkjenningPerPeriodetype
+                perPeriodetype = tilGodkjenningPerPeriodetype,
             ),
             tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(
                 totalt = tildeltPerPeriodetype.sumOf { (_, antall) -> antall },
@@ -35,20 +35,24 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
     }
 
     private fun tilGodkjenningPerPeriodetype() =
-        """ SELECT sot.type AS periodetype, COUNT(distinct o.id) AS antall FROM oppgave o
+        """ SELECT sot.type AS periodetype, o.type, COUNT(distinct o.id)
+            FILTER (WHERE o.type != 'UTBETALING_TIL_SYKMELDT' or o.type != 'DELVIS_REFUSJON') AS antall,
+            COUNT(distinct o.type) as antallAvOppgaveType FROM oppgave o
               INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
-            GROUP BY sot.type
-        """.list { perPeriodetype(it) }
+            GROUP BY sot.type, o.type
+        """.list { perStatistikktype(it) }
 
     private fun tildeltPerPeriodetype() =
-        """ SELECT s.type as periodetype, COUNT(1) as antall FROM oppgave o
+        """ SELECT s.type as periodetype, o.type, COUNT(distinct s.type)
+            FILTER (WHERE o.type != 'UTBETALING_TIL_SYKMELDT' or o.type != 'DELVIS_REFUSJON') AS antall,
+            COUNT(distinct o.type) as antallAvOppgaveType FROM oppgave o
                  INNER JOIN vedtak v on o.vedtak_ref = v.id
                  INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
                  INNER JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
-            GROUP BY s.type
-        """.list { perPeriodetype(it) }
+            GROUP BY s.type, o.type
+        """.list { perStatistikktype(it) }
 
     private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(
         """ SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom"""
@@ -64,5 +68,20 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
             SELECT COUNT(1) as antall FROM annullert_av_saksbehandler WHERE annullert_tidspunkt >= :fom
         """.single(mapOf("fom" to fom)) {it.int("antall")})
 
-    private fun perPeriodetype(row: Row) = Periodetype.valueOf(row.string("periodetype")) to row.int("antall")
+    private fun perStatistikktype(row: Row): Pair<BehandlingsstatistikkType, Int> {
+        val oppgavetype: Oppgavetype = Oppgavetype.valueOf(row.string("type"))
+
+        return if (oppgavetype != Oppgavetype.DELVIS_REFUSJON && oppgavetype != Oppgavetype.UTBETALING_TIL_SYKMELDT) {
+            BehandlingsstatistikkType.valueOf(row.string("periodetype")) to row.int("antall")
+        } else {  BehandlingsstatistikkType.valueOf(row.string("type")) to row.int("antallAvOppgaveType") }
+    }
+}
+
+enum class BehandlingsstatistikkType {
+    FØRSTEGANGSBEHANDLING,
+    FORLENGELSE,
+    INFOTRYGDFORLENGELSE,
+    OVERGANG_FRA_IT,
+    UTBETALING_TIL_SYKMELDT,
+    DELVIS_REFUSJON
 }

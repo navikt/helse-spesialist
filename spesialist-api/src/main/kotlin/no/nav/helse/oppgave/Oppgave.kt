@@ -34,6 +34,8 @@ class Oppgave private constructor(
         fun revurdering(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.REVURDERING, vedtaksperiodeId, utbetalingId)
         fun riskQA(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.RISK_QA, vedtaksperiodeId, utbetalingId)
         fun fortroligAdressebeskyttelse(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.FORTROLIG_ADRESSE, vedtaksperiodeId, utbetalingId)
+        fun utbetalingTilSykmeldt(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.UTBETALING_TIL_SYKMELDT, vedtaksperiodeId, utbetalingId)
+        fun delvisRefusjon(vedtaksperiodeId: UUID, utbetalingId: UUID) = oppgave(Oppgavetype.DELVIS_REFUSJON, vedtaksperiodeId, utbetalingId)
 
         private fun oppgave(type: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
             Oppgave(type, Oppgavestatus.AvventerSaksbehandler, vedtaksperiodeId, utbetalingId)
@@ -144,5 +146,5 @@ class Oppgave private constructor(
 }
 
 enum class Oppgavetype {
-    SØKNAD, STIKKPRØVE, RISK_QA, REVURDERING, FORTROLIG_ADRESSE
+    SØKNAD, STIKKPRØVE, RISK_QA, REVURDERING, FORTROLIG_ADRESSE, UTBETALING_TIL_SYKMELDT, DELVIS_REFUSJON
 }

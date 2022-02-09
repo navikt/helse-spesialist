@@ -9,14 +9,10 @@ import io.ktor.routing.*
 import io.ktor.server.testing.*
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
-import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto
+import no.nav.helse.behandlingsstatistikk.*
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.Companion.toSpeilMap
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
-import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.objectMapper
-import no.nav.helse.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -24,7 +20,8 @@ internal class BehandlingsstatistikkApiTest {
     private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator> {
         every { hentSaksbehandlingsstatistikk() } returns toSpeilMap(
             BehandlingsstatistikkDto(
-                oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(1, listOf(FØRSTEGANGSBEHANDLING to 1)),
+                oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(1, listOf(
+                    BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING to 1)),
                 tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(0, emptyList()),
                 fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(0, 0, 0, 0)
             )

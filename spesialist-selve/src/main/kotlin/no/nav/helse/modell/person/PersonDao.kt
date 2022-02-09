@@ -1,13 +1,16 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
+import no.nav.helse.person.SnapshotDto
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
+import java.util.*
 import javax.sql.DataSource
 
 internal class PersonDao(private val dataSource: DataSource) {
@@ -127,6 +130,36 @@ internal class PersonDao(private val dataSource: DataSource) {
             )
         )
     }
+
+    internal fun findVedtaksperiodeUtbetalingElement(fødselsnummer: String, utbetalingId: UUID) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT * FROM person AS p
+            INNER JOIN speil_snapshot AS ss ON ss.person_ref = p.id
+            WHERE p.fodselsnummer = ?;
+        """
+        session.run(
+            queryOf(query, fødselsnummer.toLong()).map { row ->
+                objectMapper.readValue<SnapshotDto>(row.string("data")).arbeidsgivere.flatMap { arbeidsgiver ->
+                    arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
+                        vedtaksperiode["utbetaling"]?.let { element ->
+                            Utbetalingen(
+                                utbetalingId = UUID.fromString(element["utbetalingId"].asText()),
+                                personNettoBeløp = (element["personNettoBeløp"]).asInt(),
+                                arbeidsgiverNettoBeløp = element["arbeidsgiverNettoBeløp"].asInt(),
+                            )
+                        }
+                    }
+                }.firstOrNull { it?.utbetalingId == utbetalingId }
+            }.asSingle
+        )
+
+    }
+    data class Utbetalingen(
+        val utbetalingId: UUID,
+        val personNettoBeløp: Int? = 0,
+        val arbeidsgiverNettoBeløp: Int? = 0
+    )
 
     internal fun updateEnhet(fødselsnummer: String, enhetNr: Int) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")

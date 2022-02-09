@@ -1,7 +1,5 @@
 package no.nav.helse.behandlingsstatistikk
 
-import no.nav.helse.vedtaksperiode.Periodetype
-
 data class BehandlingstatistikkForSpeilDto(
     val antallOppgaverTilGodkjenning: OppgavestatistikkForSpeilDto,
     val antallTildelteOppgaver: OppgavestatistikkForSpeilDto,
@@ -28,18 +26,20 @@ data class BehandlingstatistikkForSpeilDto(
     enum class PeriodetypeForSpeil {
         FØRSTEGANGSBEHANDLING,
         FORLENGELSE,
-        OVERGANG_FRA_IT
+        OVERGANG_FRA_IT,
+        UTBETALING_TIL_SYKMELDT,
+        DELVIS_REFUSJON
     }
 
     companion object {
         fun toSpeilMap(behandlingsstatistikkDto: BehandlingsstatistikkDto) = BehandlingstatistikkForSpeilDto(
             antallOppgaverTilGodkjenning = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.oppgaverTilGodkjenning.totalt,
-                perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.toPerPeriodetypeForSpeil()
+                perPeriodetype = behandlingsstatistikkDto.oppgaverTilGodkjenning.perPeriodetype.toPerStatistikktypeForSpeil()
             ),
             antallTildelteOppgaver = OppgavestatistikkForSpeilDto(
                 totalt = behandlingsstatistikkDto.tildelteOppgaver.totalt,
-                perPeriodetype = behandlingsstatistikkDto.tildelteOppgaver.perPeriodetype.toPerPeriodetypeForSpeil()
+                perPeriodetype = behandlingsstatistikkDto.tildelteOppgaver.perPeriodetype.toPerStatistikktypeForSpeil()
             ),
             fullførteBehandlinger = BehandlingerForSpeilDto(
                 totalt = behandlingsstatistikkDto.fullførteBehandlinger.totalt,
@@ -49,17 +49,19 @@ data class BehandlingstatistikkForSpeilDto(
             )
         )
 
-        private fun List<Pair<Periodetype, Int>>.toPerPeriodetypeForSpeil() =
+        private fun List<Pair<BehandlingsstatistikkType, Int>>.toPerStatistikktypeForSpeil() =
             groupBy { toPeriodetypeForSpeil(it.first) }
             .map { (key, value) ->
                 PerPeriodetype(key, value.sumOf { it.second })
             }
 
-        private fun toPeriodetypeForSpeil(periodetype: Periodetype) = when (periodetype) {
-            Periodetype.FORLENGELSE,
-            Periodetype.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
-            Periodetype.FØRSTEGANGSBEHANDLING -> PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING
-            Periodetype.OVERGANG_FRA_IT -> PeriodetypeForSpeil.OVERGANG_FRA_IT
+        private fun toPeriodetypeForSpeil(behandlingsstatistikkType: BehandlingsstatistikkType) = when (behandlingsstatistikkType) {
+            BehandlingsstatistikkType.FORLENGELSE,
+            BehandlingsstatistikkType.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
+            BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING -> PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING
+            BehandlingsstatistikkType.OVERGANG_FRA_IT -> PeriodetypeForSpeil.OVERGANG_FRA_IT
+            BehandlingsstatistikkType.UTBETALING_TIL_SYKMELDT -> PeriodetypeForSpeil.UTBETALING_TIL_SYKMELDT
+            BehandlingsstatistikkType.DELVIS_REFUSJON -> PeriodetypeForSpeil.DELVIS_REFUSJON
         }
     }
 }
