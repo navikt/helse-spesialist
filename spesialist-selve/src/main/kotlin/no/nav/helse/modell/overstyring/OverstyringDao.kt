@@ -108,15 +108,15 @@ class OverstyringDao(private val dataSource: DataSource) {
         orgnummer: String,
         begrunnelse: String,
         forklaring: String,
-        erAktivt: Boolean,
+        deaktivert: Boolean,
         skjæringstidspunkt: LocalDate,
         saksbehandlerRef: UUID
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring_arbeidsforhold(hendelse_ref, person_ref, arbeidsgiver_ref, saksbehandler_ref, begrunnelse, forklaring, er_aktivt, skjaeringstidspunkt)
-                SELECT :hendelse_id, p.id, ag.id, :saksbehandler_ref, :begrunnelse, :forklaring, :er_aktivt, :skjaeringstidspunkt
+                INSERT INTO overstyring_arbeidsforhold(hendelse_ref, person_ref, arbeidsgiver_ref, saksbehandler_ref, begrunnelse, forklaring, deaktivert, skjaeringstidspunkt)
+                SELECT :hendelse_id, p.id, ag.id, :saksbehandler_ref, :begrunnelse, :forklaring, :deaktivert, :skjaeringstidspunkt
                 FROM arbeidsgiver ag,
                      person p
                 WHERE p.fodselsnummer = :fodselsnummer
@@ -132,7 +132,7 @@ class OverstyringDao(private val dataSource: DataSource) {
                         "saksbehandler_ref" to saksbehandlerRef,
                         "begrunnelse" to begrunnelse,
                         "forklaring" to forklaring,
-                        "er_aktivt" to erAktivt,
+                        "deaktivert" to deaktivert,
                         "skjaeringstidspunkt" to skjæringstidspunkt
 
                     )

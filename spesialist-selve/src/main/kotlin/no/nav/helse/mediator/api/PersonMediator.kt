@@ -165,7 +165,7 @@ internal class PersonMediator(
                             saksbehandlerIdent = overstyring.saksbehandlerIdent,
                             overstyrtArbeidsforhold = OverstyrtArbeidsforholdApiDto(
                                 forklaring = overstyring.forklaring,
-                                deaktivert = !overstyring.erAktivt,
+                                deaktivert = overstyring.deaktivert,
                                 skjæringstidspunkt = overstyring.skjæringstidspunkt
                             )
                         )

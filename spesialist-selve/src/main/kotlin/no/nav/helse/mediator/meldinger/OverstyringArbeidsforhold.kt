@@ -77,7 +77,7 @@ internal class OverstyringArbeidsforhold(
                     it.requireKey("@id")
                     it.requireArray("overstyrteArbeidsforhold") {
                         requireKey("orgnummer")
-                        requireKey("erAktivt")
+                        requireKey("deaktivert")
                         requireKey("begrunnelse")
                         requireKey("forklaring")
                     }
@@ -108,7 +108,7 @@ internal class OverstyringArbeidsforhold(
                 overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"].map {
                     OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                         it["orgnummer"].asText(),
-                        it["erAktivt"].asBoolean(),
+                        it["deaktivert"].asBoolean(),
                         it["begrunnelse"].asText(),
                         it["forklaring"].asText()
                     )

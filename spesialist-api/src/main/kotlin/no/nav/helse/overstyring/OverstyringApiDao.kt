@@ -101,7 +101,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                         timestamp = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerNavn = overstyringRow.string("navn"),
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
-                        erAktivt = overstyringRow.boolean("er_aktivt"),
+                        deaktivert = overstyringRow.boolean("deaktivert"),
                         skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt")
                     )
                 }.asList

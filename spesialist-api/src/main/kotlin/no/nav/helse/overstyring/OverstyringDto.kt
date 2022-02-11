@@ -45,6 +45,6 @@ data class OverstyringArbeidsforholdDto(
     val timestamp: LocalDateTime,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
-    val erAktivt: Boolean,
+    val deaktivert: Boolean,
     val skjæringstidspunkt: LocalDate
 )

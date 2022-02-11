@@ -172,7 +172,7 @@ data class OverstyrArbeidsforholdDto(
 ) {
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
-        val erAktivt: Boolean,
+        val deaktivert: Boolean,
         val begrunnelse: String,
         val forklaring: String
     )

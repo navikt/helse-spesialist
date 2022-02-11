@@ -79,7 +79,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = listOf(OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     orgnummer = "6667",
-                    erAktivt = false,
+                    deaktivert = true,
                     begrunnelse = "en begrunnelse",
                     forklaring = "en forklaring"
                 ))

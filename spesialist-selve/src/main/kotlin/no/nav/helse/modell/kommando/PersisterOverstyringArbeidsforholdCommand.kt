@@ -19,7 +19,7 @@ internal class PersisterOverstyringArbeidsforholdCommand(
                 hendelseId = eventId,
                 fødselsnummer = fødselsnummer,
                 orgnummer = it.orgnummer,
-                erAktivt = it.erAktivt,
+                deaktivert = it.deaktivert,
                 begrunnelse = it.begrunnelse,
                 forklaring = it.forklaring,
                 saksbehandlerRef = oid,

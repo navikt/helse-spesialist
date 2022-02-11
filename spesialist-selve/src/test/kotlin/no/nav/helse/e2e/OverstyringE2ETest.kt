@@ -102,7 +102,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     orgnummer = ORGNR_GHOST,
-                    erAktivt = false,
+                    deaktivert = true,
                     begrunnelse = "begrunnelse",
                     forklaring = "forklaring"
                 )
@@ -183,7 +183,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     orgnummer = ORGNR,
-                    erAktivt = false,
+                    deaktivert = true,
                     begrunnelse = "begrunnelse",
                     forklaring = "forklaring"
                 ))

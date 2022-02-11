@@ -21,7 +21,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private const val ARBEIDSGIVER_NAVN = "Skrue Mc Duck"
         private val ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
-        private const val ER_AKTIVT = false
+        private const val DEAKTIVERT = true
         private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
         private const val AKTØR_ID = "100000234234"
         private val OID = UUID.randomUUID()
@@ -79,7 +79,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     orgnummer = GHOST_ORGNUMMER,
-                    erAktivt = ER_AKTIVT,
+                    deaktivert = DEAKTIVERT,
                     begrunnelse = BEGRUNNELSE,
                     forklaring = FORKLARING
                 )
@@ -95,7 +95,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             ORGNUMMER,
             BEGRUNNELSE,
             FORKLARING,
-            ER_AKTIVT,
+            DEAKTIVERT,
             SKJÆRINGSTIDSPUNKT,
             OID
         )
@@ -104,7 +104,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(ID, hentetOverstyring.hendelseId)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FORKLARING, hentetOverstyring.forklaring)
-        assertEquals(ER_AKTIVT, hentetOverstyring.erAktivt)
+        assertEquals(DEAKTIVERT, hentetOverstyring.deaktivert)
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
         assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)

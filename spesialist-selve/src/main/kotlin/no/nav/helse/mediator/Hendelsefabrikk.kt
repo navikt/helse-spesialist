@@ -328,7 +328,7 @@ internal class Hendelsefabrikk(
             overstyrteArbeidsforhold = jsonNode.path("overstyrteArbeidsforhold").map {
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     it["orgnummer"].asText(),
-                    it["erAktivt"].asBoolean(),
+                    it["deaktivert"].asBoolean(),
                     it["begrunnelse"].asText(),
                     it["forklaring"].asText()
                 )
