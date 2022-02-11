@@ -6,7 +6,8 @@ import java.time.LocalDateTime
 data class UtbetalingApiDto(
     val type: String,
     val status: String,
-    val arbeidsgiverOppdrag: OppdragApiDto,
+    val arbeidsgiveroppdrag: OppdragApiDto?,
+    val personoppdrag: OppdragApiDto?,
     val annullertAvSaksbehandler: AnnullertAvSaksbehandlerApiDto?,
     val totalbeløp: Int?
 )
@@ -17,12 +18,13 @@ data class AnnullertAvSaksbehandlerApiDto(
 )
 
 data class OppdragApiDto(
-    val organisasjonsnummer: String,
     val fagsystemId: String,
-    val utbetalingslinjer: List<UtbetalingslinjeApiDto>
+    val utbetalingslinjer: List<UtbetalingslinjeApiDto>,
+    val mottaker: String // Fødselsnummer eller organisasjonsnummer
 )
 
 data class UtbetalingslinjeApiDto(
     val fom: LocalDate,
-    val tom: LocalDate
+    val tom: LocalDate,
+    val totalbeløp: Int?
 )

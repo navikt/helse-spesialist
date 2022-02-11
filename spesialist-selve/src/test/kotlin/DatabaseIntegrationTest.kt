@@ -281,13 +281,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun lagOppdrag(fagsystemId: String = fagsystemId()) =
+    protected fun lagArbeidsgiveroppdrag(fagsystemId: String = fagsystemId()) =
         utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", "NY", LocalDate.now().plusDays(169))!!
 
-    protected fun lagUtbetalingId(arbeidsgiverOppdragId: Long): Long {
-        val personOppdragId =
-            utbetalingDao.nyttOppdrag(fagsystemId(), FNR, "SPREF", "NY", LocalDate.now().plusDays(169))!!
-        val utbetalingId = utbetalingDao.opprettUtbetalingId(
+    protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) =
+        utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SPREF", "NY", LocalDate.now().plusDays(169))!!
+
+    protected fun lagUtbetalingId(arbeidsgiverOppdragId: Long, personOppdragId: Long): Long =
+        utbetalingDao.opprettUtbetalingId(
             utbetalingId = UUID.randomUUID(),
             fødselsnummer = FNR,
             orgnummer = ORGNUMMER,
@@ -296,10 +297,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
             personFagsystemIdRef = personOppdragId
         )
-        return utbetalingId
-    }
 
-    protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate) {
+    protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate, totalbeløp: Int? = null) {
         utbetalingDao.nyLinje(
             oppdragId = oppdrag,
             endringskode = "NY",
@@ -309,7 +308,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             fom = fom,
             tom = tom,
             dagsats = 1200,
-            totalbeløp = null,
+            totalbeløp = totalbeløp,
             lønn = 3000,
             grad = 100.0,
             delytelseId = 1,

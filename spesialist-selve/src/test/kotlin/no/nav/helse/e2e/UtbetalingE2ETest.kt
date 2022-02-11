@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 internal class UtbetalingE2ETest : AbstractE2ETest() {
 
@@ -98,7 +100,10 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
-        assertEquals(4000, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().totalbeløp)
+        utbetalingDao.findUtbetalinger(FØDSELSNUMMER).first().let {
+            assertNotNull(it)
+            assertEquals(4000, it.totalbeløp)
+        }
     }
 
     @Test
@@ -106,7 +111,10 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
-        assertEquals("FERIEPENGER", utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().type)
+        utbetalingDao.findUtbetalinger(FØDSELSNUMMER).first().let {
+            assertNotNull(it)
+            assertEquals("FERIEPENGER", it.type)
+        }
     }
 
     @Test
@@ -117,8 +125,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = nyUtbetalingId)
 
-        assertEquals(1, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
-        assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().utbetalingId)
+        assertEquals(2, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
+        assertTrue { utbetalingDao.findUtbetalinger(FØDSELSNUMMER).find { it.utbetalingId == nyUtbetalingId } != null }
     }
 
     @Test
@@ -128,7 +136,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         sendPersonUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, utbetalingId = nyUtbetalingId)
 
         assertEquals(1, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
-        assertEquals(nyUtbetalingId, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).single().utbetalingId)
+        assertTrue { utbetalingDao.findUtbetalinger(FØDSELSNUMMER).find { it.utbetalingId == nyUtbetalingId } != null }
     }
 
     private fun utbetalinger(): List<Long> {

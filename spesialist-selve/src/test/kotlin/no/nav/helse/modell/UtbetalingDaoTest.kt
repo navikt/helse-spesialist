@@ -10,18 +10,22 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `hent utbetalinger for en person`() {
         nyPerson()
-        val fagsystemId = fagsystemId()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
 
-        val arbeidsgiverOppdragId = lagOppdrag(fagsystemId)
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
 
         lagLinje(arbeidsgiverOppdragId, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
-        val utbetalingId = lagUtbetalingId(arbeidsgiverOppdragId)
+        val utbetalingId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
         utbetalingDao.nyUtbetalingStatus(utbetalingId, GODKJENT, LocalDateTime.now().minusDays(3), "{}")
         utbetalingDao.nyUtbetalingStatus(utbetalingId, SENDT, LocalDateTime.now().minusDays(2), "{}")
         utbetalingDao.nyUtbetalingStatus(utbetalingId, OVERFØRT, LocalDateTime.now().minusDays(1), "{}")
@@ -29,33 +33,58 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
         val utbetalinger = utbetalingDao.findUtbetalinger(FNR)
         assertEquals(1, utbetalinger.size)
-        val utbetaling = utbetalinger.first()
-
-        assertEquals(UTBETALT, utbetaling.status)
-        assertEquals("UTBETALING", utbetaling.type)
-        assertEquals(fagsystemId, utbetaling.arbeidsgiverOppdrag.fagsystemId)
-        assertEquals(ORGNUMMER, utbetaling.arbeidsgiverOppdrag.organisasjonsnummer)
-        assertEquals(1, utbetaling.arbeidsgiverOppdrag.linjer.size)
+        utbetalinger.first().let {
+            assertEquals(UTBETALT, it.status)
+            assertEquals("UTBETALING", it.type)
+            assertEquals(arbeidsgiverFagsystemId, it.arbeidsgiveroppdrag!!.fagsystemId)
+            assertEquals(personFagsystemId, it.personoppdrag!!.fagsystemId)
+            assertEquals(ORGNUMMER, it.arbeidsgiveroppdrag.mottaker)
+            assertEquals(FNR, it.personoppdrag.mottaker)
+            assertEquals(1, it.arbeidsgiveroppdrag.linjer.size)
+        }
     }
 
     @Test
     fun `henter riktige linjer for person`() {
         nyPerson()
-        val oppdrag1 = lagOppdrag()
+        val oppdrag1 = lagArbeidsgiveroppdrag()
         lagLinje(oppdrag1, 1.januar(), 31.januar())
         lagLinje(oppdrag1, 1.februar(), 28.februar())
 
-        val arbeidsgiverOppdragId = lagOppdrag()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag()
+        val personOppdragId = lagPersonoppdrag()
         lagLinje(arbeidsgiverOppdragId, 1.juli(), 31.juli())
-        val utbetalingIdId = lagUtbetalingId(arbeidsgiverOppdragId)
+        val utbetalingIdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
         utbetalingDao.nyUtbetalingStatus(utbetalingIdId, UTBETALT, LocalDateTime.now(), "{}")
 
-        val utbetaling = utbetalingDao.findUtbetalinger(FNR).first()
+        utbetalingDao.findUtbetalinger(FNR).find { it.arbeidsgiveroppdrag!!.linjer.size == 1 }.let {
+            assertNotNull(it)
+            assertEquals(listOf(UtbetalingDao.UtbetalingDto.OppdragDto.UtbetalingLinje(
+                fom = 1.juli(),
+                tom = 31.juli(),
+                totalbeløp = null
+            )), it.arbeidsgiveroppdrag!!.linjer)
+        }
+    }
 
-        assertEquals(listOf(UtbetalingDao.UtbetalingDto.OppdragDto.UtbetalingLinje(
-            fom = 1.juli(),
-            tom = 31.juli(),
-            totalbeløp = null
-        )), utbetaling.arbeidsgiverOppdrag.linjer)
+    @Test
+    fun `henter ut personoppdrag`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
+        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
+        val utbetaling = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
+        utbetalingDao.nyUtbetalingStatus(utbetaling, UTBETALT, LocalDateTime.now(), "{}")
+
+        val utbetalinger = utbetalingDao.findUtbetalinger(FNR)
+
+        assertEquals(1, utbetalinger.size)
+        assertTrue { utbetalinger.find { it.arbeidsgiveroppdrag!!.fagsystemId == arbeidsgiverFagsystemId } != null }
+        assertTrue { utbetalinger.find { it.personoppdrag!!.fagsystemId == personFagsystemId } != null }
+        assertTrue { utbetalinger.all { it.arbeidsgiveroppdrag!!.linjer.size == 1 } }
+        assertTrue { utbetalinger.all { it.personoppdrag!!.linjer.size == 1 } }
     }
 }

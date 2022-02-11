@@ -96,16 +96,32 @@ internal class PersonMediator(
                     UtbetalingApiDto(
                         type = utbetaling.type,
                         status = utbetaling.status.toString(),
-                        arbeidsgiverOppdrag = OppdragApiDto(
-                            organisasjonsnummer = utbetaling.arbeidsgiverOppdrag.organisasjonsnummer,
-                            fagsystemId = utbetaling.arbeidsgiverOppdrag.fagsystemId,
-                            utbetalingslinjer = utbetaling.arbeidsgiverOppdrag.linjer.map { linje ->
-                                UtbetalingslinjeApiDto(
-                                    fom = linje.fom,
-                                    tom = linje.tom
-                                )
-                            }
-                        ),
+                        arbeidsgiveroppdrag = utbetaling.arbeidsgiveroppdrag?.let {
+                            OppdragApiDto(
+                                mottaker = it.mottaker,
+                                fagsystemId = it.fagsystemId,
+                                utbetalingslinjer = it.linjer.map { linje ->
+                                    UtbetalingslinjeApiDto(
+                                        fom = linje.fom,
+                                        tom = linje.tom,
+                                        totalbeløp = linje.totalbeløp,
+                                    )
+                                }
+                            )
+                        },
+                        personoppdrag = utbetaling.personoppdrag?.let {
+                            OppdragApiDto(
+                                mottaker = it.mottaker,
+                                fagsystemId = it.fagsystemId,
+                                utbetalingslinjer = it.linjer.map { linje ->
+                                    UtbetalingslinjeApiDto(
+                                        fom = linje.fom,
+                                        tom = linje.tom,
+                                        totalbeløp = linje.totalbeløp,
+                                    )
+                                }
+                            )
+                        },
                         annullertAvSaksbehandler = utbetaling.annullertAvSaksbehandler?.let {
                             AnnullertAvSaksbehandlerApiDto(
                                 annullertTidspunkt = it.annullertTidspunkt,
@@ -236,7 +252,8 @@ internal class PersonMediator(
 
     internal class SnapshotResponse(
         val snapshot: PersonForSpeilDto?,
-        val tilstand: SnapshotTilstand) {
+        val tilstand: SnapshotTilstand
+    ) {
 
         enum class SnapshotTilstand {
             FINNES_IKKE,

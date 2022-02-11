@@ -233,11 +233,12 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         val utbetaling2 = speilSnapshot2.utbetalinger.first()
         assertEquals("UTBETALT", utbetaling2.status)
         assertEquals("UTBETALING", utbetaling2.type)
-        assertEquals(utbetaling1.arbeidsgiverOppdrag, utbetaling2.arbeidsgiverOppdrag)
+        assertEquals(utbetaling1.arbeidsgiveroppdrag, utbetaling2.arbeidsgiveroppdrag)
         assertEquals(4000, utbetaling1.totalbeløp)
-        assertEquals(utbetaling2.arbeidsgiverOppdrag.fagsystemId, arbeidsgiverFagsystemId)
-        assertEquals(ORGNR, utbetaling2.arbeidsgiverOppdrag.organisasjonsnummer)
-        assertEquals(2, utbetaling2.arbeidsgiverOppdrag.utbetalingslinjer.size)
+
+        assertEquals(utbetaling2.arbeidsgiveroppdrag?.fagsystemId, arbeidsgiverFagsystemId)
+        assertEquals(ORGNR, utbetaling2.arbeidsgiveroppdrag?.mottaker)
+        assertEquals(2, utbetaling2.arbeidsgiveroppdrag?.utbetalingslinjer?.size)
         assertEquals(4000, utbetaling2.totalbeløp)
     }
 

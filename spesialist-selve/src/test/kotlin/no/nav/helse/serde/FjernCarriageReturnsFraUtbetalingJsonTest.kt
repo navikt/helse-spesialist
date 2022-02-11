@@ -95,9 +95,10 @@ internal class FjernCarriageReturnsFraUtbetalingJsonTest : DatabaseIntegrationTe
 
     private fun opprettUtbetaling(data: String, opprettet: LocalDateTime = now()): Long {
         val fagsystemId = fagsystemId()
-        val arbeidsgiverOppdragId = lagOppdrag(fagsystemId)
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(fagsystemId)
+        val personOppdragId = lagPersonoppdrag()
         lagLinje(arbeidsgiverOppdragId, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
-        val utbetalingId = lagUtbetalingId(arbeidsgiverOppdragId)
+        val utbetalingId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
         utbetalingDao.nyUtbetalingStatus(utbetalingId, GODKJENT, opprettet, data)
         return utbetalingId
     }
