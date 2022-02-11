@@ -421,6 +421,10 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
+    override fun fjernGjenliggendeOppgaver(message: JsonMessage, context: MessageContext) {
+        utfør(hendelsefabrikk.vedtaksperiodePåminnet(message.toJson()), context)
+    }
+
     fun revurderingAvvist(fødselsnummer: String, error: List<String>, json:String, context: MessageContext) {
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }

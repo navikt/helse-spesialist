@@ -127,4 +127,5 @@ internal interface IHendelsefabrikk {
     fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet
+    fun vedtaksperiodePåminnet(json: String): VedtaksperiodePåminnet
 }
