@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
-internal class UtbetalingDao(private val dataSource: DataSource) {
+class UtbetalingDao(private val dataSource: DataSource) {
     internal fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"

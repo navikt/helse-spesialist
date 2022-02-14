@@ -6,6 +6,7 @@ import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -20,7 +21,8 @@ internal class SchemaBuilder(
     val overstyringApiDao: OverstyringApiDao,
     val risikovurderingApiDao: RisikovurderingApiDao,
     val varselDao: VarselDao,
-    val snapshotGraphQLClient: SpeilSnapshotGraphQLClient
+    val utbetalingDao: UtbetalingDao,
+    val snapshotGraphQLClient: SpeilSnapshotGraphQLClient,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -42,6 +44,12 @@ internal class SchemaBuilder(
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
                         snapshotGraphQLClient = snapshotGraphQLClient
+                    )
+                ),
+                TopLevelObject(
+                    OppdragQuery(
+                        personApiDao = personApiDao,
+                        utbetalingDao = utbetalingDao
                     )
                 )
             )

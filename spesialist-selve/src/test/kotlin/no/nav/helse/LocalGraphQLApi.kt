@@ -16,6 +16,7 @@ import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -36,12 +37,14 @@ fun main() = runBlocking {
         val overstyringApiDao = OverstyringApiDao(dataSource)
         val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
         val varselDao = VarselDao(dataSource)
+        val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
 
         every { snapshotDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo to enPerson)
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
         every { personApiDao.personHarAdressebeskyttelse(any(), no.nav.helse.person.Adressebeskyttelse.Ugradert) } returns true
         every { personApiDao.finnEnhet(any()) } returns EnhetDto("1234", "Bømlo")
         every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson.fodselsnummer
+        every { utbetalingDao.findUtbetalinger(any()) } returns emptyList()
 
         install(ContentNegotiation) {
             register(
@@ -58,6 +61,7 @@ fun main() = runBlocking {
             overstyringApiDao = overstyringApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
+            utbetalingDao = utbetalingDao,
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             snapshotGraphQLClient = mockk(relaxed = true)
         )

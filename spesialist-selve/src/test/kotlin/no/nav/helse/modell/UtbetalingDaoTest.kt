@@ -38,9 +38,9 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
             assertEquals("UTBETALING", it.type)
             assertEquals(arbeidsgiverFagsystemId, it.arbeidsgiveroppdrag!!.fagsystemId)
             assertEquals(personFagsystemId, it.personoppdrag!!.fagsystemId)
-            assertEquals(ORGNUMMER, it.arbeidsgiveroppdrag.mottaker)
-            assertEquals(FNR, it.personoppdrag.mottaker)
-            assertEquals(1, it.arbeidsgiveroppdrag.linjer.size)
+            assertEquals(ORGNUMMER, it.arbeidsgiveroppdrag!!.mottaker)
+            assertEquals(FNR, it.personoppdrag!!.mottaker)
+            assertEquals(1, it.arbeidsgiveroppdrag!!.linjer.size)
         }
     }
 
