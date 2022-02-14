@@ -15,7 +15,8 @@ internal class FjernGjenliggendeOppgaveCommand(
 
     override fun execute(context: CommandContext): Boolean {
         if (oppgaveMediator.venterPåSaksbehandler(vedtaksperiodeId)) {
-            log.info("Tenker å invalidere oppgave for vedtaksperiode $vedtaksperiodeId")
+            log.info("Invaliderer oppgave for vedtaksperiode $vedtaksperiodeId")
+            oppgaveMediator.avbrytOppgaver(vedtaksperiodeId)
         }
         return true
     }
