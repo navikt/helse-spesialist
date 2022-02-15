@@ -22,8 +22,9 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA = if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
             val gyldigeAdressebeskyttelser =
-                if (saksbehandlerTilganger.harTilgangTilKode7Oppgaver()) "AND pi.adressebeskyttelse in ('Ugradert', 'Fortrolig')"
-                else "AND pi.adressebeskyttelse ='Ugradert'"
+                if (saksbehandlerTilganger.harTilgangTilKode7Oppgaver()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
+                else "AND pi.adressebeskyttelse = 'Ugradert'"
+            val eventuellBegrensningAvAntallOppgaver = if (saksbehandlerTilganger.kanSeAlleOppgaver()) "" else "LIMIT 4000"
 
             @Language("PostgreSQL")
             val query = """
@@ -46,7 +47,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
                 opprettet ASC
-            LIMIT 4000;
+                $eventuellBegrensningAvAntallOppgaver
+                ;
             """
             session.run(
                 queryOf(query)

@@ -332,5 +332,10 @@ internal fun PipelineContext<Unit, ApplicationCall>.getGrupper(): List<UUID> {
     return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
 }
 
+internal fun PipelineContext<Unit, ApplicationCall>.getNAVident(): String {
+    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+    return accessToken.payload.getClaim("NAVident").asString()
+}
+
 private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue("KODE7_SAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))

@@ -17,6 +17,7 @@ internal class SaksbehandlerTilgangerTest {
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -28,6 +29,7 @@ internal class SaksbehandlerTilgangerTest {
         )
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -39,6 +41,7 @@ internal class SaksbehandlerTilgangerTest {
         )
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -50,5 +53,17 @@ internal class SaksbehandlerTilgangerTest {
         )
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
+    }
+
+    @Test
+    fun `kan se alle oppgaver`() {
+        val saksbehandlerTilganger = SaksbehandlerTilganger(
+            gruppetilganger = emptyList(),
+            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
+            NAVident = "N115007"
+        )
+        assertTrue(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 }
