@@ -519,17 +519,6 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun vedtaksperiodePåminnet(json: String): VedtaksperiodePåminnet {
-        val jsonNode = mapper.readTree(json)
-        return VedtaksperiodePåminnet(
-            id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
-            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-            json = json,
-            oppgaveMediator = oppgaveMediator
-        )
-    }
-
     override fun revurderingAvvist(json: String): RevurderingAvvist {
         val jsonNode = mapper.readTree(json)
         return RevurderingAvvist(

@@ -56,8 +56,6 @@ class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    fun venterPåSaksbehandler(vedtaksperiodeId: UUID) = oppgaveDao.venterPåSaksbehandler(vedtaksperiodeId)
-
     private fun avventerSystem(oppgave: Oppgave, saksbehandlerIdent: String, oid: UUID) {
         oppgave.avventerSystem(saksbehandlerIdent, oid)
         nyOppgave(oppgave)

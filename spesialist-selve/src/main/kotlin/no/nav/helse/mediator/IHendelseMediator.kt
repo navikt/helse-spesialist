@@ -147,9 +147,4 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
-    fun fjernGjenliggendeOppgaver(
-        message: JsonMessage,
-        context: MessageContext
-    )
-
 }

@@ -6,10 +6,7 @@ import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.IHendelsefabrikk
-import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -86,7 +83,6 @@ internal class HendelseMediator(
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
-            VedtaksperiodePåminnet.River(it, this)
             RevurderingAvvist.River(it, this)
         }
     }
@@ -423,10 +419,6 @@ internal class HendelseMediator(
 
     override fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
-    }
-
-    override fun fjernGjenliggendeOppgaver(message: JsonMessage, context: MessageContext) {
-        utfør(hendelsefabrikk.vedtaksperiodePåminnet(message.toJson()), context)
     }
 
     fun revurderingAvvist(fødselsnummer: String, error: List<String>, json:String, context: MessageContext) {

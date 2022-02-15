@@ -198,12 +198,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """ SELECT EXISTS ( SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus) )"""
             .single(mapOf("oppgaveId" to oppgaveId)) { it.boolean(1) })
 
-    fun venterPåSaksbehandler(vedtaksperiodeId: UUID) = requireNotNull(
-        """ SELECT COUNT(1) AS oppgave_count FROM oppgave o
-                INNER JOIN vedtak v on o.vedtak_ref = v.id
-                WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'AvventerSaksbehandler'::oppgavestatus
-            """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.int("oppgave_count") }) > 0
-
     fun finnFødselsnummer(oppgaveId: Long) = requireNotNull(
         """ SELECT fodselsnummer from person
             INNER JOIN vedtak v on person.id = v.person_ref
