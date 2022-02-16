@@ -67,6 +67,7 @@ internal class VedtaksperiodeEndret(
                     it.requireKey("vedtaksperiodeId")
                     it.requireKey("fødselsnummer")
                     it.requireKey("@id")
+                    it.requireKey("aktørId")
                 }
             }.register(this)
         }
@@ -78,6 +79,10 @@ internal class VedtaksperiodeEndret(
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
+            if (packet["aktørId"].asText() == "1000094512507") {
+                log.info("Ignorerer vedtaksperiode_endret for aktørId ${packet["aktørId"].asText()} pga: lar seg pt. ikke hente fra spleis")
+                return
+            }
             log.info(
                 "Mottok vedtaksperiode endret {}, {}",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
