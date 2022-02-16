@@ -96,7 +96,7 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   opprettet: LocalDateTime!
   periodetype: GraphQLPeriodetype!
   periodevilkar: GraphQLPeriodevilkar!
-  simulering: GraphQLSimulering
+  refusjon: GraphQLRefusjon
   skjaeringstidspunkt: LocalDate!
   soknaderArbeidsgiver: [GraphQLSoknadArbeidsgiver!]!
   soknaderNav: [GraphQLSoknadNav!]!
@@ -182,6 +182,24 @@ type GraphQLPerson {
   versjon: Int!
   vilkarsgrunnlag(id: String!): [GraphQLVilkarsgrunnlag!]
   vilkarsgrunnlaghistorikk: [GraphQLVilkarsgrunnlaghistorikk!]!
+}
+
+type GraphQLRefusjon {
+  arbeidsgiverperioder: [GraphQLRefusjonsperiode!]!
+  belop: Float
+  endringer: [GraphQLRefusjonsendring!]!
+  forsteFravaersdag: LocalDate
+  sisteRefusjonsdag: LocalDate
+}
+
+type GraphQLRefusjonsendring {
+  belop: Float!
+  dato: LocalDate!
+}
+
+type GraphQLRefusjonsperiode {
+  fom: LocalDate!
+  tom: LocalDate!
 }
 
 type GraphQLSammenligningsgrunnlag {
@@ -365,6 +383,7 @@ enum GraphQLHendelsetype {
 
 enum GraphQLInntektskilde {
   AOrdningen
+  IkkeRapportert
   Infotrygd
   Inntektsmelding
   Saksbehandler

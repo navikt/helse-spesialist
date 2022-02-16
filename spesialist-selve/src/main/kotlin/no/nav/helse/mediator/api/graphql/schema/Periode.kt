@@ -65,6 +65,24 @@ data class Risikovurdering(
     val kontrollertOk: List<Faresignal>
 )
 
+data class Refusjon(
+    val belop: Double?,
+    val arbeidsgiverperioder: List<Refusjonsperiode>,
+    val endringer: List<Endring>,
+    val forsteFravaersdag: LocalDate?,
+    val sisteRefusjonsdag: LocalDate?
+) {
+    data class Refusjonsperiode(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
+    data class Endring(
+        val belop: Double,
+        val dato: LocalDate
+    )
+}
+
 interface Periode {
     fun behandlingstype(): Behandlingstype
     fun erForkastet(): Boolean
@@ -205,6 +223,20 @@ data class BeregnetPeriode(
         }
 
     fun varsler(): List<String> = varselDao.finnVarsler(vedtaksperiodeId().java())
+
+    fun refusjon(): Refusjon? = periode.refusjon?.let { refusjon ->
+        Refusjon(
+            belop = refusjon.belop,
+            arbeidsgiverperioder = refusjon.arbeidsgiverperioder.map {
+                Refusjon.Refusjonsperiode(it.fom, it.tom)
+            },
+            endringer = refusjon.endringer.map {
+                Refusjon.Endring(it.belop, it.dato)
+            },
+            forsteFravaersdag = refusjon.forsteFravaersdag,
+            sisteRefusjonsdag = refusjon.sisteRefusjonsdag
+        )
+    }
 }
 
 private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =

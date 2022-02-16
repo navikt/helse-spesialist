@@ -147,6 +147,19 @@ query HentSnapshot($fnr: String!) {
                                 tidsstempel
                             }
                         },
+                        refusjon {
+                            belop,
+                            arbeidsgiverperioder {
+                                tom,
+                                fom
+                            },
+                            endringer {
+                                belop,
+                                dato
+                            },
+                            forsteFravaersdag,
+                            sisteRefusjonsdag
+                        }
                         vilkarsgrunnlaghistorikkId
                     }
                 }
