@@ -36,7 +36,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
 
     private fun tilGodkjenningPerPeriodetype() =
         """ SELECT sot.type AS periodetype, o.type, COUNT(distinct o.id)
-            FILTER (WHERE o.type != 'UTBETALING_TIL_SYKMELDT' or o.type != 'DELVIS_REFUSJON') AS antall,
+            FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.type) as antallAvOppgaveType FROM oppgave o
               INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
@@ -45,7 +45,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
 
     private fun tildeltPerPeriodetype() =
         """ SELECT s.type as periodetype, o.type, COUNT(distinct s.type)
-            FILTER (WHERE o.type != 'UTBETALING_TIL_SYKMELDT' or o.type != 'DELVIS_REFUSJON') AS antall,
+            FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.type) as antallAvOppgaveType FROM oppgave o
                  INNER JOIN vedtak v on o.vedtak_ref = v.id
                  INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
@@ -71,7 +71,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
     private fun perStatistikktype(row: Row): Pair<BehandlingsstatistikkType, Int> {
         val oppgavetype: Oppgavetype = Oppgavetype.valueOf(row.string("type"))
 
-        return if (oppgavetype != Oppgavetype.DELVIS_REFUSJON && oppgavetype != Oppgavetype.UTBETALING_TIL_SYKMELDT) {
+        return if (oppgavetype == Oppgavetype.SØKNAD) {
             BehandlingsstatistikkType.valueOf(row.string("periodetype")) to row.int("antall")
         } else {  BehandlingsstatistikkType.valueOf(row.string("type")) to row.int("antallAvOppgaveType") }
     }
@@ -82,6 +82,10 @@ enum class BehandlingsstatistikkType {
     FORLENGELSE,
     INFOTRYGDFORLENGELSE,
     OVERGANG_FRA_IT,
+    STIKKPRØVE,
+    RISK_QA,
+    REVURDERING,
+    FORTROLIG_ADRESSE,
     UTBETALING_TIL_SYKMELDT,
     DELVIS_REFUSJON
 }

@@ -28,7 +28,11 @@ data class BehandlingstatistikkForSpeilDto(
         FORLENGELSE,
         OVERGANG_FRA_IT,
         UTBETALING_TIL_SYKMELDT,
-        DELVIS_REFUSJON
+        DELVIS_REFUSJON,
+        STIKKPRØVE,
+        RISK_QA,
+        REVURDERING,
+        FORTROLIG_ADRESSE
     }
 
     companion object {
@@ -60,6 +64,10 @@ data class BehandlingstatistikkForSpeilDto(
             BehandlingsstatistikkType.INFOTRYGDFORLENGELSE -> PeriodetypeForSpeil.FORLENGELSE
             BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING -> PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING
             BehandlingsstatistikkType.OVERGANG_FRA_IT -> PeriodetypeForSpeil.OVERGANG_FRA_IT
+            BehandlingsstatistikkType.STIKKPRØVE -> PeriodetypeForSpeil.STIKKPRØVE
+            BehandlingsstatistikkType.RISK_QA -> PeriodetypeForSpeil.RISK_QA
+            BehandlingsstatistikkType.REVURDERING -> PeriodetypeForSpeil.REVURDERING
+            BehandlingsstatistikkType.FORTROLIG_ADRESSE -> PeriodetypeForSpeil.FORTROLIG_ADRESSE
             BehandlingsstatistikkType.UTBETALING_TIL_SYKMELDT -> PeriodetypeForSpeil.UTBETALING_TIL_SYKMELDT
             BehandlingsstatistikkType.DELVIS_REFUSJON -> PeriodetypeForSpeil.DELVIS_REFUSJON
         }
