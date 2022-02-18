@@ -13,5 +13,5 @@ class SaksbehandlerTilganger(
 
     fun harTilgangTilRiskOppgaver() = riskSaksbehandlergruppe in gruppetilganger
 
-    fun kanSeAlleOppgaver() = NAVident in listOf("G103083", "D117949", "A148751", "N115007", "C117102", "S145454", "E148846")
+    fun kanSeAlleOppgaver() = NAVident in listOf("G103083", "D117949", "A148751", "N115007", "C117102", "S145454", "E148846", "S144991")
 }
