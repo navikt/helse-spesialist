@@ -44,7 +44,8 @@ enum class Inntektskilde {
     AORDNINGEN,
     INFOTRYGD,
     INNTEKTSMELDING,
-    SAKSBEHANDLER
+    SAKSBEHANDLER,
+    IKKE_RAPPORTERT
 }
 
 internal fun GraphQLInntektsgrunnlag.tilInntektsgrunnlag(): Inntektsgrunnlag =
@@ -93,5 +94,6 @@ private fun GraphQLInntektskilde.tilInntektskilde(): Inntektskilde =
         GraphQLInntektskilde.INFOTRYGD -> Inntektskilde.INFOTRYGD
         GraphQLInntektskilde.INNTEKTSMELDING -> Inntektskilde.INNTEKTSMELDING
         GraphQLInntektskilde.SAKSBEHANDLER -> Inntektskilde.SAKSBEHANDLER
+        GraphQLInntektskilde.IKKERAPPORTERT -> Inntektskilde.IKKE_RAPPORTERT
         else -> throw Exception("Ukjent inntektskilde ${this.name}")
     }
