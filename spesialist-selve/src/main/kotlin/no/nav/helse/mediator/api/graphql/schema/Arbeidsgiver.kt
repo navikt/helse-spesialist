@@ -62,10 +62,19 @@ data class Inntektoverstyring(
     )
 }
 
+data class GhostPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skjaeringstidspunkt: LocalDate,
+    val vilkarsgrunnlaghistorikkId: UUID?,
+    val deaktivert: Boolean
+)
+
 data class Arbeidsgiver(
     val organisasjonsnummer: String,
     val navn: String,
     val bransjer: List<String>,
+    val ghostPerioder: List<GhostPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<GraphQLGenerasjon>,
     private val overstyringApiDao: OverstyringApiDao,

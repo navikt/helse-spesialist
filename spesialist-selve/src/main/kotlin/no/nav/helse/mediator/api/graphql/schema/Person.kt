@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
@@ -101,12 +102,13 @@ data class Person(
             organisasjonsnummer = it.organisasjonsnummer,
             navn = arbeidsgiverApiDao.finnNavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig",
             bransjer = arbeidsgiverApiDao.finnBransjer(it.organisasjonsnummer),
+            ghostPerioder = it.ghostPerioder.tilGhostPerioder(),
             fødselsnummer = snapshot.fodselsnummer,
             overstyringApiDao = overstyringApiDao,
             generasjoner = it.generasjoner,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
-            varselDao = varselDao
+            varselDao = varselDao,
         )
     }
 
@@ -118,4 +120,15 @@ data class Person(
 
     fun vilkarsgrunnlaghistorikk(): List<Vilkarsgrunnlaghistorikk> =
         snapshot.vilkarsgrunnlaghistorikk.map { it.tilVilkarsgrunnlaghistorikk() }
+
+    private fun List<GraphQLGhostPeriode>.tilGhostPerioder(): List<GhostPeriode> =
+        map {
+            GhostPeriode(
+                fom = it.fom,
+                tom = it.tom,
+                skjaeringstidspunkt = it.skjaeringstidspunkt,
+                vilkarsgrunnlaghistorikkId = it.vilkarsgrunnlaghistorikkId,
+                deaktivert = it.deaktivert
+            )
+        }
 }

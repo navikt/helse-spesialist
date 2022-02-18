@@ -30,6 +30,13 @@ query HentSnapshot($fnr: String!) {
         aktorId,
         arbeidsgivere {
             organisasjonsnummer,
+            ghostPerioder {
+                fom,
+                tom,
+                skjaeringstidspunkt,
+                vilkarsgrunnlaghistorikkId,
+                deaktivert
+            },
             generasjoner {
                 id,
                 perioder {
