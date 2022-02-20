@@ -145,6 +145,6 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
     inntekt = Inntektoverstyring.OverstyrtInntekt(
         forklaring = forklaring,
         manedligInntekt = månedligInntekt,
-        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE_TIME)
+        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE)
     )
 )
