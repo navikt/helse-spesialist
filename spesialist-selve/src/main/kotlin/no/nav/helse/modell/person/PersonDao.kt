@@ -8,6 +8,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.SnapshotDto
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
@@ -144,21 +145,21 @@ internal class PersonDao(private val dataSource: DataSource) {
                     arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
                         vedtaksperiode["utbetaling"]?.let { element ->
                             Utbetalingen(
-                                utbetalingId = UUID.fromString(element["utbetalingId"].asText()),
-                                personNettoBeløp = (element["personNettoBeløp"]).asInt(),
-                                arbeidsgiverNettoBeløp = element["arbeidsgiverNettoBeløp"].asInt(),
+                                utbetalingId = element["utbetalingId"]?.takeUnless{ it.isMissingOrNull()}?.let { UUID.fromString(it.asText()) },
+                                personNettoBeløp = element["personNettoBeløp"]?.asInt(),
+                                arbeidsgiverNettoBeløp = element["arbeidsgiverNettoBeløp"]?.asInt(),
                             )
                         }
                     }
-                }.firstOrNull { it?.utbetalingId == utbetalingId }
+                }.firstOrNull { it?.utbetalingId != null && it?.utbetalingId == utbetalingId }
             }.asSingle
         )
 
     }
     data class Utbetalingen(
-        val utbetalingId: UUID,
-        val personNettoBeløp: Int? = 0,
-        val arbeidsgiverNettoBeløp: Int? = 0
+        val utbetalingId: UUID?,
+        val personNettoBeløp: Int?,
+        val arbeidsgiverNettoBeløp: Int?
     )
 
     internal fun updateEnhet(fødselsnummer: String, enhetNr: Int) = sessionOf(dataSource).use { session ->
