@@ -18,18 +18,17 @@ internal class ÅpneGosysOppgaverCommand(
         private val logg = LoggerFactory.getLogger(ÅpneGosysOppgaverCommand::class.java)
     }
 
-    override fun execute(context: CommandContext): Boolean {
-        logg.info("Trenger oppgaveinformasjon fra Gosys")
-        context.behov(
-            "ÅpneOppgaver", mapOf(
-                "aktørId" to aktørId
-            )
-        )
-        return false
-    }
+    override fun execute(context: CommandContext) = behandle(context)
 
-    override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<ÅpneGosysOppgaverløsning>() ?: return false
+    override fun resume(context: CommandContext) = behandle(context)
+
+    private fun behandle(context: CommandContext): Boolean {
+        val løsning = context.get<ÅpneGosysOppgaverløsning>()
+        if (løsning == null) {
+            logg.info("Trenger oppgaveinformasjon fra Gosys")
+            context.behov("ÅpneOppgaver", mapOf("aktørId" to aktørId))
+            return false
+        }
         løsning.lagre(åpneGosysOppgaverDao)
         løsning.evaluer(warningDao, vedtaksperiodeId)
         return true

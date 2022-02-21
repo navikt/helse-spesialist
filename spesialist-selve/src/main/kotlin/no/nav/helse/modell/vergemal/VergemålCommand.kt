@@ -16,14 +16,18 @@ internal class VergemålCommand(
     val vedtaksperiodeId: UUID
 ) : Command {
 
-    override fun execute(context: CommandContext): Boolean {
-        logg.info("Trenger informasjon om vergemål og fullmakter")
-        context.behov("Vergemål")
-        return false
-    }
+    override fun execute(context: CommandContext) = behandle(context)
 
-    override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<Vergemålløsning>() ?: return false
+    override fun resume(context: CommandContext) = behandle(context)
+
+    private fun behandle(context: CommandContext): Boolean {
+        val løsning = context.get<Vergemålløsning>()
+        if (løsning == null) {
+            logg.info("Trenger informasjon om vergemål og fullmakter")
+            context.behov("Vergemål")
+            return false
+        }
+
         løsning.lagre(vergemålDao)
 
         if (løsning.harVergemål()) {
@@ -37,6 +41,7 @@ internal class VergemålCommand(
 
         return true
     }
+
 
     private fun String.leggTilSomWarning() {
         warningDao.leggTilWarning(vedtaksperiodeId, Warning(this, WarningKilde.Spesialist))

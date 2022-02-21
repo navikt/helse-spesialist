@@ -17,14 +17,17 @@ internal class DigitalKontaktinformasjonCommand(
         private val logg = LoggerFactory.getLogger(DigitalKontaktinformasjonCommand::class.java)
     }
 
-    override fun execute(context: CommandContext): Boolean {
-        logg.info("Trenger reservasjonsinformasjon fra DKIF")
-        context.behov("DigitalKontaktinformasjon")
-        return false
-    }
+    override fun execute(context: CommandContext) = behandle(context)
 
-    override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<DigitalKontaktinformasjonløsning>() ?: return false
+    override fun resume(context: CommandContext) = behandle(context)
+
+    private fun behandle(context: CommandContext): Boolean {
+        val løsning = context.get<DigitalKontaktinformasjonløsning>()
+        if (løsning == null) {
+            logg.info("Trenger reservasjonsinformasjon fra DKIF")
+            context.behov("DigitalKontaktinformasjon")
+            return false
+        }
         løsning.lagre(digitalKontaktinformasjonDao)
         løsning.evaluer(warningDao, vedtaksperiodeId)
         return true
