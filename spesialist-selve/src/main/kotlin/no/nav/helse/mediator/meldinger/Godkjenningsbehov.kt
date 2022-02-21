@@ -187,15 +187,13 @@ internal class Godkjenningsbehov(
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            utbetalingtype = utbetalingtype,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
-            egenAnsattDao = egenAnsattDao,
             hendelseId = id,
             personDao = personDao,
             risikovurderingDao = risikovurderingDao,
-            vergemålDao = vergemålDao
+            utbetalingId = utbetalingId,
+            utbetalingtype = utbetalingtype
         ),
         OpprettOpptegnelseCommand(
             opptegnelseDao = opptegnelseDao,

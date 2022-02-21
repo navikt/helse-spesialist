@@ -39,7 +39,7 @@ internal abstract class MacroCommand : Command {
     }
 
     private fun run(context: CommandContext, commands: List<Command>): Boolean {
-        return commands.all {
+        return CommandContext.run(context, commands) {
             historikk.add(0, it)
             runCommand(context, it, Command::execute)
         }

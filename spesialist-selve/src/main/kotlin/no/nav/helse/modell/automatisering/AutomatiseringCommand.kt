@@ -4,6 +4,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -28,6 +29,7 @@ internal class AutomatiseringCommand(
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer)
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
+            ferdigstill(context)
         }
 
         return true

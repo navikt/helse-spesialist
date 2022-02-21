@@ -4,6 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -100,6 +101,27 @@ internal class CommandContextTest {
     }
 
     @Test
+    fun ferdigstiller() {
+        context = CommandContext(CONTEXT)
+        TestCommand(executeAction = { this.ferdigstill(context)}).apply {
+            context.utfør(commandContextDao, this)
+            verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
+        }
+    }
+
+    @Test
+    fun `ferdigstiller selv ved suspendering`() {
+        context = CommandContext(CONTEXT)
+        TestCommand(executeAction = {
+            this.ferdigstill(context)
+            false
+        }).apply {
+            context.utfør(commandContextDao, this)
+            verify(exactly = 1) { commandContextDao.ferdig(any(), any())}
+        }
+    }
+
+    @Test
     fun `Henter ut første av en gitt type`() {
         val testObject1 = TestObject1("object 1")
         val testObject2 = TestObject1("object 2")
@@ -189,8 +211,8 @@ internal class CommandContextTest {
     private class TestObject1(val data: String)
     private class TestObject2(val data: String)
     private class TestCommand(
-        private val executeAction: () -> Boolean = { true },
-        private val resumeAction: () -> Boolean = { true }
+        private val executeAction: Command.() -> Boolean = { true },
+        private val resumeAction: Command.() -> Boolean = { true }
     ) : Hendelse {
         var executed = false
         var resumed = false
@@ -203,12 +225,12 @@ internal class CommandContextTest {
 
         override fun execute(context: CommandContext): Boolean {
             executed = true
-            return executeAction()
+            return executeAction(this)
         }
 
         override fun resume(context: CommandContext): Boolean {
             resumed = true
-            return resumeAction()
+            return resumeAction(this)
         }
 
         override fun undo(context: CommandContext) {

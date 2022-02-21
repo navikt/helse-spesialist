@@ -1,9 +1,11 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -199,6 +201,31 @@ internal class MacroCommandTest {
         assertTellere(0, 1, 2)
     }
 
+    @Test
+    fun `Utfører ikke commands etter at context er ferdigstilt i execute`() {
+        val macroCommand =
+            command(
+                execute = { this.ferdigstill(context) }
+            ) +
+            command(
+                execute = { throw Exception() }
+            )
+        assertDoesNotThrow { macroCommand.execute(context) }
+    }
+
+    @Test
+    fun `Utfører ikke commands etter at context er ferdigstilt i resume`() {
+        val macroCommand =
+            command(
+                execute = { throw Exception() },
+                resume = { this.ferdigstill(context) }
+            ) +
+            command(
+                execute = { throw Exception() }
+            )
+        assertDoesNotThrow { macroCommand.resume(context) }
+    }
+
     private fun assertRekkefølge(vararg konstanter: String) {
         assertEquals(konstanter.toList(), constants)
     }
@@ -215,16 +242,16 @@ internal class MacroCommandTest {
         }
     }
 
-    private fun command(execute: (context: CommandContext) -> Boolean, resume: (context: CommandContext) -> Boolean = { true }, undo: () -> Unit = {}): Command {
+    private fun command(execute: Command.(context: CommandContext) -> Boolean, resume: Command.(context: CommandContext) -> Boolean = { true }, undo: () -> Unit = {}): Command {
         return object : Command {
             override fun execute(context: CommandContext): Boolean {
                 executeCount += 1
-                return execute(context)
+                return execute(this, context)
             }
 
             override fun resume(context: CommandContext): Boolean {
                 resumeCount += 1
-                return resume(context)
+                return resume(this, context)
             }
 
             override fun undo(context: CommandContext) {

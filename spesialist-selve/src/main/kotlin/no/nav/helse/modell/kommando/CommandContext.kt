@@ -1,7 +1,9 @@
 package no.nav.helse.modell.kommando
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()) {
@@ -9,6 +11,7 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     private val behovsgrupper = mutableListOf<Behovgruppe>()
     private val sti: MutableList<Int> = sti.toMutableList()
     private val meldinger = mutableListOf<String>()
+    private var ferdigstilt = false
 
     internal class Behovgruppe {
         private val behov = mutableMapOf<String, Map<String, Any>>()
@@ -74,11 +77,15 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         commandContextDao.avbryt(vedtaksperiodeId, id)
     }
 
+    private fun ferdigstill() {
+        ferdigstilt = true
+    }
+
     internal inline fun <reified T> get(): T? = data.filterIsInstance<T>().firstOrNull()
 
     internal fun utfør(commandContextDao: CommandContextDao, hendelse: Hendelse) = try {
         utfør(hendelse).also {
-            if (it) commandContextDao.ferdig(hendelse, id)
+            if (ferdigstilt || it) commandContextDao.ferdig(hendelse, id)
             else commandContextDao.suspendert(hendelse, id, sti)
         }
     } catch (rootErr: Exception) {
@@ -93,5 +100,19 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
     private fun utfør(command: Command) = when {
         sti.isEmpty() -> command.execute(this)
         else -> command.resume(this)
+    }
+
+    internal companion object {
+        private val logger = LoggerFactory.getLogger(CommandContext::class.java)
+        internal fun Command.ferdigstill(context: CommandContext) : Boolean {
+            logger.info("Kommando ${this.javaClass.simpleName} ferdigstilte {}", keyValue("context_id", "${context.id}"))
+            context.ferdigstill()
+            return true
+        }
+        internal fun run(context: CommandContext, commands: List<Command>, runner:(command: Command) -> Boolean) =
+            commands.all {
+                if (context.ferdigstilt) true
+                else runner(it)
+            }
     }
 }

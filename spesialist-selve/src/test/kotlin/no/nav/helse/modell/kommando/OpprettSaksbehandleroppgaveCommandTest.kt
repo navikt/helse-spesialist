@@ -40,13 +40,11 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         oppgaveMediator = oppgaveMediator,
         automatisering = automatisering,
-        egenAnsattDao = egenAnsattDao,
         hendelseId = hendelseId,
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UTBETALING_ID,
-        utbetalingtype = Utbetalingtype.UTBETALING,
-        vergemålDao = vergemålDao
+        utbetalingtype = Utbetalingtype.UTBETALING
     )
 
     @BeforeEach

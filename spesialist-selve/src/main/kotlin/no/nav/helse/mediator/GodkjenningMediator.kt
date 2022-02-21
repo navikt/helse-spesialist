@@ -45,6 +45,19 @@ internal class GodkjenningMediator(
         automatiseringsteller.inc()
     }
 
+    internal fun automatiskAvvisning(
+        context: CommandContext,
+        behov: UtbetalingsgodkjenningMessage,
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        begrunnelser: List<String>
+    ) {
+        behov.avvisAutomatisk(begrunnelser)
+        context.publiser(behov.toJson())
+        context.publiser(lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, behov).toJson())
+        automatiseringsteller.inc()
+    }
+
     private fun lagVedtaksperiodeGodkjent(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
@@ -57,7 +70,7 @@ internal class GodkjenningMediator(
         løsning = behov.løsning()
     )
 
-    internal fun lagVedtaksperiodeAvvist(
+    private fun lagVedtaksperiodeAvvist(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         behov: UtbetalingsgodkjenningMessage
