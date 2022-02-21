@@ -19,7 +19,7 @@ data class BehandlingstatistikkForSpeilDto(
     data class BehandlingerForSpeilDto(
         val totalt: Int,
         val annulleringer: Int,
-        val manuelt: Int,
+        val manuelt: BehandlingsstatistikkDto.OppgavestatistikkDto,
         val automatisk: Int
     )
 

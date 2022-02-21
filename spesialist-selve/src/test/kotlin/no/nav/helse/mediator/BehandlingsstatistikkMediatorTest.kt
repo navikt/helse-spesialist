@@ -48,7 +48,12 @@ internal class BehandlingsstatistikkMediatorTest {
                 fullførteBehandlinger = BehandlingerDto(
                     totalt = 10,
                     annullert = 8,
-                    manuelt = 1,
+                    manuelt = OppgavestatistikkDto(
+                        totalt = 1,
+                        perPeriodetype = listOf(
+                            BehandlingsstatistikkType.DELVIS_REFUSJON to 1
+                        )
+                    ),
                     automatisk = 1
                 )
             )
@@ -74,7 +79,7 @@ internal class BehandlingsstatistikkMediatorTest {
         assertEquals(10, eksternDto.fullførteBehandlinger.totalt)
         assertEquals(8, eksternDto.fullførteBehandlinger.annulleringer)
         assertEquals(1, eksternDto.fullførteBehandlinger.automatisk)
-        assertEquals(1, eksternDto.fullførteBehandlinger.manuelt)
+        assertEquals(1, eksternDto.fullførteBehandlinger.manuelt.totalt)
     }
 
     private operator fun List<PerPeriodetype>.get(type: PeriodetypeForSpeil) = this.first { it.periodetypeForSpeil == type }.antall

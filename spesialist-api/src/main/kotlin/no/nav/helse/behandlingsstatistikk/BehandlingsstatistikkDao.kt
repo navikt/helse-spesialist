@@ -6,29 +6,38 @@ import no.nav.helse.oppgave.Oppgavetype
 import java.time.LocalDate
 import javax.sql.DataSource
 
-class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
+class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
 
     fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
+
+        val godkjentManueltPerPeriodetype = godkjentManueltPerPeriodetype(fom)
         val tilGodkjenningPerPeriodetype = tilGodkjenningPerPeriodetype()
         val tildeltPerPeriodetype = tildeltPerPeriodetype()
-        val antallAnnulleringer = antallAnnulleringer(fom)
-        val antallManuelleGodkjenninger = godkjentManueltTotalt(fom)
-        val antallAutomatiskeGodkjenninger = godkjentAutomatiskTotalt(fom)
-        val behandletTotalt = antallAnnulleringer + antallAutomatiskeGodkjenninger + antallManuelleGodkjenninger
+
+        val godkjentManueltTotalt = godkjentManueltPerPeriodetype(fom).sumOf { (_, antall) -> antall }
+        val annulleringerTotalt = antallAnnulleringer(fom)
+        val godkjentAutomatiskTotalt = godkjentAutomatiskTotalt(fom)
+        val oppgaverTilGodkjenningTotalt = tilGodkjenningPerPeriodetype.sumOf { (_, antall) -> antall }
+        val tildelteOppgaverTotalt = tildeltPerPeriodetype.sumOf { (_, antall) -> antall }
+
+        val behandletTotalt = annulleringerTotalt + godkjentManueltTotalt + godkjentAutomatiskTotalt
 
         return BehandlingsstatistikkDto(
             oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(
-                totalt = tilGodkjenningPerPeriodetype.sumOf { (_, antall) -> antall },
+                totalt = oppgaverTilGodkjenningTotalt,
                 perPeriodetype = tilGodkjenningPerPeriodetype,
             ),
             tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(
-                totalt = tildeltPerPeriodetype.sumOf { (_, antall) -> antall },
+                totalt = tildelteOppgaverTotalt,
                 perPeriodetype = tildeltPerPeriodetype
             ),
             fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(
-                annullert = antallAnnulleringer,
-                manuelt = antallManuelleGodkjenninger,
-                automatisk = antallAutomatiskeGodkjenninger,
+                annullert = annulleringerTotalt,
+                manuelt = BehandlingsstatistikkDto.OppgavestatistikkDto(
+                    totalt = godkjentManueltTotalt,
+                    perPeriodetype = godkjentManueltPerPeriodetype
+                ),
+                automatisk = godkjentAutomatiskTotalt,
                 totalt = behandletTotalt
             )
         )
@@ -37,7 +46,8 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
     private fun tilGodkjenningPerPeriodetype() =
         """ SELECT sot.type AS periodetype, o.type, COUNT(distinct o.id)
             FILTER (WHERE o.type = 'SØKNAD') AS antall,
-            COUNT(distinct o.type) as antallAvOppgaveType FROM oppgave o
+            COUNT(distinct o.id) as antallAvOppgaveType
+            FROM oppgave o
               INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY sot.type, o.type
@@ -46,34 +56,43 @@ class BehandlingsstatistikkDao(dataSource: DataSource): HelseDao(dataSource) {
     private fun tildeltPerPeriodetype() =
         """ SELECT s.type as periodetype, o.type, COUNT(distinct s.type)
             FILTER (WHERE o.type = 'SØKNAD') AS antall,
-            COUNT(distinct o.type) as antallAvOppgaveType FROM oppgave o
-                 INNER JOIN vedtak v on o.vedtak_ref = v.id
-                 INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
-                 INNER JOIN tildeling t on o.id = t.oppgave_id_ref
+            COUNT(distinct o.id) as antallAvOppgaveType
+            FROM oppgave o
+              INNER JOIN vedtak v on o.vedtak_ref = v.id
+              INNER JOIN saksbehandleroppgavetype s on v.id = s.vedtak_ref
+              INNER JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'
             GROUP BY s.type, o.type
         """.list { perStatistikktype(it) }
 
-    private fun godkjentManueltTotalt(fom: LocalDate) = requireNotNull(
-        """ SELECT COUNT(1) as antall FROM oppgave o WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom"""
-            .single(mapOf("fom" to fom)) { it.int("antall") } )
+    private fun godkjentManueltPerPeriodetype(fom: LocalDate) =
+        """ SELECT sot.type AS periodetype, o.type, COUNT(distinct o.id)
+            FILTER (WHERE o.type = 'SØKNAD') AS antall,
+            COUNT(distinct o.id) as antallAvOppgaveType
+            FROM oppgave o
+              INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
+            WHERE o.status = 'Ferdigstilt' AND o.oppdatert >= :fom
+            GROUP BY sot.type, o.type
+        """.list(mapOf("fom" to fom)) { perStatistikktype(it) }
 
     private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(
         """ SELECT COUNT(1) as antall FROM automatisering a
                 INNER JOIN vedtak v on a.vedtaksperiode_ref = v.id
-            WHERE a.automatisert = true AND stikkprøve = false AND a.opprettet >= :fom
-        """.single(mapOf("fom" to fom)) { it.int("antall")})
+            WHERE a.automatisert = true AND a.stikkprøve = false AND a.opprettet >= :fom
+        """.single(mapOf("fom" to fom)) { it.int("antall") })
 
     private fun antallAnnulleringer(fom: LocalDate) = requireNotNull("""
             SELECT COUNT(1) as antall FROM annullert_av_saksbehandler WHERE annullert_tidspunkt >= :fom
-        """.single(mapOf("fom" to fom)) {it.int("antall")})
+        """.single(mapOf("fom" to fom)) { it.int("antall") })
 
     private fun perStatistikktype(row: Row): Pair<BehandlingsstatistikkType, Int> {
         val oppgavetype: Oppgavetype = Oppgavetype.valueOf(row.string("type"))
 
         return if (oppgavetype == Oppgavetype.SØKNAD) {
             BehandlingsstatistikkType.valueOf(row.string("periodetype")) to row.int("antall")
-        } else {  BehandlingsstatistikkType.valueOf(row.string("type")) to row.int("antallAvOppgaveType") }
+        } else {
+            BehandlingsstatistikkType.valueOf(row.string("type")) to row.int("antallAvOppgaveType")
+        }
     }
 }
 

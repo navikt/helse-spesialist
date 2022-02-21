@@ -12,7 +12,7 @@ data class BehandlingsstatistikkDto(
     data class BehandlingerDto(
         val totalt: Int,
         val annullert: Int,
-        val manuelt: Int,
+        val manuelt: OppgavestatistikkDto,
         val automatisk: Int
     )
 }

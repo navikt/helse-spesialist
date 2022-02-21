@@ -20,10 +20,18 @@ internal class BehandlingsstatistikkApiTest {
     private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator> {
         every { hentSaksbehandlingsstatistikk() } returns toSpeilMap(
             BehandlingsstatistikkDto(
-                oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(1, listOf(
-                    BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING to 1)),
+                oppgaverTilGodkjenning = BehandlingsstatistikkDto.OppgavestatistikkDto(
+                    1, listOf(
+                        BehandlingsstatistikkType.FØRSTEGANGSBEHANDLING to 1
+                    )
+                ),
                 tildelteOppgaver = BehandlingsstatistikkDto.OppgavestatistikkDto(0, emptyList()),
-                fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(0, 0, 0, 0)
+                fullførteBehandlinger = BehandlingsstatistikkDto.BehandlingerDto(
+                    0,
+                    0,
+                    BehandlingsstatistikkDto.OppgavestatistikkDto(0, emptyList()),
+                    0
+                )
             )
         )
     }
@@ -40,7 +48,7 @@ internal class BehandlingsstatistikkApiTest {
                 val deserialized = objectMapper.readValue<BehandlingstatistikkForSpeilDto>(response.content!!)
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(0, deserialized.fullførteBehandlinger.totalt)
-                assertEquals(0, deserialized.fullførteBehandlinger.manuelt)
+                assertEquals(0, deserialized.fullførteBehandlinger.manuelt.totalt)
                 assertEquals(0, deserialized.fullførteBehandlinger.automatisk)
                 assertEquals(0, deserialized.fullførteBehandlinger.annulleringer)
                 assertEquals(0, deserialized.antallTildelteOppgaver.totalt)
