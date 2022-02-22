@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
@@ -54,6 +55,7 @@ internal class SaksbehandlerløsningTest {
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val graphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
@@ -77,7 +79,7 @@ internal class SaksbehandlerløsningTest {
         speilSnapshotRestClient = restClient,
         speilSnapshotGraphQLClient = graphQLClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = mockk(relaxed = true),
         arbeidsforholdDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),

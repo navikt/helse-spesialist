@@ -3,6 +3,7 @@ package no.nav.helse.modell
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.oppgave.*
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
@@ -19,6 +20,7 @@ internal class OppgaveTest {
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val UTBETALING_ID = UUID.randomUUID()
         private val COMMAND_CONTEXT_ID = UUID.randomUUID()
+        private val HENDELSE_ID = UUID.randomUUID()
         private const val SAKSBEHANDLERIDENT = "Z999999"
         private val SAKSBEHANDLEROID = UUID.randomUUID()
         private val OPPGAVE_ID = Random.nextLong()
@@ -28,7 +30,8 @@ internal class OppgaveTest {
     private val vedtakDao = mockk<VedtakDao>()
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
 
     private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
 
@@ -39,7 +42,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppretter ny oppgave`() {
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE, VEDTAKSPERIODE_ID, UTBETALING_ID) }
     }
 
@@ -47,7 +50,7 @@ internal class OppgaveTest {
     fun `oppdater oppgave`() {
         val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         oppgave.ferdigstill(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Ferdigstilt, SAKSBEHANDLERIDENT, SAKSBEHANDLEROID) }
     }
 
@@ -64,7 +67,7 @@ internal class OppgaveTest {
     fun `Setter oppgavestatus til INVALIDERT når oppgaven avbrytes`() {
         val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         oppgave.avbryt()
-        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID)
+        oppgave.lagre(oppgaveMediator, COMMAND_CONTEXT_ID, HENDELSE_ID)
         verify(exactly = 1) { oppgaveDao.updateOppgave(OPPGAVE_ID, Oppgavestatus.Invalidert, null, null) }
     }
 

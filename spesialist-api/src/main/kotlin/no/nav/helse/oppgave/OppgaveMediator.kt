@@ -1,6 +1,9 @@
 package no.nav.helse.oppgave
 
 import no.nav.helse.SaksbehandlerTilganger
+import no.nav.helse.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -14,7 +17,8 @@ import java.util.*
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
-    private val reservasjonDao: ReservasjonDao
+    private val reservasjonDao: ReservasjonDao,
+    private val opptegnelseDao: OpptegnelseDao
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
@@ -85,10 +89,12 @@ class OppgaveMediator(
         avventerSystem(oppgave, saksbehandlerIdent, oid)
     }
 
-    fun opprett(contextId: UUID, vedtaksperiodeId: UUID, utbetalingId: UUID, navn: Oppgavetype): Long? {
+    fun opprett(contextId: UUID, vedtaksperiodeId: UUID, utbetalingId: UUID, navn: Oppgavetype, hendelseId: UUID): Long? {
         if (oppgaveDao.harGyldigOppgave(utbetalingId)) return null
-        return oppgaveDao.opprettOppgave(contextId, navn, vedtaksperiodeId, utbetalingId)
-            .also { oppgaveId -> oppgaverForPublisering[oppgaveId] = "oppgave_opprettet" }
+        return oppgaveDao.opprettOppgave(contextId, navn, vedtaksperiodeId, utbetalingId).also { oppgaveId ->
+            oppgaverForPublisering[oppgaveId] = "oppgave_opprettet"
+            GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, oppgaveDao.finnFødselsnummer(oppgaveId))
+        }
     }
 
     fun oppdater(
@@ -126,7 +132,7 @@ class OppgaveMediator(
             ${oppgaver.joinToString()}
         """.trimIndent())
 
-        oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId) }
+        oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId, hendelseId) }
         doAlso()
         oppgaver.clear()
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->

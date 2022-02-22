@@ -6,6 +6,7 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.AbonnementDao
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.graphQLSnapshot
@@ -19,7 +20,6 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -138,7 +138,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(dataSource)
     internal val opptegnelseDao = OpptegnelseDao(dataSource)
-    internal val opptegnelseApiDao = no.nav.helse.abonnement.OpptegnelseDao(dataSource)
     internal val abonnementDao = AbonnementDao(dataSource)
     internal val utbetalingDao = UtbetalingDao(dataSource)
     internal val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)

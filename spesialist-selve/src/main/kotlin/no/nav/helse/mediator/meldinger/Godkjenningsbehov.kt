@@ -26,8 +26,6 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.*
-import no.nav.helse.modell.opptegnelse.OpprettOpptegnelseCommand
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -82,7 +80,6 @@ internal class Godkjenningsbehov(
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
-    opptegnelseDao: OpptegnelseDao,
     utbetalingDao: UtbetalingDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
@@ -172,7 +169,8 @@ internal class Godkjenningsbehov(
             personDao = personDao,
             vergemålDao = vergemålDao,
             godkjenningsbehovJson = json,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
+            hendelseId = id
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,
@@ -194,13 +192,7 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype
-        ),
-        OpprettOpptegnelseCommand(
-            opptegnelseDao = opptegnelseDao,
-            fødselsnummer = fødselsnummer,
-            hendelseId = id,
-            opptegnelseType = NY_SAKSBEHANDLEROPPGAVE
-        ),
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer

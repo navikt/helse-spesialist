@@ -27,7 +27,7 @@ internal class AutomatiseringCommand(
     override fun execute(context: CommandContext): Boolean {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, utbetalingtype) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
-            godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer)
+            godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
             ferdigstill(context)
         }

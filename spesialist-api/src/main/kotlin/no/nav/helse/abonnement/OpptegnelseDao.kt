@@ -1,11 +1,20 @@
 package no.nav.helse.abonnement
 
 import no.nav.helse.HelseDao
+import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
 
 class OpptegnelseDao(dataSource: DataSource) : HelseDao(dataSource) {
 
+    @Language("PostgreSQL")
+    fun opprettOpptegnelse(fødselsnummer: String, payload: OpptegnelsePayload, type: OpptegnelseType) =
+        """
+            INSERT INTO opptegnelse (person_id, payload, type)
+            VALUES ((SELECT id FROM person WHERE fodselsnummer=:fodselsnummer), cast(:payload as jsonb), :type);
+            """.update(mapOf("fodselsnummer" to fødselsnummer.toLong(), "payload" to payload.toJson(), "type" to "$type"))
+
+    @Language("PostgreSQL")
     fun finnOpptegnelser(saksbehandlerIdent: UUID) =
         """
             SELECT o.sekvensnummer, p.aktor_id, o.payload, o.type

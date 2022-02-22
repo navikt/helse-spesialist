@@ -31,7 +31,7 @@ internal class AutomatiseringCommandTest {
             automatisering,
             """{ "@event_name": "behov" }""",
             Utbetalingtype.UTBETALING,
-            GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true))
+            GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true), opptegnelseDao = mockk(relaxed = true))
         )
 
     private lateinit var context: CommandContext

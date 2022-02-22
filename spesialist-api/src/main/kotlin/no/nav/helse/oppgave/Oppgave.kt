@@ -116,10 +116,10 @@ class Oppgave private constructor(
         ferdigstiltAvOid = oid
     }
 
-    fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID) {
+    fun lagre(oppgaveMediator: OppgaveMediator, contextId: UUID, hendelseId: UUID) {
         id?.also {
             oppgaveMediator.oppdater(it, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId!!, type).also { id = it } ?: return
+        } ?: oppgaveMediator.opprett(contextId, vedtaksperiodeId, utbetalingId!!, type, hendelseId).also { id = it } ?: return
     }
 
     fun avbryt() {

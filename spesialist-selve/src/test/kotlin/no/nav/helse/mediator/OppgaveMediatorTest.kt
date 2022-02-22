@@ -5,6 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.abonnement.OpptegnelseDao
+import no.nav.helse.abonnement.OpptegnelseType
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.oppgave.*
@@ -40,7 +42,8 @@ internal class OppgaveMediatorTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val mediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val mediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
     private val søknadsoppgave: Oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
     private val stikkprøveoppgave: Oppgave = Oppgave.stikkprøve(VEDTAKSPERIODE_ID_2, UTBETALING_ID_2)
 
@@ -48,7 +51,7 @@ internal class OppgaveMediatorTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, vedtakDao, tildelingDao)
+        clearMocks(oppgaveDao, vedtakDao, tildelingDao, opptegnelseDao)
         testRapid.reset()
     }
 
@@ -61,6 +64,7 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnContextId(any()) } returns COMMAND_CONTEXT_ID
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
         mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
@@ -69,6 +73,7 @@ internal class OppgaveMediatorTest {
         assertEquals(2, testRapid.inspektør.size)
         assertOppgaveevent(0, "oppgave_opprettet")
         assertOppgaveevent(1, "oppgave_opprettet")
+        assertAntallOpptegnelser(2)
     }
 
     @Test
@@ -79,6 +84,7 @@ internal class OppgaveMediatorTest {
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, gyldigTil) }
+        assertOpptegnelseIkkeOpprettet()
     }
 
     @Test
@@ -96,6 +102,7 @@ internal class OppgaveMediatorTest {
             assertEquals(SAKSBEHANDLERIDENT, it.path("ferdigstiltAvIdent").asText())
             assertEquals(SAKSBEHANDLEROID, UUID.fromString(it.path("ferdigstiltAvOid").asText()))
         }
+        assertOpptegnelseIkkeOpprettet()
     }
 
     @Test
@@ -107,8 +114,9 @@ internal class OppgaveMediatorTest {
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.opprettOppgave(COMMAND_CONTEXT_ID, OPPGAVETYPE_SØKNAD, any(), UTBETALING_ID) }
-    }
+        assertOpptegnelseIkkeOpprettet()
 
+    }
     @Test
     fun `lagrer ikke dobbelt`() {
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
@@ -116,13 +124,18 @@ internal class OppgaveMediatorTest {
         every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_STIKKPRØVE, any(), any()) } returns 1L
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+
         mediator.opprett(søknadsoppgave)
         mediator.opprett(stikkprøveoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(2, testRapid.inspektør.size)
+        assertAntallOpptegnelser(2)
         testRapid.reset()
+        clearMocks(opptegnelseDao)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         assertEquals(0, testRapid.inspektør.size)
+        assertOpptegnelseIkkeOpprettet()
     }
 
     @Test
@@ -137,7 +150,12 @@ internal class OppgaveMediatorTest {
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { oppgaveDao.finnAktive(VEDTAKSPERIODE_ID) }
         verify(exactly = 2) { oppgaveDao.updateOppgave(any(), Oppgavestatus.Invalidert, null, null) }
+        assertOpptegnelseIkkeOpprettet()
     }
+
+    private fun assertAntallOpptegnelser(antallOpptegnelser: Int) = verify(exactly = antallOpptegnelser) { opptegnelseDao.opprettOpptegnelse(eq(TESTHENDELSE.fødselsnummer()), any(), eq(OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE)) }
+
+    private fun assertOpptegnelseIkkeOpprettet()= assertAntallOpptegnelser(0)
 
     private fun assertOppgaveevent(indeks: Int, navn: String, status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler, assertBlock: (JsonNode) -> Unit = {}) {
         testRapid.inspektør.message(indeks).also {

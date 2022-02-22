@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.meldinger.*
@@ -12,7 +13,6 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -131,7 +131,6 @@ internal class Hendelsefabrikk(
             godkjenningMediator = godkjenningMediator,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
-            opptegnelseDao = opptegnelseDao,
             utbetalingDao = utbetalingDao
         )
     }

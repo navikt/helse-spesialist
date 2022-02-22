@@ -17,6 +17,7 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         dataSource = dataSource,
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk,
+        opptegnelseDao = opptegnelseDao
     )
 
     @Test

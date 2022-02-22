@@ -1,10 +1,10 @@
 package no.nav.helse.modell.utbetaling
 
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.abonnement.OpptegnelseType
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
-import no.nav.helse.modell.opptegnelse.UtbetalingPayload
+import no.nav.helse.abonnement.UtbetalingPayload
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.godkjenteStatuser
 import org.slf4j.LoggerFactory

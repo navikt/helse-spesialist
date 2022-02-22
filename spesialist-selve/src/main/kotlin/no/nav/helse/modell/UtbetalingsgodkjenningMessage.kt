@@ -1,12 +1,17 @@
 package no.nav.helse.modell
 
+import com.fasterxml.jackson.module.kotlin.convertValue
+import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
+import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.isMissingOrNull
 import java.time.LocalDateTime
+import java.util.*
 
 internal class UtbetalingsgodkjenningMessage(json: String) {
     private val behov = JsonMessage(json, MessageProblems(json))
+    private lateinit var løsning: Map<String, Any>
 
     internal fun godkjennAutomatisk() {
         løsAutomatisk(true)
@@ -79,7 +84,7 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
         begrunnelser: List<String>?,
         kommentar: String?
     ) {
-        behov["@løsning"] = mapOf(
+        løsning = mapOf(
             "Godkjenning" to mapOf(
                 "godkjent" to godkjent,
                 "saksbehandlerIdent" to saksbehandlerIdent,
@@ -91,9 +96,35 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
                 "kommentar" to kommentar
             )
         )
+        behov["@løsning"] = løsning
     }
 
+    internal fun lagVedtaksperiodeGodkjent(
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        warningDao: WarningDao,
+        vedtakDao: VedtakDao
+    ) =
+        VedtaksperiodeGodkjent(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+            periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
+            løsning = objectMapper.convertValue(løsning)
+        )
+
+    internal fun lagVedtaksperiodeAvvist(
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+        warningDao: WarningDao,
+        vedtakDao: VedtakDao
+    ) = VedtaksperiodeAvvist(
+        vedtaksperiodeId = vedtaksperiodeId,
+        fødselsnummer = fødselsnummer,
+        warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+        periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
+        løsning = objectMapper.convertValue(løsning)
+    )
+
     internal fun toJson() = behov.toJson()
-    internal fun løsning() = behov["@løsning"].takeUnless { it.isMissingOrNull() }
-        ?: throw RuntimeException("Forsøkte å hente ut løsning før den er satt")
 }

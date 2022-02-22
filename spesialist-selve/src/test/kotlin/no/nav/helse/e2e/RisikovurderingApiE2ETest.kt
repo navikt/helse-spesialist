@@ -52,7 +52,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         val respons =
             AbstractApiTest.TestServer {
                 oppgaveApi(
-                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao), riskQaGruppe, kode7Gruppe
+                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao), riskQaGruppe, kode7Gruppe
                 )
             }
                 .withAuthenticatedServer {

@@ -35,7 +35,7 @@ internal class UtbetalingsgodkjenningCommandTest {
     fun setup() {
         clearMocks(dao)
         commandContext = CommandContext(UUID.randomUUID())
-        command = UtbetalingsgodkjenningCommand(GODKJENT, IDENT, OID, EPOST, TIDSPUNKT, null, null, null, GODKJENNINGSBEHOV_ID, dao, GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true)), vedtaksperiodeId, fødselsnummer)
+        command = UtbetalingsgodkjenningCommand(GODKJENT, IDENT, OID, EPOST, TIDSPUNKT, null, null, null, GODKJENNINGSBEHOV_ID, dao, GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)), vedtaksperiodeId, fødselsnummer)
     }
 
     @Test

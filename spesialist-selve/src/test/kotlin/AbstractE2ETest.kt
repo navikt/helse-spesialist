@@ -9,6 +9,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.*
 import no.nav.helse.abonnement.AbonnementDao
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -31,7 +32,6 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -146,7 +146,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     protected val graphqlClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
 
-    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
+    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
         personDao = personDao,
@@ -168,7 +168,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         speilSnapshotRestClient = restClient,
         speilSnapshotGraphQLClient = graphqlClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
@@ -190,6 +190,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dataSource = dataSource,
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk,
+        opptegnelseDao = opptegnelseDao
     )
     internal val personMediator = PersonMediator(
         personsnapshotDao = personsnapshotDao,

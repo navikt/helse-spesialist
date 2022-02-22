@@ -1,16 +1,25 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
+import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
-import no.nav.helse.modell.opptegnelse.UtbetalingPayload
+import no.nav.helse.abonnement.UtbetalingPayload
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
 
-    companion object {
-        private val PAYLOAD = UtbetalingPayload(UUID.randomUUID())
+    private companion object {
+        private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID())
+        private val GODKJENNINGSBEHOV_PAYLOAD = GodkjenningsbehovPayload(UUID.randomUUID())
+        private val objectMapper = jacksonObjectMapper()
+        private fun assertJson(expected: String, actual: String) {
+            assertEquals("${objectMapper.readTree(expected)}", "${objectMapper.readTree(actual)}")
+        }
     }
 
     @Test
@@ -20,12 +29,24 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
         abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
         opptegnelseDao.opprettOpptegnelse(
             FNR,
-            PAYLOAD,
+            UTBETALING_PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
 
-        val alle = opptegnelseApiDao.finnOpptegnelser(SAKSBEHANDLER_OID)
-        assertEquals(1, alle.size)
+        GODKJENNINGSBEHOV_PAYLOAD.lagre(opptegnelseDao, FNR)
+
+        val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
+        assertEquals(2, alle.size)
+
+        alle.first { it.type == UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
+            assertEquals(AKTØR.toLong(), opptegnelse.aktørId)
+            assertJson(UTBETALING_PAYLOAD.toJson(), opptegnelse.payload)
+        }
+
+        alle.first { it.type == NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
+            assertEquals(AKTØR.toLong(), opptegnelse.aktørId)
+            assertJson(GODKJENNINGSBEHOV_PAYLOAD.toJson(), opptegnelse.payload)
+        }
     }
 
     @Test
@@ -34,12 +55,12 @@ internal class OpptegnelseDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler()
         opptegnelseDao.opprettOpptegnelse(
             FNR,
-            PAYLOAD,
+            UTBETALING_PAYLOAD,
             UTBETALING_ANNULLERING_OK
         )
         abonnementDao.opprettAbonnement(SAKSBEHANDLER_OID, AKTØR.toLong())
 
-        val alle = opptegnelseApiDao.finnOpptegnelser(SAKSBEHANDLER_OID)
+        val alle = opptegnelseDao.finnOpptegnelser(SAKSBEHANDLER_OID)
         assertEquals(0, alle.size)
     }
 }

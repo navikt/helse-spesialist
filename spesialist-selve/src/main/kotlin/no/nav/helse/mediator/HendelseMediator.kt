@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.*
 import no.nav.helse.mediator.api.modell.Saksbehandler
@@ -49,6 +50,7 @@ internal class HendelseMediator(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
+    private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
 ) : IHendelseMediator {
@@ -136,7 +138,7 @@ internal class HendelseMediator(
         )
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
-        val internOppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao)
+        val internOppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
         internOppgaveMediator.reserverOppgave(oid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)

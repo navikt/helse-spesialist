@@ -23,6 +23,7 @@ internal class AutomatiskAvvisningCommand(
     val vergemålDao: VergemålDao,
     val godkjenningsbehovJson: String,
     val godkjenningMediator: GodkjenningMediator,
+    val hendelseId: UUID
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
@@ -41,7 +42,7 @@ internal class AutomatiskAvvisningCommand(
             .also { avvistPåGrunnAvVergemålTeller.inc() }
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
-        godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList())
+        godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
         logg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
         sikkerLogg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
         return ferdigstill(context)

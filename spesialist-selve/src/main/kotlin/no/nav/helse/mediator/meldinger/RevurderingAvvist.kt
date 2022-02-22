@@ -1,11 +1,11 @@
 package no.nav.helse.mediator.meldinger
 
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.abonnement.OpptegnelseType
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
-import no.nav.helse.modell.opptegnelse.RevurderingAvvistPayload
+import no.nav.helse.abonnement.RevurderingAvvistPayload
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger

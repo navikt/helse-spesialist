@@ -16,6 +16,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import no.nav.helse.abonnement.AbonnementDao
+import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.abonnement.opptegnelseApi
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
@@ -37,7 +38,6 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
-import no.nav.helse.modell.opptegnelse.OpptegnelseDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -157,7 +157,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
         tildelingDao,
-        reservasjonDao
+        reservasjonDao,
+        opptegnelseDao
     )
 
     private val plukkTilManuell: PlukkTilManuell = ({
@@ -191,7 +192,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         speilSnapshotRestClient = speilSnapshotRestClient,
         speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao),
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
@@ -305,6 +306,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             dataSource = dataSource,
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk,
+            opptegnelseDao = opptegnelseDao
         )
         notatMediator = NotatMediator(notatDao)
     }
