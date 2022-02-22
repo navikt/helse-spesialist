@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
@@ -38,6 +37,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilArbeidsgiver
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
+import no.nav.helse.modell.utbetaling.Utbetalingsfilter
+import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
@@ -82,6 +85,22 @@ internal class Godkjenningsbehov(
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao
 ) : Hendelse, MacroCommand() {
+    private val utbetalingsfilter: () -> Utbetalingsfilter = {
+        val utbetalingen = personDao.findVedtaksperiodeUtbetalingElement(
+            fødselsnummer = fødselsnummer,
+            utbetalingId = utbetalingId
+        )
+        Utbetalingsfilter(
+            fødselsnummer = fødselsnummer,
+            utbetalingTilSykmeldt = utbetalingen.utbetalingTilSykmeldt(),
+            utbetalingTilArbeidsgiver = utbetalingen.utbetalingTilArbeidsgiver(),
+            warnings = warningDao.finnWarnings(vedtaksperiodeId),
+            periodetype = periodetype,
+            inntektskilde = inntektskilde,
+            utbetalingtype = utbetalingtype
+        )
+    }
+
     override val commands: List<Command> = listOf(
         OpprettKoblingTilHendelseCommand(
             hendelseId = id,
@@ -127,6 +146,14 @@ internal class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             utbetalingDao = utbetalingDao,
         ),
+        UtbetalingsfilterCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            hendelseId = id,
+            godkjenningsbehovJson = json,
+            godkjenningMediator = godkjenningMediator,
+            utbetalingsfilter = utbetalingsfilter
+        ),
         EgenAnsattCommand(
             egenAnsattDao = egenAnsattDao,
         ),
@@ -170,7 +197,8 @@ internal class Godkjenningsbehov(
             vergemålDao = vergemålDao,
             godkjenningsbehovJson = json,
             godkjenningMediator = godkjenningMediator,
-            hendelseId = id
+            hendelseId = id,
+            utbetalingsfilter = utbetalingsfilter
         ),
         AutomatiseringCommand(
             fødselsnummer = fødselsnummer,

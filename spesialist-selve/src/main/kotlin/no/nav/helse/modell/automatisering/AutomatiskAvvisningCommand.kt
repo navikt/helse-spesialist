@@ -11,27 +11,30 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.utbetaling.Utbetalingsfilter
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class AutomatiskAvvisningCommand(
-    val fødselsnummer: String,
-    val vedtaksperiodeId: UUID,
-    val egenAnsattDao: EgenAnsattDao,
-    val personDao: PersonDao,
-    val vergemålDao: VergemålDao,
-    val godkjenningsbehovJson: String,
-    val godkjenningMediator: GodkjenningMediator,
-    val hendelseId: UUID
+    private val fødselsnummer: String,
+    private val vedtaksperiodeId: UUID,
+    private val egenAnsattDao: EgenAnsattDao,
+    private val personDao: PersonDao,
+    private val vergemålDao: VergemålDao,
+    private val godkjenningsbehovJson: String,
+    private val godkjenningMediator: GodkjenningMediator,
+    private val hendelseId: UUID,
+    private val utbetalingsfilter: () -> Utbetalingsfilter
 ) : Command {
 
     override fun execute(context: CommandContext): Boolean {
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer) ?: false
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
+        val utbetalingsfilter = utbetalingsfilter()
 
-        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål) return true
+        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) return true
 
         val årsaker = mutableListOf<String>()
         if (erEgenAnsatt) årsaker.add("Egen ansatt")
@@ -40,6 +43,9 @@ internal class AutomatiskAvvisningCommand(
             .also { avvistPåGrunnAvUtlandTeller.inc() }
         if (underVergemål) årsaker.add("Vergemål")
             .also { avvistPåGrunnAvVergemålTeller.inc() }
+        if (utbetalingsfilter.kanIkkeUtbetales) {
+            årsaker.addAll(utbetalingsfilter.årsaker())
+        }
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)

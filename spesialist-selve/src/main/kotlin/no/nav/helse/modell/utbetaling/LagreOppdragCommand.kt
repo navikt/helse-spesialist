@@ -130,8 +130,4 @@ internal class LagreOppdragCommand(
 
         opptegnelseDao.opprettOpptegnelse(fødselsnummer, UtbetalingPayload(utbetalingId), opptegnelseType)
     }
-
-    override fun resume(context: CommandContext) = true
-
-    override fun undo(context: CommandContext) {}
 }
