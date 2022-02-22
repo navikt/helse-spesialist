@@ -159,8 +159,15 @@ internal class PersonDao(private val dataSource: DataSource) {
     data class Utbetalingen(
         val utbetalingId: UUID?,
         val personNettoBeløp: Int?,
-        val arbeidsgiverNettoBeløp: Int?
-    )
+        val arbeidsgiverNettoBeløp: Int?) {
+
+        internal companion object {
+            internal fun Utbetalingen?.utbetalingTilSykmeldt() = (this?.personNettoBeløp ?: 0) != 0
+            internal fun Utbetalingen?.bareUtbetalingTilSykmeldt() = utbetalingTilSykmeldt() && !utbetalingTilArbeidsgiver()
+            internal fun Utbetalingen?.utbetalingTilArbeidsgiver() = (this?.arbeidsgiverNettoBeløp ?: 0) != 0
+            internal fun Utbetalingen?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()
+        }
+    }
 
     internal fun updateEnhet(fødselsnummer: String, enhetNr: Int) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")

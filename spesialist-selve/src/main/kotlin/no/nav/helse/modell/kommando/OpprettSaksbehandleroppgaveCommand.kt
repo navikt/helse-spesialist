@@ -2,6 +2,8 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.bareUtbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgave
@@ -27,10 +29,6 @@ internal class OpprettSaksbehandleroppgaveCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val utbetalingTilSykmeldt =
-            (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) == 0
-        val delvisRefusjon = (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) != 0
-
         val oppgave = when {
             harFortroligAdressebeskyttelse -> Oppgave.fortroligAdressebeskyttelse(vedtaksperiodeId, utbetalingId)
             utbetalingtype == Utbetalingtype.REVURDERING -> Oppgave.revurdering(vedtaksperiodeId, utbetalingId)
@@ -42,8 +40,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
                 vedtaksperiodeId,
                 utbetalingId
             )
-            utbetalingTilSykmeldt -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
-            delvisRefusjon -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.bareUtbetalingTilSykmeldt() -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.delvisRefusjon() -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave på utbetalingId $utbetalingId og vedtaksperiodeId $vedtaksperiodeId")

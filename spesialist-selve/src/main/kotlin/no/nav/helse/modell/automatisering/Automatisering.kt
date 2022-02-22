@@ -8,6 +8,8 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.bareUtbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -70,9 +72,6 @@ internal class Automatisering(
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
         val vedtaksperiodensUtbetaling = personDao.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId)
-        val utbetalingTilSykmeldt =
-            (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) == 0
-        val delvisRefusjon = (vedtaksperiodensUtbetaling?.personNettoBeløp ?: 0) != 0 && (vedtaksperiodensUtbetaling?.arbeidsgiverNettoBeløp ?: 0) != 0
 
         return valider(
             risikovurdering,
@@ -85,8 +84,8 @@ internal class Automatisering(
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
-            validering("Utbetaling til sykmeldt") { !utbetalingTilSykmeldt },
-            validering("Delvis refusjon") { !delvisRefusjon },
+            validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.bareUtbetalingTilSykmeldt() },
+            validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
         )
     }
 
