@@ -18,6 +18,7 @@ import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -34,6 +35,7 @@ internal fun Application.graphQLApi(
     risikovurderingApiDao: RisikovurderingApiDao,
     varselDao: VarselDao,
     utbetalingDao: UtbetalingDao,
+    oppgaveDao: OppgaveDao,
     kode7Saksbehandlergruppe: UUID,
     snapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) {
@@ -46,6 +48,7 @@ internal fun Application.graphQLApi(
         risikovurderingApiDao = risikovurderingApiDao,
         varselDao = varselDao,
         utbetalingDao = utbetalingDao,
+        oppgaveDao = oppgaveDao,
         snapshotGraphQLClient = snapshotGraphQLClient
     ).build()
 

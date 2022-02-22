@@ -7,6 +7,7 @@ import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringDto
@@ -80,7 +81,8 @@ data class Arbeidsgiver(
     private val overstyringApiDao: OverstyringApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselDao: VarselDao
+    private val varselDao: VarselDao,
+    private val oppgaveDao: OppgaveDao
 ) {
     fun generasjoner(): List<Generasjon> = generasjoner.map { generasjon ->
         Generasjon(
@@ -92,7 +94,8 @@ data class Arbeidsgiver(
                         id = it.id,
                         periode = it,
                         risikovurderingApiDao = risikovurderingApiDao,
-                        varselDao = varselDao
+                        varselDao = varselDao,
+                        oppgaveDao = oppgaveDao
                     )
                     else -> throw Exception("Ukjent tidslinjeperiode")
                 }

@@ -9,8 +9,13 @@ import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.hentsnapshot.*
+import no.nav.helse.mediator.graphql.hentsnapshot.Alder
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
+import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.objectMapper
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
 
@@ -154,7 +159,8 @@ data class BeregnetPeriode(
     val id: UUID,
     private val periode: GraphQLBeregnetPeriode,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselDao: VarselDao
+    private val varselDao: VarselDao,
+    private val oppgaveDao: OppgaveDao
 ) : Periode {
     override fun behandlingstype(): Behandlingstype = behandlingstype(periode)
     override fun erForkastet(): Boolean = erForkastet(periode)
@@ -237,6 +243,9 @@ data class BeregnetPeriode(
             sisteRefusjonsdag = refusjon.sisteRefusjonsdag
         )
     }
+
+    fun oppgavereferanse(): String? =
+        oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 }
 
 private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =

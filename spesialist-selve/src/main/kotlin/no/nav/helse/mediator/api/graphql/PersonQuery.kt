@@ -7,6 +7,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -21,6 +22,7 @@ class PersonQuery(
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
+    private val oppgaveDao: OppgaveDao,
     private val snapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) : AbstractPersonQuery(personApiDao) {
 
@@ -58,7 +60,8 @@ class PersonQuery(
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 overstyringApiDao = overstyringApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,
-                varselDao = varselDao
+                varselDao = varselDao,
+                oppgaveDao = oppgaveDao,
             )
         }
 

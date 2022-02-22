@@ -7,6 +7,7 @@ import graphql.schema.GraphQLSchema
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -22,6 +23,7 @@ internal class SchemaBuilder(
     val risikovurderingApiDao: RisikovurderingApiDao,
     val varselDao: VarselDao,
     val utbetalingDao: UtbetalingDao,
+    val oppgaveDao: OppgaveDao,
     val snapshotGraphQLClient: SpeilSnapshotGraphQLClient,
 ) {
     fun build(): GraphQLSchema {
@@ -43,6 +45,7 @@ internal class SchemaBuilder(
                         overstyringApiDao = overstyringApiDao,
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
+                        oppgaveDao = oppgaveDao,
                         snapshotGraphQLClient = snapshotGraphQLClient
                     )
                 ),

@@ -10,6 +10,7 @@ import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.objectMapper
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -62,7 +63,8 @@ data class Person(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
-    private val varselDao: VarselDao
+    private val varselDao: VarselDao,
+    private val oppgaveDao: OppgaveDao,
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -109,6 +111,7 @@ data class Person(
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
+            oppgaveDao = oppgaveDao,
         )
     }
 

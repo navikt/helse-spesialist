@@ -258,6 +258,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
                 utbetalingDao = utbetalingDao,
+                oppgaveDao = oppgaveDao,
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
                 snapshotGraphQLClient = speilSnapshotGraphQLClient
             )
