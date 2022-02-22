@@ -19,7 +19,7 @@ data class BehandlingstatistikkForSpeilDto(
     data class BehandlingerForSpeilDto(
         val totalt: Int,
         val annulleringer: Int,
-        val manuelt: BehandlingsstatistikkDto.OppgavestatistikkDto,
+        val manuelt: OppgavestatistikkForSpeilDto,
         val automatisk: Int
     )
 
@@ -48,7 +48,10 @@ data class BehandlingstatistikkForSpeilDto(
             fullførteBehandlinger = BehandlingerForSpeilDto(
                 totalt = behandlingsstatistikkDto.fullførteBehandlinger.totalt,
                 annulleringer = behandlingsstatistikkDto.fullførteBehandlinger.annullert,
-                manuelt = behandlingsstatistikkDto.fullførteBehandlinger.manuelt,
+                manuelt = OppgavestatistikkForSpeilDto(
+                    totalt = behandlingsstatistikkDto.fullførteBehandlinger.manuelt.totalt,
+                    perPeriodetype = behandlingsstatistikkDto.fullførteBehandlinger.manuelt.perPeriodetype.toPerStatistikktypeForSpeil()
+                ),
                 automatisk = behandlingsstatistikkDto.fullførteBehandlinger.automatisk,
             )
         )

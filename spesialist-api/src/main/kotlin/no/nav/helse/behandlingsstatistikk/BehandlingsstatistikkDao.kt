@@ -54,8 +54,8 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """.list { perStatistikktype(it) }
 
     private fun tildeltPerPeriodetype() =
-        """ SELECT s.type as periodetype, o.type, COUNT(distinct s.type)
-            FILTER (WHERE o.type = 'SØKNAD') AS antall,
+        """ SELECT s.type as periodetype, o.type,
+            COUNT(distinct o.id) FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.id) as antallAvOppgaveType
             FROM oppgave o
               INNER JOIN vedtak v on o.vedtak_ref = v.id
@@ -66,8 +66,8 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """.list { perStatistikktype(it) }
 
     private fun godkjentManueltPerPeriodetype(fom: LocalDate) =
-        """ SELECT sot.type AS periodetype, o.type, COUNT(distinct o.id)
-            FILTER (WHERE o.type = 'SØKNAD') AS antall,
+        """ SELECT sot.type AS periodetype, o.type,
+            COUNT(distinct o.id) FILTER (WHERE o.type = 'SØKNAD') AS antall,
             COUNT(distinct o.id) as antallAvOppgaveType
             FROM oppgave o
               INNER JOIN saksbehandleroppgavetype sot ON o.vedtak_ref = sot.vedtak_ref
@@ -76,14 +76,17 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """.list(mapOf("fom" to fom)) { perStatistikktype(it) }
 
     private fun godkjentAutomatiskTotalt(fom: LocalDate) = requireNotNull(
-        """ SELECT COUNT(1) as antall FROM automatisering a
+        """ SELECT COUNT(1) as antall
+            FROM automatisering a
                 INNER JOIN vedtak v on a.vedtaksperiode_ref = v.id
             WHERE a.automatisert = true AND a.stikkprøve = false AND a.opprettet >= :fom
         """.single(mapOf("fom" to fom)) { it.int("antall") })
 
     private fun antallAnnulleringer(fom: LocalDate) = requireNotNull("""
-            SELECT COUNT(1) as antall FROM annullert_av_saksbehandler WHERE annullert_tidspunkt >= :fom
-        """.single(mapOf("fom" to fom)) { it.int("antall") })
+            SELECT COUNT(1) as antall
+            FROM annullert_av_saksbehandler
+            WHERE annullert_tidspunkt >= :fom
+        """.single(mapOf("fom" to fom)){ it.int("antall") })
 
     private fun perStatistikktype(row: Row): Pair<BehandlingsstatistikkType, Int> {
         val oppgavetype: Oppgavetype = Oppgavetype.valueOf(row.string("type"))
