@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
@@ -26,13 +27,18 @@ internal class UtbetalingsfilterCommand(
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         val årsaker = utbetalingsfilter.årsaker()
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker, hendelseId)
-        logg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
-        sikkerLogg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
+        sikkerLogg("Automatisk avvisning av vedtaksperiode pga:$årsaker")
         return ferdigstill(context)
     }
 
+    private fun sikkerLogg(melding: String) = sikkerLogg.info(
+        melding,
+        keyValue("vedtaksperiodeId", "$vedtaksperiodeId"),
+        keyValue("fødselsnummer", fødselsnummer),
+        keyValue("hendelseId", "$hendelseId")
+    )
+
     private companion object {
-        private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

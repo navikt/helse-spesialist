@@ -1,8 +1,7 @@
 package no.nav.helse.modell.automatisering
 
-import no.nav.helse.avvistPåGrunnAvEgenAnsattTeller
-import no.nav.helse.avvistPåGrunnAvUtlandTeller
-import no.nav.helse.avvistPåGrunnAvVergemålTeller
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -34,28 +33,36 @@ internal class AutomatiskAvvisningCommand(
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val utbetalingsfilter = utbetalingsfilter()
 
-        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) return true
+        if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) {
+            if (utbetalingsfilter.plukketUtForUtbetalingTilSykmeldt) sikkerLogg("Plukket ut for utbetaling til sykmeldt")
+            return true
+        }
 
         val årsaker = mutableListOf<String>()
         if (erEgenAnsatt) årsaker.add("Egen ansatt")
-            .also { avvistPåGrunnAvEgenAnsattTeller.inc() }
+            .also { automatiskAvvistÅrsakerTeller.labels("Egen ansatt").inc() }
         if (tilhørerEnhetUtland) årsaker.add("Utland")
-            .also { avvistPåGrunnAvUtlandTeller.inc() }
+            .also { automatiskAvvistÅrsakerTeller.labels("Utland").inc() }
         if (underVergemål) årsaker.add("Vergemål")
-            .also { avvistPåGrunnAvVergemålTeller.inc() }
-        if (utbetalingsfilter.kanIkkeUtbetales) {
-            årsaker.addAll(utbetalingsfilter.årsaker())
+            .also { automatiskAvvistÅrsakerTeller.labels("Vergemål").inc() }
+        if (utbetalingsfilter.kanIkkeUtbetales) { årsaker.addAll(utbetalingsfilter.årsaker())
+            .also { utbetalingsfilter.årsaker().forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() } }
         }
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
-        logg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
-        sikkerLogg.info("Automatisk avvisning for vedtaksperiode:$vedtaksperiodeId pga:$årsaker")
+        sikkerLogg("Automatisk avvisning av vedtaksperiode pga:$årsaker")
         return ferdigstill(context)
     }
 
+    private fun sikkerLogg(melding: String) = sikkerLogg.info(
+        melding,
+        keyValue("vedtaksperiodeId", "$vedtaksperiodeId"),
+        keyValue("fødselsnummer", fødselsnummer),
+        keyValue("hendelseId", "$hendelseId")
+    )
+
     private companion object {
-        val logg = LoggerFactory.getLogger(this::class.java)
-        val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

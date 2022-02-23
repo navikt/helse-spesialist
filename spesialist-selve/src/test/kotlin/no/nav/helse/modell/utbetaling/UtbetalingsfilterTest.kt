@@ -30,7 +30,7 @@ internal class UtbetalingsfilterTest {
             warnings = enWarning,
             inntektskilde = FLERE_ARBEIDSGIVERE,
             utbetalingtype = UTBETALING
-        ))
+        ), false)
     }
 
     @Test
@@ -43,7 +43,7 @@ internal class UtbetalingsfilterTest {
             warnings = enWarning,
             inntektskilde = FLERE_ARBEIDSGIVERE,
             utbetalingtype = UTBETALING
-        ))
+        ), false)
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon kan utbetales`() {
-        assertKanUtbetales(utbetalingsfilter())
+        assertKanUtbetales(utbetalingsfilter(), true)
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & spleis forlengelse kan utbetales`() {
-        assertKanUtbetales(utbetalingsfilter(periodetype = FORLENGELSE))
+        assertKanUtbetales(utbetalingsfilter(periodetype = FORLENGELSE), true)
     }
 
     @Test
@@ -83,7 +83,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `revurdering kan utbetales tross warnings`() {
-        assertKanUtbetales(utbetalingsfilter(utbetalingstype = REVURDERING, warnings = enWarning))
+        assertKanUtbetales(utbetalingsfilter(utbetalingstype = REVURDERING, warnings = enWarning), false)
     }
 
     @Test
@@ -126,16 +126,18 @@ internal class UtbetalingsfilterTest {
             utbetalingtype = utbetalingstype
         )
 
-        private fun assertKanUtbetales(filter: Utbetalingsfilter) {
+        private fun assertKanUtbetales(filter: Utbetalingsfilter, forventetPlukketUtForUtbetalingTilSykmeldt: Boolean) {
             assertTrue(filter.kanUtbetales)
             assertFalse(filter.kanIkkeUtbetales)
             assertThrows<IllegalArgumentException> { filter.årsaker() }
+            assertEquals(forventetPlukketUtForUtbetalingTilSykmeldt, filter.plukketUtForUtbetalingTilSykmeldt)
         }
 
         private fun assertKanIkkeUtbetales(filter: Utbetalingsfilter, forventedeÅrsaker: List<String>) {
             assertFalse(filter.kanUtbetales)
             assertTrue(filter.kanIkkeUtbetales)
             assertEquals(filter.årsaker(), forventedeÅrsaker)
+            assertFalse(filter.plukketUtForUtbetalingTilSykmeldt)
         }
     }
 }

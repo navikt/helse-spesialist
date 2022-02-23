@@ -31,8 +31,9 @@ internal class Utbetalingsfilter(
         return årsaker.isEmpty()
     }
 
-    internal val kanUtbetales by lazy {evaluer()}
+    internal val kanUtbetales by lazy { evaluer() }
     internal val kanIkkeUtbetales get() = !kanUtbetales
+    internal val plukketUtForUtbetalingTilSykmeldt get() = kanUtbetales && utbetalingTilSykmeldt && utbetalingtype != REVURDERING
 
     internal fun årsaker(): List<String> {
         require(kanIkkeUtbetales) { "Årsaker skal kun brukes for vedtaksperioder vi ikke kan utbetale" }

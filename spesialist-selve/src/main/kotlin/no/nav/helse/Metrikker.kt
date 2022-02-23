@@ -13,23 +13,15 @@ internal val overstyringsteller = Counter.build("overstyringer", "Teller antall 
     .labelNames("opplysningstype", "type")
     .register()
 
-
 internal val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
     .register()
 
 internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
     .register()
 
-internal val avvistPåGrunnAvEgenAnsattTeller =
-    Counter.build("avvist_egen_ansatt", "Teller antall avvisninger på grunn av egen ansatt")
-        .register()
-
-internal val avvistPåGrunnAvVergemålTeller =
-    Counter.build("avvist_vergemal", "Teller antall avvisninger på grunn av vergemål")
-        .register()
-
-internal val avvistPåGrunnAvUtlandTeller =
-    Counter.build("avvist_utland", "Teller antall avvisninger på grunn av tilhørighet til utlandsenhet")
+internal val automatiskAvvistÅrsakerTeller =
+    Counter.build("automatisk_avvist_aarsaker", "Årsaker til at en vedtaksperiode avvises automatisk. En vedtaksperiode kan avvises av flere årsaker")
+        .labelNames("aarsak")
         .register()
 
 internal val warningteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
