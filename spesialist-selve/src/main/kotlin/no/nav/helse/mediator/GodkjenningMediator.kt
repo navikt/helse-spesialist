@@ -4,12 +4,13 @@ import no.nav.helse.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.automatiseringsteller
+import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class GodkjenningMediator(
     private val warningDao: WarningDao,
@@ -73,6 +74,7 @@ internal class GodkjenningMediator(
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, fødselsnummer)
+        begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }
         automatiseringsteller.inc()
     }
 }

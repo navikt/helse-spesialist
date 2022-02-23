@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -13,7 +12,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingsfilter
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class AutomatiskAvvisningCommand(
     private val fødselsnummer: String,
@@ -40,14 +39,9 @@ internal class AutomatiskAvvisningCommand(
 
         val årsaker = mutableListOf<String>()
         if (erEgenAnsatt) årsaker.add("Egen ansatt")
-            .also { automatiskAvvistÅrsakerTeller.labels("Egen ansatt").inc() }
         if (tilhørerEnhetUtland) årsaker.add("Utland")
-            .also { automatiskAvvistÅrsakerTeller.labels("Utland").inc() }
         if (underVergemål) årsaker.add("Vergemål")
-            .also { automatiskAvvistÅrsakerTeller.labels("Vergemål").inc() }
-        if (utbetalingsfilter.kanIkkeUtbetales) { årsaker.addAll(utbetalingsfilter.årsaker())
-            .also { utbetalingsfilter.årsaker().forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() } }
-        }
+        if (utbetalingsfilter.kanIkkeUtbetales) årsaker.addAll(utbetalingsfilter.årsaker())
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
