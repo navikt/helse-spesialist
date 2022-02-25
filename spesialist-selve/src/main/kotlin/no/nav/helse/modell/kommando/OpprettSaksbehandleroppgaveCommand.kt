@@ -26,6 +26,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettSaksbehandleroppgaveCommand::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
@@ -45,6 +46,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave $oppgave")
+        sikkerLogg.info("Oppretter saksbehandleroppgave $oppgave")
         oppgaveMediator.opprett(oppgave)
         return true
     }
