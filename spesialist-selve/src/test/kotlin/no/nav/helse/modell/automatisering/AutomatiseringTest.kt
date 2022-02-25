@@ -165,14 +165,16 @@ internal class AutomatiseringTest {
     @Test
     fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
         every { personDaoMock.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId) } returns PersonDao.Utbetalingen(
-            utbetalingId,11000, 0)
+            utbetalingId, endringIArbeidsgiverOppdrag = false, endringIPersonOppdrag = true
+        )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `periode med delvis refusjon skal ikke automatisk godkjennes`() {
         every { personDaoMock.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId) } returns PersonDao.Utbetalingen(
-            utbetalingId,11000, 11000)
+            utbetalingId, endringIArbeidsgiverOppdrag = true, endringIPersonOppdrag = true
+        )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId, Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 }

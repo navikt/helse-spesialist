@@ -81,8 +81,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
             utbetalingId = UTBETALING_ID,
-            personNettoBeløp = 11000,
-            arbeidsgiverNettoBeløp = 0
+            endringIPersonOppdrag = true,
+            endringIArbeidsgiverOppdrag = false
         )
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID))}
@@ -93,8 +93,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
             utbetalingId = UTBETALING_ID,
-            personNettoBeløp = 11000,
-            arbeidsgiverNettoBeløp = 11000
+            endringIPersonOppdrag = true,
+            endringIArbeidsgiverOppdrag = true
         )
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID))}

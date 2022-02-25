@@ -11,8 +11,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     fun `Går ikke gjennom første filtrering`() {
         behandleGodkjenningsbeov(
             fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
-            arbeidsgiverNettoBeløp = 0,
-            personNettoBeløp = 1
+            endringIArbeidsgiverOppdrag = false,
+            endringIPersonOppdrag = true
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
@@ -24,8 +24,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     fun `Går gjennom begge filtreringer`() {
         behandleGodkjenningsbeov(
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            arbeidsgiverNettoBeløp = 0,
-            personNettoBeløp = 1
+            endringIArbeidsgiverOppdrag = false,
+            endringIPersonOppdrag = true
         )
         assertVedtak(vedtaksperiodeId)
         sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(), SAKSBEHANDLER_IDENT, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, true)
@@ -36,8 +36,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     fun `Går gjennom første filtreringer, men fått warning før andre filtrering`() {
         behandleGodkjenningsbeov(
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            arbeidsgiverNettoBeløp = 0,
-            personNettoBeløp = 1,
+            endringIArbeidsgiverOppdrag = false,
+            endringIPersonOppdrag = true,
             risikofunn = listOf("MjA@")
         )
         assertVedtak(vedtaksperiodeId)
@@ -49,8 +49,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     fun `Går alltid gjennom uten personbeløp`() {
         behandleGodkjenningsbeov(
             fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
-            arbeidsgiverNettoBeløp = 1,
-            personNettoBeløp = 0
+            endringIArbeidsgiverOppdrag = true,
+            endringIPersonOppdrag = false
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(true, "Automatisk behandlet")
@@ -58,8 +58,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     private fun behandleGodkjenningsbeov(
         fødselsnummer: String,
-        arbeidsgiverNettoBeløp: Int?,
-        personNettoBeløp: Int?,
+        endringIArbeidsgiverOppdrag: Boolean,
+        endringIPersonOppdrag: Boolean,
         risikofunn: List<String> = emptyList()
     ) {
         FØDSELSNUMMER = fødselsnummer
@@ -71,8 +71,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingen = Utbetalingen(
                     utbetalingId = utbetalingId,
-                    arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-                    personNettoBeløp = personNettoBeløp
+                    endringIPersonOppdrag = endringIPersonOppdrag,
+                    endringIArbeidsgiverOppdrag = endringIArbeidsgiverOppdrag
                 )
             ),
             kanAutomatiseres = risikofunn.isEmpty(),

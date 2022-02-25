@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.somUtbetaling
 import no.nav.helse.objectMapper
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
@@ -143,28 +144,29 @@ internal class PersonDao(private val dataSource: DataSource) {
             queryOf(query, fødselsnummer.toLong()).map { row ->
                 objectMapper.readValue<SnapshotDto>(row.string("data")).arbeidsgivere.flatMap { arbeidsgiver ->
                     arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
-                        vedtaksperiode["utbetaling"]?.let { element ->
-                            Utbetalingen(
-                                utbetalingId = element["utbetalingId"]?.takeUnless{ it.isMissingOrNull()}?.let { UUID.fromString(it.asText()) },
-                                personNettoBeløp = element["personNettoBeløp"]?.asInt(),
-                                arbeidsgiverNettoBeløp = element["arbeidsgiverNettoBeløp"]?.asInt(),
-                            )
-                        }
+                        vedtaksperiode["utbetaling"]?.somUtbetaling()
                     }
-                }.firstOrNull { it?.utbetalingId != null && it?.utbetalingId == utbetalingId }
+                }.firstOrNull { it?.utbetalingId == utbetalingId }
             }.asSingle
         )
 
     }
     data class Utbetalingen(
         val utbetalingId: UUID?,
-        val personNettoBeløp: Int?,
-        val arbeidsgiverNettoBeløp: Int?) {
+        val endringIArbeidsgiverOppdrag: Boolean,
+        val endringIPersonOppdrag: Boolean
+    ) {
 
         internal companion object {
-            internal fun Utbetalingen?.utbetalingTilSykmeldt() = (this?.personNettoBeløp ?: 0) != 0
+            private fun JsonNode.getOrNull(felt: String) = path(felt).takeUnless { it.isMissingOrNull() }
+            internal fun JsonNode.somUtbetaling() = Utbetalingen(
+                utbetalingId = getOrNull("utbetalingId")?.let { UUID.fromString(it.asText()) },
+                endringIPersonOppdrag = getOrNull("personOppdrag")?.getOrNull("linjer")?.any { it["endringskode"].asText() != "UEND" } ?: false,
+                endringIArbeidsgiverOppdrag = getOrNull("arbeidsgiverOppdrag")?.getOrNull("linjer")?.any { it["endringskode"].asText() != "UEND" } ?: false
+            )
+            internal fun Utbetalingen?.utbetalingTilSykmeldt() = this?.endringIPersonOppdrag == true
             internal fun Utbetalingen?.bareUtbetalingTilSykmeldt() = utbetalingTilSykmeldt() && !utbetalingTilArbeidsgiver()
-            internal fun Utbetalingen?.utbetalingTilArbeidsgiver() = (this?.arbeidsgiverNettoBeløp ?: 0) != 0
+            internal fun Utbetalingen?.utbetalingTilArbeidsgiver() = this?.endringIArbeidsgiverOppdrag == true
             internal fun Utbetalingen?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()
         }
     }
