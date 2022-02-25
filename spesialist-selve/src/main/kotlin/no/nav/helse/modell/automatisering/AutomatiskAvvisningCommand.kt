@@ -33,7 +33,7 @@ internal class AutomatiskAvvisningCommand(
         val utbetalingsfilter = utbetalingsfilter()
 
         if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) {
-            if (utbetalingsfilter.plukketUtForUtbetalingTilSykmeldt) sikkerLogg("Plukket ut for utbetaling til sykmeldt")
+            if (utbetalingsfilter.plukketUtForUtbetalingTilSykmeldt) sikkerLogg.info("Plukket ut for utbetaling til sykmeldt", keyValue("fødselsnummer", fødselsnummer))
             return true
         }
 
@@ -45,18 +45,12 @@ internal class AutomatiskAvvisningCommand(
 
         val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
         godkjenningMediator.automatiskAvvisning(context, behov, vedtaksperiodeId, fødselsnummer, årsaker.toList(), hendelseId)
-        sikkerLogg("Automatisk avvisning av vedtaksperiode pga:$årsaker")
+        logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$årsaker")
         return ferdigstill(context)
     }
 
-    private fun sikkerLogg(melding: String) = sikkerLogg.info(
-        melding,
-        keyValue("vedtaksperiodeId", "$vedtaksperiodeId"),
-        keyValue("fødselsnummer", fødselsnummer),
-        keyValue("hendelseId", "$hendelseId")
-    )
-
     private companion object {
+        private val logg = LoggerFactory.getLogger(AutomatiskAvvisningCommand::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

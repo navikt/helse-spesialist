@@ -1,5 +1,6 @@
 package no.nav.helse.mediator
 
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.abonnement.OpptegnelseDao
@@ -9,6 +10,7 @@ import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -60,6 +62,7 @@ internal class GodkjenningMediator(
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, fødselsnummer)
         automatiseringsteller.inc()
+        sikkerLogg.info("Automatisk godkjenning av vedtaksperiode $vedtaksperiodeId", keyValue("fødselsnummer", fødselsnummer))
     }
 
     internal fun automatiskAvvisning(
@@ -76,5 +79,10 @@ internal class GodkjenningMediator(
         GodkjenningsbehovPayload(hendelseId).lagre(opptegnelseDao, fødselsnummer)
         begrunnelser.forEach { automatiskAvvistÅrsakerTeller.labels(it).inc() }
         automatiseringsteller.inc()
+        sikkerLogg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$begrunnelser", keyValue("fødselsnummer", fødselsnummer))
+    }
+
+    private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
