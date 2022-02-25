@@ -8,8 +8,8 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
 import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.bareUtbetalingTilSykmeldt
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -31,6 +31,7 @@ internal class Automatisering(
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     internal fun utfør(
@@ -44,9 +45,12 @@ internal class Automatisering(
         val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
 
         when {
-            utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() ->
+            utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() -> {
+                if (problemer.isNotEmpty()) sikkerLogg.info("automatiserer ikke {} {} {} fordi {}", keyValue("utbetalingtype", utbetalingtype), keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("utbetalingId", utbetalingId), problemer)
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
+            }
             plukkTilManuell() -> {
+                sikkerLogg.info("automatiserer ikke, plukket ut til stikkprøve {} {} {}", keyValue("utbetalingtype", utbetalingtype), keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("utbetalingId", utbetalingId))
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
                 logger.info(
                     "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
@@ -54,6 +58,7 @@ internal class Automatisering(
                 )
             }
             else -> {
+                sikkerLogg.info("automatiserer {} {} {}", keyValue("utbetalingtype", utbetalingtype), keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("utbetalingId", utbetalingId))
                 onAutomatiserbar()
                 automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
             }
