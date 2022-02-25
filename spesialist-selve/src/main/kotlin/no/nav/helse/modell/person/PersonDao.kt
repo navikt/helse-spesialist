@@ -161,8 +161,8 @@ internal class PersonDao(private val dataSource: DataSource) {
             private fun JsonNode.getOrNull(felt: String) = path(felt).takeUnless { it.isMissingOrNull() }
             internal fun JsonNode.somUtbetaling() = Utbetalingen(
                 utbetalingId = getOrNull("utbetalingId")?.let { UUID.fromString(it.asText()) },
-                endringIPersonOppdrag = getOrNull("personOppdrag")?.getOrNull("linjer")?.any { it["endringskode"].asText() != "UEND" } ?: false,
-                endringIArbeidsgiverOppdrag = getOrNull("arbeidsgiverOppdrag")?.getOrNull("linjer")?.any { it["endringskode"].asText() != "UEND" } ?: false
+                endringIPersonOppdrag = !path("personOppdrag").path("utbetalingslinjer").isEmpty,
+                endringIArbeidsgiverOppdrag = !path("arbeidsgiverOppdrag").path("utbetalingslinjer").isEmpty
             )
             internal fun Utbetalingen?.utbetalingTilSykmeldt() = this?.endringIPersonOppdrag == true
             internal fun Utbetalingen?.bareUtbetalingTilSykmeldt() = utbetalingTilSykmeldt() && !utbetalingTilArbeidsgiver()

@@ -38,18 +38,18 @@ internal class UtbetalingenTest {
     }
 
     private fun utbetalingen(
-        personOppdragEndringskoder: List<String> = emptyList(),
-        arbeidsgiverOppdragEndringskoder: List<String> = emptyList()
+        personOppdragLinjer: List<String> = emptyList(),
+        arbeidsgiverOppdragLinjer: List<String> = emptyList()
     ) : Utbetalingen {
         @Language("JSON")
         val json = """
         {
             "utbetalingId": "${UUID.randomUUID()}",
             "personOppdrag": {
-                "linjer": ${personOppdragEndringskoder.map { """{"endringskode": "$it"}""" }}
+                "utbetalingslinjer": ${personOppdragLinjer.map { "{}" }}
             },
             "arbeidsgiverOppdrag": {
-                "linjer": ${arbeidsgiverOppdragEndringskoder.map { """{"endringskode": "$it"}""" }}
+                "utbetalingslinjer": ${arbeidsgiverOppdragLinjer.map { "{}" }}
             }
         }
         """

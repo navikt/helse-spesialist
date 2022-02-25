@@ -1017,22 +1017,22 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     @Language("JSON")
     private fun Utbetalingen?.tilJson() : String? {
         if (this == null) return null
-        val personOppdragEndring = when(endringIPersonOppdrag) {
-            true -> "ENDR"
-            false -> "UEND"
+        val personOppdragLinjer = when(endringIPersonOppdrag) {
+            true -> "[{}]"
+            false -> "[]"
         }
-        val arbeidsgiverOppdragEndring = when(endringIArbeidsgiverOppdrag) {
-            true -> "ENDR"
-            false -> "UEND"
+        val arbeidsgiverOppdragLinjer = when(endringIArbeidsgiverOppdrag) {
+            true -> "[{}]"
+            false -> "[]"
         }
         return """
         {
             "utbetalingId": ${utbetalingId?.let { "\"$it\"" }},
             "personOppdrag": {
-                "linjer": [{"endringskode": "$personOppdragEndring"}]
+                "utbetalingslinjer": $personOppdragLinjer
             },
             "arbeidsgiverOppdrag": {
-                "linjer": [{"endringskode": "$arbeidsgiverOppdragEndring"}]
+                "utbetalingslinjer": $arbeidsgiverOppdragLinjer
             }
         }
         """
