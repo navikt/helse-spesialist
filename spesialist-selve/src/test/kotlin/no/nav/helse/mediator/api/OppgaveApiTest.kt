@@ -11,19 +11,17 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.routing.*
+import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.clientId
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.issuer
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.jwtStub
 import no.nav.helse.objectMapper
-import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.oppgave.OppgaveMediator
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -32,8 +30,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.assertThrows
 import java.net.ServerSocket
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class OppgaveApiTest {
@@ -43,7 +39,7 @@ internal class OppgaveApiTest {
 
     @BeforeAll
     fun setup() {
-        embeddedServer(Netty, port = httpPort) {
+        embeddedServer(CIO, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             val jwkProvider = jwtStub.getJwkProviderMock()
             val azureConfig = AzureAdAppConfig(

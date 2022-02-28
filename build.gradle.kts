@@ -18,7 +18,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation("com.github.navikt:rapids-and-rivers:2022.01.19-09.53.b526ca84a9e4")
+        implementation("com.github.navikt:rapids-and-rivers:2022.02.28-16.20.1a549dcffaae")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
         implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
         implementation("com.zaxxer:HikariCP:5.0.1")

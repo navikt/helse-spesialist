@@ -10,8 +10,8 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.routing.*
+import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
@@ -107,7 +107,7 @@ abstract class AbstractApiTest {
 
         companion object {
             private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int) =
-                embeddedServer(Netty, port = httpPort) {
+                embeddedServer(CIO, port = httpPort) {
                     install(ContentNegotiation) {
                         register(
                             ContentType.Application.Json,

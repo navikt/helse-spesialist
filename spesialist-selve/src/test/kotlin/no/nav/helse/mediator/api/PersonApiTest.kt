@@ -11,8 +11,8 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.routing.*
+import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -21,11 +21,14 @@ import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse
-import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.INGEN_TILGANG
 import no.nav.helse.objectMapper
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.net.ServerSocket
 import java.util.*
@@ -166,7 +169,7 @@ internal class PersonApiTest {
     @BeforeAll
     fun setup() {
 
-        server = embeddedServer(Netty, port = httpPort) {
+        server = embeddedServer(CIO, port = httpPort) {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
             val jwkProvider = jwtStub.getJwkProviderMock()

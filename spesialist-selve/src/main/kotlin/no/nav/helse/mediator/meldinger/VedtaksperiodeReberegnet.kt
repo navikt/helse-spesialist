@@ -46,9 +46,7 @@ internal class VedtaksperiodeReberegnet(
                 validate {
                     it.demandValue("@event_name", "vedtaksperiode_endret")
                     it.demandValue("forrigeTilstand", "AVVENTER_GODKJENNING")
-                    it.demand("gjeldendeTilstand") { gjeldendeTilstand ->
-                        require(gjeldendeTilstand.asText() !in setOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
-                    }
+                    it.rejectValues("gjeldendeTilstand", listOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
                     it.requireKey(
                         "@id", "fødselsnummer", "vedtaksperiodeId"
                     )

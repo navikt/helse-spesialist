@@ -14,6 +14,10 @@ internal class DelegatedRapid(
         rapidsConnection.register(this)
     }
 
+    override fun rapidName(): String {
+        return "Spesialist"
+    }
+
     override fun onMessage(message: String, context: MessageContext) {
         try {
             beforeRiverAction()
