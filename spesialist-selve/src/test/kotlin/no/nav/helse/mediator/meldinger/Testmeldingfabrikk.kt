@@ -6,7 +6,6 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vergemal.Vergemål
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
@@ -610,17 +609,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         id, "revurdering_avvist", mapOf(
             "fødselsnummer" to fødselsnummer,
             "errors" to errors
-        )
-    )
-
-    fun lagAvbrytSaksbehandling(
-        id: UUID = UUID.randomUUID(),
-        fødselsnummer: String = "12020052345",
-        vedtaksperiodeId: UUID
-    ) = nyHendelse(
-        id, "vedtaksperiode_reberegnet", mapOf(
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "fødselsnummer" to fødselsnummer
         )
     )
 

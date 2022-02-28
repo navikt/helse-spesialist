@@ -40,7 +40,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
 
-        sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -61,7 +61,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
-        sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -88,7 +88,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
         tildelOppgave(saksbehandlerOid)
 
-        sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
         testRapid.reset()
         vedtaksperiodeTilGodkjenning()
 
@@ -122,8 +122,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
 
-
-        sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -159,7 +158,49 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryt ikke-eksisterende vedtaksperiode`() =
-        assertDoesNotThrow { sendAvbrytSaksbehandling(FØDSELSNUMMER, VEDTAKSPERIODE_ID) }
+        assertDoesNotThrow { sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK") }
+
+    @Test
+    fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING`() {
+        testIkkeAvbrutt("TIL_UTBETALING", "UBETALING_FEILET")
+    }
+
+    @Test
+    fun `avbryter ikke om gjeldende tilstand er TIL_INFOTRYGD`() {
+        testIkkeAvbrutt(gjeldendeTilstand = "TIL_INFOTRYGD")
+    }
+
+    @Test
+    fun `avbryter ikke om gjeldende tilstand er AVSLUTTET`() {
+        testIkkeAvbrutt(gjeldendeTilstand = "AVSLUTTET")
+    }
+
+    @Test
+    fun `avbryter ikke om gjeldende tilstand er TIL_UTBETALING`() {
+        testIkkeAvbrutt(gjeldendeTilstand = "TIL_UTBETALING")
+    }
+
+    private fun testIkkeAvbrutt(forrigeTilstand: String = "AVVENTER_GODKJENNING", gjeldendeTilstand: String) {
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
+
+        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = forrigeTilstand, gjeldendeTilstand = gjeldendeTilstand)
+
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler)
+    }
 
     private fun vedtaksperiodeTilGodkjenning(): UUID {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(

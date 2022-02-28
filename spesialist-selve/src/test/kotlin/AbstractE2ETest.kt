@@ -228,8 +228,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
     }
 
-    protected fun sendVedtaksperiodeEndret(orgnr: String, vedtaksperiodeId: UUID): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, vedtaksperiodeId, orgnr))
+    protected fun sendVedtaksperiodeEndret(orgnr: String = "orgnr", vedtaksperiodeId: UUID, forrigeTilstand: String = "FORRIGE_TILSTAND", gjeldendeTilstand: String = "GJELDENDE_TILSTAND"): UUID = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, vedtaksperiodeId, orgnr, forrigeTilstand, gjeldendeTilstand))
     }
 
     protected fun sendAdressebeskyttelseEndret(): UUID = nyHendelseId().also { id ->
@@ -467,14 +467,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     antall,
                     oppslagFeilet
                 )
-            )
-        }
-    }
-
-    protected fun sendAvbrytSaksbehandling(fødselsnummer: String, vedtaksperiodeId: UUID) {
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagAvbrytSaksbehandling(id, fødselsnummer, vedtaksperiodeId)
             )
         }
     }

@@ -17,7 +17,6 @@ enum class Oppdragsstatus {
     FORKASTET,
     IKKE_GODKJENT,
     GODKJENT_UTEN_UTBETALING,
-    UKJENT
 }
 
 data class Utbetalingslinje(
@@ -99,6 +98,5 @@ data class Oppdrag(private val utbetaling: UtbetalingDao.UtbetalingDto) {
             Utbetalingsstatus.FORKASTET -> Oppdragsstatus.FORKASTET
             Utbetalingsstatus.IKKE_GODKJENT -> Oppdragsstatus.IKKE_GODKJENT
             Utbetalingsstatus.GODKJENT_UTEN_UTBETALING -> Oppdragsstatus.GODKJENT_UTEN_UTBETALING
-            Utbetalingsstatus.UKJENT -> Oppdragsstatus.UKJENT
         }
 }
