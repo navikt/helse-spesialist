@@ -27,7 +27,7 @@ internal class UtbetalingsfilterTest {
             utbetalingTilArbeidsgiver = false,
             utbetalingTilSykmeldt = false,
             periodetype = OVERGANG_FRA_IT,
-            warnings = enWarning,
+            warnings = toWarnings,
             inntektskilde = FLERE_ARBEIDSGIVERE,
             utbetalingtype = UTBETALING
         ), false)
@@ -40,7 +40,7 @@ internal class UtbetalingsfilterTest {
             utbetalingTilArbeidsgiver = true,
             utbetalingTilSykmeldt = false,
             periodetype = OVERGANG_FRA_IT,
-            warnings = enWarning,
+            warnings = toWarnings,
             inntektskilde = FLERE_ARBEIDSGIVERE,
             utbetalingtype = UTBETALING
         ), false)
@@ -78,12 +78,12 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & warnings på vedtaksperiode kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(warnings = enWarning), listOf("Utbetalingsfilter: Vedtaksperioden har warnings"))
+        assertKanIkkeUtbetales(utbetalingsfilter(warnings = toWarnings), listOf("Utbetalingsfilter: Vedtaksperioden har warnings"))
     }
 
     @Test
     fun `revurdering kan utbetales tross warnings`() {
-        assertKanUtbetales(utbetalingsfilter(utbetalingstype = REVURDERING, warnings = enWarning), false)
+        assertKanUtbetales(utbetalingsfilter(utbetalingstype = REVURDERING, warnings = toWarnings), false)
     }
 
     @Test
@@ -93,7 +93,7 @@ internal class UtbetalingsfilterTest {
             utbetalingTilArbeidsgiver = true,
             utbetalingTilSykmeldt = true,
             periodetype = OVERGANG_FRA_IT,
-            warnings = enWarning,
+            warnings = toWarnings,
             inntektskilde = FLERE_ARBEIDSGIVERE,
             utbetalingtype = UTBETALING
         ), listOf(
@@ -106,7 +106,10 @@ internal class UtbetalingsfilterTest {
     }
 
     private companion object {
-        private val enWarning = listOf(Warning("testwarning", WarningKilde.Spesialist))
+        private val toWarnings = listOf(
+            Warning("En warning fra Spesialist", WarningKilde.Spesialist),
+            Warning("En warning fra Spleis", WarningKilde.Spleis)
+        )
 
         private fun utbetalingsfilter(
             fødselsnummer: String = "31111111111",

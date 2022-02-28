@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import org.slf4j.LoggerFactory
 
 internal class Utbetalingsfilter(
     private val fødselsnummer: String,
@@ -27,7 +28,10 @@ internal class Utbetalingsfilter(
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
         // Unngå ping-pong om en av de utvalgte utbetalingene til sykmeldt revurderes og får warning
-        if (warnings.isNotEmpty() && utbetalingtype != REVURDERING) nyÅrsak("Vedtaksperioden har warnings")
+        if (warnings.isNotEmpty() && utbetalingtype != REVURDERING) {
+            nyÅrsak("Vedtaksperioden har warnings")
+            sikkerLogg.info("Utbetalingsfilter warnings:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
+        }
         return årsaker.isEmpty()
     }
 
@@ -42,6 +46,7 @@ internal class Utbetalingsfilter(
     }
 
     private companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val tillatePeriodetyper = setOf(FØRSTEGANGSBEHANDLING, FORLENGELSE)
     }
 }
