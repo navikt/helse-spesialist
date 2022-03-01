@@ -187,7 +187,9 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             risikovurderingDao = risikovurderingDao,
-            warningDao = warningDao
+            warningDao = warningDao,
+            organisasjonsnummer = organisasjonsnummer,
+            periodetype = periodetype
         ),
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,

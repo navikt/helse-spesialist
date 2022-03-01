@@ -1,48 +1,71 @@
 package no.nav.helse.modell.risiko
 
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.alleHarRisikovurdering
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.warningteller
-import java.util.*
+import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class RisikoCommand(
     private val vedtaksperiodeId: UUID,
-    private val aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
+    aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
     private val risikovurderingDao: RisikovurderingDao,
-    private val warningDao: WarningDao
+    private val warningDao: WarningDao,
+    private val organisasjonsnummer: String,
+    private val periodetype: Periodetype
 ) : Command {
+    private val andreOrganisasjonsnummer = aktiveVedtaksperioder.orgnummere().minus(organisasjonsnummer).distinct()
 
-    override fun execute(context: CommandContext): Boolean {
-        if (risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null) return true
+    override fun execute(context: CommandContext) = behandle(context)
 
-        aktiveVedtaksperioder.forEach { aktivVedtaksperiode ->
-            aktivVedtaksperiode.behov(context, vedtaksperiodeId)
+    override fun resume(context: CommandContext) = behandle(context)
+
+    private fun behandle(context: CommandContext): Boolean {
+        if (risikovurderingAlleredeGjort()) return true
+
+        val løsning = context.get<Risikovurderingløsning>()
+        if (løsning == null) {
+            logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
+            context.behov("Risikovurdering", mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "periodetype" to periodetype
+            ))
+            if (andreOrganisasjonsnummer.isNotEmpty()) {
+                sikkerLogg.info("Ville tidligere etterspurt Risikovurdering også for organisasjonsummer:$andreOrganisasjonsnummer")
+            }
+            return false
         }
 
-        return false
+        løsning.lagre(risikovurderingDao, vedtaksperiodeId)
+        løsning.leggTilWarnings()
+        return true
     }
 
-    override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<Risikovurderingløsning>() ?: return false
-        løsning.lagre(risikovurderingDao, vedtaksperiodeId)
-        if (løsning.harArbeidsuførhetFunn()) {
-            val melding = løsning.arbeidsuførhetsmelding()
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
-        }
-        if (løsning.harFaresignalerFunn()) {
-            val melding =
-                "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
-        }
+    private fun risikovurderingAlleredeGjort() = risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null
 
-        return aktiveVedtaksperioder.alleHarRisikovurdering(risikovurderingDao)
+    private fun Risikovurderingløsning.leggTilWarnings() {
+        if (harArbeidsuførhetFunn()) {
+            val melding = arbeidsuførhetsmelding()
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningteller.labels("WARN", melding).inc()
+        }
+        if (harFaresignalerFunn()) {
+            val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningteller.labels("WARN", melding).inc()
+        }
+    }
+
+    private companion object {
+        private val logg = LoggerFactory.getLogger(RisikoCommand::class.java)
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
