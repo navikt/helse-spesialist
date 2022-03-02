@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.PersonDao.Utbetalingen
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -38,7 +39,11 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
             endringIArbeidsgiverOppdrag = false,
             endringIPersonOppdrag = true,
-            risikofunn = listOf("MjA@")
+            risikofunn = listOf(Risikofunn(
+                kreverSupersaksbehandler = false,
+                kategori = listOf("Noe"),
+                beskrivele = "Noe"
+            ))
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
@@ -60,7 +65,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
         fødselsnummer: String,
         endringIArbeidsgiverOppdrag: Boolean,
         endringIPersonOppdrag: Boolean,
-        risikofunn: List<String> = emptyList()
+        risikofunn: List<Risikofunn> = emptyList()
     ) {
         FØDSELSNUMMER = fødselsnummer
         vedtaksperiode(

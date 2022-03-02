@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -430,7 +431,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
-        funn: JsonNode
+        funn: List<Risikofunn>
     ): String =
         nyHendelse(
             id,
@@ -448,7 +449,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@løsning" to mapOf(
                     "Risikovurdering" to mapOf(
                         "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
-                        "funn" to funn,
+                        "funn" to funn.tilJson(),
                         "kontrollertOk" to emptyList<JsonNode>(),
                     )
                 )

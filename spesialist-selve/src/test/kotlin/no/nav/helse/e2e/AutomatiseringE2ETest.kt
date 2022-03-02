@@ -2,10 +2,10 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgavestatus
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertNotNull
@@ -217,20 +217,11 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak ved 8-4 ikke oppfylt`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
 
-        @Language("json")
-        val funn = objectMapper.readTree(
-            """
-            [{
-                "kategori": ["8-4"],
-                "beskrivelse": "8-4 ikke ok",
-                "kreverSupersaksbehandler": false
-            },{
-                "kategori": [],
-                "beskrivelse": "faresignaler ikke ok",
-                "kreverSupersaksbehandler": false
-            }]
-        """.trimIndent()
+        val funn = listOf(
+            Risikofunn(kategori = listOf("8-4"), beskrivele = "8-4 ikke ok", kreverSupersaksbehandler = false),
+            Risikofunn(kategori = emptyList(), beskrivele = "faresignaler ikke ok", kreverSupersaksbehandler = false)
         )
+
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
             periodetype = Periodetype.FORLENGELSE,

@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
@@ -22,19 +23,9 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         private val ID = UUID.randomUUID()
     }
 
-    @Language("json")
-    private val funn = objectMapper.readTree(
-        """
-            [{
-                "kategori": ["8-4"],
-                "beskrivelse": "8-4 ikke ok",
-                "kreverSupersaksbehandler": false
-            },{
-                "kategori": [],
-                "beskrivelse": "faresignal ikke ok",
-                "kreverSupersaksbehandler": false
-            }]
-        """
+    private val funn = listOf(
+        Risikofunn(kategori = listOf("8-4"), beskrivele = "8-4 ikke ok", kreverSupersaksbehandler = false),
+        Risikofunn(kategori = emptyList(), beskrivele = "faresignal ikke ok", kreverSupersaksbehandler = false)
     )
 
     @BeforeEach

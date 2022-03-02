@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -10,8 +9,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.oppgaveApi
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.oppgave.OppgaveMediator
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -25,25 +24,19 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     @Test
     fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        @Language("json")
-        val funn1 = objectMapper.readTree(
-            """
-            [{
-                "kategori": ["8-4"],
-                "beskrivelse": "ny sjekk ikke ok",
-                "kreverSupersaksbehandler": true
-            }]
-        """
-        )
-        val funn2 = objectMapper.readTree(
-            """
-            [{
-                "kategori": ["8-4"],
-                "beskrivelse": "8-4 ikke ok",
-                "kreverSupersaksbehandler": false
-            }]
-        """
-        )
+
+        val funn1 = listOf(Risikofunn(
+            kategori = listOf("8-4"),
+            beskrivele = "ny sjekk ikke ok",
+            kreverSupersaksbehandler = true
+        ))
+
+        val funn2 = listOf(Risikofunn(
+            kategori = listOf("8-4"),
+            beskrivele = "8-4 ikke ok",
+            kreverSupersaksbehandler = false
+        ))
+
         godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID, UTBETALING_ID)
         godkjenningsoppgave(funn2, UUID.randomUUID(), UTBETALING_ID2)
 
@@ -72,7 +65,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     }
 
     fun godkjenningsoppgave(
-        funn: JsonNode,
+        funn: List<Risikofunn>,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UTBETALING_ID
     ) {

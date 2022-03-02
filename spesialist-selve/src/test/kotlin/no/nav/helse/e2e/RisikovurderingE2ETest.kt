@@ -1,39 +1,29 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*
 
 private class RisikovurderingE2ETest : AbstractE2ETest() {
 
-    @Language("json")
-    private val funn1 = objectMapper.readTree(
-        """
-            [{
-                "kategori": ["8-4"],
-                "beskrivelse": "ny sjekk ikke ok",
-                "kreverSupersaksbehandler": true
-            }]
-        """
-    )
-    @Language("json")
-    private val funn2 = objectMapper.readTree(
-        """
-            [{
-                "kategori": ["8-4"],
-                "beskrivelse": "8-4 ikke ok",
-                "kreverSupersaksbehandler": false
-            }]
-        """
-    )
+    private val funn1 = listOf(Risikofunn(
+        kategori = listOf("8-4"),
+        beskrivele = "ny sjekk ikke ok",
+        kreverSupersaksbehandler = true
+    ))
+
+    private val funn2 = listOf(Risikofunn(
+        kategori = listOf("8-4"),
+        beskrivele = "8-4 ikke ok",
+        kreverSupersaksbehandler = false
+    ))
 
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
@@ -84,7 +74,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     }
 
     fun godkjenningsoppgave(
-        funn: JsonNode,
+        funn: List<Risikofunn>,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
             Testmeldingfabrikk.AktivVedtaksperiodeJson(

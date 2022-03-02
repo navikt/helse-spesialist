@@ -31,7 +31,7 @@ internal class RisikoCommand(
         if (risikovurderingAlleredeGjort()) return true
 
         val løsning = context.get<Risikovurderingløsning>()
-        if (løsning == null) {
+        if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
             logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
             context.behov("Risikovurdering", mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
@@ -44,7 +44,7 @@ internal class RisikoCommand(
             return false
         }
 
-        løsning.lagre(risikovurderingDao, vedtaksperiodeId)
+        løsning.lagre(risikovurderingDao)
         løsning.leggTilWarnings()
         return true
     }

@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.rapids_rivers.*
@@ -10,7 +9,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class Risikovurderingløsning(
-    private val hendelseId: UUID,
     private val vedtaksperiodeId: UUID,
     private val opprettet: LocalDateTime,
     private val kanGodkjennesAutomatisk: Boolean,
@@ -20,12 +18,8 @@ internal class Risikovurderingløsning(
         private val logg = LoggerFactory.getLogger(Risikovurderingløsning::class.java)
     }
 
-    internal fun lagre(risikovurderingDao: RisikovurderingDao, vedtaksperiodeIdTilGodkjenning: UUID) {
-        logg.info(
-            "Mottok risikovurdering for {} (Periode til godkjenning: {})",
-            keyValue("vedtaksperiodeId", vedtaksperiodeId),
-            keyValue("vedtaksperiodeIdTilGodkjenning", vedtaksperiodeIdTilGodkjenning)
-        )
+    internal fun lagre(risikovurderingDao: RisikovurderingDao) {
+        logg.info("Mottok risikovurdering for vedtaksperiode $vedtaksperiodeId")
         risikovurderingDao.lagre(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = opprettet,
@@ -34,6 +28,8 @@ internal class Risikovurderingløsning(
             data = løsning
         )
     }
+
+    internal fun gjelderVedtaksperiode(vedtaksperiodeId: UUID) = this.vedtaksperiodeId == vedtaksperiodeId
 
     internal fun harArbeidsuførhetFunn() =
         !kanGodkjennesAutomatisk && løsning["funn"].any { it["kategori"].toList().map { it.asText() }.contains("8-4") }
@@ -87,7 +83,6 @@ internal class Risikovurderingløsning(
             val kanGodkjennesAutomatisk = løsning["kanGodkjennesAutomatisk"].asBoolean()
 
             val risikovurdering = Risikovurderingløsning(
-                hendelseId = hendelseId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 opprettet = opprettet,
                 kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,

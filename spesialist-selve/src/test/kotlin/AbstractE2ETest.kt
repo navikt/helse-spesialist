@@ -21,6 +21,7 @@ import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.PersonMediator
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.api.modell.Saksbehandler
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.*
 import no.nav.helse.modell.*
@@ -476,7 +477,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
         contextId: UUID = testRapid.inspektør.contextId(),
-        funn: JsonNode = objectMapper.createArrayNode()
+        funn: List<Risikofunn> = emptyList()
     ) {
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
@@ -951,7 +952,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         kanAutomatiseres: Boolean = false,
         snapshot: String = snapshot(),
         utbetalingId: UUID,
-        risikofunn: List<String> = emptyList()
+        risikofunn: List<Risikofunn> = emptyList()
     ): UUID {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
@@ -1001,7 +1002,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             kanGodkjennesAutomatisk = kanAutomatiseres,
             contextId = contextId(godkjenningsmeldingId),
-            funn = objectMapper.readTree("""{"funn":{"kreverSupersaksbehandler": false, "kategori":${risikofunn.map { "\"$it\"" }}}}""")
+            funn = risikofunn
         )
         return godkjenningsmeldingId
     }
