@@ -6,7 +6,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class BehovMediator(
     private val rapidsConnection: RapidsConnection,
@@ -26,14 +26,12 @@ internal class BehovMediator(
 
     private fun publiserBehov(hendelse: Hendelse, context: CommandContext, contextId: UUID) {
         if (!context.harBehov()) return
-        context.behovsgrupper().forEach { behovgruppe ->
-            val packet = packet(hendelse, behovgruppe, contextId)
-            sikkerLogg.info("Sender behov for ${behovgruppe}\n{}", packet)
-            rapidsConnection.publish(hendelse.fødselsnummer(), packet)
-        }
+        val packet = behovPacket(hendelse, context, contextId)
+        sikkerLogg.info("Sender behov for ${context.behov().keys}\n{}", packet)
+        rapidsConnection.publish(hendelse.fødselsnummer(), packet)
     }
 
-    private fun packet(hendelse: Hendelse, context: CommandContext.Behovgruppe, contextId: UUID) =
+    private fun behovPacket(hendelse: Hendelse, context: CommandContext, contextId: UUID) =
         standardfelter(hendelse).apply {
             this["@behov"] = context.behov().keys.toList()
             this["contextId"] = contextId

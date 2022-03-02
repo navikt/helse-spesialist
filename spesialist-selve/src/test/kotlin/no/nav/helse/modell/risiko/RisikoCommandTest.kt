@@ -6,7 +6,6 @@ import io.mockk.mockk
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.behov
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -54,33 +54,6 @@ internal class BehovMediatorTest {
     }
 
     @Test
-    fun `sender grupper av behov`() {
-        testContext.behov("type 1", mapOf("param 1" to 1))
-        testContext.behov("type 2", mapOf("param 2" to 2))
-        testContext.nyBehovgruppe()
-        testContext.behov("type 3", mapOf("param 3" to 3))
-        behovMediator.håndter(testHendelse, testContext, contextId)
-        assertEquals(listOf("type 1", "type 2"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
-        assertEquals("$contextId", testRapid.inspektør.field(0, "contextId").asText())
-        assertEquals("$hendelseId", testRapid.inspektør.field(0, "hendelseId").asText())
-        assertEquals("$hendelseId", testRapid.inspektør.field(0, "spleisBehovId").asText())
-        testRapid.inspektør.field(0, "type 1").also {
-            assertEquals(1, it.path("param 1").asInt())
-        }
-        testRapid.inspektør.field(0, "type 2").also {
-            assertEquals(2, it.path("param 2").asInt())
-        }
-
-        assertEquals(listOf("type 3"), testRapid.inspektør.field(1, "@behov").map(JsonNode::asText))
-        assertEquals("$contextId", testRapid.inspektør.field(1, "contextId").asText())
-        assertEquals("$hendelseId", testRapid.inspektør.field(1, "hendelseId").asText())
-        assertEquals("$hendelseId", testRapid.inspektør.field(1, "spleisBehovId").asText())
-        testRapid.inspektør.field(1, "type 3").also {
-            assertEquals(3, it.path("param 3").asInt())
-        }
-    }
-
-    @Test
     fun `sender meldinger`() {
         val melding1 = """{ "a_key": "with_a_value" }"""
         val melding2 = """{ "a_key": "with_a_value" }"""

@@ -300,32 +300,10 @@ internal class Godkjenningsbehov(
     internal data class AktivVedtaksperiode(
         private val orgnummer: String,
         private val vedtaksperiodeId: UUID,
-        private val periodetype: Periodetype
-    ) {
-        internal fun behov(context: CommandContext, vedtaksperiodeIdTilGodkjenning: UUID) {
-            context.nyBehovgruppe()
-            context.behov(
-                "Risikovurdering", mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId,
-                    "organisasjonsnummer" to orgnummer,
-                    "periodetype" to periodetype
-                )
-            )
-            logg.info(
-                "Trenger risikovurdering for {} (Periode til godkjenning: {})",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("vedtaksperiodeIdTilGodkjenning", vedtaksperiodeIdTilGodkjenning)
-            )
-        }
+        private val periodetype: Periodetype) {
 
         companion object {
-            private val logg = LoggerFactory.getLogger(AktivVedtaksperiode::class.java)
-
             internal fun List<AktivVedtaksperiode>.orgnummere() = map { it.orgnummer }
-
-            internal fun List<AktivVedtaksperiode>.alleHarRisikovurdering(risikovurderingDao: RisikovurderingDao) =
-                map { it.vedtaksperiodeId }
-                    .all { vedtaksperiodeId -> risikovurderingDao.hentRisikovurdering(vedtaksperiodeId) != null }
 
             internal fun fromNode(json: JsonNode) = json.map {
                 AktivVedtaksperiode(

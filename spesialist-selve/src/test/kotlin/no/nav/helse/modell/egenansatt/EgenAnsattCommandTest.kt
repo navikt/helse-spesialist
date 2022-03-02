@@ -1,16 +1,10 @@
 package no.nav.helse.modell.egenansatt
 
 import io.mockk.clearMocks
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.meldinger.EgenAnsattløsning
-import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.behov
-import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,11 +14,9 @@ import java.util.*
 internal class EgenAnsattCommandTest {
     private companion object {
         private const val FNR = "12345678911"
-        private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     }
 
     private val dao = mockk<EgenAnsattDao>(relaxed = true)
-    private val godkjenningMediator = mockk<GodkjenningMediator>(relaxed = true)
 
     private val command = EgenAnsattCommand(dao)
     private lateinit var context: CommandContext

@@ -4,41 +4,23 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.CommandContextDao
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()) {
     private val data = mutableListOf<Any>()
-    private val behovsgrupper = mutableListOf<Behovgruppe>()
+    private val behov = mutableMapOf<String, Map<String, Any>>()
     private val sti: MutableList<Int> = sti.toMutableList()
     private val meldinger = mutableListOf<String>()
     private var ferdigstilt = false
 
-    internal class Behovgruppe {
-        private val behov = mutableMapOf<String, Map<String, Any>>()
-
-        internal operator fun contains(behovtype: String) = behovtype in behov
-        internal operator fun get(behovtype: String) = behov.getValue(behovtype)
-        internal val size get() = behov.size
-
-        internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
-            this.behov[behovtype] = params
-        }
-
-        internal fun behov() = behov.toMap()
-
-        override fun toString() = behov.keys.toString()
-    }
-
-    internal fun nyBehovgruppe() {
-        behovsgrupper.add(Behovgruppe())
-    }
-
     internal fun behov(behovtype: String, params: Map<String, Any> = emptyMap()) {
-        if (behovsgrupper.isEmpty()) behovsgrupper.add(Behovgruppe())
-        this.behovsgrupper.last().behov(behovtype, params)
+        this.behov[behovtype] = params
     }
 
-    internal fun behovsgrupper() = behovsgrupper.filter { it.size > 0 }.toList()
+    internal fun behov() = behov.toMap()
+
+    internal fun harBehov() = behov.isNotEmpty()
+
     internal fun meldinger() = meldinger.toList()
 
     /**
@@ -64,8 +46,6 @@ internal class CommandContext(private val id: UUID, sti: List<Int> = emptyList()
         if (sti.isEmpty()) return
         command.restore(sti.removeAt(0))
     }
-
-    internal fun harBehov() = behovsgrupper().isNotEmpty()
 
     internal fun sti() = sti.toList()
 

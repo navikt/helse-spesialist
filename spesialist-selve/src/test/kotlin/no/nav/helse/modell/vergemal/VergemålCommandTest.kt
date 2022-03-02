@@ -4,7 +4,6 @@ import io.mockk.*
 import no.nav.helse.mediator.meldinger.Vergemålløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.behov
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.*
