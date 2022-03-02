@@ -49,6 +49,7 @@ internal class DataSourceBuilder(private val env: Map<String, String>) {
     fun migrate() {
         val dataSource = createDataSource(hikariMigrationConfig, vaultMountPath, Role.Admin.asRole(databaseName))
         runMigration(dataSource, "SET ROLE \"${Role.Admin.asRole(databaseName)}\"")
+        dataSource.close()
     }
 
     private fun runMigration(dataSource: DataSource, initSql: String? = null) =
