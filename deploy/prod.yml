@@ -6,7 +6,7 @@ metadata:
   labels:
     team: tbd
 spec:
-  image: {{image}}
+    image: {{image}}
   port: 8080
   liveness:
     path: isalive
@@ -22,9 +22,9 @@ spec:
       cpu: 100m
       memory: 512Mi
   replicas:
-    min: 3
-    max: 3
-    cpuThresholdPercentage: 70
+      min: 12
+      max: 12
+      cpuThresholdPercentage: 70
   prometheus:
     enabled: true
     path: /metrics
