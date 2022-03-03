@@ -47,7 +47,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     fun `kan legge en oppgave på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
+            client.post<HttpResponse>("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -65,7 +65,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     fun `kan fjerne på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
+            client.delete<HttpResponse>("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -84,7 +84,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
         every { leggPåVentMediator.leggOppgavePåVent(any()) } throws OppgaveIkkeTildelt(1L)
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/leggpåvent/${oppgavereferanse}") {
+            client.post<HttpResponse>("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -100,7 +100,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse POST gir Bad Request`() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/leggpåvent/null") {
+            client.post<HttpResponse>("/api/leggpaavent/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()
@@ -114,7 +114,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse DELETE gir Bad Request`() {
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/leggpåvent/null") {
+            client.delete<HttpResponse>("/api/leggpaavent/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 body = objectMapper.createObjectNode()

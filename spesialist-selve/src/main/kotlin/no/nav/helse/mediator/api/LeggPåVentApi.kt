@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 private val log = LoggerFactory.getLogger("LeggPåVentApi")
 
 internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator) {
-    post("/api/leggpåvent/{oppgavereferanse}") {
+    post("/api/leggpaavent/{oppgavereferanse}") {
         modellfeilForRest {
             val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
             if (oppgaveId == null) {
@@ -29,7 +29,7 @@ internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator) {
         }
     }
 
-    delete("/api/leggpåvent/{oppgavereferanse}") {
+    delete("/api/leggpaavent/{oppgavereferanse}") {
         val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
         if (oppgaveId == null) {
             call.respond(HttpStatusCode.BadRequest, "Ugyldig oppgavereferanse i path parameter")
