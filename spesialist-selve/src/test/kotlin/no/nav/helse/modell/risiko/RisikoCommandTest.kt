@@ -118,7 +118,6 @@ internal class RisikoCommandTest {
         periodetype: Periodetype = PERIODETYPE
     ) = RisikoCommand(
         vedtaksperiodeId = vedtaksperiodeId,
-        aktiveVedtaksperioder = aktiveVedtaksperioder,
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao,
         organisasjonsnummer = organisasjonsnummer,

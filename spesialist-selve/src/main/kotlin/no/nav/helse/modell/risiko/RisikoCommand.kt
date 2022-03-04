@@ -1,7 +1,5 @@
 package no.nav.helse.modell.risiko
 
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -15,13 +13,11 @@ import java.util.UUID
 
 internal class RisikoCommand(
     private val vedtaksperiodeId: UUID,
-    aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
     private val organisasjonsnummer: String,
     private val periodetype: Periodetype
 ) : Command {
-    private val andreOrganisasjonsnummer = aktiveVedtaksperioder.orgnummere().minus(organisasjonsnummer).distinct()
 
     override fun execute(context: CommandContext) = behandle(context)
 
@@ -38,9 +34,6 @@ internal class RisikoCommand(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "periodetype" to periodetype
             ))
-            if (andreOrganisasjonsnummer.isNotEmpty()) {
-                sikkerLogg.info("Ville tidligere etterspurt Risikovurdering også for organisasjonsummer:$andreOrganisasjonsnummer")
-            }
             return false
         }
 
@@ -66,6 +59,5 @@ internal class RisikoCommand(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(RisikoCommand::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

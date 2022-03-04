@@ -185,7 +185,6 @@ internal class Godkjenningsbehov(
         ),
         RisikoCommand(
             vedtaksperiodeId = vedtaksperiodeId,
-            aktiveVedtaksperioder = aktiveVedtaksperioder,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
             organisasjonsnummer = organisasjonsnummer,
