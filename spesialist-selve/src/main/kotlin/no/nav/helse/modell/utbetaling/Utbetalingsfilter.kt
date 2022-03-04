@@ -29,8 +29,11 @@ internal class Utbetalingsfilter(
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
         // Unngå ping-pong om en av de utvalgte utbetalingene til sykmeldt revurderes og får warning
         if (warnings.isNotEmpty() && utbetalingtype != REVURDERING) {
+            when (årsaker.isEmpty()) {
+                true -> sikkerLogg.info("Utbetalingsfilter warnings som eneste årsak til at det ikke kan utbetales:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
+                false -> sikkerLogg.info("Utbetalingsfilter warnings som en av flere årsaker til at det ikke kan utbetales:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
+            }
             nyÅrsak("Vedtaksperioden har warnings")
-            sikkerLogg.info("Utbetalingsfilter warnings:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
         }
         return årsaker.isEmpty()
     }
