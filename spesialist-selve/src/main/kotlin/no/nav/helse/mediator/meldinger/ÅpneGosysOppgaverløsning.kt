@@ -7,7 +7,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.*
-import no.nav.helse.warningteller
+import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -36,7 +36,7 @@ internal class ÅpneGosysOppgaverløsning(
                 vedtaksperiodeId,
                 Warning(melding, WarningKilde.Spesialist)
             )
-            warningteller.labels("WARN", melding).inc()
+            tellWarning(melding)
         }
 
         antall?.takeIf { it > 0 }?.also {
@@ -45,7 +45,7 @@ internal class ÅpneGosysOppgaverløsning(
                 vedtaksperiodeId,
                 Warning(melding, WarningKilde.Spesialist)
             )
-            warningteller.labels("WARN", melding).inc()
+            tellWarning(melding)
         }
     }
 

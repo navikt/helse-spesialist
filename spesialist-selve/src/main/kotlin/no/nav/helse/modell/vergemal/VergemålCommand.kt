@@ -6,7 +6,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.warningteller
+import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -45,7 +45,7 @@ internal class VergemålCommand(
 
     private fun String.leggTilSomWarning() {
         warningDao.leggTilWarning(vedtaksperiodeId, Warning(this, WarningKilde.Spesialist))
-        warningteller.labels("WARN", this).inc()
+        tellWarning(this)
     }
 
     private fun Vergemålløsning.harVergemål() = vergemål.harVergemål

@@ -7,7 +7,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.warningteller
+import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -34,7 +34,7 @@ internal class SjekkArbeidsforholdCommand(
             val melding = "ArbeidsforholdsID er fylt ut i inntektsmeldingen. Kontroller om brukeren har flere arbeidsforhold i samme virksomhet. Systemet har foreløpig begrenset støtte for dette."
             log.info("Legger til warning for arbeidsforholdId på vedtaksperiode $vedtaksperiodeId")
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
+            tellWarning(melding)
         }
         return true
     }

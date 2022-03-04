@@ -7,7 +7,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.warningteller
+import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -48,12 +48,12 @@ internal class RisikoCommand(
         if (harArbeidsuførhetFunn()) {
             val melding = arbeidsuførhetsmelding()
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
+            tellWarning(melding)
         }
         if (harFaresignalerFunn()) {
             val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
-            warningteller.labels("WARN", melding).inc()
+            tellWarning(melding)
         }
     }
 
