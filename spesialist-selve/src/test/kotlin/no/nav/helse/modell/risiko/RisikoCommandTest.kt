@@ -110,7 +110,6 @@ internal class RisikoCommandTest {
     }
 
     private fun risikoCommand(
-        aktiveVedtaksperioder: List<AktivVedtaksperiode> = listOf(AKTIV_VEDTAKSPERIODE),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
         warningDao: WarningDao = WARNING_DAO,
