@@ -12,6 +12,7 @@ import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstan
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.INGEN_TILGANG
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.OK
 import no.nav.helse.modell.SpeilSnapshotDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
@@ -43,6 +44,7 @@ internal class PersonMediator(
     private val personsnapshotDao: PersonsnapshotDao,
     private val varselDao: VarselDao,
     private val personDao: PersonApiDao,
+    private val egenAnsattDao: EgenAnsattDao,
     private val arbeidsgiverDao: ArbeidsgiverApiDao,
     private val overstyringDao: OverstyringApiDao,
     private val oppgaveDao: OppgaveDao,
@@ -79,8 +81,14 @@ internal class PersonMediator(
         val erFortrolig = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
         val erUgradert = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert)
         val erUkjentEllerStrengtFortrolig = !erFortrolig && !erUgradert
+        val erSkjermet = egenAnsattDao.erEgenAnsatt(fødselsnummer)
 
         return when {
+            erSkjermet == null || erSkjermet -> {
+                // Dette har vi ikke støtte for ennå, mangler å kunne finne om saksbehandler har tilgang til skjermede personer.
+                sikkerLog.info("Personen er skjermet, returnerer feilmelding.")
+                SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
+            }
             erFortrolig && !kanSeKode7 -> {
                 sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
                 SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)

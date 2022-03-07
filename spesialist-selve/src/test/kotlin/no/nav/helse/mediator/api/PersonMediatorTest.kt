@@ -2,6 +2,7 @@ package no.nav.helse.mediator.api
 
 import AbstractE2ETest
 import io.mockk.every
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -11,7 +12,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -48,6 +52,11 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
+        )
+
         val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
 
         assertTrue(
@@ -69,6 +78,11 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
+        )
+
         val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
 
         assertFalse(speilSnapshot.inntektsgrunnlag.isNull)
@@ -177,6 +191,10 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
+        )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -204,6 +222,10 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
         )
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -260,6 +282,11 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId1,
+            erEgenAnsatt = false,
+            fødselsnummer1,
+        )
         sendUtbetalingEndret(
             type = "UTBETALING",
             status = OVERFØRT,
@@ -291,6 +318,11 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId2,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId2,
+            erEgenAnsatt = false,
+            fødselsnummer2,
         )
 
         val speilSnapshot1 = assertNotNull(personMediator.byggSpeilSnapshotForFnr(fødselsnummer1, false).snapshot)
@@ -430,6 +462,11 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
+        )
+
         val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
 
         assertEquals("Eliteserien", speilSnapshot.arbeidsgivere.last().navn)
@@ -505,8 +542,6 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     fun `Ukjent adressbeskyttelse - ingen saksbehandlere skal kunne søke opp personer`() {
         vedtak(Adressebeskyttelse.Ukjent)
         assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
-
-        vedtak(Adressebeskyttelse.Ukjent)
         assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true).snapshot)
     }
 
@@ -522,6 +557,38 @@ internal class PersonMediatorTest : AbstractE2ETest() {
         vedtak(Adressebeskyttelse.Fortrolig)
         val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true).snapshot)
         assertEquals(Adressebeskyttelse.Fortrolig, speilSnapshot.personinfo.adressebeskyttelse)
+    }
+
+    @Test
+    fun `Ingen skal få se skjermede personer - per nå, det skal egentlig tilgangsstyres`() {
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = true,
+        )
+
+        val response = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true)
+        assertNull(response.snapshot)
+        assertEquals(SnapshotTilstand.INGEN_TILGANG, response.tilstand)
+
+        val responseUtenKode7 = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false)
+        assertNull(responseUtenKode7.snapshot)
+        assertEquals(SnapshotTilstand.INGEN_TILGANG, responseUtenKode7.tilstand)
     }
 
     private fun vedtak(adressebeskyttelse: Adressebeskyttelse) {
@@ -541,6 +608,10 @@ internal class PersonMediatorTest : AbstractE2ETest() {
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false,
         )
     }
 

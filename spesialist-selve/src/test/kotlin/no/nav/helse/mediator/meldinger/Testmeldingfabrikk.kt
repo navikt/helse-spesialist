@@ -367,7 +367,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-        erEgenAnsatt: Boolean = false
+        erEgenAnsatt: Boolean = false,
+        fødselsnummer: String = this.fødselsnummer,
     ): String = nyHendelse(
         id,
         "behov", mutableMapOf(

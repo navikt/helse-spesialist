@@ -26,9 +26,23 @@ import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.*
+import no.nav.helse.mediator.api.PersonMediator
+import no.nav.helse.mediator.api.adminApi
+import no.nav.helse.mediator.api.annulleringApi
+import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
-import no.nav.helse.modell.*
+import no.nav.helse.mediator.api.leggPåVentApi
+import no.nav.helse.mediator.api.notaterApi
+import no.nav.helse.mediator.api.oppgaveApi
+import no.nav.helse.mediator.api.overstyringApi
+import no.nav.helse.mediator.api.personApi
+import no.nav.helse.mediator.api.tildelingApi
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -276,6 +290,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             speilSnapshotDao = speilSnapshotDao,
                             varselDao = varselDao,
                             personDao = personApiDao,
+                            egenAnsattDao = egenAnsattDao,
                             arbeidsgiverDao = arbeidsgiverApiDao,
                             overstyringDao = overstyringApiDao,
                             oppgaveDao = oppgaveDao,

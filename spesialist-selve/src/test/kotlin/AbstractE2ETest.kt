@@ -7,10 +7,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.*
+import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -23,8 +25,15 @@ import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.*
-import no.nav.helse.modell.*
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.AktivVedtaksperiodeJson
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.SpeilSnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -57,11 +66,16 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.snapshotMedWarning
+import no.nav.helse.snapshotUtenWarnings
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -201,6 +215,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         personsnapshotDao = personsnapshotDao,
         varselDao = varselDao,
         personDao = personApiDao,
+        egenAnsattDao = egenAnsattDao,
         arbeidsgiverDao = arbeidsgiverApiDao,
         overstyringDao = overstyringApiDao,
         oppgaveDao = oppgaveDao,
@@ -496,6 +511,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun sendEgenAnsattløsning(
         godkjenningsmeldingId: UUID,
         erEgenAnsatt: Boolean,
+        fødselsnummer: String = FØDSELSNUMMER,
         contextId: UUID = testRapid.inspektør.contextId()
     ) {
         nyHendelseId().also { id ->
@@ -504,7 +520,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     id,
                     godkjenningsmeldingId,
                     contextId,
-                    erEgenAnsatt
+                    erEgenAnsatt,
+                    fødselsnummer,
                 )
             )
         }
