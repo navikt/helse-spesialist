@@ -1,4 +1,4 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.mediator.api
 
 import AbstractE2ETest
 import io.mockk.every
@@ -7,6 +7,7 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
