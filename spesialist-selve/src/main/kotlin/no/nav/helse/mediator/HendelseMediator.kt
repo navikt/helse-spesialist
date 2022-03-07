@@ -4,10 +4,41 @@ import com.fasterxml.jackson.databind.JsonNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.annulleringsteller
-import no.nav.helse.mediator.api.*
+import no.nav.helse.mediator.api.AnnulleringDto
+import no.nav.helse.mediator.api.GodkjenningDTO
+import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
+import no.nav.helse.mediator.api.OverstyrInntektKafkaDto
+import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.*
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
+import no.nav.helse.mediator.meldinger.EgenAnsattløsning
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
+import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Risikovurderingløsning
+import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
+import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.mediator.meldinger.Vergemålløsning
+import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.IHendelsefabrikk
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -606,10 +637,10 @@ internal class HendelseMediator(
 
         fun fortsett(mediator: HendelseMediator, message: String, context: MessageContext) {
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
-            /*sikkerLogg.info(
+            sikkerLogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                     "Innkommende melding:\n\t$message"
-            )*/
+            )
             mediator.utfør(hendelse, commandContext, contextId, context)
         }
     }
