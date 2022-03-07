@@ -37,7 +37,6 @@ import no.nav.helse.utbetaling.OppdragApiDto
 import no.nav.helse.utbetaling.UtbetalingApiDto
 import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.vedtaksperiode.VarselDao
-import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class PersonMediator(
@@ -54,7 +53,6 @@ internal class PersonMediator(
     private val speilSnapshotDao: SpeilSnapshotDao,
     private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
-    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
     fun byggSpeilSnapshotForFnr(fødselsnummer: String, kanSeKode7: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
@@ -86,11 +84,9 @@ internal class PersonMediator(
         return when {
             erSkjermet == null || erSkjermet -> {
                 // Dette har vi ikke støtte for ennå, mangler å kunne finne om saksbehandler har tilgang til skjermede personer.
-                sikkerLog.info("Personen er skjermet, returnerer feilmelding.")
                 SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
             }
             erFortrolig && !kanSeKode7 -> {
-                sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
                 SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
             }
             erUkjentEllerStrengtFortrolig -> {
