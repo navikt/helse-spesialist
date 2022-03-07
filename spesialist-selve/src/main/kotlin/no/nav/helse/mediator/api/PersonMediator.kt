@@ -8,15 +8,27 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
 import no.nav.helse.measureAsHistogram
-import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.INGEN_TILGANG
+import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.OK
 import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.*
-import no.nav.helse.person.*
+import no.nav.helse.overstyring.OverstyringApiArbeidsforholdDto
+import no.nav.helse.overstyring.OverstyringApiDagerDto
+import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.overstyring.OverstyringApiInntektDto
+import no.nav.helse.overstyring.OverstyrtArbeidsforholdApiDto
+import no.nav.helse.overstyring.OverstyrtDagApiDto
+import no.nav.helse.overstyring.OverstyrtInntektApiDto
+import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.person.PersonApiDao
+import no.nav.helse.person.PersonForSpeilDto
+import no.nav.helse.person.PersonMetadataApiDto
+import no.nav.helse.person.PersonsnapshotDao
+import no.nav.helse.person.SnapshotDto
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.utbetaling.AnnullertAvSaksbehandlerApiDto
@@ -65,24 +77,27 @@ internal class PersonMediator(
         }
 
         val erFortrolig = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
-        if (erFortrolig && !kanSeKode7) {
-            sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
-            return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
-        }
-
         val erUgradert = personDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert)
         val erUkjentEllerStrengtFortrolig = !erFortrolig && !erUgradert
-        if (erUkjentEllerStrengtFortrolig) {
-            return SnapshotResponse(snapshot = null, tilstand = SnapshotTilstand.INGEN_TILGANG)
-        }
 
-        if (speilSnapshotDao.utdatert(fødselsnummer)) {
-            val nyttSnapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
-            speilSnapshotDao.lagre(fødselsnummer, nyttSnapshot)
+        return when {
+            erFortrolig && !kanSeKode7 -> {
+                sikkerLog.info("Saksbehandler har ikke tilgang til dette søket")
+                SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
+            }
+            erUkjentEllerStrengtFortrolig -> {
+                SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
+            }
+            else -> {
+                if (speilSnapshotDao.utdatert(fødselsnummer)) {
+                    val nyttSnapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
+                    speilSnapshotDao.lagre(fødselsnummer, nyttSnapshot)
+                }
+                val snapshot = personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
+                if (snapshot != null) SnapshotResponse(snapshot, OK)
+                else SnapshotResponse(null, FINNES_IKKE)
+            }
         }
-        val snapshot = personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
-        return if (snapshot != null) SnapshotResponse(snapshot, SnapshotTilstand.OK)
-        else SnapshotResponse(null, FINNES_IKKE)
     }
 
     private fun byggSpeilSnapshot(personsnapshot: Pair<PersonMetadataApiDto, SnapshotDto>) =
