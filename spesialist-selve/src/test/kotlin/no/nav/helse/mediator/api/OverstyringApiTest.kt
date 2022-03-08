@@ -62,7 +62,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr arbeidsforhold`() {
-        Toggle.OverstyrArbeidsforhold.enable()
         withTestApplication({
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             azureAdAppAuthentication(azureAdConfig)
@@ -113,7 +112,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 assertEquals(false, event["overstyrteArbeidsforhold"].toList().single()["orgnummer"].asBoolean())
             }
         }
-        Toggle.OverstyrArbeidsforhold.disable()
     }
 
     @Test

@@ -70,24 +70,20 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     }
 
     post("/api/overstyr/arbeidsforhold") {
-        if (Toggle.OverstyrArbeidsforhold.enabled) {
-            val overstyring = call.receive<OverstyrArbeidsforholdDto>()
+        val overstyring = call.receive<OverstyrArbeidsforholdDto>()
 
-            val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
+        val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-            val message = OverstyrArbeidsforholdKafkaDto(
-                saksbehandler = saksbehandler.toDto(),
-                organisasjonsnummer = overstyring.organisasjonsnummer,
-                fødselsnummer = overstyring.fødselsnummer,
-                aktørId = overstyring.aktørId,
-                skjæringstidspunkt = overstyring.skjæringstidspunkt,
-                overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold
-            )
-            withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
-            call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
-        } else {
-            call.respond(HttpStatusCode.NotImplemented, "Featuren er skrudd av")
-        }
+        val message = OverstyrArbeidsforholdKafkaDto(
+            saksbehandler = saksbehandler.toDto(),
+            organisasjonsnummer = overstyring.organisasjonsnummer,
+            fødselsnummer = overstyring.fødselsnummer,
+            aktørId = overstyring.aktørId,
+            skjæringstidspunkt = overstyring.skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyring.overstyrteArbeidsforhold
+        )
+        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
+        call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }
 

@@ -82,7 +82,5 @@ spec:
       value: "true"
     - name: GRAPHQL_PLAYGROUND_ENABLED
       value: "true"
-    - name: OVERSTYR_ARBEIDSFORHOLD
-      value: "true"
     - name: SPLEIS_API_URL
       value: "http://spleis-api.tbd.svc.nais.local/"
