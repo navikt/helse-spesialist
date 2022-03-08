@@ -79,3 +79,5 @@ spec:
       value: "200"
     - name: GRAPHQL_ENABLED
       value: "true"
+    - name: SPLEIS_API_URL
+      value: "http://spleis-api.tbd.svc.nais.local/"

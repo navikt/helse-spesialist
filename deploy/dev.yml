@@ -84,3 +84,5 @@ spec:
       value: "true"
     - name: OVERSTYR_ARBEIDSFORHOLD
       value: "true"
+    - name: SPLEIS_API_URL
+      value: "http://spleis-api.tbd.svc.nais.local/"

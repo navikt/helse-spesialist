@@ -9,6 +9,7 @@ import no.nav.helse.AccessTokenClient
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
+import java.net.URI
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -24,7 +25,7 @@ internal class SpeilSnapshotRestClientTest {
         }
     }
     val accessTokenClient = mockk<AccessTokenClient>(relaxed = true)
-    val snapshotClient = SpeilSnapshotRestClient(httpClient, accessTokenClient, UUID.randomUUID().toString(), 1L)
+    val snapshotClient = SpeilSnapshotRestClient(httpClient, accessTokenClient, UUID.randomUUID().toString(), URI.create("http://mock"), 1L)
 
     @Test
     fun `retries on IO error` () {

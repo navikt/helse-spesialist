@@ -11,12 +11,14 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.AccessTokenClient
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.net.URI
 import java.util.*
 
 class SpeilSnapshotRestClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
     private val spleisClientId: String,
+    private val spleisUrl: URI,
     private val retryInterval: Long = 5000L
 ) {
     private companion object {
@@ -37,7 +39,7 @@ class SpeilSnapshotRestClient(
             keyValue("fødselsnummer", fnr),
             keyValue("callId", callId)
         )
-        val response: HttpResponse = httpClient.get("http://spleis-api.tbd.svc.nais.local/api/person-snapshot") {
+        val response: HttpResponse = httpClient.get(spleisUrl.resolve("api/person-snapshot").toURL()) {
             header("Authorization", "Bearer $accessToken")
             header("fnr", fnr)
             header("callId", callId)

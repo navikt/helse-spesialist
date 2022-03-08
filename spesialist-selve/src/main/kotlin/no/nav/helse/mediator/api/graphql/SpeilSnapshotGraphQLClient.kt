@@ -16,6 +16,7 @@ import no.nav.helse.mediator.graphql.HentSnapshot
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.net.URI
 import java.util.*
 
 private data class GraphQLRequestBody(
@@ -27,6 +28,7 @@ private data class GraphQLRequestBody(
 class SpeilSnapshotGraphQLClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
+    private val spleisUrl: URI,
     private val spleisClientId: String,
     private val retries: Int = 5,
     private val retryInterval: Long = 5000L
@@ -80,7 +82,7 @@ class SpeilSnapshotGraphQLClient(
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
-        val response = httpClient.post<String>("http://spleis-api.tbd.svc.nais.local/graphql") {
+        val response = httpClient.post<String>(spleisUrl.resolve("graphql").toURL()) {
             header("Authorization", "Bearer $accessToken")
             header("callId", callId)
             contentType(ContentType.Application.Json)

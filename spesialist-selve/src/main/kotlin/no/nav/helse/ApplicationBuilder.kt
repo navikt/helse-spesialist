@@ -77,6 +77,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.net.ProxySelector
+import java.net.URI
 import java.net.URL
 import java.util.*
 import kotlin.random.Random.Default.nextInt
@@ -120,11 +121,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val speilSnapshotRestClient = SpeilSnapshotRestClient(
         httpClient = spleisClient,
         accessTokenClient = accessTokenClient,
+        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
     )
     private val speilSnapshotGraphQLClient = SpeilSnapshotGraphQLClient(
         httpClient = spleisClient,
         accessTokenClient = accessTokenClient,
+        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
     )
     private val azureConfig = AzureAdAppConfig(
