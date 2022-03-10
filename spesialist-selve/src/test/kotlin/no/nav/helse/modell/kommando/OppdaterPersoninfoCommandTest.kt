@@ -4,14 +4,16 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class OppdaterPersoninfoCommandTest {
     private companion object {
@@ -42,7 +44,7 @@ internal class OppdaterPersoninfoCommandTest {
         val context = CommandContext(UUID.randomUUID())
         val command = OppdaterPersoninfoCommand(FNR, dao, force = false)
         utdatertPersoninfo()
-        val løsning = spyk(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+        val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(løsning)
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
@@ -63,7 +65,7 @@ internal class OppdaterPersoninfoCommandTest {
     fun `oppdaterer personinfo dersom force er satt til true`() {
         val context = CommandContext(UUID.randomUUID())
         val command = OppdaterPersoninfoCommand(FNR, dao, force = true)
-        val løsning = spyk(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+        val løsning = spyk(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(løsning)
         every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))

@@ -1,6 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -9,9 +12,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.random.Random.Default.nextLong
 
 internal class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
@@ -104,6 +104,13 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
+    fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>) =
+            ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer).toBody()
+
+    fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>, ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) = (
+            listOf(ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer)) + ekstraArbeidsgivere
+        ).map(ArbeidsgiverinformasjonJson::toBody)
+
     fun lagArbeidsgiverinformasjonløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
@@ -124,13 +131,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "aktørId" to aktørId,
             "orgnummer" to orgnummer,
             "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to (listOf(
-                    ArbeidsgiverinformasjonJson(
-                        orgnummer,
-                        navn,
-                        bransjer
-                    )
-                ) + ekstraArbeidsgivere).map(ArbeidsgiverinformasjonJson::toBody)
+                "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(orgnummer, navn, bransjer, ekstraArbeidsgivere)
             )
         )
     )
@@ -156,6 +157,38 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagHentPersoninfoV2(ident: String, adressebeskyttelse: String = "Ugradert") = mapOf(
+            "ident" to ident,
+            "fornavn" to "Kari",
+            "mellomnavn" to "",
+            "etternavn" to "Nordmann",
+            "fødselsdato" to "1970-01-01",
+            "kjønn" to "Kvinne",
+            "adressebeskyttelse" to adressebeskyttelse
+    )
+
+    fun lagFullstendigBehov(
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String = "orgnr",
+        behov: List<String>,
+        detaljer: Map<String, Any>
+    ) =
+        nyHendelse(
+            id, "behov", mapOf(
+                "@final" to true,
+                "@behov" to behov,
+                "hendelseId" to "$hendelseId",
+                "contextId" to "$contextId",
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "orgnummer" to organisasjonsnummer,
+            ) + detaljer
+        )
+
     fun lagPersoninfoløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
@@ -164,17 +197,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         organisasjonsnummer: String = "orgnr",
         enhet: String = "0301",
         adressebeskyttelse: String = "Ugradert"
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@final" to true,
-                "@behov" to listOf("HentEnhet", "HentPersoninfoV2", "HentInfotrygdutbetalinger"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId",
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
+    ) = lagFullstendigBehov(id, hendelseId, contextId, vedtaksperiodeId, organisasjonsnummer, listOf("HentEnhet", "HentPersoninfoV2", "HentInfotrygdutbetalinger"), mapOf(
                 "HentInfotrygdutbetalinger" to mapOf(
                     "historikkFom" to "2017-01-01",
                     "historikkTom" to "2020-12-31"
@@ -191,14 +214,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                         )
                     ),
                     "HentEnhet" to enhet,
-                    "HentPersoninfoV2" to mapOf(
-                        "fornavn" to "Kari",
-                        "mellomnavn" to "",
-                        "etternavn" to "Nordmann",
-                        "fødselsdato" to "1970-01-01",
-                        "kjønn" to "Kvinne",
-                        "adressebeskyttelse" to adressebeskyttelse
-                    )
+                    "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse)
                 )
             )
         )
@@ -614,7 +630,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
-    private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
+    internal fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 
     private fun nyHendelse(id: UUID, navn: String) = mutableMapOf(

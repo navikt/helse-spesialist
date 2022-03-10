@@ -1,6 +1,12 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalDateTime.now
+import java.time.temporal.ChronoUnit.SECONDS
+import java.util.UUID
+import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.annulleringsteller
@@ -60,12 +66,6 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalDateTime.now
-import java.time.temporal.ChronoUnit.SECONDS
-import java.util.*
-import javax.sql.DataSource
 
 internal class HendelseMediator(
     private val dataSource: DataSource,
@@ -96,6 +96,7 @@ internal class HendelseMediator(
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             Godkjenningsbehov.GodkjenningsbehovRiver(it, this)
             HentPersoninfoløsning.PersoninfoRiver(it, this)
+            HentPersoninfoløsning.FlerePersoninfoRiver(it, this)
             HentEnhetløsning.HentEnhetRiver(it, this)
             HentInfotrygdutbetalingerløsning.InfotrygdutbetalingerRiver(it, this)
             Saksbehandlerløsning.SaksbehandlerløsningRiver(it, this)

@@ -1,13 +1,16 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import java.time.LocalDate
 
 internal class OppdaterArbeidsgiverCommand(
-    private val orgnummere: List<String>,
+    orgnummere: List<String>,
     private val arbeidsgiverDao: ArbeidsgiverDao
 ) : Command {
+    // ignorerer fnr/aktørId/dnr ettersom bransje/navn er ganske så statisk for dem
+    private val orgnummere = orgnummere.filter { it.length == 9 }
+
     override fun execute(context: CommandContext): Boolean {
         val trengerOppdateringer = (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty()
         if (trengerOppdateringer) return true

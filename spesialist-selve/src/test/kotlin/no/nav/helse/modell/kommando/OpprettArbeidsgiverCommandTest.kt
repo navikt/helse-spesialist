@@ -4,12 +4,19 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsninger
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.person.Kjønn
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class OpprettArbeidsgiverCommandTest {
     private companion object {
@@ -48,17 +55,40 @@ internal class OpprettArbeidsgiverCommandTest {
     }
 
     @Test
+    fun `forespør informasjon når personinfo mangeøer`() {
+        val fnr = "12345678911"
+        arbeidsgiverFinnesIkke(fnr)
+        val command = OpprettArbeidsgiverCommand(listOf(fnr), dao)
+        assertFalse(command.execute(context))
+        context.behov().getValue("HentPersoninfoV2").also { behov ->
+            assertEquals(listOf(fnr), behov["ident"])
+        }
+    }
+
+    @Test
+    fun `opprett person-arbeidsgiver`() {
+        val fnr = "12345678911"
+        arbeidsgiverFinnesIkke(fnr)
+        context.add(HentPersoninfoløsninger(listOf(
+            HentPersoninfoløsning(fnr, "LITEN", null, "TRANFLASKE", LocalDate.of(1970, 1, 1), Kjønn.Kvinne, Adressebeskyttelse.Ugradert)
+        )))
+        val command = OpprettArbeidsgiverCommand(listOf(fnr), dao)
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { dao.insertArbeidsgiver(fnr, "LITEN TRANFLASKE", listOf("Privatperson")) }
+    }
+
+    @Test
     fun `oppretter ikke arbeidsgiver når den finnes`() {
         arbeidsgiverFinnes()
         assertTrue(command.execute(context))
         verify(exactly = 0) { dao.insertArbeidsgiver(any(), any(), any()) }
     }
 
-    private fun arbeidsgiverFinnes() {
-        every { dao.findArbeidsgiverByOrgnummer(ORGNR) } returns 1
+    private fun arbeidsgiverFinnes(orgnr: String = ORGNR) {
+        every { dao.findArbeidsgiverByOrgnummer(orgnr) } returns 1
     }
 
-    private fun arbeidsgiverFinnesIkke() {
-        every { dao.findArbeidsgiverByOrgnummer(ORGNR) } returns null
+    private fun arbeidsgiverFinnesIkke(orgnr: String = ORGNR) {
+        every { dao.findArbeidsgiverByOrgnummer(orgnr) } returns null
     }
 }

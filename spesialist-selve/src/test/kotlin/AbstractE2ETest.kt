@@ -5,6 +5,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
@@ -77,9 +80,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
@@ -89,7 +89,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val AKTØR = "999999999"
     protected val ORGNR = "222222222"
-    protected val ORGNR_GHOST = "666"
+    protected val ORGNR_GHOST = "666666666"
 
     protected val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_OID = UUID.randomUUID()
@@ -363,6 +363,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 )
             )
         }
+
+    protected fun sendKomposittbehov(
+            hendelseId: UUID,
+            behov: List<String>,
+            vedtaksperiodeId: UUID,
+            organisasjonsnummer: String = "orgnr",
+            contextId: UUID = testRapid.inspektør.contextId(),
+            detaljer: Map<String, Any>
+    ) = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(meldingsfabrikk.lagFullstendigBehov(id, hendelseId, contextId, vedtaksperiodeId, organisasjonsnummer, behov, detaljer))
+    }
 
     protected fun sendPersoninfoløsning(
         hendelseId: UUID,

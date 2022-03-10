@@ -4,6 +4,9 @@ import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.graphQLSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
@@ -11,13 +14,16 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.oppgave.Oppgavestatus.*
+import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.oppgave.Oppgavestatus.AvventerSystem
+import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.person.Adressebeskyttelse
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
@@ -608,7 +614,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger ved alle orgnummere på behov for Arbeidsgiverinformasjon`() {
-        val orgnummereMedAktiveArbeidsforhold = listOf("420")
+        val orgnummereMedAktiveArbeidsforhold = listOf("123456789")
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
@@ -622,6 +628,58 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val orgnummere =
             testRapid.inspektør.meldinger().last()["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
         assertEquals(listOf(ORGNR) + orgnummereMedAktiveArbeidsforhold, orgnummere)
+    }
+
+    @Test
+    fun `skiller arbeidsgiverinformasjon- og personinfo-behov etter om det er et orgnr eller ikke`() {
+        val orgnr1 = "123456789"
+        val fnr1 = "12345678911"
+        val orgnummereMedAktiveArbeidsforhold = listOf(orgnr1, fnr1)
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+        )
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+
+        val sisteMelding = testRapid.inspektør.meldinger().last()
+        assertTrue("Arbeidsgiverinformasjon" in sisteMelding.path("@behov").map { it.asText() })
+        assertTrue("HentPersoninfoV2" in sisteMelding.path("@behov").map { it.asText() })
+        val orgnummere = sisteMelding["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
+        val identer = sisteMelding["HentPersoninfoV2"]["ident"].map { it.asText() }
+        assertEquals(listOf(ORGNR, orgnr1), orgnummere)
+        assertEquals(listOf(fnr1), identer)
+    }
+
+    @Test
+    fun `tar inn arbeidsgiverinformasjon- og personinfo-behov samtidig`() {
+        val orgnr1 = "123456789"
+        val fnr1 = "12345678911"
+        val orgnummereMedAktiveArbeidsforhold = listOf(orgnr1, fnr1)
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+        )
+        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendKomposittbehov(godkjenningsmeldingId, listOf("HentPersoninfoV2", "Arbeidsgiverinformasjon"), VEDTAKSPERIODE_ID, ORGNR, detaljer = mapOf(
+            "@løsning" to mapOf(
+                    "HentPersoninfoV2" to listOf(meldingsfabrikk.lagHentPersoninfoV2(fnr1)),
+                    "Arbeidsgiverinformasjon" to listOf(
+                            meldingsfabrikk.arbeidsgiverinformasjon(ORGNR, "Arbeidsgiver 1", emptyList()),
+                            meldingsfabrikk.arbeidsgiverinformasjon(orgnr1, "Arbeidsgiver 2", emptyList())
+                    )
+            )
+        ))
+        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
+        val sisteMelding = testRapid.inspektør.meldinger().last()
+        assertTrue("Arbeidsforhold" in sisteMelding.path("@behov").map { it.asText() })
     }
 
     @Test

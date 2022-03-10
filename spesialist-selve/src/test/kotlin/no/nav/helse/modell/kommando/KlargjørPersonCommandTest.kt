@@ -5,7 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.GodkjenningMediator
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
@@ -14,11 +15,11 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class KlargjørPersonCommandTest {
     private companion object {
@@ -50,7 +51,7 @@ internal class KlargjørPersonCommandTest {
     @Test
     fun `oppretter person`() {
         personFinnesIkke()
-        context.add(HentPersoninfoløsning(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+        context.add(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
         context.add(HentEnhetløsning(ENHET_OSLO))
         context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
         assertTrue(command.execute(context))

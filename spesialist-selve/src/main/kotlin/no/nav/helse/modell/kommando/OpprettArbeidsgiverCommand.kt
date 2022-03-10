@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsninger
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 
@@ -29,12 +30,17 @@ internal class OpprettArbeidsgiverCommand(
     private fun behandle(context: CommandContext): Boolean {
         val arbeidsgivereSomIkkeFinnes = arbeidsgivereSomIkkeFinnes()
         if (arbeidsgivereSomIkkeFinnes.isEmpty()) return ignorer()
-        val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(
-            context,
-            arbeidsgivereSomIkkeFinnes
-        )
-        log.info("oppretter arbeidsgiver")
-        arbeidsgiver.opprett(arbeidsgiverDao)
+        val arbeidsgiver = context.get<Arbeidsgiverinformasjonløsning>()?.also { arbeidsgiver ->
+            log.info("oppretter arbeidsgiver fra orgnumre")
+            arbeidsgiver.opprett(arbeidsgiverDao)
+        }
+        val personinfo = context.get<HentPersoninfoløsninger>()?.also { personinfo ->
+            log.info("oppretter arbeidsgiver fra personer")
+            personinfo.opprett(arbeidsgiverDao)
+        }
+
+        if (arbeidsgiver == null && personinfo == null) return trengerMerInformasjon(context, arbeidsgivereSomIkkeFinnes)
+
         return true
     }
 
@@ -42,7 +48,9 @@ internal class OpprettArbeidsgiverCommand(
         orgnummere.filter { arbeidsgiverDao.findArbeidsgiverByOrgnummer(it) == null }
 
     private fun trengerMerInformasjon(context: CommandContext, arbeidsgivereSomIkkeFinnes: List<String>): Boolean {
-        context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to arbeidsgivereSomIkkeFinnes))
+        val (orgnumre, personer) = arbeidsgivereSomIkkeFinnes.partition { it.length == 9 }
+        if (orgnumre.isNotEmpty()) context.behov("Arbeidsgiverinformasjon", mapOf("organisasjonsnummer" to orgnumre))
+        if (personer.isNotEmpty()) context.behov("HentPersoninfoV2", mapOf("ident" to personer))
         return false
     }
 }
