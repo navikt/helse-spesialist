@@ -1,5 +1,7 @@
 package no.nav.helse.modell.automatisering
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
@@ -7,7 +9,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class AutomatiseringCommand(
     private val fødselsnummer: String,
@@ -17,7 +18,9 @@ internal class AutomatiseringCommand(
     private val automatisering: Automatisering,
     private val godkjenningsbehovJson: String,
     private val utbetalingtype: Utbetalingtype,
-    private val godkjenningMediator: GodkjenningMediator
+    private val godkjenningMediator: GodkjenningMediator,
+    private val periodeFom: LocalDate,
+    private val periodeTom: LocalDate,
 ) : Command {
 
     private companion object {
@@ -25,7 +28,7 @@ internal class AutomatiseringCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, utbetalingtype) {
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, utbetalingtype, periodeFom, periodeTom) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")

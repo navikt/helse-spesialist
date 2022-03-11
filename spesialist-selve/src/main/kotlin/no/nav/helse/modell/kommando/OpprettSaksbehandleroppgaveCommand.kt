@@ -1,16 +1,17 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.bareUtbetalingTilSykmeldt
 import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class OpprettSaksbehandleroppgaveCommand(
     private val fødselsnummer: String,
@@ -20,6 +21,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val hendelseId: UUID,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
+    private val periodeFom: LocalDate,
+    private val periodeTom: LocalDate,
     private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype
 ) : Command {
@@ -41,8 +44,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
                 vedtaksperiodeId,
                 utbetalingId
             )
-            vedtaksperiodensUtbetaling.bareUtbetalingTilSykmeldt() -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
-            vedtaksperiodensUtbetaling.delvisRefusjon() -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.delvisRefusjon(periodeFom, periodeTom) -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt(periodeFom, periodeTom) -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave $oppgave")

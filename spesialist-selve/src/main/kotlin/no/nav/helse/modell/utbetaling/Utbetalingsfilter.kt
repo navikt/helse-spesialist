@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory
 
 internal class Utbetalingsfilter(
     private val fødselsnummer: String,
-    private val utbetalingTilArbeidsgiver: Boolean,
-    private val utbetalingTilSykmeldt: Boolean,
+    private val delvisRefusjon: Boolean,
+    private val harUtbetalingTilSykmeldt: Boolean,
     private val periodetype: Periodetype,
     private val inntektskilde: Inntektskilde,
     private val warnings: List<Warning>,
@@ -22,8 +22,8 @@ internal class Utbetalingsfilter(
     private fun nyÅrsak(årsak: String) = årsaker.add("Utbetalingsfilter: $årsak")
 
     private fun evaluer(): Boolean{
-        if (!utbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
-        if (utbetalingTilArbeidsgiver && utbetalingTilSykmeldt) nyÅrsak("Utbetalingen består av delvis refusjon")
+        if (!harUtbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
+        if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
         if (!fødselsnummer.startsWith("31")) nyÅrsak("Fødselsdag passer ikke")
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
@@ -40,7 +40,7 @@ internal class Utbetalingsfilter(
 
     internal val kanUtbetales by lazy { evaluer() }
     internal val kanIkkeUtbetales get() = !kanUtbetales
-    internal val plukketUtForUtbetalingTilSykmeldt get() = kanUtbetales && utbetalingTilSykmeldt && utbetalingtype != REVURDERING
+    internal val plukketUtForUtbetalingTilSykmeldt get() = kanUtbetales && harUtbetalingTilSykmeldt && utbetalingtype != REVURDERING
 
     internal fun årsaker(): List<String> {
         require(kanIkkeUtbetales) { "Årsaker skal kun brukes for vedtaksperioder vi ikke kan utbetale" }

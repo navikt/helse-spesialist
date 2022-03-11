@@ -24,8 +24,8 @@ internal class UtbetalingsfilterTest {
     fun `ingen utbetaling kan utbetales`() {
         assertKanUtbetales(Utbetalingsfilter(
             fødselsnummer = "21111111111",
-            utbetalingTilArbeidsgiver = false,
-            utbetalingTilSykmeldt = false,
+            delvisRefusjon = false,
+            harUtbetalingTilSykmeldt = false,
             periodetype = OVERGANG_FRA_IT,
             warnings = toWarnings,
             inntektskilde = FLERE_ARBEIDSGIVERE,
@@ -37,8 +37,8 @@ internal class UtbetalingsfilterTest {
     fun `full refusjon kan utbetales`() {
         assertKanUtbetales(Utbetalingsfilter(
             fødselsnummer = "21111111111",
-            utbetalingTilArbeidsgiver = true,
-            utbetalingTilSykmeldt = false,
+            delvisRefusjon = false,
+            harUtbetalingTilSykmeldt = false,
             periodetype = OVERGANG_FRA_IT,
             warnings = toWarnings,
             inntektskilde = FLERE_ARBEIDSGIVERE,
@@ -48,12 +48,12 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `delvis refusjon kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(utbetalingTilArbeidsgiver = true, utbetalingTilSykmeldt = true), listOf("Utbetalingsfilter: Utbetalingen består av delvis refusjon"))
+        assertKanIkkeUtbetales(utbetalingsfilter(delvisRefusjon = true), listOf("Utbetalingsfilter: Utbetalingen består av delvis refusjon"))
     }
 
     @Test
     fun `ingen refusjon kan utbetales`() {
-        assertKanUtbetales(utbetalingsfilter(), true)
+        assertKanUtbetales(utbetalingsfilter(harUtbetalingTilSykmeldt = true), true)
     }
 
     @Test
@@ -90,8 +90,8 @@ internal class UtbetalingsfilterTest {
     fun `passerer ingen av kriteriene i filteret`() {
         assertKanIkkeUtbetales(Utbetalingsfilter(
             fødselsnummer = "21111111111",
-            utbetalingTilArbeidsgiver = true,
-            utbetalingTilSykmeldt = true,
+            delvisRefusjon = true,
+            harUtbetalingTilSykmeldt = true,
             periodetype = OVERGANG_FRA_IT,
             warnings = toWarnings,
             inntektskilde = FLERE_ARBEIDSGIVERE,
@@ -113,16 +113,16 @@ internal class UtbetalingsfilterTest {
 
         private fun utbetalingsfilter(
             fødselsnummer: String = "31111111111",
-            utbetalingTilArbeidsgiver: Boolean = false,
-            utbetalingTilSykmeldt: Boolean = true,
+            delvisRefusjon: Boolean = false,
+            harUtbetalingTilSykmeldt: Boolean = true,
             periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
             inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
             warnings: List<Warning> = emptyList(),
             utbetalingstype: Utbetalingtype = UTBETALING
         ) = Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
-            utbetalingTilArbeidsgiver = utbetalingTilArbeidsgiver,
-            utbetalingTilSykmeldt = utbetalingTilSykmeldt,
+            delvisRefusjon = delvisRefusjon,
+            harUtbetalingTilSykmeldt = harUtbetalingTilSykmeldt,
             periodetype = periodetype,
             warnings = warnings,
             inntektskilde = inntektskilde,

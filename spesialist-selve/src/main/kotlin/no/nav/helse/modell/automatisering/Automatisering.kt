@@ -1,5 +1,7 @@
 package no.nav.helse.modell.automatisering
 
+import java.time.LocalDate
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
@@ -8,14 +10,13 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.bareUtbetalingTilSykmeldt
 import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class Automatisering(
     private val warningDao: WarningDao,
@@ -40,9 +41,11 @@ internal class Automatisering(
         hendelseId: UUID,
         utbetalingId: UUID,
         utbetalingtype: Utbetalingtype,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodeFom, periodeTom)
 
         when {
             utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() -> {
@@ -65,7 +68,7 @@ internal class Automatisering(
         }
     }
 
-    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID, utbetalingId: UUID): List<String> {
+    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID, utbetalingId: UUID, periodeFom: LocalDate, periodeTom: LocalDate): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
@@ -89,8 +92,8 @@ internal class Automatisering(
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
-            validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.bareUtbetalingTilSykmeldt() },
-            validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
+            validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon(periodeFom, periodeTom) },
+            validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt(periodeFom, periodeTom) },
         )
     }
 

@@ -4,6 +4,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
+import no.nav.helse.januar
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
@@ -17,7 +19,6 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class OpprettSaksbehandleroppgaveCommandTest {
     private companion object {
@@ -44,7 +45,9 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         personDao = personDao,
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UTBETALING_ID,
-        utbetalingtype = Utbetalingtype.UTBETALING
+        utbetalingtype = Utbetalingtype.UTBETALING,
+        periodeFom = 1.januar,
+        periodeTom = 31.januar
     )
 
     @BeforeEach
@@ -81,8 +84,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
             utbetalingId = UTBETALING_ID,
-            endringIPersonOppdrag = true,
-            endringIArbeidsgiverOppdrag = false
+            utbetalingstidslinje = listOf(PersonDao.Utbetalingen.Utbetalingstidslinjedag(1.januar, 500, null))
         )
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID))}
@@ -93,8 +95,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
         every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
             utbetalingId = UTBETALING_ID,
-            endringIPersonOppdrag = true,
-            endringIArbeidsgiverOppdrag = true
+            utbetalingstidslinje = listOf(PersonDao.Utbetalingen.Utbetalingstidslinjedag(1.januar, 500, 500))
         )
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID))}

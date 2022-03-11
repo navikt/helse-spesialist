@@ -1,13 +1,17 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -31,7 +35,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
         val ET_ORGNR = "1"
         val ET_ANNET_ORGNR = "2"
-        vedtaksperiode(ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
         assertDoesNotThrow {
             sendUtbetalingEndret("UTBETALING", GODKJENT, ET_ANNET_ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         }
@@ -64,7 +68,6 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer utbetaling_endret når utbetalingen er av type UTBETALING og ikke har vært til godkjenning`() {
-
         assertDoesNotThrow {
             sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         }
@@ -74,7 +77,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling forkastet`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret(
             "UTBETALING",
             FORKASTET,
@@ -97,7 +100,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger på totalbeløp på utbetaling`() {
-        vedtaksperiode(ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
         utbetalingDao.findUtbetalinger(FØDSELSNUMMER).first().let {

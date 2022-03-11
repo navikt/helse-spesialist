@@ -1,14 +1,16 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
-import no.nav.helse.modell.*
 import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -18,17 +20,29 @@ import no.nav.helse.modell.arbeidsforhold.command.SjekkArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
+import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattCommand
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.kommando.*
+import no.nav.helse.modell.kommando.AvbrytContextCommand
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.KlargjørArbeidsgiverCommand
+import no.nav.helse.modell.kommando.KlargjørPersonCommand
+import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
+import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
+import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
+import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingsfilter
+import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
@@ -36,17 +50,15 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilArbeidsgiver
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
-import no.nav.helse.modell.utbetaling.Utbetalingsfilter
-import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 internal class Godkjenningsbehov(
     override val id: UUID,
@@ -92,8 +104,8 @@ internal class Godkjenningsbehov(
         )
         Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
-            utbetalingTilSykmeldt = utbetalingen.utbetalingTilSykmeldt(),
-            utbetalingTilArbeidsgiver = utbetalingen.utbetalingTilArbeidsgiver(),
+            harUtbetalingTilSykmeldt = utbetalingen.utbetalingTilSykmeldt(periodeFom, periodeTom),
+            delvisRefusjon = utbetalingen.delvisRefusjon(periodeFom, periodeTom),
             warnings = warningDao.finnWarnings(vedtaksperiodeId),
             periodetype = periodetype,
             inntektskilde = inntektskilde,
@@ -209,7 +221,9 @@ internal class Godkjenningsbehov(
             automatisering = automatisering,
             godkjenningsbehovJson = json,
             utbetalingtype = utbetalingtype,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
@@ -219,6 +233,8 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             personDao = personDao,
             risikovurderingDao = risikovurderingDao,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype
         )

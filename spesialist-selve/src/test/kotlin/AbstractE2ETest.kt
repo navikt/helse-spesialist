@@ -47,7 +47,6 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -975,20 +974,25 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun vedtaksperiode(
+        fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kanAutomatiseres: Boolean = false,
         snapshot: String = snapshot(),
         utbetalingId: UUID,
+        periodeFom: LocalDate = 1.januar,
+        periodeTom: LocalDate = 31.januar,
         risikofunn: List<Risikofunn> = emptyList()
     ): UUID {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
+        every { restClient.hentSpeilSnapshot(fødselsnummer) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             periodetype = Periodetype.FORLENGELSE,
             utbetalingId = utbetalingId,
-            fødselsnummer = FØDSELSNUMMER
+            fødselsnummer = fødselsnummer,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom
         )
         sendPersoninfoløsning(
             orgnr = organisasjonsnummer,
@@ -1036,55 +1040,65 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     @Language("JSON")
-    private fun Utbetalingen?.tilJson() : String? {
-        if (this == null) return null
-        val personOppdragLinjer = when(endringIPersonOppdrag) {
-            true -> "[{}]"
-            false -> "[]"
-        }
-        val arbeidsgiverOppdragLinjer = when(endringIArbeidsgiverOppdrag) {
-            true -> "[{}]"
-            false -> "[]"
-        }
-        return """
-        {
-            "utbetalingId": ${utbetalingId?.let { "\"$it\"" }},
-            "personOppdrag": {
-                "utbetalingslinjer": $personOppdragLinjer
-            },
-            "arbeidsgiverOppdrag": {
-                "utbetalingslinjer": $arbeidsgiverOppdragLinjer
-            }
-        }
-        """
-    }
-
-    @Language("JSON")
     protected fun snapshot(
         versjon: Int = 1,
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingen: Utbetalingen? = null
+        utbetalingId: UUID = UUID.randomUUID(),
+        utbetalingstidslinje: List<Triple<LocalDate, Int?, Int?>> = emptyList(),
+        personOppdragLinjer: List<ClosedRange<LocalDate>> = emptyList(),
+        arbeidsgiverOppdragLinjer: List<ClosedRange<LocalDate>> = emptyList()
     ) = """{
-      "versjon": $versjon,
-      "aktørId": "$AKTØR",
-      "fødselsnummer": "$fødselsnummer",
-      "arbeidsgivere": [
+  "versjon": $versjon,
+  "aktørId": "$AKTØR",
+  "fødselsnummer": "$fødselsnummer",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "$ORGNR",
+      "id": "${UUID.randomUUID()}",
+      "vedtaksperioder": [
         {
-          "organisasjonsnummer": "$ORGNR",
-          "id": "${UUID.randomUUID()}",
-          "vedtaksperioder": [
-            {
-              "id": "$vedtaksperiodeId",
-              "aktivitetslogg": [],
-              "utbetaling": ${utbetalingen.tilJson()}
+          "id": "$vedtaksperiodeId",
+          "aktivitetslogg": [],
+          "utbetaling": {
+            "utbetalingId": "$utbetalingId",
+            "utbetalingstidslinje": ${utbetalingstidslinje.map { (dato, personbeløp, arbeidsgiverbeløp) ->
+                """
+                       {
+                            "dato": "$dato",
+                            "arbeidsgiverbeløp": $arbeidsgiverbeløp,
+                            "personbeløp": $personbeløp
+                        }
+                        """
+            } },
+            "personOppdrag": {
+              "utbetalingslinjer": ${personOppdragLinjer.map {
+                """
+                            {
+                                "fom": "${it.start}",
+                                "tom": "${it.endInclusive}"
+                             }
+                            """
+            }}
+            },
+            "arbeidsgiverOppdrag": {
+              "utbetalingslinjer": ${arbeidsgiverOppdragLinjer.map {
+                """
+                            {
+                                "fom": "${it.start}",
+                                "tom": "${it.endInclusive}"
+                             }
+                            """
+            }}
             }
-          ],
-          "utbetalingshistorikk": []
+          }
         }
       ],
-      "inntektsgrunnlag": {}
-      }"""
+      "utbetalingshistorikk": []
+    }
+  ],
+  "inntektsgrunnlag": {}
+}"""
 
     protected fun TestRapid.RapidInspector.meldinger() =
         (0 until size).map { index -> message(index) }

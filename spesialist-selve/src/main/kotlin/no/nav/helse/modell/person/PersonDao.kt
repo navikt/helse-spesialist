@@ -2,6 +2,9 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.LocalDate
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.somUtbetaling
@@ -9,11 +12,9 @@ import no.nav.helse.objectMapper
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.SnapshotDto
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
-import java.util.*
-import javax.sql.DataSource
 
 internal class PersonDao(private val dataSource: DataSource) {
     internal fun findPersonByFødselsnummer(fødselsnummer: String) = sessionOf(dataSource).use { session ->
@@ -153,21 +154,74 @@ internal class PersonDao(private val dataSource: DataSource) {
     }
     data class Utbetalingen(
         val utbetalingId: UUID?,
-        val endringIArbeidsgiverOppdrag: Boolean,
-        val endringIPersonOppdrag: Boolean
+        val utbetalingstidslinje: List<Utbetalingstidslinjedag>
     ) {
+        data class Utbetalingstidslinjedag(
+            val dato: LocalDate,
+            val personbeløp: Int?,
+            val arbeidsgiverbeløp: Int?
+        ) {
+            val harPersonutbetaling = personbeløp != null && personbeløp > 0
+            val harArbeidsgiverutbetaling = arbeidsgiverbeløp != null && arbeidsgiverbeløp > 0
+            val ingenArbeidsgiverutbetaling = arbeidsgiverbeløp == null || arbeidsgiverbeløp == 0
+            val ingenPersonutbetaling = personbeløp == null || personbeløp == 0
+            val delvisRefusjon = harPersonutbetaling && harArbeidsgiverutbetaling
+        }
+
+        val harPersonutbetaling = utbetalingstidslinje.any { dag -> dag.harPersonutbetaling }
+        val barePersonutbetaling = harPersonutbetaling && utbetalingstidslinje.all { dag -> dag.ingenArbeidsgiverutbetaling }
+        val harArbeidsgiverutbetaling = utbetalingstidslinje.any { dag -> dag.harArbeidsgiverutbetaling }
+        val bareArbeidsgiverutbetaling = utbetalingstidslinje.all { dag -> dag.ingenPersonutbetaling }
+        val overlappendeUtbetaling = utbetalingstidslinje.any { dag -> dag.delvisRefusjon }
+        val delvisRefusjon = overlappendeUtbetaling
+
+        internal fun utbetalingTilSykmeldt(fom: LocalDate, tom: LocalDate) = utbetalingstidslinje.filter { it.dato in fom..tom }.any { it.harPersonutbetaling }
+        internal fun barePersonutbetaling(fom: LocalDate, tom: LocalDate) = utbetalingstidslinje.filter { it.dato in fom..tom }.let {
+            it.any { it.harPersonutbetaling } && it.all { it.ingenArbeidsgiverutbetaling }
+        }
+        internal fun bareArbeidsgiverutbetaling(fom: LocalDate, tom: LocalDate) = utbetalingstidslinje.filter { it.dato in fom..tom }.let {
+            it.any { it.harArbeidsgiverutbetaling } && it.all { it.ingenPersonutbetaling }
+        }
+        internal fun delvisRefusjon(fom: LocalDate, tom: LocalDate) = utbetalingstidslinje.filter { it.dato in fom..tom }.any { it.delvisRefusjon }
 
         internal companion object {
+            internal fun Utbetalingen?.utbetalingTilSykmeldt(fom: LocalDate, tom: LocalDate) = this?.utbetalingTilSykmeldt(fom, tom) == true
+            internal fun Utbetalingen?.barePersonutbetaling(fom: LocalDate, tom: LocalDate) = this?.barePersonutbetaling(fom, tom) == true
+            internal fun Utbetalingen?.bareArbeidsgiverutbetaling(fom: LocalDate, tom: LocalDate) = this?.bareArbeidsgiverutbetaling(fom, tom) == true
+            internal fun Utbetalingen?.delvisRefusjon(fom: LocalDate, tom: LocalDate) = this?.delvisRefusjon(fom, tom) == true
+
             private fun JsonNode.getOrNull(felt: String) = path(felt).takeUnless { it.isMissingOrNull() }
-            internal fun JsonNode.somUtbetaling() = Utbetalingen(
-                utbetalingId = getOrNull("utbetalingId")?.let { UUID.fromString(it.asText()) },
-                endringIPersonOppdrag = !path("personOppdrag").path("utbetalingslinjer").isEmpty,
-                endringIArbeidsgiverOppdrag = !path("arbeidsgiverOppdrag").path("utbetalingslinjer").isEmpty
-            )
-            internal fun Utbetalingen?.utbetalingTilSykmeldt() = this?.endringIPersonOppdrag == true
-            internal fun Utbetalingen?.bareUtbetalingTilSykmeldt() = utbetalingTilSykmeldt() && !utbetalingTilArbeidsgiver()
-            internal fun Utbetalingen?.utbetalingTilArbeidsgiver() = this?.endringIArbeidsgiverOppdrag == true
-            internal fun Utbetalingen?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()
+            private fun oppdragsperiode(oppdrag: JsonNode): ClosedRange<LocalDate>? {
+                val min = oppdrag.path("utbetalingslinjer").minOfOrNull { linje ->
+                    linje.path("fom").asLocalDate()
+                } ?: return null
+                val max = oppdrag.path("utbetalingslinjer").maxOfOrNull { linje ->
+                    linje.path("tom").asLocalDate()
+                } ?: return null
+                return min..max
+            }
+            private fun utbetalingstidslinje(tidslinje: JsonNode, periode: ClosedRange<LocalDate>?): List<JsonNode> {
+                if (periode == null) return emptyList()
+                return tidslinje.filter { dag ->  dag.path("dato").asLocalDate() in periode }
+            }
+            internal fun JsonNode.somUtbetaling(): Utbetalingen {
+                val arbeidsgiverUtbetalingsperiode = oppdragsperiode( path("arbeidsgiverOppdrag"))
+                val personUtbetalingsperiode = oppdragsperiode( path("personOppdrag"))
+                val førstedato = listOfNotNull(arbeidsgiverUtbetalingsperiode?.start, personUtbetalingsperiode?.start).minOrNull()
+                val sistedato = listOfNotNull(arbeidsgiverUtbetalingsperiode?.endInclusive, personUtbetalingsperiode?.endInclusive).maxOrNull()
+                val periode = førstedato?.let { først -> sistedato?.let { sist -> først..sist } }
+                val utbetalingstidslinje = utbetalingstidslinje(path("utbetalingstidslinje"), periode) // fjerner alle dager som ikke er del av oppdragene
+                return Utbetalingen(
+                    utbetalingId = getOrNull("utbetalingId")?.let { UUID.fromString(it.asText()) },
+                    utbetalingstidslinje = utbetalingstidslinje.map { dag ->
+                        Utbetalingstidslinjedag(
+                            dato = dag.path("dato").asLocalDate(),
+                            personbeløp = dag.path("personbeløp").takeUnless { it.isMissingOrNull() }?.asInt(),
+                            arbeidsgiverbeløp = dag.path("arbeidsgiverbeløp").takeUnless { it.isMissingOrNull() }?.asInt()
+                        )
+                    }
+                )
+            }
         }
     }
 
