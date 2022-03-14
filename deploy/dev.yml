@@ -56,6 +56,8 @@ spec:
     outbound:
       rules:
         - application: spleis-api
+          namespace: tbd
+          cluster: dev-gcp
   vault:
     enabled: true
   envFrom:
