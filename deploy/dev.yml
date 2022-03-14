@@ -53,6 +53,9 @@ spec:
     inbound:
       rules:
         - application: speil
+    outbound:
+      rules:
+        - application: spleis-api
   vault:
     enabled: true
   envFrom:
