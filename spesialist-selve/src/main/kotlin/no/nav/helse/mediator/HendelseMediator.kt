@@ -605,8 +605,10 @@ internal class HendelseMediator(
             try {
                 log.info("utfører ${hendelse::class.simpleName} med context_id=$contextId for hendelse_id=${hendelse.id}")
                 if (context.utfør(commandContextDao, hendelse)) {
-                    log.info("kommando er utført ferdig. Det skjedde ca {}s etter at kommandoen ble startet",
-                        SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now()))
+                    log.info(
+                        "Kommando(er) for ${hendelse::class.simpleName} er utført ferdig. Det tok ca {}s å kjøre hele kommandokjeden",
+                        SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
+                    )
                 } else log.info("${hendelse::class.simpleName} er suspendert")
                 behovMediator.håndter(hendelse, context, contextId)
                 oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
