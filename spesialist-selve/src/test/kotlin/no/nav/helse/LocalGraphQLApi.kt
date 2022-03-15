@@ -14,16 +14,7 @@ import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.hentsnapshot.Alder
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVurdering
-import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.mediator.graphql.hentsnapshot.*
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
@@ -37,6 +28,7 @@ import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.EnhetDto
 import no.nav.helse.vedtaksperiode.VarselDao
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -105,7 +97,7 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     fom = "2020-01-01",
     tom = "2020-01-31",
     inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-    opprettet = java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+    opprettet = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
     periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
     tidslinje = emptyList(),
     vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -123,7 +115,7 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
         ),
         soknadsfrist = Soknadsfrist(
             oppfylt = true,
-            sendtNav = java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
+            sendtNav = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME),
             soknadFom = "2020-01-01",
             soknadTom = "2020-01-31"
         ),
@@ -147,7 +139,52 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
             automatisk = false,
             godkjent = true,
             ident = "AB123456",
-            tidsstempel = java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+            tidsstempel = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+        ),
+        personoppdrag = GraphQLOppdrag(
+            fagsystemId = "EN-PERSONFAGSYSTEMID",
+            tidsstempel = "2021-01-01",
+            utbetalingslinjer = emptyList(),
+            simulering = null
+        ),
+        arbeidsgiveroppdrag = GraphQLOppdrag(
+            fagsystemId = "EN-ARBEIDSGIVERFAGSYSTEMID",
+            tidsstempel = "2021-01-01",
+            utbetalingslinjer = emptyList(),
+            simulering = GraphQLSimulering(
+                totalbelop = 30000,
+                perioder = listOf(
+                    GraphQLSimuleringsperiode(
+                        fom = "2020-01-01",
+                        tom = "2020-01-31",
+                        utbetalinger = listOf(
+                            GraphQLSimuleringsutbetaling(
+                                utbetalesTilNavn = "EN-PERSON",
+                                utbetalesTilId = "EN-PERSONID",
+                                feilkonto = false,
+                                forfall = "2022-01-01",
+                                detaljer = listOf(
+                                    GraphQLSimuleringsdetaljer(
+                                        belop = 30000,
+                                        antallSats = 1,
+                                        faktiskFom = "2020-01-01",
+                                        faktiskTom = "2020-01-31",
+                                        klassekode = "EN-KLASSEKODE",
+                                        klassekodeBeskrivelse = "EN-KLASSEKODEBESKRIVELSE",
+                                        konto = "EN-KONTO",
+                                        refunderesOrgNr = "ET-ORGNR",
+                                        sats = 30000.0,
+                                        tilbakeforing = false,
+                                        typeSats = "EN-TYPESATS",
+                                        uforegrad = 100,
+                                        utbetalingstype = "EN-UTBETALINGSTYPE"
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         )
     ),
     refusjon = null,

@@ -3,8 +3,8 @@ package no.nav.helse
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.application.*
-import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
 import java.net.ServerSocket
@@ -52,12 +52,15 @@ class TestApplication(private val port: Int = randomPort()) {
         flyway.migrate()
 
         app = embeddedServer(
-            factory = CIO,
+            factory = Netty,
             environment = applicationEngineEnvironment {
                 KtorConfig(httpPort = port).configure(this)
                 module {
                     appBlock?.let { it(dataSource) }
                 }
+            },
+            configure = {
+                responseWriteTimeoutSeconds = 30
             }
         )
 
