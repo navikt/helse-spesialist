@@ -4,7 +4,7 @@
   "extensions": {
     "endpoints": {
       "Default GraphQL Endpoint": {
-        "url": "https://spleis-api.dev-fss-pub.nais.io/graphql",
+        "url": "https://spleis-api.dev.intern.nav.no/graphql",
         "headers": {
           "user-agent": "JS GraphQL"
         },

@@ -17,7 +17,7 @@ dependencies {
 }
 
 val graphqlIntrospectSchema by tasks.getting(GraphQLIntrospectSchemaTask::class) {
-    endpoint.set("https://spleis-api.dev-fss-pub.nais.io/graphql")
+    endpoint.set("https://spleis-api.dev.intern.nav.no/graphql")
     outputFile.set(File("${project.projectDir}/src/main/resources/graphql/schema.graphql"))
 }
 

@@ -130,6 +130,7 @@ type GraphQLGenerasjon {
 type GraphQLGhostPeriode {
   deaktivert: Boolean!
   fom: LocalDate!
+  organisasjonsnummer: String!
   skjaeringstidspunkt: LocalDate!
   tom: LocalDate!
   vilkarsgrunnlaghistorikkId: UUID
@@ -173,6 +174,13 @@ type GraphQLOmregnetArsinntekt {
   inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
   kilde: GraphQLInntektskilde!
   manedsbelop: Float!
+}
+
+type GraphQLOppdrag {
+  fagsystemId: String!
+  simulering: GraphQLSimulering
+  tidsstempel: LocalDateTime!
+  utbetalingslinjer: [GraphQLUtbetalingslinje!]!
 }
 
 type GraphQLPeriodevilkar {
@@ -230,7 +238,7 @@ type GraphQLSimuleringsdetaljer {
   klassekodeBeskrivelse: String!
   konto: String!
   refunderesOrgNr: String!
-  sats: Int!
+  sats: Float!
   tilbakeforing: Boolean!
   typeSats: String!
   uforegrad: Int!
@@ -314,9 +322,11 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
 type GraphQLUtbetaling {
   arbeidsgiverFagsystemId: String!
   arbeidsgiverNettoBelop: Int!
+  arbeidsgiveroppdrag: GraphQLOppdrag
   id: UUID!
   personFagsystemId: String!
   personNettoBelop: Int!
+  personoppdrag: GraphQLOppdrag
   status: String!
   type: String!
   vurdering: GraphQLVurdering
@@ -329,6 +339,13 @@ type GraphQLUtbetalingsinfo {
   refusjonsbelop: Int
   totalGrad: Float
   utbetaling: Int
+}
+
+type GraphQLUtbetalingslinje {
+  dagsats: Int!
+  fom: LocalDate!
+  grad: Int!
+  tom: LocalDate!
 }
 
 type GraphQLVilkarsgrunnlaghistorikk {

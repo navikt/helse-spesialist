@@ -1,3 +1,41 @@
+fragment oppdrag on GraphQLOppdrag {
+    fagsystemId,
+    tidsstempel,
+    utbetalingslinjer {
+        tom,
+        fom,
+        grad,
+        dagsats
+    },
+    simulering {
+        totalbelop,
+        perioder {
+            fom,
+            tom,
+            utbetalinger {
+                detaljer {
+                    belop,
+                    antallSats,
+                    faktiskFom,
+                    faktiskTom,
+                    klassekode,
+                    klassekodeBeskrivelse,
+                    konto,
+                    refunderesOrgNr,
+                    sats,
+                    tilbakeforing,
+                    typeSats,
+                    uforegrad,
+                    utbetalingstype
+                },
+                feilkonto,
+                forfall,
+                utbetalesTilId,
+                utbetalesTilNavn
+            }
+        }
+    }
+}
 
 fragment grunnlag on GraphQLVilkarsgrunnlag {
     inntekter {
@@ -152,6 +190,12 @@ query HentSnapshot($fnr: String!) {
                                 godkjent,
                                 ident,
                                 tidsstempel
+                            },
+                            personoppdrag {
+                                ...oppdrag
+                            },
+                            arbeidsgiveroppdrag {
+                                ...oppdrag
                             }
                         },
                         refusjon {
