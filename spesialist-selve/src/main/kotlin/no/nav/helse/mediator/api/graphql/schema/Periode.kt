@@ -9,11 +9,7 @@ import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.hentsnapshot.Alder
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
-import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.mediator.graphql.hentsnapshot.*
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -37,6 +33,51 @@ data class Vurdering(
     val tidsstempel: LocalDateTime
 )
 
+data class Simuleringslinje(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val dagsats: Int,
+    val grad: Int
+)
+
+data class Simuleringsdetaljer(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val belop: Int,
+    val antallSats: Int,
+    val klassekode: String,
+    val klassekodebeskrivelse: String,
+    val konto: String,
+    val refunderesOrgNr: String,
+    val sats: Double,
+    val tilbakeforing: Boolean,
+    val typeSats: String,
+    val uforegrad: Int,
+    val utbetalingstype: String
+)
+
+data class Simuleringsutbetaling(
+    val mottakerId: String,
+    val mottakerNavn: String,
+    val forfall: LocalDate,
+    val feilkonto: Boolean,
+    val detaljer: List<Simuleringsdetaljer>
+)
+
+data class Simuleringsperiode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val utbetalinger: List<Simuleringsutbetaling>
+)
+
+data class Simulering(
+    val fagsystemId: String,
+    val tidsstempel: LocalDateTime,
+    val utbetalingslinjer: List<Simuleringslinje>,
+    val totalbelop: Int?,
+    val perioder: List<Simuleringsperiode>?
+)
+
 data class Utbetaling(
     val arbeidsgiverFagsystemId: String,
     val arbeidsgiverNettoBelop: Int,
@@ -44,7 +85,9 @@ data class Utbetaling(
     val personNettoBelop: Int,
     val status: String,
     val type: String,
-    val vurdering: Vurdering?
+    val vurdering: Vurdering?,
+    val arbeidsgiversimulering: Simulering?,
+    val personsimulering: Simulering?
 )
 
 data class Periodevilkar(
@@ -214,7 +257,9 @@ data class BeregnetPeriode(
                     ident = vurdering.ident,
                     tidsstempel = vurdering.tidsstempel
                 )
-            }
+            },
+            arbeidsgiversimulering = it.arbeidsgiveroppdrag?.tilSimulering(),
+            personsimulering = it.personoppdrag?.tilSimulering()
         )
     }
 
@@ -247,6 +292,52 @@ data class BeregnetPeriode(
     fun oppgavereferanse(): String? =
         oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 }
+
+private fun GraphQLOppdrag.tilSimulering(): Simulering =
+    Simulering(
+        fagsystemId = fagsystemId,
+        tidsstempel = tidsstempel,
+        utbetalingslinjer = utbetalingslinjer.map { linje ->
+            Simuleringslinje(
+                fom = linje.fom,
+                tom = linje.tom,
+                dagsats = linje.dagsats,
+                grad = linje.grad
+            )
+        },
+        totalbelop = simulering?.totalbelop,
+        perioder = simulering?.perioder?.map { periode ->
+            Simuleringsperiode(
+                fom = periode.fom,
+                tom = periode.tom,
+                utbetalinger = periode.utbetalinger.map { utbetaling ->
+                    Simuleringsutbetaling(
+                        mottakerNavn = utbetaling.utbetalesTilNavn,
+                        mottakerId = utbetaling.utbetalesTilId,
+                        forfall = utbetaling.forfall,
+                        feilkonto = utbetaling.feilkonto,
+                        detaljer = utbetaling.detaljer.map { detaljer ->
+                            Simuleringsdetaljer(
+                                fom = detaljer.faktiskFom,
+                                tom = detaljer.faktiskTom,
+                                belop = detaljer.belop,
+                                antallSats = detaljer.antallSats,
+                                klassekode = detaljer.klassekode,
+                                klassekodebeskrivelse = detaljer.klassekodeBeskrivelse,
+                                konto = detaljer.konto,
+                                refunderesOrgNr = detaljer.refunderesOrgNr,
+                                sats = detaljer.sats,
+                                tilbakeforing = detaljer.tilbakeforing,
+                                typeSats = detaljer.typeSats,
+                                uforegrad = detaljer.uforegrad,
+                                utbetalingstype = detaljer.utbetalingstype
+                            )
+                        }
+                    )
+                }
+            )
+        }
+    )
 
 private fun List<JsonNode>.tilFaresignaler(): List<Faresignal> =
     map { objectMapper.readValue(it.traverse(), object : TypeReference<Faresignal>() {}) }
