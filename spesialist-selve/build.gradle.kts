@@ -3,6 +3,8 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 val graphQLKotlinVersion = "5.3.1"
+val testcontainersVersion = "1.16.2"
+val ktorVersion = "1.6.7"
 
 plugins {
     kotlin("plugin.serialization") version "1.5.31"
@@ -13,7 +15,8 @@ dependencies {
     implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
-    testImplementation(project(":testkode"))
+    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }
 
 val graphqlIntrospectSchema by tasks.getting(GraphQLIntrospectSchemaTask::class) {
