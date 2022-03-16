@@ -13,6 +13,7 @@ import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.db.AbstractDatabaseTest
 
 internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
     protected companion object {
