@@ -23,8 +23,8 @@ allprojects {
         implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
         implementation("com.zaxxer:HikariCP:5.0.1")
         implementation("no.nav:vault-jdbc:1.3.7")
-        implementation("org.flywaydb:flyway-core:8.4.1")
-        implementation("com.github.seratch:kotliquery:1.6.0") //April, 2019
+        implementation("org.flywaydb:flyway-core:8.5.2")
+        implementation("com.github.seratch:kotliquery:1.6.3") //April, 2019
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
         implementation("io.ktor:ktor-client-jackson:$ktorVersion")
@@ -49,7 +49,7 @@ allprojects {
         }
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-        testImplementation("io.mockk:mockk:1.12.0")
+        testImplementation("io.mockk:mockk:1.12.3")
     }
 }
 
