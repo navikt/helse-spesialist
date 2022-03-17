@@ -53,6 +53,8 @@ spec:
     inbound:
       rules:
         - application: speil
+          namespace: tbd
+          cluster: dev-fss
     outbound:
       rules:
         - application: spleis-api
