@@ -85,11 +85,17 @@ import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
-private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 private val personIdRegex = "\\d{11,13}".toRegex()
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
-    private val dataSourceBuilder = DataSourceBuilder(System.getenv())
+    private val dataSourceBuilder = when (env["NAIS_CLUSTER_NAME"]) {
+        "dev-gcp",
+        "prod-gcp" -> GcpDataSourceBuilder(env)
+        "dev-fss",
+        "prod-fss" -> OnPremDataSourceBuilder(env)
+        else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
+    }
     private val dataSource = dataSourceBuilder.getDataSource()
 
     private val azureAdClient = HttpClient(Apache) {
@@ -334,6 +340,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
     }
+
+    override fun onShutdown(rapidsConnection: RapidsConnection) {
+        dataSource.close()
+    }
 }
 
 fun Application.installErrorHandling() {
@@ -342,7 +352,7 @@ fun Application.installErrorHandling() {
             val uri = call.request.uri
             val verb = call.request.httpMethod.value
             logg.error("Unhandled: $verb", cause)
-            sikkerLog.error("Unhandled: $verb - $uri", cause)
+            sikkerlogg.error("Unhandled: $verb - $uri", cause)
             call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
         }
     }
