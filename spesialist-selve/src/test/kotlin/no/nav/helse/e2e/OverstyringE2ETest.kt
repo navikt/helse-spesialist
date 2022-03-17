@@ -96,7 +96,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `saksbehandler overstyrer arbeidsforhold`() {
-        val godkjenningsbehovId = settOppBruker(orgnummereMedAktiveArbeidsforhold = listOf(ORGNR_GHOST))
+        val godkjenningsbehovId = settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
         sendOverstyrtArbeidsforhold(
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(

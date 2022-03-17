@@ -80,7 +80,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 periodetype
             )
         ),
-        orgnummereMedAktiveArbeidsforhold: List<String> = emptyList()
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()
     ) =
         nyHendelse(
             id, "behov",
@@ -99,7 +99,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                     "utbetalingtype" to utbetalingtype.name,
                     "inntektskilde" to inntektskilde.name,
                     "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiodeJson::toBody),
-                    "orgnummereMedAktiveArbeidsforhold" to orgnummereMedAktiveArbeidsforhold
+                    "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold
                 )
             )
         )

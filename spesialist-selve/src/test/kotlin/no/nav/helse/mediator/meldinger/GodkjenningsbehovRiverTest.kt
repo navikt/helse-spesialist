@@ -36,7 +36,7 @@ internal class GodkjenningsbehovRiverTest {
 
     @Test
     fun `leser Godkjenningbehov`() {
-        val aktiveArbeidsforhold = listOf("HALLO⁉")
+        val relevanteArbeidsforhold = listOf("HALLO⁉")
         testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(
             id = HENDELSE,
             vedtaksperiodeId = VEDTAKSPERIODE,
@@ -46,7 +46,7 @@ internal class GodkjenningsbehovRiverTest {
             periodeTom = TOM,
             inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
             utbetalingId = UTBETALING_ID,
-            orgnummereMedAktiveArbeidsforhold = aktiveArbeidsforhold
+            orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold
         ))
         verify(exactly = 1) { mediator.godkjenningsbehov(
             any(),
@@ -64,7 +64,7 @@ internal class GodkjenningsbehovRiverTest {
             Utbetalingtype.UTBETALING,
             Inntektskilde.FLERE_ARBEIDSGIVERE,
             listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Periodetype.FØRSTEGANGSBEHANDLING)),
-            aktiveArbeidsforhold,
+            relevanteArbeidsforhold,
             any()
         ) }
     }

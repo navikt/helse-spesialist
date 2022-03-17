@@ -75,7 +75,7 @@ internal class Godkjenningsbehov(
     utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
-    orgnummereMedAktiveArbeidsforhold: List<String>,
+    orgnummereMedRelevanteArbeidsforhold: List<String>,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -129,7 +129,7 @@ internal class Godkjenningsbehov(
             personDao = personDao
         ),
         KlargjørArbeidsgiverCommand(
-            orgnummere = (aktiveVedtaksperioder.orgnummere() + orgnummereMedAktiveArbeidsforhold).distinct(),
+            orgnummere = (aktiveVedtaksperioder.orgnummere() + orgnummereMedRelevanteArbeidsforhold).distinct(),
             arbeidsgiverDao = arbeidsgiverDao
         ),
         KlargjørArbeidsforholdCommand(
@@ -268,7 +268,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.aktiveVedtaksperioder"
                     )
                     it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
-                    it.interestedIn("Godkjenning.arbeidsforholdId", "Godkjenning.orgnummereMedAktiveArbeidsforhold")
+                    it.interestedIn("Godkjenning.arbeidsforholdId", "Godkjenning.orgnummereMedRelevanteArbeidsforhold")
                 }
             }.register(this)
         }
@@ -304,7 +304,7 @@ internal class Godkjenningsbehov(
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),
-                orgnummereMedAktiveArbeidsforhold = packet["Godkjenning.orgnummereMedAktiveArbeidsforhold"]
+                orgnummereMedRelevanteArbeidsforhold = packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
                     .takeUnless(JsonNode::isMissingOrNull)
                     ?.map { it.asText() } ?: emptyList(),
                 context = context

@@ -269,7 +269,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 periodetype
             )
         ),
-        orgnummereMedAktiveArbeidsforhold: List<String> = emptyList(),
+        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
     ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
@@ -286,7 +286,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 aktørId = aktørId,
                 inntektskilde = inntektskilde,
                 aktiveVedtaksperioder = aktiveVedtaksperioder,
-                orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold,
+                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 utbetalingtype = utbetalingtype
             )
         )
@@ -582,7 +582,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
 
-    protected fun settOppBruker(orgnummereMedAktiveArbeidsforhold: List<String> = emptyList()): UUID {
+    protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
             ORGNR,
@@ -590,14 +590,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             UTBETALING_ID,
             1.januar,
             31.januar,
-            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsbehovId,
             orgnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            ekstraArbeidsgivere = orgnummereMedAktiveArbeidsforhold.map {
+            ekstraArbeidsgivere = orgnummereMedRelevanteArbeidsforhold.map {
                 ArbeidsgiverinformasjonJson(
                     orgnummer = it,
                     navn = "ghost",

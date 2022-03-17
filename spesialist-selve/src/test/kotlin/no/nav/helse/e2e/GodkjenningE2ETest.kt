@@ -614,34 +614,34 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger ved alle orgnummere på behov for Arbeidsgiverinformasjon`() {
-        val orgnummereMedAktiveArbeidsforhold = listOf("123456789")
+        val orgnummereMedRelevanteArbeidsforhold = listOf("123456789")
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
-            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
 
         val orgnummere =
             testRapid.inspektør.meldinger().last()["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
-        assertEquals(listOf(ORGNR) + orgnummereMedAktiveArbeidsforhold, orgnummere)
+        assertEquals(listOf(ORGNR) + orgnummereMedRelevanteArbeidsforhold, orgnummere)
     }
 
     @Test
     fun `skiller arbeidsgiverinformasjon- og personinfo-behov etter om det er et orgnr eller ikke`() {
         val orgnr1 = "123456789"
         val fnr1 = "12345678911"
-        val orgnummereMedAktiveArbeidsforhold = listOf(orgnr1, fnr1)
+        val orgnummereMedRelevanteArbeidsforhold = listOf(orgnr1, fnr1)
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
-            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
 
@@ -658,14 +658,14 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `tar inn arbeidsgiverinformasjon- og personinfo-behov samtidig`() {
         val orgnr1 = "123456789"
         val fnr1 = "12345678911"
-        val orgnummereMedAktiveArbeidsforhold = listOf(orgnr1, fnr1)
+        val orgnummereMedRelevanteArbeidsforhold = listOf(orgnr1, fnr1)
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
         every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
-            orgnummereMedAktiveArbeidsforhold = orgnummereMedAktiveArbeidsforhold
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendKomposittbehov(godkjenningsmeldingId, listOf("HentPersoninfoV2", "Arbeidsgiverinformasjon"), VEDTAKSPERIODE_ID, ORGNR, detaljer = mapOf(

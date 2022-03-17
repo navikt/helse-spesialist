@@ -6,7 +6,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
-import no.nav.helse.person.Adressebeskyttelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -70,7 +69,7 @@ internal interface IHendelsefabrikk {
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
-        orgnummereMedAktiveArbeidsforhold: List<String>,
+        orgnummereMedRelevanteArbeidsforhold: List<String>,
         json: String
     ): Godkjenningsbehov
     fun godkjenning(json: String): Godkjenningsbehov
