@@ -12,7 +12,7 @@ import org.flywaydb.core.Flyway
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration as createDataSource
 
 internal abstract class DataSourceBuilder(private val spesialistOid: String) {
-    protected val hikariConfig = HikariConfig().apply {
+    protected val hikariConfig by lazy { HikariConfig().apply {
         configure(this)
         maximumPoolSize = 5
         minimumIdle = 2
@@ -26,15 +26,15 @@ internal abstract class DataSourceBuilder(private val spesialistOid: String) {
             CollectorRegistry.defaultRegistry,
             Clock.SYSTEM
         )
-    }
+    }}
 
     protected abstract fun configure(hikariConfig: HikariConfig)
 
-    protected val hikariMigrationConfig = HikariConfig().apply {
+    protected val hikariMigrationConfig by lazy { HikariConfig().apply {
         configure(this)
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
         maximumPoolSize = 1
-    }
+    }}
 
     abstract fun getDataSource(): HikariDataSource
 
