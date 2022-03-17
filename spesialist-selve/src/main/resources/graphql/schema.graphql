@@ -103,6 +103,7 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   soknaderNav: [GraphQLSoknadNav!]!
   sykmeldinger: [GraphQLSykmelding!]!
   tidslinje: [GraphQLDag!]!
+  tilstand: GraphQLPeriodetilstand!
   tom: LocalDate!
   utbetaling: GraphQLUtbetaling!
   vedtaksperiodeId: UUID!
@@ -418,6 +419,22 @@ enum GraphQLInntektskilde {
 enum GraphQLInntektstype {
   EnArbeidsgiver
   FlereArbeidsgivere
+}
+
+enum GraphQLPeriodetilstand {
+  AnnulleringFeilet
+  Annullert
+  Feilet
+  IngenUtbetaling
+  KunFerie
+  Oppgaver
+  RevurderingFeilet
+  TilAnnullering
+  TilInfotrygd
+  TilUtbetaling
+  Utbetalt
+  Venter
+  VenterPaKiling
 }
 
 enum GraphQLPeriodetype {

@@ -31,6 +31,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 
 fun main() = runBlocking {
     Toggle.GraphQLApi.enable()
@@ -188,7 +189,8 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
         )
     ),
     refusjon = null,
-    vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString()
+    vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
+    tilstand = GraphQLPeriodetilstand.OPPGAVER
 )
 
 private fun enGenerasjon() = GraphQLGenerasjon(

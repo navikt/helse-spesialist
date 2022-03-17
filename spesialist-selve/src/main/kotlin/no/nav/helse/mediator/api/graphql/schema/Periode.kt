@@ -8,8 +8,14 @@ import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.hentsnapshot.*
+import no.nav.helse.mediator.graphql.hentsnapshot.Alder
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
+import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
@@ -24,6 +30,23 @@ enum class Periodetype {
     FORSTEGANGSBEHANDLING,
     INFOTRYGDFORLENGELSE,
     OVERGANG_FRA_IT
+}
+
+enum class Periodetilstand {
+    AnnulleringFeilet,
+    Annullert,
+    Feilet,
+    IngenUtbetaling,
+    KunFerie,
+    Oppgaver,
+    RevurderingFeilet,
+    TilAnnullering,
+    TilInfotrygd,
+    TilUtbetaling,
+    Utbetalt,
+    Venter,
+    VenterPaKiling,
+    Ukjent
 }
 
 data class Vurdering(
@@ -291,6 +314,24 @@ data class BeregnetPeriode(
 
     fun oppgavereferanse(): String? =
         oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
+
+    fun tilstand(): Periodetilstand =
+        when (periode.tilstand) {
+            GraphQLPeriodetilstand.ANNULLERINGFEILET -> Periodetilstand.AnnulleringFeilet
+            GraphQLPeriodetilstand.ANNULLERT -> Periodetilstand.Annullert
+            GraphQLPeriodetilstand.FEILET -> Periodetilstand.Feilet
+            GraphQLPeriodetilstand.INGENUTBETALING -> Periodetilstand.IngenUtbetaling
+            GraphQLPeriodetilstand.KUNFERIE -> Periodetilstand.KunFerie
+            GraphQLPeriodetilstand.OPPGAVER -> Periodetilstand.Oppgaver
+            GraphQLPeriodetilstand.REVURDERINGFEILET -> Periodetilstand.RevurderingFeilet
+            GraphQLPeriodetilstand.TILANNULLERING -> Periodetilstand.TilAnnullering
+            GraphQLPeriodetilstand.TILINFOTRYGD -> Periodetilstand.TilInfotrygd
+            GraphQLPeriodetilstand.TILUTBETALING -> Periodetilstand.TilUtbetaling
+            GraphQLPeriodetilstand.UTBETALT -> Periodetilstand.Utbetalt
+            GraphQLPeriodetilstand.VENTER -> Periodetilstand.Venter
+            GraphQLPeriodetilstand.VENTERPAKILING -> Periodetilstand.VenterPaKiling
+            GraphQLPeriodetilstand.__UNKNOWN_VALUE -> Periodetilstand.Ukjent
+        }
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

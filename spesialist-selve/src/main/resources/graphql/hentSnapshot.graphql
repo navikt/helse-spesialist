@@ -211,7 +211,8 @@ query HentSnapshot($fnr: String!) {
                             forsteFravaersdag,
                             sisteRefusjonsdag
                         }
-                        vilkarsgrunnlaghistorikkId
+                        vilkarsgrunnlaghistorikkId,
+                        tilstand
                     }
                 }
             }
