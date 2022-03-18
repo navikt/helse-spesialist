@@ -11,7 +11,6 @@ internal class RisikovurderingløsningTest {
 
     @Test
     fun `Oppretter arbeidsuførhetsmelding fra risikovurderingsløsning`() {
-        val hendelseId = UUID.randomUUID()
         val løsningNode = objectMapper.readTree(løsningJson)
         val løsning = Risikovurderingløsning(UUID.randomUUID(), LocalDateTime.now(), false, løsningNode)
 

@@ -439,7 +439,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
     ): UUID =
-        nyHendelseId().also { id ->
+        nyHendelseId().also {
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyringArbeidsforhold(
                     organisasjonsnummer = ORGNR,

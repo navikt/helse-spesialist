@@ -7,5 +7,11 @@ Backend for saksbehandling av sykepengesøknader
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
+## Protip for å kjøre tester raskere
+Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt eks: 
+```/home/joakim/.testcontainers.properties```
+legg til denne verdien
+```testcontainers.reuse.enable=true```
+
 ### For NAV-ansatte
 Interne henvendelser kan sendes via Slack i kanalen #område-helse.

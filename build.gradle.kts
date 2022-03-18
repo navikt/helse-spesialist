@@ -1,7 +1,15 @@
 val junitJupiterVersion = "5.8.2"
 val ktorVersion = "1.6.7"
-val graphqlKotlinVersion = "5.3.1"
+val graphqlKotlinVersion = "5.3.2"
 val jvmTargetVersion = "17"
+val rapidsAndRiversVersion = "2022.02.28-16.20.1a549dcffaae"
+val logbackSyslog4jVersion = "1.0.0"
+val hikariCPVersion = "5.0.1"
+val vaultJdbcVersion = "1.3.9"
+val flywayCoreVersion = "8.5.2"
+val kotliqueryVersion = "1.6.3"
+val kotlinTestVersion = "1.5.21"
+val mockkVersion = "1.12.3"
 
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -18,13 +26,13 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     dependencies {
-        implementation("com.github.navikt:rapids-and-rivers:2022.02.28-16.20.1a549dcffaae")
+        implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
-        implementation("com.papertrailapp:logback-syslog4j:1.0.0") //August, 2014
-        implementation("com.zaxxer:HikariCP:5.0.1")
-        implementation("no.nav:vault-jdbc:1.3.7")
-        implementation("org.flywaydb:flyway-core:8.5.2")
-        implementation("com.github.seratch:kotliquery:1.6.3") //April, 2019
+        implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") //August, 2014
+        implementation("com.zaxxer:HikariCP:$hikariCPVersion")
+        implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
+        implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
+        implementation("com.github.seratch:kotliquery:$kotliqueryVersion") //April, 2019
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
         implementation("io.ktor:ktor-client-jackson:$ktorVersion")
@@ -40,7 +48,7 @@ allprojects {
             exclude("com.expediagroup:graphql-kotlin-client-serialization")
         }
 
-        testImplementation("org.jetbrains.kotlin:kotlin-test:1.5.21")
+        testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")
@@ -49,7 +57,7 @@ allprojects {
         }
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 
-        testImplementation("io.mockk:mockk:1.12.3")
+        testImplementation("io.mockk:mockk:$mockkVersion")
     }
 }
 
@@ -80,10 +88,6 @@ subprojects {
             }
 
         }
-
-        withType<Wrapper> {
-            gradleVersion = "7.3.3"
-        }
     }
 }
 
@@ -91,6 +95,9 @@ tasks {
     named<Jar>("jar") { enabled = false }
 }
 
-gradle.buildFinished {
-    project.buildDir.deleteRecursively()
+tasks {
+    named("build") {
+        finalizedBy()
+        project.buildDir.deleteRecursively()
+    }
 }
