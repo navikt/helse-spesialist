@@ -60,8 +60,13 @@ spec:
         - application: spleis-api
           namespace: tbd
           cluster: dev-gcp
-  vault:
-    enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        diskAutoresize: true
+        databases:
+          - name: spesialist
+            envVarPrefix: DATABASE
   envFrom:
     - secret: spesialist
   env:
@@ -69,14 +74,6 @@ spec:
       value: tbd.rapid.v1
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-spesialist-v1
-    - name: DATABASE_HOST
-      value: b27dbvl009.preprod.local
-    - name: DATABASE_PORT
-      value: "5432"
-    - name: DATABASE_NAME
-      value: spesialist
-    - name: VAULT_MOUNTPATH
-      value: postgresql/preprod-fss/
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: 1119ba1f-3b10-4598-a47b-16568c379114
     - name: KODE7_SAKSBEHANDLER_GROUP
