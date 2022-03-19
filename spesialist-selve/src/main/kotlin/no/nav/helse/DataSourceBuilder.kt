@@ -11,7 +11,7 @@ import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration as createDataSource
 
-internal abstract class DataSourceBuilder(private val spesialistOid: String) {
+internal abstract class DataSourceBuilder {
     protected val hikariConfig by lazy { HikariConfig().apply {
         configure(this)
         maximumPoolSize = 5
@@ -43,14 +43,13 @@ internal abstract class DataSourceBuilder(private val spesialistOid: String) {
     protected fun runMigration(dataSource: DataSource, initSql: String? = null) =
         Flyway.configure()
             .dataSource(dataSource)
-            .placeholders(mapOf("spesialist_oid" to spesialistOid))
             .initSql(initSql)
             .lockRetryCount(-1)
             .load()
             .migrate()
 }
 
-internal class GcpDataSourceBuilder(env: Map<String, String>) : DataSourceBuilder(requireNotNull(env["SPESIALIST_OID"])) {
+internal class GcpDataSourceBuilder(env: Map<String, String>) : DataSourceBuilder() {
     private val databaseHost: String = requireNotNull(env["DATABASE_HOST"]) { "host må settes" }
     private val databasePort: String = requireNotNull(env["DATABASE_PORT"]) { "port må settes" }
     private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "databasenavn må settes" }
@@ -81,7 +80,7 @@ internal class GcpDataSourceBuilder(env: Map<String, String>) : DataSourceBuilde
 }
 
 internal class OnPremDataSourceBuilder(env: Map<String, String>) :
-    DataSourceBuilder(requireNotNull(env["SPESIALIST_OID"])) {
+    DataSourceBuilder() {
     private val databaseName = requireNotNull(env["DATABASE_NAME"]) { "database name must be set if jdbc url is not provided" }
     private val databaseHost = requireNotNull(env["DATABASE_HOST"]) { "database host must be set if jdbc url is not provided" }
     private val databasePort = requireNotNull(env["DATABASE_PORT"]) { "database port must be set if jdbc url is not provided" }

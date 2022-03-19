@@ -67,8 +67,6 @@ spec:
         databases:
           - name: spesialist
             envVarPrefix: DATABASE
-  envFrom:
-    - secret: spesialist
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
@@ -80,8 +78,6 @@ spec:
       value: c811e9f4-26a6-43f9-b930-8c83365683a9
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
-    - name: SPESIALIST_OID
-      value: be87b958-4ff0-405d-80b5-f47e836f0a0e
     - name: GRAPHQL_ENABLED
       value: "true"
     - name: GRAPHQL_PLAYGROUND_ENABLED
