@@ -27,7 +27,6 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.PersonMediator
-import no.nav.helse.mediator.api.adminApi
 import no.nav.helse.mediator.api.annulleringApi
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
@@ -272,7 +271,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureConfig)
-            basicAuthentication(env.getValue("ADMIN_SECRET"))
             graphQLApi(
                 snapshotDao = snapshotDao,
                 personApiDao = personApiDao,
@@ -320,7 +318,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     notaterApi(notatMediator)
                 }
             }
-            adminApi(hendelseMediator)
         }.build()
 
     init {
