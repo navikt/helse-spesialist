@@ -88,13 +88,7 @@ private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 private val personIdRegex = "\\d{11,13}".toRegex()
 
 internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
-    private val dataSourceBuilder = when (env["NAIS_CLUSTER_NAME"]) {
-        "dev-gcp",
-        "prod-gcp" -> GcpDataSourceBuilder(env)
-        "dev-fss",
-        "prod-fss" -> OnPremDataSourceBuilder(env)
-        else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
-    }
+    private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
 
     private val azureAdClient = HttpClient(Apache) {

@@ -9,11 +9,22 @@ import io.prometheus.client.CollectorRegistry
 import java.time.Duration
 import javax.sql.DataSource
 import org.flywaydb.core.Flyway
-import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration as createDataSource
 
-internal abstract class DataSourceBuilder {
-    protected val hikariConfig by lazy { HikariConfig().apply {
-        configure(this)
+internal class DataSourceBuilder(env: Map<String, String>) {
+    private val databaseHost: String = requireNotNull(env["DATABASE_HOST"]) { "host må settes" }
+    private val databasePort: String = requireNotNull(env["DATABASE_PORT"]) { "port må settes" }
+    private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "databasenavn må settes" }
+    private val databaseUsername: String = requireNotNull(env["DATABASE_USERNAME"]) { "brukernavn må settes" }
+    private val databasePassword: String = requireNotNull(env["DATABASE_PASSWORD"]) { "passord må settes" }
+
+    private val dbUrl = String.format(
+        "jdbc:postgresql://%s:%s/%s", databaseHost, databasePort, databaseName
+    )
+
+    private val hikariConfig = HikariConfig().apply {
+        jdbcUrl = dbUrl
+        username = databaseUsername
+        password = databasePassword
         maximumPoolSize = 5
         minimumIdle = 2
         idleTimeout = Duration.ofMinutes(1).toMillis()
@@ -26,88 +37,30 @@ internal abstract class DataSourceBuilder {
             CollectorRegistry.defaultRegistry,
             Clock.SYSTEM
         )
-    }}
+    }
 
-    protected abstract fun configure(hikariConfig: HikariConfig)
-
-    protected val hikariMigrationConfig by lazy { HikariConfig().apply {
-        configure(this)
+    private val hikariMigrationConfig = HikariConfig().apply {
+        jdbcUrl = dbUrl
+        username = databaseUsername
+        password = databasePassword
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
         maximumPoolSize = 1
-    }}
+    }
 
-    abstract fun getDataSource(): HikariDataSource
-
-    abstract fun migrate()
-
-    protected fun runMigration(dataSource: DataSource, initSql: String? = null) =
+    private fun runMigration(dataSource: DataSource) =
         Flyway.configure()
             .dataSource(dataSource)
-            .initSql(initSql)
             .lockRetryCount(-1)
             .load()
             .migrate()
-}
 
-internal class GcpDataSourceBuilder(env: Map<String, String>) : DataSourceBuilder() {
-    private val databaseHost: String = requireNotNull(env["DATABASE_HOST"]) { "host må settes" }
-    private val databasePort: String = requireNotNull(env["DATABASE_PORT"]) { "port må settes" }
-    private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "databasenavn må settes" }
-    private val databaseUsername: String = requireNotNull(env["DATABASE_USERNAME"]) { "brukernavn må settes" }
-    private val databasePassword: String = requireNotNull(env["DATABASE_PASSWORD"]) { "passord må settes" }
-
-    override fun getDataSource(): HikariDataSource {
+    internal fun getDataSource(): HikariDataSource {
         return HikariDataSource(hikariConfig)
     }
 
-    override fun migrate() {
+    internal fun migrate() {
         val dataSource = HikariDataSource(hikariMigrationConfig)
-        runMigration(dataSource, null)
+        runMigration(dataSource)
         dataSource.close()
-    }
-
-    private val dbUrl = String.format(
-        "jdbc:postgresql://%s:%s/%s", databaseHost, databasePort, databaseName
-    )
-
-    override fun configure(hikariConfig: HikariConfig) {
-        hikariConfig.apply {
-            jdbcUrl = dbUrl
-            username = databaseUsername
-            password = databasePassword
-        }
-    }
-}
-
-internal class OnPremDataSourceBuilder(env: Map<String, String>) :
-    DataSourceBuilder() {
-    private val databaseName = requireNotNull(env["DATABASE_NAME"]) { "database name must be set if jdbc url is not provided" }
-    private val databaseHost = requireNotNull(env["DATABASE_HOST"]) { "database host must be set if jdbc url is not provided" }
-    private val databasePort = requireNotNull(env["DATABASE_PORT"]) { "database port must be set if jdbc url is not provided" }
-    private val vaultMountPath = env["VAULT_MOUNTPATH"]
-
-    private val dbUrl = String.format(
-        "jdbc:postgresql://%s:%s/%s", databaseHost, databasePort, databaseName
-    )
-
-    override fun getDataSource(): HikariDataSource =
-        createDataSource(hikariConfig, vaultMountPath, Role.User.asRole(databaseName))
-
-    override fun migrate() {
-        val dataSource = createDataSource(hikariMigrationConfig, vaultMountPath, Role.Admin.asRole(databaseName))
-        runMigration(dataSource, "SET ROLE \"${Role.Admin.asRole(databaseName)}\"")
-        dataSource.close()
-    }
-
-    override fun configure(hikariConfig: HikariConfig) {
-        hikariConfig.apply {
-            jdbcUrl = dbUrl
-        }
-    }
-
-    enum class Role {
-        Admin, User;
-
-        fun asRole(databaseName: String) = "$databaseName-${name.lowercase()}"
     }
 }

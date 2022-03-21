@@ -27,6 +27,7 @@ allprojects {
     dependencies {
         implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
+        implementation("org.postgresql:postgresql:42.3.3")
         implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") //August, 2014
         implementation("com.zaxxer:HikariCP:$hikariCPVersion")
         implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
