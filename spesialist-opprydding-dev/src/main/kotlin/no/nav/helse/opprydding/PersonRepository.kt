@@ -46,23 +46,38 @@ internal class PersonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.slettPerson(personRef: Int) {
+        val infotrygdutbetalingRef = finnInfotrygdutbetalingerRef(personRef)
+        val personinfoRef = finnPersoninfoRef(personRef)
+
         @Language("PostgreSQL")
         val query = "DELETE FROM person WHERE id = ?"
         run(queryOf(query, personRef).asExecute)
-        slettInfo(personRef)
-        slettInfotrygdutbetalinger(personRef)
+        slettInfo(personinfoRef)
+        slettInfotrygdutbetalinger(infotrygdutbetalingRef)
     }
 
-    private fun TransactionalSession.slettInfo(personRef: Int) {
+    private fun TransactionalSession.finnPersoninfoRef(personRef: Int): List<Int> {
         @Language("PostgreSQL")
-        val query = "DELETE FROM person_info WHERE id = ?"
-        run(queryOf(query, personRef).asExecute)
+        val query = "SELECT pi.id FROM person_info pi INNER JOIN person p on pi.id = p.info_ref WHERE p.id = ?"
+        return run(queryOf(query, personRef).map { it.int("id") }.asList)
     }
 
-    private fun TransactionalSession.slettInfotrygdutbetalinger(personRef: Int) {
+    private fun TransactionalSession.slettInfo(personinfoRef: List<Int>) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM infotrygdutbetalinger WHERE id = ?"
-        run(queryOf(query, personRef).asExecute)
+        val query = "DELETE FROM person_info WHERE id IN (${personinfoRef.joinToString { "?" }})"
+        run(queryOf(query, *personinfoRef.toTypedArray()).asExecute)
+    }
+
+    private fun TransactionalSession.finnInfotrygdutbetalingerRef(personRef: Int): List<Int> {
+        @Language("PostgreSQL")
+        val query = "SELECT i.id FROM infotrygdutbetalinger i INNER JOIN person p on i.id = p.infotrygdutbetalinger_ref WHERE p.id = ?"
+        return run(queryOf(query, personRef).map { it.int("id") }.asList)
+    }
+
+    private fun TransactionalSession.slettInfotrygdutbetalinger(infotrygdutbetalingerRef: List<Int>) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM infotrygdutbetalinger WHERE id IN (${infotrygdutbetalingerRef.joinToString { "?" }})"
+        run(queryOf(query, *infotrygdutbetalingerRef.toTypedArray()).asExecute)
     }
 
     private fun TransactionalSession.slettOpptegnelse(personRef: Int) {
