@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+    - https://spesialist.intern.nav.no
   liveness:
     path: isalive
     initialDelay: 5
@@ -48,10 +50,13 @@ spec:
     inbound:
       rules:
         - application: speil
-  vault:
-    enabled: true
-  envFrom:
-    - secret: spesialist
+          namespace: tbd
+          cluster: prod-fss
+    outbound:
+      rules:
+        - application: spleis-api
+          namespace: tbd
+          cluster: prod-gcp
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
@@ -59,22 +64,12 @@ spec:
       value: tbd-spesialist-v1
     - name: KAFKA_RESET_POLICY
       value: none
-    - name: DATABASE_HOST
-      value: a01dbvl011.adeo.no
-    - name: DATABASE_PORT
-      value: "5432"
-    - name: DATABASE_NAME
-      value: spesialist
-    - name: VAULT_MOUNTPATH
-      value: postgresql/prod-fss/
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
       value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: KODE7_SAKSBEHANDLER_GROUP
       value: c21e58b6-d838-4cb0-919a-398cd40117e3
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
-    - name: SPESIALIST_OID
-      value: 5cc46653-7c6c-4c5e-b617-baf648452ad4
     - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering
       value: "200"
     - name: GRAPHQL_ENABLED
