@@ -19,7 +19,7 @@ class TestApplication(private val port: Int = randomPort()) {
         }
     }
 
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:13")
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
