@@ -67,6 +67,8 @@ spec:
         databases:
           - name: spesialist
             envVarPrefix: DATABASE
+            users:
+              - name: spesialist-opprydding-dev
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
