@@ -1,7 +1,12 @@
-name: Bygg og deploy
+name: Spesialist
 
 on:
     push:
+        paths-ignore:
+            - 'Dockerfile-opprydding-dev'
+            - 'spesialist-opprydding-dev/**'
+            - '.github/workflows/spesialist-opprydding-dev.yml'
+            - 'deploy/dev-opprydding.yml'
         branches:
             - master
 
