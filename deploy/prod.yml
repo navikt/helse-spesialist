@@ -57,6 +57,19 @@ spec:
         - application: spleis-api
           namespace: tbd
           cluster: prod-gcp
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        diskAutoresize: true
+        pointInTimeRecovery: true
+        diskSize: 1024
+        diskType: SSD
+        name: spesialist
+        tier: db-custom-32-131072
+        retainedBackups: 14
+        databases:
+          - name: spesialist
+            envVarPrefix: DATABASE
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
