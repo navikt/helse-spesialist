@@ -54,7 +54,7 @@ spec:
       rules:
         - application: speil
           namespace: tbd
-          cluster: dev-fss
+          cluster: dev-gcp
     outbound:
       rules:
         - application: spleis-api
