@@ -70,7 +70,8 @@ data class Arbeidsforholdoverstyring(
     override val timestamp: LocalDateTime,
     override val saksbehandler: Saksbehandler,
     val deaktivert: Boolean,
-    val skjaeringstidspunkt: LocalDate
+    val skjaeringstidspunkt: LocalDate,
+    val forklaring: String
 ) : Overstyring
 
 data class GhostPeriode(
@@ -173,5 +174,6 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeid
         ident = saksbehandlerIdent
     ),
     deaktivert = deaktivert,
-    skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE)
+    skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+    forklaring = forklaring
 )
