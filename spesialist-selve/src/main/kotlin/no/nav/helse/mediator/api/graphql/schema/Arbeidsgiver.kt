@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api.graphql.schema
 
+import java.time.format.DateTimeFormatter
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
@@ -10,11 +11,11 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.overstyring.OverstyringDto
 import no.nav.helse.overstyring.OverstyringInntektDto
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
-import java.time.format.DateTimeFormatter
 
 data class Arbeidsforhold(
     val stillingstittel: String,
@@ -63,6 +64,15 @@ data class Inntektoverstyring(
     )
 }
 
+data class Arbeidsforholdoverstyring(
+    override val hendelseId: UUID,
+    override val begrunnelse: String,
+    override val timestamp: LocalDateTime,
+    override val saksbehandler: Saksbehandler,
+    val deaktivert: Boolean,
+    val skjaeringstidspunkt: LocalDate
+) : Overstyring
+
 data class GhostPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
@@ -106,8 +116,10 @@ data class Arbeidsgiver(
     fun overstyringer(): List<Overstyring> =
         overstyringApiDao.finnOverstyringerAvTidslinjer(fødselsnummer, organisasjonsnummer)
             .map { it.tilDagoverstyring() } +
-            overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
-                .map { it.tilInntektoverstyring() }
+                overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
+                    .map { it.tilInntektoverstyring() } +
+                overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
+                    .map { it.tilArbeidsforholdoverstyring() }
 
     fun arbeidsforhold(): List<Arbeidsforhold> =
         arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
@@ -150,4 +162,16 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
         manedligInntekt = månedligInntekt,
         skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE)
     )
+)
+
+private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() = Arbeidsforholdoverstyring(
+    hendelseId = hendelseId.toString(),
+    begrunnelse = begrunnelse,
+    timestamp = timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
+    saksbehandler = Saksbehandler(
+        navn = saksbehandlerNavn,
+        ident = saksbehandlerIdent
+    ),
+    deaktivert = deaktivert,
+    skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE)
 )
