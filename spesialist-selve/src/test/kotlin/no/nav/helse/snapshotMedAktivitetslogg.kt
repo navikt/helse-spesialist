@@ -1,16 +1,17 @@
 package no.nav.helse
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import java.util.*
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
-import java.util.*
 
 @Language("json")
 fun snapshotMedWarning(vedtaksperiodeId: UUID, orgnr: String, fnr: String, aktørId: String) = """{
   "versjon": 1,
   "aktørId": "$aktørId",
   "fødselsnummer": "$fnr",
+  "inntektsgrunnlag": [],
   "arbeidsgivere": [
     {
       "organisasjonsnummer": "$orgnr",
@@ -66,6 +67,7 @@ fun snapshotUtenWarnings(vedtaksperiodeId: UUID, orgnr: String, fnr: String, akt
   "versjon": 1,
   "aktørId": "$aktørId",
   "fødselsnummer": "$fnr",
+  "inntektsgrunnlag": [],
   "arbeidsgivere": [
     {
       "organisasjonsnummer": "$orgnr",

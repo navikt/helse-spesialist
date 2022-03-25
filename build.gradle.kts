@@ -2,7 +2,7 @@ val junitJupiterVersion = "5.8.2"
 val ktorVersion = "1.6.7"
 val graphqlKotlinVersion = "5.3.2"
 val jvmTargetVersion = "17"
-val rapidsAndRiversVersion = "2022.02.28-16.20.1a549dcffaae"
+val rapidsAndRiversVersion = "2022.03.25-09.17.0628678a7192"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.0.1"
 val flywayCoreVersion = "8.5.2"
@@ -34,15 +34,24 @@ allprojects {
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion") //April, 2019
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
-        implementation("io.ktor:ktor-client-jackson:$ktorVersion")
-        implementation("io.ktor:ktor-jackson:$ktorVersion")
+        implementation("io.ktor:ktor-client-jackson:$ktorVersion") {
+            exclude(group = "com.fasterxml.jackson.core")
+            exclude(group = "com.fasterxml.jackson.module")
+        }
+        implementation("io.ktor:ktor-jackson:$ktorVersion") {
+            exclude(group = "com.fasterxml.jackson.core")
+            exclude(group = "com.fasterxml.jackson.module")
+        }
 
         implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
             exclude(group = "junit")
         }
 
         implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
-        implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion")
+        implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion") {
+            exclude(group = "com.fasterxml.jackson.core")
+            exclude(group = "com.fasterxml.jackson.module")
+        }
         implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
             exclude("com.expediagroup:graphql-kotlin-client-serialization")
         }
