@@ -2,6 +2,7 @@ package no.nav.helse.mediator.api.graphql.schema
 
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
+import no.nav.helse.mediator.graphql.enums.GraphQLBegrunnelse
 import no.nav.helse.mediator.graphql.enums.GraphQLSykdomsdagkildetype
 import no.nav.helse.mediator.graphql.enums.GraphQLSykdomsdagtype
 import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingsdagType
@@ -42,6 +43,20 @@ enum class Utbetalingsdagtype {
     UKJENT_DAG,
 }
 
+enum class Begrunnelse {
+    EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE,
+    ETTER_DODSDATO,
+    MANGLER_MEDLEMSKAP,
+    MANGLER_OPPTJENING,
+    MINIMUM_INNTEKT,
+    MINIMUM_INNTEKT_OVER_67,
+    MINIMUM_SYKDOMSGRAD,
+    OVER_70,
+    SYKEPENGEDAGER_OPPBRUKT,
+    SYKEPENGEDAGER_OPPBRUKT_OVER_67,
+    UKJENT
+}
+
 data class Kilde(
     val id: UUID,
     val type: Kildetype
@@ -62,7 +77,8 @@ data class Dag(
     val kilde: Kilde,
     val sykdomsdagtype: Sykdomsdagtype,
     val utbetalingsdagtype: Utbetalingsdagtype,
-    val utbetalingsinfo: Utbetalingsinfo?
+    val utbetalingsinfo: Utbetalingsinfo?,
+    val begrunnelser: List<Begrunnelse>?
 )
 
 internal fun GraphQLDag.tilDag(): Dag =
@@ -72,7 +88,8 @@ internal fun GraphQLDag.tilDag(): Dag =
         kilde = kilde.tilKilde(),
         sykdomsdagtype = sykdomsdagtype.tilSykdomsdagtype(),
         utbetalingsdagtype = utbetalingsdagtype.tilUtbetalingsdagtype(),
-        utbetalingsinfo = utbetalingsinfo?.tilUtbetalingsinfo()
+        utbetalingsinfo = utbetalingsinfo?.tilUtbetalingsinfo(),
+        begrunnelser = begrunnelser?.map { it.tilBegrunnelse() },
     )
 
 private fun GraphQLSykdomsdagkilde.tilKilde(): Kilde =
@@ -127,3 +144,18 @@ private fun GraphQLUtbetalingsinfo.tilUtbetalingsinfo(): Utbetalingsinfo =
         totalGrad = totalGrad,
         utbetaling = utbetaling
     )
+
+private fun GraphQLBegrunnelse.tilBegrunnelse(): Begrunnelse =
+    when (this) {
+        GraphQLBegrunnelse.EGENMELDINGUTENFORARBEIDSGIVERPERIODE -> Begrunnelse.EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
+        GraphQLBegrunnelse.ETTERDODSDATO -> Begrunnelse.ETTER_DODSDATO
+        GraphQLBegrunnelse.MANGLERMEDLEMSKAP -> Begrunnelse.MANGLER_MEDLEMSKAP
+        GraphQLBegrunnelse.MANGLEROPPTJENING -> Begrunnelse.MANGLER_OPPTJENING
+        GraphQLBegrunnelse.MINIMUMINNTEKT -> Begrunnelse.MINIMUM_INNTEKT
+        GraphQLBegrunnelse.MINIMUMINNTEKTOVER67 -> Begrunnelse.MINIMUM_INNTEKT_OVER_67
+        GraphQLBegrunnelse.MINIMUMSYKDOMSGRAD -> Begrunnelse.MINIMUM_SYKDOMSGRAD
+        GraphQLBegrunnelse.OVER70 -> Begrunnelse.OVER_70
+        GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> Begrunnelse.SYKEPENGEDAGER_OPPBRUKT
+        GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> Begrunnelse.SYKEPENGEDAGER_OPPBRUKT_OVER_67
+        GraphQLBegrunnelse.__UNKNOWN_VALUE -> Begrunnelse.UKJENT
+    }
