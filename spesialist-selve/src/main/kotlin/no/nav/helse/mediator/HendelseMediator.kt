@@ -149,7 +149,7 @@ internal class HendelseMediator(
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val godkjenningMessage = JsonMessage.newMessage(
-            standardfelter("saksbehandler_løsning", fødselsnummer).apply {
+            standardfelter("saksbehandler_løsning", fødselsnummer, "Godkjenning" to hendelseId).apply {
                 put("oppgaveId", godkjenningDTO.oppgavereferanse)
                 put("hendelseId", hendelseId)
                 put("godkjent", godkjenningDTO.godkjent)
@@ -649,9 +649,16 @@ internal class HendelseMediator(
     }
 }
 
-internal fun standardfelter(hendelsetype: String, fødselsnummer: String) = mutableMapOf<String, Any>(
+internal fun standardfelter(hendelsetype: String, fødselsnummer: String, parent: Pair<String, UUID>? = null) = mutableMapOf<String, Any>(
     "@event_name" to hendelsetype,
     "@opprettet" to now(),
     "@id" to UUID.randomUUID(),
     "fødselsnummer" to fødselsnummer
-)
+).apply {
+    if (parent != null) {
+        this["@forårsaket_av"] = mapOf(
+            "event_name" to parent.first,
+            "id" to parent.second
+        )
+    }
+}
