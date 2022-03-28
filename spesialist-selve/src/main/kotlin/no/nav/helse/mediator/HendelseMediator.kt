@@ -90,7 +90,7 @@ internal class HendelseMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val behovMediator = BehovMediator(rapidsConnection, sikkerLogg)
+    private val behovMediator = BehovMediator(sikkerLogg)
 
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
@@ -148,19 +148,25 @@ internal class HendelseMediator(
         val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
-        val godkjenningMessage = JsonMessage.newMessage(
-            standardfelter("saksbehandler_løsning", fødselsnummer, "Godkjenning" to hendelseId).apply {
-                put("oppgaveId", godkjenningDTO.oppgavereferanse)
-                put("hendelseId", hendelseId)
-                put("godkjent", godkjenningDTO.godkjent)
-                put("saksbehandlerident", godkjenningDTO.saksbehandlerIdent)
-                put("saksbehandleroid", oid)
-                put("saksbehandlerepost", epost)
-                put("godkjenttidspunkt", now())
+        val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
+            "@forårsaket_av" to mapOf(
+                "event_name" to "behov",
+                "behov" to "Godkjenning",
+                "id" to hendelseId
+            ),
+            "fødselsnummer" to fødselsnummer,
+            "oppgaveId" to godkjenningDTO.oppgavereferanse,
+            "hendelseId" to hendelseId,
+            "godkjent" to godkjenningDTO.godkjent,
+            "saksbehandlerident" to godkjenningDTO.saksbehandlerIdent,
+            "saksbehandleroid" to oid,
+            "saksbehandlerepost" to epost,
+            "godkjenttidspunkt" to now()
+        ).apply {
                 godkjenningDTO.årsak?.let { put("årsak", it) }
                 godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
                 godkjenningDTO.kommentar?.let { put("kommentar", it) }
-            }).also {
+        }).also {
             sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
         log.info(
@@ -461,22 +467,19 @@ internal class HendelseMediator(
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
         overstyringsteller.labels("opplysningstype", "tidslinje").inc()
-
-        val overstyring = JsonMessage.newMessage(
-            standardfelter("overstyr_tidslinje", overstyringMessage.fødselsnummer).apply {
-                put("aktørId", overstyringMessage.aktørId)
-                put("organisasjonsnummer", overstyringMessage.organisasjonsnummer)
-                put("dager", overstyringMessage.dager)
-                put("begrunnelse", overstyringMessage.begrunnelse)
-                put("saksbehandlerOid", overstyringMessage.saksbehandlerOid)
-                put("saksbehandlerNavn", overstyringMessage.saksbehandlerNavn)
-                put("saksbehandlerIdent", overstyringMessage.saksbehandlerIdent)
-                put("saksbehandlerEpost", overstyringMessage.saksbehandlerEpost)
-            }
-        ).also {
+        val overstyring = JsonMessage.newMessage("overstyr_tidslinje", mutableMapOf(
+            "fødselsnummer" to overstyringMessage.fødselsnummer,
+            "aktørId" to overstyringMessage.aktørId,
+            "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
+            "dager" to overstyringMessage.dager,
+            "begrunnelse" to overstyringMessage.begrunnelse,
+            "saksbehandlerOid" to overstyringMessage.saksbehandlerOid,
+            "saksbehandlerNavn" to overstyringMessage.saksbehandlerNavn,
+            "saksbehandlerIdent" to overstyringMessage.saksbehandlerIdent,
+            "saksbehandlerEpost" to overstyringMessage.saksbehandlerEpost,
+        )).also {
             sikkerLogg.info("Publiserer overstyring:\n${it.toJson()}")
         }
-
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }
 
@@ -504,24 +507,17 @@ internal class HendelseMediator(
         annulleringsteller.inc()
         saksbehandler.persister(saksbehandlerDao)
 
-        val annulleringMessage = annulleringDto.run {
-            JsonMessage.newMessage(
-                standardfelter("annullering", fødselsnummer).apply {
-                    putAll(
-                        mapOf(
-                            "organisasjonsnummer" to organisasjonsnummer,
-                            "aktørId" to aktørId,
-                            "saksbehandler" to saksbehandler.json().toMutableMap()
-                                .apply { put("ident", annulleringDto.saksbehandlerIdent) },
-                            "fagsystemId" to fagsystemId,
-                            "begrunnelser" to (begrunnelser) as Any,
-                            "gjelderSisteSkjæringstidspunkt" to annulleringDto.gjelderSisteSkjæringstidspunkt,
-                        ) + (kommentar?.let {
-                            mapOf<String, Any>("kommentar" to it)
-                        } ?: mapOf()))
-                }
-            )
-        }
+        val annulleringMessage = JsonMessage.newMessage("annullering", mutableMapOf(
+            "fødselsnummer" to annulleringDto.fødselsnummer,
+            "organisasjonsnummer" to annulleringDto.organisasjonsnummer,
+            "aktørId" to annulleringDto.aktørId,
+            "saksbehandler" to saksbehandler.json().toMutableMap().apply { put("ident", annulleringDto.saksbehandlerIdent) },
+            "fagsystemId" to annulleringDto.fagsystemId,
+            "begrunnelser" to annulleringDto.begrunnelser,
+            "gjelderSisteSkjæringstidspunkt" to annulleringDto.gjelderSisteSkjæringstidspunkt
+        ).apply {
+            compute("kommentar") { _, _ -> annulleringDto.kommentar }
+        })
 
         rapidsConnection.publish(annulleringDto.fødselsnummer, annulleringMessage.toJson().also {
             sikkerLogg.info(
@@ -535,9 +531,9 @@ internal class HendelseMediator(
     fun håndter(oppdaterPersonsnapshotDto: OppdaterPersonsnapshotDto) {
         rapidsConnection.publish(
             oppdaterPersonsnapshotDto.fødselsnummer,
-            JsonMessage.newMessage(
-                standardfelter("oppdater_personsnapshot", oppdaterPersonsnapshotDto.fødselsnummer)
-            ).toJson()
+            JsonMessage.newMessage("oppdater_personsnapshot", mapOf(
+                "fødselsnummer" to oppdaterPersonsnapshotDto.fødselsnummer
+            )).toJson()
         )
         sikkerLogg.info("Publiserte event for å be om siste versjon av person: ${oppdaterPersonsnapshotDto.fødselsnummer}")
     }
@@ -610,7 +606,7 @@ internal class HendelseMediator(
                         SECONDS.between(commandContextDao.contextOpprettetTidspunkt(contextId), now())
                     )
                 } else log.info("${hendelse::class.simpleName} er suspendert")
-                behovMediator.håndter(hendelse, context, contextId)
+                behovMediator.håndter(hendelse, context, contextId, messageContext)
                 oppgaveMediator.lagreOgTildelOppgaver(hendelse.id, hendelse.fødselsnummer(), contextId, messageContext)
             } catch (err: Exception) {
                 log.warn(
@@ -646,19 +642,5 @@ internal class HendelseMediator(
             )
             mediator.utfør(hendelse, commandContext, contextId, context)
         }
-    }
-}
-
-internal fun standardfelter(hendelsetype: String, fødselsnummer: String, parent: Pair<String, UUID>? = null) = mutableMapOf<String, Any>(
-    "@event_name" to hendelsetype,
-    "@opprettet" to now(),
-    "@id" to UUID.randomUUID(),
-    "fødselsnummer" to fødselsnummer
-).apply {
-    if (parent != null) {
-        this["@forårsaket_av"] = mapOf(
-            "event_name" to parent.first,
-            "id" to parent.second
-        )
     }
 }

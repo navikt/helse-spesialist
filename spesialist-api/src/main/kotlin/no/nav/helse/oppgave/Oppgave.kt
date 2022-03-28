@@ -1,9 +1,10 @@
 package no.nav.helse.oppgave
 
+import java.time.LocalDateTime
+import java.util.Objects
+import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 class Oppgave private constructor(
     private val type: Oppgavetype,
@@ -81,22 +82,17 @@ class Oppgave private constructor(
             ferdigstiltAvIdent: String? = null,
             ferdigstiltAvOid: UUID? = null,
         ): JsonMessage {
-            return JsonMessage.newMessage(
-                mutableMapOf(
-                    "@event_name" to eventName,
-                    "@id" to UUID.randomUUID(),
-                    "@opprettet" to LocalDateTime.now(),
-                    "hendelseId" to hendelseId,
-                    "contextId" to contextId,
-                    "oppgaveId" to oppgaveId,
-                    "status" to status.name,
-                    "type" to type.name,
-                    "fødselsnummer" to fødselsnummer
-                ).apply {
-                    ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
-                    ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
-                }
-            )
+            return JsonMessage.newMessage(eventName, mutableMapOf(
+                "hendelseId" to hendelseId,
+                "contextId" to contextId,
+                "oppgaveId" to oppgaveId,
+                "status" to status.name,
+                "type" to type.name,
+                "fødselsnummer" to fødselsnummer
+            ).apply {
+                ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
+                ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
+            })
         }
     }
 

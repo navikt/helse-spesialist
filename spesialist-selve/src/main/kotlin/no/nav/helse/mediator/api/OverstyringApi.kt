@@ -1,23 +1,22 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.application.call
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.principal
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.receive
+import io.ktor.response.respond
+import io.ktor.routing.Route
+import io.ktor.routing.post
+import java.time.LocalDate
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.mediator.standardfelter
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.saksbehandler.SaksbehandlerDto
-import java.time.LocalDate
-import java.util.*
 
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     post("/api/overstyr/dager") {
@@ -143,20 +142,19 @@ data class OverstyrInntektKafkaDto(
     val månedligInntekt: Double,
     val skjæringstidspunkt: LocalDate
 ) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
-        standardfelter("overstyr_inntekt", fødselsnummer).apply {
-            put("aktørId", aktørId)
-            put("organisasjonsnummer", organisasjonsnummer)
-            put("begrunnelse", begrunnelse)
-            put("forklaring", forklaring)
-            put("saksbehandlerOid", saksbehandler.oid)
-            put("saksbehandlerNavn", saksbehandler.navn)
-            put("saksbehandlerIdent", saksbehandler.ident)
-            put("saksbehandlerEpost", saksbehandler.epost)
-            put("månedligInntekt", månedligInntekt)
-            put("skjæringstidspunkt", skjæringstidspunkt)
-        }
-    )
+    fun somKafkaMessage() = JsonMessage.newMessage("overstyr_inntekt", mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "organisasjonsnummer" to organisasjonsnummer,
+        "begrunnelse" to begrunnelse,
+        "forklaring" to forklaring,
+        "saksbehandlerOid" to saksbehandler.oid,
+        "saksbehandlerNavn" to saksbehandler.navn,
+        "saksbehandlerIdent" to saksbehandler.ident,
+        "saksbehandlerEpost" to saksbehandler.epost,
+        "månedligInntekt" to månedligInntekt,
+        "skjæringstidspunkt" to skjæringstidspunkt
+    ))
 }
 
 data class OverstyrArbeidsforholdDto(
@@ -182,16 +180,15 @@ data class OverstyrArbeidsforholdKafkaDto(
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
 ) {
-    fun somKafkaMessage() = JsonMessage.newMessage(
-        standardfelter("overstyr_arbeidsforhold", fødselsnummer).apply {
-            put("aktørId", aktørId)
-            put("organisasjonsnummer", organisasjonsnummer)
-            put("saksbehandlerOid", saksbehandler.oid)
-            put("saksbehandlerNavn", saksbehandler.navn)
-            put("saksbehandlerIdent", saksbehandler.ident)
-            put("saksbehandlerEpost", saksbehandler.epost)
-            put("skjæringstidspunkt", skjæringstidspunkt)
-            put("overstyrteArbeidsforhold", overstyrteArbeidsforhold)
-        }
-    )
+    fun somKafkaMessage() = JsonMessage.newMessage("overstyr_arbeidsforhold", mapOf(
+        "fødselsnummer" to fødselsnummer,
+        "aktørId" to aktørId,
+        "organisasjonsnummer" to organisasjonsnummer,
+        "saksbehandlerOid" to saksbehandler.oid,
+        "saksbehandlerNavn" to saksbehandler.navn,
+        "saksbehandlerIdent" to saksbehandler.ident,
+        "saksbehandlerEpost" to saksbehandler.epost,
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
+    ))
 }
