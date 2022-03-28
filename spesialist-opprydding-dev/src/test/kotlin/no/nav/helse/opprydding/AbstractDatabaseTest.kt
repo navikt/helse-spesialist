@@ -40,7 +40,7 @@ internal abstract class AbstractDatabaseTest {
             })
 
         private fun createTruncateFunction(dataSource: DataSource) {
-            sessionOf(dataSource).use  {
+            sessionOf(dataSource).use {
                 @Language("PostgreSQL")
                 val query = """
             CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$
@@ -100,7 +100,18 @@ internal abstract class AbstractDatabaseTest {
 
     protected fun assertTabellinnhold(booleanExpressionBlock: (actualTabellCount: Int) -> Boolean) {
         val tabeller = finnTabeller().toMutableList()
-        tabeller.removeAll(listOf("flyway_schema_history", "enhet", "global_snapshot_versjon", "saksbehandler", "feilende_meldinger"))
+        tabeller.removeAll(
+            listOf(
+                "flyway_schema_history",
+                "enhet",
+                "global_snapshot_versjon",
+                "saksbehandler",
+                "feilende_meldinger",
+                "arbeidsgiver",
+                "arbeidsgiver_bransjer",
+                "arbeidsgiver_navn"
+            )
+        )
         tabeller.forEach {
             val tabellCount = finnTabellCount(it)
             if (it in listOf("oppdrag", "utbetalingslinje"))
@@ -128,7 +139,7 @@ internal abstract class AbstractDatabaseTest {
 
     @BeforeEach
     fun resetDatabase() {
-        sessionOf(dataSource).use  {
+        sessionOf(dataSource).use {
             it.run(queryOf("SELECT truncate_tables()").asExecute)
         }
     }

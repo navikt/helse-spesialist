@@ -93,58 +93,10 @@ internal class PersonRepository(private val dataSource: DataSource) {
         run(queryOf(query, personRef).asExecute)
     }
 
-    private fun TransactionalSession.finnArbeidsgiver(personRef: Int): List<Int> {
-        @Language("PostgreSQL")
-        val query = "SELECT arbeidsgiver_ref FROM arbeidsforhold WHERE person_ref = ?"
-        return run(queryOf(query, personRef).map { it.int("arbeidsgiver_ref") }.asList)
-    }
-
     private fun TransactionalSession.slettArbeidsforhold(personRef: Int) {
-        val ref = finnArbeidsgiver(personRef)
-
-        if (ref.isEmpty()) return
         @Language("PostgreSQL")
-        val query = "DELETE FROM arbeidsforhold WHERE arbeidsgiver_ref IN (${ref.joinToString { "?" }})"
-        run(queryOf(query, *ref.toTypedArray()).asExecute)
-        slettArbeidsgiver(ref)
-    }
-
-    private fun TransactionalSession.slettArbeidsgiver(arbeidsgiverIder: List<Int>) {
-        if (arbeidsgiverIder.isEmpty()) return
-        val bransjerRef = arbeidsgiverIder.map { finnBransjeRef(it) }
-        val navnRef = arbeidsgiverIder.map { finnNavnRef(it) }
-
-        @Language("PostgreSQL")
-        val query = "DELETE FROM arbeidsgiver WHERE id IN (${arbeidsgiverIder.joinToString { "?" }})"
-        run(queryOf(query, *arbeidsgiverIder.toTypedArray()).asExecute)
-        slettArbeidsgiverBransjer(bransjerRef)
-        slettArbeidsgiverNavn(navnRef)
-    }
-
-    private fun TransactionalSession.finnBransjeRef(arbeidsgiverRef: Int): Int {
-        @Language("PostgreSQL")
-        val query = "SELECT bransjer_ref FROM arbeidsgiver WHERE id = ?"
-        return run(queryOf(query, arbeidsgiverRef).map { it.int("bransjer_ref") }.asSingle)!!
-    }
-
-    private fun TransactionalSession.slettArbeidsgiverBransjer(bransjerRef: List<Int>) {
-        if (bransjerRef.isEmpty()) return
-        @Language("PostgreSQL")
-        val query = "DELETE FROM arbeidsgiver_bransjer WHERE id IN (${bransjerRef.joinToString { "?" }})"
-        run(queryOf(query, *bransjerRef.toTypedArray()).asExecute)
-    }
-
-    private fun TransactionalSession.finnNavnRef(arbeidsgiverRef: Int): Int {
-        @Language("PostgreSQL")
-        val query = "SELECT navn_ref FROM arbeidsgiver WHERE id = ?"
-        return run(queryOf(query, arbeidsgiverRef).map { it.int("navn_ref") }.asSingle)!!
-    }
-
-    private fun TransactionalSession.slettArbeidsgiverNavn(arbeidsgiverRef: List<Int>) {
-        if (arbeidsgiverRef.isEmpty()) return
-        @Language("PostgreSQL")
-        val query = "DELETE FROM arbeidsgiver_navn WHERE id IN (${arbeidsgiverRef.joinToString { "?" }})"
-        run(queryOf(query, *arbeidsgiverRef.toTypedArray()).asExecute)
+        val query = "DELETE FROM arbeidsforhold WHERE person_ref = ?"
+        run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettReserverPerson(personRef: Int) {
