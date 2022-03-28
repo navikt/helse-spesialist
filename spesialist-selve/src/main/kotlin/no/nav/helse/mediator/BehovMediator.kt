@@ -43,6 +43,7 @@ internal class BehovMediator(
     private fun behovPacket(hendelse: Hendelse, context: CommandContext, contextId: UUID) =
         standardfelter(hendelse).apply {
             this["@behov"] = context.behov().keys.toList()
+            this["@behovId"] = UUID.randomUUID()
             this["contextId"] = contextId
             this["hendelseId"] = hendelse.id
             this["spleisBehovId"] =
