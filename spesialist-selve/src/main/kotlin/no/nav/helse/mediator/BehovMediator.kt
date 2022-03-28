@@ -1,12 +1,14 @@
 package no.nav.helse.mediator
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
-import java.time.LocalDateTime
-import java.util.UUID
 
 internal class BehovMediator(
     private val rapidsConnection: RapidsConnection,
@@ -20,7 +22,12 @@ internal class BehovMediator(
     private fun publiserMeldinger(hendelse: Hendelse, context: CommandContext) {
         context.meldinger().forEach { melding ->
             sikkerLogg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}\n{}", melding)
-            rapidsConnection.publish(hendelse.fødselsnummer(), melding)
+            val outgoing = hendelse.tracinginfo().takeUnless { it.isEmpty() }?.let { tracinginfo ->
+                val node = objectMapper.readTree(melding) as ObjectNode
+                node.replace("@forårsaket_av", objectMapper.valueToTree(tracinginfo))
+                node.toString()
+            } ?: melding
+            rapidsConnection.publish(hendelse.fødselsnummer(), outgoing)
         }
     }
 

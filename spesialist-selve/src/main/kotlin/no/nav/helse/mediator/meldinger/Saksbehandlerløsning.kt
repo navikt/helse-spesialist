@@ -1,16 +1,23 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
+import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 /**
  * Behandler input til godkjenningsbehov fra saksbehandler som har blitt lagt på rapid-en av API-biten av spesialist.
@@ -41,6 +48,13 @@ internal class Saksbehandlerløsning(
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
     override fun toJson() = json
+    override fun tracinginfo() = objectMapper.readTree(json).let { node ->
+        mapOf(
+            "event_name" to node.path("@event_name").asText(),
+            "id" to id,
+            "opprettet" to node.path("@opprettet").asText()
+        )
+    }
 
     internal class SaksbehandlerløsningRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
