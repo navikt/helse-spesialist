@@ -8,7 +8,6 @@ import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
-import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -48,13 +47,6 @@ internal class Saksbehandlerløsning(
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
     override fun toJson() = json
-    override fun tracinginfo() = objectMapper.readTree(json).let { node ->
-        mapOf(
-            "event_name" to node.path("@event_name").asText(),
-            "id" to id,
-            "opprettet" to node.path("@opprettet").asText()
-        )
-    }
 
     internal class SaksbehandlerløsningRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")

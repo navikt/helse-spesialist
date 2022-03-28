@@ -1,17 +1,20 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 internal class BehovMediatorTest {
     private companion object {
@@ -61,8 +64,19 @@ internal class BehovMediatorTest {
         testContext.publiser(melding2)
         behovMediator.håndter(testHendelse, testContext, contextId)
         assertEquals(2, testRapid.inspektør.size)
-        assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0))
-        assertEquals(objectMapper.readTree(melding2), testRapid.inspektør.message(1))
+        assertEquals(objectMapper.readTree(melding1), testRapid.inspektør.message(0).also { (it as ObjectNode).remove("@forårsaket_av") })
+        assertEquals(objectMapper.readTree(melding2), testRapid.inspektør.message(1).also { (it as ObjectNode).remove("@forårsaket_av") })
+    }
+
+    @Test
+    fun `sporing på melding`() {
+        val melding1 = """{ "a_key": "with_a_value" }"""
+        testContext.publiser(melding1)
+        behovMediator.håndter(testHendelse, testContext, contextId)
+        assertEquals(1, testRapid.inspektør.size)
+        assertTrue(testRapid.inspektør.field(0, "@forårsaket_av").path("id").asText().isNotBlank())
+        assertTrue(testRapid.inspektør.field(0, "@forårsaket_av").path("event_name").asText().isNotBlank())
+        assertTrue(testRapid.inspektør.field(0, "@forårsaket_av").path("opprettet").asText().isNotBlank())
     }
 
     @Test
@@ -71,6 +85,9 @@ internal class BehovMediatorTest {
         behovMediator.håndter(testHendelse, testContext, contextId)
         assertEquals("behov", testRapid.inspektør.field(0, "@event_name").asText())
         assertEquals(FNR, testRapid.inspektør.field(0, "fødselsnummer").asText())
+        assertTrue(testRapid.inspektør.field(0, "@forårsaket_av").path("id").asText().isNotBlank())
+        assertTrue(testRapid.inspektør.field(0, "@forårsaket_av").path("event_name").asText().isNotBlank())
+        assertTrue(testRapid.inspektør.field(0, "@forårsaket_av").path("opprettet").asText().isNotBlank())
         assertDoesNotThrow { UUID.fromString(testRapid.inspektør.field(0, "@id").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(testRapid.inspektør.field(0, "@opprettet").asText()) }
     }
@@ -88,8 +105,9 @@ internal class BehovMediatorTest {
             return vedtaksperiodeId
         }
 
+        @Language("JSON")
         override fun toJson(): String {
-            throw UnsupportedOperationException()
+            return """{ "@id": "${UUID.randomUUID()}", "@event_name": "testhendelse", "@opprettet": "${LocalDateTime.now()}" }"""
         }
     }
 }

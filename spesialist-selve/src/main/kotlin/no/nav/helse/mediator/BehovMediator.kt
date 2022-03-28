@@ -22,12 +22,7 @@ internal class BehovMediator(
     private fun publiserMeldinger(hendelse: Hendelse, context: CommandContext) {
         context.meldinger().forEach { melding ->
             sikkerLogg.info("Sender melding i forbindelse med ${hendelse.javaClass.simpleName}\n{}", melding)
-            val outgoing = hendelse.tracinginfo().takeUnless { it.isEmpty() }?.let { tracinginfo ->
-                val node = objectMapper.readTree(melding) as ObjectNode
-                node.replace("@forårsaket_av", objectMapper.valueToTree(tracinginfo))
-                node.toString()
-            } ?: melding
-            rapidsConnection.publish(hendelse.fødselsnummer(), outgoing)
+            rapidsConnection.publish(hendelse.fødselsnummer(), medTracing(hendelse, melding))
         }
     }
 
@@ -37,6 +32,13 @@ internal class BehovMediator(
         sikkerLogg.info("Sender behov for ${context.behov().keys}\n{}", packet)
         rapidsConnection.publish(hendelse.fødselsnummer(), packet)
     }
+
+    private fun medTracing(hendelse: Hendelse, melding: String) =
+        hendelse.tracinginfo().takeUnless { it.isEmpty() }?.let { tracinginfo ->
+            val node = objectMapper.readTree(melding) as ObjectNode
+            node.replace("@forårsaket_av", objectMapper.valueToTree(tracinginfo))
+            node.toString()
+        } ?: melding
 
     private fun behovPacket(hendelse: Hendelse, context: CommandContext, contextId: UUID) =
         standardfelter(hendelse).apply {
@@ -51,11 +53,13 @@ internal class BehovMediator(
     private fun standardfelter(hendelse: Hendelse): MutableMap<String, Any> {
         val id = UUID.randomUUID()
         val fødselsnummer = hendelse.fødselsnummer()
-        return mutableMapOf(
+        return mutableMapOf<String, Any>(
             "@event_name" to "behov",
-            "@opprettet" to LocalDateTime.now(),
+            "@opprettet" to "${LocalDateTime.now()}",
             "@id" to id,
             "fødselsnummer" to fødselsnummer
-        )
+        ).apply {
+            compute("@forårsaket_av") { _, _ -> hendelse.tracinginfo().takeUnless { it.isEmpty() } }
+        }
     }
 }
