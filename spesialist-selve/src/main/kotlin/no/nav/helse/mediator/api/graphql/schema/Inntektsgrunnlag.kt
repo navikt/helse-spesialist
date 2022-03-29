@@ -20,7 +20,8 @@ data class Inntektsgrunnlag(
 data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetArsinntekt: OmregnetArsinntekt?,
-    val sammenligningsgrunnlag: Sammenligningsgrunnlag?
+    val sammenligningsgrunnlag: Sammenligningsgrunnlag?,
+    val deaktivert: Boolean? = null
 )
 
 data class Sammenligningsgrunnlag(
@@ -66,6 +67,14 @@ internal fun GraphQLArbeidsgiverinntekt.tilArbeidsgiverinntekt(): Arbeidsgiverin
         arbeidsgiver = arbeidsgiver,
         omregnetArsinntekt = omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
         sammenligningsgrunnlag = sammenligningsgrunnlag?.tilSammenligningsgrunnlag()
+    )
+
+internal fun GraphQLArbeidsgiverinntekt2.tilArbeidsgiverinntekt(): Arbeidsgiverinntekt =
+    Arbeidsgiverinntekt(
+        arbeidsgiver = arbeidsgiver,
+        omregnetArsinntekt = omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
+        sammenligningsgrunnlag = sammenligningsgrunnlag?.tilSammenligningsgrunnlag(),
+        deaktivert = deaktivert
     )
 
 private fun GraphQLSammenligningsgrunnlag.tilSammenligningsgrunnlag(): Sammenligningsgrunnlag =

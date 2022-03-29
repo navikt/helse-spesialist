@@ -77,6 +77,7 @@ type GraphQLArbeidsgiver {
 
 type GraphQLArbeidsgiverinntekt {
   arbeidsgiver: String!
+  deaktivert: Boolean
   omregnetArsinntekt: GraphQLOmregnetArsinntekt
   sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag
 }
