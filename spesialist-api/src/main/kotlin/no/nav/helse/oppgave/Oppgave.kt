@@ -83,6 +83,9 @@ class Oppgave private constructor(
             ferdigstiltAvOid: UUID? = null,
         ): JsonMessage {
             return JsonMessage.newMessage(eventName, mutableMapOf(
+                "@forårsaket_av" to mapOf(
+                    "id" to hendelseId
+                ),
                 "hendelseId" to hendelseId,
                 "contextId" to contextId,
                 "oppgaveId" to oppgaveId,

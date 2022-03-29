@@ -136,7 +136,7 @@ internal class HendelseMediator(
                 "behovId" to "$behovId"
             )
         ) {
-            løsninger(hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
+            løsninger(context, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: log.info(
                     "mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
                         "eller fordi hendelsen $hendelseId er ukjent"
@@ -546,7 +546,7 @@ internal class HendelseMediator(
         løsninger = null
     }
 
-    private fun løsninger(hendelseId: UUID, contextId: UUID): Løsninger? {
+    private fun løsninger(messageContext: MessageContext, hendelseId: UUID, contextId: UUID): Løsninger? {
         return løsninger ?: run {
             val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk)
             val commandContext = commandContextDao.finnSuspendert(contextId)
@@ -554,13 +554,13 @@ internal class HendelseMediator(
                 log.info("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")
                 return null
             }
-            Løsninger(hendelse, contextId, commandContext).also { løsninger = it }
+            Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }
         }
     }
 
     // fortsetter en command (resume) med oppsamlet løsninger
-    private fun fortsett(message: String, context: MessageContext) {
-        løsninger?.fortsett(this, message, context)
+    private fun fortsett(message: String) {
+        løsninger?.fortsett(this, message)
     }
 
     private fun errorHandler(err: Exception, message: String) {
@@ -628,6 +628,7 @@ internal class HendelseMediator(
     }
 
     private class Løsninger(
+        private val messageContex: MessageContext,
         private val hendelse: Hendelse,
         private val contextId: UUID,
         private val commandContext: CommandContext
@@ -638,13 +639,13 @@ internal class HendelseMediator(
             commandContext.add(løsning)
         }
 
-        fun fortsett(mediator: HendelseMediator, message: String, context: MessageContext) {
+        fun fortsett(mediator: HendelseMediator, message: String) {
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
             sikkerLogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
                     "Innkommende melding:\n\t$message"
             )
-            mediator.utfør(hendelse, commandContext, contextId, context)
+            mediator.utfør(hendelse, commandContext, contextId, messageContex)
         }
     }
 }

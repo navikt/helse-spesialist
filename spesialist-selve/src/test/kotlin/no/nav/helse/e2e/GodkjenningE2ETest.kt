@@ -20,6 +20,7 @@ import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -160,6 +161,61 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
         assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
+    }
+
+    @Test
+    fun `behovene spores tilbake`() {
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val personinfomeldingId = sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        val arbeidsgiverløsningId = sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        val arbeidsforholdmeldingId = sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        val egenansattMeldingId = sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        val vergemålløsningId = sendVergemålløsning(godkjenningsmeldingId)
+        val dkifløsningId = sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        val åpnegosysoppgaverløsningId = sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId
+        )
+        val risikoløsningId = sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+
+        testRapid.inspektør.also { inspektør ->
+            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(0, "@forårsaket_av").path("id").asText())
+            assertEquals(personinfomeldingId.toString(), inspektør.field(1, "@forårsaket_av").path("id").asText())
+            assertEquals(arbeidsgiverløsningId.toString(), inspektør.field(2, "@forårsaket_av").path("id").asText())
+            assertEquals(arbeidsforholdmeldingId.toString(), inspektør.field(3, "@forårsaket_av").path("id").asText())
+            assertEquals(egenansattMeldingId.toString(), inspektør.field(4, "@forårsaket_av").path("id").asText())
+            assertEquals(vergemålløsningId.toString(), inspektør.field(5, "@forårsaket_av").path("id").asText())
+            assertEquals(dkifløsningId.toString(), inspektør.field(6, "@forårsaket_av").path("id").asText())
+            assertEquals(åpnegosysoppgaverløsningId.toString(), inspektør.field(7, "@forårsaket_av").path("id").asText())
+            assertEquals(risikoløsningId.toString(), inspektør.field(8, "@forårsaket_av").path("id").asText())
+            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(9, "@forårsaket_av").path("id").asText())
+            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(10, "@forårsaket_av").path("id").asText())
+            assertEquals(løsningId.toString(), inspektør.field(11, "@forårsaket_av").path("id").asText())
+            assertNotEquals(godkjenningsmeldingId.toString(), inspektør.field(11, "@id").asText())
+
+            0.until(inspektør.size).forEach {
+                println(inspektør.message(it))
+            }
+        }
     }
 
     @Test

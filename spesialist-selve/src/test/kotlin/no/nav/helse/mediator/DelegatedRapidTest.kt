@@ -52,7 +52,7 @@ internal class DelegatedRapidTest : River.PacketListener {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun afterRiver(message: String, context: MessageContext) {
+    private fun afterRiver(message: String) {
         order.add("AFTER")
     }
 

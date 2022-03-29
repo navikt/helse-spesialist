@@ -465,8 +465,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsmeldingId: UUID,
         erDigital: Boolean = true,
         contextId: UUID = testRapid.inspektør.contextId()
-    ) {
-        nyHendelseId().also { id ->
+    ): UUID {
+        return nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
                     id,
@@ -483,8 +483,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         antall: Int = 0,
         oppslagFeilet: Boolean = false,
         contextId: UUID = testRapid.inspektør.contextId()
-    ) {
-        nyHendelseId().also { id ->
+    ): UUID {
+        return nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagÅpneGosysOppgaverløsning(
                     id,
@@ -503,8 +503,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         kanGodkjennesAutomatisk: Boolean = true,
         contextId: UUID = testRapid.inspektør.contextId(),
         funn: List<Risikofunn> = emptyList()
-    ) {
-        nyHendelseId().also { id ->
+    ): UUID {
+        return nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagRisikovurderingløsning(
                     id,
@@ -523,8 +523,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         erEgenAnsatt: Boolean,
         fødselsnummer: String = FØDSELSNUMMER,
         contextId: UUID = testRapid.inspektør.contextId()
-    ) {
-        nyHendelseId().also { id ->
+    ): UUID {
+        return nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagEgenAnsattløsning(
                     id,
@@ -541,8 +541,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsmeldingId: UUID,
         vergemål: VergemålJson = VergemålJson(),
         contextId: UUID = testRapid.inspektør.contextId()
-    ) {
-        nyHendelseId().also { id ->
+    ): UUID {
+        return nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagVergemålløsning(
                     id,

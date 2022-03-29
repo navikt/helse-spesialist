@@ -1,13 +1,13 @@
 package no.nav.helse.modell
 
 import com.fasterxml.jackson.module.kotlin.convertValue
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeGodkjent
 import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
-import java.time.LocalDateTime
-import java.util.*
 
 internal class UtbetalingsgodkjenningMessage(json: String) {
     private val behov = JsonMessage(json, MessageProblems(json))
@@ -97,6 +97,8 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
             )
         )
         behov["@løsning"] = løsning
+        behov["@id"] = UUID.randomUUID()
+        behov["@opprettet"] = LocalDateTime.now()
     }
 
     internal fun lagVedtaksperiodeGodkjent(
