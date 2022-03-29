@@ -187,14 +187,18 @@ internal class HendelseMediator(
         saksbehandlerreferanse: UUID,
     ): Boolean {
         val suksess = oppgaveMediator.tildel(oppgaveId, saksbehandlerreferanse)
-        if (suksess) rapidsConnection.publish(Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).toJson())
+        if (suksess) Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).also { (key, message) ->
+            rapidsConnection.publish(key, message.toJson())
+        }
         return suksess
     }
 
     internal fun leggOppgavePåVent(
         oppgaveId: Long,
     ) {
-        rapidsConnection.publish(Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).toJson())
+        Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).also { (key, message) ->
+            rapidsConnection.publish(key, message.toJson())
+        }
     }
 
     internal fun sendMeldingPåTopic(melding: JsonNode) {

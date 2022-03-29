@@ -52,13 +52,13 @@ class Oppgave private constructor(
             oppgaveId: Long,
             eventName: String,
             oppgaveDao: OppgaveDao
-        ): JsonMessage {
+        ): Pair<String, JsonMessage> {
             val hendelseId = oppgaveDao.finnHendelseId(oppgaveId)
             val contextId = oppgaveDao.finnContextId(oppgaveId)
             val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
 
-            return lagMelding(
+            return fødselsnummer to lagMelding(
                 eventName = eventName,
                 hendelseId = hendelseId,
                 contextId = contextId,

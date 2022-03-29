@@ -1,5 +1,7 @@
 package no.nav.helse.oppgave
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
@@ -11,8 +13,6 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
@@ -136,7 +136,7 @@ class OppgaveMediator(
         doAlso()
         oppgaver.clear()
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
-            messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).toJson())
+            messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).second.toJson())
         }.clear()
     }
 }
