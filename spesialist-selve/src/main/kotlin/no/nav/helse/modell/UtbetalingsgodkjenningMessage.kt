@@ -96,6 +96,10 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
                 "kommentar" to kommentar
             )
         )
+        // <midlertidig forklaring="@behovId brukes for å gruppere behov/løsning. Ble innført 28. mars 2022. Må likevel fikse godkjenningsbehov som ble opprettet før 28. mars">
+        behov.interestedIn("@behovId", "@id")
+        if (behov["@behovId"].asText().isBlank()) behov["@behovId"] = behov["@id"].asText() // migrerer gamle behov på nytt format
+        // </midlertidig>
         behov["@løsning"] = løsning
         behov["@id"] = UUID.randomUUID()
         behov["@opprettet"] = LocalDateTime.now()
