@@ -9,6 +9,7 @@ val flywayCoreVersion = "8.5.2"
 val kotliqueryVersion = "1.6.3"
 val kotlinTestVersion = "1.5.21"
 val mockkVersion = "1.12.3"
+val postgressqlVersion = "42.3.3"
 
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -27,7 +28,7 @@ allprojects {
     dependencies {
         implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
-        implementation("org.postgresql:postgresql:42.3.3")
+        implementation("org.postgresql:postgresql:$postgressqlVersion")
         implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") //August, 2014
         implementation("com.zaxxer:HikariCP:$hikariCPVersion")
         implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
