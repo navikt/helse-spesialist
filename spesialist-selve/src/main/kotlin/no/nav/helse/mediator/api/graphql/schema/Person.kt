@@ -104,7 +104,7 @@ data class Person(
             organisasjonsnummer = it.organisasjonsnummer,
             navn = arbeidsgiverApiDao.finnNavn(it.organisasjonsnummer) ?: "Ikke tilgjengelig",
             bransjer = arbeidsgiverApiDao.finnBransjer(it.organisasjonsnummer),
-            ghostPerioder = it.ghostPerioder.tilGhostPerioder(),
+            ghostPerioder = it.ghostPerioder.tilGhostPerioder(it.organisasjonsnummer),
             fødselsnummer = snapshot.fodselsnummer,
             overstyringApiDao = overstyringApiDao,
             generasjoner = it.generasjoner,
@@ -124,14 +124,15 @@ data class Person(
     fun vilkarsgrunnlaghistorikk(): List<Vilkarsgrunnlaghistorikk> =
         snapshot.vilkarsgrunnlaghistorikk.map { it.tilVilkarsgrunnlaghistorikk() }
 
-    private fun List<GraphQLGhostPeriode>.tilGhostPerioder(): List<GhostPeriode> =
+    private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<GhostPeriode> =
         map {
             GhostPeriode(
                 fom = it.fom,
                 tom = it.tom,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
                 vilkarsgrunnlaghistorikkId = it.vilkarsgrunnlaghistorikkId,
-                deaktivert = it.deaktivert
+                deaktivert = it.deaktivert,
+                organisasjonsnummer = organisasjonsnummer
             )
         }
 }
