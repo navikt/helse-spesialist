@@ -2,13 +2,17 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.oppgave.OppgaveDto
-import no.nav.helse.overstyring.*
+import no.nav.helse.overstyring.Dagtype
+import no.nav.helse.overstyring.OverstyringApiArbeidsforholdDto
+import no.nav.helse.overstyring.OverstyringApiDagerDto
+import no.nav.helse.overstyring.OverstyringApiInntektDto
+import no.nav.helse.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -216,7 +220,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertTrue(
             oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fødselsnummer == FØDSELSNUMMER })
 
-        val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot
+        val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere.first().overstyringer
         assertEquals(3, overstyringer.size)
@@ -225,7 +229,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(true, (overstyringer[2] as OverstyringApiArbeidsforholdDto).overstyrtArbeidsforhold.deaktivert)
     }
 
-    private fun assertSaksbehandlerOppgaveOpprettet(hendelseId: UUID) {
+    private fun assertSaksbehandlerOppgavpprettet(hendelseId: UUID) {
         val saksbehandlerOppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
         assertEquals(
             1,

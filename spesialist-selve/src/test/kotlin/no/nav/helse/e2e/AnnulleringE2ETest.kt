@@ -2,13 +2,13 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import java.util.UUID
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
 import kotlin.test.assertNotNull
 
 internal class AnnulleringE2ETest : AbstractE2ETest() {
@@ -60,7 +60,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
         sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")
 
-        val snapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
+        val snapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot)
         val annullertAvSaksbehandler = snapshot.utbetalinger.first().annullertAvSaksbehandler
 
         assertNotNull(annullertAvSaksbehandler?.annullertTidspunkt)

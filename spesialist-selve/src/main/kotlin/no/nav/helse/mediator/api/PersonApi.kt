@@ -1,13 +1,17 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.application.call
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.principal
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.receive
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.Route
+import io.ktor.routing.get
+import io.ktor.routing.post
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.getGrupper
@@ -15,22 +19,24 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.FINNES_IKKE
 import no.nav.helse.mediator.api.PersonMediator.SnapshotResponse.SnapshotTilstand.INGEN_TILGANG
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal fun Route.personApi(
     personMediator: PersonMediator,
     hendelseMediator: HendelseMediator,
-    kode7Saksbehandlergruppe: UUID
+    kode7Saksbehandlergruppe: UUID,
+    skjermedePersonerGruppeId: UUID
 ) {
     val log = LoggerFactory.getLogger("PersonApi")
 
     get("/api/person/{vedtaksperiodeId}") {
         val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
+        val kanSeSkjermede = getGrupper().contains(skjermedePersonerGruppeId)
         val snapshotResponse = withContext(Dispatchers.IO) {
             personMediator
                 .byggSpeilSnapshotForVedtaksperiodeId(
                     UUID.fromString(call.parameters["vedtaksperiodeId"]!!),
-                    kanSeKode7
+                    kanSeKode7,
+                    kanSeSkjermede,
                 )
         }
         if (snapshotResponse.tilstand == INGEN_TILGANG) {
@@ -45,13 +51,14 @@ internal fun Route.personApi(
     }
     get("/api/person/aktorId/{aktørId}") {
         val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
+        val kanSeSkjermede = getGrupper().contains(skjermedePersonerGruppeId)
         call.parameters["aktørId"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "AktørId må være numerisk")
             return@get
         }
         val snapshotResponse = withContext(Dispatchers.IO) {
             personMediator
-                .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!, kanSeKode7)
+                .byggSpeilSnapshotForAktørId(call.parameters["aktørId"]!!, kanSeKode7, kanSeSkjermede)
         }
         if (snapshotResponse.tilstand == INGEN_TILGANG) {
             call.respond(HttpStatusCode.Forbidden, "Har ikke tilgang til denne vedtaksperioden")
@@ -65,13 +72,14 @@ internal fun Route.personApi(
     }
     get("/api/person/fnr/{fødselsnummer}") {
         val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
+        val kanSeSkjermede = getGrupper().contains(skjermedePersonerGruppeId)
         call.parameters["fødselsnummer"]?.toLongOrNull() ?: run {
             call.respond(status = HttpStatusCode.BadRequest, message = "Fødselsnummer må være numerisk")
             return@get
         }
         val snapshotResponse = withContext(Dispatchers.IO) {
             personMediator
-                .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!, kanSeKode7)
+                .byggSpeilSnapshotForFnr(call.parameters["fødselsnummer"]!!, kanSeKode7, kanSeSkjermede)
         }
         if (snapshotResponse.tilstand == INGEN_TILGANG) {
             call.respond(HttpStatusCode.Forbidden, "Har ikke tilgang til denne vedtaksperioden")

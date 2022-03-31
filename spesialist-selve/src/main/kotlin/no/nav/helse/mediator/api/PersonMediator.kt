@@ -4,6 +4,7 @@ import UtbetalingshistorikkElementApiDto
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
+import java.util.UUID
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDto
 import no.nav.helse.arbeidsgiver.ArbeidsgiverDto
@@ -37,7 +38,6 @@ import no.nav.helse.utbetaling.OppdragApiDto
 import no.nav.helse.utbetaling.UtbetalingApiDto
 import no.nav.helse.utbetaling.UtbetalingslinjeApiDto
 import no.nav.helse.vedtaksperiode.VarselDao
-import java.util.*
 
 internal class PersonMediator(
     private val personsnapshotDao: PersonsnapshotDao,
@@ -54,24 +54,24 @@ internal class PersonMediator(
     private val speilSnapshotRestClient: SpeilSnapshotRestClient
 ) {
 
-    fun byggSpeilSnapshotForFnr(fødselsnummer: String, kanSeKode7: Boolean) =
+    fun byggSpeilSnapshotForFnr(fødselsnummer: String, kanSeKode7: Boolean, kanSeSkjermede: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForFnr") {
-            byggSnapshot(fødselsnummer, kanSeKode7)
+            byggSnapshot(fødselsnummer, kanSeKode7, kanSeSkjermede)
         }
 
-    fun byggSpeilSnapshotForAktørId(aktørId: String, kanSeKode7: Boolean) =
+    fun byggSpeilSnapshotForAktørId(aktørId: String, kanSeKode7: Boolean, kanSeSkjermede: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForAktørId") {
-            personsnapshotDao.finnFnrByAktørId(aktørId)?.let { byggSnapshot(it, kanSeKode7) }
+            personsnapshotDao.finnFnrByAktørId(aktørId)?.let { byggSnapshot(it, kanSeKode7, kanSeSkjermede) }
                 ?: SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
-    fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID, kanSeKode7: Boolean) =
+    fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID, kanSeKode7: Boolean, kanSeSkjermede: Boolean) =
         measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7) }
+            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7, kanSeSkjermede) }
                 ?: SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
-    private fun byggSnapshot(fødselsnummer: String, kanSeKode7: Boolean): SnapshotResponse {
+    private fun byggSnapshot(fødselsnummer: String, kanSeKode7: Boolean, kanSeSkjermede: Boolean): SnapshotResponse {
         if (!personDao.finnesPersonMedFødselsnummer(fødselsnummer)) {
             return SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
@@ -82,7 +82,7 @@ internal class PersonMediator(
         val erSkjermet = egenAnsattDao.erEgenAnsatt(fødselsnummer)
 
         return when {
-            erSkjermet == null || erSkjermet -> {
+            erSkjermet == null || (erSkjermet && !kanSeSkjermede) -> {
                 // Dette har vi ikke støtte for ennå, mangler å kunne finne om saksbehandler har tilgang til skjermede personer.
                 SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
             }

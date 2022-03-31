@@ -3,13 +3,13 @@ package no.nav.helse.serde
 import AbstractE2ETest
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -37,7 +37,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
-        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot)
 
         assertEquals(1, speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.size)
         val historikkElement = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first()
@@ -87,7 +87,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
-        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot)
 
         val utbetaling = speilSnapshot.arbeidsgivere.last().utbetalingshistorikk.first().utbetaling
         assertNull(utbetaling.vurdering)
@@ -102,7 +102,7 @@ internal class UtbetalingshistorikkSerdeTest : AbstractE2ETest() {
         sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendEgenAnsattløsning(godkjenningsmeldingId, false)
-        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false).snapshot)
+        val speilSnapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot)
 
         assertNotNull(speilSnapshot.arbeidsgivere.first().generasjoner)
     }

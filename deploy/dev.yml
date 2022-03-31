@@ -78,6 +78,8 @@ spec:
       value: 1119ba1f-3b10-4598-a47b-16568c379114
     - name: KODE7_SAKSBEHANDLER_GROUP
       value: c811e9f4-26a6-43f9-b930-8c83365683a9
+    - name: SKJERMEDE_PERSONER_GROUP
+      value: 611669fa-de5c-4dc2-a0e8-6041a019992a
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: GRAPHQL_ENABLED

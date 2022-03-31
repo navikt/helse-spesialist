@@ -1,21 +1,32 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
+import io.ktor.application.install
+import io.ktor.auth.authenticate
+import io.ktor.client.HttpClient
+import io.ktor.client.features.defaultRequest
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.host
+import io.ktor.client.request.port
+import io.ktor.client.request.post
+import io.ktor.client.statement.HttpResponse
+import io.ktor.features.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.jackson.JacksonConverter
+import io.ktor.routing.routing
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.ApplicationEngine
+import io.ktor.server.engine.embeddedServer
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import java.net.ServerSocket
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
@@ -30,8 +41,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
-import java.net.ServerSocket
-import java.util.*
 
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
@@ -44,6 +53,7 @@ internal class PersonApiTest {
     private val FØDSELSNUMMER = "20046913337"
     private val AKTØRID = "01017011111111"
     private val KODE7_SAKSBEHANDLER_GROUP = UUID.randomUUID()
+    private val SKJERMEDE_PERSONER_GROUP = UUID.randomUUID()
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
@@ -75,8 +85,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en person med fnr som har fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
-        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
-        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns SnapshotResponse(
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true), eq(false)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false), eq(false)) } returns SnapshotResponse(
             null,
             INGEN_TILGANG
         )
@@ -91,8 +101,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en person med aktørId som har fortrolig adresse kan ikke hentes av saksbehandler uten tilgang til kode 7`() {
-        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true)) } returns mockk(relaxed = true)
-        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false)) } returns SnapshotResponse(
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true), eq(false)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false), eq(false)) } returns SnapshotResponse(
             null,
             INGEN_TILGANG
         )
@@ -107,8 +117,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en person med fnr som har fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
-        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
-        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true), eq(false)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
             client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
@@ -121,8 +131,8 @@ internal class PersonApiTest {
 
     @Test
     fun `en person med aktørId som har fortrolig adresse kan hentes av saksbehandler med tilgang til kode 7`() {
-        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
-        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true), eq(false)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
             client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
@@ -131,6 +141,54 @@ internal class PersonApiTest {
             }
         }
         assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `en skjermet person kan ikke hentes av saksbehandler som ikke har tilgang til skjermede personer`() {
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
+
+        runBlocking {
+            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }.apply {
+            assertEquals(HttpStatusCode.Forbidden, status)
+        }
+
+        runBlocking {
+            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID)
+            }
+        }.apply {
+            assertEquals(HttpStatusCode.Forbidden, status)
+        }
+    }
+
+    @Test
+    fun `en skjermet person kan hentes av saksbehandler med tilgang til skjermede personer`() {
+        every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(false), eq(true)) } returns mockk(relaxed = true)
+        every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false), eq(true)) } returns mockk(relaxed = true)
+
+        runBlocking {
+            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID, listOf(SKJERMEDE_PERSONER_GROUP.toString()))
+            }
+        }.apply {
+            assertEquals(HttpStatusCode.OK, status)
+        }
+
+        runBlocking {
+            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+                contentType(ContentType.Application.Json)
+                authentication(SAKSBEHANDLER_OID, listOf(SKJERMEDE_PERSONER_GROUP.toString()))
+            }
+        }.apply {
+            assertEquals(HttpStatusCode.OK, status)
+        }
     }
 
     private fun HttpRequestBuilder.authentication(oid: UUID, groups: Collection<String> = emptyList()) {
@@ -181,7 +239,7 @@ internal class PersonApiTest {
             azureAdAppAuthentication(azureConfig)
             routing {
                 authenticate("oidc") {
-                    personApi(personMediator, hendelseMediator, KODE7_SAKSBEHANDLER_GROUP)
+                    personApi(personMediator, hendelseMediator, KODE7_SAKSBEHANDLER_GROUP, SKJERMEDE_PERSONER_GROUP)
                 }
             }
         }.also {

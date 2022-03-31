@@ -81,6 +81,8 @@ spec:
       value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: KODE7_SAKSBEHANDLER_GROUP
       value: c21e58b6-d838-4cb0-919a-398cd40117e3
+    - name: SKJERMEDE_PERSONER_GROUP
+      value: 73ff0e76-f2b1-4586-8387-b33f15617381
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering

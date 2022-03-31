@@ -2,19 +2,39 @@ package no.nav.helse
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
-import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.util.pipeline.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationCall
+import io.ktor.application.ApplicationCallPipeline
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.auth.authenticate
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.principal
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.features.CORS
+import io.ktor.features.CallId
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.StatusPages
+import io.ktor.features.callIdMdc
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.JacksonConverter
+import io.ktor.request.header
+import io.ktor.request.httpMethod
+import io.ktor.request.path
+import io.ktor.request.uri
+import io.ktor.response.respond
+import io.ktor.routing.routing
+import io.ktor.util.pipeline.PipelineContext
+import java.net.ProxySelector
+import java.net.URI
+import java.net.URL
+import java.util.UUID
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.abonnement.OpptegnelseMediator
@@ -75,10 +95,6 @@ import no.nav.helse.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
-import java.net.ProxySelector
-import java.net.URI
-import java.net.URL
-import java.util.*
 import kotlin.random.Random.Default.nextInt
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
@@ -301,7 +317,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                             speilSnapshotRestClient = speilSnapshotRestClient
                         ),
                         hendelseMediator = hendelseMediator,
-                        kode7Saksbehandlergruppe = env.kode7GruppeId()
+                        kode7Saksbehandlergruppe = env.kode7GruppeId(),
+                        skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
@@ -361,3 +378,4 @@ internal fun PipelineContext<Unit, ApplicationCall>.getNAVident(): String {
 
 private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue("KODE7_SAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
+private fun Map<String, String>.skjermedePersonerGruppeId() = UUID.fromString(this.getValue("SKJERMEDE_PERSONER_GROUP"))
