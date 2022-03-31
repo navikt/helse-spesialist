@@ -42,20 +42,6 @@ internal class VersjoneringAvSnapshotTest: AbstractE2ETest() {
     }
 
     @Test
-    fun `utdatert snapshot fra vedtaksperiodeid`() {
-        val utbetalingId = UUID.randomUUID()
-        val vedtaksperiodeid = UUID.randomUUID()
-        val gammelSnapshot = snapshot(-1)
-        val nyttSnapshot = snapshot(2)
-        vedtaksperiode(vedtaksperiodeId = vedtaksperiodeid, snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
-        every { speilSnapshotGraphQLClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, "1234")
-
-        personMediator.byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeid, false, false)
-        verify(exactly = 1) { speilSnapshotRestClient.hentSpeilSnapshot(FØDSELSNUMMER) }
-    }
-
-    @Test
     fun `fnr finnes ikke`() {
         val actual = personMediator.byggSpeilSnapshotForFnr("77889900", false, false).snapshot
         assertNull(actual)

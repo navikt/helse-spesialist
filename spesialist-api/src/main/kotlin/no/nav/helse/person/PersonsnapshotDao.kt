@@ -1,11 +1,10 @@
 package no.nav.helse.person
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import javax.sql.DataSource
 import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.objectMapper
-import java.util.*
-import javax.sql.DataSource
 
 class PersonsnapshotDao(private val dataSource: DataSource): HelseDao(dataSource) {
     fun finnPersonByFnr(fnr: String) =
@@ -18,12 +17,6 @@ class PersonsnapshotDao(private val dataSource: DataSource): HelseDao(dataSource
     fun finnFnrByAktørId(aktørId: String) =
         """SELECT fodselsnummer FROM person WHERE aktor_id = :aktorId"""
             .single(mapOf("aktorId" to aktørId.toLong()))  { it.long("fodselsnummer").toFødselsnummer() }
-
-    fun finnFnrByVedtaksperiodeId(vedtaksperiodeId: UUID) =
-        """ SELECT fodselsnummer FROM person
-                INNER JOIN vedtak v on person.id = v.person_ref
-            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
-            """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("fodselsnummer").toFødselsnummer() }
 
     private fun tilPersonsnapshot(row: Row): Pair<PersonMetadataApiDto, SnapshotDto> {
         val person = PersonMetadataApiDto(

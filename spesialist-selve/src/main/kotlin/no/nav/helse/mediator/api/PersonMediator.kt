@@ -65,12 +65,6 @@ internal class PersonMediator(
                 ?: SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
         }
 
-    fun byggSpeilSnapshotForVedtaksperiodeId(vedtaksperiodeId: UUID, kanSeKode7: Boolean, kanSeSkjermede: Boolean) =
-        measureAsHistogram("byggSpeilSnapshotForVedtaksperiodeId") {
-            personsnapshotDao.finnFnrByVedtaksperiodeId(vedtaksperiodeId)?.let { byggSnapshot(it, kanSeKode7, kanSeSkjermede) }
-                ?: SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
-        }
-
     private fun byggSnapshot(fødselsnummer: String, kanSeKode7: Boolean, kanSeSkjermede: Boolean): SnapshotResponse {
         if (!personDao.finnesPersonMedFødselsnummer(fødselsnummer)) {
             return SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)

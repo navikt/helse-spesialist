@@ -12,10 +12,4 @@ internal class PersonsnapshotDaoTest: DatabaseIntegrationTest() {
         assertEquals(FØDSELSNUMMER, personsnapshotDao.finnFnrByAktørId(AKTØRID))
     }
 
-    @Test
-    fun `finn fnr fra vedtaksperiodeid`() {
-        val (id, _, _) = PERIODE
-        nyVedtaksperiode()
-        assertEquals(FØDSELSNUMMER, personsnapshotDao.finnFnrByVedtaksperiodeId(id))
-    }
 }

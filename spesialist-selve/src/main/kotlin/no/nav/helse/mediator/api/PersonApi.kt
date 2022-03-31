@@ -28,27 +28,6 @@ internal fun Route.personApi(
 ) {
     val log = LoggerFactory.getLogger("PersonApi")
 
-    get("/api/person/{vedtaksperiodeId}") {
-        val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
-        val kanSeSkjermede = getGrupper().contains(skjermedePersonerGruppeId)
-        val snapshotResponse = withContext(Dispatchers.IO) {
-            personMediator
-                .byggSpeilSnapshotForVedtaksperiodeId(
-                    UUID.fromString(call.parameters["vedtaksperiodeId"]!!),
-                    kanSeKode7,
-                    kanSeSkjermede,
-                )
-        }
-        if (snapshotResponse.tilstand == INGEN_TILGANG) {
-            call.respond(HttpStatusCode.Forbidden, "Har ikke tilgang til denne vedtaksperioden")
-            return@get
-        }
-        if (snapshotResponse.snapshot == null || snapshotResponse.tilstand == FINNES_IKKE) {
-            call.respond(HttpStatusCode.NotFound, "Fant ikke vedtaksperiode")
-            return@get
-        }
-        call.respond(snapshotResponse.snapshot)
-    }
     get("/api/person/aktorId/{aktørId}") {
         val kanSeKode7 = getGrupper().contains(kode7Saksbehandlergruppe)
         val kanSeSkjermede = getGrupper().contains(skjermedePersonerGruppeId)
