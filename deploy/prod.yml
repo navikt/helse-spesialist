@@ -46,7 +46,7 @@ spec:
           - id: "f787f900-6697-440d-a086-d5bb56e26a9c"
           - id: "eb6e5e78-51a9-411c-b3b3-314debe35863"
           - id: "c21e58b6-d838-4cb0-919a-398cd40117e3"
-          - id: "73ff0e76-f2b1-4586-8387-b33f15617381π"
+          - id: "73ff0e76-f2b1-4586-8387-b33f15617381"
   accessPolicy:
     inbound:
       rules:
