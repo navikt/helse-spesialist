@@ -31,7 +31,6 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
         JsonMessage.newNeed(context.behov().keys.toList(), mutableMapOf<String, Any>(
             "contextId" to contextId,
             "hendelseId" to hendelse.id,
-            "spleisBehovId" to hendelse.id, // only for BC because the need apps requires updating to use "hendelseId"
             "fødselsnummer" to hendelse.fødselsnummer()
         ).apply {
             putAll(context.behov())

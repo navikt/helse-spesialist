@@ -47,7 +47,6 @@ internal class BehovMediatorTest {
         assertEquals(listOf("type 1"), testRapid.inspektør.field(0, "@behov").map(JsonNode::asText))
         assertEquals("$contextId", testRapid.inspektør.field(0, "contextId").asText())
         assertEquals("$hendelseId", testRapid.inspektør.field(0, "hendelseId").asText())
-        assertEquals("$hendelseId", testRapid.inspektør.field(0, "spleisBehovId").asText())
         testRapid.inspektør.field(0, "type 1").also {
             assertEquals(1, it.path("param 1").asInt())
             assertEquals(2, it.path("param 2").asInt())
