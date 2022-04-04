@@ -82,8 +82,10 @@ internal class PersonMediator(
         val erSkjermet = egenAnsattDao.erEgenAnsatt(fødselsnummer)
 
         return when {
-            erSkjermet == null || (erSkjermet && !kanSeSkjermede) -> {
-                // Dette har vi ikke støtte for ennå, mangler å kunne finne om saksbehandler har tilgang til skjermede personer.
+            erSkjermet == null && !kanSeSkjermede -> {
+                SnapshotResponse(snapshot = null, tilstand = FINNES_IKKE)
+            }
+            erSkjermet == true && !kanSeSkjermede -> {
                 SnapshotResponse(snapshot = null, tilstand = INGEN_TILGANG)
             }
             erFortrolig && !kanSeKode7 -> {
@@ -98,8 +100,8 @@ internal class PersonMediator(
                     speilSnapshotDao.lagre(fødselsnummer, nyttSnapshot)
                 }
                 val snapshot = personsnapshotDao.finnPersonByFnr(fødselsnummer)?.let(::byggSpeilSnapshot)
-                if (snapshot != null) SnapshotResponse(snapshot, OK)
-                else SnapshotResponse(null, FINNES_IKKE)
+                    ?: return SnapshotResponse(null, FINNES_IKKE)
+                SnapshotResponse(snapshot, OK)
             }
         }
     }

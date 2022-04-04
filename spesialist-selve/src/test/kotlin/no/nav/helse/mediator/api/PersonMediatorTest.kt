@@ -36,6 +36,7 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     @BeforeEach
     fun setup() {
         every { restClient.hentSpeilSnapshot(any()) } returns TEST_SNAPSHOTV1
+        every { speilSnapshotRestClient.hentSpeilSnapshot(any()) } returns TEST_SNAPSHOTV1
     }
 
     @Test
@@ -523,10 +524,18 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     @Test
     fun `Skjermet person - kun saksbehandler med tilgang til skjermede personer kan søke opp personer`() {
         vedtak(Adressebeskyttelse.Ugradert, true)
-        assertNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot)
-
-        vedtak(Adressebeskyttelse.Ugradert, false)
-        assertNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, true).snapshot)
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).run {
+            assertNull(snapshot)
+            assertEquals(SnapshotTilstand.INGEN_TILGANG, tilstand)
+        }
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true, false).run {
+            assertNull(snapshot)
+            assertEquals(SnapshotTilstand.INGEN_TILGANG, tilstand)
+        }
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, true).run {
+            assertNotNull(snapshot)
+            assertEquals(SnapshotTilstand.OK, tilstand)
+        }
     }
 
     @Test
@@ -569,35 +578,21 @@ internal class PersonMediatorTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Ingen skal få se skjermede personer - per nå, det skal egentlig tilgangsstyres`() {
+    fun `Kun de uten tilgang får FINNES_IKKE hvis vi ikke har hentet skjermingsinfo ennå`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
         )
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendArbeidsforholdløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID
-        )
-        sendEgenAnsattløsning(
-            godkjenningsmeldingId = godkjenningsmeldingId,
-            erEgenAnsatt = true,
-        )
-
-        val response = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, true, false)
-        assertNull(response.snapshot)
-        assertEquals(SnapshotTilstand.INGEN_TILGANG, response.tilstand)
-
-        val responseUtenKode7 = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false)
-        assertNull(responseUtenKode7.snapshot)
-        assertEquals(SnapshotTilstand.INGEN_TILGANG, responseUtenKode7.tilstand)
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).run {
+            assertNull(snapshot)
+            assertEquals(SnapshotTilstand.FINNES_IKKE, tilstand)
+        }
+        personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, true).run {
+            assertNotNull(snapshot)
+            assertEquals(SnapshotTilstand.OK, tilstand)
+        }
     }
 
     private fun vedtak(adressebeskyttelse: Adressebeskyttelse, skjermet: Boolean = false) {
