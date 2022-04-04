@@ -329,8 +329,10 @@ type GraphQLUtbetaling {
   personFagsystemId: String!
   personNettoBelop: Int!
   personoppdrag: GraphQLOppdrag
-  status: String!
-  type: String!
+  status: String! @deprecated(reason : "Burde bruke enum \"statusEnum\"")
+  statusEnum: GraphQLUtbetalingstatus!
+  type: String! @deprecated(reason : "Burde bruke enum \"typeEnum\"")
+  typeEnum: Utbetalingtype!
   vurdering: GraphQLVurdering
 }
 
@@ -478,10 +480,31 @@ enum GraphQLUtbetalingsdagType {
   UkjentDag
 }
 
+enum GraphQLUtbetalingstatus {
+  Annullert
+  Forkastet
+  Godkjent
+  GodkjentUtenUtbetaling
+  IkkeGodkjent
+  Overfort
+  Sendt
+  Ubetalt
+  UtbetalingFeilet
+  Utbetalt
+}
+
 enum GraphQLVilkarsgrunnlagtype {
   Infotrygd
   Spleis
   Ukjent
+}
+
+enum Utbetalingtype {
+  ANNULLERING
+  ETTERUTBETALING
+  FERIEPENGER
+  REVURDERING
+  UTBETALING
 }
 
 scalar LocalDate

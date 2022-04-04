@@ -32,6 +32,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.mediator.graphql.enums.Utbetalingtype
 
 fun main() = runBlocking {
     Toggle.GraphQLApi.enable()
@@ -134,8 +136,8 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
         arbeidsgiverNettoBelop = 30000,
         personFagsystemId = "EN-PERSONFAGSYSTEMID",
         personNettoBelop = 0,
-        status = "UTBETALT",
-        type = "UTBETALING",
+        statusEnum = GraphQLUtbetalingstatus.GODKJENT,
+        typeEnum = Utbetalingtype.UTBETALING,
         vurdering = GraphQLVurdering(
             automatisk = false,
             godkjent = true,

@@ -10,6 +10,7 @@ import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.mediator.graphql.hentsnapshot.Alder
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
@@ -20,6 +21,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.mediator.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 enum class Behandlingstype { BEHANDLET, UBEREGNET, VENTER }
 
@@ -47,6 +49,29 @@ enum class Periodetilstand {
     Venter,
     VenterPaKiling,
     Ukjent
+}
+
+enum class Utbetalingstatus {
+    ANNULLERT,
+    FORKASTET,
+    GODKJENT,
+    GODKJENTUTENUTBETALING,
+    IKKEGODKJENT,
+    OVERFORT,
+    SENDT,
+    UBETALT,
+    UTBETALINGFEILET,
+    UTBETALT,
+    UKJENT
+}
+
+enum class Utbetalingtype {
+    ANNULLERING,
+    ETTERUTBETALING,
+    FERIEPENGER,
+    REVURDERING,
+    UTBETALING,
+    UKJENT
 }
 
 data class Vurdering(
@@ -106,8 +131,8 @@ data class Utbetaling(
     val arbeidsgiverNettoBelop: Int,
     val personFagsystemId: String,
     val personNettoBelop: Int,
-    val status: String,
-    val type: String,
+    val status: Utbetalingstatus,
+    val type: Utbetalingtype,
     val vurdering: Vurdering?,
     val arbeidsgiversimulering: Simulering?,
     val personsimulering: Simulering?
@@ -271,8 +296,27 @@ data class BeregnetPeriode(
             arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
             personFagsystemId = it.personFagsystemId,
             personNettoBelop = it.personNettoBelop,
-            status = it.status,
-            type = it.type,
+            status = when (it.statusEnum) {
+                GraphQLUtbetalingstatus.ANNULLERT -> Utbetalingstatus.ANNULLERT
+                GraphQLUtbetalingstatus.FORKASTET -> Utbetalingstatus.FORKASTET
+                GraphQLUtbetalingstatus.GODKJENT -> Utbetalingstatus.GODKJENT
+                GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> Utbetalingstatus.GODKJENTUTENUTBETALING
+                GraphQLUtbetalingstatus.IKKEGODKJENT -> Utbetalingstatus.IKKEGODKJENT
+                GraphQLUtbetalingstatus.OVERFORT -> Utbetalingstatus.OVERFORT
+                GraphQLUtbetalingstatus.SENDT -> Utbetalingstatus.SENDT
+                GraphQLUtbetalingstatus.UBETALT -> Utbetalingstatus.UBETALT
+                GraphQLUtbetalingstatus.UTBETALINGFEILET -> Utbetalingstatus.UTBETALINGFEILET
+                GraphQLUtbetalingstatus.UTBETALT -> Utbetalingstatus.UTBETALT
+                GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> Utbetalingstatus.UKJENT
+            },
+            type = when (it.typeEnum) {
+                GraphQLUtbetalingtype.ANNULLERING -> Utbetalingtype.ANNULLERING
+                GraphQLUtbetalingtype.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
+                GraphQLUtbetalingtype.FERIEPENGER -> Utbetalingtype.FERIEPENGER
+                GraphQLUtbetalingtype.REVURDERING -> Utbetalingtype.REVURDERING
+                GraphQLUtbetalingtype.UTBETALING -> Utbetalingtype.UTBETALING
+                GraphQLUtbetalingtype.__UNKNOWN_VALUE -> Utbetalingtype.UKJENT
+            },
             vurdering = it.vurdering?.let { vurdering ->
                 Vurdering(
                     automatisk = vurdering.automatisk,

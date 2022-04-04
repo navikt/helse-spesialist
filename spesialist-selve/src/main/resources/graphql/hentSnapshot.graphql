@@ -184,8 +184,8 @@ query HentSnapshot($fnr: String!) {
                             arbeidsgiverNettoBelop,
                             personFagsystemId,
                             personNettoBelop,
-                            status,
-                            type,
+                            statusEnum,
+                            typeEnum,
                             vurdering {
                                 automatisk,
                                 godkjent,
