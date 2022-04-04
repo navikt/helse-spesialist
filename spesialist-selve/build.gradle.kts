@@ -26,7 +26,7 @@ val graphqlIntrospectSchema by tasks.getting(GraphQLIntrospectSchemaTask::class)
 
 // Disabler automatisk kjøring av introspection siden henting av schema feiler under bygg på Github.
 // Kan kjøres manuelt for å hente nytt schema.
-graphqlIntrospectSchema.enabled = false
+graphqlIntrospectSchema.enabled = System.getenv("CI") != "true"
 
 val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
     val baseDir = "${project.projectDir}/src/main/resources/graphql"
