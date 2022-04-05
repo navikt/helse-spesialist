@@ -16,7 +16,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.command.KlargjørArbeidsforholdCommand
-import no.nav.helse.modell.arbeidsforhold.command.SjekkArbeidsforholdCommand
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
@@ -184,16 +183,6 @@ internal class Godkjenningsbehov(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
             vedtaksperiodeId = vedtaksperiodeId
-        ),
-        SjekkArbeidsforholdCommand(
-            fødselsnummer = fødselsnummer,
-            arbeidsforholdId = arbeidsforholdId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = periodetype,
-            skjæringstidspunkt = skjæringstidspunkt,
-            orgnummer = organisasjonsnummer,
-            arbeidsforholdDao = arbeidsforholdDao,
-            warningDao = warningDao
         ),
         RisikoCommand(
             vedtaksperiodeId = vedtaksperiodeId,
