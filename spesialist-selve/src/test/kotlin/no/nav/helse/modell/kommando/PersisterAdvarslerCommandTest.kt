@@ -4,6 +4,7 @@ import io.mockk.Ordering
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
@@ -36,5 +37,5 @@ internal class PersisterAdvarslerCommandTest {
         }
     }
 
-    private fun List<String>.somWarnings() = map { Warning(it, WarningKilde.Spleis) }
+    private fun List<String>.somWarnings() = map { Warning(it, WarningKilde.Spleis, LocalDateTime.now()) }
 }

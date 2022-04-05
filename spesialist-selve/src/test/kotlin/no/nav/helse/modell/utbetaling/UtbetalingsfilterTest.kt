@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import java.time.LocalDateTime
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtak.Warning
@@ -107,8 +108,8 @@ internal class UtbetalingsfilterTest {
 
     private companion object {
         private val toWarnings = listOf(
-            Warning("En warning fra Spesialist", WarningKilde.Spesialist),
-            Warning("En warning fra Spleis", WarningKilde.Spleis)
+            Warning("En warning fra Spesialist", WarningKilde.Spesialist, LocalDateTime.now()),
+            Warning("En warning fra Spleis", WarningKilde.Spleis, LocalDateTime.now())
         )
 
         private fun utbetalingsfilter(

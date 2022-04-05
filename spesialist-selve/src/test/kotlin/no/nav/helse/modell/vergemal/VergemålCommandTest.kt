@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vergemal
 
 import io.mockk.*
+import java.time.LocalDateTime
 import no.nav.helse.mediator.meldinger.Vergemålløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -20,9 +21,19 @@ class VergemålCommandTest {
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val warningMock = WarningMock()
-    private val forventetFullmaktWarnings = listOf(Warning("Registert fullmakt på personen.", WarningKilde.Spesialist))
+    private val forventetFullmaktWarnings = listOf(
+        Warning(
+            "Registert fullmakt på personen.",
+            WarningKilde.Spesialist,
+            LocalDateTime.now()
+        )
+    )
 
-    private val command = VergemålCommand(vergemålDao = vergemålDao, warningDao = warningMock.warningDao, vedtaksperiodeId = VEDTAKSPERIODE_ID)
+    private val command = VergemålCommand(
+        vergemålDao = vergemålDao,
+        warningDao = warningMock.warningDao,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID
+    )
     private lateinit var context: CommandContext
 
     private val ingenVergemål = Vergemål(harVergemål = false, harFremtidsfullmakter = false, harFullmakter = false)
@@ -30,7 +41,8 @@ class VergemålCommandTest {
     private val harFullmakt = Vergemål(harVergemål = false, harFremtidsfullmakter = true, harFullmakter = false)
     private val harFremtidsfullmakt = Vergemål(harVergemål = false, harFremtidsfullmakter = false, harFullmakter = true)
     private val harAlt = Vergemål(harVergemål = true, harFremtidsfullmakter = true, harFullmakter = true)
-    private val harBeggeFullmatkstyper = Vergemål(harVergemål = false, harFremtidsfullmakter = true, harFullmakter = true)
+    private val harBeggeFullmatkstyper =
+        Vergemål(harVergemål = false, harFremtidsfullmakter = true, harFullmakter = true)
 
     @BeforeEach
     fun setup() {

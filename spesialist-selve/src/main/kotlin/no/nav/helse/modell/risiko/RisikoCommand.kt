@@ -1,5 +1,6 @@
 package no.nav.helse.modell.risiko
 
+import java.time.LocalDateTime
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -47,12 +48,24 @@ internal class RisikoCommand(
     private fun Risikovurderingløsning.leggTilWarnings() {
         if (harArbeidsuførhetFunn()) {
             val melding = arbeidsuførhetsmelding()
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(
+                vedtaksperiodeId, Warning(
+                    melding = melding,
+                    kilde = WarningKilde.Spesialist,
+                    opprettet = LocalDateTime.now(),
+                )
+            )
             tellWarning(melding)
         }
         if (harFaresignalerFunn()) {
             val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
-            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist))
+            warningDao.leggTilWarning(
+                vedtaksperiodeId, Warning(
+                    melding = melding,
+                    kilde = WarningKilde.Spesialist,
+                    opprettet = LocalDateTime.now(),
+                )
+            )
             tellWarning(melding)
         }
     }

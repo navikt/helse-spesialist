@@ -66,7 +66,8 @@ internal class ÅpneGosysOppgaverCommandTest {
     fun `Lagrer warning ved åpne oppgaver`() {
         val forventetWarning = Warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
-            kilde = WarningKilde.Spesialist
+            kilde = WarningKilde.Spesialist,
+            opprettet = LocalDateTime.now()
         )
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command.resume(context))
@@ -78,7 +79,8 @@ internal class ÅpneGosysOppgaverCommandTest {
     fun `Lagrer warning ved oppslag feilet`() {
         val forventetWarning = Warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
-            kilde = WarningKilde.Spesialist
+            kilde = WarningKilde.Spesialist,
+            opprettet = LocalDateTime.now()
         )
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command.resume(context))

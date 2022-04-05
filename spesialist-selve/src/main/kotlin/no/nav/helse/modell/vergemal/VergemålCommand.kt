@@ -1,5 +1,6 @@
 package no.nav.helse.modell.vergemal
 
+import java.time.LocalDateTime
 import no.nav.helse.mediator.meldinger.Vergemålløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -44,7 +45,13 @@ internal class VergemålCommand(
 
 
     private fun String.leggTilSomWarning() {
-        warningDao.leggTilWarning(vedtaksperiodeId, Warning(this, WarningKilde.Spesialist))
+        warningDao.leggTilWarning(
+            vedtaksperiodeId, Warning(
+                melding = this,
+                kilde = WarningKilde.Spesialist,
+                opprettet = LocalDateTime.now(),
+            )
+        )
         tellWarning(this)
     }
 

@@ -28,7 +28,8 @@ internal class DigitalKontaktinformasjonløsning(
             vedtaksperiodeId,
             Warning(
                 melding,
-                WarningKilde.Spesialist
+                WarningKilde.Spesialist,
+                LocalDateTime.now(),
             )
         )
         tellWarning(melding)

@@ -1,5 +1,6 @@
 package no.nav.helse.modell
 
+import java.time.LocalDateTime
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.vedtak.Warning
@@ -42,17 +43,26 @@ internal class WarningDao(private val dataSource: DataSource) {
         warning.lagre(this, vedtakRef)
     }
 
-    internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde) = sessionOf(dataSource).use  { session ->
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO warning (melding, kilde, vedtak_ref) VALUES (?, CAST(? as warning_kilde), ?)"
-        session.run(queryOf(statement, melding, kilde.name, vedtakRef).asUpdate)
-    }
+    internal fun leggTilWarning(vedtakRef: Long, melding: String, kilde: WarningKilde, opprettet: LocalDateTime) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO warning (melding, kilde, vedtak_ref, opprettet) VALUES (?, CAST(? as warning_kilde), ?, ?)"
+            session.run(queryOf(statement, melding, kilde.name, vedtakRef, opprettet).asUpdate)
+        }
 
     internal fun finnWarnings(vedtaksperiodeId: UUID): List<Warning> = sessionOf(dataSource).use { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
+
         @Language("PostgreSQL")
         val statement = "SELECT * FROM warning where vedtak_ref = ?"
-        session.run(queryOf(statement, vedtakRef).map { Warning( melding = it.string("melding"), kilde = WarningKilde.valueOf(it.string("kilde"))) }.asList)
+        session.run(queryOf(statement, vedtakRef).map {
+            Warning(
+                melding = it.string("melding"),
+                kilde = WarningKilde.valueOf(it.string("kilde")),
+                opprettet = it.localDateTime("opprettet"),
+            )
+        }.asList)
     }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->

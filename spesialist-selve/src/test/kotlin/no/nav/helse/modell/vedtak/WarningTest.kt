@@ -3,6 +3,7 @@ package no.nav.helse.modell.vedtak
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
 import no.nav.helse.modell.WarningDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -23,37 +24,45 @@ internal class WarningTest {
 
     @Test
     fun `lagrer ikke tom melding`() {
-        Warning("", WarningKilde.Spleis).lagre(warningDao, VEDTAK_REF)
-        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAK_REF, any(), any()) }
+        Warning("", WarningKilde.Spleis, LocalDateTime.now()).lagre(warningDao, VEDTAK_REF)
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAK_REF, any(), any(), any()) }
     }
 
     @Test
     fun `lagrer ikke blank melding`() {
-        Warning("     ", WarningKilde.Spleis).lagre(warningDao, VEDTAK_REF)
-        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAK_REF, any(), any()) }
+        Warning("     ", WarningKilde.Spleis, LocalDateTime.now()).lagre(warningDao, VEDTAK_REF)
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAK_REF, any(), any(), any()) }
     }
 
     @Test
     fun `lagrer melding`() {
         val melding = "Warning"
         val kilde = WarningKilde.Spleis
-        Warning(melding, kilde).lagre(warningDao, VEDTAK_REF)
-        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAK_REF, melding, kilde) }
+        val opprettet = LocalDateTime.now()
+        Warning(melding, kilde, opprettet).lagre(warningDao, VEDTAK_REF)
+        verify(exactly = 1) { warningDao.leggTilWarning(VEDTAK_REF, melding, kilde, opprettet) }
     }
 
     @Test
     fun `henter ut meldinger`() {
         val melding1 = "Warning A"
         val melding2 = "Warning B"
-        assertEquals(listOf(melding1, melding2), Warning.meldinger(listOf(Warning(melding1, WarningKilde.Spleis), Warning(melding2, WarningKilde.Spleis))))
+        assertEquals(
+            listOf(melding1, melding2), Warning.meldinger(
+                listOf(
+                    Warning(melding1, WarningKilde.Spleis, LocalDateTime.now()),
+                    Warning(melding2, WarningKilde.Spleis, LocalDateTime.now())
+                )
+            )
+        )
     }
 
     @Test
     fun likhet() {
-        val warning1 = Warning("Warning A", WarningKilde.Spleis)
-        val warning2 = Warning("Warning A", WarningKilde.Spleis)
-        val warning3 = Warning("Warning A", WarningKilde.Spesialist)
-        val warning4 = Warning("Warning B", WarningKilde.Spleis)
+        val warning1 = Warning("Warning A", WarningKilde.Spleis, LocalDateTime.now())
+        val warning2 = Warning("Warning A", WarningKilde.Spleis, LocalDateTime.now())
+        val warning3 = Warning("Warning A", WarningKilde.Spesialist, LocalDateTime.now())
+        val warning4 = Warning("Warning B", WarningKilde.Spleis, LocalDateTime.now())
         assertEquals(warning1, warning1)
         assertEquals(warning1, warning2)
         assertNotEquals(warning1, warning3)

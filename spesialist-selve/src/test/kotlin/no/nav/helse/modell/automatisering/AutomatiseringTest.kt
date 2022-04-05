@@ -3,6 +3,7 @@ package no.nav.helse.modell.automatisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.VedtakDao
@@ -84,7 +85,8 @@ internal class AutomatiseringTest {
         every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(
             Warning(
                 "8.4 - Uenig i diagnose",
-                WarningKilde.Spesialist
+                WarningKilde.Spesialist,
+                LocalDateTime.now()
             )
         )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING, 1.januar, 31.januar) { fail("Denne skal ikke kalles") }

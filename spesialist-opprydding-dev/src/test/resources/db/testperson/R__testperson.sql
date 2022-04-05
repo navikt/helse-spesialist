@@ -4,27 +4,55 @@ INSERT INTO hendelse(id, data, type, fodselsnummer) VALUES ('${hendelse_id}', '{
 INSERT INTO vedtaksperiode_hendelse(hendelse_ref, vedtaksperiode_id) VALUES ('${hendelse_id}', '${vedtaksperiode_id}');
 INSERT INTO command_context(context_id, hendelse_id, tilstand, data) VALUES ('${command_context_id}', '${hendelse_id}', 'TESTTILSTAND', '{}'::json);
 INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
-INSERT INTO infotrygdutbetalinger(id, data) VALUES (${sequence_number}, '{}'::json);
-INSERT INTO person(id, fodselsnummer, aktor_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert) VALUES (${sequence_number}, ${fødselsnummer}, ${aktør_id}, ${sequence_number}, 101, now(), now(), ${sequence_number}, now());
-INSERT INTO arbeidsgiver_navn(id, navn, navn_oppdatert) VALUES (${sequence_number}, 'ARBEIDSGIVER', '2018-01-01');
-INSERT INTO arbeidsgiver_bransjer(id, bransjer, oppdatert) VALUES (${sequence_number}, 'BRANSJE', now());
-INSERT INTO arbeidsgiver(id, orgnummer, navn_ref, bransjer_ref) VALUES (${sequence_number}, ${organisasjonsnummer}, ${sequence_number}, ${sequence_number});
-INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert) VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 'STILLING', 100, now());
-UPDATE global_snapshot_versjon SET versjon = 1;
-INSERT INTO speil_snapshot(id, data, sist_endret, person_ref, versjon) VALUES (${sequence_number}, '{}'::json, '2018-01-01', ${sequence_number}, 1);
-INSERT INTO snapshot(id, data, person_ref, versjon) VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
-INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, speil_snapshot_ref, snapshot_ref) VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number}, ${sequence_number}, ${sequence_number});
-INSERT INTO warning(id, melding, vedtak_ref, kilde) VALUES (${sequence_number}, 'WARNING', ${sequence_number}, 'Spesialist');
-INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde) VALUES (${sequence_number}, 'SØKNAD', ${sequence_number}, 'EN_ARBEIDSGIVER');
-INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id) VALUES ('${vedtaksperiode_id}', '${utbetaling_id}');
-INSERT INTO egen_ansatt(person_ref, er_egen_ansatt, opprettet) VALUES (${sequence_number}, false, now());
-INSERT INTO vergemal(person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, opprettet) VALUES (${sequence_number}, false, false, false, now());
-INSERT INTO digital_kontaktinformasjon(person_ref, er_digital, opprettet) VALUES (${sequence_number}, true, now());
-INSERT INTO gosysoppgaver(person_ref, antall, oppslag_feilet, opprettet) VALUES (${sequence_number}, 0, false, now());
-INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data, opprettet) VALUES (${sequence_number}, '${vedtaksperiode_id}', false, false, '{}'::json, now());
-INSERT INTO automatisering(vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, opprettet, utbetaling_id) VALUES (${sequence_number}, '${hendelse_id}', false, false, now(), '${utbetaling_id}');
-INSERT INTO automatisering_problem(id, vedtaksperiode_ref, hendelse_ref, problem) VALUES (${sequence_number}, ${sequence_number}, '${hendelse_id}', 'PROBLEM');
-INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av, ferdigstilt_av_oid, command_context_id, type, utbetaling_id) VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}', 'SØKNAD', '${utbetaling_id}');
+INSERT INTO infotrygdutbetalinger(id, data)
+VALUES (${sequence_number}, '{}'::json);
+INSERT INTO person(id, fodselsnummer, aktor_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert,
+                   infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert)
+VALUES (${sequence_number}, ${fødselsnummer}, ${aktør_id}, ${sequence_number}, 101, now(), now(), ${sequence_number},
+        now());
+INSERT INTO arbeidsgiver_navn(id, navn, navn_oppdatert)
+VALUES (${sequence_number}, 'ARBEIDSGIVER', '2018-01-01');
+INSERT INTO arbeidsgiver_bransjer(id, bransjer, oppdatert)
+VALUES (${sequence_number}, 'BRANSJE', now());
+INSERT INTO arbeidsgiver(id, orgnummer, navn_ref, bransjer_ref)
+VALUES (${sequence_number}, ${organisasjonsnummer}, ${sequence_number}, ${sequence_number});
+INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent,
+                           oppdatert)
+VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 'STILLING', 100, now());
+UPDATE global_snapshot_versjon
+SET versjon = 1;
+INSERT INTO speil_snapshot(id, data, sist_endret, person_ref, versjon)
+VALUES (${sequence_number}, '{}'::json, '2018-01-01', ${sequence_number}, 1);
+INSERT INTO snapshot(id, data, person_ref, versjon)
+VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
+INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, speil_snapshot_ref, snapshot_ref)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number},
+        ${sequence_number}, ${sequence_number});
+INSERT INTO warning(id, melding, vedtak_ref, kilde, opprettet)
+VALUES (${sequence_number}, 'WARNING', ${sequence_number}, 'Spesialist', now());
+INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde)
+VALUES (${sequence_number}, 'SØKNAD', ${sequence_number}, 'EN_ARBEIDSGIVER');
+INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id)
+VALUES ('${vedtaksperiode_id}', '${utbetaling_id}');
+INSERT INTO egen_ansatt(person_ref, er_egen_ansatt, opprettet)
+VALUES (${sequence_number}, false, now());
+INSERT INTO vergemal(person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, opprettet)
+VALUES (${sequence_number}, false, false, false, now());
+INSERT INTO digital_kontaktinformasjon(person_ref, er_digital, opprettet)
+VALUES (${sequence_number}, true, now());
+INSERT INTO gosysoppgaver(person_ref, antall, oppslag_feilet, opprettet)
+VALUES (${sequence_number}, 0, false, now());
+INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data,
+                                 opprettet)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', false, false, '{}'::json, now());
+INSERT INTO automatisering(vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, opprettet, utbetaling_id)
+VALUES (${sequence_number}, '${hendelse_id}', false, false, now(), '${utbetaling_id}');
+INSERT INTO automatisering_problem(id, vedtaksperiode_ref, hendelse_ref, problem)
+VALUES (${sequence_number}, ${sequence_number}, '${hendelse_id}', 'PROBLEM');
+INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av, ferdigstilt_av_oid,
+                    command_context_id, type, utbetaling_id)
+VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}',
+        'SØKNAD', '${utbetaling_id}');
 
 INSERT INTO tildeling(saksbehandler_ref, gyldig_til, oppgave_id_ref, på_vent) VALUES ('${saksbehandler_oid}', now(), ${sequence_number}, false);
 INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til) VALUES ('${saksbehandler_oid}', ${sequence_number}, now());

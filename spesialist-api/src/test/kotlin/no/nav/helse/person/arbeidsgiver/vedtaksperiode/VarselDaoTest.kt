@@ -1,5 +1,6 @@
 package no.nav.helse.person.arbeidsgiver.vedtaksperiode
 
+import java.time.LocalDateTime
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.DatabaseIntegrationTest
@@ -23,7 +24,7 @@ internal class VarselDaoTest: DatabaseIntegrationTest() {
 
     private fun nyttVarsel(varseltekst: String = "Et varsel") = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val statement = "INSERT INTO warning(melding, vedtak_ref, kilde) VALUES (?, ?, ?::warning_kilde)"
-        session.run(queryOf(statement, varseltekst, vedtakId(), "Spesialist").asExecute)
+        val statement = "INSERT INTO warning(melding, vedtak_ref, kilde, opprettet) VALUES (?, ?, ?::warning_kilde, ?)"
+        session.run(queryOf(statement, varseltekst, vedtakId(), "Spesialist", LocalDateTime.now()).asExecute)
     }
 }

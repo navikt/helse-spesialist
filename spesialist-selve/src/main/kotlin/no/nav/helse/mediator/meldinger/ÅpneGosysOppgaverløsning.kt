@@ -34,7 +34,7 @@ internal class ÅpneGosysOppgaverløsning(
             val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
             warningDao.leggTilWarning(
                 vedtaksperiodeId,
-                Warning(melding, WarningKilde.Spesialist)
+                Warning(melding, WarningKilde.Spesialist, LocalDateTime.now())
             )
             tellWarning(melding)
         }
@@ -43,7 +43,7 @@ internal class ÅpneGosysOppgaverløsning(
             val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
             warningDao.leggTilWarning(
                 vedtaksperiodeId,
-                Warning(melding, WarningKilde.Spesialist)
+                Warning(melding, WarningKilde.Spesialist, LocalDateTime.now())
             )
             tellWarning(melding)
         }
