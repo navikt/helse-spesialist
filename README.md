@@ -16,7 +16,7 @@ legg til denne verdien
 
 ```testcontainers.reuse.enable=true```
 
-## Oppgradering av gradle
+## Oppgradering av gradle wrapper
 ```./gradlew wrapper --gradle-version $gradleVersjon```
 
 Finn nyeste versjon av gradle her: https://gradle.org/releases/
