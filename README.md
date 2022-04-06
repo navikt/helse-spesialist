@@ -17,9 +17,12 @@ legg til denne verdien
 ```testcontainers.reuse.enable=true```
 
 ## Oppgradering av gradle wrapper
+Finn nyeste versjon av gradle her: https://gradle.org/releases/
+
 ```./gradlew wrapper --gradle-version $gradleVersjon```
 
-Finn nyeste versjon av gradle her: https://gradle.org/releases/
+Husk å oppdater gradle versjon i build.gradle.kts filen
+```gradleVersion = "$gradleVersjon"```
 
 
 ### For NAV-ansatte

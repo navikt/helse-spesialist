@@ -89,7 +89,7 @@ subprojects {
         }
 
         withType<Wrapper> {
-            distributionType = Wrapper.DistributionType.ALL
+            gradleVersion = "7.4.2"
         }
 
         withType<Test> {
