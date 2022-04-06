@@ -88,6 +88,10 @@ subprojects {
             kotlinOptions.jvmTarget = jvmTargetVersion
         }
 
+        withType<Wrapper> {
+            distributionType = Wrapper.DistributionType.ALL
+        }
+
         withType<Test> {
             useJUnitPlatform()
             testLogging {
