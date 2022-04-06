@@ -17,4 +17,4 @@ legg til denne verdien
 ```testcontainers.reuse.enable=true```
 
 ### For NAV-ansatte
-Interne henvendelser kan sendes via Slack i kanalen #område-helse.
+Interne henvendelser kan sendes via Slack i kanalen ![#team-bømlo-værsågod](https://nav-it.slack.com/archives/C019637N90X).

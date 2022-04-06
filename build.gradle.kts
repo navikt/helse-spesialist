@@ -12,7 +12,7 @@ val mockkVersion = "1.12.3"
 val postgressqlVersion = "42.3.3"
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.20"
 }
 
 allprojects {
