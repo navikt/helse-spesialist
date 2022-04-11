@@ -127,6 +127,7 @@ data class Simulering(
 )
 
 data class Utbetaling(
+    val id: UUID,
     val arbeidsgiverFagsystemId: String,
     val arbeidsgiverNettoBelop: Int,
     val personFagsystemId: String,
@@ -292,6 +293,7 @@ data class BeregnetPeriode(
 
     fun utbetaling(): Utbetaling = periode.utbetaling.let {
         Utbetaling(
+            id = it.id,
             arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
             arbeidsgiverNettoBelop = it.arbeidsgiverNettoBelop,
             personFagsystemId = it.personFagsystemId,

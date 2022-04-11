@@ -180,6 +180,7 @@ query HentSnapshot($fnr: String!) {
                         }
                         skjaeringstidspunkt,
                         utbetaling {
+                            id,
                             arbeidsgiverFagsystemId,
                             arbeidsgiverNettoBelop,
                             personFagsystemId,

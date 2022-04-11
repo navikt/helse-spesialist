@@ -132,6 +132,7 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     ),
     skjaeringstidspunkt = "2020-01-01",
     utbetaling = GraphQLUtbetaling(
+        id = "EN-UTBETALING",
         arbeidsgiverFagsystemId = "EN-ARBEIDSGIVERFAGSYSTEMID",
         arbeidsgiverNettoBelop = 30000,
         personFagsystemId = "EN-PERSONFAGSYSTEMID",
