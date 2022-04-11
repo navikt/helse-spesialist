@@ -4,6 +4,8 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.SnapshotDao
@@ -13,6 +15,8 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class PersonQuery(
     personApiDao: PersonApiDao,
@@ -25,6 +29,8 @@ class PersonQuery(
     private val oppgaveDao: OppgaveDao,
     private val snapshotGraphQLClient: SpeilSnapshotGraphQLClient
 ) : AbstractPersonQuery(personApiDao) {
+
+    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     fun person(fnr: String? = null, aktorId: String? = null, env: DataFetchingEnvironment): DataFetcherResult<Person?> {
         if (fnr == null && aktorId == null) {
@@ -48,6 +54,7 @@ class PersonQuery(
         val snapshot = try {
             snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
         } catch (e: Exception) {
+            sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
             return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
         }
 
