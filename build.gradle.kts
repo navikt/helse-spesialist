@@ -28,6 +28,7 @@ allprojects {
     dependencies {
         implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
+        implementation("io.ktor:ktor-server-websockets:$ktorVersion")
         implementation("org.postgresql:postgresql:$postgressqlVersion")
         implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") //August, 2014
         {
