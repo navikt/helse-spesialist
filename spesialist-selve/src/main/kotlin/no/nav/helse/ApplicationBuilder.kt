@@ -31,6 +31,7 @@ import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
 import java.net.ProxySelector
@@ -294,6 +295,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     UUID.randomUUID().toString()
                 }
             }
+            install(WebSockets)
             installErrorHandling()
             install(CallLogging) {
                 disableDefaultColors()

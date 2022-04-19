@@ -16,6 +16,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
 import java.net.ServerSocket
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
@@ -147,6 +148,7 @@ abstract class AbstractApiTest {
 }
 
 internal fun Application.module(build: Route.() -> Unit) {
+    install(WebSockets)
     installErrorHandling()
     install(ContentNegotiationServer) {
         register(

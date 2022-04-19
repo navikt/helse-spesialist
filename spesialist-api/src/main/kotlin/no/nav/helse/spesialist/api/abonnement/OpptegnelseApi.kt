@@ -9,10 +9,15 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.websocket.webSocket
 import io.ktor.util.pipeline.*
+import io.ktor.websocket.Frame
 import java.util.*
+import org.slf4j.LoggerFactory
 
 fun Route.opptegnelseApi(opptegnelseMediator: OpptegnelseMediator) {
+    val log = LoggerFactory.getLogger("OpptegnelseApi")
+
     post("/api/opptegnelse/abonner/{aktørId}") {
         val saksbehandlerreferanse = getSaksbehandlerOid()
         val aktørId = call.parameters["aktørId"]!!.let {
@@ -39,6 +44,14 @@ fun Route.opptegnelseApi(opptegnelseMediator: OpptegnelseMediator) {
         val opptegnelser = opptegnelseMediator.hentAbonnerteOpptegnelser(saksbehandlerreferanse)
 
         call.respond(HttpStatusCode.OK, opptegnelser)
+    }
+
+    webSocket("/ws/opptegnelse") {
+        log.info("WebSocket opptegnelse")
+        for (frame in incoming) {
+            log.info("Incoming frame $frame")
+            this.outgoing.send(Frame.Text("Melding via WebSocket fra Spesialist"))
+        }
     }
 }
 
