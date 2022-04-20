@@ -3,11 +3,17 @@ import no.nav.helse.mediator.Toggle
 internal object TestToggles {
 
     internal fun Toggle.enable() {
-        _enabled = true
+        setPrivateValue(true)
     }
 
     internal fun Toggle.disable() {
-        _enabled = false
+        setPrivateValue(false)
     }
 
+    private fun Toggle.setPrivateValue(value: Boolean) {
+        this.javaClass.superclass.getDeclaredField("_enabled").let { field ->
+            field.isAccessible = true
+            field.set(this, value)
+        }
+    }
 }

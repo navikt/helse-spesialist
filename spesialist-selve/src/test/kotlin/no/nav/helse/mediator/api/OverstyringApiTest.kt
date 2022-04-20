@@ -1,8 +1,6 @@
 package no.nav.helse.mediator.api
 
 import AbstractE2ETest
-import TestToggles.disable
-import TestToggles.enable
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -12,7 +10,6 @@ import io.ktor.routing.*
 import io.ktor.server.testing.*
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
 import no.nav.helse.rapids_rivers.asLocalDate
