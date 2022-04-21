@@ -132,6 +132,7 @@ type GraphQLGenerasjon {
 type GraphQLGhostPeriode {
   deaktivert: Boolean!
   fom: LocalDate!
+  id: UUID!
   organisasjonsnummer: String!
   skjaeringstidspunkt: LocalDate!
   tom: LocalDate!

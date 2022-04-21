@@ -127,6 +127,7 @@ data class Person(
     private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<GhostPeriode> =
         map {
             GhostPeriode(
+                id = it.id,
                 fom = it.fom,
                 tom = it.tom,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,

@@ -70,6 +70,7 @@ query HentSnapshot($fnr: String!) {
         arbeidsgivere {
             organisasjonsnummer,
             ghostPerioder {
+                id,
                 fom,
                 tom,
                 skjaeringstidspunkt,

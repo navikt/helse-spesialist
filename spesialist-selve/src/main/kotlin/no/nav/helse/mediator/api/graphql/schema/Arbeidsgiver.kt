@@ -75,6 +75,7 @@ data class Arbeidsforholdoverstyring(
 ) : Overstyring
 
 data class GhostPeriode(
+    val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
     val skjaeringstidspunkt: LocalDate,
