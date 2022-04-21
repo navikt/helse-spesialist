@@ -13,6 +13,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
@@ -114,6 +115,7 @@ abstract class AbstractApiTest {
                             JacksonConverter(objectMapper)
                         )
                     }
+                    install(WebSockets)
                     val jwkProvider = jwtStub.getJwkProviderMock()
                     val azureConfig =
                         AzureAdAppConfig(
