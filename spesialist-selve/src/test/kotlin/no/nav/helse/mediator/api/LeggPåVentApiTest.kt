@@ -47,12 +47,12 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     fun `kan legge en oppgave på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/leggpaavent/${oppgavereferanse}") {
+            client.preparePost("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -65,12 +65,12 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     fun `kan fjerne på vent`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/leggpaavent/${oppgavereferanse}") {
+            client.prepareDelete("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -84,28 +84,28 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
         every { leggPåVentMediator.leggOppgavePåVent(any()) } throws OppgaveIkkeTildelt(1L)
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/leggpaavent/${oppgavereferanse}") {
+            client.preparePost("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertEquals(HttpStatusCode.FailedDependency, response.status)
-        val feil = runBlocking { response.receive<FeilDto>() }
+        val feil = runBlocking { response.body<FeilDto>() }
         assertEquals("oppgave_er_ikke_tildelt", feil.feilkode)
     }
 
     @Test
     fun `manglende oppgavereferanse POST gir Bad Request`() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/leggpaavent/null") {
+            client.preparePost("/api/leggpaavent/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
@@ -114,12 +114,12 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse DELETE gir Bad Request`() {
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/leggpaavent/null") {
+            client.prepareDelete("/api/leggpaavent/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
     }

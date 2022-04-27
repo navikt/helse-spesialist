@@ -1,17 +1,18 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.auth.authenticate
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.routing
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
@@ -108,7 +109,7 @@ abstract class AbstractApiTest {
         companion object {
             private fun createEmbeddedServer(build: Route.() -> Unit, httpPort: Int) =
                 embeddedServer(CIO, port = httpPort) {
-                    install(ContentNegotiation) {
+                    install(ContentNegotiationServer) {
                         register(
                             ContentType.Application.Json,
                             JacksonConverter(objectMapper)
@@ -144,8 +145,11 @@ abstract class AbstractApiTest {
                     port = httpPort
                 }
                 expectSuccess = false
-                install(JsonFeature) {
-                    serializer = JacksonSerializer(jackson = objectMapper)
+                install(ContentNegotiation) {
+                    register(
+                        ContentType.Application.Json,
+                        JacksonConverter(objectMapper)
+                    )
                 }
             }
         }

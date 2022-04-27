@@ -1,27 +1,24 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.application.install
-import io.ktor.auth.authenticate
 import io.ktor.client.HttpClient
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.host
-import io.ktor.client.request.port
-import io.ktor.client.request.post
-import io.ktor.client.statement.HttpResponse
-import io.ktor.features.ContentNegotiation
+import io.ktor.client.request.prepareGet
+import io.ktor.client.request.preparePost
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.jackson.JacksonConverter
-import io.ktor.routing.routing
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.auth.authenticate
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
+import io.ktor.server.routing.routing
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -60,11 +57,11 @@ internal class PersonApiTest {
         every { personMediator.erAktivOppgave(any()) } returns true
 
         val response = runBlocking {
-            client.post<HttpResponse>("/api/vedtak") {
+            client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
-                body = objectMapper.valueToTree(godkjenning)
+                setBody<GodkjenningDTO>(objectMapper.valueToTree(godkjenning))
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(HttpStatusCode.Created, response.status)
     }
@@ -74,11 +71,11 @@ internal class PersonApiTest {
         every { personMediator.erAktivOppgave(any()) } returns false
 
         val response = runBlocking {
-            client.post<HttpResponse>("/api/vedtak") {
+            client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
-                body = objectMapper.valueToTree(godkjenning)
+                setBody<GodkjenningDTO>(objectMapper.valueToTree(godkjenning))
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
     }
@@ -91,10 +88,10 @@ internal class PersonApiTest {
             INGEN_TILGANG
         )
         val response = runBlocking {
-            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+            client.prepareGet("/api/person/fnr/$FØDSELSNUMMER") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(HttpStatusCode.Forbidden, response.status)
     }
@@ -107,10 +104,10 @@ internal class PersonApiTest {
             INGEN_TILGANG
         )
         val response = runBlocking {
-            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+            client.prepareGet("/api/person/aktorId/$AKTØRID") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(HttpStatusCode.Forbidden, response.status)
     }
@@ -121,10 +118,10 @@ internal class PersonApiTest {
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(true), eq(false)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
-            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+            client.prepareGet("/api/person/fnr/$FØDSELSNUMMER") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP.toString()))
-            }
+            }.execute()
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
@@ -135,10 +132,10 @@ internal class PersonApiTest {
         every { personMediator.byggSpeilSnapshotForAktørId(any(), eq(true), eq(false)) } returns mockk(relaxed = true)
 
         val response = runBlocking {
-            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+            client.prepareGet("/api/person/aktorId/$AKTØRID") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID, listOf(KODE7_SAKSBEHANDLER_GROUP.toString()))
-            }
+            }.execute()
         }
         assertEquals(HttpStatusCode.OK, response.status)
     }
@@ -149,19 +146,19 @@ internal class PersonApiTest {
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false), eq(false)) } returns SnapshotResponse(null, INGEN_TILGANG)
 
         runBlocking {
-            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+            client.prepareGet("/api/person/aktorId/$AKTØRID") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }.apply {
             assertEquals(HttpStatusCode.Forbidden, status)
         }
 
         runBlocking {
-            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+            client.prepareGet("/api/person/fnr/$FØDSELSNUMMER") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }.apply {
             assertEquals(HttpStatusCode.Forbidden, status)
         }
@@ -173,19 +170,19 @@ internal class PersonApiTest {
         every { personMediator.byggSpeilSnapshotForFnr(any(), eq(false), eq(true)) } returns mockk(relaxed = true)
 
         runBlocking {
-            client.get<HttpResponse>("/api/person/aktorId/$AKTØRID") {
+            client.prepareGet("/api/person/aktorId/$AKTØRID") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID, listOf(SKJERMEDE_PERSONER_GROUP.toString()))
-            }
+            }.execute()
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
         }
 
         runBlocking {
-            client.get<HttpResponse>("/api/person/fnr/$FØDSELSNUMMER") {
+            client.prepareGet("/api/person/fnr/$FØDSELSNUMMER") {
                 contentType(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID, listOf(SKJERMEDE_PERSONER_GROUP.toString()))
-            }
+            }.execute()
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
         }
@@ -219,8 +216,8 @@ internal class PersonApiTest {
 
         }
         expectSuccess = false
-        install(JsonFeature) {
-            serializer = JacksonSerializer(jackson = objectMapper)
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
     }
 
@@ -228,7 +225,7 @@ internal class PersonApiTest {
     fun setup() {
 
         server = embeddedServer(CIO, port = httpPort) {
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
             val jwkProvider = jwtStub.getJwkProviderMock()
             val azureConfig = AzureAdAppConfig(

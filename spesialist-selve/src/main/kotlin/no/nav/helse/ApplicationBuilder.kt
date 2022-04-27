@@ -2,34 +2,35 @@ package no.nav.helse
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.auth.authenticate
-import io.ktor.auth.jwt.JWTPrincipal
-import io.ktor.auth.principal
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.features.CORS
-import io.ktor.features.CallId
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
-import io.ktor.features.callIdMdc
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.JacksonConverter
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.request.uri
-import io.ktor.response.respond
-import io.ktor.routing.routing
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.plugins.callid.CallId
+import io.ktor.server.plugins.callid.callIdMdc
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.cors.CORS
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
+import io.ktor.server.request.uri
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import java.net.ProxySelector
 import java.net.URI
@@ -113,14 +114,17 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
             }
         }
-        install(JsonFeature) {
-            serializer = JacksonSerializer {
-                registerModule(JavaTimeModule())
-            }
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(
+                jacksonObjectMapper()
+                    .registerModule(JavaTimeModule())
+            ))
         }
     }
     private val spleisClient = HttpClient(Apache) {
-        install(JsonFeature) { serializer = JacksonSerializer() }
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter())
+        }
         engine {
             socketTimeout = 120_000
             connectTimeout = 1_000
@@ -245,9 +249,9 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
-                header(HttpHeaders.AccessControlAllowOrigin)
-                host("speil.nais.adeo.no", listOf("https"))
-                host("spesialist.dev.intern.nav.no", listOf("https"))
+                allowHeader(HttpHeaders.AccessControlAllowOrigin)
+                allowHost("speil.nais.adeo.no", listOf("https"))
+                allowHost("spesialist.dev.intern.nav.no", listOf("https"))
             }
             install(CallId) {
                 generate {
@@ -278,7 +282,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     }
                 }
             }
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureConfig)
             graphQLApi(
@@ -355,13 +359,19 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 }
 
 fun Application.installErrorHandling() {
+
     install(StatusPages) {
-        exception<Throwable> { cause ->
+        exception<Throwable> { call, cause ->
             val uri = call.request.uri
             val verb = call.request.httpMethod.value
             logg.error("Unhandled: $verb", cause)
             sikkerlogg.error("Unhandled: $verb - $uri", cause)
+            call.respondText(
+                text ="Det skjedde en uventet feil",
+                status = HttpStatusCode.InternalServerError
+            )
             call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
+
         }
     }
 }

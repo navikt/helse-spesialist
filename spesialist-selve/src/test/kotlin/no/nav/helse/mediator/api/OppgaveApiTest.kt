@@ -1,20 +1,22 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.client.request.prepareGet
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.auth.authenticate
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.routing.routing
 import io.mockk.every
 import io.mockk.mockk
+import java.net.ServerSocket
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
@@ -27,9 +29,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.junit.jupiter.api.assertThrows
-import java.net.ServerSocket
-import java.util.*
+import kotlin.test.assertEquals
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class OppgaveApiTest {
@@ -40,7 +41,7 @@ internal class OppgaveApiTest {
     @BeforeAll
     fun setup() {
         embeddedServer(CIO, port = httpPort) {
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+            install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             val jwkProvider = jwtStub.getJwkProviderMock()
             val azureConfig = AzureAdAppConfig(
                 clientId = clientId,
@@ -68,28 +69,30 @@ internal class OppgaveApiTest {
             host = "localhost"
             port = httpPort
         }
-        install(JsonFeature) {
-            serializer = JacksonSerializer(jackson = objectMapper)
+        install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(objectMapper)
+            )
         }
     }
 
     @Test
-    fun `returnerer 400 bad request hvis fødselsnummer ikke er satt eller er null`() {
-        assertThrows<ClientRequestException> {
-            runBlocking {
-                client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", null) }.execute()
+    fun `returnerer 404 not found hvis fødselsnummer ikke er satt eller er null`() {
+        val response = runBlocking {
+                client.prepareGet("/api/v1/oppgave") { header("fodselsnummer", null) }.execute()
             }
-        }
+        assertEquals(response.status, HttpStatusCode.NotFound)
     }
 
     @Test
     fun `får 404 not found hvis oppgaven ikke finnes`() {
         every { oppgaveMediator.hentOppgaveId(any()) } returns null
-        assertThrows<ClientRequestException> {
-            runBlocking {
-                client.get<HttpStatement>("/api/v1/oppgave") { header("fodselsnummer", "42069") }.execute()
+        val response = runBlocking {
+                client.prepareGet("/api/v1/oppgave") { header("fodselsnummer", "42069")
+                }.execute()
             }
-        }
+        assertEquals(response.status, HttpStatusCode.NotFound)
     }
 
 }

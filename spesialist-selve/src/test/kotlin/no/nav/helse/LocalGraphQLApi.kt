@@ -1,10 +1,10 @@
 package no.nav.helse
 
 import TestToggles.enable
-import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.jackson.*
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

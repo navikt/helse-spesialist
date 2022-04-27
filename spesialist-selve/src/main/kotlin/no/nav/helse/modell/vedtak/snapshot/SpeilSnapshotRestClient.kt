@@ -48,7 +48,7 @@ class SpeilSnapshotRestClient(
         if (!response.status.isSuccess()) {
             throw RuntimeException("Feil ved henting av speilsnapshot. Statuskode: ${response.status.value}")
         }
-        response.receive()
+        response.body()
     } catch (e: IOException) {
         sikkerLogg.error(
             "Feil ved henting av snapshot for fødselsnummer: $fnr. Vi prøver ${retries - 1} ganger til.",

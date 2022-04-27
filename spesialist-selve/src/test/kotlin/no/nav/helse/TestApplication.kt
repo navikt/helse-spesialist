@@ -2,7 +2,7 @@ package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.application.*
+import io.ktor.server.application.Application
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.flywaydb.core.Flyway

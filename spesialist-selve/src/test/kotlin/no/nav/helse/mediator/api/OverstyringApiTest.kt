@@ -1,12 +1,12 @@
 package no.nav.helse.mediator.api
 
 import AbstractE2ETest
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.auth.authenticate
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.routing.routing
 import io.ktor.server.testing.*
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar

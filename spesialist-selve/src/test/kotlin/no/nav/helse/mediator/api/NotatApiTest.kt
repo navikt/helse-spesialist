@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api
 
+import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -47,12 +48,12 @@ internal class NotatApiTest: AbstractApiTest() {
     @Test
     fun `post av notat`() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/notater/$vedtaksperiodeId1") {
+            client.preparePost("/api/notater/$vedtaksperiodeId1") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = mapOf("tekst" to "en-tekst")
+                setBody(mapOf("tekst" to "en-tekst"))
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -65,10 +66,10 @@ internal class NotatApiTest: AbstractApiTest() {
     fun `feilregistrering av notat`() {
         every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)} returns true
         val response = runBlocking {
-            client.put<HttpResponse>("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
+            client.preparePut("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
                 accept(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -81,10 +82,10 @@ internal class NotatApiTest: AbstractApiTest() {
     fun `feilregistrering av annen saksbehandler sitt originale notat`() {
         every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)} returns false
         val response = runBlocking {
-            client.put<HttpResponse>("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
+            client.preparePut("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
                 accept(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertEquals(
@@ -97,12 +98,12 @@ internal class NotatApiTest: AbstractApiTest() {
     @Test
     fun `manglende vedtaksperiode på post gir trøbbel`() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/notater/null") {
+            client.preparePost("/api/notater/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = mapOf("tekst" to "en-tekst")
+                setBody(mapOf("tekst" to "en-tekst"))
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(
             response.status,
@@ -137,9 +138,9 @@ internal class NotatApiTest: AbstractApiTest() {
                 feilregistrert = false,
                 feilregistrert_tidspunkt = null))
         )
-        val response = client.get<Map<UUID, List<NotatDto>>>("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
+        val response = client.prepareGet("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
             authentication(SAKSBEHANDLER_OID)
-        }
+        }.execute().body<Map<UUID, List<NotatDto>>>()
         assertEquals(2, response.size)
     }
 

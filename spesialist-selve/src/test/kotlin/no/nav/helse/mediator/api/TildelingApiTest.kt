@@ -3,7 +3,6 @@ package no.nav.helse.mediator.api
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.mockk.clearMocks
 import io.mockk.every
@@ -49,12 +48,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     fun `kan tildele en oppgave til seg selv`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.preparePost("/api/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -67,12 +66,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     fun `kan slette en tildeling av en oppgave`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.prepareDelete("/api/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
@@ -87,16 +86,16 @@ internal class TildelingApiTest : AbstractApiTest() {
         every { tildelingMediator.tildelOppgaveTilSaksbehandler(any(), any(), any(), any(), any()) } throws tildeltFeil
         val oppgavereferanse = nextLong()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/${oppgavereferanse}") {
+            client.preparePost("/api/tildeling/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertEquals(HttpStatusCode.Conflict, response.status)
-        val feilDto = runBlocking { response.receive<FeilDto>() }
+        val feilDto = runBlocking { response.body<FeilDto>() }
         assertEquals( "oppgave_er_allerede_tildelt", feilDto.feilkode)
         val tildeling = objectMapper.valueToTree<JsonNode>(feilDto.kontekst["tildeling"])
         assertEquals("en annen saksbehandler", tildeling["navn"].asText())
@@ -106,12 +105,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse POST gir Bad Request`() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/tildeling/null") {
+            client.preparePost("/api/tildeling/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
 
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
@@ -120,12 +119,12 @@ internal class TildelingApiTest : AbstractApiTest() {
     @Test
     fun `manglende oppgavereferanse DELETE gir Bad Request`() {
         val response = runBlocking {
-            client.delete<HttpResponse>("/api/tildeling/null") {
+            client.prepareDelete("/api/tildeling/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = objectMapper.createObjectNode()
+                setBody(objectMapper.createObjectNode())
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertEquals(response.status, HttpStatusCode.BadRequest, "HTTP response burde returnere en Bad request, fikk ${response.status}")
     }

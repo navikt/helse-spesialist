@@ -22,7 +22,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
+    suspend fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
 
         val funn1 = listOf(Risikofunn(
@@ -49,16 +49,16 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
                 )
             }
                 .withAuthenticatedServer {
-                    it.get<HttpResponse>("/api/oppgaver") {
+                    it.prepareGet("/api/oppgaver") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID, riskQaGruppe.toString())
                     }
-                }
+                }.execute()
 
         Assertions.assertEquals(HttpStatusCode.OK, respons.status)
         val json = runBlocking {
-            objectMapper.readTree(respons.readText())
+            objectMapper.readTree(respons.bodyAsText())
         }
 
         assertEquals(listOf("RISK_QA", "SØKNAD"), json.map { it["oppgavetype"].asText() })

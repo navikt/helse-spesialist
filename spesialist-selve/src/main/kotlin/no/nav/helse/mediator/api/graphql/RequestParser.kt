@@ -2,7 +2,8 @@ package no.nav.helse.mediator.api.graphql
 
 import com.expediagroup.graphql.server.execution.GraphQLRequestParser
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
-import io.ktor.request.*
+import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.request.receiveText
 import no.nav.helse.objectMapper
 import java.io.IOException
 

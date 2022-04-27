@@ -3,7 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.helse.abonnement.OpptegnelseDto
 import no.nav.helse.abonnement.OpptegnelseMediator
@@ -23,7 +22,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
     private val SAKSBEHANDLER_ID = UUID.randomUUID()
 
     @Test
-    fun `Ved abonnering får du et nytt abonnement`() {
+    suspend fun `Ved abonnering får du et nytt abonnement`() {
         val utbetalingId = UUID.randomUUID()
         setupPerson()
         setupArbeidsgiver()
@@ -33,12 +32,12 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val respons =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
-                    it.post<HttpResponse>("/api/opptegnelse/abonner/$AKTØR") {
+                    it.preparePost("/api/opptegnelse/abonner/$AKTØR") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
                     }
-                }
+                }.execute()
 
         assertEquals(HttpStatusCode.OK, respons.status)
 
@@ -51,11 +50,11 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val opptegnelser =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
-                    it.get<HttpResponse>("/api/opptegnelse/hent") {
+                    it.prepareGet("/api/opptegnelse/hent") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
-                    }.call.receive<List<OpptegnelseDto>>()
+                    }.execute().call.body<List<OpptegnelseDto>>()
                 }
 
         assertEquals(1, opptegnelser.size)
@@ -63,11 +62,11 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
         val oppdateringer =
             AbstractApiTest.TestServer { opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao)) }
                 .withAuthenticatedServer {
-                    it.get<HttpResponse>("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
+                    it.prepareGet("/api/opptegnelse/hent/${opptegnelser[0].sekvensnummer}") {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
-                    }.call.receive<List<OpptegnelseDto>>()
+                    }.execute().call.body<List<OpptegnelseDto>>()
                 }
 
         assertEquals(0, oppdateringer.size)

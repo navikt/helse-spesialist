@@ -2,7 +2,6 @@ package no.nav.helse.mediator.api
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
@@ -33,11 +32,11 @@ class OpptegnelseApiTest : AbstractApiTest() {
     @Test
     fun oppdateringOk() {
         val response = runBlocking {
-            client.post<HttpResponse>("/api/opptegnelse/abonner/$AKTØR_ID") {
+            client.preparePost("/api/opptegnelse/abonner/$AKTØR_ID") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_ID)
-            }
+            }.execute()
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
     }
@@ -64,15 +63,15 @@ class OpptegnelseApiTest : AbstractApiTest() {
         every { opptegnelseMediator.hentAbonnerteOpptegnelser(any(), any()) } returns expected
 
         val response = runBlocking {
-            client.get<HttpResponse>("/api/opptegnelse/hent/123") {
+            client.prepareGet("/api/opptegnelse/hent/123") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 authentication(SAKSBEHANDLER_ID)
-            }
+            }.execute()
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
 
-        val actual = runBlocking { response.receive<List<OpptegnelseDto>>() }
+        val actual = runBlocking { response.body<List<OpptegnelseDto>>() }
         assertEquals(expected, actual)
     }
 

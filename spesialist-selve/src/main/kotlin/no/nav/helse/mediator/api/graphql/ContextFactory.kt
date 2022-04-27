@@ -4,9 +4,9 @@ package no.nav.helse.mediator.api.graphql
 
 import com.expediagroup.graphql.generator.execution.GraphQLContext
 import com.expediagroup.graphql.server.execution.GraphQLContextFactory
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.request.*
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.request.ApplicationRequest
 import java.util.*
 
 data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext

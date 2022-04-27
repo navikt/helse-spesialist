@@ -1,16 +1,17 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.application.call
-import io.ktor.auth.jwt.JWTPrincipal
-import io.ktor.auth.principal
+
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.response.respondText
-import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.post
+import io.ktor.server.application.call
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

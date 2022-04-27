@@ -33,16 +33,16 @@ class AccessTokenClient(
                 ?: run {
                     log.info("Henter nytt token fra Azure AD")
                     val response: AadAccessToken = try {
-                        httpClient.post(aadAccessTokenUrl) {
+                        httpClient.preparePost(aadAccessTokenUrl) {
                             accept(ContentType.Application.Json)
                             method = HttpMethod.Post
-                            body = FormDataContent(Parameters.build {
+                            setBody(FormDataContent(Parameters.build {
                                 append("client_id", clientId)
                                 append("scope", scope)
                                 append("grant_type", "client_credentials")
                                 append("client_secret", clientSecret)
-                            })
-                        }
+                            }))
+                        }.body()
                     } catch (e: Exception) {
                         throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
                     }

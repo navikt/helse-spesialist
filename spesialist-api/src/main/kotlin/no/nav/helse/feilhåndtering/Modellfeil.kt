@@ -1,8 +1,9 @@
 package no.nav.helse.feilhåndtering
 
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.response.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.response.respond
 import io.ktor.util.pipeline.*
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.tildeling.TildelingApiDto

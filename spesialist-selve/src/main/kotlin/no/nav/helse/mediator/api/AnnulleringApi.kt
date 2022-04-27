@@ -1,12 +1,13 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.call
+import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
 

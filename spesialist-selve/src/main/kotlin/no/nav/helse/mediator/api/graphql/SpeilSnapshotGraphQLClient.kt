@@ -5,7 +5,7 @@ import com.expediagroup.graphql.client.serializer.defaultGraphQLSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.delay
@@ -82,16 +82,16 @@ class SpeilSnapshotGraphQLClient(
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
-        val response = httpClient.post<String>(spleisUrl.resolve("graphql").toURL()) {
+        val response = httpClient.preparePost(spleisUrl.resolve("graphql").toURL()) {
             header("Authorization", "Bearer $accessToken")
             header("callId", callId)
             contentType(ContentType.Application.Json)
-            body = GraphQLRequestBody(
+            setBody(GraphQLRequestBody(
                 query = request.query,
                 variables = request.variables,
                 operationName = request.operationName,
-            )
-        }
+            ))
+        }.body<String>()
 
         val graphQLResponse = serializer.deserialize(response, request.responseType())
 

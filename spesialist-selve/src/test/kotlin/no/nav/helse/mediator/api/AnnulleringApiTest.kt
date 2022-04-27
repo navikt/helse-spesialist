@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.api
 
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.mockk.clearMocks
 import io.mockk.mockk
@@ -42,10 +41,10 @@ internal class AnnulleringApiTest : AbstractApiTest() {
     fun annulleringOk() {
         val clot = slot<AnnulleringDto>()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/annullering") {
+            client.preparePost("/api/annullering") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = mapOf(
+                setBody(mapOf(
                     "aktørId" to "en-aktørid",
                     "fødselsnummer" to "et-fødselsnummer",
                     "organisasjonsnummer" to "et-organisasjonsnummer",
@@ -53,9 +52,9 @@ internal class AnnulleringApiTest : AbstractApiTest() {
                     "saksbehandlerIdent" to "Z999999",
                     "kommentar" to "Russekort",
                     "begrunnelser" to listOf("Ingen liker fisk", "En giraff!!")
-                )
+                ))
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
@@ -69,18 +68,18 @@ internal class AnnulleringApiTest : AbstractApiTest() {
     fun annulleringTommeVerdier() {
         val clot = slot<AnnulleringDto>()
         val response = runBlocking {
-            client.post<HttpResponse>("/api/annullering") {
+            client.preparePost("/api/annullering") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                body = mapOf(
+                setBody(mapOf(
                     "aktørId" to "en-aktørid",
                     "fødselsnummer" to "et-fødselsnummer",
                     "organisasjonsnummer" to "et-organisasjonsnummer",
                     "fagsystemId" to "en-fagsystem-id",
                     "saksbehandlerIdent" to "Z999999"
-                )
+                ))
                 authentication(SAKSBEHANDLER_OID)
-            }
+            }.execute()
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {

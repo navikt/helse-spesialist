@@ -1,8 +1,8 @@
 val junitJupiterVersion = "5.8.2"
-val ktorVersion = "1.6.7"
+val ktorVersion = "2.0.0"
 val graphqlKotlinVersion = "5.3.2"
 val jvmTargetVersion = "17"
-val rapidsAndRiversVersion = "2022.04.05-09.40.11a466d7ac70"
+val rapidsAndRiversVersion = "2022.04.21-09.34.08966130226f"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.0.1"
 val flywayCoreVersion = "8.5.2"
@@ -12,7 +12,7 @@ val mockkVersion = "1.12.3"
 val postgressqlVersion = "42.3.3"
 
 plugins {
-    kotlin("jvm") version "1.6.20"
+    kotlin("jvm") version "1.6.21"
 }
 
 allprojects {
@@ -39,12 +39,12 @@ allprojects {
             exclude(group = "com.fasterxml.jackson.core")
             exclude(group = "com.fasterxml.jackson.module")
         }
-        implementation("io.ktor:ktor-jackson:$ktorVersion") {
-            exclude(group = "com.fasterxml.jackson.core")
-            exclude(group = "com.fasterxml.jackson.module")
-        }
+        implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+        implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+        implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+        implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
-        implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
+        implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
             exclude(group = "junit")
         }
 
@@ -56,6 +56,8 @@ allprojects {
         implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
             exclude("com.expediagroup:graphql-kotlin-client-serialization")
         }
+        implementation("io.ktor:ktor-server-cors:$ktorVersion")
+        implementation("io.ktor:ktor-server-call-id:$ktorVersion")
 
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
