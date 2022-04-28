@@ -343,7 +343,7 @@ data class BeregnetPeriode(
             )
         }
 
-    fun varsler(): List<String> = varselDao.finnVarsler(vedtaksperiodeId().java()).distinct()
+    fun varsler(): List<String> = varselDao.finnAktiveVarsler(vedtaksperiodeId().java()).distinct()
 
     fun refusjon(): Refusjon? = periode.refusjon?.let { refusjon ->
         Refusjon(

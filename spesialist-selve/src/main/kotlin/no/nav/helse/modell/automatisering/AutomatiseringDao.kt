@@ -17,6 +17,31 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
     internal fun stikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID) =
         lagre(automatisert = false, stikkprøve = true, vedtaksperiodeId, hendelseId, utbetalingId = utbetalingId)
 
+    internal fun deleteAutomatisering(vedtaksperiodeId: UUID, hendelseId: UUID) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query =
+            """ DELETE FROM automatisering a
+                WHERE vedtaksperiode_ref = (SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiode_id LIMIT 1)
+                AND hendelse_ref = :hendelse_ref
+            """
+        session.run(
+            queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId, "hendelse_ref" to hendelseId)).asUpdate
+        )
+    }
+
+    internal fun deleteAutomatiseringProblem(vedtaksperiodeId: UUID, hendelseId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                """ DELETE FROM automatisering_problem
+                    WHERE vedtaksperiode_ref = (SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = ? LIMIT 1)
+                    AND hendelse_ref = :hendelse_ref
+                """
+            session.run(
+                queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId, "hendelse_ref" to hendelseId)).asUpdate
+            )
+        }
+
     private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList(), utbetalingId: UUID) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->

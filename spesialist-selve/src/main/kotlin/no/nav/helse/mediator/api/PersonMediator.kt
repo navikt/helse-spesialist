@@ -219,7 +219,7 @@ internal class PersonMediator(
                         val vedtaksperiodeId = UUID.fromString(vedtaksperiode["id"].asText())
                         val oppgaveId = oppgaveDao.finnOppgaveId(vedtaksperiodeId)
                         val risikovurdering = risikovurderingApiDao.finnRisikovurdering(vedtaksperiodeId)
-                        val varsler = varselDao.finnVarsler(vedtaksperiodeId)
+                        val varsler = varselDao.finnAktiveVarsler(vedtaksperiodeId)
 
                         vedtaksperiode as ObjectNode
                         vedtaksperiode.put("oppgavereferanse", oppgaveId?.toString())

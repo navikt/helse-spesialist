@@ -114,7 +114,7 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
         VedtaksperiodeGodkjent(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+            warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId).map { it.dto() },
             periodetype = vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId),
             løsning = objectMapper.convertValue(løsning)
         )
@@ -127,7 +127,7 @@ internal class UtbetalingsgodkjenningMessage(json: String) {
     ) = VedtaksperiodeAvvist(
         vedtaksperiodeId = vedtaksperiodeId,
         fødselsnummer = fødselsnummer,
-        warnings = warningDao.finnWarnings(vedtaksperiodeId).map { it.dto() },
+        warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId).map { it.dto() },
         periodetype = vedtakDao.finnVedtakId(vedtaksperiodeId)?.let { vedtakDao.finnVedtaksperiodetype(vedtaksperiodeId) },
         løsning = objectMapper.convertValue(løsning)
     )

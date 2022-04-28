@@ -524,6 +524,36 @@ internal class Hendelsefabrikk(
         )
     }
 
+    override fun gosysOppgaveEndret(
+        json: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        utbetalingtype: Utbetalingtype,
+        hendelseId: UUID,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        godkjenningsbehovJson: String,
+    ): GosysOppgaveEndret {
+        val jsonNode = mapper.readTree(json)
+        return GosysOppgaveEndret(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            aktørId = jsonNode["aktørId"].asText(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            utbetalingtype = utbetalingtype,
+            hendelseId = hendelseId,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            json = json,
+            godkjenningsbehovJson = godkjenningsbehovJson,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            warningDao = warningDao,
+            automatisering = automatisering,
+            godkjenningMediator = godkjenningMediator
+        )
+    }
+
     override fun revurderingAvvist(json: String): RevurderingAvvist {
         val jsonNode = mapper.readTree(json)
         return RevurderingAvvist(

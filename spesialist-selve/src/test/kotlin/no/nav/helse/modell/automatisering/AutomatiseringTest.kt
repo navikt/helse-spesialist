@@ -62,7 +62,7 @@ internal class AutomatiseringTest {
     @BeforeEach
     fun setupDefaultTilHappyCase() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
-        every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns emptyList()
+        every { warningDaoMock.finnAktiveWarnings(vedtaksperiodeId) } returns emptyList()
         every { vedtakDaoMock.finnVedtaksperiodetype(vedtaksperiodeId) } returns Periodetype.FORLENGELSE
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
@@ -82,7 +82,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
-        every { warningDaoMock.finnWarnings(vedtaksperiodeId) } returns listOf(
+        every { warningDaoMock.finnAktiveWarnings(vedtaksperiodeId) } returns listOf(
             Warning(
                 "8.4 - Uenig i diagnose",
                 WarningKilde.Spesialist,

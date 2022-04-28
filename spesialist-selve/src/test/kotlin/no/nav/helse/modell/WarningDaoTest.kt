@@ -20,7 +20,7 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         val testwarning = Warning("Warning C", WarningKilde.Spesialist, LocalDateTime.now())
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings)
         warningDao.leggTilWarning(VEDTAKSPERIODE, testwarning)
-        assertWarnings(testwarnings + listOf(testwarning), warningDao.finnWarnings(VEDTAKSPERIODE))
+        assertWarnings(testwarnings + listOf(testwarning), warningDao.finnAktiveWarnings(VEDTAKSPERIODE))
     }
 
     @Test
@@ -38,7 +38,7 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
             Warning("Warning D", WarningKilde.Spleis, LocalDateTime.now())
         )
         warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarnings2)
-        assertWarnings(testwarnings1 + testwarnings2, warningDao.finnWarnings(VEDTAKSPERIODE))
+        assertWarnings(testwarnings1 + testwarnings2, warningDao.finnAktiveWarnings(VEDTAKSPERIODE))
     }
 
     @Test
@@ -54,7 +54,7 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
             Warning("Warning D", WarningKilde.Spleis, LocalDateTime.now())
         )
         warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, testwarnings2)
-        assertWarnings((listOf(spesialistWarning) + testwarnings2), warningDao.finnWarnings(VEDTAKSPERIODE))
+        assertWarnings((listOf(spesialistWarning) + testwarnings2), warningDao.finnAktiveWarnings(VEDTAKSPERIODE))
     }
 
     private fun assertWarnings(expected: List<Warning>, result: List<Warning>) {

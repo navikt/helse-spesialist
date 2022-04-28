@@ -51,11 +51,16 @@ internal class WarningDao(private val dataSource: DataSource) {
             session.run(queryOf(statement, melding, kilde.name, vedtakRef, opprettet).asUpdate)
         }
 
-    internal fun finnWarnings(vedtaksperiodeId: UUID): List<Warning> = sessionOf(dataSource).use { session ->
+    internal fun finnAktiveWarnings(vedtaksperiodeId: UUID): List<Warning> = sessionOf(dataSource).use { session ->
         val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
 
         @Language("PostgreSQL")
-        val statement = "SELECT * FROM warning where vedtak_ref = ?"
+        val statement = """
+            SELECT * FROM warning 
+            WHERE vedtak_ref = ? 
+            AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
+        """.trimIndent()
+
         session.run(queryOf(statement, vedtakRef).map {
             Warning(
                 melding = it.string("melding"),
@@ -64,6 +69,45 @@ internal class WarningDao(private val dataSource: DataSource) {
             )
         }.asList)
     }
+
+    internal fun finnAktiveWarningsMedMelding(vedtaksperiodeId: UUID, melding: String): List<Warning> = sessionOf(dataSource).use { session ->
+        val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return emptyList()
+
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT * FROM warning 
+            WHERE vedtak_ref = :vedtak_ref
+            AND melding = :melding
+            AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
+        """.trimIndent()
+
+        session.run(queryOf(statement, mapOf("vedtak_ref" to vedtakRef, "melding" to melding)).map {
+            Warning(
+                melding = it.string("melding"),
+                kilde = WarningKilde.valueOf(it.string("kilde")),
+                opprettet = it.localDateTime("opprettet"),
+            )
+        }.asList)
+    }
+
+    internal fun setWarningMedMeldingInaktiv(vedtaksperiodeId: UUID, melding: String, inaktiv_fra: LocalDateTime) =
+        sessionOf(dataSource).use { session ->
+            val vedtakRef = finnVedtakId(vedtaksperiodeId) ?: return@use
+
+            @Language("PostgreSQL")
+            val statement = """
+                UPDATE warning 
+                SET inaktiv_fra = :inaktiv_fra 
+                WHERE vedtak_ref = :vedtak_ref
+                AND melding = :melding
+            """.trimIndent()
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf("inaktiv_fra" to inaktiv_fra, "vedtak_ref" to vedtakRef, "melding" to melding)
+                ).asUpdate
+            )
+        }
 
     private fun finnVedtakId(vedtaksperiodeId: UUID) = sessionOf(dataSource).use  { session ->
         @Language("PostgreSQL")

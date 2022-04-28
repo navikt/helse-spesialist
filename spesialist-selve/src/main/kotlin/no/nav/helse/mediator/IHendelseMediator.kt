@@ -147,4 +147,9 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
+    fun gosysOppgaveEndret(
+        message: JsonMessage,
+        context: MessageContext
+    )
+
 }

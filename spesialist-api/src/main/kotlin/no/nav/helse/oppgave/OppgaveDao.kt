@@ -30,7 +30,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             val query = """
             SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                    pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
-                   (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref) AS antall_varsler
+                   (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
@@ -206,6 +206,26 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
+
+    fun gosysOppgaveEndretArbeidsdata(oppgaveId: Long): GosysOppgaveEndretArbeidsdata? =
+        """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetalingId, uid.type as utbetalingType, h.id as hendelseId, h.data as godkjenningbehovJson
+            FROM vedtak v
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            INNER JOIN utbetaling_id uid on v.person_ref = uid.person_ref
+            INNER JOIN command_context cc on o.command_context_id = cc.id
+            INNER JOIN hendelse h on cc.hendelse_id = h.id
+            WHERE o.id = :oppgaveId 
+        """.single(mapOf("oppgaveId" to oppgaveId)) {
+            GosysOppgaveEndretArbeidsdata(
+                vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
+                periodeFom = it.localDate("fom"),
+                periodeTom = it.localDate("tom"),
+                utbetalingId = it.uuid("utbetalingId"),
+                utbetalingType = it.string("utbetalingType"),
+                hendelseId = it.uuid("hendelseId"),
+                godkjenningsbehovJson = it.string("godkjenningbehovJson")
+            )
+        }
 
     private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),

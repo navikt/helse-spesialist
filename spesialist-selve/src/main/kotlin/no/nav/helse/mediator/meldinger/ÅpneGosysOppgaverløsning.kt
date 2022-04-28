@@ -11,6 +11,7 @@ import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.tellWarningInaktiv
 
 internal class ÅpneGosysOppgaverløsning(
     private val opprettet: LocalDateTime,
@@ -39,8 +40,16 @@ internal class ÅpneGosysOppgaverløsning(
             tellWarning(melding)
         }
 
-        antall?.takeIf { it > 0 }?.also {
-            val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
+        if (antall == null) return
+
+        val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
+        val eksisterendeWarningsMedGosysMelding = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding)
+        if (antall == 0) {
+            warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
+            if (eksisterendeWarningsMedGosysMelding.isNotEmpty()) {
+                tellWarningInaktiv(melding)
+            }
+        } else if (antall > 0 && eksisterendeWarningsMedGosysMelding.isEmpty()) {
             warningDao.leggTilWarning(
                 vedtaksperiodeId,
                 Warning(melding, WarningKilde.Spesialist, LocalDateTime.now())

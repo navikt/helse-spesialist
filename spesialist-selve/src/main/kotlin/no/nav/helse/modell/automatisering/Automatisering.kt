@@ -35,6 +35,11 @@ internal class Automatisering(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
+    internal fun reset(vedtaksperiodeId: UUID, hendelseId: UUID) {
+        automatiseringDao.deleteAutomatisering(vedtaksperiodeId, hendelseId)
+        automatiseringDao.deleteAutomatiseringProblem(vedtaksperiodeId, hendelseId)
+    }
+
     internal fun utfør(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
@@ -72,7 +77,7 @@ internal class Automatisering(
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
-        val warnings = warningDao.finnWarnings(vedtaksperiodeId)
+        val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
         val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false

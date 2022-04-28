@@ -126,4 +126,14 @@ internal interface IHendelsefabrikk {
     fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet
+    fun gosysOppgaveEndret(
+        json: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        utbetalingtype: Utbetalingtype,
+        hendelseId: UUID,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        godkjenningsbehovJson: String,
+    ): GosysOppgaveEndret
 }

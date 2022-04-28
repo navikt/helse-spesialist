@@ -965,7 +965,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertTrue(sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
+                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is null or inaktiv_fra > now())",
                     mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId
                     )

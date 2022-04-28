@@ -31,7 +31,7 @@ internal class VedtaksperiodeEndretTest : AbstractE2ETest() {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement =
-                "SELECT * FROM warning where kilde='Spleis' AND vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
+                "SELECT * FROM warning where kilde='Spleis' AND vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?) and (inaktiv_fra is null or inaktiv_fra > now())"
             session.run(queryOf(statement, vedtaksperiodeId).map {
                 it.int("id") to it.localDateTime("opprettet")
             }.asList).toMap()

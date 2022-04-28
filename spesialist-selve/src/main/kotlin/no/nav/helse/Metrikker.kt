@@ -28,7 +28,13 @@ private val warningteller = Counter.build("aktivitet_totals", "Teller antall war
     .labelNames("alvorlighetsgrad", "melding")
     .register()
 
+private val inaktiveWarningteller = Counter.build("inaktive_warning_totals", "Teller antall warnings satt inaktive i Spesialist")
+    .labelNames("alvorlighetsgrad", "melding")
+    .register()
+
 internal fun tellWarning(warning: String) = warningteller.labels("WARN", warning).inc()
+
+internal fun tellWarningInaktiv(warning: String) = inaktiveWarningteller.labels("WARN", warning).inc()
 
 internal fun <T> measureAsHistogram(measurement: String, block: () -> T): T {
     val result: T
