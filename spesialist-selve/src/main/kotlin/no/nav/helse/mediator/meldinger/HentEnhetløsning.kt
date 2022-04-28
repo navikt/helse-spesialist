@@ -28,8 +28,6 @@ internal class HentEnhetløsning(private val enhetNr: String) {
             infotrygdutbetalingerId = infotrygdutbetalingerId
         )
 
-    internal fun tilhørerUtlandEnhet() = erEnhetUtland(enhetNr)
-
     fun oppdater(personDao: PersonDao, fødselsnummer: String) =
         personDao.updateEnhet(fødselsnummer, enhetNr.toInt())
 
