@@ -585,7 +585,7 @@ internal class HendelseMediator(
 
     private fun utfør(hendelse: Hendelse, messageContext: MessageContext) {
         val contextId = UUID.randomUUID()
-        log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id}")
+        log.info("oppretter ny kommandokontekst med context_id=$contextId for hendelse_id=${hendelse.id} og type=${hendelse::class.simpleName}")
         utfør(hendelse, nyContext(hendelse, contextId), contextId, messageContext)
     }
 
