@@ -1,12 +1,13 @@
 package no.nav.helse.modell.kommando
 
-import TestToggles.disable
-import TestToggles.enable
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.mediator.graphql.HentSnapshot
@@ -16,7 +17,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 import kotlin.test.assertTrue
 
 internal class OppdaterSnapshotCommandTest {

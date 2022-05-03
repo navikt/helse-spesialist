@@ -1,20 +1,41 @@
 package no.nav.helse
 
-import TestToggles.enable
-import io.ktor.http.*
+import ToggleHelpers.enable
+import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.mockk.every
 import io.mockk.mockk
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.hentsnapshot.*
+import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.mediator.graphql.enums.Utbetalingtype
+import no.nav.helse.mediator.graphql.hentsnapshot.Alder
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimulering
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimuleringsdetaljer
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimuleringsperiode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVurdering
+import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
@@ -27,13 +48,6 @@ import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.EnhetDto
 import no.nav.helse.vedtaksperiode.VarselDao
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
-import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.mediator.graphql.enums.Utbetalingtype
 
 fun main() = runBlocking {
     Toggle.GraphQLApi.enable()
