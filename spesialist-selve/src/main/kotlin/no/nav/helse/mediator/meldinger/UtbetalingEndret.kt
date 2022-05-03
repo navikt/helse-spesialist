@@ -1,6 +1,8 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.IHendelseMediator
@@ -16,12 +18,15 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.River.PacketListener
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 internal class UtbetalingEndret(
     override val id: UUID,
@@ -95,7 +100,7 @@ internal class UtbetalingEndret(
             val utbetalingType : Utbetalingtype = Utbetalingtype.valueOf(packet["type"].asText())
 
             sikkerLogg.info(
-                "Mottok utbetalt event for {}, {}",
+                "Mottok utbetaling_endret for {}, {}",
                 keyValue("fødselsnummer", fødselsnummer),
                 keyValue("utbetalingId", utbetalingId)
             )
