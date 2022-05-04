@@ -414,7 +414,9 @@ internal class Hendelsefabrikk(
             warningDao = warningDao,
             speilSnapshotDao = speilSnapshotDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotDao = snapshotDao
         )
     }
 
@@ -441,6 +443,8 @@ internal class Hendelsefabrikk(
             speilSnapshotDao = speilSnapshotDao,
             utbetalingDao = utbetalingDao,
             saksbehandlerDao = saksbehandlerDao,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotDao = snapshotDao
         )
     }
 
@@ -500,7 +504,9 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             json = json,
             speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotDao = speilSnapshotDao
+            speilSnapshotDao = speilSnapshotDao,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotDao = snapshotDao
         )
     }
 

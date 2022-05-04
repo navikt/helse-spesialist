@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import java.util.UUID
+import no.nav.helse.graphQLSnapshot
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
@@ -30,6 +31,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
         assertVedtak(vedtaksperiodeId2)
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         sendUtbetalingAnnullert(saksbehandlerEpost = epost)
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)

@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.graphQLSnapshot
 
 internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
@@ -22,6 +23,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2)
 
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         sendOppdaterPersonsnapshot()
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
@@ -43,6 +45,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String, utbetalingId: UUID) {
 
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,

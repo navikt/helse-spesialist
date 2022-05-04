@@ -12,19 +12,25 @@ import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.modell.SnapshotDao
 
 internal class OppdaterPersonsnapshot(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
-    speilSnapshotDao: SpeilSnapshotDao
+    speilSnapshotDao: SpeilSnapshotDao,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    snapshotDao: SnapshotDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
             speilSnapshotDao = speilSnapshotDao,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = fødselsnummer,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotDao = snapshotDao
         )
     )
 

@@ -16,6 +16,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.modell.SnapshotDao
 
 internal class UtbetalingAnnullert(
     override val id: UUID,
@@ -27,13 +29,17 @@ internal class UtbetalingAnnullert(
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     speilSnapshotDao: SpeilSnapshotDao,
     utbetalingDao: UtbetalingDao,
-    saksbehandlerDao: SaksbehandlerDao
+    saksbehandlerDao: SaksbehandlerDao,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    snapshotDao: SnapshotDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
             speilSnapshotDao = speilSnapshotDao,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = fødselsnummer,
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotDao = snapshotDao
         ),
         LagreAnnulleringCommand(
             utbetalingDao = utbetalingDao,

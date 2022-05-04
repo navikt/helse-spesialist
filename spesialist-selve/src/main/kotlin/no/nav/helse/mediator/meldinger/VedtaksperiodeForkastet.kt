@@ -17,6 +17,9 @@ import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 
 internal class VedtaksperiodeForkastet(
     override val id: UUID,
@@ -28,11 +31,14 @@ internal class VedtaksperiodeForkastet(
     warningDao: WarningDao,
     speilSnapshotDao: SpeilSnapshotDao,
     oppgaveMediator: OppgaveMediator,
-    speilSnapshotRestClient: SpeilSnapshotRestClient
+    speilSnapshotRestClient: SpeilSnapshotRestClient,
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    snapshotDao: SnapshotDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
-        OppdaterSpeilSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, speilSnapshotDao, vedtaksperiodeId, fødselsnummer)
+        OppdaterSpeilSnapshotCommand(speilSnapshotRestClient, vedtakDao, warningDao, speilSnapshotDao, vedtaksperiodeId, fødselsnummer),
+        OppdaterSnapshotCommand(speilSnapshotGraphQLClient, vedtakDao, snapshotDao, vedtaksperiodeId, fødselsnummer, warningDao)
     )
 
     override fun fødselsnummer() = fødselsnummer

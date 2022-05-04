@@ -15,6 +15,7 @@ import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.graphQLSnapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -985,6 +986,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         risikofunn: List<Risikofunn> = emptyList()
     ): UUID {
         every { restClient.hentSpeilSnapshot(fødselsnummer) } returns snapshot
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
