@@ -23,7 +23,7 @@ import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import no.nav.helse.mediator.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
-enum class Behandlingstype { BEHANDLET, UBEREGNET, VENTER }
+enum class Behandlingstype { BEHANDLET, UBEREGNET, VENTER, VENTER_PA_INFORMASJON }
 
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
 
@@ -196,6 +196,7 @@ interface Periode {
         GraphQLBehandlingstype.BEHANDLET -> Behandlingstype.BEHANDLET
         GraphQLBehandlingstype.UBEREGNET -> Behandlingstype.UBEREGNET
         GraphQLBehandlingstype.VENTER -> Behandlingstype.VENTER
+        GraphQLBehandlingstype.VENTERPAINFORMASJON -> Behandlingstype.VENTER_PA_INFORMASJON
         else -> throw Exception("Ukjent behandlingstype ${periode.behandlingstype}")
     }
 

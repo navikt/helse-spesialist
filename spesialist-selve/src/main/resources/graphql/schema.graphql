@@ -402,6 +402,7 @@ enum GraphQLBehandlingstype {
   Behandlet
   Uberegnet
   Venter
+  VenterPaInformasjon
 }
 
 enum GraphQLHendelsetype {
