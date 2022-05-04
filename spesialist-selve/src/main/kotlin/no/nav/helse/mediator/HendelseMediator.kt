@@ -574,12 +574,12 @@ internal class HendelseMediator(
     }
 
     private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: MessageContext) {
-        if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
+        if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
         return utfør(hendelse, messageContext)
     }
 
     private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: MessageContext) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.debug("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til personen")
         return utfør(hendelse, messageContext)
     }
 
