@@ -5,7 +5,6 @@ import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.SpeilSnapshotDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
@@ -16,31 +15,31 @@ import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.modell.person.PersonDao
 
 internal class VedtaksperiodeEndret(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val json: String,
-    vedtakDao: VedtakDao,
     warningDao: WarningDao,
     speilSnapshotDao: SpeilSnapshotDao,
     speilSnapshotRestClient: SpeilSnapshotRestClient,
     snapshotDao: SnapshotDao,
-    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient
+    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    personDao: PersonDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSpeilSnapshotCommand(
             speilSnapshotRestClient = speilSnapshotRestClient,
-            vedtakDao = vedtakDao,
             warningDao = warningDao,
+            personDao = personDao,
             speilSnapshotDao = speilSnapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer
         ),
         OppdaterSnapshotCommand(
             speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
-            vedtakDao = vedtakDao,
             snapshotDao = snapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.modell.person.PersonDao
 
 internal class OppdaterSpeilSnapshotCommandTest {
 
@@ -26,22 +27,22 @@ internal class OppdaterSpeilSnapshotCommandTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
-    private val command = OppdaterSpeilSnapshotCommand(restClient, vedtakDao, warningDao, speilSnapshotDao, VEDTAKSPERIODE, FNR)
+    private val command = OppdaterSpeilSnapshotCommand(
+        restClient,
+        warningDao,
+        personDao,
+        speilSnapshotDao,
+        VEDTAKSPERIODE,
+        FNR
+    )
 
     @BeforeEach
     fun setup() {
         clearMocks(vedtakDao, speilSnapshotDao, restClient)
-    }
-
-    @Test
-    fun `ignorerer vedtaksperioder som ikke finnes`() {
-        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE) } returns null
-        assertTrue(command.execute(context))
-        verify(exactly = 0) { restClient.hentSpeilSnapshot(FNR) }
-        verify(exactly = 0) { speilSnapshotDao.lagre(FNR, any()) }
     }
 
     @Test

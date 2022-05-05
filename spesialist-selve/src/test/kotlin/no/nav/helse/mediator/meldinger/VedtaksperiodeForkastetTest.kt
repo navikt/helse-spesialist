@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.modell.person.PersonDao
 
 internal class VedtaksperiodeForkastetTest {
 
@@ -34,6 +35,7 @@ internal class VedtaksperiodeForkastetTest {
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
+    private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
     private val graphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
@@ -42,8 +44,8 @@ internal class VedtaksperiodeForkastetTest {
     private val testhendelsefabrikk =
         Hendelsefabrikk(
             hendelseDao = mockk(),
-            personDao = mockk(),
             arbeidsgiverDao = mockk(),
+            personDao = personDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
             oppgaveDao = oppgaveDao,
@@ -85,6 +87,7 @@ internal class VedtaksperiodeForkastetTest {
     fun `avbryter kommandoer og oppdaterer snapshot`() {
         every { restClient.hentSpeilSnapshot(FNR) } returns SNAPSHOT
         every { speilSnapshotDao.lagre(FNR, SNAPSHOT) } returns 1
+        every { personDao.findPersonByFødselsnummer(FNR) } returns 1
         assertTrue(vedtaksperiodeForkastetMessage.execute(context))
         verify(exactly = 1) { commandContextDao.avbryt(VEDTAKSPERIODE, CONTEXT) }
         verify(exactly = 1) { speilSnapshotDao.lagre(FNR, SNAPSHOT) }

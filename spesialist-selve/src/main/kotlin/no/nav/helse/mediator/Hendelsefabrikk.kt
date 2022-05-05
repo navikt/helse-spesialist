@@ -379,12 +379,12 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             json = json,
-            vedtakDao = vedtakDao,
             warningDao = warningDao,
             speilSnapshotDao = speilSnapshotDao,
             speilSnapshotRestClient = speilSnapshotRestClient,
             snapshotDao = snapshotDao,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient
+            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            personDao = personDao
         )
     }
 
@@ -410,13 +410,13 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             json = json,
             commandContextDao = commandContextDao,
-            vedtakDao = vedtakDao,
             warningDao = warningDao,
             speilSnapshotDao = speilSnapshotDao,
-            speilSnapshotRestClient = speilSnapshotRestClient,
             oppgaveMediator = oppgaveMediator,
+            speilSnapshotRestClient = speilSnapshotRestClient,
             speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
-            snapshotDao = snapshotDao
+            snapshotDao = snapshotDao,
+            personDao = personDao
         )
     }
 

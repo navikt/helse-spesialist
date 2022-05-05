@@ -43,7 +43,7 @@ internal class OppdaterSnapshotCommandTest {
     private val spleisGraphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
-    private val command = OppdaterSnapshotCommand(spleisGraphQLClient, vedtakDao, snapshotDao, VEDTAKSPERIODE, FNR, warningDao)
+    private val command = OppdaterSnapshotCommand(spleisGraphQLClient, snapshotDao, VEDTAKSPERIODE, FNR, warningDao)
 
     @BeforeEach
     fun setup() {
