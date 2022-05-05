@@ -105,6 +105,22 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
+    fun finnAktive(fødselsnummer: String) =
+        """ SELECT o.id, o.type, o.status, o.utbetaling_id, v.vedtaksperiode_id
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus)
+        """.list(mapOf("fodselsnummer" to fødselsnummer.toLong())) { row ->
+            Oppgave(
+                id = row.long("id"),
+                type = enumValueOf(row.string("type")),
+                status = enumValueOf(row.string("status")),
+                vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
+            )
+        }
+
     fun finn(utbetalingId: UUID) =
         """ SELECT o.id, o.type, o.status, v.vedtaksperiode_id, o.utbetaling_id, o.ferdigstilt_av, o.ferdigstilt_av_oid
             FROM oppgave o

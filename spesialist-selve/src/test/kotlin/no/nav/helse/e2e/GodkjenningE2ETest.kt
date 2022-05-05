@@ -331,7 +331,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `endringer på kjente vedtaksperioder`() {
+    fun `vedtaksperiode endret på aktiv saksbehandleroppgave`() {
         every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returnsMany listOf(
             SNAPSHOTV1_UTEN_WARNINGS,
             SNAPSHOTV1_UTEN_WARNINGS
@@ -354,10 +354,180 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendVergemålløsning(godkjenningsmeldingId)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            antall = 1,
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        assertOppgavestatuser(0, AvventerSaksbehandler)
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
-        assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        verify(exactly = 2) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+    }
+
+    @Test
+    fun `vedtaksperiode endret på oppgave som avventer system`() {
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returnsMany listOf(
+            SNAPSHOTV1_UTEN_WARNINGS,
+            SNAPSHOTV1_UTEN_WARNINGS
+        )
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendVergemålløsning(godkjenningsmeldingId)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            antall = 1,
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendSaksbehandlerløsning(
+            OPPGAVEID,
+            SAKSBEHANDLERIDENT,
+            SAKSBEHANDLEREPOST,
+            SAKSBEHANDLEROID,
+            true,
+            listOf("begrunnelser"),
+            "kommentar"
+        )
+        assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem)
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
+        val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        assertTilstand(endringsmeldingId, "NY", "FERDIG")
+        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        verify(exactly = 2) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+    }
+
+    @Test
+    fun `vedtaksperiode endret på ferdigstilt oppgave`() {
+        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returnsMany listOf(
+            SNAPSHOTV1_UTEN_WARNINGS,
+            SNAPSHOTV1_UTEN_WARNINGS
+        )
+        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+
+        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendPersoninfoløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsgiverinformasjonløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendArbeidsforholdløsning(
+            hendelseId = godkjenningsmeldingId,
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendEgenAnsattløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erEgenAnsatt = false
+        )
+        sendVergemålløsning(godkjenningsmeldingId)
+        sendDigitalKontaktinformasjonløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            erDigital = true
+        )
+        sendÅpneGosysOppgaverløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            antall = 1,
+        )
+        sendRisikovurderingløsning(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
+        )
+        sendSaksbehandlerløsning(
+            OPPGAVEID,
+            SAKSBEHANDLERIDENT,
+            SAKSBEHANDLEREPOST,
+            SAKSBEHANDLEROID,
+            true,
+            listOf("begrunnelser"),
+            "kommentar"
+        )
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
+        assertTilstand(
+            godkjenningsmeldingId,
+            "NY",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "SUSPENDERT",
+            "FERDIG"
+        )
         verify(exactly = 2) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
     }
 

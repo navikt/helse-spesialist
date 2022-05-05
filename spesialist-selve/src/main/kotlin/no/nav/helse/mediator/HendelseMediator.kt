@@ -227,8 +227,8 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         utfør(
-            vedtaksperiodeId,
             hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
+            fødselsnummer,
             context
         )
     }
@@ -601,6 +601,15 @@ internal class HendelseMediator(
         opprett(commandContextDao, hendelse)
     }
 
+    private fun utfør(hendelse: Hendelse, fødselsnummer: String, messageContext: MessageContext) {
+        val harAktivOppgave = oppgaveDao.finnAktive(fødselsnummer).isNotEmpty()
+        if (!harAktivOppgave) {
+            log.info("ignorerer hendelseId=${hendelse.id} fordi personen ikke har en aktiv oppgave på seg")
+            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi personen ikke har en aktiv oppgave på seg med fnr=${fødselsnummer}")
+            return
+        }
+        return utfør(hendelse, messageContext)
+    }
     private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: MessageContext) {
         if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
         return utfør(hendelse, messageContext)
