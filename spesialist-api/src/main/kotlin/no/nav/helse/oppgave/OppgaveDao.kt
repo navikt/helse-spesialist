@@ -1,5 +1,7 @@
 package no.nav.helse.oppgave
 
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -14,8 +16,6 @@ import no.nav.helse.vedtaksperiode.EnhetDto
 import no.nav.helse.vedtaksperiode.Inntektskilde
 import no.nav.helse.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) =
@@ -208,11 +208,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
 
     fun gosysOppgaveEndretArbeidsdata(oppgaveId: Long): GosysOppgaveEndretArbeidsdata? =
-        """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetalingId, uid.type as utbetalingType, h.id as hendelseId, h.data as godkjenningbehovJson
+        """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, uid.type as utbetalingType, h.id as hendelseId, h.data as godkjenningbehovJson
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             INNER JOIN utbetaling_id uid on v.person_ref = uid.person_ref
-            INNER JOIN command_context cc on o.command_context_id = cc.id
+            INNER JOIN command_context cc on o.command_context_id = cc.context_id
             INNER JOIN hendelse h on cc.hendelse_id = h.id
             WHERE o.id = :oppgaveId 
         """.single(mapOf("oppgaveId" to oppgaveId)) {
