@@ -528,7 +528,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        verify(exactly = 2) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        verify(exactly = 3) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
     }
 
     @Test

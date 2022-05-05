@@ -602,10 +602,9 @@ internal class HendelseMediator(
     }
 
     private fun utfør(hendelse: Hendelse, fødselsnummer: String, messageContext: MessageContext) {
-        val harAktivOppgave = oppgaveDao.finnAktive(fødselsnummer).isNotEmpty()
-        if (!harAktivOppgave) {
-            log.info("ignorerer hendelseId=${hendelse.id} fordi personen ikke har en aktiv oppgave på seg")
-            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi personen ikke har en aktiv oppgave på seg med fnr=${fødselsnummer}")
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
+            log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
+            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
         return utfør(hendelse, messageContext)
