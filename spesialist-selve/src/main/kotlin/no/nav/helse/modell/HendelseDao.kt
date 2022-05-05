@@ -125,6 +125,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is UtbetalingEndret -> UTBETALING_ENDRET
         is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
         is RevurderingAvvist -> REVURDERING_AVVIST
+        is GosysOppgaveEndret -> OPPDATER_PERSONSNAPSHOT
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
