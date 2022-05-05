@@ -79,7 +79,10 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         """ SELECT COUNT(1) as antall
             FROM automatisering a
                 INNER JOIN vedtak v on a.vedtaksperiode_ref = v.id
-            WHERE a.automatisert = true AND a.stikkprøve = false AND a.opprettet >= :fom
+            WHERE a.automatisert = true 
+            AND a.stikkprøve = false 
+            AND a.opprettet >= :fom
+            AND (a.inaktiv_fra IS NULL OR a.inaktiv_fra > now()) 
         """.single(mapOf("fom" to fom)) { it.int("antall") })
 
     private fun antallAnnulleringer(fom: LocalDate) = requireNotNull("""

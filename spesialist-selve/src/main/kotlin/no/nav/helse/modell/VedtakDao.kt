@@ -159,7 +159,11 @@ internal class VedtakDao(private val dataSource: DataSource) {
 
     internal fun erAutomatiskGodkjent(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val query = "SELECT automatisert FROM automatisering WHERE utbetaling_id = ?;"
+        val query = """
+            SELECT automatisert FROM automatisering 
+            WHERE utbetaling_id = ?
+            AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
+        """
         session.run(queryOf(query, utbetalingId).map { it.boolean("automatisert") }.asSingle)
     } ?: false
 }

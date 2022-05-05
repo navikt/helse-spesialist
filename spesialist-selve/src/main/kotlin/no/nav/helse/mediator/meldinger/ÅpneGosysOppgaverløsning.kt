@@ -31,30 +31,45 @@ internal class ÅpneGosysOppgaverløsning(
     }
 
     internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
+        warningsForOppslagFeilet(warningDao, vedtaksperiodeId)
+        warningsForÅpneGosysOppgaver(warningDao, vedtaksperiodeId)
+    }
+
+    private fun warningsForOppslagFeilet(warningDao: WarningDao, vedtaksperiodeId: UUID) {
+        val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
+
         if (oppslagFeilet) {
-            val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
-            warningDao.leggTilWarning(
-                vedtaksperiodeId,
-                Warning(melding, WarningKilde.Spesialist, LocalDateTime.now())
-            )
+            leggTilWarning(warningDao, vedtaksperiodeId, melding)
+        } else {
+            setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
+        }
+    }
+
+    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, vedtaksperiodeId: UUID) {
+        val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
+
+        antall?.also {
+            if (it > 0) {
+                leggTilWarning(warningDao, vedtaksperiodeId, melding)
+            } else if (it == 0) {
+                setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
+            }
+        }
+    }
+
+    private fun leggTilWarning(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
+        val eksisterendeWarnings = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding)
+        if (eksisterendeWarnings.isEmpty()) {
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spesialist, LocalDateTime.now()))
             tellWarning(melding)
         }
+    }
 
-        if (antall == null) return
-
-        val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
-        val eksisterendeWarningsMedGosysMelding = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding)
-        if (antall == 0) {
+    private fun setEksisterendeWarningInaktive(warningDao: WarningDao, vedtaksperiodeId: UUID, melding: String) {
+        val eksisterendeWarnings = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, melding)
+        if (eksisterendeWarnings.isNotEmpty()) {
             warningDao.setWarningMedMeldingInaktiv(vedtaksperiodeId, melding, LocalDateTime.now())
-            if (eksisterendeWarningsMedGosysMelding.isNotEmpty()) {
-                tellWarningInaktiv(melding)
-            }
-        } else if (antall > 0 && eksisterendeWarningsMedGosysMelding.isEmpty()) {
-            warningDao.leggTilWarning(
-                vedtaksperiodeId,
-                Warning(melding, WarningKilde.Spesialist, LocalDateTime.now())
-            )
-            tellWarning(melding)
+            tellWarningInaktiv(melding)
         }
     }
 

@@ -35,9 +35,9 @@ internal class Automatisering(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    internal fun reset(vedtaksperiodeId: UUID, hendelseId: UUID) {
-        automatiseringDao.deleteAutomatisering(vedtaksperiodeId, hendelseId)
-        automatiseringDao.deleteAutomatiseringProblem(vedtaksperiodeId, hendelseId)
+    internal fun settInaktiv(vedtaksperiodeId: UUID, hendelseId: UUID) {
+        automatiseringDao.settAutomatiseringInaktiv(vedtaksperiodeId, hendelseId)
+        automatiseringDao.settAutomatiseringProblemInaktiv(vedtaksperiodeId, hendelseId)
     }
 
     internal fun utfør(
@@ -103,7 +103,7 @@ internal class Automatisering(
     }
 
     internal fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        automatiseringDao.hentAutomatisering(vedtaksperiodeId, hendelseId)?.automatisert ?: false
+        automatiseringDao.hentAktivAutomatisering(vedtaksperiodeId, hendelseId)?.automatisert ?: false
 
     private fun valider(vararg valideringer: AutomatiseringValidering) =
         valideringer.toList()

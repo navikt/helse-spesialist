@@ -630,6 +630,17 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagGosysOppgaveEndret(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
+        aktørId: String
+    ) = nyHendelse(
+        id, "gosys_oppgave_endret", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
+
     internal fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 

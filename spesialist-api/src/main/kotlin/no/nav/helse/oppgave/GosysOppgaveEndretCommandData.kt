@@ -3,7 +3,7 @@ package no.nav.helse.oppgave
 import java.time.LocalDate
 import java.util.UUID
 
-data class GosysOppgaveEndretArbeidsdata(
+data class GosysOppgaveEndretCommandData(
     val vedtaksperiodeId: UUID,
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,

@@ -524,29 +524,22 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun gosysOppgaveEndret(
-        json: String,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        utbetalingtype: Utbetalingtype,
-        hendelseId: UUID,
-        periodeFom: LocalDate,
-        periodeTom: LocalDate,
-        godkjenningsbehovJson: String,
-    ): GosysOppgaveEndret {
+    override fun gosysOppgaveEndret(json: String): GosysOppgaveEndret {
         val jsonNode = mapper.readTree(json)
+        val fødselsnummer = jsonNode["fødselsnummer"].asText()
+
+        // Denne kan ikke være null, fordi vi allerede har nullsjekket i GosysOppgaveEndret.River.
+        // Vi kan ikke sende med oss dataene ned i løypa, så derfor må vi hente det ut på nytt her.
+        val commandData = oppgaveDao.finnOppgaveId(fødselsnummer)!!.let { oppgaveId ->
+            return@let oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
+        }
+
         return GosysOppgaveEndret(
             id = UUID.fromString(jsonNode["@id"].asText()),
-            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            fødselsnummer = fødselsnummer,
             aktørId = jsonNode["aktørId"].asText(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            utbetalingtype = utbetalingtype,
-            hendelseId = hendelseId,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom,
             json = json,
-            godkjenningsbehovJson = godkjenningsbehovJson,
+            gosysOppgaveEndretCommandData = commandData!!,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
             automatisering = automatisering,

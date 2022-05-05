@@ -462,6 +462,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         }
 
+    protected fun sendGosysOppgaveEndret(fødselsnummer: String, aktørId: String) =
+        nyHendelseId().also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagGosysOppgaveEndret(
+                    id = id,
+                    fødselsnummer = fødselsnummer,
+                    aktørId = aktørId
+                )
+            )
+        }
+
     protected fun sendDigitalKontaktinformasjonløsning(
         godkjenningsmeldingId: UUID,
         erDigital: Boolean = true,

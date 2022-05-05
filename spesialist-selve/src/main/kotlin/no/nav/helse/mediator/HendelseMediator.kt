@@ -119,7 +119,7 @@ internal class HendelseMediator(
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
             RevurderingAvvist.River(it, this)
-            //GosysOppgaveEndret.River(it, this)
+            //GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
         }
     }
 
@@ -468,29 +468,7 @@ internal class HendelseMediator(
     }
 
     override fun gosysOppgaveEndret(message: JsonMessage, context: MessageContext) {
-        val fødselsnummer = message["fødselsnummer"].asText()
-
-        // Sjekker at vi har en oppgave til_godkjenning og som ikke er tildelt
-        val arbeidsdata = oppgaveDao.finnOppgaveId(fødselsnummer)?.let {
-            val tildeling = tildelingDao.tildelingForOppgave(it)
-            if (tildeling != null) return@gosysOppgaveEndret
-            oppgaveDao.gosysOppgaveEndretArbeidsdata(it) ?: return@gosysOppgaveEndret
-        } ?: return
-
-        sikkerLogg.info("Fant arbeidsdata for oppgave til_godkjenning som ikke er tildelt for fnr $fødselsnummer")
-
-        utfør(
-            hendelsefabrikk.gosysOppgaveEndret(
-                message.toJson(),
-                arbeidsdata.vedtaksperiodeId,
-                arbeidsdata.utbetalingId,
-                Utbetalingtype.valueOf(arbeidsdata.utbetalingType),
-                arbeidsdata.hendelseId,
-                arbeidsdata.periodeFom,
-                arbeidsdata.periodeTom,
-                arbeidsdata.godkjenningsbehovJson
-            ), context
-        )
+        utfør(hendelsefabrikk.gosysOppgaveEndret(message.toJson()), context)
     }
 
     fun revurderingAvvist(fødselsnummer: String, error: List<String>, json:String, context: MessageContext) {

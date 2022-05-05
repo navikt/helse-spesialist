@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import DatabaseIntegrationTest
+import java.time.LocalDateTime
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.*
@@ -23,7 +24,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre og lese false`() {
         automatiseringDao.manuellSaksbehandling(listOf("Problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
-        val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
+        val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(false, automatiseringSvar.automatisert)
         assertEquals(VEDTAKSPERIODE, automatiseringSvar.vedtaksperiodeId)
@@ -36,7 +37,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre og lese false uten utbetalingsId`() {
         insertAutomatisering(false, false, VEDTAKSPERIODE, HENDELSE_ID, listOf("Problem"), null)
-        val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
+        val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(false, automatiseringSvar.automatisert)
         assertEquals(VEDTAKSPERIODE, automatiseringSvar.vedtaksperiodeId)
@@ -48,7 +49,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `lagre og lese true`() {
         automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
-        val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
+        val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(true, automatiseringSvar.automatisert)
         assertEquals(VEDTAKSPERIODE, automatiseringSvar.vedtaksperiodeId)
@@ -60,7 +61,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     fun `finner ikke automatisering`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
-        assertNull(automatiseringDao.hentAutomatisering(vedtaksperiodeId, hendelseId))
+        assertNull(automatiseringDao.hentAktivAutomatisering(vedtaksperiodeId, hendelseId))
     }
 
     @Test
@@ -71,8 +72,8 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         automatiseringDao.automatisert(VEDTAKSPERIODE, hendelseId2, UTBETALING_ID)
 
-        val automatiseringSvar1 = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
-        val automatiseringSvar2 = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, hendelseId2))
+        val automatiseringSvar1 = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
+        val automatiseringSvar2 = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, hendelseId2))
 
         assertEquals(false, automatiseringSvar1.automatisert)
         assertEquals(1, automatiseringSvar1.problemer.size)
@@ -85,7 +86,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         assertThrows<PSQLException> { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) }
 
-        val automatiseringSvar = requireNotNull(automatiseringDao.hentAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
+        val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
         assertEquals(false, automatiseringSvar.automatisert)
         assertEquals(VEDTAKSPERIODE, automatiseringSvar.vedtaksperiodeId)
@@ -113,6 +114,28 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     fun `stikkprøve happy case`() {
         automatiseringDao.stikkprøve(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         assertTrue(automatiseringDao.plukketUtTilStikkprøve(VEDTAKSPERIODE, HENDELSE_ID))
+    }
+
+    @Test
+    fun `inaktivering av automatisering og automatisering_problem fungerer`() {
+        automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+
+        val automatiseringFørInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
+        val vedtaksperiodeRefFørInaktivering = automatiseringDao.finnVedtaksperiode(VEDTAKSPERIODE)
+        val problemerFørInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRefFørInaktivering!!, HENDELSE_ID)
+
+        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(2))
+        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(2))
+
+        val automatiseringEtterInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
+        val vedtaksperiodeRefEtterInaktivering = automatiseringDao.finnVedtaksperiode(VEDTAKSPERIODE)
+        val problemerEtterInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRefEtterInaktivering!!, HENDELSE_ID)
+
+        assertNotNull(automatiseringFørInaktivering)
+        assertEquals(1, problemerFørInaktivering.size)
+
+        assertNull(automatiseringEtterInaktivering)
+        assertEquals(0, problemerEtterInaktivering.size)
     }
 
     private fun insertAutomatisering(

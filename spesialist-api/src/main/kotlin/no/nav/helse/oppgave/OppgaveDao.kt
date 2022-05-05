@@ -207,7 +207,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             WHERE o.id = :oppgaveId
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.long("fodselsnummer").toFødselsnummer() })
 
-    fun gosysOppgaveEndretArbeidsdata(oppgaveId: Long): GosysOppgaveEndretArbeidsdata? =
+    fun gosysOppgaveEndretCommandData(oppgaveId: Long): GosysOppgaveEndretCommandData? =
         """ SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, uid.type as utbetalingType, h.id as hendelseId, h.data as godkjenningbehovJson
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
@@ -216,7 +216,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             INNER JOIN hendelse h on cc.hendelse_id = h.id
             WHERE o.id = :oppgaveId 
         """.single(mapOf("oppgaveId" to oppgaveId)) {
-            GosysOppgaveEndretArbeidsdata(
+            GosysOppgaveEndretCommandData(
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 periodeFom = it.localDate("fom"),
                 periodeTom = it.localDate("tom"),
