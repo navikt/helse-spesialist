@@ -477,6 +477,8 @@ internal class HendelseMediator(
             oppgaveDao.gosysOppgaveEndretArbeidsdata(it) ?: return@gosysOppgaveEndret
         } ?: return
 
+        sikkerLogg.info("Fant arbeidsdata for oppgave til_godkjenning som ikke er tildelt for fnr $fødselsnummer")
+
         utfør(
             hendelsefabrikk.gosysOppgaveEndret(
                 message.toJson(),
