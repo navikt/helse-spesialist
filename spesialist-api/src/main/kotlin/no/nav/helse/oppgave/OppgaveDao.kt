@@ -220,7 +220,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 periodeFom = it.localDate("fom"),
                 periodeTom = it.localDate("tom"),
-                utbetalingId = it.uuid("utbetalingId"),
+                utbetalingId = it.uuid("utbetaling_id"),
                 utbetalingType = it.string("utbetalingType"),
                 hendelseId = it.uuid("hendelseId"),
                 godkjenningsbehovJson = it.string("godkjenningbehovJson")
