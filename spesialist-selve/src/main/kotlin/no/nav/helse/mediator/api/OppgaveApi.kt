@@ -47,7 +47,7 @@ Saker til $ident:
                 )
             )
         }
-        if (getNAVident() == "F131883" || getNAVident() == "E156407")
+        if (getNAVident() == "F131883" || getNAVident() == "E156407" || getNAVident() == "D117949")
             loggDebuginfoOmSaker(saksbehandlerOppgaver, getNAVident())
         log.info("Returnerer ${saksbehandlerOppgaver.size} oppgaver til ${getNAVident()}")
         call.respond(saksbehandlerOppgaver)
