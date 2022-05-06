@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.getGrupper
 import no.nav.helse.getNAVident
+import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 
@@ -19,6 +20,21 @@ internal fun Route.oppgaveApi(
     kode7Saksbehandlergruppe: UUID
 ) {
     val log = LoggerFactory.getLogger("OppgaveApi")
+
+    fun loggDebuginfoOmSaker(oppgaver: List<OppgaveDto>, ident: String) {
+        val antallSakerByType = oppgaver.fold(mutableMapOf<String, Int>()) { acc, oppgave ->
+            acc.apply { merge("${oppgave.oppgavetype} - ${oppgave.type}", 1, Int::plus) }
+        }
+
+        log.info(
+            """
+Saker til $ident:
+  ${
+                antallSakerByType.map { it.key to it.value }.joinToString("\n  ")
+            }
+""".trimIndent()
+        )
+    }
 
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
@@ -31,6 +47,8 @@ internal fun Route.oppgaveApi(
                 )
             )
         }
+        if (getNAVident() == "F131883" || getNAVident() == "E156407")
+            loggDebuginfoOmSaker(saksbehandlerOppgaver, getNAVident())
         log.info("Returnerer ${saksbehandlerOppgaver.size} oppgaver til ${getNAVident()}")
         call.respond(saksbehandlerOppgaver)
     }
