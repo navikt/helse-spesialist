@@ -1,6 +1,6 @@
 package no.nav.helse
 
-import java.util.*
+import java.util.UUID
 
 class SaksbehandlerTilganger(
     private val gruppetilganger: List<UUID>,
@@ -13,5 +13,15 @@ class SaksbehandlerTilganger(
 
     fun harTilgangTilRiskOppgaver() = riskSaksbehandlergruppe in gruppetilganger
 
-    fun kanSeAlleOppgaver() = NAVident in listOf("G103083", "D117949", "A148751", "N115007", "C117102", "S145454", "E148846", "S144991")
+    fun kanSeAlleOppgaver() = NAVident in listOf(
+        "G103083",
+        "D117949",
+        "A148751",
+        "N115007",
+        "C117102",
+        "S145454",
+        "E148846",
+        "S144991",
+        "F131883"
+    )
 }
