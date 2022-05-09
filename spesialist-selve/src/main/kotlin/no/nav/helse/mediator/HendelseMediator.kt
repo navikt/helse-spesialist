@@ -119,7 +119,7 @@ internal class HendelseMediator(
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
             RevurderingAvvist.River(it, this)
-            //GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
+            GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
         }
     }
 
