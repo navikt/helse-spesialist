@@ -4,7 +4,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import net.logstash.logback.argument.StructuredArguments
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
@@ -37,7 +36,7 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getBadRequestError()).build()
         }
 
-        val fødselsnummer = fnr
+        val fødselsnummer = fnr.takeIf { it != null && personApiDao.finnesPersonMedFødselsnummer(it) }
             ?: aktorId?.let { personApiDao.finnFødselsnummer(it.toLong()) }
             ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError()).build()
 
