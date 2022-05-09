@@ -36,6 +36,7 @@ import no.nav.helse.tildeling.TildelingDao
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import org.slf4j.LoggerFactory
 
 internal class Hendelsefabrikk(
     private val hendelseDao: HendelseDao,
@@ -65,6 +66,8 @@ internal class Hendelsefabrikk(
     private val opptegnelseDao: OpptegnelseDao,
     private val vergemålDao: VergemålDao
 ) : IHendelsefabrikk {
+    private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+
     internal companion object {
         private val mapper = jacksonObjectMapper()
 
@@ -533,6 +536,8 @@ internal class Hendelsefabrikk(
         val commandData = oppgaveDao.finnOppgaveId(fødselsnummer)!!.let { oppgaveId ->
             return@let oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
         }
+
+        sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr {}", fødselsnummer)
 
         return GosysOppgaveEndret(
             id = UUID.fromString(jsonNode["@id"].asText()),

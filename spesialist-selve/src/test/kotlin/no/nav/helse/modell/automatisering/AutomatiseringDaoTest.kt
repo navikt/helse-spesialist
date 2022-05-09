@@ -2,14 +2,17 @@ package no.nav.helse.modell.automatisering
 
 import DatabaseIntegrationTest
 import java.time.LocalDateTime
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import org.postgresql.util.PSQLException
-import java.util.*
+import kotlin.test.assertFailsWith
 
 internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
@@ -84,7 +87,9 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `to automatiseringer på samme vedtaksperiode og samme hendelseID kræsjer`() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
-        assertThrows<PSQLException> { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) }
+
+        val actualException = assertFailsWith<Exception>(block = { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) })
+        assertEquals("Det kan bare finnes 1 aktiv automatisering. Klarer ikke opprette ny automatisering for vedtaksperiodeId $VEDTAKSPERIODE og hendelseId $HENDELSE_ID.", actualException.message)
 
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 

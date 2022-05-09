@@ -69,6 +69,10 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
     private fun lagre(automatisert: Boolean, stikkprøve: Boolean, vedtaksperiodeId: UUID, hendelseId: UUID, problems: List<String> = emptyList(), utbetalingId: UUID) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
+                hentAktivAutomatisering(vedtaksperiodeId, hendelseId)?.also {
+                    throw Exception("Det kan bare finnes 1 aktiv automatisering. Klarer ikke opprette ny automatisering for vedtaksperiodeId $vedtaksperiodeId og hendelseId $hendelseId.")
+                }
+
                 transactionalSession.run(
                     queryOf(
                         """
