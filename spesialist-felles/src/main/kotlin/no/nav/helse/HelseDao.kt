@@ -21,7 +21,7 @@ abstract class HelseDao(private val dataSource: DataSource) {
         session.run(queryOf(this, argMap).map { mapping(it) }.asList)
     }
 
-    fun <T> String.single(argMap: Map<String, Any> = emptyMap(), mapping: (Row) -> T?) = sessionOf(dataSource).use { session ->
+    fun <T> String.single(argMap: Map<String, Any> = emptyMap(), mapping: (Row) -> T?) = sessionOf(dataSource, strict = true).use { session ->
         session.run(queryOf(this, argMap).map { mapping(it) }.asSingle)
     }
 
