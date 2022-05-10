@@ -5,7 +5,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.automatisering.AutomatiseringCommand
+import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
 import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -14,6 +14,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.GosysOppgaveEndretCommandData
 import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -32,6 +33,7 @@ internal class GosysOppgaveEndret(
     warningDao: WarningDao,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
+    oppgaveMediator: OppgaveMediator
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
@@ -49,7 +51,7 @@ internal class GosysOppgaveEndret(
             hendelseId = gosysOppgaveEndretCommandData.hendelseId,
             automatisering = automatisering,
         ),
-        AutomatiseringCommand(
+        AutomatiseringForEksisterendeOppgaveCommand(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
             utbetalingId = gosysOppgaveEndretCommandData.utbetalingId,
@@ -59,7 +61,8 @@ internal class GosysOppgaveEndret(
             utbetalingtype = Utbetalingtype.valueOf(gosysOppgaveEndretCommandData.utbetalingType),
             godkjenningMediator = godkjenningMediator,
             periodeFom = gosysOppgaveEndretCommandData.periodeFom,
-            periodeTom = gosysOppgaveEndretCommandData.periodeTom
+            periodeTom = gosysOppgaveEndretCommandData.periodeTom,
+            oppgaveMediator = oppgaveMediator
         )
     )
 

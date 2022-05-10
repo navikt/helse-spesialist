@@ -548,7 +548,8 @@ internal class Hendelsefabrikk(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
             automatisering = automatisering,
-            godkjenningMediator = godkjenningMediator
+            godkjenningMediator = godkjenningMediator,
+            oppgaveMediator = oppgaveMediator
         )
     }
 
