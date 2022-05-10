@@ -26,8 +26,6 @@ class OppgaveMediator(
 
     fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) = oppgaveDao.finnOppgaver(saksbehandlerTilganger)
 
-    fun hentOppgaveId(fødselsnummer: String) = oppgaveDao.finnOppgaveId(fødselsnummer)
-
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)
     }
