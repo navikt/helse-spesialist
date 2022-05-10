@@ -531,25 +531,25 @@ internal class Hendelsefabrikk(
         val jsonNode = mapper.readTree(json)
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
 
-        // Denne kan ikke være null, fordi vi allerede har nullsjekket i GosysOppgaveEndret.River.
         // Vi kan ikke sende med oss dataene ned i løypa, så derfor må vi hente det ut på nytt her.
-        val commandData = oppgaveDao.finnOppgaveId(fødselsnummer)!!.let { oppgaveId ->
-            return@let oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
+        val commandData = oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer).let { oppgaveId ->
+            oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)!!
         }
 
-        sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData?.vedtaksperiodeId}")
+        sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
 
         return GosysOppgaveEndret(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = fødselsnummer,
             aktørId = jsonNode["aktørId"].asText(),
             json = json,
-            gosysOppgaveEndretCommandData = commandData!!,
+            gosysOppgaveEndretCommandData = commandData,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            oppgaveDao = oppgaveDao
         )
     }
 

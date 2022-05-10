@@ -11,6 +11,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.GosysOppgaveEndretCommandData
 import no.nav.helse.oppgave.OppgaveDao
@@ -33,7 +34,8 @@ internal class GosysOppgaveEndret(
     warningDao: WarningDao,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
-    oppgaveMediator: OppgaveMediator
+    oppgaveMediator: OppgaveMediator,
+    oppgaveDao: OppgaveDao
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
@@ -46,6 +48,7 @@ internal class GosysOppgaveEndret(
             warningDao = warningDao,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId
         ),
+        SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),
         SettTidligereAutomatiseringInaktivCommand(
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
             hendelseId = gosysOppgaveEndretCommandData.hendelseId,

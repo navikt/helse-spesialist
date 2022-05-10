@@ -64,6 +64,16 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
+    fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
+        """ SELECT o.id as oppgaveId
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            ORDER BY o.id DESC
+            LIMIT 1;
+        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }!!
+
     fun finnOppgaveId(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId
             FROM oppgave o
