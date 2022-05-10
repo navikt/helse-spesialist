@@ -1,12 +1,12 @@
 package no.nav.helse.modell.tildeling
 
 import DatabaseIntegrationTest
+import java.time.LocalDateTime
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -92,23 +92,6 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         tildelTilSaksbehandler()
         val saksbehandlerepost = tildelingDao.tildelingForPerson(FNR)
         assertNull(saksbehandlerepost)
-    }
-
-    @Test
-    fun `henter den siste saksbehandlereposten for tildeling med fødselsnummer`() {
-        val nySaksbehandlerepost = "ny.saksbehandler@nav.no"
-        nyPerson()
-        tildelTilSaksbehandler()
-        opprettVedtaksperiode(vedtaksperiodeId = UUID.randomUUID())
-        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        tildelTilSaksbehandler(
-            oppgaveId = oppgaveId,
-            oid = UUID.randomUUID(),
-            navn = "Ny Saksbehandler",
-            epost = nySaksbehandlerepost
-        )
-        val tildeling = tildelingDao.tildelingForPerson(FNR)
-        assertEquals(nySaksbehandlerepost, tildeling?.epost)
     }
 
     @Test

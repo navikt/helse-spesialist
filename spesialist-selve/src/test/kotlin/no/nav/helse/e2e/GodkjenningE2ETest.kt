@@ -832,7 +832,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId2,
             vedtaksperiodeId = VEDTAKSPERIODE_ID2,
         )
-        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
         val tildeling = tildelingDao.tildelingForOppgave(OPPGAVEID)
         assertEquals(SAKSBEHANDLEREPOST, tildeling?.epost)

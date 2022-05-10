@@ -1,11 +1,11 @@
 package no.nav.helse
 
+import javax.sql.DataSource
 import kotliquery.Query
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import javax.sql.DataSource
 
 abstract class HelseDao(private val dataSource: DataSource) {
 
@@ -17,7 +17,7 @@ abstract class HelseDao(private val dataSource: DataSource) {
         session.run(queryOf(this, argMap).map { mapping(it) }.asList)
     }
 
-    fun <T> String.single(argMap: Map<String, Any> = emptyMap(), mapping: (Row) -> T?) = sessionOf(dataSource).use { session ->
+    fun <T> String.single(argMap: Map<String, Any> = emptyMap(), mapping: (Row) -> T?) = sessionOf(dataSource, strict = true).use { session ->
         session.run(queryOf(this, argMap).map { mapping(it) }.asSingle)
     }
 

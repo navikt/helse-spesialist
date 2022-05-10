@@ -191,7 +191,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         })
 
     fun finnHendelseId(oppgaveId: Long) = requireNotNull(
-        """SELECT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)"""
+        """SELECT DISTINCT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)"""
             .single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("hendelse_id")) })
 
     fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(
