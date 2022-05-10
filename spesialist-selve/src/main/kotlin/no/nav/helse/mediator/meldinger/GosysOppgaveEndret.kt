@@ -10,7 +10,6 @@ import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivComm
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.DummyCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.oppgave.GosysOppgaveEndretCommandData
@@ -39,30 +38,29 @@ internal class GosysOppgaveEndret(
     override fun toJson(): String = json
 
     override val commands: List<Command> = listOf(
-        DummyCommand()
-//        ÅpneGosysOppgaverCommand(
-//            aktørId = aktørId,
-//            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-//            warningDao = warningDao,
-//            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId
-//        ),
-//        SettTidligereAutomatiseringInaktivCommand(
-//            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
-//            hendelseId = gosysOppgaveEndretCommandData.hendelseId,
-//            automatisering = automatisering,
-//        ),
-//        AutomatiseringCommand(
-//            fødselsnummer = fødselsnummer,
-//            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
-//            utbetalingId = gosysOppgaveEndretCommandData.utbetalingId,
-//            hendelseId = gosysOppgaveEndretCommandData.hendelseId,
-//            automatisering = automatisering,
-//            godkjenningsbehovJson = gosysOppgaveEndretCommandData.godkjenningsbehovJson,
-//            utbetalingtype = Utbetalingtype.valueOf(gosysOppgaveEndretCommandData.utbetalingType),
-//            godkjenningMediator = godkjenningMediator,
-//            periodeFom = gosysOppgaveEndretCommandData.periodeFom,
-//            periodeTom = gosysOppgaveEndretCommandData.periodeTom
-//        )
+        ÅpneGosysOppgaverCommand(
+            aktørId = aktørId,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            warningDao = warningDao,
+            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId
+        ),
+        SettTidligereAutomatiseringInaktivCommand(
+            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
+            hendelseId = gosysOppgaveEndretCommandData.hendelseId,
+            automatisering = automatisering,
+        ),
+        AutomatiseringCommand(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId,
+            utbetalingId = gosysOppgaveEndretCommandData.utbetalingId,
+            hendelseId = gosysOppgaveEndretCommandData.hendelseId,
+            automatisering = automatisering,
+            godkjenningsbehovJson = gosysOppgaveEndretCommandData.godkjenningsbehovJson,
+            utbetalingtype = Utbetalingtype.valueOf(gosysOppgaveEndretCommandData.utbetalingType),
+            godkjenningMediator = godkjenningMediator,
+            periodeFom = gosysOppgaveEndretCommandData.periodeFom,
+            periodeTom = gosysOppgaveEndretCommandData.periodeTom
+        )
     )
 
     internal class River(
