@@ -3,14 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import java.util.UUID
-import no.nav.helse.graphQLSnapshot
-import no.nav.helse.mediator.api.AnnulleringDto
-import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertNotNull
 
 internal class AnnulleringE2ETest : AbstractE2ETest() {
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
@@ -21,7 +14,7 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling annullert oppdaterer alle snapshots på personen`() {
-        val oid= UUID.randomUUID()
+        val oid = UUID.randomUUID()
         val navn = "en saksbehandler"
         val epost = "saksbehandler_epost"
         val ident = "Z999999"
@@ -30,42 +23,11 @@ internal class AnnulleringE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2, snapshot = snapshotV2, utbetalingId = UUID.randomUUID())
 
         assertVedtak(vedtaksperiodeId2)
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendUtbetalingAnnullert(saksbehandlerEpost = epost)
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
         assertSnapshot(snapshotFinal, vedtaksperiodeId2)
     }
 
-    @Test
-    fun `Annullert av saksbehandler mappes til speil`() {
-        vedtaksperiode(organisasjonsnummer = ORGNR, vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UTBETALING_ID)
-
-        sendUtbetalingEndret(
-            type = "UTBETALING",
-            status = UTBETALT,
-            orgnr = ORGNR,
-            arbeidsgiverFagsystemId = "arbeidsgiver_fagsystem_id",
-            forrigeStatus = SENDT,
-            utbetalingId = UTBETALING_ID
-        )
-
-        val annulleringDto = AnnulleringDto(AKTØR, FØDSELSNUMMER, ORGNR, "ASJKLD90283JKLHAS3JKLF", "123", emptyList(), true, null)
-        val saksbehandler = Saksbehandler(
-            "kevders.chilleby@nav.no",
-            UUID.randomUUID(),
-            "Kevders Chilleby",
-            "Z999999"
-        )
-        håndterAnnullering(annulleringDto, saksbehandler)
-
-        sendUtbetalingAnnullert(saksbehandlerEpost = "kevders.chilleby@nav.no")
-
-        val snapshot = requireNotNull(personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot)
-        val annullertAvSaksbehandler = snapshot.utbetalinger.first().annullertAvSaksbehandler
-
-        assertNotNull(annullertAvSaksbehandler?.annullertTidspunkt)
-        assertEquals("Kevders Chilleby", annullertAvSaksbehandler?.saksbehandlerNavn)
-    }
 }

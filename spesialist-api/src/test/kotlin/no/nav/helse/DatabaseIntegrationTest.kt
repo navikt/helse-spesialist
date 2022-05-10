@@ -1,21 +1,20 @@
 package no.nav.helse
 
+import java.time.LocalDate
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.db.AbstractDatabaseTest
 import no.nav.helse.notat.NotatDao
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.PersonApiDao
-import no.nav.helse.person.PersonsnapshotDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
-import java.util.*
-import no.nav.helse.db.AbstractDatabaseTest
 
-internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
+internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected companion object {
         val NAVN = Triple("Ola", "Kari", "Nordhen")
         val ENHET = Pair(101, "Halden")
@@ -28,7 +27,6 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
     }
 
     protected val varselDao = VarselDao(dataSource)
-    protected val personsnapshotDao = PersonsnapshotDao(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -40,8 +38,10 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         val personid = person()
         val arbeidsgiverid = arbeidsgiver()
         val snapshotid = snapshot()
+
         @Language("PostgreSQL")
-        val statement = "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, speil_snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
+        val statement =
+            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
         session.run(
             queryOf(
                 statement, id, fom, tom, arbeidsgiverid, personid, snapshotid
@@ -59,43 +59,67 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         }
     }
 
-    protected fun person(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val personinfoid = personinfo(adressebeskyttelse)
-        val infotrygdutbetalingerid = infotrygdutbetalinger()
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?)"
-        requireNotNull(session.run(
-            queryOf(
-                statement, FØDSELSNUMMER.toLong(), AKTØRID.toLong(), infotrygdutbetalingerid, ENHET.first, personinfoid
-            ).asUpdateAndReturnGeneratedKey
-        ))
-    }
+    protected fun person(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val personinfoid = personinfo(adressebeskyttelse)
+            val infotrygdutbetalingerid = infotrygdutbetalinger()
 
-    private fun personinfo(adressebeskyttelse: Adressebeskyttelse) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val (fornavn, mellomnavn, etternavn) = NAVN
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) VALUES(?, ?, ?, ?::date, ?::person_kjonn, ?)"
-        requireNotNull(session.run(
-            queryOf(
-                statement,
-                fornavn,
-                mellomnavn,
-                etternavn,
-                LocalDate.of(1970, 1, 1),
-                "Ukjent",
-                adressebeskyttelse.name
-            ).asUpdateAndReturnGeneratedKey
-        ))
-    }
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref) VALUES(?, ?, ?, ?, ?)"
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        statement,
+                        FØDSELSNUMMER.toLong(),
+                        AKTØRID.toLong(),
+                        infotrygdutbetalingerid,
+                        ENHET.first,
+                        personinfoid
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            )
+        }
 
-    protected fun arbeidsgiver(bransjer: List<String> = emptyList()) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val bransjeid = bransjer(bransjer)
-        val navnid = arbeidsgivernavn()
+    private fun personinfo(adressebeskyttelse: Adressebeskyttelse) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val (fornavn, mellomnavn, etternavn) = NAVN
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) VALUES(?, ?, ?, ?::date, ?::person_kjonn, ?)"
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        statement,
+                        fornavn,
+                        mellomnavn,
+                        etternavn,
+                        LocalDate.of(1970, 1, 1),
+                        "Ukjent",
+                        adressebeskyttelse.name
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            )
+        }
 
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?)"
-        requireNotNull(session.run(queryOf(statement, ORGANISASJONSNUMMER.toLong(), navnid, bransjeid).asUpdateAndReturnGeneratedKey))
-    }
+    protected fun arbeidsgiver(bransjer: List<String> = emptyList()) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val bransjeid = bransjer(bransjer)
+            val navnid = arbeidsgivernavn()
+
+            @Language("PostgreSQL")
+            val statement = "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?)"
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        statement,
+                        ORGANISASJONSNUMMER.toLong(),
+                        navnid,
+                        bransjeid
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            )
+        }
 
     protected fun saksbehandler(
         oid: UUID = UUID.randomUUID(),
@@ -107,17 +131,38 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
         return oid
     }
 
-    private fun arbeidsforhold(personid: Long, arbeidsgiverid: Long) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val (startdato, sluttdato, tittel, prosent) = ARBEIDSFORHOLD
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent) VALUES(?, ?, ?, ?, ?, ?)"
-        requireNotNull(session.run(queryOf(statement, personid, arbeidsgiverid, startdato, sluttdato, tittel, prosent).asUpdateAndReturnGeneratedKey))
-    }
+    private fun arbeidsforhold(personid: Long, arbeidsgiverid: Long) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val (startdato, sluttdato, tittel, prosent) = ARBEIDSFORHOLD
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent) VALUES(?, ?, ?, ?, ?, ?)"
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        statement,
+                        personid,
+                        arbeidsgiverid,
+                        startdato,
+                        sluttdato,
+                        tittel,
+                        prosent
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            )
+        }
 
     private fun bransjer(bransjer: List<String>) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val statement = "INSERT INTO arbeidsgiver_bransjer(bransjer) VALUES(?)"
-        requireNotNull(session.run(queryOf(statement, objectMapper.writeValueAsString(bransjer)).asUpdateAndReturnGeneratedKey))
+        requireNotNull(
+            session.run(
+                queryOf(
+                    statement,
+                    objectMapper.writeValueAsString(bransjer)
+                ).asUpdateAndReturnGeneratedKey
+            )
+        )
     }
 
     private fun arbeidsgivernavn() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
@@ -134,29 +179,20 @@ internal abstract class DatabaseIntegrationTest: AbstractDatabaseTest() {
 
     private fun snapshot() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
-        val statement = "INSERT INTO speil_snapshot(data) VALUES(?::json)"
-        requireNotNull(session.run(queryOf(statement, snapshot).asUpdateAndReturnGeneratedKey))
+        val statement = "INSERT INTO snapshot(data, versjon) VALUES(?::json, ?)"
+        requireNotNull(session.run(queryOf(statement, snapshot, 1).asUpdateAndReturnGeneratedKey))
     }
 
     @Language("JSON")
     private val snapshot = """
         {
-          "version": "this_is_version_1",
-          "aktørId": "123456789101112",
-          "fødselsnummer": "12345612345",
-          "arbeidsgivere": [
-            {
-              "organisasjonsnummer": "987654321",
-              "id": "${UUID.randomUUID()}",
-              "vedtaksperioder": [
-                {
-                  "id": "${UUID.randomUUID()}",
-                  "aktivitetslogg": []
-                }
-              ]
-            }
-          ],
-          "inntektsgrunnlag": {}
+          "aktorId": "123456789101112",
+          "arbeidsgivere": [],
+          "dodsdato": null,
+          "fodselsnummer": "12345612345",
+          "inntektsgrunnlag": [],
+          "versjon": 1,
+          "vilkarsgrunnlaghistorikk": []
         }
     """
 

@@ -6,6 +6,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.person.PersonDao
@@ -33,6 +36,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
+    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private lateinit var context: CommandContext
@@ -47,7 +51,8 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         utbetalingId = UTBETALING_ID,
         utbetalingtype = Utbetalingtype.UTBETALING,
         periodeFom = 1.januar,
-        periodeTom = 31.januar
+        periodeTom = 31.januar,
+        snapshotDao = snapshotDao,
     )
 
     @BeforeEach
@@ -74,7 +79,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     @Test
     fun `oppretter oppgave med egen oppgavetype for fortrlig adressebeskyttelse`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
-        every { personDao.findPersoninfoAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
+        every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.fortroligAdressebeskyttelse(VEDTAKSPERIODE_ID, UTBETALING_ID))}
     }
@@ -82,10 +87,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     @Test
     fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
-        every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
-            utbetalingId = UTBETALING_ID,
-            utbetalingstidslinje = listOf(PersonDao.Utbetalingen.Utbetalingstidslinjedag(1.januar, 500, null))
-        )
+        every { snapshotDao.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID))}
     }
@@ -93,11 +95,22 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     @Test
     fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() {
         every { reservasjonDao.hentReservasjonFor(FNR) } returns null
-        every { personDao.findVedtaksperiodeUtbetalingElement(FNR, UTBETALING_ID) } returns PersonDao.Utbetalingen(
-            utbetalingId = UTBETALING_ID,
-            utbetalingstidslinje = listOf(PersonDao.Utbetalingen.Utbetalingstidslinjedag(1.januar, 500, 500))
-        )
+        every { snapshotDao.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 500)
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID))}
     }
+
+    private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =
+        GraphQLUtbetaling(
+            id = UTBETALING_ID.toString(),
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
+            arbeidsgiverNettoBelop = arbeidsgiverbeløp,
+            personFagsystemId = "EN_FAGSYSTEMID",
+            personNettoBelop = personbeløp,
+            statusEnum = GraphQLUtbetalingstatus.GODKJENT,
+            typeEnum = no.nav.helse.mediator.graphql.enums.Utbetalingtype.UTBETALING,
+            vurdering = null,
+            personoppdrag = null,
+            arbeidsgiveroppdrag = null,
+        )
 }

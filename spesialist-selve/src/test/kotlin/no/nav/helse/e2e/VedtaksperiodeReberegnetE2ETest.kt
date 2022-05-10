@@ -2,20 +2,20 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import java.util.*
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.util.*
 
 internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
 
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -40,7 +40,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
 
-        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
+        sendVedtaksperiodeEndret(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        )
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -58,10 +62,14 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter saksbehandling etter oppgave er opprettet til saksbehandling`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
-        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
+        sendVedtaksperiodeEndret(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        )
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -81,14 +89,18 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `tildeler andre rundes oppgave til saksbehandler`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val saksbehandlerOid = UUID.randomUUID()
 
         vedtaksperiodeTilGodkjenning()
         opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
         tildelOppgave(saksbehandlerOid)
 
-        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
+        sendVedtaksperiodeEndret(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        )
         testRapid.reset()
         vedtaksperiodeTilGodkjenning()
 
@@ -97,7 +109,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         var godkjenningsmeldingId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -122,7 +134,11 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId
         )
 
-        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK")
+        sendVedtaksperiodeEndret(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        )
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -157,8 +173,15 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `avbryt ikke-eksisterende vedtaksperiode`() =
-        assertDoesNotThrow { sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "AVVENTER_GODKJENNING", gjeldendeTilstand = "AVVENTER_HISTORIKK") }
+    fun `avbryt ikke-eksisterende vedtaksperiode`() {
+        assertDoesNotThrow {
+            sendVedtaksperiodeEndret(
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                forrigeTilstand = "AVVENTER_GODKJENNING",
+                gjeldendeTilstand = "AVVENTER_HISTORIKK"
+            )
+        }
+    }
 
     @Test
     fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING`() {
@@ -181,10 +204,14 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     private fun testIkkeAvbrutt(forrigeTilstand: String = "AVVENTER_GODKJENNING", gjeldendeTilstand: String) {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
-        sendVedtaksperiodeEndret(vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = forrigeTilstand, gjeldendeTilstand = gjeldendeTilstand)
+        sendVedtaksperiodeEndret(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = forrigeTilstand,
+            gjeldendeTilstand = gjeldendeTilstand
+        )
 
         assertTilstand(
             godkjenningsmeldingId,
@@ -259,8 +286,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     private fun finnOidForTildeling(oppgaveId: Long) =
-        sessionOf(dataSource).use {
-            it.run(
+        sessionOf(dataSource).use { session ->
+            session.run(
                 queryOf(
                     "SELECT * FROM tildeling WHERE oppgave_id_ref=?;", oppgaveId
                 ).map {

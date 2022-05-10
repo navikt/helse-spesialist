@@ -1,25 +1,19 @@
 package no.nav.helse.modell.kommando
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
 internal class OpprettVedtakCommand(
-    private val speilSnapshotRestClient: SpeilSnapshotRestClient,
-    private val speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    private val snapshotClient: SnapshotClient,
     private val fødselsnummer: String,
     private val orgnummer: String,
     private val vedtaksperiodeId: UUID,
@@ -27,7 +21,6 @@ internal class OpprettVedtakCommand(
     private val periodeTom: LocalDate,
     private val personDao: PersonDao,
     private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val speilSnapshotDao: SpeilSnapshotDao,
     private val snapshotDao: SnapshotDao,
     private val vedtakDao: VedtakDao,
     private val warningDao: WarningDao
@@ -38,35 +31,19 @@ internal class OpprettVedtakCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val vedtakRef = vedtakDao.finnVedtakId(vedtaksperiodeId) ?: return opprett()
-        return oppdaterRestApiSnapshot(vedtakRef) && (if (Toggle.GraphQLApi.enabled) oppdaterGraphQLApiSnapshot(
-            vedtakRef
-        ) else true)
+        return oppdaterSnapshot(vedtakRef)
     }
 
-    private fun oppdaterRestApiSnapshot(vedtakRef: Long): Boolean {
-        log.info("Henter oppdatert snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val snapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
-        val snapshotId = speilSnapshotDao.lagre(fødselsnummer, snapshot)
-        oppdaterWarnings(snapshot)
-
-        log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
-        vedtakDao.oppdater(
-            vedtakRef = vedtakRef,
-            fom = periodeFom,
-            tom = periodeTom,
-            speilSnapshotRef = snapshotId
-        )
-        return true
-    }
-
-    private fun oppdaterGraphQLApiSnapshot(vedtakRef: Long): Boolean {
+    private fun oppdaterSnapshot(vedtakRef: Long): Boolean {
         log.info("Henter oppdatert graphql-snapshot for vedtaksperiode: $vedtaksperiodeId")
-        return speilSnapshotGraphQLClient.hentSnapshot(fødselsnummer).data?.person?.let {
+        return snapshotClient.hentSnapshot(fødselsnummer).data?.person?.let {
             val id = snapshotDao.lagre(fødselsnummer, it)
             oppdaterWarnings(it)
             log.info("Oppdaterer vedtak for vedtaksperiode: $vedtaksperiodeId")
-            vedtakDao.oppdaterGraphQLSnapshot(
+            vedtakDao.oppdaterSnaphot(
                 vedtakRef = vedtakRef,
+                fom = periodeFom,
+                tom = periodeTom,
                 snapshotRef = id
             )
             true
@@ -75,10 +52,8 @@ internal class OpprettVedtakCommand(
 
     private fun opprett(): Boolean {
         log.info("Henter snapshot for vedtaksperiode: $vedtaksperiodeId")
-        val restApiSnapshot = speilSnapshotRestClient.hentSpeilSnapshot(fødselsnummer)
-        val restApiSnapshotId = speilSnapshotDao.lagre(fødselsnummer, restApiSnapshot)
-        val graphQLApiSnapshot = if (Toggle.GraphQLApi.enabled) speilSnapshotGraphQLClient.hentSnapshot(fødselsnummer) else null
-        val graphQLApiSnapshotId = graphQLApiSnapshot?.data?.person?.let {
+        val snapshot = snapshotClient.hentSnapshot(fødselsnummer)
+        val snapshotId = snapshot.data?.person?.let {
             snapshotDao.lagre(fødselsnummer, it)
         }
         val personRef = requireNotNull(personDao.findPersonByFødselsnummer(fødselsnummer))
@@ -90,22 +65,12 @@ internal class OpprettVedtakCommand(
             tom = periodeTom,
             personRef = personRef,
             arbeidsgiverRef = arbeidsgiverRef,
-            speilSnapshotRef = restApiSnapshotId,
-            snapshotRef = graphQLApiSnapshotId
+            snapshotRef = snapshotId
         )
-        oppdaterWarnings(restApiSnapshot)
-        graphQLApiSnapshot?.data?.person?.let {
+        snapshot.data?.person?.let {
             oppdaterWarnings(it)
         }
         return true
-    }
-
-    private fun oppdaterWarnings(snapshot: String) {
-        warningDao.oppdaterSpleisWarnings(
-            vedtaksperiodeId, Warning.warnings(
-                vedtaksperiodeId, objectMapper.readValue(snapshot)
-            )
-        )
     }
 
     private fun oppdaterWarnings(person: GraphQLPerson) {

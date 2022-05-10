@@ -16,8 +16,8 @@ internal class Utbetalingsfilter(
     private val periodetype: Periodetype,
     private val inntektskilde: Inntektskilde,
     private val warnings: List<Warning>,
-    private val utbetalingtype: Utbetalingtype) {
-
+    private val utbetalingtype: Utbetalingtype
+) {
     private val årsaker = mutableListOf<String>()
     private fun nyÅrsak(årsak: String) = årsaker.add("Utbetalingsfilter: $årsak")
 

@@ -23,7 +23,6 @@ import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.cors.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
@@ -47,10 +46,10 @@ import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.PersonMediator
 import no.nav.helse.mediator.api.annulleringApi
 import no.nav.helse.mediator.api.graphQLApi
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
+import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
 import no.nav.helse.mediator.api.oppgaveApi
@@ -60,7 +59,6 @@ import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -77,7 +75,6 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.notat.NotatDao
 import no.nav.helse.notat.NotatMediator
@@ -85,7 +82,6 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
-import no.nav.helse.person.PersonsnapshotDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -97,6 +93,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import kotlin.random.Random.Default.nextInt
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 private val auditLog = LoggerFactory.getLogger("auditLogger")
@@ -115,10 +112,12 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
         }
         install(ContentNegotiation) {
-            register(ContentType.Application.Json, JacksonConverter(
-                jacksonObjectMapper()
-                    .registerModule(JavaTimeModule())
-            ))
+            register(
+                ContentType.Application.Json, JacksonConverter(
+                    jacksonObjectMapper()
+                        .registerModule(JavaTimeModule())
+                )
+            )
         }
     }
     private val spleisClient = HttpClient(Apache) {
@@ -137,13 +136,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET"),
         httpClient = azureAdClient
     )
-    private val speilSnapshotRestClient = SpeilSnapshotRestClient(
-        httpClient = spleisClient,
-        accessTokenClient = accessTokenClient,
-        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
-        spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
-    )
-    private val speilSnapshotGraphQLClient = SpeilSnapshotGraphQLClient(
+    private val snapshotClient = SnapshotClient(
         httpClient = spleisClient,
         accessTokenClient = accessTokenClient,
         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
@@ -161,7 +154,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     private val varselDao = VarselDao(dataSource)
-    private val personsnapshotDao = PersonsnapshotDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val warningDao = WarningDao(dataSource)
@@ -175,7 +167,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val overstyringDao = OverstyringDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val hendelseDao = HendelseDao(dataSource)
@@ -197,6 +188,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         opptegnelseDao
     )
 
+    private val snapshotMediator = SnapshotMediator(snapshotDao, snapshotClient)
+
     private val plukkTilManuell: PlukkTilManuell = ({
         env["STIKKPROEVER_DIVISOR"]?.let {
             val divisor = it.toInt()
@@ -213,7 +206,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         vedtakDao = vedtakDao,
         warningDao = warningDao,
         commandContextDao = commandContextDao,
-        speilSnapshotDao = speilSnapshotDao,
         oppgaveDao = oppgaveDao,
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
@@ -225,8 +217,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         egenAnsattDao = egenAnsattDao,
         arbeidsforholdDao = arbeidsforholdDao,
         snapshotDao = snapshotDao,
-        speilSnapshotRestClient = speilSnapshotRestClient,
-        speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+        snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
@@ -239,7 +230,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             personDao = personDao,
             vedtakDao = vedtakDao,
             plukkTilManuell = plukkTilManuell,
-            vergemålDao = vergemålDao
+            vergemålDao = vergemålDao,
+            snapshotDao = snapshotDao,
         ),
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
@@ -286,7 +278,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             requestResponseTracing(httpTraceLog)
             azureAdAppAuthentication(azureConfig)
             graphQLApi(
-                snapshotDao = snapshotDao,
                 personApiDao = personApiDao,
                 tildelingDao = tildelingDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
@@ -296,7 +287,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
-                snapshotGraphQLClient = speilSnapshotGraphQLClient
+                snapshotMediator = snapshotMediator,
             )
             routing {
                 authenticate("oidc") {
@@ -306,23 +297,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         kode7Saksbehandlergruppe = env.kode7GruppeId()
                     )
                     personApi(
-                        personMediator = PersonMediator(
-                            personsnapshotDao = personsnapshotDao,
-                            speilSnapshotDao = speilSnapshotDao,
-                            varselDao = varselDao,
-                            personDao = personApiDao,
-                            egenAnsattDao = egenAnsattDao,
-                            arbeidsgiverDao = arbeidsgiverApiDao,
-                            overstyringDao = overstyringApiDao,
-                            oppgaveDao = oppgaveDao,
-                            tildelingDao = tildelingDao,
-                            risikovurderingApiDao = risikovurderingApiDao,
-                            utbetalingDao = utbetalingDao,
-                            speilSnapshotRestClient = speilSnapshotRestClient
-                        ),
                         hendelseMediator = hendelseMediator,
-                        kode7Saksbehandlergruppe = env.kode7GruppeId(),
-                        skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
+                        oppgaveMediator = oppgaveMediator
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
@@ -367,7 +343,7 @@ fun Application.installErrorHandling() {
             logg.error("Unhandled: $verb", cause)
             sikkerlogg.error("Unhandled: $verb - $uri", cause)
             call.respondText(
-                text ="Det skjedde en uventet feil",
+                text = "Det skjedde en uventet feil",
                 status = HttpStatusCode.InternalServerError
             )
             call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")

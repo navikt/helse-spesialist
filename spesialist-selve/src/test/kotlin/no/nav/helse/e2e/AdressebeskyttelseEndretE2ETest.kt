@@ -14,9 +14,9 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         val hendelseId = sendAdressebeskyttelseEndret()
 
         assertEquals(originaleBehov + 1, testRapid.inspektør.behov().size)
-        assertEquals(Adressebeskyttelse.Ugradert, personDao.findPersoninfoAdressebeskyttelse(FØDSELSNUMMER))
+        assertEquals(Adressebeskyttelse.Ugradert, personDao.findAdressebeskyttelse(FØDSELSNUMMER))
         sendHentPersoninfoLøsning(hendelseId, adressebeskyttelse = "Fortrolig")
-        assertEquals(Adressebeskyttelse.Fortrolig, personDao.findPersoninfoAdressebeskyttelse(FØDSELSNUMMER))
+        assertEquals(Adressebeskyttelse.Fortrolig, personDao.findAdressebeskyttelse(FØDSELSNUMMER))
     }
     @Test
     fun `oppdaterer ikke adressebeskyttelse dersom vi ikke kjenner til fødselsnummer`() {

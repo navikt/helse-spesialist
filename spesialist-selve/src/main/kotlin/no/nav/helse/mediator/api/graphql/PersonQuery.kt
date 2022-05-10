@@ -7,7 +7,6 @@ import graphql.schema.DataFetchingEnvironment
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
@@ -19,14 +18,13 @@ import org.slf4j.LoggerFactory
 
 class PersonQuery(
     personApiDao: PersonApiDao,
-    private val snapshotDao: SnapshotDao,
     private val tildelingDao: TildelingDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
-    private val snapshotGraphQLClient: SpeilSnapshotGraphQLClient
+    private val snapshotMediator: SnapshotMediator,
 ) : AbstractPersonQuery(personApiDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -44,22 +42,16 @@ class PersonQuery(
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
         }
 
-        if (snapshotDao.utdatert(fødselsnummer)) {
-            snapshotGraphQLClient.hentSnapshot(fødselsnummer).data?.person?.let {
-                snapshotDao.lagre(fødselsnummer, it)
-            }
-        }
-
         val snapshot = try {
-            snapshotDao.hentSnapshotMedMetadata(fødselsnummer)
+            snapshotMediator.hentSnapshot(fødselsnummer)
         } catch (e: Exception) {
             sikkerLogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
             return DataFetcherResult.newResult<Person?>().error(getSnapshotValidationError()).build()
         }
 
-        val person = snapshot?.let { (personinfo, snapshot) ->
+        val person = snapshot?.let { (personinfo, personSnapshot) ->
             Person(
-                snapshot = snapshot,
+                snapshot = personSnapshot,
                 personinfo = personinfo,
                 personApiDao = personApiDao,
                 tildelingDao = tildelingDao,

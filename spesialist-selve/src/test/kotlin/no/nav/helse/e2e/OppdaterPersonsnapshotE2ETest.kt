@@ -1,12 +1,13 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.mockk.every
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
-import no.nav.helse.graphQLSnapshot
+import no.nav.helse.mediator.graphql.HentSnapshot
 
 internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     private val vedtaksperiodeId1: UUID = UUID.randomUUID()
@@ -22,8 +23,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         vedtaksperiode(vedtaksperiodeId1, snapshotV1, utbetalingId1)
         vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2)
 
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotFinal
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendOppdaterPersonsnapshot()
 
         assertSnapshot(snapshotFinal, vedtaksperiodeId1)
@@ -42,10 +42,8 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         testRapid.sendTestMessage(json)
     }
 
-    fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: String, utbetalingId: UUID) {
-
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshot
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+    fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: GraphQLClientResponse<HentSnapshot.Result>, utbetalingId: UUID) {
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,

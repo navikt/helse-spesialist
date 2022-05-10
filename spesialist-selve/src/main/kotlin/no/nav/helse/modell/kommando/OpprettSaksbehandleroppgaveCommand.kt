@@ -2,12 +2,13 @@ package no.nav.helse.modell.kommando
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.person.Adressebeskyttelse
@@ -24,7 +25,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val periodeFom: LocalDate,
     private val periodeTom: LocalDate,
     private val utbetalingId: UUID,
-    private val utbetalingtype: Utbetalingtype
+    private val utbetalingtype: Utbetalingtype,
+    private val snapshotDao: SnapshotDao,
 ) : Command {
 
     private companion object {
@@ -44,8 +46,8 @@ internal class OpprettSaksbehandleroppgaveCommand(
                 vedtaksperiodeId,
                 utbetalingId
             )
-            vedtaksperiodensUtbetaling.delvisRefusjon(periodeFom, periodeTom) -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
-            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt(periodeFom, periodeTom) -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.delvisRefusjon() -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave $oppgave")
@@ -55,6 +57,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     }
 
     private val harFortroligAdressebeskyttelse get() =
-        personDao.findPersoninfoAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
-    private val vedtaksperiodensUtbetaling get () = personDao.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId)
+        personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
+
+    private val vedtaksperiodensUtbetaling get () = snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId)
 }

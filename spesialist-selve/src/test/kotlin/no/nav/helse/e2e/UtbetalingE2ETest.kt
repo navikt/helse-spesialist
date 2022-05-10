@@ -35,7 +35,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
         val ET_ORGNR = "1"
         val ET_ANNET_ORGNR = "2"
-        vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         assertDoesNotThrow {
             sendUtbetalingEndret("UTBETALING", GODKJENT, ET_ANNET_ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         }
@@ -77,7 +77,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling forkastet`() {
-        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret(
             "UTBETALING",
             FORKASTET,
@@ -100,7 +100,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger på totalbeløp på utbetaling`() {
-        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOTV1_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
         utbetalingDao.findUtbetalinger(FØDSELSNUMMER).first().let {

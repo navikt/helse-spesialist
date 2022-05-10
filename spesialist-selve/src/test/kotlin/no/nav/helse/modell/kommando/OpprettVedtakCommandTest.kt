@@ -4,21 +4,18 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.graphQLSnapshot
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import java.time.LocalDate
+import java.util.*
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
-import no.nav.helse.snapshotUtenWarnings
+import no.nav.helse.snapshot
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class OpprettVedtakCommandTest {
     private companion object {
@@ -33,15 +30,12 @@ internal class OpprettVedtakCommandTest {
     private lateinit var context: CommandContext
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val arbeidsgiverDao = mockk<ArbeidsgiverDao>(relaxed = true)
-    private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val graphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
+    private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val command = OpprettVedtakCommand(
-        speilSnapshotRestClient = restClient,
-        speilSnapshotGraphQLClient = graphQLClient,
+        snapshotClient = snapshotClient,
         fødselsnummer = FNR,
         orgnummer = ORGNR,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -49,7 +43,6 @@ internal class OpprettVedtakCommandTest {
         periodeTom = TOM,
         personDao = personDao,
         arbeidsgiverDao = arbeidsgiverDao,
-        speilSnapshotDao = speilSnapshotDao,
         snapshotDao = snapshotDao,
         vedtakDao = vedtakDao,
         warningDao = warningDao
@@ -58,47 +51,49 @@ internal class OpprettVedtakCommandTest {
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
-        clearMocks(personDao, arbeidsgiverDao, speilSnapshotDao, vedtakDao)
+        clearMocks(personDao, arbeidsgiverDao, snapshotDao, vedtakDao)
     }
 
     @Test
     fun `opprette vedtak`() {
-        every { restClient.hentSpeilSnapshot(FNR) } returns snapshotUtenWarnings(
-            VEDTAKSPERIODE_ID,
-            ORGNR,
-            FNR,
-            "Aktørid"
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot(
+            fnr = FNR,
+            aktørId = "Aktørid",
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        every { graphQLClient.hentSnapshot(FNR) } returns graphQLSnapshot(FNR, "Aktørid")
         val (personRef, arbeidsgiverRef, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
         verify(exactly = 1) {
             vedtakDao.opprett(
-                VEDTAKSPERIODE_ID,
-                FOM,
-                TOM,
-                personRef,
-                arbeidsgiverRef,
-                snapshotRef,
-                null
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                fom = FOM,
+                tom = TOM,
+                personRef = personRef,
+                arbeidsgiverRef = arbeidsgiverRef,
+                snapshotRef = snapshotRef,
             )
         }
     }
 
     @Test
     fun `oppdatere vedtak`() {
-        every { restClient.hentSpeilSnapshot(FNR) } returns snapshotUtenWarnings(
-            VEDTAKSPERIODE_ID,
-            ORGNR,
-            FNR,
-            "Aktørid"
+        every { snapshotClient.hentSnapshot(FNR) } returns snapshot(
+            fnr = FNR,
+            aktørId = "Aktørid",
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        every { graphQLClient.hentSnapshot(FNR) } returns graphQLSnapshot(FNR, "Aktørid")
         val (_, _, snapshotRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns VEDTAK_REF
         assertTrue(command.execute(context))
-        verify(exactly = 1) { vedtakDao.oppdater(VEDTAK_REF, FOM, TOM, snapshotRef) }
+        verify(exactly = 1) { vedtakDao.oppdaterSnaphot(
+            vedtakRef = VEDTAK_REF,
+            fom = FOM,
+            tom = TOM,
+            snapshotRef = snapshotRef
+        ) }
     }
 
     private fun personFinnes(): Triple<Long, Long, Int> {
@@ -107,7 +102,6 @@ internal class OpprettVedtakCommandTest {
         val snapshotRef = 3
         every { personDao.findPersonByFødselsnummer(FNR) } returns personRef
         every { arbeidsgiverDao.findArbeidsgiverByOrgnummer(ORGNR) } returns arbeidsgiverRef
-        every { speilSnapshotDao.lagre(any(), any()) } returns snapshotRef
         every { snapshotDao.lagre(any(), any()) } returns snapshotRef
         return Triple(personRef, arbeidsgiverRef, snapshotRef)
     }

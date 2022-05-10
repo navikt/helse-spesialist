@@ -1,25 +1,27 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.SpeilSnapshotDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
-import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
-import no.nav.helse.modell.person.PersonDao
 
 internal class VedtaksperiodeForkastet(
     override val id: UUID,
@@ -28,24 +30,22 @@ internal class VedtaksperiodeForkastet(
     private val json: String,
     commandContextDao: CommandContextDao,
     warningDao: WarningDao,
-    speilSnapshotDao: SpeilSnapshotDao,
     oppgaveMediator: OppgaveMediator,
-    speilSnapshotRestClient: SpeilSnapshotRestClient,
-    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
-    personDao: PersonDao
+    vedtakDao: VedtakDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
-        OppdaterSpeilSnapshotCommand(
-            speilSnapshotRestClient,
-            warningDao,
-            personDao,
-            speilSnapshotDao,
-            vedtaksperiodeId,
-            fødselsnummer
-        ),
-        OppdaterSnapshotCommand(speilSnapshotGraphQLClient, snapshotDao, vedtaksperiodeId, fødselsnummer, warningDao)
+        OppdaterSpeilSnapshotCommand(),
+        OppdaterSnapshotCommand(
+            snapshotClient = snapshotClient,
+            snapshotDao = snapshotDao,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            warningDao = warningDao,
+            vedtakDao = vedtakDao,
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer

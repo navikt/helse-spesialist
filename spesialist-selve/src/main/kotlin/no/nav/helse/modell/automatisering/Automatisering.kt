@@ -1,19 +1,19 @@
 package no.nav.helse.modell.automatisering
 
-import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
+import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
 import org.slf4j.LoggerFactory
@@ -28,7 +28,8 @@ internal class Automatisering(
     private val vergemålDao: VergemålDao,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
-    private val plukkTilManuell: PlukkTilManuell
+    private val snapshotDao: SnapshotDao,
+    private val plukkTilManuell: PlukkTilManuell,
 ) {
     private companion object {
         private val logger = LoggerFactory.getLogger(Automatisering::class.java)
@@ -46,11 +47,9 @@ internal class Automatisering(
         hendelseId: UUID,
         utbetalingId: UUID,
         utbetalingtype: Utbetalingtype,
-        periodeFom: LocalDate,
-        periodeTom: LocalDate,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, periodeFom, periodeTom)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
 
         when {
             utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() -> {
@@ -73,7 +72,7 @@ internal class Automatisering(
         }
     }
 
-    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID, utbetalingId: UUID, periodeFom: LocalDate, periodeTom: LocalDate): List<String> {
+    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID, utbetalingId: UUID): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
@@ -84,7 +83,7 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
-        val vedtaksperiodensUtbetaling = personDao.findVedtaksperiodeUtbetalingElement(fødselsnummer, utbetalingId)
+        val vedtaksperiodensUtbetaling = snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId)
 
         return valider(
             risikovurdering,
@@ -97,8 +96,8 @@ internal class Automatisering(
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
-            validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon(periodeFom, periodeTom) },
-            validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt(periodeFom, periodeTom) },
+            validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
+            validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() },
         )
     }
 

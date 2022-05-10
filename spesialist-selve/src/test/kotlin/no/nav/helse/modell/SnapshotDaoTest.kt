@@ -1,44 +1,43 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 
 internal class SnapshotDaoTest : DatabaseIntegrationTest() {
 
 
     @Test
     fun `lagre snapshot`() {
-        val snapshot = snapshot()
+        val snapshot = snapshot().data!!.person!!
         opprettPerson()
-        speilSnapshotDao.lagre(FNR, snapshot)
+        snapshotDao.lagre(FNR, snapshot)
         assertEquals(1, finnAlleSnapshot().size)
         assertEquals(snapshot, finnAlleSnapshot().first().first)
-        assertEquals(LocalDate.now(), finnAlleSnapshot().first().second)
     }
 
     @Test
     fun `oppdaterer globalt og pr snapshot dersom utdatert`() {
-        val snapshot = snapshot(1)
-        val nyttSnapshot = snapshot(2)
+        val snapshot = snapshot(1).data!!.person!!
+        val nyttSnapshot = snapshot(2).data!!.person!!
         opprettPerson()
-        speilSnapshotDao.lagre(FNR, snapshot)
-        speilSnapshotDao.lagre(FNR, nyttSnapshot)
+        snapshotDao.lagre(FNR, snapshot)
+        snapshotDao.lagre(FNR, nyttSnapshot)
 
         val alleSnapshots = finnAlleSnapshot()
         assertEquals(1, alleSnapshots.size)
         assertEquals(nyttSnapshot, alleSnapshots.first().first)
-        assertEquals(LocalDate.now(), alleSnapshots.first().second)
-        assertEquals(2, alleSnapshots.first().third)
+        assertEquals(2, alleSnapshots.first().second)
         assertEquals(2, globaltVersjonsnummer())
     }
 
-    private fun finnAlleSnapshot() = sessionOf(dataSource).use  {
-        it.run(queryOf("SELECT data, sist_endret, versjon FROM speil_snapshot").map {
-            Triple(it.string("data"), it.localDate("sist_endret"), it.int("versjon"))
+    private fun finnAlleSnapshot() = sessionOf(dataSource).use  { session ->
+        session.run(queryOf("SELECT data, versjon FROM snapshot").map {
+            Pair(objectMapper.readValue<GraphQLPerson>(it.string("data")), it.int("versjon"))
         }.asList)
     }
 

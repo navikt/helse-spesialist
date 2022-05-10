@@ -1,8 +1,10 @@
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mockk.clearMocks
+import com.fasterxml.jackson.module.kotlin.readValue
+import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
@@ -15,7 +17,6 @@ import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.graphQLSnapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
@@ -24,9 +25,26 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.PersonMediator
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.PersonQuery
+import no.nav.helse.mediator.api.graphql.SnapshotClient
+import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
+import no.nav.helse.mediator.graphql.HentSnapshot
+import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
+import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.mediator.graphql.hentsnapshot.Alder
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLAktivitet
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.AktivVedtaksperiodeJson
@@ -35,7 +53,6 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -52,7 +69,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.utbetaling.Utbetalingtype.*
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -63,14 +80,12 @@ import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.person.PersonApiDao
-import no.nav.helse.person.PersonsnapshotDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.snapshotMedWarning
-import no.nav.helse.snapshotUtenWarnings
+import no.nav.helse.snapshotMedWarnings
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import org.intellij.lang.annotations.Language
@@ -83,7 +98,7 @@ import org.junit.jupiter.api.BeforeEach
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
-    protected val VEDTAKSPERIODE_ID = UUID.randomUUID()
+    protected val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
     private val DEFAULT_FØDSELSNUMER = "12020052345"
     protected var FØDSELSNUMMER = DEFAULT_FØDSELSNUMER
 
@@ -92,7 +107,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val ORGNR_GHOST = "666666666"
 
     protected val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
-    protected val SAKSBEHANDLER_OID = UUID.randomUUID()
+    protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_IDENT = "X999999"
     protected val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
     protected val SAKSBEHANDLERTILGANGER_UTEN_TILGANGER =
@@ -102,17 +117,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             riskSaksbehandlergruppe = UUID.randomUUID()
         )
 
-    protected val SNAPSHOTV1_MED_WARNINGS =
-        snapshotMedWarning(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
-    protected val SNAPSHOTV1_UTEN_WARNINGS =
-        snapshotUtenWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID, orgnr = ORGNR, fnr = FØDSELSNUMMER, aktørId = AKTØR)
+    protected val SNAPSHOT_MED_WARNINGS = snapshotMedWarnings(
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        orgnr = ORGNR,
+        fnr = FØDSELSNUMMER,
+        aktørId = AKTØR
+    )
 
-    protected fun snapshotv1MedWarnings(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        orgnr: String = ORGNR,
-        fnr: String = FØDSELSNUMMER,
-        aktørId: String = AKTØR
-    ) = snapshotMedWarning(vedtaksperiodeId, orgnr, fnr, aktørId)
+    protected val SNAPSHOT_UTEN_WARNINGS = snapshot()
 
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
@@ -122,48 +134,43 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         internal val UTBETALING_ID2 = UUID.randomUUID()
     }
 
+    private val commandContextDao = CommandContextDao(dataSource)
+    private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
+    private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
+    private val automatiseringDao = AutomatiseringDao(dataSource)
+    private val hendelseDao = HendelseDao(dataSource)
+    private val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
+    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
+    private val snapshotDao = SnapshotDao(dataSource)
+
+    protected val varselDao = VarselDao(dataSource)
+    protected val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     protected val vedtakDao = VedtakDao(dataSource)
     protected val warningDao = WarningDao(dataSource)
-    protected val commandContextDao = CommandContextDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     protected val risikovurderingDao = RisikovurderingDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
-    protected val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    private val automatiseringDao = AutomatiseringDao(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
-    protected val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    protected val egenAnsattDao = EgenAnsattDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
-    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
-    private val personApiDao = PersonApiDao(dataSource)
-    private val varselDao = VarselDao(dataSource)
-    private val personsnapshotDao = PersonsnapshotDao(dataSource)
-    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
-    protected val snapshotDao = SnapshotDao(dataSource)
     protected val vergemålDao = VergemålDao(dataSource)
 
-    protected val speilSnapshotRestClient = mockk<SpeilSnapshotRestClient>()
-    protected val speilSnapshotGraphQLClient = mockk<SpeilSnapshotGraphQLClient>()
+    protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
     protected val testRapid = TestRapid()
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
-
-    protected val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    protected val graphqlClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
 
     protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
@@ -174,7 +181,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         warningDao = warningDao,
         oppgaveDao = oppgaveDao,
         commandContextDao = commandContextDao,
-        speilSnapshotDao = SpeilSnapshotDao(dataSource),
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
         saksbehandlerDao = saksbehandlerDao,
@@ -184,8 +190,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
         snapshotDao = snapshotDao,
-        speilSnapshotRestClient = restClient,
-        speilSnapshotGraphQLClient = graphqlClient,
+        snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = Automatisering(
@@ -197,7 +202,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,
             vedtakDao = vedtakDao,
-            vergemålDao = vergemålDao
+            vergemålDao = vergemålDao,
+            snapshotDao = snapshotDao,
         ) { false },
         arbeidsforholdDao = arbeidsforholdDao,
         utbetalingDao = utbetalingDao,
@@ -211,25 +217,27 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelsefabrikk = hendelsefabrikk,
         opptegnelseDao = opptegnelseDao
     )
-    internal val personMediator = PersonMediator(
-        personsnapshotDao = personsnapshotDao,
-        varselDao = varselDao,
-        personDao = personApiDao,
-        egenAnsattDao = egenAnsattDao,
-        arbeidsgiverDao = arbeidsgiverApiDao,
-        overstyringDao = overstyringApiDao,
-        oppgaveDao = oppgaveDao,
+    internal val snapshotMediator = SnapshotMediator(
+        snapshotDao = snapshotDao,
+        snapshotClient = snapshotClient,
+    )
+
+
+    internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
+
+    internal val personQuery = PersonQuery(
+        personApiDao = personApiDao,
         tildelingDao = tildelingDao,
+        arbeidsgiverApiDao = arbeidsgiverApiDao,
+        overstyringApiDao = overstyringApiDao,
         risikovurderingApiDao = risikovurderingApiDao,
-        utbetalingDao = utbetalingDao,
-        speilSnapshotDao = speilSnapshotDao,
-        speilSnapshotRestClient = speilSnapshotRestClient
+        varselDao = varselDao,
+        oppgaveDao = oppgaveDao,
+        snapshotMediator = snapshotMediator
     )
 
     @BeforeEach
     internal fun resetTestSetup() {
-        clearMocks(restClient)
-        clearMocks(speilSnapshotRestClient)
         testRapid.reset()
     }
 
@@ -244,8 +252,21 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
     }
 
-    protected fun sendVedtaksperiodeEndret(orgnr: String = "orgnr", vedtaksperiodeId: UUID, forrigeTilstand: String = "FORRIGE_TILSTAND", gjeldendeTilstand: String = "GJELDENDE_TILSTAND"): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(id, vedtaksperiodeId, orgnr, forrigeTilstand, gjeldendeTilstand))
+    protected fun sendVedtaksperiodeEndret(
+        orgnr: String = "orgnr",
+        vedtaksperiodeId: UUID,
+        forrigeTilstand: String = "FORRIGE_TILSTAND",
+        gjeldendeTilstand: String = "GJELDENDE_TILSTAND"
+    ): UUID = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagVedtaksperiodeEndret(
+                id,
+                vedtaksperiodeId,
+                orgnr,
+                forrigeTilstand,
+                gjeldendeTilstand
+            )
+        )
     }
 
     protected fun sendAdressebeskyttelseEndret(): UUID = nyHendelseId().also { id ->
@@ -271,7 +292,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
         ),
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
+        utbetalingtype: Utbetalingtype = UTBETALING
     ): UUID = nyHendelseId().also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
@@ -365,14 +386,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
 
     protected fun sendKomposittbehov(
-            hendelseId: UUID,
-            behov: List<String>,
-            vedtaksperiodeId: UUID,
-            organisasjonsnummer: String = "orgnr",
-            contextId: UUID = testRapid.inspektør.contextId(),
-            detaljer: Map<String, Any>
-    ) = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagFullstendigBehov(id, hendelseId, contextId, vedtaksperiodeId, organisasjonsnummer, behov, detaljer))
+        hendelseId: UUID,
+        behov: List<String>,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String = "orgnr",
+        contextId: UUID = testRapid.inspektør.contextId(),
+        detaljer: Map<String, Any>
+    ): UUID = nyHendelseId().also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagFullstendigBehov(
+                id,
+                hendelseId,
+                contextId,
+                vedtaksperiodeId,
+                organisasjonsnummer,
+                behov,
+                detaljer
+            )
+        )
     }
 
     protected fun sendPersoninfoløsning(
@@ -451,7 +482,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
 
 
-    protected fun sendRevurderingAvvist(fødselsnummer: String, errors: List<String>) =
+    protected fun sendRevurderingAvvist(fødselsnummer: String, errors: List<String>): UUID =
         nyHendelseId().also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagRevurderingAvvist(
@@ -595,7 +626,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
             ORGNR,
             VEDTAKSPERIODE_ID,
@@ -959,15 +990,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, testRapid.inspektør.hendelser("oppgave_opprettet").size)
     }
 
-    protected fun assertSnapshot(forventet: String, vedtaksperiodeId: UUID) {
-        assertEquals(forventet, sessionOf(dataSource).use {
+    protected fun assertSnapshot(forventet: GraphQLClientResponse<HentSnapshot.Result>, vedtaksperiodeId: UUID) {
+        assertEquals(forventet.data?.person, sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "SELECT data FROM speil_snapshot WHERE id = (SELECT speil_snapshot_ref FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
+                    "SELECT data FROM snapshot WHERE id = (SELECT snapshot_ref FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
                     mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId
                     )
-                ).map { row -> row.string("data") }.asSingle
+                ).map { row -> objectMapper.readValue<GraphQLPerson>(row.string("data")) }.asSingle
             )
         })
     }
@@ -990,14 +1021,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         kanAutomatiseres: Boolean = false,
-        snapshot: String = snapshot(),
+        snapshot: GraphQLClientResponse<HentSnapshot.Result> = snapshot(),
         utbetalingId: UUID,
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
         risikofunn: List<Risikofunn> = emptyList()
     ): UUID {
-        every { restClient.hentSpeilSnapshot(fødselsnummer) } returns snapshot
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -1052,66 +1082,149 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         return godkjenningsmeldingId
     }
 
-    @Language("JSON")
     protected fun snapshot(
         versjon: Int = 1,
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UUID.randomUUID(),
-        utbetalingstidslinje: List<Triple<LocalDate, Int?, Int?>> = emptyList(),
-        personOppdragLinjer: List<ClosedRange<LocalDate>> = emptyList(),
-        arbeidsgiverOppdragLinjer: List<ClosedRange<LocalDate>> = emptyList()
-    ) = """{
-  "versjon": $versjon,
-  "aktørId": "$AKTØR",
-  "fødselsnummer": "$fødselsnummer",
-  "arbeidsgivere": [
-    {
-      "organisasjonsnummer": "$ORGNR",
-      "id": "${UUID.randomUUID()}",
-      "vedtaksperioder": [
-        {
-          "id": "$vedtaksperiodeId",
-          "aktivitetslogg": [],
-          "utbetaling": {
-            "utbetalingId": "$utbetalingId",
-            "utbetalingstidslinje": ${utbetalingstidslinje.map { (dato, personbeløp, arbeidsgiverbeløp) ->
-                """
-                       {
-                            "dato": "$dato",
-                            "arbeidsgiverbeløp": $arbeidsgiverbeløp,
-                            "personbeløp": $personbeløp
-                        }
-                        """
-            } },
-            "personOppdrag": {
-              "utbetalingslinjer": ${personOppdragLinjer.map {
-                """
-                            {
-                                "fom": "${it.start}",
-                                "tom": "${it.endInclusive}"
-                             }
-                            """
-            }}
-            },
-            "arbeidsgiverOppdrag": {
-              "utbetalingslinjer": ${arbeidsgiverOppdragLinjer.map {
-                """
-                            {
-                                "fom": "${it.start}",
-                                "tom": "${it.endInclusive}"
-                             }
-                            """
-            }}
-            }
-          }
+        arbeidsgiverbeløp: Int = 30000,
+        personbeløp: Int = 0,
+        aktivitetslogg: List<GraphQLAktivitet> = emptyList()
+    ): GraphQLClientResponse<HentSnapshot.Result> =
+        object : GraphQLClientResponse<HentSnapshot.Result> {
+            override val data = HentSnapshot.Result(
+                GraphQLPerson(
+                    aktorId = AKTØR,
+                    fodselsnummer = fødselsnummer,
+                    versjon = versjon,
+                    arbeidsgivere = listOf(
+                        GraphQLArbeidsgiver(
+                            organisasjonsnummer = ORGNR,
+                            ghostPerioder = emptyList(),
+                            generasjoner = listOf(
+                                GraphQLGenerasjon(
+                                    id = UUID.randomUUID().toString(),
+                                    perioder = listOf(
+                                        GraphQLBeregnetPeriode(
+                                            id = UUID.randomUUID().toString(),
+                                            vedtaksperiodeId = vedtaksperiodeId.toString(),
+                                            utbetaling = GraphQLUtbetaling(
+                                                id = utbetalingId.toString(),
+                                                arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
+                                                arbeidsgiverNettoBelop = arbeidsgiverbeløp,
+                                                personFagsystemId = "EN_FAGSYSTEMID",
+                                                personNettoBelop = personbeløp,
+                                                statusEnum = GraphQLUtbetalingstatus.UBETALT,
+                                                typeEnum = no.nav.helse.mediator.graphql.enums.Utbetalingtype.UTBETALING,
+                                                vurdering = null,
+                                                personoppdrag = null,
+                                                arbeidsgiveroppdrag = null
+                                            ),
+                                            behandlingstype = GraphQLBehandlingstype.BEHANDLET,
+                                            erForkastet = false,
+                                            fom = "2020-01-01",
+                                            tom = "2020-01-31",
+                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+                                            opprettet = "2020-01-31",
+                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+                                            tidslinje = emptyList(),
+                                            aktivitetslogg = aktivitetslogg,
+                                            beregningId = UUID.randomUUID().toString(),
+                                            forbrukteSykedager = null,
+                                            gjenstaendeSykedager = null,
+                                            hendelser = emptyList(),
+                                            maksdato = "2021-01-01",
+                                            periodevilkar = GraphQLPeriodevilkar(
+                                                alder = Alder(
+                                                    alderSisteSykedag = 30,
+                                                    oppfylt = true,
+                                                ),
+                                                soknadsfrist = Soknadsfrist(
+                                                    sendtNav = "2020-01-31",
+                                                    soknadFom = "2020-01-01",
+                                                    soknadTom = "2020-01-31",
+                                                    oppfylt = true,
+                                                ),
+                                                sykepengedager = Sykepengedager(
+                                                    forbrukteSykedager = null,
+                                                    gjenstaendeSykedager = null,
+                                                    maksdato = "2021-01-01",
+                                                    skjaeringstidspunkt = "2020-01-01",
+                                                    oppfylt = true,
+                                                )
+                                            ),
+                                            skjaeringstidspunkt = "2020-01-01",
+                                            refusjon = null,
+                                            vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
+                                            tilstand = GraphQLPeriodetilstand.OPPGAVER,
+                                        )
+                                    )
+                                )
+                            ),
+                        )
+                    ),
+                    dodsdato = null,
+                    inntektsgrunnlag = emptyList(),
+                    vilkarsgrunnlaghistorikk = emptyList(),
+                )
+            )
         }
-      ],
-      "utbetalingshistorikk": []
-    }
-  ],
-  "inntektsgrunnlag": {}
-}"""
+
+//    """{
+//  "versjon": $versjon,
+//  "aktørId": "$AKTØR",
+//  "fødselsnummer": "$fødselsnummer",
+//  "arbeidsgivere": [
+//    {
+//      "organisasjonsnummer": "$ORGNR",
+//      "id": "${UUID.randomUUID()}",
+//      "vedtaksperioder": [
+//        {
+//          "id": "$vedtaksperiodeId",
+//          "aktivitetslogg": [],
+//          "utbetaling": {
+//            "utbetalingId": "$utbetalingId",
+//            "utbetalingstidslinje": ${utbetalingstidslinje.map
+//    {
+//        (dato, personbeløp, arbeidsgiverbeløp) ->
+//        """
+//                       {
+//                            "dato": "$dato",
+//                            "arbeidsgiverbeløp": $arbeidsgiverbeløp,
+//                            "personbeløp": $personbeløp
+//                        }
+//                        """
+//    } },
+//            "personOppdrag": {
+//              "utbetalingslinjer": ${personOppdragLinjer.map
+//    {
+//        """
+//                            {
+//                                "fom": "${it.start}",
+//                                "tom": "${it.endInclusive}"
+//                             }
+//                            """
+//    }}
+//            },
+//            "arbeidsgiverOppdrag": {
+//              "utbetalingslinjer": ${arbeidsgiverOppdragLinjer.map
+//    {
+//        """
+//                            {
+//                                "fom": "${it.start}",
+//                                "tom": "${it.endInclusive}"
+//                             }
+//                            """
+//    }}
+//            }
+//          }
+//        }
+//      ],
+//      "utbetalingshistorikk": []
+//    }
+//  ],
+//  "inntektsgrunnlag": {}
+//}"""
 
     protected fun TestRapid.RapidInspector.meldinger() =
         (0 until size).map { index -> message(index) }

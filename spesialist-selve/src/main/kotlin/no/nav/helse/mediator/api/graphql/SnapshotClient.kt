@@ -25,7 +25,7 @@ private data class GraphQLRequestBody(
     val operationName: String?,
 )
 
-class SpeilSnapshotGraphQLClient(
+class SnapshotClient(
     private val httpClient: HttpClient,
     private val accessTokenClient: AccessTokenClient,
     private val spleisUrl: URI,

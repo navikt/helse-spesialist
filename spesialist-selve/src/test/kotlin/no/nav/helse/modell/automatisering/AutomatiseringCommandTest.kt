@@ -35,8 +35,6 @@ internal class AutomatiseringCommandTest {
             """{ "@event_name": "behov" }""",
             Utbetalingtype.UTBETALING,
             GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true), opptegnelseDao = mockk(relaxed = true)),
-            periodeFom,
-            periodeTom
         )
 
     private lateinit var context: CommandContext
@@ -50,7 +48,7 @@ internal class AutomatiseringCommandTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -58,9 +56,9 @@ internal class AutomatiseringCommandTest {
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), captureLambda())
+            automatisering.utfør(any(), any(), any(), any(), any(), captureLambda())
         } answers {
-            arg<() -> Unit>(7).invoke()
+            arg<() -> Unit>(5).invoke()
         }
 
         assertTrue(command.execute(context))
