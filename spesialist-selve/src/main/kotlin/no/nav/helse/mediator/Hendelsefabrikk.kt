@@ -537,7 +537,7 @@ internal class Hendelsefabrikk(
             return@let oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
         }
 
-        sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr {}", fødselsnummer)
+        sikkerLog.info("Gjør ny sjekk om det finnes åpne gosysoppgaver for fnr $fødselsnummer og vedtaksperiodeId ${commandData?.vedtaksperiodeId}")
 
         return GosysOppgaveEndret(
             id = UUID.fromString(jsonNode["@id"].asText()),

@@ -94,7 +94,7 @@ internal class GosysOppgaveEndret(
                 val commandData = oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
                 val tildeling = tildelingDao.tildelingForOppgave(oppgaveId)
                 if (tildeling == null && commandData != null) {
-                    sikkerLog.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr {}", fødselsnummer)
+                    sikkerLog.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
                     mediator.gosysOppgaveEndret(packet, context)
                 }
             }
