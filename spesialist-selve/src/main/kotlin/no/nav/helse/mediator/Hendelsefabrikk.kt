@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -20,7 +20,6 @@ import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -46,7 +45,6 @@ internal class Hendelsefabrikk(
     private val warningDao: WarningDao,
     private val oppgaveDao: OppgaveDao,
     private val commandContextDao: CommandContextDao,
-    private val speilSnapshotDao: SpeilSnapshotDao,
     private val reservasjonDao: ReservasjonDao,
     private val tildelingDao: TildelingDao,
     private val saksbehandlerDao: SaksbehandlerDao,
@@ -56,8 +54,7 @@ internal class Hendelsefabrikk(
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val snapshotDao: SnapshotDao,
     private val egenAnsattDao: EgenAnsattDao,
-    private val speilSnapshotRestClient: SpeilSnapshotRestClient,
-    private val speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    private val snapshotClient: SnapshotClient,
     private val oppgaveMediator: OppgaveMediator,
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
@@ -118,7 +115,6 @@ internal class Hendelsefabrikk(
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
-            speilSnapshotDao = speilSnapshotDao,
             snapshotDao = snapshotDao,
             commandContextDao = commandContextDao,
             risikovurderingDao = risikovurderingDao,
@@ -127,8 +123,7 @@ internal class Hendelsefabrikk(
             egenAnsattDao = egenAnsattDao,
             arbeidsforholdDao = arbeidsforholdDao,
             vergemålDao = vergemålDao,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
@@ -383,11 +378,9 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer,
             json = json,
             warningDao = warningDao,
-            speilSnapshotDao = speilSnapshotDao,
-            speilSnapshotRestClient = speilSnapshotRestClient,
             snapshotDao = snapshotDao,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
-            personDao = personDao
+            snapshotClient = snapshotClient,
+            vedtakDao = vedtakDao,
         )
     }
 
@@ -414,12 +407,10 @@ internal class Hendelsefabrikk(
             json = json,
             commandContextDao = commandContextDao,
             warningDao = warningDao,
-            speilSnapshotDao = speilSnapshotDao,
             oppgaveMediator = oppgaveMediator,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
-            personDao = personDao
+            vedtakDao = vedtakDao
         )
     }
 
@@ -442,11 +433,9 @@ internal class Hendelsefabrikk(
             annullertTidspunkt = LocalDateTime.parse(jsonNode["tidspunkt"].asText()),
             saksbehandlerEpost = jsonNode["epost"].asText(),
             json = json,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotDao = speilSnapshotDao,
             utbetalingDao = utbetalingDao,
             saksbehandlerDao = saksbehandlerDao,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             snapshotDao = snapshotDao
         )
     }
@@ -506,9 +495,7 @@ internal class Hendelsefabrikk(
             id = UUID.fromString(jsonNode["@id"].asText()),
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             json = json,
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotDao = speilSnapshotDao,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             snapshotDao = snapshotDao
         )
     }

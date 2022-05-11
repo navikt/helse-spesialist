@@ -23,7 +23,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
 
     @Test
     suspend fun `saksbehandler medlem av risk gruppe skal se riskqa-oppgaver`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
 
         val funn1 = listOf(Risikofunn(
             kategori = listOf("8-4"),

@@ -2,34 +2,28 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotUtenÅLagreWarningsCommand
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
 
 internal class OppdaterPersonsnapshot(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
-    speilSnapshotRestClient: SpeilSnapshotRestClient,
-    speilSnapshotDao: SpeilSnapshotDao,
-    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotDao = speilSnapshotDao,
             fødselsnummer = fødselsnummer,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             snapshotDao = snapshotDao
         )
     )

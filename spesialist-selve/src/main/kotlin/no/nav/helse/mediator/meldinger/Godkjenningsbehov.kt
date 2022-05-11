@@ -6,12 +6,11 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
@@ -20,6 +19,7 @@ import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
+import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattCommand
@@ -35,8 +35,6 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.delvisRefusjon
-import no.nav.helse.modell.person.PersonDao.Utbetalingen.Companion.utbetalingTilSykmeldt
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -44,7 +42,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsfilter
 import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
+import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
@@ -80,7 +78,6 @@ internal class Godkjenningsbehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
-    speilSnapshotDao: SpeilSnapshotDao,
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
@@ -89,22 +86,21 @@ internal class Godkjenningsbehov(
     egenAnsattDao: EgenAnsattDao,
     arbeidsforholdDao: ArbeidsforholdDao,
     vergemålDao: VergemålDao,
-    speilSnapshotRestClient: SpeilSnapshotRestClient,
-    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    snapshotClient: SnapshotClient,
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao
 ) : Hendelse, MacroCommand() {
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
-        val utbetalingen = personDao.findVedtaksperiodeUtbetalingElement(
+        val utbetaling = snapshotDao.finnUtbetaling(
             fødselsnummer = fødselsnummer,
             utbetalingId = utbetalingId
         )
         Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
-            harUtbetalingTilSykmeldt = utbetalingen.utbetalingTilSykmeldt(periodeFom, periodeTom),
-            delvisRefusjon = utbetalingen.delvisRefusjon(periodeFom, periodeTom),
+            harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
+            delvisRefusjon = utbetaling.delvisRefusjon(),
             warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId),
             periodetype = periodetype,
             inntektskilde = inntektskilde,
@@ -139,8 +135,7 @@ internal class Godkjenningsbehov(
             periodetype = periodetype
         ),
         KlargjørVedtaksperiodeCommand(
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -150,7 +145,6 @@ internal class Godkjenningsbehov(
             inntektskilde = inntektskilde,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
-            speilSnapshotDao = speilSnapshotDao,
             snapshotDao = snapshotDao,
             vedtakDao = vedtakDao,
             warningDao = warningDao,
@@ -211,8 +205,6 @@ internal class Godkjenningsbehov(
             godkjenningsbehovJson = json,
             utbetalingtype = utbetalingtype,
             godkjenningMediator = godkjenningMediator,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom
         ),
         OpprettSaksbehandleroppgaveCommand(
             fødselsnummer = fødselsnummer,
@@ -225,7 +217,8 @@ internal class Godkjenningsbehov(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             utbetalingId = utbetalingId,
-            utbetalingtype = utbetalingtype
+            utbetalingtype = utbetalingtype,
+            snapshotDao = snapshotDao,
         )
     )
 

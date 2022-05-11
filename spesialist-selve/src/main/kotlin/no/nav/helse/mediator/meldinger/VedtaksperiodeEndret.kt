@@ -2,20 +2,18 @@ package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.IHendelseMediator
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.SpeilSnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
-import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.VedtakDao
 
 internal class VedtaksperiodeEndret(
     override val id: UUID,
@@ -23,27 +21,19 @@ internal class VedtaksperiodeEndret(
     private val fødselsnummer: String,
     private val json: String,
     warningDao: WarningDao,
-    speilSnapshotDao: SpeilSnapshotDao,
-    speilSnapshotRestClient: SpeilSnapshotRestClient,
     snapshotDao: SnapshotDao,
-    speilSnapshotGraphQLClient: SpeilSnapshotGraphQLClient,
-    personDao: PersonDao
+    snapshotClient: SnapshotClient,
+    vedtakDao: VedtakDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSpeilSnapshotCommand(
-            speilSnapshotRestClient = speilSnapshotRestClient,
-            warningDao = warningDao,
-            personDao = personDao,
-            speilSnapshotDao = speilSnapshotDao,
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer
-        ),
+        OppdaterSpeilSnapshotCommand(),
         OppdaterSnapshotCommand(
-            speilSnapshotGraphQLClient = speilSnapshotGraphQLClient,
+            snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
-            warningDao = warningDao
+            warningDao = warningDao,
+            vedtakDao = vedtakDao,
         )
     )
 

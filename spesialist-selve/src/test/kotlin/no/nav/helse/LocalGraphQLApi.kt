@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphQLApi
+import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
@@ -84,7 +85,6 @@ fun main() = runBlocking {
         }
 
         graphQLApi(
-            snapshotDao = snapshotDao,
             personApiDao = personApiDao,
             tildelingDao = tildelingDao,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
@@ -94,7 +94,7 @@ fun main() = runBlocking {
             utbetalingDao = utbetalingDao,
             oppgaveDao = oppgaveDao,
             kode7Saksbehandlergruppe = UUID.randomUUID(),
-            snapshotGraphQLClient = mockk(relaxed = true)
+            snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true))
         )
     }
 }

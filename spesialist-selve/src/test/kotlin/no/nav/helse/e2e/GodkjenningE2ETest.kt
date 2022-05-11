@@ -1,13 +1,14 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.graphQLSnapshot
+import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.VergemålType.voksen
@@ -18,6 +19,7 @@ import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.snapshotMedWarnings
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -64,8 +66,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -91,7 +92,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -110,8 +111,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -143,7 +143,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
-        assertSnapshot(SNAPSHOTV1_MED_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -165,8 +165,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `behovene spores tilbake`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         val personinfomeldingId = sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val arbeidsgiverløsningId = sendArbeidsgiverinformasjonløsning(
@@ -195,7 +194,8 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val løsningId = sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        val løsningId =
+            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
         testRapid.inspektør.also { inspektør ->
             assertEquals(godkjenningsmeldingId.toString(), inspektør.field(0, "@forårsaket_av").path("id").asText())
@@ -205,7 +205,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             assertEquals(egenansattMeldingId.toString(), inspektør.field(4, "@forårsaket_av").path("id").asText())
             assertEquals(vergemålløsningId.toString(), inspektør.field(5, "@forårsaket_av").path("id").asText())
             assertEquals(dkifløsningId.toString(), inspektør.field(6, "@forårsaket_av").path("id").asText())
-            assertEquals(åpnegosysoppgaverløsningId.toString(), inspektør.field(7, "@forårsaket_av").path("id").asText())
+            assertEquals(
+                åpnegosysoppgaverløsningId.toString(),
+                inspektør.field(7, "@forårsaket_av").path("id").asText()
+            )
             assertEquals(risikoløsningId.toString(), inspektør.field(8, "@forårsaket_av").path("id").asText())
             assertEquals(godkjenningsmeldingId.toString(), inspektør.field(9, "@forårsaket_av").path("id").asText())
             assertEquals(godkjenningsmeldingId.toString(), inspektør.field(10, "@forårsaket_av").path("id").asText())
@@ -220,8 +223,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `slår sammen warnings fra spleis og spesialist i utgående event`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -267,8 +269,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `løser godkjenningsbehov når saksbehandler avslår`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -310,7 +311,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 kommentar
             )
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
-        assertSnapshot(SNAPSHOTV1_MED_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -332,11 +333,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vedtaksperiode endret på aktiv saksbehandleroppgave`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returnsMany listOf(
-            SNAPSHOTV1_UTEN_WARNINGS,
-            SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returnsMany listOf(
+            SNAPSHOT_UTEN_WARNINGS,
+            SNAPSHOT_UTEN_WARNINGS
         )
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(
@@ -387,17 +387,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
-        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
-        verify(exactly = 2) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        verify(exactly = 2) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
     @Test
     fun `vedtaksperiode endret på oppgave som avventer system`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returnsMany listOf(
-            SNAPSHOTV1_UTEN_WARNINGS,
-            SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returnsMany listOf(
+            SNAPSHOT_UTEN_WARNINGS,
+            SNAPSHOT_UTEN_WARNINGS
         )
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(
@@ -457,17 +456,16 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
-        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
-        verify(exactly = 2) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        verify(exactly = 2) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
     @Test
     fun `vedtaksperiode endret på ferdigstilt oppgave`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returnsMany listOf(
-            SNAPSHOTV1_UTEN_WARNINGS,
-            SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returnsMany listOf(
+            SNAPSHOT_UTEN_WARNINGS,
+            SNAPSHOT_UTEN_WARNINGS
         )
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(
@@ -528,7 +526,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        verify(exactly = 3) { restClient.hentSpeilSnapshot(FØDSELSNUMMER) }
+        verify(exactly = 3) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
     @Test
@@ -549,8 +547,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `gjør ingen ting om man får tilbake løsning på en avbrutt command context`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -574,8 +571,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter ikke oppgave om bruker er egen ansatt`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -603,7 +599,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -624,8 +620,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter ikke oppgave om bruker tilhører utlandsenhet`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID, enhet = ENHET_UTLAND)
         sendArbeidsgiverinformasjonløsning(
@@ -653,7 +648,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        assertSnapshot(SNAPSHOTV1_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
+        assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
@@ -674,8 +669,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vanlig arbeidsforhold`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -719,7 +713,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter ikke ny oppgave når godkjenningsbehov kommer inn på nytt, og oppgaven er ferdigstilt`() {
         håndterVergeflyt(
-            snapshot = SNAPSHOTV1_MED_WARNINGS // Legger på warning for at saken ikke skal automatiseres
+            snapshot = SNAPSHOT_MED_WARNINGS // Legger på warning for at saken ikke skal automatiseres
         )
         val løsningId =
             sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
@@ -728,8 +722,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter suspendert kommando når godkjenningsbehov kommer inn på nytt`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val hendelseId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterVergeflyt(
             snapshot = null
@@ -766,8 +759,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             SAKSBEHANDLERIDENT
         )
 
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -807,7 +799,12 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         val VEDTAKSPERIODE_ID2 = UUID.randomUUID()
         val UTBETALING_ID2 = UUID.randomUUID()
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns snapshotv1MedWarnings(vedtaksperiodeId = VEDTAKSPERIODE_ID2)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotMedWarnings(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID2,
+            aktørId = AKTØR,
+            fnr = FØDSELSNUMMER,
+            orgnr = ORGNR
+        )
 
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID2, UTBETALING_ID2)
         sendPersoninfoløsning(godkjenningsmeldingId2, ORGNR, VEDTAKSPERIODE_ID2)
@@ -841,8 +838,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `legger ved alle orgnummere på behov for Arbeidsgiverinformasjon`() {
         val orgnummereMedRelevanteArbeidsforhold = listOf("123456789")
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -861,8 +857,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val orgnr1 = "123456789"
         val fnr1 = "12345678911"
         val orgnummereMedRelevanteArbeidsforhold = listOf(orgnr1, fnr1)
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -885,8 +880,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val orgnr1 = "123456789"
         val fnr1 = "12345678911"
         val orgnummereMedRelevanteArbeidsforhold = listOf(orgnr1, fnr1)
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -894,15 +888,21 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendKomposittbehov(godkjenningsmeldingId, listOf("HentPersoninfoV2", "Arbeidsgiverinformasjon"), VEDTAKSPERIODE_ID, ORGNR, detaljer = mapOf(
-            "@løsning" to mapOf(
+        sendKomposittbehov(
+            godkjenningsmeldingId,
+            listOf("HentPersoninfoV2", "Arbeidsgiverinformasjon"),
+            VEDTAKSPERIODE_ID,
+            ORGNR,
+            detaljer = mapOf(
+                "@løsning" to mapOf(
                     "HentPersoninfoV2" to listOf(meldingsfabrikk.lagHentPersoninfoV2(fnr1)),
                     "Arbeidsgiverinformasjon" to listOf(
-                            meldingsfabrikk.arbeidsgiverinformasjon(ORGNR, "Arbeidsgiver 1", emptyList()),
-                            meldingsfabrikk.arbeidsgiverinformasjon(orgnr1, "Arbeidsgiver 2", emptyList())
+                        meldingsfabrikk.arbeidsgiverinformasjon(ORGNR, "Arbeidsgiver 1", emptyList()),
+                        meldingsfabrikk.arbeidsgiverinformasjon(orgnr1, "Arbeidsgiver 2", emptyList())
                     )
+                )
             )
-        ))
+        )
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT")
         val sisteMelding = testRapid.inspektør.meldinger().last()
         assertTrue("Arbeidsforhold" in sisteMelding.path("@behov").map { it.asText() })
@@ -910,8 +910,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `legger til riktig felt for adressebeskyttelse i Personinfo`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -987,8 +986,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter saksbehandling og avvise godkjenning pga vergemål og egen ansatt`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
-        every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -1046,10 +1044,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     private fun håndterVergeflyt(
         vergemål: VergemålJson = VergemålJson(),
-        snapshot: String? = SNAPSHOTV1_UTEN_WARNINGS) : UUID {
+        snapshot: GraphQLClientResponse<HentSnapshot.Result>? = SNAPSHOT_UTEN_WARNINGS
+    ): UUID {
         snapshot?.also {
-            every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns it
-            every { graphqlClient.hentSnapshot(FØDSELSNUMMER) } returns graphQLSnapshot(FØDSELSNUMMER, AKTØR)
+            every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns it
         }
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)

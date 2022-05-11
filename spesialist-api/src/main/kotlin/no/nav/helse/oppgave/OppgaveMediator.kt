@@ -102,7 +102,7 @@ class OppgaveMediator(
         ferdigstiltAvOid: UUID?
     ) {
         oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid)
-        oppgaverForPublisering.put(oppgaveId, "oppgave_oppdatert")
+        oppgaverForPublisering[oppgaveId] = "oppgave_oppdatert"
     }
 
     fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
@@ -137,4 +137,6 @@ class OppgaveMediator(
             messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).second.toJson())
         }.clear()
     }
+
+    fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 }

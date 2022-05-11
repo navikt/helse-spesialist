@@ -6,11 +6,12 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.graphql.schema.Arbeidsforholdoverstyring
+import no.nav.helse.mediator.api.graphql.schema.Dagoverstyring
+import no.nav.helse.mediator.api.graphql.schema.Inntektoverstyring
+import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringApiArbeidsforholdDto
-import no.nav.helse.overstyring.OverstyringApiDagerDto
-import no.nav.helse.overstyring.OverstyringApiInntektDto
 import no.nav.helse.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -145,7 +146,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 1),
             LocalDate.of(2018, 1, 31)
         )
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_MED_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
+        every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeKode7") } returns true
+
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,
@@ -190,7 +193,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     deaktivert = true,
                     begrunnelse = "begrunnelse",
                     forklaring = "forklaring"
-                ))
+                )
+            )
         )
 
         val hendelseId2 = sendGodkjenningsbehov(
@@ -220,13 +224,14 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertTrue(
             oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fødselsnummer == FØDSELSNUMMER })
 
-        val snapshot = personMediator.byggSpeilSnapshotForFnr(FØDSELSNUMMER, false, false).snapshot
+        val snapshot: Person = personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!!
+
         assertNotNull(snapshot)
-        val overstyringer = snapshot.arbeidsgivere.first().overstyringer
+        val overstyringer = snapshot.arbeidsgivere().first().overstyringer()
         assertEquals(3, overstyringer.size)
-        assertEquals(1, (overstyringer.first() as OverstyringApiDagerDto).overstyrteDager.size)
-        assertEquals(15000.0, (overstyringer[1] as OverstyringApiInntektDto).overstyrtInntekt.månedligInntekt)
-        assertEquals(true, (overstyringer[2] as OverstyringApiArbeidsforholdDto).overstyrtArbeidsforhold.deaktivert)
+        assertEquals(1, (overstyringer.first() as Dagoverstyring).dager.size)
+        assertEquals(15000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
+        assertEquals(true, (overstyringer[2] as Arbeidsforholdoverstyring).deaktivert)
     }
 
     private fun assertSaksbehandlerOppgavpprettet(hendelseId: UUID) {

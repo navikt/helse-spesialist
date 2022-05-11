@@ -63,8 +63,6 @@ internal class GosysOppgaveEndret(
             godkjenningsbehovJson = gosysOppgaveEndretCommandData.godkjenningsbehovJson,
             utbetalingtype = Utbetalingtype.valueOf(gosysOppgaveEndretCommandData.utbetalingType),
             godkjenningMediator = godkjenningMediator,
-            periodeFom = gosysOppgaveEndretCommandData.periodeFom,
-            periodeTom = gosysOppgaveEndretCommandData.periodeTom,
             oppgaveMediator = oppgaveMediator
         )
     )

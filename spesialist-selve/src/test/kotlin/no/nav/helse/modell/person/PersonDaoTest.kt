@@ -80,7 +80,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `finner adressebeskyttelse for person`() {
         opprettPerson(fødselsnummer = FNR, adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-        assertEquals(Adressebeskyttelse.Fortrolig, personDao.findPersoninfoAdressebeskyttelse(FNR))
+        assertEquals(Adressebeskyttelse.Fortrolig, personDao.findAdressebeskyttelse(FNR))
     }
 
     private fun assertPersoninfo(

@@ -1,6 +1,11 @@
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Random
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
@@ -9,10 +14,20 @@ import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
-import no.nav.helse.graphQLSnapshot
 import no.nav.helse.mediator.FeilendeMeldingerDao
+import no.nav.helse.mediator.graphql.HentSnapshot
+import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
+import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.modell.*
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -42,9 +57,6 @@ import no.nav.helse.tildeling.TildelingDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.fail
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
@@ -109,8 +121,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         private set
     internal var snapshotId: Int = -1
         private set
-    internal var graphQLSnapshotId: Int = -1
-        private set
     internal var vedtakId: Long = -1
         private set
     internal var oppgaveId: Long = -1
@@ -121,7 +131,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    internal val speilSnapshotDao = SpeilSnapshotDao(dataSource)
     internal val snapshotDao = SnapshotDao(dataSource)
     internal val vedtakDao = VedtakDao(dataSource)
     internal val warningDao = WarningDao(dataSource)
@@ -202,7 +211,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId)
     }
 
-    protected fun opprettVedtakstype(
+    private fun opprettVedtakstype(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         type: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
@@ -210,8 +219,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
 
-    protected fun opprettPerson(fødselsnummer: String = FNR, aktørId: String = AKTØR, adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert): Persondata {
-        val personinfoId = personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
+    protected fun opprettPerson(
+        fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
+    ): Persondata {
+        val personinfoId =
+            personDao.insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
         val infotrygdutbetalingerId = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personId = personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
@@ -240,12 +254,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return arbeidsgiverDao.insertArbeidsgiver(organisasjonsnummer, navn, bransjer)!!.also { arbeidsgiverId = it }
     }
 
-    protected fun opprettSnapshot(personBlob: String = snapshot()) {
-        snapshotId = speilSnapshotDao.lagre(FNR, personBlob)
-    }
-
-    protected fun opprettGraphQLSnapshot(person: GraphQLPerson = graphQLSnapshot(FNR, AKTØR).data!!.person!!) {
-        graphQLSnapshotId = snapshotDao.lagre(FNR, person)
+    protected fun opprettSnapshot(person: GraphQLPerson = snapshot().data!!.person!!) {
+        snapshotId = snapshotDao.lagre(FNR, person)
     }
 
     protected fun opprettVedtaksperiode(
@@ -256,8 +266,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER
     ): Long {
         opprettSnapshot()
-        opprettGraphQLSnapshot()
-        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId, graphQLSnapshotId)
+        return vedtakDao.opprett(vedtaksperiodeId, fom, tom, personId, arbeidsgiverId, snapshotId)
             .let { vedtakDao.finnVedtakId(vedtaksperiodeId) }
             ?.also {
                 vedtakId = it
@@ -319,8 +328,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun hentUtbetalingMedUtbetalingId(utbetalingIdRef: Long): String? {
         @Language("PostgreSQL")
         val statement = "SELECT data FROM utbetaling WHERE utbetaling_id_ref = ? LIMIT 1;"
-        return sessionOf(dataSource).use {
-            it.run(queryOf(statement, utbetalingIdRef).map {
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(statement, utbetalingIdRef).map {
                 it.string("data")
             }.asSingle)
         }
@@ -329,8 +338,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun hentHendelse(hendelseId: UUID): String? {
         @Language("PostgreSQL")
         val statement = "SELECT data FROM hendelse WHERE id = ? LIMIT 1;"
-        return sessionOf(dataSource).use {
-            it.run(queryOf(statement, hendelseId).map {
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(statement, hendelseId).map {
                 it.string("data")
             }.asSingle)
         }
@@ -345,23 +354,42 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val infotrygdutbetalingerId: Long
     )
 
-    @Language("JSON")
-    protected fun snapshot(versjon: Int = 1) = """{
-      "versjon": $versjon,
-      "aktørId": "123456789101112",
-      "fødselsnummer": "12345612345",
-      "arbeidsgivere": [
-        {
-          "organisasjonsnummer": "987654321",
-          "id": "${UUID.randomUUID()}",
-          "vedtaksperioder": [
-            {
-              "id": "${UUID.randomUUID()}",
-              "aktivitetslogg": []
-            }
-          ]
+    protected fun snapshot(versjon: Int = 1): GraphQLClientResponse<HentSnapshot.Result> =
+        object : GraphQLClientResponse<HentSnapshot.Result> {
+            override val data = HentSnapshot.Result(
+                GraphQLPerson(
+                    versjon = versjon,
+                    aktorId = "123456789101112",
+                    fodselsnummer = "12345612345",
+                    arbeidsgivere = listOf(
+                        GraphQLArbeidsgiver(
+                            organisasjonsnummer = "987654321",
+                            ghostPerioder = emptyList(),
+                            generasjoner = listOf(
+                                GraphQLGenerasjon(
+                                    id = UUID.randomUUID().toString(),
+                                    perioder = listOf(
+                                        GraphQLUberegnetPeriode(
+                                            behandlingstype = GraphQLBehandlingstype.VENTER,
+                                            erForkastet = false,
+                                            fom = "2020-01-01",
+                                            tom = "2020-01-31",
+                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
+                                            opprettet = "2020-01-31",
+                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
+                                            tidslinje = emptyList(),
+                                            vedtaksperiodeId = UUID.randomUUID().toString(),
+                                            id = UUID.randomUUID().toString(),
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    inntektsgrunnlag = emptyList(),
+                    dodsdato = null,
+                    vilkarsgrunnlaghistorikk = emptyList()
+                )
+            )
         }
-      ],
-      "inntektsgrunnlag": {}
-      }"""
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api.graphql.schema
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.time.format.DateTimeFormatter
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
@@ -16,7 +17,6 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
-import java.time.format.DateTimeFormatter
 
 enum class Kjonn { Mann, Kvinne, Ukjent }
 

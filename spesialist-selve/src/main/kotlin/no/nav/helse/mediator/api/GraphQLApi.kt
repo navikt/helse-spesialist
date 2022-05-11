@@ -3,7 +3,7 @@ package no.nav.helse.mediator.api
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import graphql.GraphQL
-import io.ktor.http.*
+import io.ktor.http.ContentType
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
@@ -14,13 +14,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import java.util.UUID
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphql.ContextFactory
 import no.nav.helse.mediator.api.graphql.RequestParser
 import no.nav.helse.mediator.api.graphql.SchemaBuilder
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
-import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
@@ -29,10 +29,8 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
-import java.util.*
 
 internal fun Application.graphQLApi(
-    snapshotDao: SnapshotDao,
     personApiDao: PersonApiDao,
     tildelingDao: TildelingDao,
     arbeidsgiverApiDao: ArbeidsgiverApiDao,
@@ -42,10 +40,9 @@ internal fun Application.graphQLApi(
     utbetalingDao: UtbetalingDao,
     oppgaveDao: OppgaveDao,
     kode7Saksbehandlergruppe: UUID,
-    snapshotGraphQLClient: SpeilSnapshotGraphQLClient
+    snapshotMediator: SnapshotMediator,
 ) {
     val schema = SchemaBuilder(
-        snapshotDao = snapshotDao,
         personApiDao = personApiDao,
         tildelingDao = tildelingDao,
         arbeidsgiverApiDao = arbeidsgiverApiDao,
@@ -54,7 +51,7 @@ internal fun Application.graphQLApi(
         varselDao = varselDao,
         utbetalingDao = utbetalingDao,
         oppgaveDao = oppgaveDao,
-        snapshotGraphQLClient = snapshotGraphQLClient
+        snapshotMediator = snapshotMediator,
     ).build()
 
     val server = GraphQLServer(

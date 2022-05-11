@@ -5,7 +5,6 @@ import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -15,7 +14,6 @@ import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
 
 internal class SchemaBuilder(
-    val snapshotDao: SnapshotDao,
     val personApiDao: PersonApiDao,
     val tildelingDao: TildelingDao,
     val arbeidsgiverApiDao: ArbeidsgiverApiDao,
@@ -24,7 +22,7 @@ internal class SchemaBuilder(
     val varselDao: VarselDao,
     val utbetalingDao: UtbetalingDao,
     val oppgaveDao: OppgaveDao,
-    val snapshotGraphQLClient: SpeilSnapshotGraphQLClient,
+    val snapshotMediator: SnapshotMediator,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -38,7 +36,6 @@ internal class SchemaBuilder(
             queries = listOf(
                 TopLevelObject(
                     PersonQuery(
-                        snapshotDao = snapshotDao,
                         personApiDao = personApiDao,
                         tildelingDao = tildelingDao,
                         arbeidsgiverApiDao = arbeidsgiverApiDao,
@@ -46,7 +43,7 @@ internal class SchemaBuilder(
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
                         oppgaveDao = oppgaveDao,
-                        snapshotGraphQLClient = snapshotGraphQLClient
+                        snapshotMediator = snapshotMediator,
                     )
                 ),
                 TopLevelObject(

@@ -8,13 +8,12 @@ import io.mockk.mockk
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.*
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -50,14 +49,12 @@ internal class SaksbehandlerløsningTest {
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
-    private val speilSnapshotDao = mockk<SpeilSnapshotDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val graphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
+    private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = hendelseDao,
         personDao = personDao,
@@ -66,7 +63,6 @@ internal class SaksbehandlerløsningTest {
         warningDao = warningDao,
         oppgaveDao = oppgaveDao,
         commandContextDao = commandContextDao,
-        speilSnapshotDao = speilSnapshotDao,
         snapshotDao = snapshotDao,
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
@@ -76,8 +72,7 @@ internal class SaksbehandlerløsningTest {
         digitalKontaktinformasjonDao = mockk(relaxed = true),
         åpneGosysOppgaverDao = mockk(relaxed = true),
         egenAnsattDao = mockk(),
-        speilSnapshotRestClient = restClient,
-        speilSnapshotGraphQLClient = graphQLClient,
+        snapshotClient = graphQLClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
         automatisering = mockk(relaxed = true),

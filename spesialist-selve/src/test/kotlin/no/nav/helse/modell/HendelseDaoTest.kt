@@ -5,10 +5,9 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.graphql.SpeilSnapshotGraphQLClient
+import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
-import no.nav.helse.modell.vedtak.snapshot.SpeilSnapshotRestClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -22,8 +21,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     }
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
-    private val restClient = mockk<SpeilSnapshotRestClient>(relaxed = true)
-    private val graphQLClient = mockk<SpeilSnapshotGraphQLClient>(relaxed = true)
+    private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
     private lateinit var hendelsefabrikk: IHendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
 
@@ -37,7 +35,6 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             warningDao = warningDao,
             oppgaveDao = oppgaveDao,
             commandContextDao = commandContextDao,
-            speilSnapshotDao = speilSnapshotDao,
             snapshotDao = snapshotDao,
             reservasjonDao = reservasjonDao,
             tildelingDao = tildelingDao,
@@ -47,8 +44,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
-            speilSnapshotRestClient = restClient,
-            speilSnapshotGraphQLClient = graphQLClient,
+            snapshotClient = graphQLClient,
             oppgaveMediator = mockk(),
             godkjenningMediator = mockk(relaxed = true),
             automatisering = mockk(relaxed = true),

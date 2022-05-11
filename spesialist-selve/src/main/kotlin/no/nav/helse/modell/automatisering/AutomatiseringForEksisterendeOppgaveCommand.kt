@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
@@ -19,9 +18,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     private val godkjenningsbehovJson: String,
     private val utbetalingtype: Utbetalingtype,
     private val godkjenningMediator: GodkjenningMediator,
-    private val periodeFom: LocalDate,
-    private val periodeTom: LocalDate,
-    private val oppgaveMediator: OppgaveMediator
+    private val oppgaveMediator: OppgaveMediator,
 ) : Command {
 
     private companion object {
@@ -29,7 +26,7 @@ internal class AutomatiseringForEksisterendeOppgaveCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, utbetalingtype, periodeFom, periodeTom) {
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, utbetalingtype) {
             val behov = UtbetalingsgodkjenningMessage(godkjenningsbehovJson)
             godkjenningMediator.automatiskUtbetaling(context, behov, vedtaksperiodeId, fødselsnummer, hendelseId)
             logg.info("Oppgave avbrytes for vedtaksperiode $vedtaksperiodeId på grunn av automatisering")

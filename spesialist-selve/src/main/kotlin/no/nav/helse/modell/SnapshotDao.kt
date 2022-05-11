@@ -8,7 +8,10 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 import java.time.LocalDate
+import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
 
 class SnapshotDao(private val dataSource: DataSource) {
     fun lagre(fødselsnummer: String, snapshot: GraphQLPerson) =
@@ -58,6 +61,24 @@ class SnapshotDao(private val dataSource: DataSource) {
                 }.asSingle
             )
         }
+
+    internal fun finnUtbetaling(fødselsnummer: String, utbetalingId: UUID): GraphQLUtbetaling? = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            SELECT * FROM person AS p
+            INNER JOIN snapshot AS ss ON ss.person_ref = p.id
+            WHERE p.fodselsnummer = ?;
+        """
+        session.run(
+            queryOf(query, fødselsnummer.toLong()).map { row ->
+                objectMapper.readValue<GraphQLPerson>(row.string("data")).arbeidsgivere.map { arbeidsgiver ->
+                    arbeidsgiver.generasjoner.firstOrNull()?.perioder!!.filterIsInstance<GraphQLBeregnetPeriode>().find { periode ->
+                        UUID.fromString(periode.utbetaling.id) == utbetalingId
+                    }?.utbetaling
+                }.firstOrNull()
+            }.asSingle
+        )
+    }
 
     private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon: Int): Int {
         @Language("PostgreSQL")
@@ -128,3 +149,9 @@ enum class Adressebeskyttelse {
     StrengtFortroligUtland,
     Ukjent
 }
+
+internal fun GraphQLUtbetaling?.utbetalingTilSykmeldt() = this != null && personNettoBelop != 0
+
+internal fun GraphQLUtbetaling?.utbetalingTilArbeidsgiver() = this != null && arbeidsgiverNettoBelop != 0
+
+internal fun GraphQLUtbetaling?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()

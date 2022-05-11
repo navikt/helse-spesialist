@@ -15,7 +15,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
 
     @Test
     fun `VedtaksperiodeForkastet oppdaterer ikke oppgave-tabellen dersom status er inaktiv`() {
-        every { restClient.hentSpeilSnapshot(FØDSELSNUMMER) } returns SNAPSHOTV1_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot()
         vedtaksperiodeTilGodkjenning()
 
         sendSaksbehandlerløsning(OPPGAVEID, "", "", UUID.randomUUID(), true)
@@ -40,8 +40,8 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
     }
 
     private fun oppgaveOppdatertTidspunkt() =
-        sessionOf(dataSource).use  {
-            it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
+        sessionOf(dataSource).use  { session ->
+            session.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {
                 it.localDateTime("oppdatert")
             }.asSingle)
         }

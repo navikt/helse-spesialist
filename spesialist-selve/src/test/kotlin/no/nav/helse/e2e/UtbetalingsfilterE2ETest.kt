@@ -11,17 +11,11 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fødselsnummer passer ikke`() {
-        behandleGodkjenningsbeov(
+        behandleGodkjenningsbehov(
             fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
             periodeFom = 1.januar,
             periodeTom = 3.januar,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, 500, null),
-                Triple(2.januar, 500, null),
-                Triple(3.januar, 500, null)
-            ),
-            personOppdragLinjer = listOf(1.januar..3.januar),
-            arbeidsgiverOppdragLinjer = emptyList()
+            personbeløp = 1500,
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
@@ -31,34 +25,29 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Går gjennom begge filtreringer`() {
-        behandleGodkjenningsbeov(
+        behandleGodkjenningsbehov(
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, 500, null),
-                Triple(2.januar, 500, null),
-                Triple(3.januar, 500, null)
-            ),
-            personOppdragLinjer = listOf(1.januar..3.januar),
-            arbeidsgiverOppdragLinjer = emptyList()
+            personbeløp = 1500,
         )
         assertVedtak(vedtaksperiodeId)
-        sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(), SAKSBEHANDLER_IDENT, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, true)
+        sendSaksbehandlerløsning(
+            testRapid.inspektør.oppgaveId(),
+            SAKSBEHANDLER_IDENT,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_OID,
+            true
+        )
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLER_IDENT)
     }
 
     @Test
     fun `overlappende utbetaling (aka delvis refusjon) går ikke gjennom`() {
-        behandleGodkjenningsbeov(
+        behandleGodkjenningsbehov(
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
             periodeFom = 1.januar,
             periodeTom = 3.januar,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, 500, 500),
-                Triple(2.januar, 500, null),
-                Triple(3.januar, 500, null)
-            ),
-            personOppdragLinjer = listOf(1.januar..3.januar),
-            arbeidsgiverOppdragLinjer = listOf(1.januar..1.januar)
+            personbeløp = 1500,
+            arbeidsgiverbeløp = 500,
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
@@ -67,40 +56,17 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `tidligere delvis refusjon går gjennom`() {
-        behandleGodkjenningsbeov(
-            fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            periodeFom = 2.januar,
-            periodeTom = 3.januar,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, 500, 500),
-                Triple(2.januar, 500, null),
-                Triple(3.januar, 500, null)
-            ),
-            personOppdragLinjer = listOf(1.januar..3.januar),
-            arbeidsgiverOppdragLinjer = listOf(1.januar..1.januar)
-        )
-        assertVedtak(vedtaksperiodeId)
-        sendSaksbehandlerløsning(testRapid.inspektør.oppgaveId(), SAKSBEHANDLER_IDENT, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, true)
-        assertGodkjenningsbehovløsning(true, SAKSBEHANDLER_IDENT)
-    }
-
-    @Test
     fun `Går gjennom første filtreringer, men fått warning før andre filtrering`() {
-        behandleGodkjenningsbeov(
+        behandleGodkjenningsbehov(
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, 500, null),
-                Triple(2.januar, 500, null),
-                Triple(3.januar, 500, null)
-            ),
-            personOppdragLinjer = listOf(1.januar..3.januar),
-            arbeidsgiverOppdragLinjer = emptyList(),
-            risikofunn = listOf(Risikofunn(
-                kreverSupersaksbehandler = false,
-                kategori = listOf("Noe"),
-                beskrivele = "Noe"
-            ))
+            personbeløp = 1500,
+            risikofunn = listOf(
+                Risikofunn(
+                    kreverSupersaksbehandler = false,
+                    kategori = listOf("Noe"),
+                    beskrivele = "Noe"
+                )
+            )
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
@@ -108,47 +74,21 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `går gjennom selv med en gammel personutbetaling`() {
-        behandleGodkjenningsbeov(
-            fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, 500, null), // representerer en tidligere personutbetaling
-                Triple(2.januar, 500, null), // representerer en tidligere personutbetaling
-                Triple(3.januar, 500, null), // representerer en tidligere personutbetaling
-                Triple(4.januar, null, 500),
-                Triple(5.januar, null, 500),
-                Triple(6.januar, null, 500)
-            ),
-            personOppdragLinjer = emptyList(),
-            arbeidsgiverOppdragLinjer = listOf(4.januar..6.januar)
-        )
-        assertVedtak(vedtaksperiodeId)
-        assertGodkjenningsbehovløsning(true, "Automatisk behandlet")
-    }
-
-    @Test
     fun `går gjennom uten personutbetaling`() {
-        behandleGodkjenningsbeov(
+        behandleGodkjenningsbehov(
             fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
-            utbetalingstidslinje = listOf(
-                Triple(1.januar, null, 500),
-                Triple(2.januar, null, 500),
-                Triple(3.januar, null, 500)
-            ),
-            personOppdragLinjer = emptyList(),
-            arbeidsgiverOppdragLinjer = listOf(1.januar..3.januar)
+            arbeidsgiverbeløp = 500,
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(true, "Automatisk behandlet")
     }
 
-    private fun behandleGodkjenningsbeov(
+    private fun behandleGodkjenningsbehov(
         fødselsnummer: String,
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
-        utbetalingstidslinje: List<Triple<LocalDate, Int?, Int?>> = emptyList(),
-        personOppdragLinjer: List<ClosedRange<LocalDate>> = emptyList(),
-        arbeidsgiverOppdragLinjer: List<ClosedRange<LocalDate>> = emptyList(),
+        personbeløp: Int = 0,
+        arbeidsgiverbeløp: Int = 0,
         risikofunn: List<Risikofunn> = emptyList()
     ) {
         FØDSELSNUMMER = fødselsnummer
@@ -162,9 +102,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
-                utbetalingstidslinje = utbetalingstidslinje,
-                personOppdragLinjer = personOppdragLinjer,
-                arbeidsgiverOppdragLinjer = arbeidsgiverOppdragLinjer,
+                personbeløp = personbeløp,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
             ),
             kanAutomatiseres = risikofunn.isEmpty(),
             risikofunn = risikofunn
