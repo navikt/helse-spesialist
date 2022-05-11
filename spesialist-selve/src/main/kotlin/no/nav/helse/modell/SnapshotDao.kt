@@ -72,7 +72,7 @@ class SnapshotDao(private val dataSource: DataSource) {
         session.run(
             queryOf(query, fødselsnummer.toLong()).map { row ->
                 objectMapper.readValue<GraphQLPerson>(row.string("data")).arbeidsgivere.map { arbeidsgiver ->
-                    arbeidsgiver.generasjoner.firstOrNull()?.perioder!!.filterIsInstance<GraphQLBeregnetPeriode>().find { periode ->
+                    arbeidsgiver.generasjoner.firstOrNull()?.perioder?.filterIsInstance<GraphQLBeregnetPeriode>()?.find { periode ->
                         UUID.fromString(periode.utbetaling.id) == utbetalingId
                     }?.utbetaling
                 }.firstOrNull()
