@@ -296,7 +296,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     oppgaveApi(
                         oppgaveMediator = oppgaveMediator,
                         riskSupersaksbehandlergruppe = env.riskGruppeId(),
-                        kode7Saksbehandlergruppe = env.kode7GruppeId()
+                        kode7Saksbehandlergruppe = env.kode7GruppeId(),
+                        beslutterSaksbehandlergruppe = env.beslutterGruppeId(),
                     )
                     personApi(
                         hendelseMediator = hendelseMediator,
@@ -366,4 +367,5 @@ internal fun PipelineContext<Unit, ApplicationCall>.getNAVident(): String {
 
 private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue("KODE7_SAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
+private fun Map<String, String>.beslutterGruppeId() = UUID.fromString(this.getValue("BESLUTTER_SAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.skjermedePersonerGruppeId() = UUID.fromString(this.getValue("SKJERMEDE_PERSONER_GROUP"))

@@ -42,10 +42,11 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
 
         val riskQaGruppe = UUID.randomUUID()
         val kode7Gruppe = UUID.randomUUID()
+        val beslutterGruppe = UUID.randomUUID()
         val respons =
             AbstractApiTest.TestServer {
                 oppgaveApi(
-                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao), riskQaGruppe, kode7Gruppe
+                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao), riskQaGruppe, kode7Gruppe, beslutterGruppe
                 )
             }
                 .withAuthenticatedServer {

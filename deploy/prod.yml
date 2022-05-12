@@ -47,6 +47,7 @@ spec:
           - id: "eb6e5e78-51a9-411c-b3b3-314debe35863"
           - id: "c21e58b6-d838-4cb0-919a-398cd40117e3"
           - id: "73ff0e76-f2b1-4586-8387-b33f15617381"
+          - id: "59f26eef-0a4f-4038-bf46-3a5b2f252155"
   accessPolicy:
     inbound:
       rules:
@@ -82,6 +83,8 @@ spec:
       value: eb6e5e78-51a9-411c-b3b3-314debe35863
     - name: KODE7_SAKSBEHANDLER_GROUP
       value: c21e58b6-d838-4cb0-919a-398cd40117e3
+    - name: BESLUTTER_SAKSBEHANDLER_GROUP
+      value: 59f26eef-0a4f-4038-bf46-3a5b2f252155
     - name: SKJERMEDE_PERSONER_GROUP
       value: 73ff0e76-f2b1-4586-8387-b33f15617381
     - name: SPLEIS_CLIENT_ID

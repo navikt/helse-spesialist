@@ -114,7 +114,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
-            riskSaksbehandlergruppe = UUID.randomUUID()
+            riskSaksbehandlergruppe = UUID.randomUUID(),
+            beslutterSaksbehandlergruppe = UUID.randomUUID()
         )
 
     protected val SNAPSHOT_MED_WARNINGS = snapshotMedWarnings(

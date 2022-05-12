@@ -17,7 +17,8 @@ import org.slf4j.LoggerFactory
 internal fun Route.oppgaveApi(
     oppgaveMediator: OppgaveMediator,
     riskSupersaksbehandlergruppe: UUID,
-    kode7Saksbehandlergruppe: UUID
+    kode7Saksbehandlergruppe: UUID,
+    beslutterSaksbehandlergruppe: UUID
 ) {
     val log = LoggerFactory.getLogger("OppgaveApi")
 
@@ -43,6 +44,7 @@ Saker til $ident:
                     gruppetilganger = getGrupper(),
                     kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
                     riskSaksbehandlergruppe = riskSupersaksbehandlergruppe,
+                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
                     NAVident = getNAVident()
                 )
             )
