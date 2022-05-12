@@ -20,7 +20,9 @@ data class OppgaveDto (
     val type: Periodetype?,
     val inntektskilde: Inntektskilde?,
     var boenhet: EnhetDto,
-    val tildeling: TildelingApiDto?
+    val tildeling: TildelingApiDto?,
+    val erBeslutterOppgave: Boolean,
+    val erReturOppgave: Boolean
 )
 
 data class OppgavereferanseDto(

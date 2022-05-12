@@ -28,7 +28,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val query = """
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutter_oppgave, o.er_retur_oppgave, s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                    pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                    (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
             FROM oppgave o
@@ -63,6 +63,18 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
+
+    fun erReturOppgave(vedtaksperiodeId: UUID): Boolean =
+        """ SELECT er_retur_oppgave FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") }!!
+
+    fun erBeslutterOppgave(vedtaksperiodeId: UUID): Boolean =
+        """ SELECT er_beslutter_oppgave FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutter_oppgave") }!!
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId
@@ -167,6 +179,25 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             .single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") })
     { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
 
+    fun setBeslutterOppgave(
+        oppgaveId: Long,
+        erBeslutterOppgave: Boolean,
+        erReturOppgave: Boolean,
+        tidligereSaksbehandler: UUID
+    ) =
+        """
+            UPDATE oppgave
+            SET er_beslutter_oppgave=:er_beslutter_oppgave, er_retur_oppgave=:er_retur_oppgave, tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
+            WHERE id=:oppgave_id
+        """.update(
+            mapOf(
+                "er_beslutter_oppgave" to erBeslutterOppgave,
+                "er_retur_oppgave" to erReturOppgave,
+                "tidligere_saksbehandler_oid" to tidligereSaksbehandler,
+                "oppgave_id" to oppgaveId
+            )
+        )
+
     fun updateOppgave(
         oppgaveId: Long,
         oppgavestatus: Oppgavestatus,
@@ -262,7 +293,9 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 oid = UUID.fromString(it.string("oid")),
                 påVent = it.boolean("på_vent")
             )
-        }
+        },
+        erBeslutterOppgave = it.boolean("er_beslutter_oppgave"),
+        erReturOppgave = it.boolean("er_retur_oppgave")
     )
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

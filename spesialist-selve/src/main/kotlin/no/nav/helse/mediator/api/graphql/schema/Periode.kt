@@ -265,6 +265,9 @@ data class BeregnetPeriode(
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
+    fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutterOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+    fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+
     fun aktivitetslogg(): List<Aktivitet> = periode.aktivitetslogg.map {
         Aktivitet(
             alvorlighetsgrad = it.alvorlighetsgrad,
