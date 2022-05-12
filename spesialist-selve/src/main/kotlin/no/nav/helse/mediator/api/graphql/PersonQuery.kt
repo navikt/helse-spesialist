@@ -7,6 +7,7 @@ import graphql.schema.DataFetchingEnvironment
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
@@ -16,8 +17,9 @@ import no.nav.helse.vedtaksperiode.VarselDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class PersonQuery(
+internal class PersonQuery(
     personApiDao: PersonApiDao,
+    egenAnsattDao: EgenAnsattDao,
     private val tildelingDao: TildelingDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
@@ -25,7 +27,7 @@ class PersonQuery(
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
     private val snapshotMediator: SnapshotMediator,
-) : AbstractPersonQuery(personApiDao) {
+) : AbstractPersonQuery(personApiDao, egenAnsattDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 

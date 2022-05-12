@@ -7,15 +7,20 @@ import com.expediagroup.graphql.server.execution.GraphQLContextFactory
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
-import java.util.*
+import java.util.UUID
 
 data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext
 
-class ContextFactory(private val kode7Saksbehandlergruppe: UUID) :
-    GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
+class ContextFactory(
+    private val kode7Saksbehandlergruppe: UUID,
+    private val skjermedePersonerGruppeId: UUID
+) : GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
 
     override suspend fun generateContextMap(request: ApplicationRequest): Map<*, Any> =
-        mapOf("kanSeKode7" to request.getGrupper().contains(kode7Saksbehandlergruppe))
+        mapOf(
+            "kanSeKode7" to request.getGrupper().contains(kode7Saksbehandlergruppe),
+            "kanSeSkjermedePersoner" to request.getGrupper().contains(skjermedePersonerGruppeId)
+        )
 
     override suspend fun generateContext(request: ApplicationRequest): AuthorizedContext {
         return AuthorizedContext(request.getGrupper().contains(kode7Saksbehandlergruppe))

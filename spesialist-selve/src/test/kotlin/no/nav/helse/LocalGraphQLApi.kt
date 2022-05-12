@@ -41,6 +41,7 @@ import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -56,6 +57,7 @@ fun main() = runBlocking {
     TestApplication(4321).start { dataSource ->
         val snapshotDao = mockk<SnapshotDao>(relaxed = true)
         val personApiDao = mockk<PersonApiDao>(relaxed = true)
+        val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
         val tildelingDao = TildelingDao(dataSource)
         val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
         val overstyringApiDao = OverstyringApiDao(dataSource)
@@ -86,6 +88,7 @@ fun main() = runBlocking {
 
         graphQLApi(
             personApiDao = personApiDao,
+            egenAnsattDao = egenAnsattDao,
             tildelingDao = tildelingDao,
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             overstyringApiDao = overstyringApiDao,
@@ -93,6 +96,7 @@ fun main() = runBlocking {
             varselDao = varselDao,
             utbetalingDao = utbetalingDao,
             oppgaveDao = oppgaveDao,
+            skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true))
         )

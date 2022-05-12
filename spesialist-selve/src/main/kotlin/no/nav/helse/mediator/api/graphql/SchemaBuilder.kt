@@ -5,6 +5,7 @@ import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -15,6 +16,7 @@ import no.nav.helse.vedtaksperiode.VarselDao
 
 internal class SchemaBuilder(
     val personApiDao: PersonApiDao,
+    val egenAnsattDao: EgenAnsattDao,
     val tildelingDao: TildelingDao,
     val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     val overstyringApiDao: OverstyringApiDao,
@@ -37,6 +39,7 @@ internal class SchemaBuilder(
                 TopLevelObject(
                     PersonQuery(
                         personApiDao = personApiDao,
+                        egenAnsattDao = egenAnsattDao,
                         tildelingDao = tildelingDao,
                         arbeidsgiverApiDao = arbeidsgiverApiDao,
                         overstyringApiDao = overstyringApiDao,
@@ -49,7 +52,8 @@ internal class SchemaBuilder(
                 TopLevelObject(
                     OppdragQuery(
                         personApiDao = personApiDao,
-                        utbetalingDao = utbetalingDao
+                        egenAnsattDao = egenAnsattDao,
+                        utbetalingDao = utbetalingDao,
                     )
                 )
             )
