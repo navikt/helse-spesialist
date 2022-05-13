@@ -185,7 +185,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         oppgaveId: Long,
         erBeslutterOppgave: Boolean,
         erReturOppgave: Boolean,
-        tidligereSaksbehandler: UUID
+        tidligereSaksbehandlerOID: UUID
     ) =
         """
             UPDATE oppgave
@@ -195,7 +195,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             mapOf(
                 "er_beslutter_oppgave" to erBeslutterOppgave,
                 "er_retur_oppgave" to erReturOppgave,
-                "tidligere_saksbehandler_oid" to tidligereSaksbehandler,
+                "tidligere_saksbehandler_oid" to tidligereSaksbehandlerOID,
                 "oppgave_id" to oppgaveId
             )
         )

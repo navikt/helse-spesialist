@@ -139,4 +139,11 @@ class OppgaveMediator(
     }
 
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
+
+    fun setBeslutterOppgave(
+        oppgaveId: Long,
+        erBeslutterOppgave: Boolean,
+        erReturOppgave: Boolean,
+        tidligereSaksbehandlerOID: UUID
+    ) = oppgaveDao.setBeslutterOppgave(oppgaveId, erBeslutterOppgave, erReturOppgave, tidligereSaksbehandlerOID)
 }
