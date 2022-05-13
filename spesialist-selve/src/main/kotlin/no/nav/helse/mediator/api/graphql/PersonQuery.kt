@@ -17,7 +17,7 @@ import no.nav.helse.vedtaksperiode.VarselDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class PersonQuery(
+class PersonQuery(
     personApiDao: PersonApiDao,
     egenAnsattDao: EgenAnsattDao,
     private val tildelingDao: TildelingDao,
@@ -38,7 +38,7 @@ internal class PersonQuery(
 
         val fødselsnummer = fnr.takeIf { it != null && personApiDao.finnesPersonMedFødselsnummer(it) }
             ?: aktorId?.let { personApiDao.finnFødselsnummer(it.toLong()) }
-            ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError()).build()
+            ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
 
         if (isForbidden(fødselsnummer, env)) {
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()

@@ -8,9 +8,9 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.PersonApiDao
 
-internal abstract class AbstractPersonQuery(
+abstract class AbstractPersonQuery(
     protected val personApiDao: PersonApiDao,
-    internal val egenAnsattDao: EgenAnsattDao,
+    protected val egenAnsattDao: EgenAnsattDao,
 ) : Query {
 
     protected fun isForbidden(fnr: String, env: DataFetchingEnvironment): Boolean {

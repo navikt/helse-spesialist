@@ -77,7 +77,7 @@ internal fun Application.graphQLApi(
     }
 }
 
-private fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
+internal fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
     post("graphql") {
         val result = server.execute(call.request)
 

@@ -7,7 +7,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.person.PersonApiDao
 
-internal class OppdragQuery(
+class OppdragQuery(
     personApiDao: PersonApiDao,
     egenAnsattDao: EgenAnsattDao,
     private val utbetalingDao: UtbetalingDao,
