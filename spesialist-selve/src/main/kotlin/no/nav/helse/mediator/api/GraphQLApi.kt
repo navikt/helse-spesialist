@@ -21,6 +21,7 @@ import no.nav.helse.mediator.api.graphql.ContextFactory
 import no.nav.helse.mediator.api.graphql.RequestParser
 import no.nav.helse.mediator.api.graphql.SchemaBuilder
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
@@ -32,6 +33,7 @@ import no.nav.helse.vedtaksperiode.VarselDao
 
 internal fun Application.graphQLApi(
     personApiDao: PersonApiDao,
+    egenAnsattDao: EgenAnsattDao,
     tildelingDao: TildelingDao,
     arbeidsgiverApiDao: ArbeidsgiverApiDao,
     overstyringApiDao: OverstyringApiDao,
@@ -39,11 +41,13 @@ internal fun Application.graphQLApi(
     varselDao: VarselDao,
     utbetalingDao: UtbetalingDao,
     oppgaveDao: OppgaveDao,
+    skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
     snapshotMediator: SnapshotMediator,
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
+        egenAnsattDao = egenAnsattDao,
         tildelingDao = tildelingDao,
         arbeidsgiverApiDao = arbeidsgiverApiDao,
         overstyringApiDao = overstyringApiDao,
@@ -56,7 +60,7 @@ internal fun Application.graphQLApi(
 
     val server = GraphQLServer(
         requestParser = RequestParser(),
-        contextFactory = ContextFactory(kode7Saksbehandlergruppe),
+        contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId),
         requestHandler = GraphQLRequestHandler(
             GraphQL.newGraphQL(schema).build()
         )
@@ -73,7 +77,7 @@ internal fun Application.graphQLApi(
     }
 }
 
-private fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
+internal fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
     post("graphql") {
         val result = server.execute(call.request)
 

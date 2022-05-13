@@ -69,7 +69,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.*
+import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -227,6 +227,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     internal val personQuery = PersonQuery(
         personApiDao = personApiDao,
+        egenAnsattDao = egenAnsattDao,
         tildelingDao = tildelingDao,
         arbeidsgiverApiDao = arbeidsgiverApiDao,
         overstyringApiDao = overstyringApiDao,

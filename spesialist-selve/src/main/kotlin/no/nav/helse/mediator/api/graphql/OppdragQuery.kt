@@ -3,13 +3,15 @@ package no.nav.helse.mediator.api.graphql
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.api.graphql.schema.Oppdrag
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.person.PersonApiDao
 
 class OppdragQuery(
     personApiDao: PersonApiDao,
-    private val utbetalingDao: UtbetalingDao
-) : AbstractPersonQuery(personApiDao) {
+    egenAnsattDao: EgenAnsattDao,
+    private val utbetalingDao: UtbetalingDao,
+) : AbstractPersonQuery(personApiDao, egenAnsattDao) {
 
     fun oppdrag(fnr: String, env: DataFetchingEnvironment): DataFetcherResult<List<Oppdrag>> {
         if (isForbidden(fnr, env)) {

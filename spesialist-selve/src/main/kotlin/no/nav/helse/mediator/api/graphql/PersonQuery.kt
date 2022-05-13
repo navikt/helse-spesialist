@@ -7,6 +7,7 @@ import graphql.schema.DataFetchingEnvironment
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.person.PersonApiDao
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory
 
 class PersonQuery(
     personApiDao: PersonApiDao,
+    egenAnsattDao: EgenAnsattDao,
     private val tildelingDao: TildelingDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val overstyringApiDao: OverstyringApiDao,
@@ -25,7 +27,7 @@ class PersonQuery(
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
     private val snapshotMediator: SnapshotMediator,
-) : AbstractPersonQuery(personApiDao) {
+) : AbstractPersonQuery(personApiDao, egenAnsattDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -36,7 +38,7 @@ class PersonQuery(
 
         val fødselsnummer = fnr.takeIf { it != null && personApiDao.finnesPersonMedFødselsnummer(it) }
             ?: aktorId?.let { personApiDao.finnFødselsnummer(it.toLong()) }
-            ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError()).build()
+            ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
 
         if (isForbidden(fødselsnummer, env)) {
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()

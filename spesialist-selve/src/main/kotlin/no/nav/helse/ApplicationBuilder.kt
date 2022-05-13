@@ -279,6 +279,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             azureAdAppAuthentication(azureConfig)
             graphQLApi(
                 personApiDao = personApiDao,
+                egenAnsattDao = egenAnsattDao,
                 tildelingDao = tildelingDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 overstyringApiDao = overstyringApiDao,
@@ -286,6 +287,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 varselDao = varselDao,
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
+                skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
                 snapshotMediator = snapshotMediator,
             )

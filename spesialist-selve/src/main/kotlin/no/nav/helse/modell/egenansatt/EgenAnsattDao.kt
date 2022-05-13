@@ -6,7 +6,7 @@ import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-internal class EgenAnsattDao(private val dataSource: DataSource) {
+class EgenAnsattDao(private val dataSource: DataSource) {
     internal fun lagre(fødselsnummer: String, erEgenAnsatt: Boolean, opprettet: LocalDateTime) {
         @Language("PostgreSQL")
         val statement = """
