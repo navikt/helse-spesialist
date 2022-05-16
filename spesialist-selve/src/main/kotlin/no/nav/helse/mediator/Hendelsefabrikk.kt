@@ -129,7 +129,8 @@ internal class Hendelsefabrikk(
             godkjenningMediator = godkjenningMediator,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            utbetalingDao = utbetalingDao
+            utbetalingDao = utbetalingDao,
+            oppgaveDao = oppgaveDao
         )
     }
 

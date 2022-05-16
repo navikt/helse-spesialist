@@ -441,6 +441,19 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         }
     }
 
+    @Test
+    fun `setter trenger Totrinnsbehandling`() {
+        Oppgavetype.values().forEach {
+            assertDoesNotThrow({
+                insertOppgave(
+                    commandContextId = UUID.randomUUID(),
+                    oppgavetype = it,
+                    utbetalingId = null
+                )
+            }, "Oppgavetype-enumen mangler verdien $it. Kjør migrering: ALTER TYPE oppgavetype ADD VALUE '$it';")
+        }
+    }
+
     private fun oppgave() =
         sessionOf(dataSource).use {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {

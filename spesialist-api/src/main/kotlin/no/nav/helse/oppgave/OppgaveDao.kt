@@ -20,7 +20,8 @@ import org.intellij.lang.annotations.Language
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) =
         sessionOf(dataSource).use { session ->
-            val eventuellEkskluderingAvRiskQA = if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
+            val eventuellEkskluderingAvRiskQA =
+                if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
             val gyldigeAdressebeskyttelser =
                 if (saksbehandlerTilganger.harTilgangTilKode7Oppgaver()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
                 else "AND pi.adressebeskyttelse = 'Ugradert'"
@@ -269,6 +270,21 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 utbetalingType = it.string("utbetalingType"),
                 hendelseId = it.uuid("hendelseId"),
                 godkjenningsbehovJson = it.string("godkjenningbehovJson")
+            )
+        }
+
+    fun setTrengerTotrinnsbehandling(commandContextId: UUID): Long? =
+        sessionOf(dataSource, returnGeneratedKey = true).use {
+            @Language("PostgreSQL")
+            val query =
+                """ UPDATE oppgave SET er_beslutter_oppgave=true 
+                WHERE command_context_id = ?
+            """
+            it.run(
+                queryOf(
+                    query,
+                    commandContextId,
+                ).asUpdateAndReturnGeneratedKey
             )
         }
 
