@@ -1,36 +1,40 @@
 package no.nav.helse.mediator.api
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import java.util.UUID
 import no.nav.helse.oppgave.OppgaveMediator
-import org.slf4j.LoggerFactory
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkType
 
-private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
-
-internal fun Route.totrinnsvurderingApi(oppgaveMediator: OppgaveMediator) {
-    post("/api/totrinnsvurdering/{oppgavereferanse}") {
-        val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
-        if (oppgaveId == null) {
-            call.respond(HttpStatusCode.BadRequest, "Ugyldig oppgavereferanse i path parameter")
-            log.warn("POST - oppgavereferanse er null i path parameter")
-            return@post
-        }
+internal fun Route.totrinnsvurderingApi(oppgaveMediator: OppgaveMediator, periodehistorikkDao: PeriodehistorikkDao) {
+    post("/api/totrinnsvurdering") {
+        val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
         val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
 
         oppgaveMediator.setBeslutterOppgave(
-            oppgaveId = oppgaveId,
+            oppgaveId = totrinnsvurdering.oppgavereferanse,
             erBeslutterOppgave = true,
             erReturOppgave = false,
-            tidligereSaksbehandlerOID = saksbehandlerOid
+            tidligereSaksbehandlerOid = saksbehandlerOid
         )
+        periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING, saksbehandlerOid, totrinnsvurdering.periodeId)
+
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 }
+
+@JsonIgnoreProperties
+class TotrinnsvurderingDto(
+    val oppgavereferanse: Long,
+    val periodeId: UUID,
+)

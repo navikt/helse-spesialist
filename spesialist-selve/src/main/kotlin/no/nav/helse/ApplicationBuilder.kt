@@ -56,6 +56,7 @@ import no.nav.helse.mediator.api.oppgaveApi
 import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
+import no.nav.helse.mediator.api.totrinnsvurderingApi
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
@@ -313,6 +314,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
+                    totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao)
                 }
             }
         }.build()

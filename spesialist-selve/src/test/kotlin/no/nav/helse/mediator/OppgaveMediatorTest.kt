@@ -5,11 +5,17 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.abonnement.OpptegnelseType
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
-import no.nav.helse.oppgave.*
+import no.nav.helse.oppgave.Oppgave
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.tildeling.TildelingDao
@@ -17,8 +23,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveMediatorTest {
@@ -160,7 +164,7 @@ internal class OppgaveMediatorTest {
             oppgaveId = 1L,
             erBeslutterOppgave = true,
             erReturOppgave = false,
-            tidligereSaksbehandlerOID = UUID.randomUUID()
+            tidligereSaksbehandlerOid = UUID.randomUUID()
         )
 
         verify(exactly = 1) { oppgaveDao.setBeslutterOppgave(any(), any(), any(), any()) }
