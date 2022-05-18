@@ -1,12 +1,12 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 
 import io.ktor.http.*
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.routing.routing
 import io.ktor.server.testing.*
 import io.mockk.every
 import io.mockk.mockk
@@ -39,26 +39,26 @@ internal class BehandlingsstatistikkApiTest {
 
     @Test
     fun `hente ut behandlingsstatistikk`() {
-        withTestApplication({
+        testApplication {
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             routing {
                 behandlingsstatistikkApi(behandlingsstatistikkMediator)
             }
-        }) {
-            with(handleRequest(HttpMethod.Get, "/api/behandlingsstatistikk")) {
-                val deserialized = objectMapper.readValue<BehandlingstatistikkForSpeilDto>(response.content!!)
-                assertEquals(HttpStatusCode.OK, response.status())
-                assertEquals(0, deserialized.fullførteBehandlinger.totalt)
-                assertEquals(0, deserialized.fullførteBehandlinger.manuelt.totalt)
-                assertEquals(0, deserialized.fullførteBehandlinger.automatisk)
-                assertEquals(0, deserialized.fullførteBehandlinger.annulleringer)
-                assertEquals(0, deserialized.antallTildelteOppgaver.totalt)
-                assertEquals(0, deserialized.antallTildelteOppgaver.perPeriodetype.size)
-                assertEquals(1, deserialized.antallOppgaverTilGodkjenning.totalt)
-                assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.size)
-                assertEquals(PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.first().periodetypeForSpeil)
-                assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.first().antall)
-            }
+
+            val response = client.get("/api/behandlingsstatistikk")
+
+            val deserialized = objectMapper.readValue<BehandlingstatistikkForSpeilDto>(response.bodyAsText())
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(0, deserialized.fullførteBehandlinger.totalt)
+            assertEquals(0, deserialized.fullførteBehandlinger.manuelt.totalt)
+            assertEquals(0, deserialized.fullførteBehandlinger.automatisk)
+            assertEquals(0, deserialized.fullførteBehandlinger.annulleringer)
+            assertEquals(0, deserialized.antallTildelteOppgaver.totalt)
+            assertEquals(0, deserialized.antallTildelteOppgaver.perPeriodetype.size)
+            assertEquals(1, deserialized.antallOppgaverTilGodkjenning.totalt)
+            assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.size)
+            assertEquals(PeriodetypeForSpeil.FØRSTEGANGSBEHANDLING, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.first().periodetypeForSpeil)
+            assertEquals(1, deserialized.antallOppgaverTilGodkjenning.perPeriodetype.first().antall)
         }
     }
 }
