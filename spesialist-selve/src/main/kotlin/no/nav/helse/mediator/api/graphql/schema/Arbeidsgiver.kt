@@ -14,6 +14,7 @@ import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.overstyring.OverstyringDto
 import no.nav.helse.overstyring.OverstyringInntektDto
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
 
@@ -95,7 +96,8 @@ data class Arbeidsgiver(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
-    private val oppgaveDao: OppgaveDao
+    private val oppgaveDao: OppgaveDao,
+    private val periodehistorikkDao: PeriodehistorikkDao
 ) {
     fun generasjoner(): List<Generasjon> = generasjoner.map { generasjon ->
         Generasjon(
@@ -108,7 +110,8 @@ data class Arbeidsgiver(
                         periode = it,
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
-                        oppgaveDao = oppgaveDao
+                        oppgaveDao = oppgaveDao,
+                        periodehistorikkDao = periodehistorikkDao
                     )
                     else -> throw Exception("Ukjent tidslinjeperiode")
                 }

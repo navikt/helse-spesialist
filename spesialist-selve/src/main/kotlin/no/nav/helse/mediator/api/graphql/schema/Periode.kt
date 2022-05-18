@@ -19,6 +19,8 @@ import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.vedtaksperiode.VarselDao
 import no.nav.helse.mediator.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
@@ -145,6 +147,13 @@ data class Periodevilkar(
     val sykepengedager: Sykepengedager
 )
 
+data class PeriodeHistorikkElement(
+    val type: PeriodehistorikkType,
+    val timestamp: LocalDateTime,
+    val saksbehandler_ident: String,
+    val notat_id: Int?
+)
+
 data class Aktivitet(
     val alvorlighetsgrad: String,
     val melding: String,
@@ -253,7 +262,8 @@ data class BeregnetPeriode(
     private val periode: GraphQLBeregnetPeriode,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
-    private val oppgaveDao: OppgaveDao
+    private val oppgaveDao: OppgaveDao,
+    private val periodehistorikkDao: PeriodehistorikkDao
 ) : Periode {
     override fun behandlingstype(): Behandlingstype = behandlingstype(periode)
     override fun erForkastet(): Boolean = erForkastet(periode)
@@ -266,7 +276,18 @@ data class BeregnetPeriode(
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
     fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutterOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+
     fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+
+    fun periodehistorikk(): List<PeriodeHistorikkElement> =
+        periodehistorikkDao.finn(java.util.UUID.fromString(id)).map {
+            PeriodeHistorikkElement(
+                type = it.type,
+                saksbehandler_ident = it.saksbehandler_ident,
+                timestamp = it.timestamp.toString(),
+                notat_id = it.notat_id
+            )
+        }
 
     fun aktivitetslogg(): List<Aktivitet> = periode.aktivitetslogg.map {
         Aktivitet(

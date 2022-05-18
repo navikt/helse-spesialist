@@ -81,6 +81,7 @@ import no.nav.helse.notat.NotatMediator
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -155,6 +156,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val personApiDao = PersonApiDao(dataSource)
     private val varselDao = VarselDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val warningDao = WarningDao(dataSource)
     private val risikovurderingDao = RisikovurderingDao(dataSource)
@@ -287,6 +289,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 varselDao = varselDao,
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
+                periodehistorikkDao = periodehistorikkDao,
                 skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
                 snapshotMediator = snapshotMediator,

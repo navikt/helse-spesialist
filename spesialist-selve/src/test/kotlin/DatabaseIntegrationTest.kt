@@ -49,6 +49,7 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -132,6 +133,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal val personDao = PersonDao(dataSource)
     internal val oppgaveDao = OppgaveDao(dataSource)
+    internal val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     internal val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)

@@ -13,6 +13,7 @@ import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
@@ -65,6 +66,7 @@ data class Person(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
+    private val periodehistorikkDao: PeriodehistorikkDao,
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -112,6 +114,7 @@ data class Person(
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
             oppgaveDao = oppgaveDao,
+            periodehistorikkDao = periodehistorikkDao,
         )
     }
 

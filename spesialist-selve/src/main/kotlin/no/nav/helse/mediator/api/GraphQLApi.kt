@@ -26,6 +26,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
@@ -41,6 +42,7 @@ internal fun Application.graphQLApi(
     varselDao: VarselDao,
     utbetalingDao: UtbetalingDao,
     oppgaveDao: OppgaveDao,
+    periodehistorikkDao: PeriodehistorikkDao,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
     snapshotMediator: SnapshotMediator,
@@ -55,6 +57,7 @@ internal fun Application.graphQLApi(
         varselDao = varselDao,
         utbetalingDao = utbetalingDao,
         oppgaveDao = oppgaveDao,
+        periodehistorikkDao = periodehistorikkDao,
         snapshotMediator = snapshotMediator,
     ).build()
 

@@ -9,6 +9,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
@@ -24,6 +25,7 @@ internal class SchemaBuilder(
     val varselDao: VarselDao,
     val utbetalingDao: UtbetalingDao,
     val oppgaveDao: OppgaveDao,
+    val periodehistorikkDao: PeriodehistorikkDao,
     val snapshotMediator: SnapshotMediator,
 ) {
     fun build(): GraphQLSchema {
@@ -46,6 +48,7 @@ internal class SchemaBuilder(
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
                         oppgaveDao = oppgaveDao,
+                        periodehistorikkDao = periodehistorikkDao,
                         snapshotMediator = snapshotMediator,
                     )
                 ),

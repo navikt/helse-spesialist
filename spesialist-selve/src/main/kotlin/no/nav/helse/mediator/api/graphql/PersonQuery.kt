@@ -10,6 +10,7 @@ import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
@@ -26,6 +27,7 @@ class PersonQuery(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
+    private val periodehistorikkDao: PeriodehistorikkDao,
     private val snapshotMediator: SnapshotMediator,
 ) : AbstractPersonQuery(personApiDao, egenAnsattDao) {
 
@@ -62,6 +64,7 @@ class PersonQuery(
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
                 oppgaveDao = oppgaveDao,
+                periodehistorikkDao = periodehistorikkDao
             )
         }
 

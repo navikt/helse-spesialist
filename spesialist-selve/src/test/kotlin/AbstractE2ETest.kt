@@ -79,6 +79,7 @@ import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -148,6 +149,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val varselDao = VarselDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
+    protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     protected val vedtakDao = VedtakDao(dataSource)
     protected val warningDao = WarningDao(dataSource)
@@ -235,6 +237,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         risikovurderingApiDao = risikovurderingApiDao,
         varselDao = varselDao,
         oppgaveDao = oppgaveDao,
+        periodehistorikkDao = periodehistorikkDao,
         snapshotMediator = snapshotMediator
     )
 
