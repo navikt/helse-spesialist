@@ -2,15 +2,11 @@ package no.nav.helse.mediator.api
 
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLServer
-import com.expediagroup.graphql.server.types.GraphQLRequest
 import graphql.GraphQL
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -18,7 +14,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
@@ -36,8 +31,6 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 internal fun Application.graphQLApi(
     personApiDao: PersonApiDao,
@@ -89,19 +82,6 @@ internal fun Application.graphQLApi(
 
 internal fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
     post("graphql") {
-        try {
-            val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
-            val navn = getSaksbehandlerNavn()
-            val parseRequest = RequestParser().parseRequest(call.request)
-            if (parseRequest is GraphQLRequest) {
-                val operationName = parseRequest.operationName
-                val fnr = parseRequest.variables?.get("fnr")
-                val aktorId = parseRequest.variables?.get("aktorId")
-                sikkerLogg.info("{} is doing lookup {} with fnr: {} aktørId: {}", navn, operationName, fnr, aktorId)
-            }
-        } catch (e: Exception) {}
-
         val result = server.execute(call.request)
 
         if (result != null) {
@@ -113,11 +93,6 @@ internal fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
     get("playground") {
         call.respondText(buildPlaygroundHtml("graphql", "subscriptions"), ContentType.Text.Html)
     }
-}
-
-private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerNavn(): String {
-    val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("name")?.asString() ?: "Fant ikke saksbehandlernavn"
 }
 
 private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: String) =
