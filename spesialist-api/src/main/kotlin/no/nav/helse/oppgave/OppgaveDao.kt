@@ -288,6 +288,23 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
+    fun harEndringOgEllerRevurderingOppgave(vedtaksperiodeId: UUID): Boolean =
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL")
+            val query =
+                """ SELECT id FROM oppgave
+            WHERE vedtak_ref = ?
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
+            OR status = 'REVURDERING'::oppgavestatus
+            """
+            it.run(
+                queryOf(
+                    query,
+                    vedtaksperiodeId,
+                ).asExecute
+            )
+        }
+
     private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),
         oppgavetype = it.string("oppgavetype"),

@@ -10,10 +10,11 @@ internal class TrengerTotrinnsvurderingCommand(
     private val oppgaveDao: OppgaveDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        val oppgavereferansen = "sada"
 
         context.harBehov()
 
+        //TODO kommenter inn når klar
+        //return harMedlemskapsVarsel() || harEndringOgEllerRevurdering ()
         return true
     }
 
@@ -21,6 +22,11 @@ internal class TrengerTotrinnsvurderingCommand(
         val medlemSkapVarsel = "Vurder lovvalg og medlemskap"
 
         return warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
+    }
+
+    private fun harEndringOgEllerRevurdering(): Boolean {
+
+        return oppgaveDao.harEndringOgEllerRevurderingOppgave(vedtaksperiodeId)
     }
 
 }
