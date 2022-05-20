@@ -442,16 +442,26 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `setter trenger Totrinnsbehandling`() {
-        Oppgavetype.values().forEach {
-            assertDoesNotThrow({
-                insertOppgave(
-                    commandContextId = UUID.randomUUID(),
-                    oppgavetype = it,
-                    utbetalingId = null
-                )
-            }, "Oppgavetype-enumen mangler verdien $it. Kjør migrering: ALTER TYPE oppgavetype ADD VALUE '$it';")
-        }
+    fun `oppgave har endring dersom personen er reservert`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+        opprettReservasjon()
+
+        assertTrue(oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `oppgave har ikke endring dersom personen ikke er reservert`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        assertFalse(oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE))
     }
 
     private fun oppgave() =

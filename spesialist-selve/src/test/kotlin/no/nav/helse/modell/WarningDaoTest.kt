@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.test.assertTrue
 
 internal class WarningDaoTest : DatabaseIntegrationTest() {
     @Test
@@ -55,6 +56,40 @@ internal class WarningDaoTest : DatabaseIntegrationTest() {
         )
         warningDao.oppdaterSpleisWarnings(VEDTAKSPERIODE, testwarnings2)
         assertWarnings((listOf(spesialistWarning) + testwarnings2), warningDao.finnAktiveWarnings(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `finn aktive warnings med meldingen Warning A`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+
+        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
+
+        val testwarning = listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
+        warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarning)
+
+        assertTrue(warningDao.finnAktiveWarningsMedMelding(VEDTAKSPERIODE, testWarningVurderMedlemskap).isNotEmpty())
+        assertEquals(
+            testWarningVurderMedlemskap,
+            warningDao.finnAktiveWarningsMedMelding(VEDTAKSPERIODE, testWarningVurderMedlemskap)[0].dto().melding
+        )
+    }
+
+    @Test
+    fun `finner ikke aktive warnings med meldingen Warning A`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+
+        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
+        val testWarningMeldingB = "Warning B"
+
+        val testwarning = listOf(Warning(testWarningMeldingB, WarningKilde.Spleis, LocalDateTime.now()))
+        warningDao.leggTilWarnings(VEDTAKSPERIODE, testwarning)
+
+        assertTrue(warningDao.finnAktiveWarningsMedMelding(VEDTAKSPERIODE, testWarningVurderMedlemskap).isEmpty())
+
     }
 
     private fun assertWarnings(expected: List<Warning>, result: List<Warning>) {

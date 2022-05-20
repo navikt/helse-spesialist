@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
@@ -40,7 +41,30 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         assertNull(reservertPerson)
     }
 
-    private fun opprettTabeller(): Long {
+    @Test
+    fun `sletter reservert person med fnr`() {
+        val fnr1 = "2444222"
+        val fnr2 = "1231313"
+
+        val personRef1 = opprettTabeller(fnr1)
+        val personRef2 = opprettTabeller(fnr2)
+
+        val reservertPerson1 = sessionOf(dataSource).use {
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, fnr1)
+            reservasjonDao.slettReservasjon(fnr1)
+            reservasjonDao.hentReservasjonFor(personRef1)
+        }
+
+        val reservertPerson2 = sessionOf(dataSource).use {
+            reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, fnr2)
+            reservasjonDao.hentReservasjonFor(personRef2)
+        }
+
+        assertNull(reservertPerson1)
+        assertNotNull(reservertPerson2)
+    }
+
+    private fun opprettTabeller(fødselsnummer: String = FNR): Long {
         val personinfoRef = personDao.insertPersoninfo(
             "KARI",
             "Mellomnavn",
@@ -51,7 +75,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         )
         val utbetalingerRef = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         val personRef = personDao.insertPerson(
-            FNR,
+            fødselsnummer,
             "4321098765432", personinfoRef, "0301".toInt(), utbetalingerRef
         )
 

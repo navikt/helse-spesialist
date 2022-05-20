@@ -13,8 +13,9 @@ internal class TrengerTotrinnsvurderingCommand(
 
         context.harBehov()
 
-        //TODO kommenter inn når klar
-        //return harMedlemskapsVarsel() || harEndringOgEllerRevurdering ()
+        if(harMedlemskapsVarsel() || harOppgaveMedEndring()) {
+                //TODO sett TrengerTotrinnsvurdering på akutell oppgave
+         }
         return true
     }
 
@@ -24,9 +25,9 @@ internal class TrengerTotrinnsvurderingCommand(
         return warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
     }
 
-    private fun harEndringOgEllerRevurdering(): Boolean {
+    private fun harOppgaveMedEndring(): Boolean {
 
-        return oppgaveDao.harEndringOgEllerRevurderingOppgave(vedtaksperiodeId)
+        return oppgaveDao.harOppgaveMedEndring(vedtaksperiodeId)
     }
 
 }
