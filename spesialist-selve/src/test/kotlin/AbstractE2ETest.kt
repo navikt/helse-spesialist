@@ -238,6 +238,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         varselDao = varselDao,
         oppgaveDao = oppgaveDao,
         periodehistorikkDao = periodehistorikkDao,
+        notatDao = notatDao,
         snapshotMediator = snapshotMediator
     )
 

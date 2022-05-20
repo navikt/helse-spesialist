@@ -43,6 +43,7 @@ import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
@@ -67,6 +68,7 @@ fun main() = runBlocking {
         val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
         val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+        val notatDao = mockk<NotatDao>(relaxed = true)
 
         every { snapshotDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo to enPerson)
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
@@ -101,7 +103,8 @@ fun main() = runBlocking {
             periodehistorikkDao = periodehistorikkDao,
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
-            snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true))
+            snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
+            notatDao = notatDao,
         )
     }
 }

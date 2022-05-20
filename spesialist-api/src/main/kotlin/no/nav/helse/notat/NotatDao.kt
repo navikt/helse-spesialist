@@ -42,8 +42,14 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finnNotat(id: Int) =
         """ SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-            WHERE id = :id
+            WHERE n.id = :id
         """.single(mapOf("id" to id)) { notatDto(it) }
+
+    fun finnNotater(vedtaksperiodeId: UUID) =
+        """ SELECT * FROM notat n
+            JOIN saksbehandler s on s.oid = n.saksbehandler_oid
+            WHERE n.vedtaksperiode_id=:vedtaksperiode_id
+        """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { notatDto(it) }
 
     fun finnNotater(vedtaksperiodeIds: List<UUID>) = sessionOf(dataSource).use { session ->
         val questionMarks = vedtaksperiodeIds.joinToString { "?" }

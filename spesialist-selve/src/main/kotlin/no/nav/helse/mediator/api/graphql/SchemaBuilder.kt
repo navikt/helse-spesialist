@@ -7,6 +7,7 @@ import graphql.schema.GraphQLSchema
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
@@ -27,6 +28,7 @@ internal class SchemaBuilder(
     val oppgaveDao: OppgaveDao,
     val periodehistorikkDao: PeriodehistorikkDao,
     val snapshotMediator: SnapshotMediator,
+    val notatDao: NotatDao,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -50,6 +52,7 @@ internal class SchemaBuilder(
                         oppgaveDao = oppgaveDao,
                         periodehistorikkDao = periodehistorikkDao,
                         snapshotMediator = snapshotMediator,
+                        notatDao = notatDao,
                     )
                 ),
                 TopLevelObject(

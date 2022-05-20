@@ -17,6 +17,7 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
@@ -147,6 +148,18 @@ data class Periodevilkar(
     val sykepengedager: Sykepengedager
 )
 
+data class Notat(
+    val id: Int,
+    val tekst: String,
+    val opprettet: LocalDateTime,
+    val saksbehandlerOid: UUID,
+    val saksbehandlerNavn: String,
+    val saksbehandlerEpost: String,
+    val vedtaksperiodeId: UUID,
+    val feilregistrert: Boolean,
+    val feilregistrert_tidspunkt: LocalDateTime?
+)
+
 data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,
     val timestamp: LocalDateTime,
@@ -263,7 +276,8 @@ data class BeregnetPeriode(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
-    private val periodehistorikkDao: PeriodehistorikkDao
+    private val periodehistorikkDao: PeriodehistorikkDao,
+    private val notatDao: NotatDao,
 ) : Periode {
     override fun behandlingstype(): Behandlingstype = behandlingstype(periode)
     override fun erForkastet(): Boolean = erForkastet(periode)
@@ -278,6 +292,20 @@ data class BeregnetPeriode(
     fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutterOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
     fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+
+    fun notater(): List<Notat> = notatDao.finnNotater(java.util.UUID.fromString(vedtaksperiodeId())).map {
+        Notat(
+            id = it.id,
+            tekst = it.tekst,
+            opprettet = it.opprettet.toString(),
+            saksbehandlerOid = it.saksbehandlerOid.toString(),
+            saksbehandlerNavn = it.saksbehandlerNavn,
+            saksbehandlerEpost = it.saksbehandlerEpost,
+            vedtaksperiodeId = it.vedtaksperiodeId.toString(),
+            feilregistrert = it.feilregistrert,
+            feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
+        )
+    }
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
         periodehistorikkDao.finn(java.util.UUID.fromString(id)).map {

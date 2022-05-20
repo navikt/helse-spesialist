@@ -8,6 +8,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
@@ -28,6 +29,7 @@ class PersonQuery(
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
+    private val notatDao: NotatDao,
     private val snapshotMediator: SnapshotMediator,
 ) : AbstractPersonQuery(personApiDao, egenAnsattDao) {
 
@@ -68,7 +70,8 @@ class PersonQuery(
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
                 oppgaveDao = oppgaveDao,
-                periodehistorikkDao = periodehistorikkDao
+                periodehistorikkDao = periodehistorikkDao,
+                notatDao = notatDao,
             )
         }
 

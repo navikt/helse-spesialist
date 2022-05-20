@@ -50,6 +50,7 @@ import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -78,6 +79,7 @@ class GraphQLApiTest : AbstractApiTest() {
     private val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val notatDao = mockk<NotatDao>(relaxed = true)
 
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
@@ -100,6 +102,7 @@ class GraphQLApiTest : AbstractApiTest() {
             utbetalingDao = utbetalingDao,
             oppgaveDao = oppgaveDao,
             periodehistorikkDao = periodehistorikkDao,
+            notatDao = notatDao,
             snapshotMediator = snapshotMediator,
         ).build()
 

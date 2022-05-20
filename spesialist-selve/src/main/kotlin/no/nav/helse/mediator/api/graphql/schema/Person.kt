@@ -10,6 +10,7 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -67,6 +68,7 @@ data class Person(
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
+    private val notatDao: NotatDao,
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -115,6 +117,7 @@ data class Person(
             varselDao = varselDao,
             oppgaveDao = oppgaveDao,
             periodehistorikkDao = periodehistorikkDao,
+            notatDao = notatDao,
         )
     }
 

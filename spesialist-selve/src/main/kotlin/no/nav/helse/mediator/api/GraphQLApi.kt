@@ -23,6 +23,7 @@ import no.nav.helse.mediator.api.graphql.SchemaBuilder
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.notat.NotatDao
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringApiDao
@@ -43,6 +44,7 @@ internal fun Application.graphQLApi(
     utbetalingDao: UtbetalingDao,
     oppgaveDao: OppgaveDao,
     periodehistorikkDao: PeriodehistorikkDao,
+    notatDao: NotatDao,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
     snapshotMediator: SnapshotMediator,
@@ -58,6 +60,7 @@ internal fun Application.graphQLApi(
         utbetalingDao = utbetalingDao,
         oppgaveDao = oppgaveDao,
         periodehistorikkDao = periodehistorikkDao,
+        notatDao = notatDao,
         snapshotMediator = snapshotMediator,
     ).build()
 

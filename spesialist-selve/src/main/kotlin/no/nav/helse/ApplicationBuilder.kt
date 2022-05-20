@@ -292,6 +292,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,
+                notatDao = notatDao,
                 skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
                 snapshotMediator = snapshotMediator,
