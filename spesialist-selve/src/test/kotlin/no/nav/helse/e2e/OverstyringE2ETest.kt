@@ -149,6 +149,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeKode7") } returns true
         every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeSkjermedePersoner") } returns true
+        every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
 
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(

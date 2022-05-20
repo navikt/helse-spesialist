@@ -15,6 +15,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeKode7") } returns false
         every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeSkjermedePersoner") } returns false
+        every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
 
         val godkjenningsmeldingId = sendMeldingerOppTilEgenAnsatt()
 

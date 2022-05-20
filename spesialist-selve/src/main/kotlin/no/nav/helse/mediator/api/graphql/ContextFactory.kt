@@ -19,7 +19,8 @@ class ContextFactory(
     override suspend fun generateContextMap(request: ApplicationRequest): Map<*, Any> =
         mapOf(
             "kanSeKode7" to request.getGrupper().contains(kode7Saksbehandlergruppe),
-            "kanSeSkjermedePersoner" to request.getGrupper().contains(skjermedePersonerGruppeId)
+            "kanSeSkjermedePersoner" to request.getGrupper().contains(skjermedePersonerGruppeId),
+            "saksbehandlerNavn" to request.getSaksbehandlerName()
         )
 
     override suspend fun generateContext(request: ApplicationRequest): AuthorizedContext {
@@ -31,4 +32,9 @@ class ContextFactory(
 private fun ApplicationRequest.getGrupper(): List<UUID> {
     val accessToken = call.principal<JWTPrincipal>()
     return accessToken?.payload?.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
+}
+
+private fun ApplicationRequest.getSaksbehandlerName(): String {
+    val accessToken = call.principal<JWTPrincipal>()
+    return accessToken?.payload?.getClaim("name")?.asString() ?: ""
 }
