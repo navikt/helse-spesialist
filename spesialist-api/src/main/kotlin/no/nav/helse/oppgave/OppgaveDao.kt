@@ -198,6 +198,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         )
 
+    fun finnTidligereSaksbehandler(oppgaveId: Long) = """
+        SELECT tidligere_saksbehandler_oid FROM oppgave
+        WHERE id=:oppgave_id
+    """.single(mapOf("oppgave_id" to oppgaveId)) { it.uuid("tidligere_saksbehandler_oid") }
+
     fun updateOppgave(
         oppgaveId: Long,
         oppgavestatus: Oppgavestatus,

@@ -146,4 +146,6 @@ class OppgaveMediator(
         erReturOppgave: Boolean,
         tidligereSaksbehandlerOid: UUID
     ) = oppgaveDao.setBeslutterOppgave(oppgaveId, erBeslutterOppgave, erReturOppgave, tidligereSaksbehandlerOid)
+
+    fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
 }

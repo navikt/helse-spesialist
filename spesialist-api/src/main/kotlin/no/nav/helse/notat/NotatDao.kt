@@ -21,6 +21,24 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         )
 
+    fun opprettNotatForOppgaveId(oppgaveId: Long, tekst: String, saksbehandler_oid: UUID) =
+        """ INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid)
+            VALUES (
+                (SELECT v.vedtaksperiode_id 
+                    FROM vedtak v 
+                    INNER JOIN oppgave o on v.id = o.vedtak_ref 
+                    WHERE o.id = :oppgave_id), 
+                :tekst, 
+                :saksbehandler_oid
+            );
+        """.updateAndReturnGeneratedKey(
+            mapOf(
+                "oppgave_id" to oppgaveId,
+                "tekst" to tekst,
+                "saksbehandler_oid" to saksbehandler_oid
+            )
+        )
+
     fun finnNotat(id: Int) =
         """ SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid

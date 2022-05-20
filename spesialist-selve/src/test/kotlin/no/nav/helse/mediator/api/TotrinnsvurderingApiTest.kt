@@ -11,12 +11,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.notat.NotatMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import no.nav.helse.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import kotlin.test.assertEquals
@@ -24,59 +26,151 @@ import kotlin.test.assertEquals
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
+    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val notatMediator = mockk<NotatMediator>(relaxed = true)
+    private val tildelingMediator = mockk<TildelingMediator>(relaxed = true)
+
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private lateinit var oppgaveMediator: OppgaveMediator
-    private lateinit var periodehistorikkDao: PeriodehistorikkDao
-    private lateinit var totrinnsvurdering: TotrinnsvurderingDto
+    private val totrinnsvurderingDto = TotrinnsvurderingDto(
+        oppgavereferanse = 1L,
+        periodeId = UUID.randomUUID()
+    )
+    private val returDtoUtenNotat = TotrinnsvurderingReturDto(
+        oppgavereferanse = 1L,
+        periodeId = UUID.randomUUID()
+    )
+    private val returDtoMedNotat = TotrinnsvurderingReturDto(
+        oppgavereferanse = 1L,
+        periodeId = UUID.randomUUID(),
+        notat = "notat_tekst"
+    )
 
-    private val totrinnsvurderingUrlPath = "/api/totrinnsvurdering"
+
+    private val TOTRINNSVURDERING_URL = "/api/totrinnsvurdering"
+    private val RETUR_URL = "/api/totrinnsvurdering/retur"
 
     @BeforeAll
     fun setupTotrinnsvurdering() {
-        oppgaveMediator = mockk(relaxed = true)
-        periodehistorikkDao = mockk(relaxed = true)
         setupServer {
-            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao)
+            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
         }
-
-        totrinnsvurdering = TotrinnsvurderingDto(
-            oppgavereferanse = 1L,
-            periodeId = UUID.randomUUID()
-        )
     }
 
-    @AfterEach
-    fun tearDownEach() {
-        clearMocks(oppgaveMediator)
+    @BeforeEach
+    fun setup() {
+        clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
     }
 
     @Test
     fun totrinnsvurderingOk() {
-        val expectedOKHttpStatusCode = HttpStatusCode.OK.value
-
         val response = runBlocking {
-            client.preparePost("$totrinnsvurderingUrlPath") {
+            client.preparePost(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurdering))
+                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }
 
         verify(exactly = 1) {
-            oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any())
+            oppgaveMediator.setBeslutterOppgave(
+                oppgaveId = totrinnsvurderingDto.oppgavereferanse,
+                erBeslutterOppgave = true,
+                erReturOppgave = false,
+                tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
+            )
+        }
+        verify(exactly = 1) {
+            tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+                totrinnsvurderingDto.oppgavereferanse,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            periodehistorikkDao.lagre(
+                PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
+                SAKSBEHANDLER_OID,
+                totrinnsvurderingDto.periodeId,
+                null
+            )
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun returOk() {
+        val response = runBlocking {
+            client.preparePost(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(returDtoUtenNotat))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
         }
 
-        Assertions.assertEquals(expectedOKHttpStatusCode, response.status.value)
+        verify(exactly = 1) {
+            oppgaveMediator.setBeslutterOppgave(
+                oppgaveId = returDtoUtenNotat.oppgavereferanse,
+                erBeslutterOppgave = false,
+                erReturOppgave = true,
+                tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
+            )
+        }
+        verify(exactly = 1) {
+            tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+                returDtoUtenNotat.oppgavereferanse,
+                any()
+            )
+        }
+        verify(exactly = 1) { periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, SAKSBEHANDLER_OID, returDtoUtenNotat.periodeId, null) }
+        verify(exactly = 0) { notatMediator.lagreForOppgaveId(any(), any(), any()) }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun returMedNotatOk() {
+        val response = runBlocking {
+            client.preparePost(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(returDtoMedNotat))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
+        }
+
+        verify(exactly = 1) {
+            oppgaveMediator.setBeslutterOppgave(
+                oppgaveId = returDtoMedNotat.oppgavereferanse,
+                erBeslutterOppgave = false,
+                erReturOppgave = true,
+                tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
+            )
+        }
+        verify(exactly = 1) {
+            tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+                returDtoUtenNotat.oppgavereferanse,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            notatMediator.lagreForOppgaveId(
+                returDtoMedNotat.oppgavereferanse,
+                returDtoMedNotat.notat!!,
+                SAKSBEHANDLER_OID
+            )
+        }
+        verify(exactly = 1) { periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, SAKSBEHANDLER_OID, returDtoMedNotat.periodeId, any()) }
+
+        assertEquals(HttpStatusCode.OK, response.status)
     }
 
     @Test
     fun totrinnsvurderingManglerPeriodeId() {
-        val expectedBadRequestHttpStatusCode = HttpStatusCode.BadRequest.value
-
         val response = runBlocking {
-            client.preparePost("$totrinnsvurderingUrlPath") {
+            client.preparePost(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
@@ -84,29 +178,50 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) {
-            oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any())
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun returManglerPeriodeId() {
+        val response = runBlocking {
+            client.preparePost(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
         }
 
-        assertEquals(expectedBadRequestHttpStatusCode, response.status.value)
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
     @Test
     fun totrinnsvurderingManglerAccessToken() {
-        val expectedUnauthorizedHttpStatusCode = HttpStatusCode.Unauthorized.value
-
         val response = runBlocking {
-            client.preparePost("$totrinnsvurderingUrlPath") {
+            client.preparePost(TOTRINNSVURDERING_URL) {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurdering))
+                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
             }.execute()
         }
 
-        verify(exactly = 0) {
-            oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any())
-        }
-        assertEquals(expectedUnauthorizedHttpStatusCode, response.status.value)
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
+    @Test
+    fun returManglerAccessToken() {
+        val response = runBlocking {
+            client.preparePost(RETUR_URL) {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
+            }.execute()
+        }
+
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+    }
 }

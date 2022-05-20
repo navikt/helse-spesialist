@@ -21,12 +21,22 @@ internal class TildelingMediator(
     ) {
         //TODO: Dette burde gjøres ute i mediatoren
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerreferanse, navn, epostadresse, ident)
+        tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerreferanse)
+    }
 
+    internal fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID) {
         val suksess = hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
         if (!suksess) {
             val eksisterendeTildeling = tildelingDao.tildelingForOppgave(oppgaveId)
             throw eksisterendeTildeling?.let { OppgaveAlleredeTildelt(eksisterendeTildeling) }
                 ?: RuntimeException("Oppgave allerede tildelt, deretter feil ved les av saksbehandlernavn")
+        }
+    }
+
+    internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandler_oid: UUID?) {
+        fjernTildeling(oppgaveId)
+        if(saksbehandler_oid != null) {
+            tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandler_oid)
         }
     }
 

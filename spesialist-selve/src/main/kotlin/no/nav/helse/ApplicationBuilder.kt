@@ -151,7 +151,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
-    private lateinit var notatMediator: NotatMediator
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -183,12 +182,18 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val notatDao = NotatDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
+    private val notatMediator = NotatMediator(notatDao)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
         tildelingDao,
         reservasjonDao,
         opptegnelseDao
+    )
+    private val tildelingMediator = TildelingMediator(
+        saksbehandlerDao,
+        tildelingDao,
+        hendelseMediator
     )
 
     private val snapshotMediator = SnapshotMediator(snapshotDao, snapshotClient)
@@ -308,13 +313,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         oppgaveMediator = oppgaveMediator
                     )
                     overstyringApi(hendelseMediator)
-                    tildelingApi(TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator))
+                    tildelingApi(tildelingMediator)
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator))
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
-                    totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao)
+                    totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
                 }
             }
         }.build()
@@ -328,7 +333,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             hendelsefabrikk = hendelsefabrikk,
             opptegnelseDao = opptegnelseDao
         )
-        notatMediator = NotatMediator(notatDao)
     }
 
     fun start() = rapidsConnection.start()
