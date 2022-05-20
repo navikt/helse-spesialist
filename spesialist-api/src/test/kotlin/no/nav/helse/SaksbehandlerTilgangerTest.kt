@@ -1,8 +1,9 @@
 package no.nav.helse
 
-import org.junit.jupiter.api.Assertions.*
+import java.util.UUID
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class SaksbehandlerTilgangerTest {
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
@@ -20,7 +21,6 @@ internal class SaksbehandlerTilgangerTest {
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
-        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -34,7 +34,6 @@ internal class SaksbehandlerTilgangerTest {
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
-        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -48,7 +47,6 @@ internal class SaksbehandlerTilgangerTest {
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
-        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -62,7 +60,6 @@ internal class SaksbehandlerTilgangerTest {
         assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
-        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 
     @Test
@@ -76,18 +73,5 @@ internal class SaksbehandlerTilgangerTest {
         assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
-        assertFalse(saksbehandlerTilganger.kanSeAlleOppgaver())
-    }
-
-    @Test
-    fun `kan se alle oppgaver`() {
-        val saksbehandlerTilganger = SaksbehandlerTilganger(
-            gruppetilganger = emptyList(),
-            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            NAVident = "N115007",
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
-        )
-        assertTrue(saksbehandlerTilganger.kanSeAlleOppgaver())
     }
 }

@@ -24,7 +24,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             val gyldigeAdressebeskyttelser =
                 if (saksbehandlerTilganger.harTilgangTilKode7Oppgaver()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
                 else "AND pi.adressebeskyttelse = 'Ugradert'"
-            val eventuellBegrensningAvAntallOppgaver = if (saksbehandlerTilganger.kanSeAlleOppgaver()) "" else "LIMIT 4000"
             val eventuellEkskluderingAvBeslutterOppgaver = if(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
 
             @Language("PostgreSQL")
@@ -49,7 +48,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
                 opprettet ASC
-                $eventuellBegrensningAvAntallOppgaver
                 ;
             """
             session.run(

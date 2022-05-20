@@ -44,8 +44,7 @@ Saker til $ident:
                     gruppetilganger = getGrupper(),
                     kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
                     riskSaksbehandlergruppe = riskSupersaksbehandlergruppe,
-                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-                    NAVident = getNAVident()
+                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
                 )
             )
         }
