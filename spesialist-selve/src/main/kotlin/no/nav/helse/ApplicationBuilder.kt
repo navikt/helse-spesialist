@@ -151,6 +151,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
+    private lateinit var tildelingMediator: TildelingMediator
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -189,11 +190,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         tildelingDao,
         reservasjonDao,
         opptegnelseDao
-    )
-    private val tildelingMediator = TildelingMediator(
-        saksbehandlerDao,
-        tildelingDao,
-        hendelseMediator
     )
 
     private val snapshotMediator = SnapshotMediator(snapshotDao, snapshotClient)
@@ -332,6 +328,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk,
             opptegnelseDao = opptegnelseDao
+        )
+        tildelingMediator = TildelingMediator(
+            saksbehandlerDao,
+            tildelingDao,
+            hendelseMediator
         )
     }
 
