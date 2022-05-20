@@ -125,16 +125,16 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     fun `inaktivering av automatisering og automatisering_problem fungerer`() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
 
-        val automatiseringFørInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
-        val vedtaksperiodeRefFørInaktivering = automatiseringDao.finnVedtaksperiode(VEDTAKSPERIODE)
-        val problemerFørInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRefFørInaktivering!!, HENDELSE_ID)
+        val vedtaksperiodeRef = automatiseringDao.finnVedtaksperiode(VEDTAKSPERIODE)!!
 
-        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(2))
-        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(2))
+        val automatiseringFørInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
+        val problemerFørInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRef, HENDELSE_ID)
+
+        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(3))
+        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(3))
 
         val automatiseringEtterInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
-        val vedtaksperiodeRefEtterInaktivering = automatiseringDao.finnVedtaksperiode(VEDTAKSPERIODE)
-        val problemerEtterInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRefEtterInaktivering!!, HENDELSE_ID)
+        val problemerEtterInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRef, HENDELSE_ID)
 
         assertNotNull(automatiseringFørInaktivering)
         assertEquals(1, problemerFørInaktivering.size)
