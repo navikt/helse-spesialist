@@ -273,17 +273,20 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun setTrengerTotrinnsbehandling(commandContextId: UUID): Long? =
+    fun setTrengerTotrinnsvurdering(vedtaksperiodeId: UUID): Long? =
         sessionOf(dataSource, returnGeneratedKey = true).use {
             @Language("PostgreSQL")
             val query =
-                """ UPDATE oppgave SET er_beslutter_oppgave=true 
-                WHERE command_context_id = ?
+                """  UPDATE oppgave o 
+                     SET totrinnsvurdering=true 
+                     FROM vedtak v
+                     WHERE o.vedtak_ref = v.id 
+                     AND v.vedtaksperiode_id = ?
             """
             it.run(
                 queryOf(
                     query,
-                    commandContextId,
+                    vedtaksperiodeId,
                 ).asUpdateAndReturnGeneratedKey
             )
         }
