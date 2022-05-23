@@ -281,6 +281,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             ?: fail { "Kunne ikke opprette vedtak" }
     }
 
+    protected fun opprettReservasjon(saksbehandlerOID: UUID = SAKSBEHANDLER_OID, fødselsnummer: String = FNR) =
+        reservasjonDao.reserverPerson(saksbehandlerOID, fødselsnummer)
+
+
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,

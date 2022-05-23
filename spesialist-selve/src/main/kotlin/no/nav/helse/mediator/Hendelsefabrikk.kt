@@ -103,10 +103,8 @@ internal class Hendelsefabrikk(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            arbeidsforholdId = arbeidsforholdId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
             utbetalingtype = utbetalingtype,
             inntektskilde = inntektskilde,
@@ -129,7 +127,8 @@ internal class Hendelsefabrikk(
             godkjenningMediator = godkjenningMediator,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            utbetalingDao = utbetalingDao
+            utbetalingDao = utbetalingDao,
+            oppgaveDao = oppgaveDao
         )
     }
 

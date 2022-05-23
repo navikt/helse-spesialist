@@ -20,7 +20,8 @@ import org.intellij.lang.annotations.Language
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) =
         sessionOf(dataSource).use { session ->
-            val eventuellEkskluderingAvRiskQA = if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
+            val eventuellEkskluderingAvRiskQA =
+                if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
             val gyldigeAdressebeskyttelser =
                 if (saksbehandlerTilganger.harTilgangTilKode7Oppgaver()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
                 else "AND pi.adressebeskyttelse = 'Ugradert'"
@@ -271,6 +272,45 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 godkjenningsbehovJson = it.string("godkjenningbehovJson")
             )
         }
+
+    fun setTrengerTotrinnsvurdering(vedtaksperiodeId: UUID): Long? =
+        sessionOf(dataSource, returnGeneratedKey = true).use {
+            @Language("PostgreSQL")
+            val query =
+                """  UPDATE oppgave o 
+                     SET totrinnsvurdering=true 
+                     FROM vedtak v
+                     WHERE o.vedtak_ref = v.id 
+                     AND v.vedtaksperiode_id = ?
+            """
+            it.run(
+                queryOf(
+                    query,
+                    vedtaksperiodeId,
+                ).asUpdateAndReturnGeneratedKey
+            )
+        }
+
+    fun harOppgaveMedEndring(vedtaksperiodeId: UUID): Boolean =
+        requireNotNull(sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                """ SELECT EXISTS (
+                SELECT o.id
+                   
+                FROM oppgave o
+                    INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                    INNER JOIN reserver_person rp ON v.person_ref = rp.person_ref
+                
+                WHERE v.vedtaksperiode_id = ?)
+            """
+            session.run(
+                queryOf(
+                    query,
+                    vedtaksperiodeId,
+                ).map { it.boolean(1) }.asSingle
+            )
+        })
 
     private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),

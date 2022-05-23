@@ -441,6 +441,63 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         }
     }
 
+    @Test
+    fun `oppgave har endring dersom personen er reservert`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+        opprettReservasjon()
+
+        assertTrue(oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `oppgave har ikke endring dersom personen ikke er reservert`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        assertFalse(oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `setter ikke trenger Totrinnsvurdering`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        assertNotEquals(null, oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `setter trenger Totrinnsvurdering`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        assertFalse(trengerTotrinnsvurdering())
+
+        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
+
+        assertTrue(trengerTotrinnsvurdering())
+    }
+
+    private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
+        it.run(
+            queryOf(
+                "SELECT totrinnsvurdering FROM oppgave"
+            ).map { it.boolean("totrinnsvurdering") }.asSingle
+        )
+    } ?: false
+
     private fun oppgave() =
         sessionOf(dataSource).use {
             it.run(queryOf("SELECT * FROM oppgave ORDER BY id DESC").map {

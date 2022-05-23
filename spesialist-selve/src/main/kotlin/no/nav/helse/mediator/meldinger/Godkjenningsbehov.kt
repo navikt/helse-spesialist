@@ -34,6 +34,7 @@ import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
+import no.nav.helse.modell.kommando.TrengerTotrinnsvurderingCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -47,6 +48,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -64,10 +66,8 @@ internal class Godkjenningsbehov(
     organisasjonsnummer: String,
     private val vedtaksperiodeId: UUID,
     utbetalingId: UUID,
-    arbeidsforholdId: String?,
     periodeFom: LocalDate,
     periodeTom: LocalDate,
-    skjæringstidspunkt: LocalDate,
     periodetype: Periodetype,
     utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
@@ -90,7 +90,8 @@ internal class Godkjenningsbehov(
     oppgaveMediator: OppgaveMediator,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
-    utbetalingDao: UtbetalingDao
+    utbetalingDao: UtbetalingDao,
+    oppgaveDao: OppgaveDao
 ) : Hendelse, MacroCommand() {
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
         val utbetaling = snapshotDao.finnUtbetaling(
@@ -219,6 +220,11 @@ internal class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype,
             snapshotDao = snapshotDao,
+        ),
+        TrengerTotrinnsvurderingCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            warningDao = warningDao,
+            oppgaveDao = oppgaveDao
         )
     )
 
