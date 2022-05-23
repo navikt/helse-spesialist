@@ -184,6 +184,15 @@ internal class HendelseMediator(
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
     }
 
+    internal fun erBeslutteroppgaveOgErTidligereSaksbehandler(
+        oppgaveId: Long,
+        saksbehandlerreferanse: UUID
+    ): Boolean {
+        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(oppgaveId)
+        val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(oppgaveId)
+        return erBeslutteroppgave && tidligereSaksbehandler == saksbehandlerreferanse
+    }
+
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID,

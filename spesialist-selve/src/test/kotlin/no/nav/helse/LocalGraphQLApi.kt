@@ -103,8 +103,9 @@ fun main() = runBlocking {
             periodehistorikkDao = periodehistorikkDao,
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
-            snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
+            beslutterGruppeId = UUID.randomUUID(),
             notatDao = notatDao,
+            snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
         )
     }
 }

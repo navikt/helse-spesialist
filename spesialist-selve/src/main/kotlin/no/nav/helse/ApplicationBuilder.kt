@@ -295,6 +295,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 notatDao = notatDao,
                 skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
+                beslutterGruppeId = env.beslutterGruppeId(),
                 snapshotMediator = snapshotMediator,
             )
             routing {
