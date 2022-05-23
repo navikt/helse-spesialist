@@ -289,7 +289,7 @@ data class BeregnetPeriode(
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
 
-    fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutteroppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+    fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutterOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
     fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 

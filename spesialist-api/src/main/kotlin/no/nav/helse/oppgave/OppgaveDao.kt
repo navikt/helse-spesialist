@@ -71,16 +71,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") }!!
 
-    fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean =
+    fun erBeslutterOppgave(vedtaksperiodeId: UUID): Boolean =
         """ SELECT er_beslutter_oppgave FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutter_oppgave") }!!
-
-    fun erBeslutteroppgave(oppgaveId: Long): Boolean =
-        """ SELECT er_beslutter_oppgave FROM oppgave
-            WHERE id=:oppgaveId
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutter_oppgave") }!!
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId

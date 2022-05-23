@@ -13,15 +13,13 @@ data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext
 
 class ContextFactory(
     private val kode7Saksbehandlergruppe: UUID,
-    private val skjermedePersonerGruppeId: UUID,
-    private val beslutterGruppeId: UUID
+    private val skjermedePersonerGruppeId: UUID
 ) : GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
 
     override suspend fun generateContextMap(request: ApplicationRequest): Map<*, Any> =
         mapOf(
             "kanSeKode7" to request.getGrupper().contains(kode7Saksbehandlergruppe),
             "kanSeSkjermedePersoner" to request.getGrupper().contains(skjermedePersonerGruppeId),
-            "kanSeBeslutterOppgaver" to request.getGrupper().contains(beslutterGruppeId),
             "saksbehandlerNavn" to request.getSaksbehandlerName()
         )
 

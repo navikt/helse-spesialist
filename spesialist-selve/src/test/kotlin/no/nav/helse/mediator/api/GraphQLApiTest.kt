@@ -86,7 +86,6 @@ class GraphQLApiTest : AbstractApiTest() {
 
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
     private val skjermedePersonerGruppeId = UUID.randomUUID()
-    private val beslutterGruppeId = UUID.randomUUID()
 
     private lateinit var server: GraphQLServer<ApplicationRequest>
 
@@ -109,7 +108,7 @@ class GraphQLApiTest : AbstractApiTest() {
 
         server = GraphQLServer(
             requestParser = RequestParser(),
-            contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId, beslutterGruppeId),
+            contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId),
             requestHandler = GraphQLRequestHandler(
                 GraphQL.newGraphQL(schema).build()
             )

@@ -47,7 +47,6 @@ internal fun Application.graphQLApi(
     notatDao: NotatDao,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
-    beslutterGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
 ) {
     val schema = SchemaBuilder(
@@ -67,7 +66,7 @@ internal fun Application.graphQLApi(
 
     val server = GraphQLServer(
         requestParser = RequestParser(),
-        contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId, beslutterGruppeId),
+        contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId),
         requestHandler = GraphQLRequestHandler(
             GraphQL.newGraphQL(schema).build()
         )
