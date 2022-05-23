@@ -11,11 +11,13 @@ internal class TrengerTotrinnsvurderingCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
 
+        /*
         context.harBehov()
 
         if(harMedlemskapsVarsel() || harOppgaveMedEndring()) {
                 //TODO sett TrengerTotrinnsvurdering på akutell oppgave
-         }
+         }*/
+
         return true
     }
 
