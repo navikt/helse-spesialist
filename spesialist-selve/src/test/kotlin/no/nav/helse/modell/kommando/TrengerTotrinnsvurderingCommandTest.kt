@@ -3,8 +3,11 @@ package no.nav.helse.modell.kommando
 
 import io.mockk.every
 import io.mockk.mockk
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.WarningKilde
 
 import no.nav.helse.oppgave.OppgaveDao
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,9 +39,41 @@ internal class TrengerTotrinnsvurderingCommandTest {
     @Test
     fun `Setter trenger totrinnsvudering dersom oppgaven har endring`() {
         every { oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE_ID) } returns true
+
         assertTrue(command.execute(context))
+    }
 
+    @Test
+    fun `Setter trenger totrinnsvudering dersom oppgaven ikke har endring`() {
+        every { oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE_ID) } returns false
 
+        assertTrue(command.execute(context))
+    }
+
+    @Test
+    fun `Setter trenger totrinnsvudering dersom oppgaven har aktive warnings med spesifikk melding`() {
+        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
+        every {
+            warningDao.finnAktiveWarningsMedMelding(
+                VEDTAKSPERIODE_ID,
+                testWarningVurderMedlemskap
+            )
+        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
+
+        assertTrue(command.execute(context))
+    }
+
+    @Test
+    fun `Setter trenger totrinnsvudering dersom oppgaven har ingen aktive warnings med spesifikk melding`() {
+        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
+        every {
+            warningDao.finnAktiveWarningsMedMelding(
+                VEDTAKSPERIODE_ID,
+                testWarningVurderMedlemskap
+            )
+        } returns emptyList()
+
+        assertTrue(command.execute(context))
     }
 
 }
