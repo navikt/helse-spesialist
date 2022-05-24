@@ -38,7 +38,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 INNER JOIN person_info pi ON p.info_ref = pi.id
                 LEFT JOIN enhet e ON p.enhet_ref = e.id
                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
-                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref AND (t.gyldig_til IS NULL OR t.gyldig_til > now())
+                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
                 $eventuellEkskluderingAvRiskQA

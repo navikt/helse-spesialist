@@ -1,12 +1,11 @@
 package no.nav.helse.modell.tildeling
 
 import DatabaseIntegrationTest
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -39,25 +38,12 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `kan tildele oppgave på nytt etter at gyldig_til har gått ut`() {
-        nyPerson()
-        val saksbehandlerOid = UUID.randomUUID()
-        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "A", "a@nav.no", "A999999")
-
-        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusMinutes(1))
-
-        val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
-
-        assertTrue(tildelingNrToSuksess)
-    }
-
-    @Test
     fun `kan ikke tildele oppgave når gyldig_til ikke har gått ut`() {
         nyPerson()
         val saksbehandlerOid = UUID.randomUUID()
         saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "A", "a@nav.no", "A999999")
 
-        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().plusMinutes(1))
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
 
         val tildelingNrToSuksess = tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
 
@@ -109,30 +95,6 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         )
         val tildeling = tildelingDao.tildelingForPerson(FNR)
         assertEquals(nySaksbehandlerepost, tildeling?.epost)
-    }
-
-    @Test
-    fun `utgått tildeling blir ikke tatt med i snapshot`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val saksbehandlerEpost = "${UUID.randomUUID()}@nav.no"
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId)
-        saksbehandlerDao.opprettSaksbehandler(
-            saksbehandlerOid,
-            "Sara Saksbehandler",
-            saksbehandlerEpost,
-            SAKSBEHANDLER_IDENT
-        )
-        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid, LocalDateTime.now().minusDays(1))
-        assertNull(tildelingDao.tildelingForOppgave(oppgaveId))
-        assertNull(tildelingDao.tildelingForPerson(FNR))
-        oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).also { oppgaver ->
-            assertTrue(oppgaver.isNotEmpty())
-            assertTrue(oppgaver.none { it.tildeling?.epost == saksbehandlerEpost })
-        }
     }
 
     @Test

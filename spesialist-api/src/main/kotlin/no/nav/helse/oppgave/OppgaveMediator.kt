@@ -1,6 +1,5 @@
 package no.nav.helse.oppgave
 
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.abonnement.GodkjenningsbehovPayload
@@ -30,8 +29,8 @@ class OppgaveMediator(
         nyOppgave(oppgave)
     }
 
-    fun tildel(oppgaveId: Long, saksbehandleroid: UUID, gyldigTil: LocalDateTime? = null): Boolean {
-        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, gyldigTil)
+    fun tildel(oppgaveId: Long, saksbehandleroid: UUID): Boolean {
+        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid)
     }
 
     private fun nyOppgave(oppgave: Oppgave) {
@@ -114,8 +113,8 @@ class OppgaveMediator(
     }
 
     private fun tildelOppgaver(fødselsnummer: String) {
-        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, gyldigTil) ->
-            oppgaver.forEach { it.tildel(this, oid, gyldigTil) }
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { oid ->
+            oppgaver.forEach { it.tildel(this, oid) }
         }
     }
 

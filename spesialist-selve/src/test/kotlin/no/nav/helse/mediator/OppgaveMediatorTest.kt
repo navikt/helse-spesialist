@@ -5,7 +5,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.abonnement.OpptegnelseType
@@ -82,12 +81,12 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer tildeling`() {
-        val (oid, gyldigTil) = Pair(UUID.randomUUID(), LocalDateTime.now())
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns (oid to gyldigTil)
+        val oid = UUID.randomUUID()
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns oid
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, gyldigTil) }
+        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid) }
         assertOpptegnelseIkkeOpprettet()
     }
 

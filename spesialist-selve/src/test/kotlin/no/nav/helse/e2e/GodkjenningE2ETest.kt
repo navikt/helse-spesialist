@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.verify
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
@@ -790,10 +789,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
-        val (saksbehandler, gyldigTil) = reservasjonDao.hentReservasjonFor(FØDSELSNUMMER)!!
+        val saksbehandler = reservasjonDao.hentReservasjonFor(FØDSELSNUMMER)!!
 
         assertEquals(SAKSBEHANDLEROID, saksbehandler)
-        assertTrue(gyldigTil.isAfter(LocalDateTime.now()))
 
         testRapid.reset()
 

@@ -2,7 +2,7 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
-import java.util.*
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
@@ -275,7 +275,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, gyldig_til) VALUES(:oppgave_id_ref, :saksbehandler_ref, now() + INTERVAL '14 DAYS');",
+                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref) VALUES(:oppgave_id_ref, :saksbehandler_ref);",
                     mapOf(
                         "oppgave_id_ref" to OPPGAVEID,
                         "saksbehandler_ref" to saksbehandlerOid

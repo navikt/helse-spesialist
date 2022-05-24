@@ -52,7 +52,7 @@ INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av
 VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}',
         'SØKNAD', '${utbetaling_id}');
 
-INSERT INTO tildeling(saksbehandler_ref, gyldig_til, oppgave_id_ref, på_vent) VALUES ('${saksbehandler_oid}', now(), ${sequence_number}, false);
+INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES ('${saksbehandler_oid}', ${sequence_number}, false);
 INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til) VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
 
 INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type) VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');

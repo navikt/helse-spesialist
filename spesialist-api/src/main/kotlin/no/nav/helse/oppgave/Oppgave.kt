@@ -1,6 +1,5 @@
 package no.nav.helse.oppgave
 
-import java.time.LocalDateTime
 import java.util.Objects
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -125,8 +124,8 @@ class Oppgave private constructor(
         status = Oppgavestatus.Invalidert
     }
 
-    fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, gyldigTil: LocalDateTime) {
-        oppgaveMediator.tildel(requireNotNull(id), saksbehandleroid, gyldigTil)
+    fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID) {
+        oppgaveMediator.tildel(requireNotNull(id), saksbehandleroid)
     }
 
     override fun equals(other: Any?): Boolean {
