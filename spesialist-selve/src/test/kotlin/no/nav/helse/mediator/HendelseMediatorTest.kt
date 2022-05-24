@@ -1,6 +1,8 @@
 package no.nav.helse.mediator
 
 import AbstractE2ETest
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
@@ -8,6 +10,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
+import no.nav.helse.oppgave.OppgaveMediator
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal class HendelseMediatorTest: AbstractE2ETest() {
@@ -16,6 +20,15 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         rapidsConnection = testRapid,
         dataSource = dataSource,
         oppgaveMediator = oppgaveMediator,
+        hendelsefabrikk = hendelsefabrikk,
+        opptegnelseDao = opptegnelseDao
+    )
+
+    private val oppgaveMediatorMock = mockk<OppgaveMediator>(relaxed = true)
+    private val mediatorWithMock = HendelseMediator(
+        rapidsConnection = testRapid,
+        dataSource = dataSource,
+        oppgaveMediator = oppgaveMediatorMock,
         hendelsefabrikk = hendelsefabrikk,
         opptegnelseDao = opptegnelseDao
     )
@@ -89,5 +102,41 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         assertEquals(navn, testRapid.inspektør.field(0, "saksbehandler")["navn"].asText())
         assertThrows<IllegalArgumentException> { testRapid.inspektør.field(0, "kommentar") }
         assertEquals(emptyList<String>(), testRapid.inspektør.field(0, "begrunnelser").map { it.asText() })
+    }
+
+    @Test
+    fun `sjekker at saksbehandler ikke har lov å attestere beslutteroppgaven hvis saksbehandler sendte saken til godkjenning`() {
+        val oppgaveId = 1L
+
+        every { oppgaveMediatorMock.erBeslutteroppgave(oppgaveId) } returns true
+        every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns SAKSBEHANDLER_OID
+
+        val kanIkkeAttestere = mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+
+        assertTrue(kanIkkeAttestere)
+    }
+
+    @Test
+    fun `sjekker at saksbehandler har lov å attestere beslutteroppgaven hvis saksbehandler ikke sendte saken til godkjenning`() {
+        val oppgaveId = 1L
+
+        every { oppgaveMediatorMock.erBeslutteroppgave(oppgaveId) } returns true
+        every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns UUID.randomUUID()
+
+        val kanIkkeAttestere = mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+
+        assertFalse(kanIkkeAttestere)
+    }
+
+    @Test
+    fun `sjekker at saksbehandler har lov å attestere beslutteroppgaven hvis tidligere saksbehandler ikke finnes`() {
+        val oppgaveId = 1L
+
+        every { oppgaveMediatorMock.erBeslutteroppgave(oppgaveId) } returns true
+        every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns null
+
+        val kanIkkeAttestere = mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+
+        assertFalse(kanIkkeAttestere)
     }
 }
