@@ -13,7 +13,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
-import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
@@ -67,8 +66,8 @@ abstract class AbstractApiTest {
             )
         }
 
-        fun TestApplicationRequest.authentication(oid: UUID, epost: String = epostadresse, navn:String, ident:String, group: String? = null) {
-            addHeader(
+        fun HttpRequestBuilder.authentication(oid: UUID, epost: String = epostadresse, navn:String, ident:String, group: String? = null) {
+            header(
                 "Authorization",
                 "Bearer ${
                     jwtStub.getToken(
