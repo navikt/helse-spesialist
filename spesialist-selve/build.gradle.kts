@@ -2,9 +2,9 @@ import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
-val graphQLKotlinVersion = "5.3.1"
-val testcontainersVersion = "1.16.2"
-val ktorVersion = "1.6.7"
+val graphQLKotlinVersion = "5.4.1"
+val testcontainersVersion = "1.17.1"
+val ktorVersion = "2.0.1"
 
 plugins {
     kotlin("plugin.serialization") version "1.6.21"
