@@ -22,7 +22,9 @@ data class OppgaveDto (
     var boenhet: EnhetDto,
     val tildeling: TildelingApiDto?,
     val erBeslutterOppgave: Boolean,
-    val erReturOppgave: Boolean
+    val erReturOppgave: Boolean,
+    val trengerTotrinnsvurdering: Boolean,
+    val tidligereSaksbehandlerOid: UUID?
 )
 
 data class OppgavereferanseDto(

@@ -293,6 +293,10 @@ data class BeregnetPeriode(
 
     fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
+    fun trengerTotrinnsvurderingOppgave(): Boolean = oppgaveDao.trengerTotrinnsvurderingOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+
+    fun hentTidligereSaksbehandlerOid(): UUID? = oppgaveDao.hentTidligereSaksbehandlerOid(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
+
     fun notater(): List<Notat> = notatDao.finnNotater(java.util.UUID.fromString(vedtaksperiodeId())).map {
         Notat(
             id = it.id,

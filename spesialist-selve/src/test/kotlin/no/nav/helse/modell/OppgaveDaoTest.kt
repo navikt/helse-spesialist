@@ -490,6 +490,48 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertTrue(trengerTotrinnsvurdering())
     }
 
+    @Test
+    fun `henter ut trenger Totrinnsvurdering`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        assertFalse(trengerTotrinnsvurdering())
+
+        oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
+
+        assertTrue(oppgaveDao.trengerTotrinnsvurderingOppgave(VEDTAKSPERIODE))
+    }
+
+
+    @Test
+    fun `henter ut tidligere saksbehandlerOid er null`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+
+        assertNull(oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `henter ut tidligere saksbehandlerOid`() {
+
+        val tidligereSaksbehandlerOid = UUID.randomUUID()
+
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettSaksbehandler()
+        oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, tidligereSaksbehandlerOid)
+
+        assertEquals(tidligereSaksbehandlerOid, oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
+    }
+
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
         it.run(
             queryOf(
