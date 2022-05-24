@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION", "OverridingDeprecatedMember")
-
 package no.nav.helse.mediator.api.graphql
 
 import com.expediagroup.graphql.generator.execution.GraphQLContext
@@ -23,6 +21,7 @@ class ContextFactory(
             "saksbehandlerNavn" to request.getSaksbehandlerName()
         )
 
+    @Deprecated("The generic context object is deprecated in favor of the context map")
     override suspend fun generateContext(request: ApplicationRequest): AuthorizedContext {
         return AuthorizedContext(request.getGrupper().contains(kode7Saksbehandlergruppe))
     }

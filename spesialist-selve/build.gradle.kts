@@ -7,7 +7,7 @@ val testcontainersVersion = "1.16.2"
 val ktorVersion = "1.6.7"
 
 plugins {
-    kotlin("plugin.serialization") version "1.5.31"
+    kotlin("plugin.serialization") version "1.6.21"
     id("com.expediagroup.graphql") version "5.3.1"
 }
 
