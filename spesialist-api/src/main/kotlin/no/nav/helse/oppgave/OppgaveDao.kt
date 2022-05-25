@@ -71,7 +71,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") }!!
 
-    fun trengerTotrinnsvurderingOppgave(vedtaksperiodeId: UUID): Boolean =
+    fun trengerTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean =
         """ SELECT totrinnsvurdering FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)

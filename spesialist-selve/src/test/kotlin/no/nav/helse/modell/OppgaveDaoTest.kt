@@ -502,7 +502,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
         oppgaveDao.setTrengerTotrinnsvurdering(VEDTAKSPERIODE)
 
-        assertTrue(oppgaveDao.trengerTotrinnsvurderingOppgave(VEDTAKSPERIODE))
+        assertTrue(oppgaveDao.trengerTotrinnsvurdering(VEDTAKSPERIODE))
     }
 
 

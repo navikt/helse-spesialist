@@ -293,7 +293,7 @@ data class BeregnetPeriode(
 
     fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
-    fun trengerTotrinnsvurderingOppgave(): Boolean = oppgaveDao.trengerTotrinnsvurderingOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
+    fun trengerTotrinnsvurdering(): Boolean = oppgaveDao.trengerTotrinnsvurdering(java.util.UUID.fromString(vedtaksperiodeId()))
 
     fun hentTidligereSaksbehandlerOid(): UUID? = oppgaveDao.hentTidligereSaksbehandlerOid(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 
