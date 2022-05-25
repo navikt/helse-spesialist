@@ -172,7 +172,7 @@ internal class HendelseMediator(
             sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
         log.info(
-            "Publiserer saksbehandler-løsning for {}. {}. {}",
+            "Publiserer saksbehandler-løsning for {}, {}",
             keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
             keyValue("hendelseId", hendelseId)
         )
@@ -234,7 +234,7 @@ internal class HendelseMediator(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         context: MessageContext
-π    ) {
+    ) {
         val hendelse = hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson())
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")

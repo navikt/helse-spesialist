@@ -125,8 +125,6 @@ data class Person(
         personApiDao.finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    fun inntektsgrunnlag(): List<Inntektsgrunnlag> = snapshot.inntektsgrunnlag.map { it.tilInntektsgrunnlag() }
-
     fun vilkarsgrunnlaghistorikk(): List<Vilkarsgrunnlaghistorikk> =
         snapshot.vilkarsgrunnlaghistorikk.map { it.tilVilkarsgrunnlaghistorikk() }
 
