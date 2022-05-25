@@ -1,512 +1,477 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
 schema {
-  query: Query
+    query: Query
 }
 
-"Directs the executor to include this field or fragment only when the `if` argument is true"
-directive @include(
-    "Included when true."
-    if: Boolean!
-  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
-
-"Directs the executor to skip this field or fragment when the `if`'argument is true."
-directive @skip(
-    "Skipped when true."
-    if: Boolean!
-  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
-
-"Marks the field, argument, input field or enum value as deprecated"
-directive @deprecated(
-    "The reason for the deprecation"
-    reason: String = "No longer supported"
-  ) on FIELD_DEFINITION | ARGUMENT_DEFINITION | ENUM_VALUE | INPUT_FIELD_DEFINITION
-
-"Exposes a URL that specifies the behaviour of this scalar."
-directive @specifiedBy(
-    "The URL that specifies the behaviour of this scalar."
-    url: String!
-  ) on SCALAR
-
 interface GraphQLHendelse {
-  id: String!
-  type: GraphQLHendelsetype!
+    id: String!
+    type: GraphQLHendelsetype!
 }
 
 interface GraphQLTidslinjeperiode {
-  behandlingstype: GraphQLBehandlingstype!
-  erForkastet: Boolean!
-  fom: LocalDate!
-  id: UUID!
-  inntektstype: GraphQLInntektstype!
-  opprettet: LocalDateTime!
-  periodetype: GraphQLPeriodetype!
-  tidslinje: [GraphQLDag!]!
-  tom: LocalDate!
-  vedtaksperiodeId: UUID!
+    behandlingstype: GraphQLBehandlingstype!
+    erForkastet: Boolean!
+    fom: LocalDate!
+    id: UUID!
+    inntektstype: GraphQLInntektstype!
+    opprettet: LocalDateTime!
+    periodetype: GraphQLPeriodetype!
+    tidslinje: [GraphQLDag!]!
+    tom: LocalDate!
+    vedtaksperiodeId: UUID!
 }
 
 interface GraphQLVilkarsgrunnlag {
-  inntekter: [GraphQLArbeidsgiverinntekt!]!
-  omregnetArsinntekt: Float!
-  sammenligningsgrunnlag: Float
-  skjaeringstidspunkt: LocalDate!
-  sykepengegrunnlag: Float!
-  vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
+    inntekter: [GraphQLArbeidsgiverinntekt!]!
+    omregnetArsinntekt: Float!
+    sammenligningsgrunnlag: Float
+    skjaeringstidspunkt: LocalDate!
+    sykepengegrunnlag: Float!
+    vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type Alder {
-  alderSisteSykedag: Int!
-  oppfylt: Boolean!
+    alderSisteSykedag: Int!
+    oppfylt: Boolean!
 }
 
 type GraphQLAktivitet {
-  alvorlighetsgrad: String!
-  melding: String!
-  tidsstempel: String!
-  vedtaksperiodeId: UUID!
+    alvorlighetsgrad: String!
+    melding: String!
+    tidsstempel: String!
+    vedtaksperiodeId: UUID!
 }
 
 type GraphQLArbeidsgiver {
-  generasjon(index: Int!): GraphQLGenerasjon
-  generasjoner: [GraphQLGenerasjon!]!
-  generasjonerSlice(first: Int, from: Int): [GraphQLGenerasjon!]!
-  ghostPerioder: [GraphQLGhostPeriode!]!
-  id: UUID!
-  organisasjonsnummer: String!
-  sisteGenerasjon: GraphQLGenerasjon
+    generasjon(index: Int!): GraphQLGenerasjon
+    generasjoner: [GraphQLGenerasjon!]!
+    generasjonerSlice(first: Int, from: Int): [GraphQLGenerasjon!]!
+    ghostPerioder: [GraphQLGhostPeriode!]!
+    id: UUID!
+    organisasjonsnummer: String!
+    sisteGenerasjon: GraphQLGenerasjon
 }
 
 type GraphQLArbeidsgiverinntekt {
-  arbeidsgiver: String!
-  deaktivert: Boolean
-  omregnetArsinntekt: GraphQLOmregnetArsinntekt
-  sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag
+    arbeidsgiver: String!
+    deaktivert: Boolean
+    omregnetArsinntekt: GraphQLOmregnetArsinntekt
+    sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag
 }
 
 type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
-  aktivitetslogg: [GraphQLAktivitet!]!
-  behandlingstype: GraphQLBehandlingstype!
-  beregningId: UUID!
-  erForkastet: Boolean!
-  fom: LocalDate!
-  forbrukteSykedager: Int
-  gjenstaendeSykedager: Int
-  hendelser: [GraphQLHendelse!]!
-  id: UUID!
-  inntektsmeldinger: [GraphQLInntektsmelding!]!
-  inntektstype: GraphQLInntektstype!
-  maksdato: LocalDate!
-  opprettet: LocalDateTime!
-  periodetype: GraphQLPeriodetype!
-  periodevilkar: GraphQLPeriodevilkar!
-  refusjon: GraphQLRefusjon
-  skjaeringstidspunkt: LocalDate!
-  soknaderArbeidsgiver: [GraphQLSoknadArbeidsgiver!]!
-  soknaderNav: [GraphQLSoknadNav!]!
-  sykmeldinger: [GraphQLSykmelding!]!
-  tidslinje: [GraphQLDag!]!
-  tilstand: GraphQLPeriodetilstand!
-  tom: LocalDate!
-  utbetaling: GraphQLUtbetaling!
-  vedtaksperiodeId: UUID!
-  vilkarsgrunnlaghistorikkId: UUID!
+    aktivitetslogg: [GraphQLAktivitet!]!
+    behandlingstype: GraphQLBehandlingstype!
+    beregningId: UUID!
+    erForkastet: Boolean!
+    fom: LocalDate!
+    forbrukteSykedager: Int
+    gjenstaendeSykedager: Int
+    hendelser: [GraphQLHendelse!]!
+    id: UUID!
+    inntektsmeldinger: [GraphQLInntektsmelding!]!
+    inntektstype: GraphQLInntektstype!
+    maksdato: LocalDate!
+    opprettet: LocalDateTime!
+    periodetype: GraphQLPeriodetype!
+    periodevilkar: GraphQLPeriodevilkar!
+    refusjon: GraphQLRefusjon
+    skjaeringstidspunkt: LocalDate!
+    soknaderArbeidsgiver: [GraphQLSoknadArbeidsgiver!]!
+    soknaderNav: [GraphQLSoknadNav!]!
+    sykmeldinger: [GraphQLSykmelding!]!
+    tidslinje: [GraphQLDag!]!
+    tilstand: GraphQLPeriodetilstand!
+    tom: LocalDate!
+    utbetaling: GraphQLUtbetaling!
+    vedtaksperiodeId: UUID!
+    vilkarsgrunnlaghistorikkId: UUID!
 }
 
 type GraphQLDag {
-  begrunnelser: [GraphQLBegrunnelse!]
-  dato: LocalDate!
-  grad: Float
-  kilde: GraphQLSykdomsdagkilde!
-  sykdomsdagtype: GraphQLSykdomsdagtype!
-  utbetalingsdagtype: GraphQLUtbetalingsdagType!
-  utbetalingsinfo: GraphQLUtbetalingsinfo
+    begrunnelser: [GraphQLBegrunnelse!]
+    dato: LocalDate!
+    grad: Float
+    kilde: GraphQLSykdomsdagkilde!
+    sykdomsdagtype: GraphQLSykdomsdagtype!
+    utbetalingsdagtype: GraphQLUtbetalingsdagType!
+    utbetalingsinfo: GraphQLUtbetalingsinfo
 }
 
 type GraphQLGenerasjon {
-  id: UUID!
-  periode(index: Int!): GraphQLTidslinjeperiode
-  perioder: [GraphQLTidslinjeperiode!]!
-  perioderSlice(first: Int, from: Int): [GraphQLTidslinjeperiode!]!
-  sistePeriode: GraphQLTidslinjeperiode
+    id: UUID!
+    periode(index: Int!): GraphQLTidslinjeperiode
+    perioder: [GraphQLTidslinjeperiode!]!
+    perioderSlice(first: Int, from: Int): [GraphQLTidslinjeperiode!]!
+    sistePeriode: GraphQLTidslinjeperiode
 }
 
 type GraphQLGhostPeriode {
-  deaktivert: Boolean!
-  fom: LocalDate!
-  id: UUID!
-  organisasjonsnummer: String!
-  skjaeringstidspunkt: LocalDate!
-  tom: LocalDate!
-  vilkarsgrunnlaghistorikkId: UUID
+    deaktivert: Boolean!
+    fom: LocalDate!
+    id: UUID!
+    organisasjonsnummer: String!
+    skjaeringstidspunkt: LocalDate!
+    tom: LocalDate!
+    vilkarsgrunnlaghistorikkId: UUID
 }
 
 type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
-  inntekter: [GraphQLArbeidsgiverinntekt!]!
-  omregnetArsinntekt: Float!
-  sammenligningsgrunnlag: Float
-  skjaeringstidspunkt: LocalDate!
-  sykepengegrunnlag: Float!
-  vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
+    inntekter: [GraphQLArbeidsgiverinntekt!]!
+    omregnetArsinntekt: Float!
+    sammenligningsgrunnlag: Float
+    skjaeringstidspunkt: LocalDate!
+    sykepengegrunnlag: Float!
+    vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type GraphQLInntekterFraAOrdningen {
-  maned: YearMonth!
-  sum: Float!
-}
-
-type GraphQLInntektsgrunnlag {
-  avviksprosent: Float
-  grunnbelop: Int!
-  inntekter: [GraphQLArbeidsgiverinntekt!]!
-  maksUtbetalingPerDag: Float
-  omregnetArsinntekt: Float
-  oppfyllerKravOmMinstelonn: Boolean
-  sammenligningsgrunnlag: Float
-  skjaeringstidspunkt: LocalDate!
-  sykepengegrunnlag: Float
+    maned: YearMonth!
+    sum: Float!
 }
 
 type GraphQLInntektsmelding implements GraphQLHendelse {
-  beregnetInntekt: Float!
-  id: String!
-  mottattDato: LocalDateTime!
-  type: GraphQLHendelsetype!
+    beregnetInntekt: Float!
+    id: String!
+    mottattDato: LocalDateTime!
+    type: GraphQLHendelsetype!
 }
 
 type GraphQLOmregnetArsinntekt {
-  belop: Float!
-  inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
-  kilde: GraphQLInntektskilde!
-  manedsbelop: Float!
+    belop: Float!
+    inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]
+    kilde: GraphQLInntektskilde!
+    manedsbelop: Float!
 }
 
 type GraphQLOppdrag {
-  fagsystemId: String!
-  simulering: GraphQLSimulering
-  tidsstempel: LocalDateTime!
-  utbetalingslinjer: [GraphQLUtbetalingslinje!]!
+    fagsystemId: String!
+    simulering: GraphQLSimulering
+    tidsstempel: LocalDateTime!
+    utbetalingslinjer: [GraphQLUtbetalingslinje!]!
 }
 
 type GraphQLPeriodevilkar {
-  alder: Alder!
-  soknadsfrist: Soknadsfrist
-  sykepengedager: Sykepengedager!
+    alder: Alder!
+    soknadsfrist: Soknadsfrist
+    sykepengedager: Sykepengedager!
 }
 
 type GraphQLPerson {
-  aktorId: String!
-  arbeidsgiver(organisasjonsnummer: String!): GraphQLArbeidsgiver
-  arbeidsgivere: [GraphQLArbeidsgiver!]!
-  dodsdato: LocalDate
-  fodselsnummer: String!
-  inntektsgrunnlag: [GraphQLInntektsgrunnlag!]!
-  versjon: Int!
-  vilkarsgrunnlag(id: String!): [GraphQLVilkarsgrunnlag!]
-  vilkarsgrunnlaghistorikk: [GraphQLVilkarsgrunnlaghistorikk!]!
+    aktorId: String!
+    arbeidsgiver(organisasjonsnummer: String!): GraphQLArbeidsgiver
+    arbeidsgivere: [GraphQLArbeidsgiver!]!
+    dodsdato: LocalDate
+    fodselsnummer: String!
+    versjon: Int!
+    vilkarsgrunnlag(id: String!): [GraphQLVilkarsgrunnlag!]
+    vilkarsgrunnlaghistorikk: [GraphQLVilkarsgrunnlaghistorikk!]!
 }
 
 type GraphQLRefusjon {
-  arbeidsgiverperioder: [GraphQLRefusjonsperiode!]!
-  belop: Float
-  endringer: [GraphQLRefusjonsendring!]!
-  forsteFravaersdag: LocalDate
-  sisteRefusjonsdag: LocalDate
+    arbeidsgiverperioder: [GraphQLRefusjonsperiode!]!
+    belop: Float
+    endringer: [GraphQLRefusjonsendring!]!
+    forsteFravaersdag: LocalDate
+    sisteRefusjonsdag: LocalDate
 }
 
 type GraphQLRefusjonsendring {
-  belop: Float!
-  dato: LocalDate!
+    belop: Float!
+    dato: LocalDate!
 }
 
 type GraphQLRefusjonsperiode {
-  fom: LocalDate!
-  tom: LocalDate!
+    fom: LocalDate!
+    tom: LocalDate!
 }
 
 type GraphQLSammenligningsgrunnlag {
-  belop: Float!
-  inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]!
+    belop: Float!
+    inntekterFraAOrdningen: [GraphQLInntekterFraAOrdningen!]!
 }
 
 type GraphQLSimulering {
-  perioder: [GraphQLSimuleringsperiode!]!
-  totalbelop: Int!
+    perioder: [GraphQLSimuleringsperiode!]!
+    totalbelop: Int!
 }
 
 type GraphQLSimuleringsdetaljer {
-  antallSats: Int!
-  belop: Int!
-  faktiskFom: LocalDate!
-  faktiskTom: LocalDate!
-  klassekode: String!
-  klassekodeBeskrivelse: String!
-  konto: String!
-  refunderesOrgNr: String!
-  sats: Float!
-  tilbakeforing: Boolean!
-  typeSats: String!
-  uforegrad: Int!
-  utbetalingstype: String!
+    antallSats: Int!
+    belop: Int!
+    faktiskFom: LocalDate!
+    faktiskTom: LocalDate!
+    klassekode: String!
+    klassekodeBeskrivelse: String!
+    konto: String!
+    refunderesOrgNr: String!
+    sats: Float!
+    tilbakeforing: Boolean!
+    typeSats: String!
+    uforegrad: Int!
+    utbetalingstype: String!
 }
 
 type GraphQLSimuleringsperiode {
-  fom: LocalDate!
-  tom: LocalDate!
-  utbetalinger: [GraphQLSimuleringsutbetaling!]!
+    fom: LocalDate!
+    tom: LocalDate!
+    utbetalinger: [GraphQLSimuleringsutbetaling!]!
 }
 
 type GraphQLSimuleringsutbetaling {
-  detaljer: [GraphQLSimuleringsdetaljer!]!
-  feilkonto: Boolean!
-  forfall: LocalDate!
-  utbetalesTilId: String!
-  utbetalesTilNavn: String!
+    detaljer: [GraphQLSimuleringsdetaljer!]!
+    feilkonto: Boolean!
+    forfall: LocalDate!
+    utbetalesTilId: String!
+    utbetalesTilNavn: String!
 }
 
 type GraphQLSoknadArbeidsgiver implements GraphQLHendelse {
-  fom: LocalDate!
-  id: String!
-  rapportertDato: LocalDateTime!
-  sendtArbeidsgiver: LocalDateTime!
-  tom: LocalDate!
-  type: GraphQLHendelsetype!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    sendtArbeidsgiver: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
 }
 
 type GraphQLSoknadNav implements GraphQLHendelse {
-  fom: LocalDate!
-  id: String!
-  rapportertDato: LocalDateTime!
-  sendtNav: LocalDateTime!
-  tom: LocalDate!
-  type: GraphQLHendelsetype!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    sendtNav: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
 }
 
 type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
-  antallOpptjeningsdagerErMinst: Int!
-  avviksprosent: Float
-  grunnbelop: Int!
-  inntekter: [GraphQLArbeidsgiverinntekt!]!
-  omregnetArsinntekt: Float!
-  oppfyllerKravOmMedlemskap: Boolean
-  oppfyllerKravOmMinstelonn: Boolean!
-  oppfyllerKravOmOpptjening: Boolean!
-  opptjeningFra: LocalDate!
-  sammenligningsgrunnlag: Float
-  skjaeringstidspunkt: LocalDate!
-  sykepengegrunnlag: Float!
-  vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
+    antallOpptjeningsdagerErMinst: Int!
+    avviksprosent: Float
+    grunnbelop: Int!
+    inntekter: [GraphQLArbeidsgiverinntekt!]!
+    omregnetArsinntekt: Float!
+    oppfyllerKravOmMedlemskap: Boolean
+    oppfyllerKravOmMinstelonn: Boolean!
+    oppfyllerKravOmOpptjening: Boolean!
+    opptjeningFra: LocalDate!
+    sammenligningsgrunnlag: Float
+    skjaeringstidspunkt: LocalDate!
+    sykepengegrunnlag: Float!
+    vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type GraphQLSykdomsdagkilde {
-  id: UUID!
-  type: GraphQLSykdomsdagkildetype!
+    id: UUID!
+    type: GraphQLSykdomsdagkildetype!
 }
 
 type GraphQLSykmelding implements GraphQLHendelse {
-  fom: LocalDate!
-  id: String!
-  rapportertDato: LocalDateTime!
-  tom: LocalDate!
-  type: GraphQLHendelsetype!
+    fom: LocalDate!
+    id: String!
+    rapportertDato: LocalDateTime!
+    tom: LocalDate!
+    type: GraphQLHendelsetype!
 }
 
 type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
-  behandlingstype: GraphQLBehandlingstype!
-  erForkastet: Boolean!
-  fom: LocalDate!
-  id: UUID!
-  inntektstype: GraphQLInntektstype!
-  opprettet: LocalDateTime!
-  periodetype: GraphQLPeriodetype!
-  tidslinje: [GraphQLDag!]!
-  tom: LocalDate!
-  vedtaksperiodeId: UUID!
+    behandlingstype: GraphQLBehandlingstype!
+    erForkastet: Boolean!
+    fom: LocalDate!
+    id: UUID!
+    inntektstype: GraphQLInntektstype!
+    opprettet: LocalDateTime!
+    periodetype: GraphQLPeriodetype!
+    tidslinje: [GraphQLDag!]!
+    tom: LocalDate!
+    vedtaksperiodeId: UUID!
 }
 
 type GraphQLUtbetaling {
-  arbeidsgiverFagsystemId: String!
-  arbeidsgiverNettoBelop: Int!
-  arbeidsgiveroppdrag: GraphQLOppdrag
-  id: UUID!
-  personFagsystemId: String!
-  personNettoBelop: Int!
-  personoppdrag: GraphQLOppdrag
-  status: String! @deprecated(reason : "Burde bruke enum \"statusEnum\"")
-  statusEnum: GraphQLUtbetalingstatus!
-  type: String! @deprecated(reason : "Burde bruke enum \"typeEnum\"")
-  typeEnum: Utbetalingtype!
-  vurdering: GraphQLVurdering
+    arbeidsgiverFagsystemId: String!
+    arbeidsgiverNettoBelop: Int!
+    arbeidsgiveroppdrag: GraphQLOppdrag
+    id: UUID!
+    personFagsystemId: String!
+    personNettoBelop: Int!
+    personoppdrag: GraphQLOppdrag
+    status: String! @deprecated(reason: "Burde bruke enum \"statusEnum\"")
+    statusEnum: GraphQLUtbetalingstatus!
+    type: String! @deprecated(reason: "Burde bruke enum \"typeEnum\"")
+    typeEnum: Utbetalingtype!
+    vurdering: GraphQLVurdering
 }
 
 type GraphQLUtbetalingsinfo {
-  arbeidsgiverbelop: Int
-  inntekt: Int
-  personbelop: Int
-  refusjonsbelop: Int
-  totalGrad: Float
-  utbetaling: Int
+    arbeidsgiverbelop: Int
+    inntekt: Int
+    personbelop: Int
+    refusjonsbelop: Int
+    totalGrad: Float
+    utbetaling: Int
 }
 
 type GraphQLUtbetalingslinje {
-  dagsats: Int!
-  fom: LocalDate!
-  grad: Int!
-  tom: LocalDate!
+    dagsats: Int!
+    fom: LocalDate!
+    grad: Int!
+    tom: LocalDate!
 }
 
 type GraphQLVilkarsgrunnlaghistorikk {
-  grunnlag: [GraphQLVilkarsgrunnlag!]!
-  id: UUID!
+    grunnlag: [GraphQLVilkarsgrunnlag!]!
+    id: UUID!
 }
 
 type GraphQLVurdering {
-  automatisk: Boolean!
-  godkjent: Boolean!
-  ident: String!
-  tidsstempel: LocalDateTime!
+    automatisk: Boolean!
+    godkjent: Boolean!
+    ident: String!
+    tidsstempel: LocalDateTime!
 }
 
 "Query object"
 type Query {
-  person(fnr: String!): GraphQLPerson
+    person(fnr: String!): GraphQLPerson
 }
 
 type Soknadsfrist {
-  oppfylt: Boolean!
-  sendtNav: LocalDateTime!
-  soknadFom: LocalDate!
-  soknadTom: LocalDate!
+    oppfylt: Boolean!
+    sendtNav: LocalDateTime!
+    soknadFom: LocalDate!
+    soknadTom: LocalDate!
 }
 
 type Sykepengedager {
-  forbrukteSykedager: Int
-  gjenstaendeSykedager: Int
-  maksdato: LocalDate!
-  oppfylt: Boolean!
-  skjaeringstidspunkt: LocalDate!
+    forbrukteSykedager: Int
+    gjenstaendeSykedager: Int
+    maksdato: LocalDate!
+    oppfylt: Boolean!
+    skjaeringstidspunkt: LocalDate!
 }
 
 enum GraphQLBegrunnelse {
-  EgenmeldingUtenforArbeidsgiverperiode
-  EtterDodsdato
-  ManglerMedlemskap
-  ManglerOpptjening
-  MinimumInntekt
-  MinimumInntektOver67
-  MinimumSykdomsgrad
-  Over70
-  SykepengedagerOppbrukt
-  SykepengedagerOppbruktOver67
+    EgenmeldingUtenforArbeidsgiverperiode
+    EtterDodsdato
+    ManglerMedlemskap
+    ManglerOpptjening
+    MinimumInntekt
+    MinimumInntektOver67
+    MinimumSykdomsgrad
+    Over70
+    SykepengedagerOppbrukt
+    SykepengedagerOppbruktOver67
 }
 
 enum GraphQLBehandlingstype {
-  Behandlet
-  Uberegnet
-  Venter
-  VenterPaInformasjon
+    Behandlet
+    Uberegnet
+    Venter
+    VenterPaInformasjon
 }
 
 enum GraphQLHendelsetype {
-  Inntektsmelding
-  NySoknad
-  SendtSoknadArbeidsgiver
-  SendtSoknadNav
-  Ukjent
+    Inntektsmelding
+    NySoknad
+    SendtSoknadArbeidsgiver
+    SendtSoknadNav
+    Ukjent
 }
 
 enum GraphQLInntektskilde {
-  AOrdningen
-  IkkeRapportert
-  Infotrygd
-  Inntektsmelding
-  Saksbehandler
+    AOrdningen
+    IkkeRapportert
+    Infotrygd
+    Inntektsmelding
+    Saksbehandler
 }
 
 enum GraphQLInntektstype {
-  EnArbeidsgiver
-  FlereArbeidsgivere
+    EnArbeidsgiver
+    FlereArbeidsgivere
 }
 
 enum GraphQLPeriodetilstand {
-  AnnulleringFeilet
-  Annullert
-  Feilet
-  IngenUtbetaling
-  KunFerie
-  Oppgaver
-  RevurderingFeilet
-  TilAnnullering
-  TilInfotrygd
-  TilUtbetaling
-  Utbetalt
-  Venter
-  VenterPaKiling
+    AnnulleringFeilet
+    Annullert
+    Feilet
+    IngenUtbetaling
+    KunFerie
+    Oppgaver
+    RevurderingFeilet
+    TilAnnullering
+    TilInfotrygd
+    TilUtbetaling
+    Utbetalt
+    Venter
+    VenterPaKiling
 }
 
 enum GraphQLPeriodetype {
-  Forlengelse
-  Forstegangsbehandling
-  Infotrygdforlengelse
-  OvergangFraIt
+    Forlengelse
+    Forstegangsbehandling
+    Infotrygdforlengelse
+    OvergangFraIt
 }
 
 enum GraphQLSykdomsdagkildetype {
-  Inntektsmelding
-  Saksbehandler
-  Soknad
-  Sykmelding
-  Ukjent
+    Inntektsmelding
+    Saksbehandler
+    Soknad
+    Sykmelding
+    Ukjent
 }
 
 enum GraphQLSykdomsdagtype {
-  Arbeidsdag
-  Arbeidsgiverdag
-  Avslatt
-  Feriedag
-  ForeldetSykedag
-  FriskHelgedag
-  Permisjonsdag
-  SykHelgedag
-  Sykedag
-  Ubestemtdag
+    Arbeidsdag
+    Arbeidsgiverdag
+    Avslatt
+    Feriedag
+    ForeldetSykedag
+    FriskHelgedag
+    Permisjonsdag
+    SykHelgedag
+    Sykedag
+    Ubestemtdag
 }
 
 enum GraphQLUtbetalingsdagType {
-  Arbeidsdag
-  ArbeidsgiverperiodeDag
-  AvvistDag
-  Feriedag
-  ForeldetDag
-  Helgedag
-  NavDag
-  NavHelgDag
-  UkjentDag
+    Arbeidsdag
+    ArbeidsgiverperiodeDag
+    AvvistDag
+    Feriedag
+    ForeldetDag
+    Helgedag
+    NavDag
+    NavHelgDag
+    UkjentDag
 }
 
 enum GraphQLUtbetalingstatus {
-  Annullert
-  Forkastet
-  Godkjent
-  GodkjentUtenUtbetaling
-  IkkeGodkjent
-  Overfort
-  Sendt
-  Ubetalt
-  UtbetalingFeilet
-  Utbetalt
+    Annullert
+    Forkastet
+    Godkjent
+    GodkjentUtenUtbetaling
+    IkkeGodkjent
+    Overfort
+    Sendt
+    Ubetalt
+    UtbetalingFeilet
+    Utbetalt
 }
 
 enum GraphQLVilkarsgrunnlagtype {
-  Infotrygd
-  Spleis
-  Ukjent
+    Infotrygd
+    Spleis
+    Ukjent
 }
 
 enum Utbetalingtype {
-  ANNULLERING
-  ETTERUTBETALING
-  FERIEPENGER
-  REVURDERING
-  UTBETALING
+    ANNULLERING
+    ETTERUTBETALING
+    FERIEPENGER
+    REVURDERING
+    UTBETALING
 }
 
 scalar LocalDate
