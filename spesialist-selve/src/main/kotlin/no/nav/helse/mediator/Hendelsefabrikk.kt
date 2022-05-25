@@ -2,11 +2,32 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.SnapshotClient
-import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.*
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
+import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
+import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
+import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.modell.CommandContextDao
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.IHendelsefabrikk
+import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.VedtakDao
+import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -32,9 +53,6 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import org.slf4j.LoggerFactory
 
 internal class Hendelsefabrikk(
@@ -379,7 +397,7 @@ internal class Hendelsefabrikk(
             warningDao = warningDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
-            vedtakDao = vedtakDao,
+            personDao = personDao,
         )
     }
 
@@ -409,7 +427,7 @@ internal class Hendelsefabrikk(
             oppgaveMediator = oppgaveMediator,
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
-            vedtakDao = vedtakDao
+            personDao = personDao
         )
     }
 

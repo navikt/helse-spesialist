@@ -7,13 +7,13 @@ import no.nav.helse.mediator.IHendelseMediator
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
-import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -33,7 +33,7 @@ internal class VedtaksperiodeForkastet(
     oppgaveMediator: OppgaveMediator,
     snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
-    vedtakDao: VedtakDao,
+    personDao: PersonDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
@@ -44,7 +44,7 @@ internal class VedtaksperiodeForkastet(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             warningDao = warningDao,
-            vedtakDao = vedtakDao,
+            personDao = personDao,
         )
     )
 

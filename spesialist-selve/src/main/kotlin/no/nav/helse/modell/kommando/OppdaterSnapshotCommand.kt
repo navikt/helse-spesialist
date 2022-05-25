@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
+import java.util.UUID
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Warning
 import org.slf4j.LoggerFactory
-import java.util.*
-import no.nav.helse.modell.VedtakDao
 
 internal class OppdaterSnapshotCommand(
     private val snapshotClient: SnapshotClient,
@@ -14,16 +14,16 @@ internal class OppdaterSnapshotCommand(
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val warningDao: WarningDao,
-    private val vedtakDao: VedtakDao,
+    private val personDao: PersonDao,
 ) : Command {
 
     private companion object {
         private val log = LoggerFactory.getLogger(OppdaterSnapshotCommand::class.java)
+        private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (null == vedtakDao.finnVedtakId(vedtaksperiodeId)) return ignorer()
-        return oppdaterSnapshot()
+        return if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) oppdaterSnapshot() else ignorer()
     }
 
     private fun oppdaterSnapshot(): Boolean {
@@ -37,7 +37,8 @@ internal class OppdaterSnapshotCommand(
     }
 
     private fun ignorer(): Boolean {
-        log.info("kjenner ikke til vedtaksperiode $vedtaksperiodeId")
+        log.info("Kjenner ikke til person, henter ikke snapshot for vedtaksperiodeId=$vedtaksperiodeId (se sikkerlogg for detaljer.)")
+        sikkerlogger.info("Kjenner ikke til person fnr=$fødselsnummer, henter ikke snapshot for vedtaksperiodeId=$vedtaksperiodeId.")
         return true
     }
 }
