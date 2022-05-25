@@ -40,6 +40,7 @@ data class VilkarsgrunnlagSpleis(
     override val sammenligningsgrunnlag: Double?,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
+    val avviksprosent: Double?,
     val antallOpptjeningsdagerErMinst: Int,
     val grunnbelop: Int,
     val oppfyllerKravOmMedlemskap: Boolean?,
@@ -70,7 +71,8 @@ private fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
             oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
-            opptjeningFra = opptjeningFra
+            opptjeningFra = opptjeningFra,
+            avviksprosent = avviksprosent
         )
         is GraphQLInfotrygdVilkarsgrunnlag -> VilkarsgrunnlagInfotrygd(
             vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
