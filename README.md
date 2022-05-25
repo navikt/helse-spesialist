@@ -7,6 +7,10 @@ Backend for saksbehandling av sykepengesøknader
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
+## Bygging lokalt
+Vi pr nå avhengig av naisdevice for å bygge lokalt, pga graphql schema endepunktet i denne filen:
+```spesialist-selve/build.gradle.kts```
+
 ## Protip for å kjøre tester raskere
 Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt eks: 
 
