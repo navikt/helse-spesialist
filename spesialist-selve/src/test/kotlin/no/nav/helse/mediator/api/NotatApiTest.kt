@@ -2,7 +2,6 @@ package no.nav.helse.mediator.api
 
 import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.mockk.clearMocks
 import io.mockk.every
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class NotatApiTest: AbstractApiTest() {

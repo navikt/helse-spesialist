@@ -9,10 +9,11 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.objectMapper
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertNotNull
+
 
 internal class AutomatiseringCommandTest {
     private companion object {
@@ -63,11 +64,17 @@ internal class AutomatiseringCommandTest {
 
         assertTrue(command.execute(context))
 
-        val løsning = assertNotNull(context.meldinger()
+        val løsning = context.meldinger()
             .map(objectMapper::readTree)
             .filter { it["@event_name"].asText() == "behov" }
-            .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })
+            .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") }
 
-        assertTrue(løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue())
+        assertNotNull(løsning)
+        if (løsning != null) {
+            val automatiskBehandling: Boolean =
+                løsning["@løsning"]["Godkjenning"]["automatiskBehandling"].booleanValue()
+
+            assertTrue(automatiskBehandling)
+        }
     }
 }

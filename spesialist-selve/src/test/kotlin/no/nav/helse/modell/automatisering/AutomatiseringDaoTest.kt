@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFailsWith
 
 internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
 
@@ -88,7 +88,11 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
     fun `to automatiseringer på samme vedtaksperiode og samme hendelseID kræsjer`() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
 
-        val actualException = assertFailsWith<Exception>(block = { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) })
+        val actualException = assertThrows(
+            Exception::class.java,
+            {  automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) },
+            "Testfeil"
+        )
         assertEquals("Det kan bare finnes 1 aktiv automatisering. Klarer ikke opprette ny automatisering for vedtaksperiodeId $VEDTAKSPERIODE og hendelseId $HENDELSE_ID.", actualException.message)
 
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))

@@ -19,8 +19,8 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlinx.coroutines.runBlocking
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 
 internal class OverstyringApiTest : AbstractE2ETest() {
 

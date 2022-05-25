@@ -2,7 +2,6 @@ package no.nav.helse.mediator.api
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.mockk.clearMocks
 import io.mockk.every
@@ -19,9 +18,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random.Default.nextLong
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+
 
 @TestInstance(PER_CLASS)
 internal class LeggPåVentApiTest : AbstractApiTest() {

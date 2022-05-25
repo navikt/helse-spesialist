@@ -8,8 +8,8 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     private companion object {
@@ -79,8 +79,13 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
         assertAutomatisertLøsning()
         val vedtaksperiodeGodkjentEvent =
-            assertNotNull(testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull())
-        assertTrue(vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean())
+            testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull()
+        assertNotNull(vedtaksperiodeGodkjentEvent)
+        if(vedtaksperiodeGodkjentEvent != null) {
+            val vedtaksperiodeGodkjentEventBoolean: Boolean =
+                vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean()
+            assertTrue(vedtaksperiodeGodkjentEventBoolean)
+        }
     }
 
     @Test

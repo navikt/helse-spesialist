@@ -12,8 +12,8 @@ import no.nav.helse.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.oppgave.Oppgavetype
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 internal class OppgaveE2ETest: AbstractE2ETest() {
 

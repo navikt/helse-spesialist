@@ -1,10 +1,10 @@
 package no.nav.helse.person
 
 import no.nav.helse.DatabaseIntegrationTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 internal class PersonApiDaoTest : DatabaseIntegrationTest() {
 

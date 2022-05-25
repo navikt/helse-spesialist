@@ -2,15 +2,18 @@ package no.nav.helse.feilhåndtering
 
 import io.ktor.http.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFailsWith
 
 internal class ModellfeilTest {
     @Test
     fun testfeil() {
-        val exception = assertFailsWith<Testfeil> {
-            throw Testfeil()
-        }
+
+        val exception = assertThrows(
+            Testfeil::class.java,
+            {  throw Testfeil() },
+            "Testfeil"
+        )
         assertEquals("testmelding", exception.message)
         assertEquals(HttpStatusCode.NotFound, exception.httpkode)
 

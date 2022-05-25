@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.test.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotNull
 
 internal class SaksbehandlerløsningTest {
 
@@ -124,19 +124,24 @@ internal class SaksbehandlerløsningTest {
 
     private fun assertLøsning(godkjent: Boolean) {
         context.meldinger().also { meldinger ->
-            val løsning = assertNotNull(meldinger
+            val løsning = meldinger
                 .map(objectMapper::readTree)
                 .filter { it["@event_name"].asText() == "behov" }
-                .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") })
-            assertJsonEquals(GODKJENNINGSBEHOV_JSON, løsning)
-            val godkjenning = løsning.path("@løsning").path("Godkjenning")
-            assertTrue(godkjenning.path("godkjent").isBoolean)
-            assertEquals(godkjent, godkjenning.path("godkjent").booleanValue())
-            assertEquals(IDENT, godkjenning.path("saksbehandlerIdent").textValue())
-            assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(godkjenning.path("godkjenttidspunkt").textValue()))
-            assertTrue(godkjenning.path("årsak").isNull)
-            assertTrue(godkjenning.path("kommentar").isNull)
-            assertTrue(godkjenning.path("begrunnelser").isNull)
+                .firstOrNull { it["@løsning"].hasNonNull("Godkjenning") }
+
+            assertNotNull(løsning)
+            if (løsning != null) {
+                assertJsonEquals(GODKJENNINGSBEHOV_JSON, løsning)
+
+                val godkjenning = løsning.path("@løsning").path("Godkjenning")
+                assertTrue(godkjenning.path("godkjent").isBoolean)
+                assertEquals(godkjent, godkjenning.path("godkjent").booleanValue())
+                assertEquals(IDENT, godkjenning.path("saksbehandlerIdent").textValue())
+                assertEquals(GODKJENTTIDSPUNKT, LocalDateTime.parse(godkjenning.path("godkjenttidspunkt").textValue()))
+                assertTrue(godkjenning.path("årsak").isNull)
+                assertTrue(godkjenning.path("kommentar").isNull)
+                assertTrue(godkjenning.path("begrunnelser").isNull)
+            }
         }
     }
 

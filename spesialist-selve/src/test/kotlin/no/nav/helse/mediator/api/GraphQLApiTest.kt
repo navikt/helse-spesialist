@@ -60,11 +60,11 @@ import no.nav.helse.person.PersonApiDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import kotlin.test.assertEquals
 
 @TestInstance(Lifecycle.PER_CLASS)
 class GraphQLApiTest : AbstractApiTest() {

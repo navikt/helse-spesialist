@@ -13,10 +13,10 @@ import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.oppgave.OppgaveDto
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 internal class OverstyringE2ETest : AbstractE2ETest() {
 

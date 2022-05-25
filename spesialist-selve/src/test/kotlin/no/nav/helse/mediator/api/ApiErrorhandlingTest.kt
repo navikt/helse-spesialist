@@ -9,8 +9,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.testing.*
 import no.nav.helse.installErrorHandling
 import no.nav.helse.objectMapper
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 class ApiErrorhandlingTest {
 

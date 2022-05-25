@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class RevurderingE2ETest : AbstractE2ETest() {
 

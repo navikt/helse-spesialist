@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class FjernCarriageReturnsFraUtbetalingJsonTest : DatabaseIntegrationTest() {
     @BeforeEach

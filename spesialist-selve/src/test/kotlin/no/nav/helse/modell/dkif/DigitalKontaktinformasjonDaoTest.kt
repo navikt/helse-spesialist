@@ -4,10 +4,10 @@ import DatabaseIntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
 
@@ -22,8 +22,9 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
         digitalKontaktinformasjonDao.lagre(FNR, false, LocalDateTime.now())
         val erDigitalSvar = digitalKontaktinformasjonDao.erDigital(FNR)
 
-        assertNotNull(erDigitalSvar) {
-            assertFalse(it)
+        assertNotNull(erDigitalSvar)
+        if (erDigitalSvar != null){
+            assertFalse(erDigitalSvar)
         }
     }
 
@@ -32,8 +33,9 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
         digitalKontaktinformasjonDao.lagre(FNR, true, LocalDateTime.now())
         val erDigitalSvar = digitalKontaktinformasjonDao.erDigital(FNR)
 
-        assertNotNull(erDigitalSvar) {
-            assertTrue(it)
+        assertNotNull(erDigitalSvar)
+        if (erDigitalSvar != null){
+            assertTrue(erDigitalSvar)
         }
     }
 
@@ -42,15 +44,17 @@ internal class DigitalKontaktinformasjonDaoTest : DatabaseIntegrationTest() {
         digitalKontaktinformasjonDao.lagre(FNR, true, LocalDateTime.now())
         val erDigitalSvar = digitalKontaktinformasjonDao.erDigital(FNR)
 
-        assertNotNull(erDigitalSvar) {
-            assertTrue(it)
+        assertNotNull(erDigitalSvar)
+        if (erDigitalSvar != null){
+            assertTrue(erDigitalSvar)
         }
 
         digitalKontaktinformasjonDao.lagre(FNR, false, LocalDateTime.now())
         val erDigitalSvar2 = digitalKontaktinformasjonDao.erDigital(FNR)
 
-        assertNotNull(erDigitalSvar2) {
-            assertFalse(it)
+        assertNotNull(erDigitalSvar2)
+        if (erDigitalSvar2 != null){
+            assertFalse(erDigitalSvar2)
         }
     }
 

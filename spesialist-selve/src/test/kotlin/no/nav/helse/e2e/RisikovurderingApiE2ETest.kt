@@ -14,7 +14,7 @@ import no.nav.helse.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     private companion object {

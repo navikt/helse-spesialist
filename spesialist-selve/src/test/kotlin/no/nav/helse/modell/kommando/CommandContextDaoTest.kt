@@ -7,8 +7,8 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 
 internal class CommandContextDaoTest : DatabaseIntegrationTest() {
 

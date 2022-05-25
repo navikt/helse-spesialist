@@ -1,12 +1,13 @@
 package no.nav.helse.modell.gosysoppgaver
 
 import DatabaseIntegrationTest
+import graphql.Assert.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+
 
 internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
 
@@ -23,8 +24,9 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         )
         val harÅpneOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
 
-        assertNotNull(harÅpneOppgaver) {
-            assertEquals(1, it)
+        assertNotNull(harÅpneOppgaver)
+        if (harÅpneOppgaver != null) {
+            assertEquals(1, harÅpneOppgaver)
         }
     }
 
@@ -35,8 +37,9 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         )
         val harÅpneOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
 
-        assertNotNull(harÅpneOppgaver) {
-            assertEquals(0, it)
+        assertNotNull(harÅpneOppgaver)
+        if (harÅpneOppgaver != null) {
+            assertEquals(0, harÅpneOppgaver)
         }
     }
 
@@ -47,8 +50,9 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         )
         val harÅpneOppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
 
-        assertNotNull(harÅpneOppgaver) {
-            assertEquals(0, it)
+        assertNotNull(harÅpneOppgaver)
+        if (harÅpneOppgaver != null) {
+            assertEquals(0, harÅpneOppgaver)
         }
 
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
@@ -56,9 +60,11 @@ internal class ÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
         )
         val erDigitalSvar2 = åpneGosysOppgaverDao.harÅpneOppgaver(FNR)
 
-        assertNotNull(erDigitalSvar2) {
-            assertEquals(1, it)
+        assertNotNull(erDigitalSvar2)
+        if (erDigitalSvar2 != null) {
+            assertEquals(1, erDigitalSvar2)
         }
+
     }
 
     @Test

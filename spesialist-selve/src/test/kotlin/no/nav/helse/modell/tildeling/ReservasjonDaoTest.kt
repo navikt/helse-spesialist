@@ -13,7 +13,7 @@ import no.nav.helse.person.Kjønn
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 

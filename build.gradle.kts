@@ -65,9 +65,7 @@ allprojects {
         implementation("io.ktor:ktor-server-cors:$ktorVersion")
         implementation("io.ktor:ktor-server-call-id:$ktorVersion")
 
-        testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinTestVersion"){
-            exclude(group = "junit")
-        }
+
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testImplementation("io.ktor:ktor-client-mock-jvm:$ktorVersion")

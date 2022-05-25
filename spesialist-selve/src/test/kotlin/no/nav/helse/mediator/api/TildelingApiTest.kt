@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random.Default.nextLong
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @TestInstance(PER_CLASS)
 internal class TildelingApiTest : AbstractApiTest() {

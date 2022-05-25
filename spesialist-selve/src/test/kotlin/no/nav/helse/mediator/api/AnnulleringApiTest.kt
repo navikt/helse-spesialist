@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(PER_CLASS)
 internal class AnnulleringApiTest : AbstractApiTest() {

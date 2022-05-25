@@ -15,9 +15,9 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
 
 internal class OppdaterSnapshotCommandTest {
 
