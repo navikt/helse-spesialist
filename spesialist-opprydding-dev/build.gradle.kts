@@ -1,5 +1,6 @@
-val testcontainersVersion = "1.16.3"
+val testcontainersVersion = "1.17.1"
 val cloudSqlVersion = "1.4.4"
+val postgresqlVersion = "42.3.3"
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
@@ -10,7 +11,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
-    implementation("org.postgresql:postgresql:42.3.3")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
 
     testImplementation(project(":spesialist-felles"))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion") {

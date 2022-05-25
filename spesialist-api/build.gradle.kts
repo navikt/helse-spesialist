@@ -1,4 +1,4 @@
-val testcontainersVersion = "1.16.2"
+val testcontainersVersion = "1.17.1"
 
 dependencies {
     implementation(project(":spesialist-felles"))
