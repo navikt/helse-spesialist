@@ -17,7 +17,7 @@ internal class TrengerTotrinnsvurderingCommand(
     override fun execute(context: CommandContext): Boolean {
 
         if (harMedlemskapsVarsel() || harOppgaveMedEndring()) {
-            logg.info("Vedtaksperioden: " + vedtaksperiodeId + " setter trenger totrinnsvurdering")
+            logg.info("Vedtaksperioden: $vedtaksperiodeId setter trenger totrinnsvurdering")
             oppgaveDao.setTrengerTotrinnsvurdering(vedtaksperiodeId)
         }
 
@@ -29,7 +29,7 @@ internal class TrengerTotrinnsvurderingCommand(
 
         val harMedlemskapsVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
 
-        logg.info("Vedtaksperioden: " + vedtaksperiodeId + " harMedlemskapsVarsel: $harMedlemskapsVarsel")
+        logg.info("Vedtaksperioden: $vedtaksperiodeId harMedlemskapsVarsel: $harMedlemskapsVarsel")
 
         return harMedlemskapsVarsel
     }
@@ -38,7 +38,7 @@ internal class TrengerTotrinnsvurderingCommand(
 
         val harOppgaveMedEndring = oppgaveDao.harOppgaveMedEndring(vedtaksperiodeId)
 
-        logg.info("Vedtaksperioden: " + vedtaksperiodeId + " harOppgaveMedEndring: $harOppgaveMedEndring")
+        logg.info("Vedtaksperioden: $vedtaksperiodeId harOppgaveMedEndring: $harOppgaveMedEndring")
 
         return harOppgaveMedEndring
     }
