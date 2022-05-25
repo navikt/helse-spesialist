@@ -234,12 +234,14 @@ internal class HendelseMediator(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         context: MessageContext
-    ) {
-        utfør(
-            hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
-            fødselsnummer,
-            context
-        )
+π    ) {
+        val hendelse = hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson())
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
+            log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
+            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
+            return
+        }
+        return utfør(hendelse, context)
     }
 
     override fun vedtaksperiodeForkastet(
@@ -249,11 +251,12 @@ internal class HendelseMediator(
         fødselsnummer: String,
         context: MessageContext
     ) {
-        utfør(
-            vedtaksperiodeId,
-            hendelsefabrikk.vedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson()),
-            context
-        )
+        val hendelse = hendelsefabrikk.vedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson())
+        if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) {
+            log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
+            return
+        }
+        return utfør(hendelse, context)
     }
 
     override fun godkjenningsbehov(
@@ -586,19 +589,6 @@ internal class HendelseMediator(
     private fun nyContext(hendelse: Hendelse, contextId: UUID) = CommandContext(contextId).apply {
         hendelseDao.opprett(hendelse)
         opprett(commandContextDao, hendelse)
-    }
-
-    private fun utfør(hendelse: Hendelse, fødselsnummer: String, messageContext: MessageContext) {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
-            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
-            return
-        }
-        return utfør(hendelse, messageContext)
-    }
-    private fun utfør(vedtaksperiodeId: UUID, hendelse: Hendelse, messageContext: MessageContext) {
-        if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) return log.info("ignorerer hendelseId=${hendelse.id} fordi vi ikke kjenner til $vedtaksperiodeId")
-        return utfør(hendelse, messageContext)
     }
 
     private fun utfør(fødselsnummer: String, hendelse: Hendelse, messageContext: MessageContext) {
