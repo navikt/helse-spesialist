@@ -17,11 +17,11 @@ import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkType
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TotrinnsvurderingApiTest : AbstractApiTest() {

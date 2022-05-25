@@ -9,7 +9,7 @@ import no.nav.helse.person.Kjønn
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 

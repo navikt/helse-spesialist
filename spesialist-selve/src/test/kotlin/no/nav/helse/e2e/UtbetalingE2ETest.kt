@@ -10,11 +10,12 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+
 
 internal class UtbetalingE2ETest : AbstractE2ETest() {
 

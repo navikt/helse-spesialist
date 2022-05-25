@@ -6,10 +6,12 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import java.time.LocalDateTime
+import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class TildelingDaoTest : DatabaseIntegrationTest() {
 

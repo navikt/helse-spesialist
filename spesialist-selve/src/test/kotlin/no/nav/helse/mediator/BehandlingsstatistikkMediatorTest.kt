@@ -11,9 +11,9 @@ import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkType
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
 import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 internal class BehandlingsstatistikkMediatorTest {
     val behandlingsstatistikkDao = mockk<BehandlingsstatistikkDao>()

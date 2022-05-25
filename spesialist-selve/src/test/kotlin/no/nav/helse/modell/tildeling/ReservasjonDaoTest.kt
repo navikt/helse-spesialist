@@ -14,6 +14,11 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import java.time.LocalDate
+import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 
 internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
 

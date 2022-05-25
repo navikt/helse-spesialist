@@ -9,9 +9,9 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
@@ -59,11 +59,13 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
         utbetalingDao.findUtbetalinger(FNR).find { it.arbeidsgiveroppdrag!!.linjer.size == 1 }.let {
             assertNotNull(it)
-            assertEquals(listOf(UtbetalingDao.UtbetalingDto.OppdragDto.UtbetalingLinje(
-                fom = 1.juli(),
-                tom = 31.juli(),
-                totalbeløp = null
-            )), it.arbeidsgiveroppdrag!!.linjer)
+            if (it != null) {
+                assertEquals(listOf(UtbetalingDao.UtbetalingDto.OppdragDto.UtbetalingLinje(
+                    fom = 1.juli(),
+                    tom = 31.juli(),
+                    totalbeløp = null
+                )), it.arbeidsgiveroppdrag!!.linjer)
+            }
         }
     }
 

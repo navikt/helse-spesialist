@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
 
 internal class WarningDaoTest : DatabaseIntegrationTest() {
     @Test

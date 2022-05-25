@@ -8,7 +8,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
     private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
