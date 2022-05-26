@@ -1,21 +1,11 @@
 package no.nav.helse.mediator.api.graphql.schema
 
-import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.YearMonth
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektskilde
-import no.nav.helse.mediator.graphql.hentsnapshot.*
-
-data class Inntektsgrunnlag(
-    val avviksprosent: Double?,
-    val grunnbelop: Int,
-    val inntekter: List<Arbeidsgiverinntekt>,
-    val maksUtbetalingPerDag: Double?,
-    val omregnetArsinntekt: Double?,
-    val oppfyllerKravOmMinstelonn: Boolean?,
-    val sammenligningsgrunnlag: Double?,
-    val skjaeringstidspunkt: LocalDate,
-    val sykepengegrunnlag: Double?
-)
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSammenligningsgrunnlag
 
 data class Arbeidsgiverinntekt(
     val arbeidsgiver: String,
@@ -49,27 +39,7 @@ enum class Inntektskilde {
     IKKE_RAPPORTERT
 }
 
-internal fun GraphQLInntektsgrunnlag.tilInntektsgrunnlag(): Inntektsgrunnlag =
-    Inntektsgrunnlag(
-        avviksprosent = avviksprosent,
-        grunnbelop = grunnbelop,
-        inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
-        maksUtbetalingPerDag = maksUtbetalingPerDag,
-        omregnetArsinntekt = omregnetArsinntekt,
-        oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
-        sammenligningsgrunnlag = sammenligningsgrunnlag,
-        skjaeringstidspunkt = skjaeringstidspunkt,
-        sykepengegrunnlag = sykepengegrunnlag
-    )
-
 internal fun GraphQLArbeidsgiverinntekt.tilArbeidsgiverinntekt(): Arbeidsgiverinntekt =
-    Arbeidsgiverinntekt(
-        arbeidsgiver = arbeidsgiver,
-        omregnetArsinntekt = omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
-        sammenligningsgrunnlag = sammenligningsgrunnlag?.tilSammenligningsgrunnlag()
-    )
-
-internal fun GraphQLArbeidsgiverinntekt2.tilArbeidsgiverinntekt(): Arbeidsgiverinntekt =
     Arbeidsgiverinntekt(
         arbeidsgiver = arbeidsgiver,
         omregnetArsinntekt = omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
