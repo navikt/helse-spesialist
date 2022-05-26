@@ -278,7 +278,6 @@ class GraphQLApiTest : AbstractApiTest() {
         arbeidsgivere = listOf(enArbeidsgiver()),
         dodsdato = null,
         fodselsnummer = fødselsnummer,
-        inntektsgrunnlag = emptyList(),
         versjon = 1,
         vilkarsgrunnlaghistorikk = emptyList()
     )

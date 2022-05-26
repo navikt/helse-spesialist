@@ -27,7 +27,6 @@ internal class OppdaterSnapshotCommandTest {
             arbeidsgivere = emptyList(),
             dodsdato = null,
             fodselsnummer = FNR,
-            inntektsgrunnlag = emptyList(),
             versjon = 1,
             vilkarsgrunnlaghistorikk = emptyList()
         )

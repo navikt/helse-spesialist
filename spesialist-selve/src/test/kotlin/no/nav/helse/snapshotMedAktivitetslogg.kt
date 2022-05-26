@@ -117,7 +117,6 @@ fun snapshot(
                     )
                 ),
                 dodsdato = null,
-                inntektsgrunnlag = emptyList(),
                 vilkarsgrunnlaghistorikk = emptyList(),
             )
         )

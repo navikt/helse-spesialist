@@ -222,35 +222,6 @@ query HentSnapshot($fnr: String!) {
         },
         dodsdato,
         fodselsnummer,
-        inntektsgrunnlag {
-            avviksprosent,
-            grunnbelop,
-            inntekter {
-                arbeidsgiver,
-                omregnetArsinntekt {
-                    belop,
-                    inntekterFraAOrdningen {
-                        maned,
-                        sum
-                    },
-                    kilde,
-                    manedsbelop
-                },
-                sammenligningsgrunnlag {
-                    belop,
-                    inntekterFraAOrdningen {
-                        maned,
-                        sum
-                    }
-                }
-            },
-            maksUtbetalingPerDag,
-            omregnetArsinntekt,
-            oppfyllerKravOmMinstelonn,
-            sammenligningsgrunnlag,
-            skjaeringstidspunkt,
-            sykepengegrunnlag
-        },
         versjon,
         vilkarsgrunnlaghistorikk {
             id,

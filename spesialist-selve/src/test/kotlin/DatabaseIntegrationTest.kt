@@ -396,7 +396,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                             )
                         )
                     ),
-                    inntektsgrunnlag = emptyList(),
                     dodsdato = null,
                     vilkarsgrunnlaghistorikk = emptyList()
                 )

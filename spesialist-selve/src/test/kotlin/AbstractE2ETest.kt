@@ -1170,7 +1170,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                         )
                     ),
                     dodsdato = null,
-                    inntektsgrunnlag = emptyList(),
                     vilkarsgrunnlaghistorikk = emptyList(),
                 )
             )

@@ -237,7 +237,6 @@ private val enPerson = GraphQLPerson(
     arbeidsgivere = listOf(enArbeidsgiver()),
     dodsdato = null,
     fodselsnummer = "01017012345",
-    inntektsgrunnlag = emptyList(),
     versjon = 1,
     vilkarsgrunnlaghistorikk = emptyList()
 )
