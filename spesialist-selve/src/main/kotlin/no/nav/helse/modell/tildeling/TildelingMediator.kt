@@ -5,6 +5,9 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import java.util.*
+import org.slf4j.LoggerFactory
+
+private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal class TildelingMediator(
     private val saksbehandlerDao: SaksbehandlerDao,
@@ -41,6 +44,7 @@ internal class TildelingMediator(
     internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandler_oid: UUID?) {
         fjernTildeling(oppgaveId)
         if(saksbehandler_oid != null) {
+            sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler ")
             tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandler_oid)
         }
     }

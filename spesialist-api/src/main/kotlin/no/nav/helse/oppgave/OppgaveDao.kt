@@ -203,8 +203,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         erReturOppgave: Boolean,
         tidligereSaksbehandlerOID: UUID
     ) =
-        """
-            UPDATE oppgave
+        """ UPDATE oppgave
             SET er_beslutter_oppgave=:er_beslutter_oppgave, er_retur_oppgave=:er_retur_oppgave, tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
             WHERE id=:oppgave_id
         """.update(

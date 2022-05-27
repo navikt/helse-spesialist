@@ -17,6 +17,10 @@ import no.nav.helse.notat.NotatMediator
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkType
+import org.slf4j.LoggerFactory
+
+private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
+private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal fun Route.totrinnsvurderingApi(
     oppgaveMediator: OppgaveMediator,
@@ -26,8 +30,10 @@ internal fun Route.totrinnsvurderingApi(
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
-
         val saksbehandlerOid = getSaksbehandlerOid()
+
+        sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
+
         val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(totrinnsvurdering.oppgavereferanse)
         tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, tidligereSaksbehandlerOid)
 
@@ -39,6 +45,8 @@ internal fun Route.totrinnsvurderingApi(
         )
         periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING, saksbehandlerOid, totrinnsvurdering.periodeId)
 
+        log.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendt til godkjenning")
+
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
@@ -46,6 +54,8 @@ internal fun Route.totrinnsvurderingApi(
         val retur = call.receive<TotrinnsvurderingReturDto>()
 
         val saksbehandlerOid = getSaksbehandlerOid()
+        sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $saksbehandlerOid")
+
         val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse)
         tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid)
 
@@ -58,6 +68,8 @@ internal fun Route.totrinnsvurderingApi(
 
         val notatId = retur.notat?.let { notatMediator.lagreForOppgaveId(retur.oppgavereferanse, it, saksbehandlerOid) }
         periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, saksbehandlerOid, retur.periodeId, notatId?.toInt())
+
+        log.info("OppgaveId ${retur.oppgavereferanse} sendt i retur")
 
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
