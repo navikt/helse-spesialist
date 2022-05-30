@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.notat.NotatType
 import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -57,7 +58,7 @@ internal class NotatApiTest: AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            notatMediator.lagre(UUID.fromString(vedtaksperiodeId1), "en-tekst", SAKSBEHANDLER_OID)
+            notatMediator.lagre(UUID.fromString(vedtaksperiodeId1), "en-tekst", SAKSBEHANDLER_OID, NotatType.PaaVent)
         }
     }
 
@@ -125,7 +126,8 @@ internal class NotatApiTest: AbstractApiTest() {
                 saksbehandlerEpost = "noen@example.com",
                 vedtaksperiodeId = periode_1_id,
                 feilregistrert = false,
-                feilregistrert_tidspunkt = null)),
+                feilregistrert_tidspunkt = null,
+                type=NotatType.PaaVent)),
             periode_2_id to listOf(NotatDto(
                 id = 2,
                 tekst = "sup?",
@@ -135,7 +137,9 @@ internal class NotatApiTest: AbstractApiTest() {
                 saksbehandlerEpost = "noen@example.com",
                 vedtaksperiodeId = periode_2_id,
                 feilregistrert = false,
-                feilregistrert_tidspunkt = null))
+                feilregistrert_tidspunkt = null,
+                type=NotatType.PaaVent
+            ))
         )
         val response = client.prepareGet("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
             authentication(SAKSBEHANDLER_OID)

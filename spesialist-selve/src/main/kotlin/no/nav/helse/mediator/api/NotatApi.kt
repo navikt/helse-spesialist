@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.notat.NotatMediator
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.notat.NotatType
 
 private val log = LoggerFactory.getLogger("NotatApi")
 
@@ -33,7 +34,7 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
             return@post
         }
         withContext(Dispatchers.IO) {
-            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandler_oid)
+            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandler_oid, NotatType.PaaVent)
         }
         call.respond(HttpStatusCode.OK)
     }

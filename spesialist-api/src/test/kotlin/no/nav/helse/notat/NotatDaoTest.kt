@@ -32,6 +32,19 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `notater defaulter til type Generelt`() {
+        nyVedtaksperiode()
+        val oid = saksbehandler()
+        val vedtaksperiodeId = PERIODE.first
+
+        notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
+
+        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+
+        assertEquals(NotatType.Generelt, notater[vedtaksperiodeId]?.get(0)?.type)
+    }
+
+    @Test
     fun `lagre notat`() {
         nyVedtaksperiode()
         val oid = saksbehandler()
@@ -41,6 +54,18 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
 
         assertEquals(1, rowsAffected)
     }
+
+    @Test
+    fun `lagre påvent-notat`() {
+        nyVedtaksperiode()
+        val oid = saksbehandler()
+        val vedtaksperiodeId = PERIODE.first
+
+        notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid, NotatType.PaaVent)
+
+        val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
+
+        assertEquals(NotatType.PaaVent, notater[vedtaksperiodeId]?.get(0)?.type) }
 
     @Test
     fun `feilregistrer notat`() {

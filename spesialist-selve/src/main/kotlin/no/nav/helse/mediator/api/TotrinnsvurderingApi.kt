@@ -14,6 +14,7 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.notat.NotatMediator
+import no.nav.helse.notat.NotatType
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkType
@@ -66,7 +67,7 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        val notatId = retur.notat?.let { notatMediator.lagreForOppgaveId(retur.oppgavereferanse, it, saksbehandlerOid) }
+        val notatId = retur.notat?.let { notatMediator.lagreForOppgaveId(retur.oppgavereferanse, it, saksbehandlerOid, NotatType.Retur) }
         periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, saksbehandlerOid, retur.periodeId, notatId?.toInt())
 
         log.info("OppgaveId ${retur.oppgavereferanse} sendt i retur")

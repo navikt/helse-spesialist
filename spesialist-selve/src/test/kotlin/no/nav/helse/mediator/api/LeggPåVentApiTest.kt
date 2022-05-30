@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
+import no.nav.helse.notat.NotatMediator
+import no.nav.helse.notat.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random.Default.nextLong
@@ -29,22 +31,24 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
     private lateinit var leggPåVentMediator: LeggPåVentMediator
+    private lateinit var notatMediator: NotatMediator
 
     @BeforeAll
     fun setupTildeling() {
         leggPåVentMediator = mockk(relaxed = true)
+        notatMediator = mockk(relaxed = true)
         setupServer {
-            leggPåVentApi(leggPåVentMediator)
+            leggPåVentApi(leggPåVentMediator, notatMediator)
         }
     }
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(leggPåVentMediator)
+        clearMocks(leggPåVentMediator, notatMediator)
     }
 
     @Test
-    fun `kan legge en oppgave på vent`() {
+    fun `kan legge en oppgave på vent uten notat`() {
         val oppgavereferanse = nextLong()
         val response = runBlocking {
             client.preparePost("/api/leggpaavent/${oppgavereferanse}") {
@@ -58,6 +62,33 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
             leggPåVentMediator.leggOppgavePåVent(oppgavereferanse)
+        }
+        verify(exactly = 0) {
+            notatMediator.lagreForOppgaveId(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `kan legge en oppgave på vent med notat`() {
+        val oppgavereferanse = nextLong()
+        val notattekst = "en-tekst"
+        val response = runBlocking {
+            client.preparePost("/api/leggpaavent/${oppgavereferanse}") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(mapOf(
+                    "tekst" to notattekst,
+                ))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
+        }
+
+        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
+        verify(exactly = 1) {
+            leggPåVentMediator.leggOppgavePåVent(oppgavereferanse)
+        }
+        verify(exactly = 1) {
+            notatMediator.lagreForOppgaveId(oppgavereferanse, notattekst, SAKSBEHANDLER_OID, NotatType.PaaVent)
         }
     }
 

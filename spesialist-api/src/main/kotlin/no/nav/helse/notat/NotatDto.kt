@@ -8,6 +8,7 @@ import java.util.*
 data class NotatDto(
     val id: Int,
     val tekst: String,
+    val type: NotatType,
     val opprettet: LocalDateTime,
     val saksbehandlerOid: UUID,
     val saksbehandlerNavn: String,
@@ -16,3 +17,9 @@ data class NotatDto(
     val feilregistrert: Boolean,
     val feilregistrert_tidspunkt: LocalDateTime?
 )
+
+enum class NotatType {
+    Retur,
+    Generelt,
+    PaaVent
+}

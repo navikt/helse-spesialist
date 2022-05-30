@@ -12,11 +12,11 @@ class NotatMediator(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    fun lagre(vedtaksperiodeId: UUID, tekst: String, saksbehandler_oid: UUID) =
-        notatDao.opprettNotat(vedtaksperiodeId, tekst, saksbehandler_oid)
+    fun lagre(vedtaksperiodeId: UUID, tekst: String, saksbehandler_oid: UUID, notatType: NotatType = NotatType.Generelt) =
+        notatDao.opprettNotat(vedtaksperiodeId, tekst, saksbehandler_oid, notatType)
 
-    fun lagreForOppgaveId(oppgaveId: Long, tekst: String, saksbehandler_oid: UUID) =
-        notatDao.opprettNotatForOppgaveId(oppgaveId, tekst, saksbehandler_oid)
+    fun lagreForOppgaveId(oppgaveId: Long, tekst: String, saksbehandler_oid: UUID, notatType: NotatType = NotatType.Generelt) =
+        notatDao.opprettNotatForOppgaveId(oppgaveId, tekst, saksbehandler_oid, notatType)
 
     fun finn(vedtaksperiodeIds: List<UUID>) =
         notatDao.finnNotater(vedtaksperiodeIds)

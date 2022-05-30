@@ -13,6 +13,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.notat.NotatMediator
+import no.nav.helse.notat.NotatType
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
@@ -125,7 +126,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             )
         }
         verify(exactly = 1) { periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, SAKSBEHANDLER_OID, returDtoUtenNotat.periodeId, null) }
-        verify(exactly = 0) { notatMediator.lagreForOppgaveId(any(), any(), any()) }
+        verify(exactly = 0) { notatMediator.lagreForOppgaveId(any(), any(), any(), any()) }
 
         assertEquals(HttpStatusCode.OK, response.status)
     }
@@ -159,7 +160,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             notatMediator.lagreForOppgaveId(
                 returDtoMedNotat.oppgavereferanse,
                 returDtoMedNotat.notat!!,
-                SAKSBEHANDLER_OID
+                SAKSBEHANDLER_OID,
+                NotatType.Retur
             )
         }
         verify(exactly = 1) { periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, SAKSBEHANDLER_OID, returDtoMedNotat.periodeId, any()) }

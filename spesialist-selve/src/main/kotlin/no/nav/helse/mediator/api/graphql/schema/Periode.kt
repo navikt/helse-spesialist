@@ -18,6 +18,7 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.notat.NotatDao
+import no.nav.helse.notat.NotatType
 import no.nav.helse.objectMapper
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
@@ -157,7 +158,8 @@ data class Notat(
     val saksbehandlerEpost: String,
     val vedtaksperiodeId: UUID,
     val feilregistrert: Boolean,
-    val feilregistrert_tidspunkt: LocalDateTime?
+    val feilregistrert_tidspunkt: LocalDateTime?,
+    val type: NotatType
 )
 
 data class PeriodeHistorikkElement(
@@ -308,6 +310,7 @@ data class BeregnetPeriode(
             vedtaksperiodeId = it.vedtaksperiodeId.toString(),
             feilregistrert = it.feilregistrert,
             feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
+            type = it.type
         )
     }
 

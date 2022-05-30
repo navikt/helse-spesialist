@@ -10,32 +10,35 @@ import javax.sql.DataSource
 
 class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
-    fun opprettNotat(vedtaksperiodeId: UUID, tekst: String, saksbehandler_oid: UUID) =
-        """ INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid)
-            VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid);
+    fun opprettNotat(vedtaksperiodeId: UUID, tekst: String, saksbehandler_oid: UUID, type: NotatType = NotatType.Generelt) =
+        """ INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
+            VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid, CAST(:type as notattype));
         """.update(
             mapOf(
                 "vedtaksperiode_id" to vedtaksperiodeId,
                 "tekst" to tekst,
-                "saksbehandler_oid" to saksbehandler_oid
+                "saksbehandler_oid" to saksbehandler_oid,
+                "type" to type.name
             )
         )
 
-    fun opprettNotatForOppgaveId(oppgaveId: Long, tekst: String, saksbehandler_oid: UUID) =
-        """ INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid)
+    fun opprettNotatForOppgaveId(oppgaveId: Long, tekst: String, saksbehandler_oid: UUID, type: NotatType = NotatType.Generelt) =
+        """ INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type)
             VALUES (
                 (SELECT v.vedtaksperiode_id 
                     FROM vedtak v 
                     INNER JOIN oppgave o on v.id = o.vedtak_ref 
                     WHERE o.id = :oppgave_id), 
                 :tekst, 
-                :saksbehandler_oid
+                :saksbehandler_oid,
+                CAST(:type as notattype)
             );
         """.updateAndReturnGeneratedKey(
             mapOf(
                 "oppgave_id" to oppgaveId,
                 "tekst" to tekst,
-                "saksbehandler_oid" to saksbehandler_oid
+                "saksbehandler_oid" to saksbehandler_oid,
+                "type" to type.name
             )
         )
 
@@ -84,6 +87,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
             feilregistrert = it.boolean("feilregistrert"),
             feilregistrert_tidspunkt = it.localDateTimeOrNull("feilregistrert_tidspunkt"),
+            type = NotatType.valueOf(it.string("type"))
         )
     }
 }

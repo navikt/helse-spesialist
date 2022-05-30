@@ -314,7 +314,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     tildelingApi(tildelingMediator)
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
-                    leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator))
+                    leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator), notatMediator)
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
                     totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
