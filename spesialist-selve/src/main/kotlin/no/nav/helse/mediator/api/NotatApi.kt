@@ -25,16 +25,16 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
         val notat = call.receive<NotatApiDto>()
 
         val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-        val saksbehandler_oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+        val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
 
         val vedtaksperiodeId = UUID.fromString(call.parameters["vedtaksperiode_id"])
         if (vedtaksperiodeId == null) {
             call.respond(HttpStatusCode.BadRequest, "vedtaksperiode_id er ikke oppgitt")
-            log.warn("POST - vedtaksperiode_id er null i path parameter. Saksbehandler OID: $saksbehandler_oid")
+            log.warn("POST - vedtaksperiode_id er null i path parameter. Saksbehandler OID: $saksbehandlerOid")
             return@post
         }
         withContext(Dispatchers.IO) {
-            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandler_oid, NotatType.PaaVent)
+            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandlerOid, notat.type ?: NotatType.PaaVent)
         }
         call.respond(HttpStatusCode.OK)
     }
@@ -80,6 +80,7 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
 }
 
 data class NotatApiDto(
-    val tekst: String
+    val tekst: String,
+    val type: NotatType?
 )
 
