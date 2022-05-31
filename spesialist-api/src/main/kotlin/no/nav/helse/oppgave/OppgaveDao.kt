@@ -312,14 +312,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             @Language("PostgreSQL")
             val query =
                 """ SELECT EXISTS (
-                SELECT o.id
-                   
-                FROM oppgave o
-                    INNER JOIN vedtak v ON o.vedtak_ref = v.id
-                    INNER JOIN reserver_person rp ON v.person_ref = rp.person_ref
-                
-                WHERE v.vedtaksperiode_id = ?)
-            """
+                        SELECT o.id
+                        FROM oppgave o
+                        INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                        INNER JOIN reserver_person rp ON v.person_ref = rp.person_ref
+                        WHERE v.vedtaksperiode_id = ?
+                    )
+                """
             session.run(
                 queryOf(
                     query,
