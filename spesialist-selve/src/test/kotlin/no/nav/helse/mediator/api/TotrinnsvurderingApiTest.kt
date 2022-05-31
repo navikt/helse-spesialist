@@ -125,7 +125,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 any()
             )
         }
-        verify(exactly = 1) { periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, SAKSBEHANDLER_OID, returDtoUtenNotat.periodeId, null) }
         verify(exactly = 0) { notatMediator.lagreForOppgaveId(any(), any(), any(), any()) }
 
         assertEquals(HttpStatusCode.OK, response.status)
@@ -164,7 +163,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 NotatType.Retur
             )
         }
-        verify(exactly = 1) { periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, SAKSBEHANDLER_OID, returDtoMedNotat.periodeId, any()) }
 
         assertEquals(HttpStatusCode.OK, response.status)
     }
