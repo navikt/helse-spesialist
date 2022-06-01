@@ -9,9 +9,7 @@ internal class LeggPåVentMediator(
     private val hendelseMediator: HendelseMediator
 ) {
 
-    internal fun leggOppgavePåVent(
-        oppgaveId: Long
-    ) {
+    internal fun leggOppgavePåVent(oppgaveId: Long) {
         tildelingDao.tildelingForOppgave(oppgaveId) ?: throw OppgaveIkkeTildelt(oppgaveId)
         tildelingDao.leggOppgavePåVent(oppgaveId)
         hendelseMediator.leggOppgavePåVent(oppgaveId)
