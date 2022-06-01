@@ -30,12 +30,16 @@ internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator, nota
                 return@post
             }
 
-            val notat = call.receive<NotatApiDto>()
-            val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-            val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+            try {
+                val notat = call.receive<NotatApiDto>()
+                val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+                val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+                notatMediator.lagreForOppgaveId(oppgaveId, notat.tekst, saksbehandlerOid, notat.type)
+            } catch (e: Exception) {
+                log.warn("Feil i lagring av notat for leggpåvent", e)
+            }
 
             withContext(Dispatchers.IO) {
-                notatMediator.lagreForOppgaveId(oppgaveId, notat.tekst, saksbehandlerOid, notat.type)
                 leggPåVentMediator.leggOppgavePåVent(oppgaveId)
             }
             call.respond(HttpStatusCode.OK)
