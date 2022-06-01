@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
-import io.ktor.server.request.receiveOrNull
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import no.nav.helse.notat.NotatMediator
-import no.nav.helse.notat.NotatType
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("LeggPåVentApi")
@@ -31,14 +30,10 @@ internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator, nota
                 return@post
             }
 
-            try {
-                val notat = call.receiveOrNull<NotatApiDto>()
-                if (notat != null) {
-                    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-                    val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-                    notatMediator.lagreForOppgaveId(oppgaveId, notat.tekst, saksbehandlerOid, NotatType.PaaVent)
-                }
-            } catch (_: Exception) {}
+            val notat = call.receive<NotatApiDto>()
+            val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+            val saksbehandlerOid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
+            notatMediator.lagreForOppgaveId(oppgaveId, notat.tekst, saksbehandlerOid, notat.type)
 
             withContext(Dispatchers.IO) {
                 leggPåVentMediator.leggOppgavePåVent(oppgaveId)

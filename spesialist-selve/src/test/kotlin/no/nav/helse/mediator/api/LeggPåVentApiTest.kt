@@ -48,27 +48,6 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun `kan legge en oppgave på vent uten notat`() {
-        val oppgavereferanse = nextLong()
-        val response = runBlocking {
-            client.preparePost("/api/leggpaavent/${oppgavereferanse}") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(objectMapper.createObjectNode())
-                authentication(SAKSBEHANDLER_OID)
-            }.execute()
-        }
-
-        assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
-        verify(exactly = 1) {
-            leggPåVentMediator.leggOppgavePåVent(oppgavereferanse)
-        }
-        verify(exactly = 0) {
-            notatMediator.lagreForOppgaveId(any(), any(), any(), any())
-        }
-    }
-
-    @Test
     fun `kan legge en oppgave på vent med notat`() {
         val oppgavereferanse = nextLong()
         val notattekst = "en-tekst"
@@ -78,6 +57,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
                 accept(ContentType.Application.Json)
                 setBody(mapOf(
                     "tekst" to notattekst,
+                    "type" to NotatType.PaaVent.name
                 ))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
@@ -118,7 +98,10 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
             client.preparePost("/api/leggpaavent/${oppgavereferanse}") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody(objectMapper.createObjectNode())
+                setBody(mapOf(
+                    "tekst" to "notattekst",
+                    "type" to NotatType.PaaVent.name
+                ))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }

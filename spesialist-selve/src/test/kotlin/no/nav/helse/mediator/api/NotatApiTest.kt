@@ -51,14 +51,17 @@ internal class NotatApiTest: AbstractApiTest() {
             client.preparePost("/api/notater/$vedtaksperiodeId1") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody(mapOf("tekst" to "en-tekst"))
+                setBody(mapOf(
+                    "tekst" to "en-tekst",
+                    "type" to "Generelt"
+                ))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            notatMediator.lagre(UUID.fromString(vedtaksperiodeId1), "en-tekst", SAKSBEHANDLER_OID, NotatType.PaaVent)
+            notatMediator.lagre(UUID.fromString(vedtaksperiodeId1), "en-tekst", SAKSBEHANDLER_OID, NotatType.Generelt)
         }
     }
 
@@ -101,7 +104,10 @@ internal class NotatApiTest: AbstractApiTest() {
             client.preparePost("/api/notater/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody(mapOf("tekst" to "en-tekst"))
+                setBody(mapOf(
+                    "tekst" to "en-tekst",
+                    "type" to "Generelt"
+                ))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }

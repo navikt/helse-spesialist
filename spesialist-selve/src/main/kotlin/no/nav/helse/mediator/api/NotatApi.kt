@@ -34,7 +34,7 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
             return@post
         }
         withContext(Dispatchers.IO) {
-            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandlerOid, notat.type ?: NotatType.PaaVent)
+            mediator.lagre(vedtaksperiodeId, notat.tekst, saksbehandlerOid, notat.type)
         }
         call.respond(HttpStatusCode.OK)
     }
@@ -81,6 +81,6 @@ internal fun Route.notaterApi(mediator: NotatMediator) {
 
 data class NotatApiDto(
     val tekst: String,
-    val type: NotatType?
+    val type: NotatType
 )
 
