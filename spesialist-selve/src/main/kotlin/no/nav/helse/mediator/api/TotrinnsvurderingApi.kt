@@ -67,7 +67,7 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        retur.notat?.let { notatMediator.lagreForOppgaveId(retur.oppgavereferanse, it, saksbehandlerOid, NotatType.Retur) }
+        notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
 
         log.info("OppgaveId ${retur.oppgavereferanse} sendt i retur")
 
@@ -95,5 +95,5 @@ class TotrinnsvurderingDto(
 class TotrinnsvurderingReturDto(
     val oppgavereferanse: Long,
     val periodeId: UUID,
-    val notat: String? = null
+    val notat: NotatApiDto
 )

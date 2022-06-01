@@ -38,14 +38,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         oppgavereferanse = 1L,
         periodeId = UUID.randomUUID()
     )
-    private val returDtoUtenNotat = TotrinnsvurderingReturDto(
-        oppgavereferanse = 1L,
-        periodeId = UUID.randomUUID()
-    )
     private val returDtoMedNotat = TotrinnsvurderingReturDto(
         oppgavereferanse = 1L,
         periodeId = UUID.randomUUID(),
-        notat = "notat_tekst"
+        notat = NotatApiDto("notat_tekst", NotatType.Retur)
     )
 
 
@@ -100,38 +96,9 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         assertEquals(HttpStatusCode.OK, response.status)
     }
 
+
     @Test
     fun returOk() {
-        val response = runBlocking {
-            client.preparePost(RETUR_URL) {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(returDtoUtenNotat))
-                authentication(SAKSBEHANDLER_OID)
-            }.execute()
-        }
-
-        verify(exactly = 1) {
-            oppgaveMediator.setBeslutterOppgave(
-                oppgaveId = returDtoUtenNotat.oppgavereferanse,
-                erBeslutterOppgave = false,
-                erReturOppgave = true,
-                tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
-            )
-        }
-        verify(exactly = 1) {
-            tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                returDtoUtenNotat.oppgavereferanse,
-                any()
-            )
-        }
-        verify(exactly = 0) { notatMediator.lagreForOppgaveId(any(), any(), any(), any()) }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-    }
-
-    @Test
-    fun returMedNotatOk() {
         val response = runBlocking {
             client.preparePost(RETUR_URL) {
                 contentType(ContentType.Application.Json)
@@ -151,16 +118,16 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
         verify(exactly = 1) {
             tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
-                returDtoUtenNotat.oppgavereferanse,
+                returDtoMedNotat.oppgavereferanse,
                 any()
             )
         }
         verify(exactly = 1) {
             notatMediator.lagreForOppgaveId(
                 returDtoMedNotat.oppgavereferanse,
-                returDtoMedNotat.notat!!,
+                returDtoMedNotat.notat.tekst,
                 SAKSBEHANDLER_OID,
-                NotatType.Retur
+                returDtoMedNotat.notat.type
             )
         }
 

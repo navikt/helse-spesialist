@@ -16,7 +16,7 @@ class NotatMediator(
         notatDao.opprettNotat(vedtaksperiodeId, tekst, saksbehandler_oid, notatType)
 
     fun lagreForOppgaveId(oppgaveId: Long, tekst: String, saksbehandler_oid: UUID, notatType: NotatType = NotatType.Generelt) {
-        log.info("Lagrer notat for oppgaveId {}", oppgaveId)
+        log.info("{} lagrer {} notat for oppgaveId {}", saksbehandler_oid, notatType, oppgaveId)
         notatDao.opprettNotatForOppgaveId(oppgaveId, tekst, saksbehandler_oid, notatType)
     }
 
