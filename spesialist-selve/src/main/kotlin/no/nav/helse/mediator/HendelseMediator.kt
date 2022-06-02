@@ -204,9 +204,7 @@ internal class HendelseMediator(
         return suksess
     }
 
-    internal fun leggOppgavePåVent(
-        oppgaveId: Long,
-    ) {
+    internal fun sendMeldingOppgaveOppdatert(oppgaveId: Long) {
         Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).also { (key, message) ->
             rapidsConnection.publish(key, message.toJson())
         }

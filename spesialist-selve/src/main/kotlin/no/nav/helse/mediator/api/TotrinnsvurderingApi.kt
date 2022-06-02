@@ -12,9 +12,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.notat.NotatMediator
-import no.nav.helse.notat.NotatType
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkType
@@ -27,7 +27,8 @@ internal fun Route.totrinnsvurderingApi(
     oppgaveMediator: OppgaveMediator,
     periodehistorikkDao: PeriodehistorikkDao,
     notatMediator: NotatMediator,
-    tildelingMediator: TildelingMediator
+    tildelingMediator: TildelingMediator,
+    hendelseMediator: HendelseMediator,
 ) {
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
@@ -45,6 +46,8 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
         periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING, saksbehandlerOid, totrinnsvurdering.periodeId)
+
+        hendelseMediator.sendMeldingOppgaveOppdatert(totrinnsvurdering.oppgavereferanse)
 
         log.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendt til godkjenning")
 
@@ -68,6 +71,8 @@ internal fun Route.totrinnsvurderingApi(
         )
 
         notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
+
+        hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
 
         log.info("OppgaveId ${retur.oppgavereferanse} sendt i retur")
 

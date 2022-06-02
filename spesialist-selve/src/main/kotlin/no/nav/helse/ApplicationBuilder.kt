@@ -317,7 +317,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator), notatMediator)
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
-                    totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
+                    totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator, hendelseMediator)
                 }
             }
         }.build()

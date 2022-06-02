@@ -12,7 +12,7 @@ internal class LeggPåVentMediator(
     internal fun leggOppgavePåVent(oppgaveId: Long) {
         tildelingDao.tildelingForOppgave(oppgaveId) ?: throw OppgaveIkkeTildelt(oppgaveId)
         tildelingDao.leggOppgavePåVent(oppgaveId)
-        hendelseMediator.leggOppgavePåVent(oppgaveId)
+        hendelseMediator.sendMeldingOppgaveOppdatert(oppgaveId)
     }
 
     internal fun fjernPåVent(oppgaveId: Long) = tildelingDao.fjernPåVent(oppgaveId)

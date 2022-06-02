@@ -11,6 +11,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.notat.NotatMediator
 import no.nav.helse.notat.NotatType
@@ -31,6 +32,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
     private val tildelingMediator = mockk<TildelingMediator>(relaxed = true)
+    private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
@@ -51,13 +53,13 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeAll
     fun setupTotrinnsvurdering() {
         setupServer {
-            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
+            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator, hendelseMediator)
         }
     }
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator)
+        clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator, hendelseMediator)
     }
 
     @Test

@@ -65,12 +65,6 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
-    fun erReturOppgave(vedtaksperiodeId: UUID): Boolean =
-        """ SELECT er_retur_oppgave FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") } ?: false
-
     fun trengerTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean =
         """ SELECT totrinnsvurdering FROM oppgave
             WHERE vedtak_ref =
@@ -93,6 +87,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """ SELECT er_beslutter_oppgave FROM oppgave
             WHERE id=:oppgaveId
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutter_oppgave") } ?: false
+
+    fun erReturOppgave(vedtaksperiodeId: UUID): Boolean =
+        """ SELECT er_retur_oppgave FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") } ?: false
+
+    fun erReturoppgave(oppgaveId: Long): Boolean =
+        """ SELECT er_retur_oppgave FROM oppgave
+            WHERE id=:oppgaveId
+        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_retur_oppgave") } ?: false
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId

@@ -56,6 +56,8 @@ class Oppgave private constructor(
             val contextId = oppgaveDao.finnContextId(oppgaveId)
             val oppgave = requireNotNull(oppgaveDao.finn(oppgaveId))
             val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+            val erBeslutterOppgave = oppgaveDao.erBeslutteroppgave(oppgaveId)
+            val erReturOppgave = oppgaveDao.erReturoppgave(oppgaveId)
 
             return fødselsnummer to lagMelding(
                 eventName = eventName,
@@ -65,6 +67,8 @@ class Oppgave private constructor(
                 status = oppgave.status,
                 type = oppgave.type,
                 fødselsnummer = fødselsnummer,
+                erBeslutterOppgave = erBeslutterOppgave,
+                erReturOppgave = erReturOppgave,
                 ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
                 ferdigstiltAvOid = oppgave.ferdigstiltAvOid
             )
@@ -78,6 +82,8 @@ class Oppgave private constructor(
             status: Oppgavestatus,
             type: Oppgavetype,
             fødselsnummer: String,
+            erBeslutterOppgave: Boolean,
+            erReturOppgave: Boolean,
             ferdigstiltAvIdent: String? = null,
             ferdigstiltAvOid: UUID? = null,
         ): JsonMessage {
@@ -90,7 +96,9 @@ class Oppgave private constructor(
                 "oppgaveId" to oppgaveId,
                 "status" to status.name,
                 "type" to type.name,
-                "fødselsnummer" to fødselsnummer
+                "fødselsnummer" to fødselsnummer,
+                "erBeslutterOppgave" to erBeslutterOppgave,
+                "erReturOppgave" to erReturOppgave,
             ).apply {
                 ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
                 ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
