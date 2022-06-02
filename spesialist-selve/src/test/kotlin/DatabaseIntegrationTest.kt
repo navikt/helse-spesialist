@@ -18,6 +18,7 @@ import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
+import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
@@ -390,6 +391,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                             tidslinje = emptyList(),
                                             vedtaksperiodeId = UUID.randomUUID().toString(),
                                             id = UUID.randomUUID().toString(),
+                                            periodetilstand = GraphQLPeriodetilstand.VENTERPAANNENPERIODE
                                         )
                                     )
                                 )

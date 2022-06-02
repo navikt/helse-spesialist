@@ -88,6 +88,7 @@ query HentSnapshot($fnr: String!) {
                     inntektstype,
                     opprettet,
                     periodetype,
+                    periodetilstand,
                     tidslinje {
                         begrunnelser,
                         dato,

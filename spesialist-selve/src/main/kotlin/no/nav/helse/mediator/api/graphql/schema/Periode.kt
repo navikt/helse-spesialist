@@ -52,7 +52,12 @@ enum class Periodetilstand {
     Utbetalt,
     Venter,
     VenterPaKiling,
-    Ukjent
+    Ukjent,
+    ForberederGodkjenning,
+    ManglerInformasjon,
+    TilGodkjenning,
+    UtbetalingFeilet,
+    VenterPaEnAnnenPeriode
 }
 
 enum class Utbetalingstatus {
@@ -214,6 +219,7 @@ interface Periode {
     fun periodetype(): Periodetype
     fun tidslinje(): List<Dag>
     fun vedtaksperiodeId(): UUID
+    fun periodetilstand(): Periodetilstand
 
     @GraphQLIgnore
     fun behandlingstype(periode: GraphQLTidslinjeperiode): Behandlingstype = when (periode.behandlingstype) {
@@ -222,6 +228,29 @@ interface Periode {
         GraphQLBehandlingstype.VENTER -> Behandlingstype.VENTER
         GraphQLBehandlingstype.VENTERPAINFORMASJON -> Behandlingstype.VENTER_PA_INFORMASJON
         else -> throw Exception("Ukjent behandlingstype ${periode.behandlingstype}")
+    }
+
+    @GraphQLIgnore
+    fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
+        GraphQLPeriodetilstand.ANNULLERINGFEILET -> Periodetilstand.AnnulleringFeilet
+        GraphQLPeriodetilstand.ANNULLERT -> Periodetilstand.Annullert
+        GraphQLPeriodetilstand.FEILET -> Periodetilstand.Feilet
+        GraphQLPeriodetilstand.INGENUTBETALING -> Periodetilstand.IngenUtbetaling
+        GraphQLPeriodetilstand.KUNFERIE -> Periodetilstand.KunFerie
+        GraphQLPeriodetilstand.OPPGAVER -> Periodetilstand.Oppgaver
+        GraphQLPeriodetilstand.REVURDERINGFEILET -> Periodetilstand.RevurderingFeilet
+        GraphQLPeriodetilstand.TILANNULLERING -> Periodetilstand.TilAnnullering
+        GraphQLPeriodetilstand.TILINFOTRYGD -> Periodetilstand.TilInfotrygd
+        GraphQLPeriodetilstand.TILUTBETALING -> Periodetilstand.TilUtbetaling
+        GraphQLPeriodetilstand.UTBETALT -> Periodetilstand.Utbetalt
+        GraphQLPeriodetilstand.VENTER -> Periodetilstand.Venter
+        GraphQLPeriodetilstand.VENTERPAKILING -> Periodetilstand.VenterPaKiling
+        GraphQLPeriodetilstand.FORBEREDERGODKJENNING -> Periodetilstand.ForberederGodkjenning
+        GraphQLPeriodetilstand.MANGLERINFORMASJON -> Periodetilstand.ManglerInformasjon
+        GraphQLPeriodetilstand.TILGODKJENNING -> Periodetilstand.TilGodkjenning
+        GraphQLPeriodetilstand.UTBETALINGFEILET -> Periodetilstand.UtbetalingFeilet
+        GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> Periodetilstand.VenterPaEnAnnenPeriode
+        GraphQLPeriodetilstand.__UNKNOWN_VALUE -> Periodetilstand.Ukjent
     }
 
     @GraphQLIgnore
@@ -269,6 +298,7 @@ data class UberegnetPeriode(
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
+    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
 }
 
 
@@ -290,6 +320,7 @@ data class BeregnetPeriode(
     override fun periodetype(): Periodetype = periodetype(periode)
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
+    override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
 
     fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutteroppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
@@ -421,23 +452,7 @@ data class BeregnetPeriode(
     fun oppgavereferanse(): String? =
         oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 
-    fun tilstand(): Periodetilstand =
-        when (periode.tilstand) {
-            GraphQLPeriodetilstand.ANNULLERINGFEILET -> Periodetilstand.AnnulleringFeilet
-            GraphQLPeriodetilstand.ANNULLERT -> Periodetilstand.Annullert
-            GraphQLPeriodetilstand.FEILET -> Periodetilstand.Feilet
-            GraphQLPeriodetilstand.INGENUTBETALING -> Periodetilstand.IngenUtbetaling
-            GraphQLPeriodetilstand.KUNFERIE -> Periodetilstand.KunFerie
-            GraphQLPeriodetilstand.OPPGAVER -> Periodetilstand.Oppgaver
-            GraphQLPeriodetilstand.REVURDERINGFEILET -> Periodetilstand.RevurderingFeilet
-            GraphQLPeriodetilstand.TILANNULLERING -> Periodetilstand.TilAnnullering
-            GraphQLPeriodetilstand.TILINFOTRYGD -> Periodetilstand.TilInfotrygd
-            GraphQLPeriodetilstand.TILUTBETALING -> Periodetilstand.TilUtbetaling
-            GraphQLPeriodetilstand.UTBETALT -> Periodetilstand.Utbetalt
-            GraphQLPeriodetilstand.VENTER -> Periodetilstand.Venter
-            GraphQLPeriodetilstand.VENTERPAKILING -> Periodetilstand.VenterPaKiling
-            GraphQLPeriodetilstand.__UNKNOWN_VALUE -> Periodetilstand.Ukjent
-        }
+    fun tilstand(): Periodetilstand = periodetilstand(periode.tilstand)
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =

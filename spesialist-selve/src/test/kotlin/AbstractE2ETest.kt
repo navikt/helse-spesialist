@@ -1163,6 +1163,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                                             refusjon = null,
                                             vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
                                             tilstand = GraphQLPeriodetilstand.OPPGAVER,
+                                            periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
                                         )
                                     )
                                 )

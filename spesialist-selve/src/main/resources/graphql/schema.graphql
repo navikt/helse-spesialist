@@ -38,6 +38,7 @@ interface GraphQLTidslinjeperiode {
   id: UUID!
   inntektstype: GraphQLInntektstype!
   opprettet: LocalDateTime!
+  periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
@@ -96,6 +97,7 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   inntektstype: GraphQLInntektstype!
   maksdato: LocalDate!
   opprettet: LocalDateTime!
+  periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   periodevilkar: GraphQLPeriodevilkar!
   refusjon: GraphQLRefusjon
@@ -310,6 +312,7 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   id: UUID!
   inntektstype: GraphQLInntektstype!
   opprettet: LocalDateTime!
+  periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
@@ -424,15 +427,20 @@ enum GraphQLPeriodetilstand {
   AnnulleringFeilet
   Annullert
   Feilet
+  ForberederGodkjenning
   IngenUtbetaling
   KunFerie
+  ManglerInformasjon
   Oppgaver
   RevurderingFeilet
   TilAnnullering
+  TilGodkjenning
   TilInfotrygd
   TilUtbetaling
+  UtbetalingFeilet
   Utbetalt
   Venter
+  VenterPaAnnenPeriode
   VenterPaKiling
 }
 

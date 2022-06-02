@@ -218,7 +218,8 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     ),
     refusjon = null,
     vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
-    tilstand = GraphQLPeriodetilstand.OPPGAVER
+    tilstand = GraphQLPeriodetilstand.OPPGAVER,
+    periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
 )
 
 private fun enGenerasjon() = GraphQLGenerasjon(
