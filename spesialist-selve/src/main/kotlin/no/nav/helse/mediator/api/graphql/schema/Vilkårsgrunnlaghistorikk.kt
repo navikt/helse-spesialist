@@ -5,6 +5,7 @@ import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.enums.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
 
@@ -43,6 +44,7 @@ data class VilkarsgrunnlagSpleis(
     val avviksprosent: Double?,
     val antallOpptjeningsdagerErMinst: Int,
     val grunnbelop: Int,
+    val sykepengegrunnlagsgrense: Sykepengegrunnlagsgrense,
     val oppfyllerKravOmMedlemskap: Boolean?,
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
@@ -68,6 +70,7 @@ private fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
             sykepengegrunnlag = sykepengegrunnlag,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
             grunnbelop = grunnbelop,
+            sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
             oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
@@ -90,3 +93,12 @@ internal fun GraphQLVilkarsgrunnlaghistorikk.tilVilkarsgrunnlaghistorikk(): Vilk
         id = id,
         grunnlag = grunnlag.map { it.tilVilkarsgrunnlag() }
     )
+
+internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
+    Sykepengegrunnlagsgrense(grunnbelop, grense, virkningstidspunkt)
+
+data class Sykepengegrunnlagsgrense(
+    val grunnbelop: Int,
+    val grense: Int,
+    val virkningstidspunkt: LocalDate
+)

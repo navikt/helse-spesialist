@@ -236,6 +236,11 @@ query HentSnapshot($fnr: String!) {
                     antallOpptjeningsdagerErMinst,
                     avviksprosent,
                     grunnbelop,
+                    sykepengegrunnlagsgrense {
+                        grunnbelop,
+                        grense,
+                        virkningstidspunkt
+                    }
                     oppfyllerKravOmMedlemskap,
                     oppfyllerKravOmMinstelonn,
                     oppfyllerKravOmOpptjening,

@@ -28,6 +28,7 @@ import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
 import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.mediator.graphql.enums.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.mediator.graphql.enums.Utbetalingtype
 import no.nav.helse.mediator.graphql.hentsnapshot.Alder
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
@@ -40,7 +41,10 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimulering
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimuleringsdetaljer
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimuleringsperiode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSimuleringsutbetaling
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
@@ -149,6 +153,53 @@ class GraphQLApiTest : AbstractApiTest() {
         }
 
         assertEquals(fødselsnummer, objectMapper.readTree(body)["data"]["person"]["fodselsnummer"].asText())
+    }
+
+    @Test
+    fun `henter sykepengegrunnlagsgrense`() {
+        val fødselsnummer = "12345678910"
+        every { personApiDao.finnesPersonMedFødselsnummer(fødselsnummer) } returns true
+        every { personApiDao.personHarAdressebeskyttelse(fødselsnummer, Ugradert) } returns true
+        every { snapshotMediator.hentSnapshot(fødselsnummer) } returns Pair(
+            enPersoninfo,
+            enPerson(fødselsnummer)
+        )
+
+
+        val queryString = """
+            {
+                person(fnr:"$fødselsnummer") {
+                    vilkarsgrunnlaghistorikk {
+                        id,
+                        grunnlag {
+                            skjaeringstidspunkt
+                             ... on VilkarsgrunnlagSpleis {
+                                sykepengegrunnlagsgrense {
+                                    grunnbelop,
+                                    grense,
+                                    virkningstidspunkt
+                                }
+                             }
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+
+        val body = runBlocking {
+            val response = client.preparePost("/graphql") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                authentication(UUID.randomUUID())
+                setBody(mapOf("query" to queryString))
+            }.execute()
+            response.body<String>()
+        }
+
+        assertEquals(100_000, objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["grunnbelop"].asInt())
+        assertEquals(600_000, objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["grense"].asInt())
+        assertEquals("2022-05-01", objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["virkningstidspunkt"].asText())
     }
 
     private val enPersoninfo = PersoninfoDto(
@@ -279,6 +330,24 @@ class GraphQLApiTest : AbstractApiTest() {
         dodsdato = null,
         fodselsnummer = fødselsnummer,
         versjon = 1,
-        vilkarsgrunnlaghistorikk = emptyList()
+        vilkarsgrunnlaghistorikk = listOf(GraphQLVilkarsgrunnlaghistorikk(
+            UUID.randomUUID().toString(),
+            grunnlag = listOf(GraphQLSpleisVilkarsgrunnlag(
+                GraphQLVilkarsgrunnlagtype.SPLEIS,
+                inntekter = emptyList(),
+                omregnetArsinntekt = 100.0,
+                sammenligningsgrunnlag = 100.0,
+                skjaeringstidspunkt = "2022-05-02",
+                sykepengegrunnlag = 100.0,
+                antallOpptjeningsdagerErMinst = 0,
+                avviksprosent = 0.0,
+                grunnbelop = 0,
+                sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(100_000, 600_000, "2022-05-01"),
+                oppfyllerKravOmMedlemskap = false,
+                oppfyllerKravOmMinstelonn = false,
+                oppfyllerKravOmOpptjening = false,
+                opptjeningFra = "2022-05-23"
+            ))
+        ))
     )
 }
