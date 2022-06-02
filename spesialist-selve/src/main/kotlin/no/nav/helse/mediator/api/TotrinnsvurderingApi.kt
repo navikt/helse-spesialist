@@ -85,11 +85,6 @@ private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
     return UUID.fromString(accessToken.payload.getClaim("oid").asString())
 }
 
-internal fun PipelineContext<Unit, ApplicationCall>.getGrupper(): List<UUID> {
-    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-    return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
-}
-
 @JsonIgnoreProperties
 class TotrinnsvurderingDto(
     val oppgavereferanse: Long,
