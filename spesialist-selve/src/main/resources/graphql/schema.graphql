@@ -280,12 +280,19 @@ type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   sammenligningsgrunnlag: Float
   skjaeringstidspunkt: LocalDate!
   sykepengegrunnlag: Float!
+  sykepengegrunnlagsgrense: GraphQLSykepengegrunnlagsgrense!
   vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype!
 }
 
 type GraphQLSykdomsdagkilde {
   id: UUID!
   type: GraphQLSykdomsdagkildetype!
+}
+
+type GraphQLSykepengegrunnlagsgrense {
+  grense: Int!
+  grunnbelop: Int!
+  virkningstidspunkt: LocalDate!
 }
 
 type GraphQLSykmelding implements GraphQLHendelse {
