@@ -78,6 +78,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 oppgaveId = totrinnsvurderingDto.oppgavereferanse,
                 erBeslutterOppgave = true,
                 erReturOppgave = false,
+                totrinnsvurdering = false,
                 tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
             )
         }
@@ -115,6 +116,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 oppgaveId = returDtoMedNotat.oppgavereferanse,
                 erBeslutterOppgave = false,
                 erReturOppgave = true,
+                totrinnsvurdering = true,
                 tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
             )
         }
@@ -147,7 +149,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -162,7 +164,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -176,7 +178,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -190,7 +192,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 }

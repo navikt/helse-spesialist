@@ -527,7 +527,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         opprettSaksbehandler()
-        oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, tidligereSaksbehandlerOid)
+        oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, false, tidligereSaksbehandlerOid)
 
         assertEquals(tidligereSaksbehandlerOid, oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
     }

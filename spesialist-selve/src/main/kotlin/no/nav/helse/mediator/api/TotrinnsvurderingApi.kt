@@ -43,6 +43,7 @@ internal fun Route.totrinnsvurderingApi(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
             erBeslutterOppgave = true,
             erReturOppgave = false,
+            totrinnsvurdering = false,
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
         periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING, saksbehandlerOid, totrinnsvurdering.periodeId)
@@ -67,6 +68,7 @@ internal fun Route.totrinnsvurderingApi(
             oppgaveId = retur.oppgavereferanse,
             erBeslutterOppgave = false,
             erReturOppgave = true,
+            totrinnsvurdering= true,
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 

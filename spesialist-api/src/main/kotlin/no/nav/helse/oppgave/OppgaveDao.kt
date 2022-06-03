@@ -206,15 +206,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         oppgaveId: Long,
         erBeslutterOppgave: Boolean,
         erReturOppgave: Boolean,
+        totrinnsvurdering: Boolean,
         tidligereSaksbehandlerOID: UUID
     ) =
         """ UPDATE oppgave
-            SET er_beslutter_oppgave=:er_beslutter_oppgave, er_retur_oppgave=:er_retur_oppgave, tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
+            SET er_beslutter_oppgave=:er_beslutter_oppgave, er_retur_oppgave=:er_retur_oppgave, totrinnsvurdering=:totrinnsvurdering, tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
             WHERE id=:oppgave_id
         """.update(
             mapOf(
                 "er_beslutter_oppgave" to erBeslutterOppgave,
                 "er_retur_oppgave" to erReturOppgave,
+                "totrinnsvurdering" to totrinnsvurdering,
                 "tidligere_saksbehandler_oid" to tidligereSaksbehandlerOID,
                 "oppgave_id" to oppgaveId
             )
