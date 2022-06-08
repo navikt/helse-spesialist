@@ -30,7 +30,6 @@ import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
@@ -1126,7 +1125,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                                                 personoppdrag = null,
                                                 arbeidsgiveroppdrag = null
                                             ),
-                                            behandlingstype = GraphQLBehandlingstype.BEHANDLET,
                                             erForkastet = false,
                                             fom = "2020-01-01",
                                             tom = "2020-01-31",

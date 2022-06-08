@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
-import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
@@ -205,7 +204,6 @@ data class Refusjon(
 }
 
 interface Periode {
-    fun behandlingstype(): Behandlingstype
     fun erForkastet(): Boolean
     fun fom(): LocalDate
     fun tom(): LocalDate
@@ -215,15 +213,6 @@ interface Periode {
     fun tidslinje(): List<Dag>
     fun vedtaksperiodeId(): UUID
     fun periodetilstand(): Periodetilstand
-
-    @GraphQLIgnore
-    fun behandlingstype(periode: GraphQLTidslinjeperiode): Behandlingstype = when (periode.behandlingstype) {
-        GraphQLBehandlingstype.BEHANDLET -> Behandlingstype.BEHANDLET
-        GraphQLBehandlingstype.UBEREGNET -> Behandlingstype.UBEREGNET
-        GraphQLBehandlingstype.VENTER -> Behandlingstype.VENTER
-        GraphQLBehandlingstype.VENTERPAINFORMASJON -> Behandlingstype.VENTER_PA_INFORMASJON
-        else -> throw Exception("Ukjent behandlingstype ${periode.behandlingstype}")
-    }
 
     @GraphQLIgnore
     fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
@@ -279,7 +268,6 @@ data class UberegnetPeriode(
     val id: UUID,
     private val periode: GraphQLTidslinjeperiode
 ) : Periode {
-    override fun behandlingstype(): Behandlingstype = behandlingstype(periode)
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): LocalDate = fom(periode)
     override fun tom(): LocalDate = tom(periode)
@@ -301,7 +289,6 @@ data class BeregnetPeriode(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
 ) : Periode {
-    override fun behandlingstype(): Behandlingstype = behandlingstype(periode)
     override fun erForkastet(): Boolean = erForkastet(periode)
     override fun fom(): LocalDate = fom(periode)
     override fun tom(): LocalDate = tom(periode)

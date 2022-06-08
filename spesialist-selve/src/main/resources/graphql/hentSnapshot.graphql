@@ -81,7 +81,6 @@ query HentSnapshot($fnr: String!) {
                 id,
                 perioder {
                     __typename,
-                    behandlingstype,
                     erForkastet,
                     fom,
                     tom,

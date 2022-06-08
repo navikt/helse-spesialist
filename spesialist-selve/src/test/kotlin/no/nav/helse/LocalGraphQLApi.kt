@@ -16,7 +16,6 @@ import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
-import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
@@ -120,7 +119,6 @@ private val enPersoninfo = PersoninfoDto(
 )
 
 private fun enPeriode() = GraphQLBeregnetPeriode(
-    behandlingstype = GraphQLBehandlingstype.BEHANDLET,
     erForkastet = false,
     fom = "2020-01-01",
     tom = "2020-01-31",

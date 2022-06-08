@@ -3,7 +3,6 @@ package no.nav.helse
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import java.util.UUID
 import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.enums.GraphQLBehandlingstype
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
@@ -73,7 +72,6 @@ fun snapshot(
                                             personoppdrag = null,
                                             arbeidsgiveroppdrag = null
                                         ),
-                                        behandlingstype = GraphQLBehandlingstype.BEHANDLET,
                                         erForkastet = false,
                                         fom = "2020-01-01",
                                         tom = "2020-01-31",
