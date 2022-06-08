@@ -32,7 +32,6 @@ interface GraphQLHendelse {
 }
 
 interface GraphQLTidslinjeperiode {
-  behandlingstype: GraphQLBehandlingstype!
   erForkastet: Boolean!
   fom: LocalDate!
   id: UUID!
@@ -40,6 +39,7 @@ interface GraphQLTidslinjeperiode {
   opprettet: LocalDateTime!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
+  skjaeringstidspunkt: LocalDate!
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
   vedtaksperiodeId: UUID!
@@ -85,7 +85,6 @@ type GraphQLArbeidsgiverinntekt {
 
 type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   aktivitetslogg: [GraphQLAktivitet!]!
-  behandlingstype: GraphQLBehandlingstype!
   beregningId: UUID!
   erForkastet: Boolean!
   fom: LocalDate!
@@ -305,7 +304,6 @@ type GraphQLSykmelding implements GraphQLHendelse {
 }
 
 type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
-  behandlingstype: GraphQLBehandlingstype!
   erForkastet: Boolean!
   fom: LocalDate!
   id: UUID!
@@ -313,6 +311,7 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   opprettet: LocalDateTime!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
+  skjaeringstidspunkt: LocalDate!
   tidslinje: [GraphQLDag!]!
   tom: LocalDate!
   vedtaksperiodeId: UUID!
@@ -392,13 +391,6 @@ enum GraphQLBegrunnelse {
   Over70
   SykepengedagerOppbrukt
   SykepengedagerOppbruktOver67
-}
-
-enum GraphQLBehandlingstype {
-  Behandlet
-  Uberegnet
-  Venter
-  VenterPaInformasjon
 }
 
 enum GraphQLHendelsetype {

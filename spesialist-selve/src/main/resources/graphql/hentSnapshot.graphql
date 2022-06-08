@@ -88,6 +88,7 @@ query HentSnapshot($fnr: String!) {
                     opprettet,
                     periodetype,
                     periodetilstand,
+                    skjaeringstidspunkt,
                     tidslinje {
                         begrunnelser,
                         dato,
@@ -179,7 +180,6 @@ query HentSnapshot($fnr: String!) {
                                 skjaeringstidspunkt
                             }
                         }
-                        skjaeringstidspunkt,
                         utbetaling {
                             id,
                             arbeidsgiverFagsystemId,

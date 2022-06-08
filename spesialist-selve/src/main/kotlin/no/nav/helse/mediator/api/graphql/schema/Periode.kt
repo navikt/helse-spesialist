@@ -213,6 +213,7 @@ interface Periode {
     fun tidslinje(): List<Dag>
     fun vedtaksperiodeId(): UUID
     fun periodetilstand(): Periodetilstand
+    fun skjaeringstidspunkt(): LocalDate
 
     @GraphQLIgnore
     fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
@@ -277,6 +278,7 @@ data class UberegnetPeriode(
     override fun tidslinje(): List<Dag> = tidslinje(periode)
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
+    override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
 }
 
 
@@ -357,7 +359,7 @@ data class BeregnetPeriode(
         sykepengedager = periode.periodevilkar.sykepengedager
     )
 
-    fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
+    override fun skjaeringstidspunkt(): LocalDate = periode.skjaeringstidspunkt
 
     fun utbetaling(): Utbetaling = periode.utbetaling.let {
         Utbetaling(
