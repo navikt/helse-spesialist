@@ -39,25 +39,20 @@ enum class Periodetype {
 }
 
 enum class Periodetilstand {
-    AnnulleringFeilet,
-    Annullert,
-    Feilet,
-    IngenUtbetaling,
-    KunFerie,
-    Oppgaver,
+    UtbetalingFeilet,
     RevurderingFeilet,
+    AnnulleringFeilet,
     TilAnnullering,
-    TilInfotrygd,
     TilUtbetaling,
+    Annullert,
     Utbetalt,
-    Venter,
-    VenterPaKiling,
-    Ukjent,
+    IngenUtbetaling,
+    TilInfotrygd,
     ForberederGodkjenning,
     ManglerInformasjon,
     TilGodkjenning,
-    UtbetalingFeilet,
-    VenterPaEnAnnenPeriode
+    VenterPaEnAnnenPeriode,
+    Ukjent
 }
 
 enum class Utbetalingstatus {
@@ -234,23 +229,18 @@ interface Periode {
     fun periodetilstand(tilstand: GraphQLPeriodetilstand) = when (tilstand) {
         GraphQLPeriodetilstand.ANNULLERINGFEILET -> Periodetilstand.AnnulleringFeilet
         GraphQLPeriodetilstand.ANNULLERT -> Periodetilstand.Annullert
-        GraphQLPeriodetilstand.FEILET -> Periodetilstand.Feilet
         GraphQLPeriodetilstand.INGENUTBETALING -> Periodetilstand.IngenUtbetaling
-        GraphQLPeriodetilstand.KUNFERIE -> Periodetilstand.KunFerie
-        GraphQLPeriodetilstand.OPPGAVER -> Periodetilstand.Oppgaver
         GraphQLPeriodetilstand.REVURDERINGFEILET -> Periodetilstand.RevurderingFeilet
         GraphQLPeriodetilstand.TILANNULLERING -> Periodetilstand.TilAnnullering
         GraphQLPeriodetilstand.TILINFOTRYGD -> Periodetilstand.TilInfotrygd
         GraphQLPeriodetilstand.TILUTBETALING -> Periodetilstand.TilUtbetaling
         GraphQLPeriodetilstand.UTBETALT -> Periodetilstand.Utbetalt
-        GraphQLPeriodetilstand.VENTER -> Periodetilstand.Venter
-        GraphQLPeriodetilstand.VENTERPAKILING -> Periodetilstand.VenterPaKiling
         GraphQLPeriodetilstand.FORBEREDERGODKJENNING -> Periodetilstand.ForberederGodkjenning
         GraphQLPeriodetilstand.MANGLERINFORMASJON -> Periodetilstand.ManglerInformasjon
         GraphQLPeriodetilstand.TILGODKJENNING -> Periodetilstand.TilGodkjenning
         GraphQLPeriodetilstand.UTBETALINGFEILET -> Periodetilstand.UtbetalingFeilet
         GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> Periodetilstand.VenterPaEnAnnenPeriode
-        GraphQLPeriodetilstand.__UNKNOWN_VALUE -> Periodetilstand.Ukjent
+        else -> Periodetilstand.Ukjent
     }
 
     @GraphQLIgnore
