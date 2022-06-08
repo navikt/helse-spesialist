@@ -109,7 +109,6 @@ fun snapshot(
                                         skjaeringstidspunkt = "2020-01-01",
                                         refusjon = null,
                                         vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
-                                        tilstand = GraphQLPeriodetilstand.OPPGAVER,
                                         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
                                     )
                                 )

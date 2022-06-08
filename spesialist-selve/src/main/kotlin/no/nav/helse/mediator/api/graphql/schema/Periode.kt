@@ -451,8 +451,6 @@ data class BeregnetPeriode(
 
     fun oppgavereferanse(): String? =
         oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
-
-    fun tilstand(): Periodetilstand = periodetilstand(periode.tilstand)
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =
