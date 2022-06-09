@@ -49,6 +49,7 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
@@ -158,6 +159,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     internal val vergemålDao = VergemålDao(dataSource)
+    internal val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

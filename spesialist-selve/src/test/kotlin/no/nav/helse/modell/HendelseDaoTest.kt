@@ -51,7 +51,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             arbeidsforholdDao = arbeidsforholdDao,
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
-            vergemålDao = vergemålDao
+            vergemålDao = vergemålDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
         )
     }
 

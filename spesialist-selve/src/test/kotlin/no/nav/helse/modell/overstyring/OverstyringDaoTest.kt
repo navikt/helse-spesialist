@@ -112,7 +112,9 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            overstyringDao = overstyringDao
+            overstyringDao = overstyringDao,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
         ))
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
@@ -156,7 +158,9 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            overstyringDao = overstyringDao
+            overstyringDao = overstyringDao,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         )
     )
 }

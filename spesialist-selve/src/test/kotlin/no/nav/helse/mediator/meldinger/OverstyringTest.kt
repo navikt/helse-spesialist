@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
@@ -15,6 +16,7 @@ import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import no.nav.helse.oppgave.OppgaveDao
 
 internal class OverstyringTest {
     companion object {
@@ -42,13 +44,14 @@ internal class OverstyringTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val hendelsefabrikk = Hendelsefabrikk(
         hendelseDao = mockk(),
         personDao = mockk(),
         arbeidsgiverDao = mockk(),
         vedtakDao = mockk(),
         warningDao = mockk(),
-        oppgaveDao = mockk(),
+        oppgaveDao = oppgaveDao,
         commandContextDao = mockk(),
         snapshotDao = mockk(),
         reservasjonDao = reservasjonDao,
@@ -66,7 +69,8 @@ internal class OverstyringTest {
         arbeidsforholdDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),
         opptegnelseDao = mockk(relaxed = true),
-        vergemålDao = mockk(relaxed = true)
+        vergemålDao = mockk(relaxed = true),
+        overstyrtVedtaksperiodeDao = mockk(relaxed = true)
     )
 
     private val overstyringMessage = hendelsefabrikk.overstyringTidslinje(
@@ -92,6 +96,8 @@ internal class OverstyringTest {
 
     @Test
     fun `Persisterer overstyring`() {
+        every { oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(any(),any(),any()) } returns(null)
+
         overstyringMessage.execute(context)
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }

@@ -82,6 +82,7 @@ import no.nav.helse.notat.NotatMediator
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringApiDao
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -184,6 +185,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val snapshotDao = SnapshotDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
+    private val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
@@ -211,6 +213,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         warningDao = warningDao,
         commandContextDao = commandContextDao,
         oppgaveDao = oppgaveDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         reservasjonDao = reservasjonDao,
         tildelingDao = tildelingDao,
         saksbehandlerDao = saksbehandlerDao,
