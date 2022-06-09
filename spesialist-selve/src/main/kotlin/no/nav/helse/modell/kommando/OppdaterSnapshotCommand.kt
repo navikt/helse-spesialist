@@ -27,7 +27,8 @@ internal class OppdaterSnapshotCommand(
     }
 
     private fun oppdaterSnapshot(): Boolean {
-        log.info("oppdaterer snapshot for $vedtaksperiodeId")
+        log.info("oppdaterer snapshot for vedtaksperiodeId=$vedtaksperiodeId")
+        sikkerlogger.info("Oppdaterer snapshot for vedtaksperiodeId=$vedtaksperiodeId, fødselsnummer=$fødselsnummer")
         return snapshotClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->
             snapshotDao.lagre(fødselsnummer = fødselsnummer, snapshot = person)
             log.info("oppdaterer warnings fra graphql-snapshot for $vedtaksperiodeId")
