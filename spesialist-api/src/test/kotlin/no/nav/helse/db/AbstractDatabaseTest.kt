@@ -2,14 +2,14 @@ package no.nav.helse.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.util.*
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.PostgreSQLContainer
-import java.util.*
-import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
@@ -18,6 +18,7 @@ abstract class AbstractDatabaseTest {
             withReuse(true)
             withLabel("app-navn", "spesialist")
             start()
+            println("🎩 Databasen er startet opp, portnummer: $firstMappedPort, jdbcUrl: jdbc:postgresql://localhost:$firstMappedPort/test, credentials: test og test")
         }
 
         val dataSource =
