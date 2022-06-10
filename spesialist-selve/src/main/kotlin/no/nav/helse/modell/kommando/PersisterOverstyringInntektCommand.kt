@@ -1,8 +1,9 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.overstyring.OverstyringDao
 import java.time.LocalDate
-import java.util.*
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.modell.overstyring.OverstyringDao
 
 internal class PersisterOverstyringInntektCommand(
     private val oid: UUID,
@@ -13,6 +14,7 @@ internal class PersisterOverstyringInntektCommand(
     private val forklaring: String,
     private val månedligInntekt: Double,
     private val skjæringstidspunkt: LocalDate,
+    private val opprettet: LocalDateTime,
     private val overstyringDao: OverstyringDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
@@ -24,7 +26,8 @@ internal class PersisterOverstyringInntektCommand(
             forklaring = forklaring,
             saksbehandlerRef = oid,
             månedligInntekt = månedligInntekt,
-            skjæringstidspunkt = skjæringstidspunkt
+            skjæringstidspunkt = skjæringstidspunkt,
+            tidspunkt = opprettet
         )
         return true
     }

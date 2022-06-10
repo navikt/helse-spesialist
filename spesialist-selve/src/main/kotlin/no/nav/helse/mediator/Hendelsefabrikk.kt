@@ -238,6 +238,7 @@ internal class Hendelsefabrikk(
         orgnummer: String,
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
+        opprettet: LocalDateTime,
         json: String
     ) = OverstyringTidslinje(
         id = id,
@@ -249,6 +250,7 @@ internal class Hendelsefabrikk(
         orgnummer = orgnummer,
         begrunnelse = begrunnelse,
         overstyrteDager = overstyrteDager,
+        opprettet = opprettet,
         json = json,
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
@@ -267,6 +269,7 @@ internal class Hendelsefabrikk(
             orgnummer = jsonNode.path("organisasjonsnummer").asText(),
             begrunnelse = jsonNode.path("begrunnelse").asText(),
             overstyrteDager = jsonNode.path("dager").toOverstyrteDagerDto(),
+            opprettet = LocalDateTime.parse(jsonNode.path("@opprettet").asText()),
             json = json
         )
     }
@@ -283,6 +286,7 @@ internal class Hendelsefabrikk(
         forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String
     ) = OverstyringInntekt(
         id = id,
@@ -299,6 +303,7 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
+        opprettet = opprettet,
         json = json
     )
 
@@ -312,6 +317,7 @@ internal class Hendelsefabrikk(
         organisasjonsnummer: String,
         overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String
     ) = OverstyringArbeidsforhold (
         id = id,
@@ -323,6 +329,7 @@ internal class Hendelsefabrikk(
         organisasjonsnummer = organisasjonsnummer,
         overstyrteArbeidsforhold = overstyrteArbeidsforhold,
         skjæringstidspunkt = skjæringstidspunkt,
+        opprettet = opprettet,
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
@@ -348,6 +355,7 @@ internal class Hendelsefabrikk(
                 )
             },
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
+            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json
         )
     }
@@ -366,6 +374,7 @@ internal class Hendelsefabrikk(
             forklaring = jsonNode.path("forklaring").asText(),
             månedligInntekt = jsonNode.path("månedligInntekt").asDouble(),
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
+            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json
         )
     }

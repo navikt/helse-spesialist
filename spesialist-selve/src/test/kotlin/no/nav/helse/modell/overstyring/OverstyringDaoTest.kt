@@ -1,15 +1,16 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.person.Kjønn
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
 
@@ -39,6 +40,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                 grad = 100
             )
         )
+        private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
+        private val INNTEKT = 31000.0
     }
 
     private fun opprettPerson() {
@@ -52,7 +55,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede tidslinjeoverstyringer`() {
         opprettPerson()
-        overstyringDao.persisterOverstyringTidslinje(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID)
+        overstyringDao.persisterOverstyringTidslinje(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
@@ -62,6 +65,27 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager)
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
+        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+    }
+
+
+    @Test
+    fun `Finner opprettede inntektoverstyringer`() {
+        opprettPerson()
+        overstyrInntekt(ID)
+        overstyringDao.persisterOverstyringInntekt(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, FORKLARING, OID, INNTEKT, SKJÆRINGSTIDSPUNKT, OPPRETTET)
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNUMMER).first()
+
+        assertEquals(ID, hentetOverstyring.hendelseId)
+        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
+        assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
+        assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
+        assertEquals(FORKLARING, hentetOverstyring.forklaring)
+        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
+        assertEquals(INNTEKT, hentetOverstyring.månedligInntekt)
+        assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
+        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
     }
 
     @Test
@@ -84,6 +108,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     forklaring = FORKLARING
                 )
             ),
+            opprettet = OPPRETTET,
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
@@ -97,7 +122,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             FORKLARING,
             DEAKTIVERT,
             SKJÆRINGSTIDSPUNKT,
-            OID
+            OID,
+            OPPRETTET
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvArbeidsforhold(FØDSELSNUMMER, ORGNUMMER).single()
 
@@ -110,5 +136,27 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
         assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
+        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
     }
+
+    private fun overstyrInntekt(hendelseId: UUID) = hendelseDao.opprett(
+        OverstyringInntekt(
+            id = hendelseId,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            orgnummer = ORGNUMMER,
+            begrunnelse = BEGRUNNELSE,
+            forklaring = FORKLARING,
+            månedligInntekt = INNTEKT,
+            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao
+        )
+    )
 }

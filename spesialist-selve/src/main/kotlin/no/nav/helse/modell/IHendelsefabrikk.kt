@@ -1,14 +1,27 @@
 package no.nav.helse.modell
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.meldinger.*
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
+import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
+import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
+import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal interface IHendelsefabrikk {
     fun adressebeskyttelseEndret(
@@ -84,6 +97,7 @@ internal interface IHendelsefabrikk {
         orgnummer: String,
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
+        opprettet: LocalDateTime,
         json: String
     ): OverstyringTidslinje
 
@@ -105,6 +119,7 @@ internal interface IHendelsefabrikk {
         forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String
     ): OverstyringInntekt
 
@@ -119,6 +134,7 @@ internal interface IHendelsefabrikk {
         organisasjonsnummer: String,
         overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String
     ): OverstyringArbeidsforhold
 

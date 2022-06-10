@@ -1,9 +1,10 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.modell.overstyring.OverstyringDao
-import java.time.LocalDate
-import java.util.*
 
 internal class PersisterOverstyringArbeidsforholdCommand(
     private val oid: UUID,
@@ -11,6 +12,7 @@ internal class PersisterOverstyringArbeidsforholdCommand(
     private val fødselsnummer: String,
     private val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
     private val skjæringstidspunkt: LocalDate,
+    private val opprettet: LocalDateTime,
     private val overstyringDao: OverstyringDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
@@ -23,7 +25,8 @@ internal class PersisterOverstyringArbeidsforholdCommand(
                 begrunnelse = it.begrunnelse,
                 forklaring = it.forklaring,
                 saksbehandlerRef = oid,
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                tidspunkt = opprettet
             )
         }
         return true

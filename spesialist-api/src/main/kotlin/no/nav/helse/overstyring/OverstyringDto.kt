@@ -2,7 +2,7 @@ package no.nav.helse.overstyring
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 enum class Dagtype { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }
 
@@ -14,7 +14,7 @@ data class OverstyringDto(
     val timestamp: LocalDateTime,
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
-    val overstyrteDager: List<OverstyringDagDto>
+    val overstyrteDager: List<OverstyringDagDto>,
 )
 
 data class OverstyringDagDto(
@@ -33,7 +33,7 @@ data class OverstyringInntektDto(
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
     val månedligInntekt: Double,
-    val skjæringstidspunkt: LocalDate
+    val skjæringstidspunkt: LocalDate,
 )
 
 data class OverstyringArbeidsforholdDto(
@@ -46,5 +46,5 @@ data class OverstyringArbeidsforholdDto(
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
     val deaktivert: Boolean,
-    val skjæringstidspunkt: LocalDate
+    val skjæringstidspunkt: LocalDate,
 )

@@ -2,6 +2,8 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -13,8 +15,6 @@ import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class OverstyringTest {
     companion object {
@@ -33,6 +33,7 @@ internal class OverstyringTest {
                 grad = 100
             )
         )
+        private val OPPRETTET = LocalDate.now().atStartOfDay()
         private const val JSON = """{ "this_key_should_exist": "this_value_should_exist" }"""
     }
 
@@ -78,6 +79,7 @@ internal class OverstyringTest {
         orgnummer = ORGNUMMER,
         begrunnelse = BEGRUNNELSE,
         overstyrteDager = OVERSTYRTE_DAGER,
+        opprettet = OPPRETTET,
         json = JSON
     )
 
@@ -101,7 +103,8 @@ internal class OverstyringTest {
                 organisasjonsnummer = ORGNUMMER,
                 begrunnelse = BEGRUNNELSE,
                 overstyrteDager = OVERSTYRTE_DAGER,
-                saksbehandlerRef = OID
+                saksbehandlerRef = OID,
+                tidspunkt = OPPRETTET
             )
         }
     }

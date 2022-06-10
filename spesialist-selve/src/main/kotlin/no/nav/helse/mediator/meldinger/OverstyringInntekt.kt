@@ -1,16 +1,27 @@
 package no.nav.helse.mediator.meldinger
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.kommando.*
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
+import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
+import no.nav.helse.modell.kommando.PersisterOverstyringInntektCommand
+import no.nav.helse.modell.kommando.ReserverPersonCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 /**
  * Tar vare på overstyring av inntekt fra saksbehandler og sletter den opprinnelige oppgaven i påvente av nytt
@@ -30,6 +41,7 @@ internal class OverstyringInntekt(
     forklaring: String,
     månedligInntekt: Double,
     skjæringstidspunkt: LocalDate,
+    opprettet: LocalDateTime,
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
@@ -53,6 +65,7 @@ internal class OverstyringInntekt(
             forklaring = forklaring,
             månedligInntekt = månedligInntekt,
             skjæringstidspunkt = skjæringstidspunkt,
+            opprettet = opprettet,
             overstyringDao = overstyringDao
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao)
@@ -72,6 +85,7 @@ internal class OverstyringInntekt(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "overstyr_inntekt")
+                    it.requireKey("@opprettet")
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")
@@ -112,6 +126,7 @@ internal class OverstyringInntekt(
                 forklaring = packet["forklaring"].asText(),
                 månedligInntekt = packet["månedligInntekt"].asDouble(),
                 skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
+                opprettet = packet["@opprettet"].asLocalDateTime(),
                 json = packet.toJson(),
                 context = context
             )

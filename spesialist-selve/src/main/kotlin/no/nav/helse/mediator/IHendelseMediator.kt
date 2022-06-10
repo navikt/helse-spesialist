@@ -1,5 +1,8 @@
 package no.nav.helse.mediator
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -8,9 +11,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal interface IHendelseMediator {
     fun vedtaksperiodeEndret(
@@ -81,17 +81,20 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
-    fun overstyringTidslinje(id: UUID,
-                             fødselsnummer: String,
-                             oid: UUID,
-                             navn: String,
-                             ident: String,
-                             epost: String,
-                             orgnummer: String,
-                             begrunnelse: String,
-                             overstyrteDager: List<OverstyringDagDto>,
-                             json: String,
-                             context: MessageContext)
+    fun overstyringTidslinje(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        orgnummer: String,
+        begrunnelse: String,
+        overstyrteDager: List<OverstyringDagDto>,
+        opprettet: LocalDateTime,
+        json: String,
+        context: MessageContext
+    )
 
     fun overstyringInntekt(
         id: UUID,
@@ -105,6 +108,7 @@ internal interface IHendelseMediator {
         forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String,
         context: MessageContext
     )
@@ -119,6 +123,7 @@ internal interface IHendelseMediator {
         organisasjonsnummer: String,
         overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String,
         context: MessageContext
     )

@@ -347,6 +347,7 @@ internal class HendelseMediator(
         orgnummer: String,
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
+        opprettet: LocalDateTime,
         json: String,
         context: MessageContext
     ) {
@@ -360,6 +361,7 @@ internal class HendelseMediator(
             orgnummer = orgnummer,
             begrunnelse = begrunnelse,
             overstyrteDager = overstyrteDager,
+            opprettet = opprettet,
             json = json
         ), context)
     }
@@ -376,6 +378,7 @@ internal class HendelseMediator(
         forklaring: String,
         månedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String,
         context: MessageContext
     ) {
@@ -392,6 +395,7 @@ internal class HendelseMediator(
                 forklaring = forklaring,
                 månedligInntekt = månedligInntekt,
                 skjæringstidspunkt = skjæringstidspunkt,
+                opprettet = opprettet,
                 json = json
             ), context
         )
@@ -407,6 +411,7 @@ internal class HendelseMediator(
         organisasjonsnummer: String,
         overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
         json: String,
         context: MessageContext
     ) {
@@ -421,6 +426,7 @@ internal class HendelseMediator(
                 organisasjonsnummer = organisasjonsnummer,
                 overstyrteArbeidsforhold = overstyrteArbeidsforhold,
                 skjæringstidspunkt = skjæringstidspunkt,
+                opprettet = opprettet,
                 json = json
             ), context
         )
