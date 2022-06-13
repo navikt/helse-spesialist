@@ -22,6 +22,9 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingInntektCommand
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 
 /**
  * Tar vare på overstyring av inntekt fra saksbehandler og sletter den opprinnelige oppgaven i påvente av nytt
@@ -45,7 +48,9 @@ internal class OverstyringInntekt(
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
-    overstyringDao: OverstyringDao
+    overstyringDao: OverstyringDao,
+    oppgaveDao: OppgaveDao,
+    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -67,6 +72,13 @@ internal class OverstyringInntekt(
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
             overstyringDao = overstyringDao
+        ),
+        PersisterTotrinnsvurderingInntektCommand(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = orgnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao)
     )

@@ -78,6 +78,7 @@ import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.overstyring.OverstyringApiDao
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -167,6 +168,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val reservasjonDao = ReservasjonDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
     protected val vergemålDao = VergemålDao(dataSource)
+    protected val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
@@ -211,6 +213,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
         vergemålDao = vergemålDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,

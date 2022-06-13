@@ -110,7 +110,8 @@ internal abstract class AbstractDatabaseTest {
                 "arbeidsgiver",
                 "arbeidsgiver_bransjer",
                 "arbeidsgiver_navn",
-                "periodehistorikk"
+                "periodehistorikk",
+                "overstyrt_vedtaksperiode"
             )
         )
         tabeller.forEach {

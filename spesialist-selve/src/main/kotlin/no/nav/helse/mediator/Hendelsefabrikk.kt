@@ -47,6 +47,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -62,6 +63,7 @@ internal class Hendelsefabrikk(
     private val vedtakDao: VedtakDao,
     private val warningDao: WarningDao,
     private val oppgaveDao: OppgaveDao,
+    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
     private val commandContextDao: CommandContextDao,
     private val reservasjonDao: ReservasjonDao,
     private val tildelingDao: TildelingDao,
@@ -146,7 +148,8 @@ internal class Hendelsefabrikk(
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             utbetalingDao = utbetalingDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
         )
     }
 
@@ -254,7 +257,9 @@ internal class Hendelsefabrikk(
         json = json,
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
-        overstyringDao = overstyringDao
+        overstyringDao = overstyringDao,
+        oppgaveDao = oppgaveDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
     )
 
     override fun overstyringTidslinje(json: String): OverstyringTidslinje {
@@ -304,6 +309,8 @@ internal class Hendelsefabrikk(
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
         opprettet = opprettet,
+        oppgaveDao = oppgaveDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         json = json
     )
 
@@ -333,6 +340,8 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
+        oppgaveDao = oppgaveDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         json = json
     )
 

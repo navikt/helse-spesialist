@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.overstyring.Dagtype
+import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.vedtaksperiode.Inntektskilde as InntektskildeForApi
 import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
 
@@ -519,7 +521,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `henter ut tidligere saksbehandlerOid`() {
-
         val tidligereSaksbehandlerOid = UUID.randomUUID()
 
         opprettPerson()
@@ -530,6 +531,138 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, false, tidligereSaksbehandlerOid)
 
         assertEquals(tidligereSaksbehandlerOid, oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `overstyr inntekt - utbetalt 2 perioder, finner vedtaksperiodeId_2`() {
+        val vedtaksperiodeId_1 = UUID.randomUUID()
+        val vedtaksperiodeId_2 = UUID.randomUUID()
+
+        opprettPerson()
+        opprettArbeidsgiver()
+
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
+        val oppgaveId_1 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_1)!!
+        oppgaveDao.updateOppgave(oppgaveId_1, Ferdigstilt)
+
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_2, fom = TOM.plusDays(1), tom = TOM.plusDays(10))
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_2)
+        val oppgaveId_2 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_2)!!
+        oppgaveDao.updateOppgave(oppgaveId_2, Ferdigstilt)
+
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)
+        assertEquals(vedtaksperiodeId, vedtaksperiodeId_2)
+    }
+
+    @Test
+    fun `overstyr inntekt - ingen utbetalte perioder, finner for aktiv oppgave`() {
+        val vedtaksperiodeId_1 = UUID.randomUUID()
+
+        opprettPerson()
+        opprettArbeidsgiver()
+
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
+
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)
+        assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
+    }
+
+    @Test
+    fun `overstyr inntekt - utbetalt 1 av 2 perioder, finner vedtaksperiodeId_1`() {
+        val vedtaksperiodeId_1 = UUID.randomUUID()
+        val vedtaksperiodeId_2 = UUID.randomUUID()
+
+        opprettPerson()
+        opprettArbeidsgiver()
+
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
+        val oppgaveId_1 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_1)!!
+        oppgaveDao.updateOppgave(oppgaveId_1, Ferdigstilt)
+
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_2, fom = TOM.plusDays(1), tom = TOM.plusDays(10))
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_2)
+
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)
+        assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
+    }
+
+    @Test
+    fun `overstyr arbeidsforhold - finner neste aktive vedtaksperiode for skjæringstidspunkt`() {
+        val vedtaksperiodeId_1 = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
+        val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeIdForSkjæringstidspunkt(FNR, FOM)
+        assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
+    }
+
+    @Test
+    fun `overstyr tidslinje - finner vedtaksperiodeId for periode med dager på fom`() {
+        val overstyrteDager = listOf(OverstyringDagDto(dato = FOM, type = Dagtype.Sykedag, grad = 100))
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertEquals(
+            VEDTAKSPERIODE,
+            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
+        )
+    }
+
+    @Test
+    fun `overstyr tidslinje - finner vedtaksperiodeId for periode med dager etter fom men før TOM`() {
+        val overstyrteDager = listOf(OverstyringDagDto(dato = TOM.minusDays(1), type = Dagtype.Sykedag, grad = 100))
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertEquals(
+            VEDTAKSPERIODE,
+            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
+        )
+    }
+
+    @Test
+    fun `overstyr tidslinje - finner vedtaksperiodeId for periode med dager på TOM`() {
+        val overstyrteDager = listOf(OverstyringDagDto(dato = TOM, type = Dagtype.Sykedag, grad = 100))
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertEquals(
+            VEDTAKSPERIODE,
+            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
+        )
+    }
+
+    @Test
+    fun `overstyr tidslinje - finner ikke vedtaksperiodeId for periode med dager før fom`() {
+        val overstyrteDager = listOf(OverstyringDagDto(dato = FOM.minusDays(1), type = Dagtype.Sykedag, grad = 100))
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertNotEquals(
+            VEDTAKSPERIODE,
+            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
+        )
+    }
+
+    @Test
+    fun `overstyr tidslinje - finner ikke vedtaksperiodeId for periode etter tom`() {
+        val overstyrteDager = listOf(OverstyringDagDto(dato = TOM.plusDays(1), type = Dagtype.Sykedag, grad = 100))
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        assertNotEquals(
+            VEDTAKSPERIODE,
+            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
+        )
     }
 
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {

@@ -50,6 +50,7 @@ import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -91,7 +92,8 @@ internal class Godkjenningsbehov(
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao,
-    oppgaveDao: OppgaveDao
+    oppgaveDao: OppgaveDao,
+    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao
 ) : Hendelse, MacroCommand() {
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
         val utbetaling = snapshotDao.finnUtbetaling(
@@ -224,7 +226,8 @@ internal class Godkjenningsbehov(
         TrengerTotrinnsvurderingCommand(
             vedtaksperiodeId = vedtaksperiodeId,
             warningDao = warningDao,
-            oppgaveDao = oppgaveDao
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao= overstyrtVedtaksperiodeDao
         )
     )
 

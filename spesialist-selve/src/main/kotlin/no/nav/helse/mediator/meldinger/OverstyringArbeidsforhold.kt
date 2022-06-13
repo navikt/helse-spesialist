@@ -23,6 +23,9 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingArbeidsforholdCommand
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 
 internal class OverstyringArbeidsforhold(
     override val id: UUID,
@@ -38,7 +41,9 @@ internal class OverstyringArbeidsforhold(
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
-    overstyringDao: OverstyringDao
+    overstyringDao: OverstyringDao,
+    oppgaveDao: OppgaveDao,
+    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -57,6 +62,12 @@ internal class OverstyringArbeidsforhold(
             skjæringstidspunkt = skjæringstidspunkt,
             overstyringDao = overstyringDao,
             opprettet = opprettet
+        ),
+        PersisterTotrinnsvurderingArbeidsforholdCommand(
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, organisasjonsnummer, saksbehandlerDao)
     )

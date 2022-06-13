@@ -10,6 +10,7 @@ import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 
 import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,12 +24,14 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val overstyrtVedtaksperiodeDao = mockk<OverstyrtVedtaksperiodeDao>(relaxed = true)
     private lateinit var context: CommandContext
 
     private val command = TrengerTotrinnsvurderingCommand(
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         warningDao = warningDao,
-        oppgaveDao = oppgaveDao
+        oppgaveDao = oppgaveDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
     )
 
     @BeforeEach

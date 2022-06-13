@@ -79,7 +79,8 @@ internal class SaksbehandlerløsningTest {
         arbeidsforholdDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),
         opptegnelseDao = mockk(relaxed = true),
-        vergemålDao = mockk(relaxed = true)
+        vergemålDao = mockk(relaxed = true),
+        overstyrtVedtaksperiodeDao = mockk(relaxed = true)
     )
 
     private val godkjenningsbehov = UtbetalingsgodkjenningMessage(GODKJENNINGSBEHOV_JSON)

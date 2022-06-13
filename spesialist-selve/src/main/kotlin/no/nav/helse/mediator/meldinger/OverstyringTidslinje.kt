@@ -22,6 +22,9 @@ import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingTidslinjeCommand
+import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 
 /**
  * Tar vare på overstyring fra saksbehandler og sletter den opprinnelige oppgaven i påvente av nytt
@@ -43,7 +46,9 @@ internal class OverstyringTidslinje(
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
-    overstyringDao: OverstyringDao
+    overstyringDao: OverstyringDao,
+    oppgaveDao: OppgaveDao,
+    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -63,6 +68,13 @@ internal class OverstyringTidslinje(
             overstyrteDager = overstyrteDager,
             overstyringDao = overstyringDao,
             opprettet = opprettet,
+        ),
+        PersisterTotrinnsvurderingTidslinjeCommand(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = orgnummer,
+            overstyrteDager = overstyrteDager,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao)
     )
