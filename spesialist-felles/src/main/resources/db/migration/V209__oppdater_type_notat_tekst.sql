@@ -1,0 +1,2 @@
+ALTER TABLE notat
+    ALTER COLUMN tekst TYPE TEXT;
