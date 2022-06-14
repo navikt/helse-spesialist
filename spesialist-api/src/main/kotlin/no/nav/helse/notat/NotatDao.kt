@@ -84,6 +84,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             saksbehandlerOid = UUID.fromString(it.string("oid")),
             saksbehandlerNavn = it.string("navn"),
             saksbehandlerEpost = it.string("epost"),
+            saksbehandlerIdent = it.string("ident"),
             vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
             feilregistrert = it.boolean("feilregistrert"),
             feilregistrert_tidspunkt = it.localDateTimeOrNull("feilregistrert_tidspunkt"),
