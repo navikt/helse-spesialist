@@ -150,6 +150,9 @@ internal class HendelseMediator(
         val contextId = oppgaveDao.finnContextId(godkjenningDTO.oppgavereferanse)
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
+        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
+        val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
+        val reserverPersonOid = if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler else oid
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
                 "event_name" to "behov",
@@ -179,7 +182,7 @@ internal class HendelseMediator(
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
         val internOppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
-        internOppgaveMediator.reserverOppgave(oid, fødselsnummer)
+        internOppgaveMediator.reserverOppgave(reserverPersonOid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
     }
