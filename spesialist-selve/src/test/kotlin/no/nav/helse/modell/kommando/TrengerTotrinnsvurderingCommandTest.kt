@@ -3,13 +3,14 @@ package no.nav.helse.modell.kommando
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-
-import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.overstyring.OverstyringType
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -23,14 +24,14 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val overstyrtVedtaksperiodeDao = mockk<OverstyrtVedtaksperiodeDao>(relaxed = true)
     private lateinit var context: CommandContext
 
     private val command = TrengerTotrinnsvurderingCommand(
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         warningDao = warningDao,
-        oppgaveDao = oppgaveDao,
+        oppgaveMediator = oppgaveMediator,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
     )
 
@@ -40,17 +41,29 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trenger totrinnsvudering dersom oppgaven har endring`() {
-        every { oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE_ID) } returns true
+    fun `Setter trenger totrinnsvudering dersom oppgaven har blitt overstyrt`() {
+        every { warningDao.finnAktiveWarningsMedMelding(any(), any()) } returns listOf(
+            Warning(
+                melding = "melding",
+                kilde = WarningKilde.Spesialist,
+                opprettet = LocalDateTime.now(),
+            )
+        )
 
         assertTrue(command.execute(context))
+        verify(exactly = 1) {
+            oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
+        }
     }
 
     @Test
-    fun `Setter trenger totrinnsvudering dersom oppgaven ikke har endring`() {
-        every { oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE_ID) } returns false
+    fun `Setter trenger totrinnsvudering dersom oppgaven ikke har blitt overstyrt`() {
+        every { overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
+        verify(exactly = 1) {
+            oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
+        }
     }
 
     @Test

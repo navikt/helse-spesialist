@@ -7,6 +7,7 @@ import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.overstyring.OverstyringType
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +44,7 @@ internal class PersisterTotrinnsvurderingInntektCommandTest {
         command.execute(context)
 
         verify(exactly = 1) {
-            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(VEDTAKSPERIODE_ID)
+            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(VEDTAKSPERIODE_ID, OverstyringType.Inntekt)
         }
     }
 
@@ -60,7 +61,7 @@ internal class PersisterTotrinnsvurderingInntektCommandTest {
         command.execute(context)
 
         verify(exactly = 0) {
-            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any())
+            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any(), any())
         }
     }
 }

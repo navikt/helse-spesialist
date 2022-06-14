@@ -21,12 +21,17 @@ class OppgaveMediator(
 ) {
     private val oppgaver = mutableSetOf<Oppgave>()
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
+    private val oppgaverTilTotrinnsvurdering = mutableSetOf<Oppgave>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) = oppgaveDao.finnOppgaver(saksbehandlerTilganger)
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)
+    }
+
+    fun alleUlagredeOppgaverTilTotrinnsvurdering() {
+        oppgaverTilTotrinnsvurdering.addAll(oppgaver)
     }
 
     fun tildel(oppgaveId: Long, saksbehandleroid: UUID): Boolean {
@@ -132,6 +137,7 @@ class OppgaveMediator(
         oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId, hendelseId) }
         doAlso()
         oppgaver.clear()
+        oppgaverTilTotrinnsvurdering.onEach { oppgave -> oppgave.trengerTotrinnsvurdering(this) }.clear()
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
             messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).second.toJson())
         }.clear()
@@ -140,6 +146,10 @@ class OppgaveMediator(
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 
     fun erBeslutteroppgave(oppgaveId: Long) = oppgaveDao.erBeslutteroppgave(oppgaveId)
+
+    fun trengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.trengerTotrinnsvurdering(oppgaveId)
+
+    fun setTrengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.setTrengerTotrinnsvurdering(oppgaveId)
 
     fun setBeslutterOppgave(
         oppgaveId: Long,

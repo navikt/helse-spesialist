@@ -7,14 +7,16 @@ import no.nav.helse.HelseDao
 
 class OverstyrtVedtaksperiodeDao(private val dataSource: DataSource) : HelseDao(dataSource)  {
 
-    fun erVedtaksperiodeOverstyrt(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
-        """ SELECT EXISTS ( SELECT 1 FROM overstyrt_vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiode_id ) 
-        """.single(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { it.boolean(1) } ?: false
+    fun hentVedtaksperiodeOverstyrtTyper(vedtaksperiodeId: UUID): List<OverstyringType> = sessionOf(dataSource).use {
+        """ SELECT type FROM overstyrt_vedtaksperiode 
+            WHERE vedtaksperiode_id = :vedtaksperiode_id
+            AND ferdigstilt = false
+        """.list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { OverstyringType.valueOf(it.string("type")) }
     }
 
-    fun lagreOverstyrtVedtaksperiode(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
-        """ INSERT INTO overstyrt_vedtaksperiode (vedtaksperiode_id)
-            VALUES (:vedtaksperiode_id)
-        """.update(mapOf("vedtaksperiode_id" to vedtaksperiodeId))
+    fun lagreOverstyrtVedtaksperiode(vedtaksperiodeId: UUID, type: OverstyringType) = sessionOf(dataSource).use {
+        """ INSERT INTO overstyrt_vedtaksperiode (vedtaksperiode_id, type)
+            VALUES (:vedtaksperiode_id, :type::overstyringtype)
+        """.update(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "type" to type.name))
     }
 }

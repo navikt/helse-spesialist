@@ -444,29 +444,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `oppgave har endring dersom personen er reservert`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-        opprettReservasjon()
-
-        assertTrue(oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `oppgave har ikke endring dersom personen ikke er reservert`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        opprettSaksbehandler()
-
-        assertFalse(oppgaveDao.harOppgaveMedEndring(VEDTAKSPERIODE))
-    }
-
-    @Test
     fun `setter ikke trenger Totrinnsvurdering`() {
         opprettPerson()
         opprettArbeidsgiver()

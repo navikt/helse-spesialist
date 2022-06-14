@@ -148,7 +148,6 @@ internal class Hendelsefabrikk(
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             utbetalingDao = utbetalingDao,
-            oppgaveDao = oppgaveDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
         )
     }

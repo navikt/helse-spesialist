@@ -9,6 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyringType
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -51,7 +52,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
         command.execute(context)
 
         verify(exactly = 1) {
-            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(VEDTAKSPERIODE_ID)
+            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(VEDTAKSPERIODE_ID, OverstyringType.Dager)
         }
     }
 
@@ -68,7 +69,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
         command.execute(context)
 
         verify(exactly = 0) {
-            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any())
+            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any(), any())
         }
     }
 
@@ -88,7 +89,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
             oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(any(), any(), any())
         }
         verify(exactly = 0) {
-            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any())
+            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any(), any())
         }
     }
 }

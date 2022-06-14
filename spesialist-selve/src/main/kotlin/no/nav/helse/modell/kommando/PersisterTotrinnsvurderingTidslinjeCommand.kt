@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyringType
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import org.slf4j.LoggerFactory
 
@@ -25,7 +26,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommand(
 
         if(vedtaksperiodeId != null) {
             sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag")
-            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(vedtaksperiodeId)
+            overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(vedtaksperiodeId, OverstyringType.Dager)
         } else {
             sikkerLogg.info("Fant ikke vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag ")
         }

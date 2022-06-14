@@ -74,6 +74,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             AND status = 'AvventerSaksbehandler'::oppgavestatus   
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("totrinnsvurdering") } ?: false
 
+    fun trengerTotrinnsvurdering(oppgaveId: Long): Boolean =
+        """ SELECT totrinnsvurdering FROM oppgave
+            WHERE id = :oppgaveId
+            AND status = 'AvventerSaksbehandler'::oppgavestatus   
+        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("totrinnsvurdering") } ?: false
+
     fun hentTidligereSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? =
         """ SELECT tidligere_saksbehandler_oid FROM oppgave
             WHERE vedtak_ref =
@@ -389,11 +395,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use {
             @Language("PostgreSQL")
             val query =
-                """ UPDATE oppgave o
+                """ UPDATE oppgave
                     SET totrinnsvurdering=true
-                    WHERE o.vedtak_ref = 
+                    WHERE vedtak_ref = 
                     (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
-                    AND o.status = 'AvventerSaksbehandler'::oppgavestatus
+                    AND status = 'AvventerSaksbehandler'::oppgavestatus
             """
             it.run(
                 queryOf(
@@ -403,25 +409,21 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun harOppgaveMedEndring(vedtaksperiodeId: UUID): Boolean =
-        requireNotNull(sessionOf(dataSource).use { session ->
+    fun setTrengerTotrinnsvurdering(oppgaveId: Long): Long? =
+        sessionOf(dataSource, returnGeneratedKey = true).use {
             @Language("PostgreSQL")
             val query =
-                """ SELECT EXISTS (
-                        SELECT o.id
-                        FROM oppgave o
-                        INNER JOIN vedtak v ON o.vedtak_ref = v.id
-                        INNER JOIN reserver_person rp ON v.person_ref = rp.person_ref
-                        WHERE v.vedtaksperiode_id = ?
-                    )
-                """
-            session.run(
+                """ UPDATE oppgave
+                    SET totrinnsvurdering=true
+                    WHERE id = ?
+            """
+            it.run(
                 queryOf(
                     query,
-                    vedtaksperiodeId,
-                ).map { it.boolean(1) }.asSingle
+                    oppgaveId,
+                ).asUpdateAndReturnGeneratedKey
             )
-        })
+        }
 
     private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
         oppgavereferanse = it.string("oppgave_id"),
