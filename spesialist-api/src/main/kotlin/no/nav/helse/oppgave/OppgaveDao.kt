@@ -71,34 +71,40 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """ SELECT totrinnsvurdering FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus   
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("totrinnsvurdering") } ?: false
 
     fun hentTidligereSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? =
         """ SELECT tidligere_saksbehandler_oid FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+             AND status = 'AvventerSaksbehandler'::oppgavestatus   
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
 
     fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean =
         """ SELECT er_beslutter_oppgave FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus  
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutter_oppgave") } ?: false
 
     fun erBeslutteroppgave(oppgaveId: Long): Boolean =
         """ SELECT er_beslutter_oppgave FROM oppgave
             WHERE id=:oppgaveId
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutter_oppgave") } ?: false
 
     fun erReturOppgave(vedtaksperiodeId: UUID): Boolean =
         """ SELECT er_retur_oppgave FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus    
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") } ?: false
 
     fun erReturoppgave(oppgaveId: Long): Boolean =
         """ SELECT er_retur_oppgave FROM oppgave
             WHERE id=:oppgaveId
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_retur_oppgave") } ?: false
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
