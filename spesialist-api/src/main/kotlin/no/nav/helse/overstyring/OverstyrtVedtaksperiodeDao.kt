@@ -19,4 +19,11 @@ class OverstyrtVedtaksperiodeDao(private val dataSource: DataSource) : HelseDao(
             VALUES (:vedtaksperiode_id, :type::overstyringtype)
         """.update(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "type" to type.name))
     }
+
+    fun ferdigstillOverstyringAvVedtaksperiode(vedtaksperiodeId: UUID) = sessionOf(dataSource).use {
+        """ UPDATE overstyrt_vedtaksperiode
+            SET ferdigstilt=true
+            WHERE vedtaksperiode_id=:vedtaksperiode_id
+        """.update(mapOf("vedtaksperiode_id" to vedtaksperiodeId))
+    }
 }

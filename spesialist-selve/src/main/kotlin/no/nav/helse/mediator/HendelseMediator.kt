@@ -59,6 +59,7 @@ import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.overstyringsteller
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -82,6 +83,7 @@ internal class HendelseMediator(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
+    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
@@ -185,6 +187,9 @@ internal class HendelseMediator(
         internOppgaveMediator.reserverOppgave(reserverPersonOid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
+
+        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
+        overstyrtVedtaksperiodeDao.ferdigstillOverstyringAvVedtaksperiode(vedtaksperiodeId)
     }
 
     internal fun erBeslutteroppgaveOgErTidligereSaksbehandler(
