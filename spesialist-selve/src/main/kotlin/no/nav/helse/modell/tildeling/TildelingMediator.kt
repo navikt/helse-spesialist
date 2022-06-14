@@ -1,10 +1,10 @@
 package no.nav.helse.modell.tildeling
 
+import java.util.UUID
 import no.nav.helse.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
-import java.util.*
 import org.slf4j.LoggerFactory
 
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
@@ -29,7 +29,8 @@ internal class TildelingMediator(
 
     internal fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID) {
         val kanIkkeAttestere = hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)
-        if (kanIkkeAttestere) {
+        val erDev = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
+        if (kanIkkeAttestere && !erDev) {
             throw RuntimeException("Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning")
         }
 
