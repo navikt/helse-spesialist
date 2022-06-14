@@ -389,11 +389,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use {
             @Language("PostgreSQL")
             val query =
-                """  UPDATE oppgave o 
-                     SET totrinnsvurdering=true 
-                     FROM vedtak v
-                     WHERE o.vedtak_ref = v.id 
-                     AND v.vedtaksperiode_id = ?
+                """ UPDATE oppgave o
+                    SET totrinnsvurdering=true
+                    WHERE o.vedtak_ref = 
+                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
+                    AND o.status = 'AvventerSaksbehandler'::oppgavestatus
             """
             it.run(
                 queryOf(
