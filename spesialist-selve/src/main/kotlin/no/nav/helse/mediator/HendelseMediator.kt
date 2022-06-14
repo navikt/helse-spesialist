@@ -28,6 +28,7 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.InnhentSkjermetinfo
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -48,6 +49,7 @@ import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -76,6 +78,7 @@ internal class HendelseMediator(
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
+    private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
@@ -122,6 +125,7 @@ internal class HendelseMediator(
             VedtaksperiodeReberegnet.River(it, this)
             RevurderingAvvist.River(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
+            InnhentSkjermetinfo.River(it, this, personDao, egenAnsattDao)
         }
     }
 
@@ -485,6 +489,10 @@ internal class HendelseMediator(
 
     override fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
+    }
+
+    override fun innhentSkjermetinfo(message: JsonMessage, context: MessageContext) {
+        utfør(hendelsefabrikk.innhentSkjermetinfo(message.toJson()), context)
     }
 
     override fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {

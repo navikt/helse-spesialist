@@ -110,6 +110,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
             REVURDERING_AVVIST -> hendelsefabrikk.revurderingAvvist(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
+            INNHENT_SKJERMETINFO -> hendelsefabrikk.innhentSkjermetinfo(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -127,6 +128,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
         is RevurderingAvvist -> REVURDERING_AVVIST
         is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
+        is InnhentSkjermetinfo -> INNHENT_SKJERMETINFO
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -134,6 +136,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
-        GOSYS_OPPGAVE_ENDRET
+        GOSYS_OPPGAVE_ENDRET, INNHENT_SKJERMETINFO
     }
 }

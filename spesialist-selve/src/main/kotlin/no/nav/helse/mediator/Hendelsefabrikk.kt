@@ -11,6 +11,7 @@ import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
+import no.nav.helse.mediator.meldinger.InnhentSkjermetinfo
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -531,6 +532,16 @@ internal class Hendelsefabrikk(
             json = json,
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao
+        )
+    }
+
+    override fun innhentSkjermetinfo(json: String): InnhentSkjermetinfo {
+        val jsonNode = mapper.readTree(json)
+        return InnhentSkjermetinfo(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            json = json,
+            egenAnsattDao = egenAnsattDao,
         )
     }
 
