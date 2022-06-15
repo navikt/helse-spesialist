@@ -107,7 +107,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
             UTBETALING_ENDRET -> hendelsefabrikk.utbetalingEndret(json)
             OPPDATER_PERSONSNAPSHOT -> hendelsefabrikk.oppdaterPersonsnapshot(json)
-            OPPDATER_SNAPSHOT_MED_WARNINGS -> hendelsefabrikk.oppdaterPersonsnapshotMedWarnings(json)
             VEDTAKSPERIODE_REBEREGNET -> hendelsefabrikk.vedtaksperiodeReberegnet(json)
             REVURDERING_AVVIST -> hendelsefabrikk.revurderingAvvist(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
@@ -125,7 +124,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
         is OppdaterPersonsnapshot -> OPPDATER_PERSONSNAPSHOT
-        is OppdaterPersonsnapshotMedWarnings -> OPPDATER_SNAPSHOT_MED_WARNINGS
         is UtbetalingEndret -> UTBETALING_ENDRET
         is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
         is RevurderingAvvist -> REVURDERING_AVVIST
@@ -136,7 +134,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     private enum class Hendelsetype {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
-        SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, OPPDATER_SNAPSHOT_MED_WARNINGS, UTBETALING_ENDRET,
+        SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
         GOSYS_OPPGAVE_ENDRET, INNHENT_SKJERMETINFO
     }

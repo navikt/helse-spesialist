@@ -37,7 +37,7 @@ internal class OppdaterSnapshotCommandTest {
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val context = CommandContext(UUID.randomUUID())
 
-    private val command = OppdaterSnapshotMedWarningsCommand(
+    private val command = OppdaterSnapshotCommand(
         snapshotClient = snapshotClient,
         snapshotDao = snapshotDao,
         vedtaksperiodeId = VEDTAKSPERIODE,

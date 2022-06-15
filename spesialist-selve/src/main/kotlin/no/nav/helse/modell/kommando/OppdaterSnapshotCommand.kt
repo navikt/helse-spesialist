@@ -8,7 +8,7 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Warning
 import org.slf4j.LoggerFactory
 
-internal class OppdaterSnapshotMedWarningsCommand(
+internal class OppdaterSnapshotCommand(
     private val snapshotClient: SnapshotClient,
     private val snapshotDao: SnapshotDao,
     private val vedtaksperiodeId: UUID,
@@ -18,7 +18,7 @@ internal class OppdaterSnapshotMedWarningsCommand(
 ) : Command {
 
     private companion object {
-        private val log = LoggerFactory.getLogger(OppdaterSnapshotMedWarningsCommand::class.java)
+        private val log = LoggerFactory.getLogger(OppdaterSnapshotCommand::class.java)
         private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
     }
 

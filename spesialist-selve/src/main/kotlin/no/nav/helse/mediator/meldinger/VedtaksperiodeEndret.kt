@@ -8,7 +8,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotMedWarningsCommand
+import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -31,7 +31,7 @@ internal class VedtaksperiodeEndret(
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSpeilSnapshotCommand(),
-        OppdaterSnapshotMedWarningsCommand(
+        OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,

@@ -9,7 +9,6 @@ import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.InnhentSkjermetinfo
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
-import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotMedWarnings
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
@@ -143,7 +142,6 @@ internal interface IHendelsefabrikk {
     fun utbetalingAnnullert(json: String): UtbetalingAnnullert
     fun utbetalingEndret(json: String): UtbetalingEndret
     fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot
-    fun oppdaterPersonsnapshotMedWarnings(json: String): OppdaterPersonsnapshotMedWarnings
     fun innhentSkjermetinfo(json: String): InnhentSkjermetinfo
     fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet
     fun gosysOppgaveEndret(json: String): GosysOppgaveEndret
