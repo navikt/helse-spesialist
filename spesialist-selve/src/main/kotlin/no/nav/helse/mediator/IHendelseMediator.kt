@@ -147,6 +147,12 @@ internal interface IHendelseMediator {
         context: MessageContext
     )
 
+    fun oppdaterPersonsnapshotMedWarnings(
+        message: JsonMessage,
+        fødselsnummer: String,
+        context: MessageContext
+    )
+
     fun innhentSkjermetinfo(
         message: JsonMessage,
         context: MessageContext

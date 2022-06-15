@@ -30,6 +30,7 @@ import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.InnhentSkjermetinfo
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
+import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshotMedWarnings
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
@@ -121,6 +122,7 @@ internal class HendelseMediator(
             Risikovurderingløsning.V2River(it, this)
             UtbetalingAnnullert.UtbetalingAnnullertRiver(it, this)
             OppdaterPersonsnapshot.River(it, this)
+            OppdaterPersonsnapshotMedWarnings.River(it, this)
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
             RevurderingAvvist.River(it, this)
@@ -489,6 +491,14 @@ internal class HendelseMediator(
 
     override fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
+    }
+
+    override fun oppdaterPersonsnapshotMedWarnings(
+        message: JsonMessage,
+        fødselsnummer: String,
+        context: MessageContext
+    ) {
+        utfør(hendelsefabrikk.oppdaterPersonsnapshotMedWarnings(message.toJson()), context)
     }
 
     override fun innhentSkjermetinfo(message: JsonMessage, context: MessageContext) {

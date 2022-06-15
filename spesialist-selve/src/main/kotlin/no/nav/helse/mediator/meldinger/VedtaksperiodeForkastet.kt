@@ -11,7 +11,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
+import no.nav.helse.modell.kommando.OppdaterSnapshotMedWarningsCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.oppgave.OppgaveMediator
@@ -38,7 +38,7 @@ internal class VedtaksperiodeForkastet(
     override val commands: List<Command> = listOf(
         AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator),
         OppdaterSpeilSnapshotCommand(),
-        OppdaterSnapshotCommand(
+        OppdaterSnapshotMedWarningsCommand(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
             vedtaksperiodeId = vedtaksperiodeId,
