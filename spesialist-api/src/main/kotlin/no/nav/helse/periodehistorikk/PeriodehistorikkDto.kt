@@ -15,4 +15,5 @@ data class PeriodehistorikkDto(
 enum class PeriodehistorikkType {
     TOTRINNSVURDERING_TIL_GODKJENNING,
     TOTRINNSVURDERING_RETUR,
+    TOTRINNSVURDERING_ATTESTERT,
 }

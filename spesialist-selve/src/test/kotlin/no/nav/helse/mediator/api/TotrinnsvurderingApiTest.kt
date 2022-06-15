@@ -38,11 +38,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     private val totrinnsvurderingDto = TotrinnsvurderingDto(
         oppgavereferanse = 1L,
-        periodeId = UUID.randomUUID()
+        beregningId = UUID.randomUUID()
     )
     private val returDtoMedNotat = TotrinnsvurderingReturDto(
         oppgavereferanse = 1L,
-        periodeId = UUID.randomUUID(),
+        beregningId = UUID.randomUUID(),
         notat = NotatApiDto("notat_tekst", NotatType.Retur)
     )
 
@@ -92,7 +92,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             periodehistorikkDao.lagre(
                 PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
                 SAKSBEHANDLER_OID,
-                totrinnsvurderingDto.periodeId,
+                totrinnsvurderingDto.beregningId,
                 null
             )
         }
