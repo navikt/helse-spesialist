@@ -1,7 +1,10 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringType
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
@@ -17,6 +20,24 @@ internal class TrengerTotrinnsvurderingCommand(
     private companion object {
         private val logg = LoggerFactory.getLogger(TrengerTotrinnsvurderingCommand::class.java)
     }
+
+    private fun formaterTekst(årsaker: List<String>): String {
+        if(årsaker.size == 1) return årsaker.joinToString()
+        return årsaker.subList(0, årsaker.lastIndex)
+            .joinToString(separator = ", ")
+            .plus(" og ${årsaker.last()}")
+    }
+
+    internal fun getWarningtekst(overstyringer: List<OverstyringType>, medlemskap: Boolean): String {
+        val årsaker = mutableListOf<String>()
+        if(medlemskap) årsaker.add("Lovvalg og medlemskap")
+        if(overstyringer.contains(OverstyringType.Dager)) årsaker.add("Overstyring av utbetalingsdager")
+        if(overstyringer.contains(OverstyringType.Inntekt)) årsaker.add("Overstyring av inntekt")
+        if(overstyringer.contains(OverstyringType.Arbeidsforhold)) årsaker.add("Overstyring av annet arbeidsforhold")
+
+        return "Beslutteroppgave: ${formaterTekst(årsaker)}"
+    }
+
     override fun execute(context: CommandContext): Boolean {
         val harMedlemskapsvarsel = harMedlemskapsVarsel()
         val overstyringer = finnOverstyringerMedType()
@@ -24,6 +45,12 @@ internal class TrengerTotrinnsvurderingCommand(
         if (harMedlemskapsvarsel || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
             oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
+
+            warningDao.leggTilWarning(vedtaksperiodeId, Warning(
+                melding = getWarningtekst(overstyringer, harMedlemskapsvarsel),
+                kilde = WarningKilde.Spesialist,
+                opprettet = LocalDateTime.now()
+            ))
         }
 
         return true
