@@ -16,8 +16,6 @@ internal class EgenAnsattløsning(
         egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, opprettet)
     }
 
-    internal fun evaluer() = erEgenAnsatt
-
     internal class EgenAnsattRiver(
         rapidsConnection: RapidsConnection,
         private val hendelseMediator: HendelseMediator
@@ -41,7 +39,7 @@ internal class EgenAnsattløsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding EgenAnsatt: ", packet.toJson())
+            sikkerLogg.info("Mottok melding EgenAnsatt:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())

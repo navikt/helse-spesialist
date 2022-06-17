@@ -94,7 +94,7 @@ internal class ÅpneGosysOppgaverløsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding ÅpneOppgaverMessage: ", packet.toJson())
+            sikkerLogg.info("Mottok melding ÅpneOppgaverMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())

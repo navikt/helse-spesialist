@@ -73,7 +73,7 @@ internal class Risikovurderingløsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding RisikovurderingMessage: ", packet.toJson())
+            sikkerLogg.info("Mottok melding RisikovurderingMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val vedtaksperiodeId = UUID.fromString(packet["Risikovurdering.vedtaksperiodeId"].asText())
             val contextId = UUID.fromString(packet["contextId"].asText())

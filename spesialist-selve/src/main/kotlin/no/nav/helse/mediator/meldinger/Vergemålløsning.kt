@@ -38,7 +38,7 @@ internal class Vergemålløsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding Vergemål: ", packet.toJson())
+            sikkerLogg.info("Mottok melding Vergemål:\n{}", packet.toJson())
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()

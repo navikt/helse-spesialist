@@ -58,7 +58,7 @@ internal class DigitalKontaktinformasjonløsning(
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding DigitalKontaktinformasjonMessage: ", packet.toJson())
+            sikkerLogg.info("Mottok melding DigitalKontaktinformasjonMessage:\n{}", packet.toJson())
             val opprettet = packet["@opprettet"].asLocalDateTime()
             val contextId = UUID.fromString(packet["contextId"].asText())
             val hendelseId = UUID.fromString(packet["hendelseId"].asText())
