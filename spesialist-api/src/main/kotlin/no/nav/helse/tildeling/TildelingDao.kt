@@ -11,12 +11,12 @@ import org.intellij.lang.annotations.Language
 
 class TildelingDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
-    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID): Boolean {
+    fun opprettTildeling(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
         return sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = """
-                INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref)
-                VALUES (:oppgave_id_ref, :saksbehandler_ref);
+                INSERT INTO tildeling (oppgave_id_ref, saksbehandler_ref, på_vent)
+                VALUES (:oppgave_id_ref, :saksbehandler_ref, :paa_vent);
             """.trimIndent()
             session.transaction { tx ->
                 if (tx.tildelingForOppgave(oppgaveId) != null) false
@@ -26,6 +26,7 @@ class TildelingDao(private val dataSource: DataSource): HelseDao(dataSource) {
                             query, mapOf(
                                 "oppgave_id_ref" to oppgaveId,
                                 "saksbehandler_ref" to saksbehandleroid,
+                                "paa_vent" to påVent,
                             )
                         ).asUpdate
                     )

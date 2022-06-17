@@ -17,7 +17,7 @@ internal class ReserverPersonHvisTildeltCommand(
     override fun execute(context: CommandContext): Boolean {
         val tildelingDto = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
         sikkerLogg.info("Oppretter reservasjon for $fødselsnummer til ${tildelingDto.navn} pga eksisterende tildeling")
-        reservasjonDao.reserverPerson(tildelingDto.oid, fødselsnummer)
+        reservasjonDao.reserverPerson(tildelingDto.oid, fødselsnummer, tildelingDto.påVent)
         return true
     }
 }

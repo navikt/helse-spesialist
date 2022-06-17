@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import java.util.UUID
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.oppgave.Oppgavestatus
@@ -105,6 +106,28 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         vedtaksperiodeTilGodkjenning()
 
         assertEquals(saksbehandlerOid, finnOidForTildeling(OPPGAVEID))
+    }
+
+    @Test
+    fun `beholder påVent-flagget ved gjentildeling`() {
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
+        val saksbehandlerOid = UUID.randomUUID()
+
+        vedtaksperiodeTilGodkjenning()
+        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
+        tildelOppgave(saksbehandlerOid, påVent = true)
+
+        sendVedtaksperiodeEndret(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = "AVVENTER_HISTORIKK"
+        )
+        testRapid.reset()
+        vedtaksperiodeTilGodkjenning()
+
+        val (oid, påVent) = finnOidOgPåVentForTildeling(OPPGAVEID)!!
+        assertEquals(saksbehandlerOid, oid)
+        assertEquals(true, påVent) { "Ny oppgave skal være lagt på vent etter reberegning"}
     }
 
     @Test
@@ -271,28 +294,36 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         return godkjenningsmeldingId1
     }
 
-    private fun tildelOppgave(saksbehandlerOid: UUID) {
+    private fun tildelOppgave(saksbehandlerOid: UUID, påVent: Boolean = false) {
         sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref) VALUES(:oppgave_id_ref, :saksbehandler_ref);",
+                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, på_vent) VALUES(:oppgave_id_ref, :saksbehandler_ref, :paa_vent);",
                     mapOf(
                         "oppgave_id_ref" to OPPGAVEID,
-                        "saksbehandler_ref" to saksbehandlerOid
+                        "saksbehandler_ref" to saksbehandlerOid,
+                        "paa_vent" to påVent,
                     )
                 ).asUpdate
             )
         }
     }
 
-    private fun finnOidForTildeling(oppgaveId: Long) =
+    private fun finnOidForTildeling(oppgaveId: Long) = hentFraTildeling<UUID?>(oppgaveId) {
+        it.uuid("saksbehandler_ref")
+    }
+
+    private fun finnOidOgPåVentForTildeling(oppgaveId: Long) =
+        hentFraTildeling<Pair<UUID, Boolean>?>(oppgaveId) {
+            it.uuid("saksbehandler_ref") to it.boolean("på_vent")
+        }
+
+    private fun <T> hentFraTildeling(oppgaveId: Long, mapping: (Row) -> T) =
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM tildeling WHERE oppgave_id_ref=?;", oppgaveId
-                ).map {
-                    UUID.fromString(it.string("saksbehandler_ref"))
-                }.asSingle
+                ).map(mapping).asSingle
             )
         }
 

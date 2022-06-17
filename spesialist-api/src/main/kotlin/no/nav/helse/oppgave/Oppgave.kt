@@ -140,8 +140,8 @@ class Oppgave private constructor(
         status = Oppgavestatus.Invalidert
     }
 
-    fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID) {
-        oppgaveMediator.tildel(requireNotNull(id), saksbehandleroid)
+    fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, påVent: Boolean = false) {
+        oppgaveMediator.tildel(checkNotNull(id), saksbehandleroid, påVent)
     }
 
     fun lagrePeriodehistorikk(

@@ -17,6 +17,7 @@ import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
+import no.nav.helse.reservasjon.Reservasjonsinfo
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,7 +61,7 @@ internal class OppgaveMediatorTest {
 
     @Test
     fun `lagrer oppgaver`() {
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
@@ -80,19 +81,19 @@ internal class OppgaveMediatorTest {
     }
 
     @Test
-    fun `lagrer tildeling`() {
+    fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
         val oid = UUID.randomUUID()
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns oid
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
-        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid) }
+        verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, any()) }
         assertOpptegnelseIkkeOpprettet()
     }
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         val oppgave = Oppgave(OPPGAVE_ID, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         every { oppgaveDao.finn(any<Long>()) } returns oppgave
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
@@ -111,7 +112,7 @@ internal class OppgaveMediatorTest {
     @Test
     fun `oppretter ikke flere oppgaver på samme vedtaksperiodeId`() {
         every { oppgaveDao.harGyldigOppgave( UTBETALING_ID) } returnsMany listOf(false, true)
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         mediator.opprett(søknadsoppgave)
         mediator.opprett(søknadsoppgave)
@@ -122,7 +123,7 @@ internal class OppgaveMediatorTest {
     }
     @Test
     fun `lagrer ikke dobbelt`() {
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
         every { oppgaveDao.finn(1L) } returns stikkprøveoppgave
         every { oppgaveDao.opprettOppgave(any(), OPPGAVETYPE_SØKNAD, any(), any()) } returns 0L
@@ -146,7 +147,7 @@ internal class OppgaveMediatorTest {
         val oppgave1 = Oppgave(1L, OPPGAVETYPE_SØKNAD, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         val oppgave2 = Oppgave(2L, OPPGAVETYPE_STIKKPRØVE, Oppgavestatus.AvventerSaksbehandler, VEDTAKSPERIODE_ID, utbetalingId = UTBETALING_ID)
         every { oppgaveDao.finnAktive(VEDTAKSPERIODE_ID) } returns listOf(oppgave1, oppgave2)
-        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns null
+        every { reservasjonDao.hentReservertTil(TESTHENDELSE.fødselsnummer()) } returns null
         every { oppgaveDao.finn(1L) } returns oppgave1
         every { oppgaveDao.finn(2L) } returns oppgave2
         mediator.avbrytOppgaver(VEDTAKSPERIODE_ID)

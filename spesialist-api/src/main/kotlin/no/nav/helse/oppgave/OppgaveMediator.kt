@@ -36,8 +36,8 @@ class OppgaveMediator(
         oppgaverTilTotrinnsvurdering.addAll(oppgaver)
     }
 
-    fun tildel(oppgaveId: Long, saksbehandleroid: UUID): Boolean {
-        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid)
+    fun tildel(oppgaveId: Long, saksbehandleroid: UUID, påVent: Boolean = false): Boolean {
+        return tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid, påVent)
     }
 
     private fun nyOppgave(oppgave: Oppgave) {
@@ -120,8 +120,8 @@ class OppgaveMediator(
     }
 
     private fun tildelOppgaver(fødselsnummer: String) {
-        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { oid ->
-            oppgaver.forEach { it.tildel(this, oid) }
+        reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
+            oppgaver.forEach { it.tildel(this, oid, settPåVent) }
         }
     }
 

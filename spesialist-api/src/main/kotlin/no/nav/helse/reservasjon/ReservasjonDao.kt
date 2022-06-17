@@ -5,18 +5,37 @@ import javax.sql.DataSource
 import no.nav.helse.HelseDao
 
 class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
-    fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String) =
-        """ INSERT INTO reserver_person(saksbehandler_ref, person_ref)
-            SELECT :saksbehandler_ref, person.id
+    fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String, påVent: Boolean = false) =
+        """ INSERT INTO reserver_person(saksbehandler_ref, person_ref, sett_på_vent_flagg)
+            SELECT :saksbehandler_ref, person.id, :sett_paa_vent_flagg
             FROM person
             WHERE person.fodselsnummer = :fodselsnummer;"""
-            .update(mapOf("saksbehandler_ref" to saksbehandlerOid, "fodselsnummer" to fødselsnummer.toLong()))
+            .update(
+                mapOf(
+                    "saksbehandler_ref" to saksbehandlerOid,
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "sett_paa_vent_flagg" to påVent,
+                )
+            )
 
-    fun hentReservasjonFor(fødselsnummer: String): UUID? =
+    fun hentReservertTil(fødselsnummer: String): UUID? =
         """ SELECT r.* FROM reserver_person r
                 JOIN person p ON p.id = r.person_ref
             WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now(); """
             .single(mapOf("fnr" to fødselsnummer.toLong())) {
-                UUID.fromString(it.string("saksbehandler_ref"))
+                it.uuid("saksbehandler_ref")
+            }
+
+    fun hentReservasjonFor(fødselsnummer: String): Reservasjonsinfo? =
+        """ SELECT r.* FROM reserver_person r
+                JOIN person p ON p.id = r.person_ref
+            WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now(); """
+            .single(mapOf("fnr" to fødselsnummer.toLong())) {
+                Reservasjonsinfo(it.uuid("saksbehandler_ref"), it.boolean("sett_på_vent_flagg"))
             }
 }
+
+data class Reservasjonsinfo(
+    val reservertTil: UUID,
+    val settPåVentFlagg: Boolean,
+)

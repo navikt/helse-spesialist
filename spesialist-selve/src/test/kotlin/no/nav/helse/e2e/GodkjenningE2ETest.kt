@@ -789,7 +789,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
-        val saksbehandler = reservasjonDao.hentReservasjonFor(FØDSELSNUMMER)!!
+        val saksbehandler = reservasjonDao.hentReservertTil(FØDSELSNUMMER)!!
 
         assertEquals(SAKSBEHANDLEROID, saksbehandler)
 

@@ -28,7 +28,7 @@ internal class ReservasjonDaoTest : DatabaseIntegrationTest() {
         opprettTabeller()
         val saksbehandlerOid = sessionOf(dataSource).use {
             reservasjonDao.reserverPerson(SAKSBEHANDLER_OID, FNR)
-            reservasjonDao.hentReservasjonFor(FNR)
+            reservasjonDao.hentReservertTil(FNR)
         } ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         assertEquals(SAKSBEHANDLER_OID, saksbehandlerOid)
         assertEquals(12, varighetPåReservasjon())
