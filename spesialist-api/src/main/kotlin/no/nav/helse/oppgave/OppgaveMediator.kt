@@ -6,6 +6,8 @@ import no.nav.helse.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -160,4 +162,16 @@ class OppgaveMediator(
     ) = oppgaveDao.setBeslutterOppgave(oppgaveId, erBeslutterOppgave, erReturOppgave, totrinnsvurdering, tidligereSaksbehandlerOid)
 
     fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
+
+    fun lagrePeriodehistorikk(
+        oppgaveId: Long,
+        periodehistorikkDao: PeriodehistorikkDao,
+        saksbehandleroid: UUID,
+        type: PeriodehistorikkType,
+        notatId: Int? = null
+    ) {
+        oppgaveDao.finn(oppgaveId)?.also {
+            it.lagrePeriodehistorikk(periodehistorikkDao, saksbehandleroid, type, notatId)
+        }
+    }
 }

@@ -327,7 +327,7 @@ data class BeregnetPeriode(
     }
 
     fun periodehistorikk(): List<PeriodeHistorikkElement> =
-        periodehistorikkDao.finn(java.util.UUID.fromString(beregningId())).map {
+        periodehistorikkDao.finn(java.util.UUID.fromString(utbetaling().id)).map {
             PeriodeHistorikkElement(
                 type = it.type,
                 saksbehandler_ident = it.saksbehandler_ident,

@@ -47,7 +47,11 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING, saksbehandlerOid, totrinnsvurdering.beregningId)
+        oppgaveMediator.lagrePeriodehistorikk(totrinnsvurdering.oppgavereferanse,
+            periodehistorikkDao,
+            saksbehandlerOid,
+            PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
+        )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(totrinnsvurdering.oppgavereferanse)
 
@@ -75,7 +79,11 @@ internal fun Route.totrinnsvurderingApi(
 
         notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
 
-        periodehistorikkDao.lagre(PeriodehistorikkType.TOTRINNSVURDERING_RETUR, saksbehandlerOid, retur.beregningId)
+        oppgaveMediator.lagrePeriodehistorikk(
+            retur.oppgavereferanse, periodehistorikkDao,
+            saksbehandlerOid,
+            PeriodehistorikkType.TOTRINNSVURDERING_RETUR
+        )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
 
@@ -93,12 +101,10 @@ private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
 @JsonIgnoreProperties
 class TotrinnsvurderingDto(
     val oppgavereferanse: Long,
-    val beregningId: UUID,
 )
 
 @JsonIgnoreProperties
 class TotrinnsvurderingReturDto(
     val oppgavereferanse: Long,
-    val beregningId: UUID,
     val notat: NotatApiDto
 )

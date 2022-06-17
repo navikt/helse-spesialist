@@ -36,16 +36,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private val totrinnsvurderingDto = TotrinnsvurderingDto(
-        oppgavereferanse = 1L,
-        beregningId = UUID.randomUUID()
-    )
+    private val totrinnsvurderingDto = TotrinnsvurderingDto(oppgavereferanse = 1L)
     private val returDtoMedNotat = TotrinnsvurderingReturDto(
         oppgavereferanse = 1L,
-        beregningId = UUID.randomUUID(),
         notat = NotatApiDto("notat_tekst", NotatType.Retur)
     )
-
 
     private val TOTRINNSVURDERING_URL = "/api/totrinnsvurdering"
     private val RETUR_URL = "/api/totrinnsvurdering/retur"
@@ -89,11 +84,11 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             )
         }
         verify(exactly = 1) {
-            periodehistorikkDao.lagre(
-                PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING,
+            oppgaveMediator.lagrePeriodehistorikk(
+                totrinnsvurderingDto.oppgavereferanse,
+                periodehistorikkDao,
                 SAKSBEHANDLER_OID,
-                totrinnsvurderingDto.beregningId,
-                null
+                PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
             )
         }
         assertEquals(HttpStatusCode.OK, response.status)

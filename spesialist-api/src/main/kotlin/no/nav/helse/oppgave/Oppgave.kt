@@ -2,6 +2,8 @@ package no.nav.helse.oppgave
 
 import java.util.Objects
 import java.util.UUID
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 
@@ -140,6 +142,17 @@ class Oppgave private constructor(
 
     fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID) {
         oppgaveMediator.tildel(requireNotNull(id), saksbehandleroid)
+    }
+
+    fun lagrePeriodehistorikk(
+        periodehistorikkDao: PeriodehistorikkDao,
+        saksbehandleroid: UUID,
+        type: PeriodehistorikkType,
+        notatId: Int?
+    ) {
+        if (utbetalingId != null) {
+            periodehistorikkDao.lagre(type, saksbehandleroid, utbetalingId, notatId)
+        }
     }
 
     override fun equals(other: Any?): Boolean {

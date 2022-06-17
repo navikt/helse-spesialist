@@ -63,6 +63,8 @@ import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.overstyringsteller
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -87,6 +89,7 @@ internal class HendelseMediator(
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: IHendelsefabrikk
@@ -194,6 +197,10 @@ internal class HendelseMediator(
 
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         overstyrtVedtaksperiodeDao.ferdigstillOverstyringAvVedtaksperiode(vedtaksperiodeId)
+
+        if (erBeslutteroppgave && godkjenningDTO.godkjent) {
+            internOppgaveMediator.lagrePeriodehistorikk(godkjenningDTO.oppgavereferanse, periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT)
+        }
     }
 
     internal fun erBeslutteroppgaveOgErTidligereSaksbehandler(
