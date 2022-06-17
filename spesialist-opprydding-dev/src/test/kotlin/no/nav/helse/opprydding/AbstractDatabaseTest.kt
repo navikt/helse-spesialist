@@ -22,7 +22,7 @@ internal abstract class AbstractDatabaseTest {
 
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
-            withLabel("app-navn", "spesialist")
+            withLabel("app-navn", "spesialist-opprydding")
             start()
         }
 
@@ -68,6 +68,7 @@ internal abstract class AbstractDatabaseTest {
                 .placeholders(
                     mapOf("spesialist_oid" to UUID.randomUUID().toString())
                 )
+                .ignoreMigrationPatterns("*:missing")
                 .locations("classpath:db/migration")
                 .load()
                 .migrate()
