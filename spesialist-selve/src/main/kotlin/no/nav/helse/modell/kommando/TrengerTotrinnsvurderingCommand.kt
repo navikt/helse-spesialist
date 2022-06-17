@@ -21,12 +21,8 @@ internal class TrengerTotrinnsvurderingCommand(
         private val logg = LoggerFactory.getLogger(TrengerTotrinnsvurderingCommand::class.java)
     }
 
-    private fun formaterTekst(årsaker: List<String>): String {
-        if(årsaker.size == 1) return årsaker.joinToString()
-        return årsaker.subList(0, årsaker.lastIndex)
-            .joinToString(separator = ", ")
-            .plus(" og ${årsaker.last()}")
-    }
+    private fun formaterTekst(årsaker: List<String>): String =
+        (årsaker.dropLast(2) + årsaker.takeLast(2).joinToString(separator = " og ")).joinToString()
 
     internal fun getWarningtekst(overstyringer: List<OverstyringType>, medlemskap: Boolean): String {
         val årsaker = mutableListOf<String>()
