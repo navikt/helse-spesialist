@@ -34,4 +34,4 @@ Det er spesialist sin egen app for å slette testpersoner.
 Spleis-testdata fyrer av et kafka-event som spesialist-opprydding-dev lytter på og dermed sletter testpersoner.
 
 ### For NAV-ansatte
-Interne henvendelser kan sendes via Slack i kanalen ![#team-bømlo-værsågod](https://nav-it.slack.com/archives/C019637N90X).
+Interne henvendelser kan sendes via Slack i kanalen [#team-bømlo-værsågod](https://nav-it.slack.com/archives/C019637N90X).
