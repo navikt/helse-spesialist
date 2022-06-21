@@ -1,6 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
-import java.util.*
+import java.util.EnumSet
 
 enum class Utbetalingsstatus {
     GODKJENT,
@@ -12,10 +12,11 @@ enum class Utbetalingsstatus {
     IKKE_UTBETALT,
     FORKASTET,
     IKKE_GODKJENT,
-    GODKJENT_UTEN_UTBETALING;
+    GODKJENT_UTEN_UTBETALING,
+    NY;
 
     internal companion object {
-        internal val godkjenteStatuser = EnumSet.of(GODKJENT, SENDT, OVERFØRT, UTBETALING_FEILET, ANNULLERT, UTBETALT)
+        internal val godkjenteStatuser = EnumSet.of(GODKJENT, SENDT, OVERFØRT, UTBETALING_FEILET, ANNULLERT, UTBETALT, NY)
         internal val gyldigeStatuser = EnumSet.allOf(Utbetalingsstatus::class.java)
 
         internal fun EnumSet<Utbetalingsstatus>.values() = this.map(Utbetalingsstatus::toString)

@@ -1,10 +1,10 @@
 package no.nav.helse.mediator.api.graphql.schema
 
+import java.time.format.DateTimeFormatter
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import java.time.format.DateTimeFormatter
 
 enum class Oppdragsstatus {
     GODKJENT,
@@ -17,6 +17,7 @@ enum class Oppdragsstatus {
     FORKASTET,
     IKKE_GODKJENT,
     GODKJENT_UTEN_UTBETALING,
+    NY
 }
 
 data class Utbetalingslinje(
@@ -98,5 +99,6 @@ data class Oppdrag(private val utbetaling: UtbetalingDao.UtbetalingDto) {
             Utbetalingsstatus.FORKASTET -> Oppdragsstatus.FORKASTET
             Utbetalingsstatus.IKKE_GODKJENT -> Oppdragsstatus.IKKE_GODKJENT
             Utbetalingsstatus.GODKJENT_UTEN_UTBETALING -> Oppdragsstatus.GODKJENT_UTEN_UTBETALING
+            Utbetalingsstatus.NY -> Oppdragsstatus.NY
         }
 }
