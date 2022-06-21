@@ -95,13 +95,22 @@ internal class GosysOppgaveEndret(
             sikkerLog.info("gosys_oppgave_endret for fnr {}", fødselsnummer)
 
             oppgaveDao.finnOppgaveId(fødselsnummer)?.also { oppgaveId ->
+                sikkerLog.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
                 val commandData = oppgaveDao.gosysOppgaveEndretCommandData(oppgaveId)
-                val tildeling = tildelingDao.tildelingForOppgave(oppgaveId)
-                if (tildeling == null && commandData != null) {
-                    sikkerLog.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
-                    mediator.gosysOppgaveEndret(packet, context)
+                if (commandData == null) {
+                    sikkerLog.info("Fant ikke commandData for {} og {}", fødselsnummer, oppgaveId)
+                    return
                 }
-            }
+
+                val tildeling = tildelingDao.tildelingForOppgave(oppgaveId)
+                if (tildeling != null) {
+                    sikkerLog.info("Fant tildeling for {}, {}: {}", fødselsnummer, oppgaveId, tildeling)
+                    return
+                }
+
+                sikkerLog.info("Har oppgave til_godkjenning, commandData og ingen tildeling for fnr $fødselsnummer og vedtaksperiodeId ${commandData.vedtaksperiodeId}")
+                mediator.gosysOppgaveEndret(packet, context)
+            } ?: sikkerLog.info("Ingen åpne oppgaver for {}", fødselsnummer)
         }
     }
 
