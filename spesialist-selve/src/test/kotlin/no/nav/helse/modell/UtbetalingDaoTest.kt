@@ -9,9 +9,11 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertDoesNotThrow
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
 
@@ -88,5 +90,23 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
         assertTrue { utbetalinger.find { it.personoppdrag!!.fagsystemId == personFagsystemId } != null }
         assertTrue { utbetalinger.all { it.arbeidsgiveroppdrag!!.linjer.size == 1 } }
         assertTrue { utbetalinger.all { it.personoppdrag!!.linjer.size == 1 } }
+    }
+
+    @Test
+    fun `alle enumer finnes også i db`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        lagLinje(arbeidsgiverOppdragId, 1.juli(), 10.juli(), 12000)
+        lagLinje(personOppdragId, 11.juli(), 31.juli(), 10000)
+        val utbetaling = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId)
+
+        assertDoesNotThrow {
+            Utbetalingsstatus.values().forEach {
+                utbetalingDao.nyUtbetalingStatus(utbetaling, it, LocalDateTime.now(), "{}")
+            }
+        }
     }
 }

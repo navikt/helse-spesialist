@@ -87,7 +87,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             forrigeStatus = IKKE_GODKJENT,
             utbetalingId = UTBETALING_ID
         )
-        assertEquals(0, utbetalinger().size)
+        assertEquals(1, utbetalinger().size)
         sendUtbetalingEndret(
             "UTBETALING",
             FORKASTET,
@@ -96,7 +96,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             forrigeStatus = GODKJENT,
             utbetalingId = UTBETALING_ID
         )
-        assertEquals(1, utbetalinger().size)
+        assertEquals(2, utbetalinger().size)
     }
 
     @Test

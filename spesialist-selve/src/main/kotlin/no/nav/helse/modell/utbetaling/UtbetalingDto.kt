@@ -16,7 +16,6 @@ enum class Utbetalingsstatus {
     NY;
 
     internal companion object {
-        internal val godkjenteStatuser = EnumSet.of(GODKJENT, SENDT, OVERFØRT, UTBETALING_FEILET, ANNULLERT, UTBETALT, NY)
         internal val gyldigeStatuser = EnumSet.allOf(Utbetalingsstatus::class.java)
 
         internal fun EnumSet<Utbetalingsstatus>.values() = this.map(Utbetalingsstatus::toString)

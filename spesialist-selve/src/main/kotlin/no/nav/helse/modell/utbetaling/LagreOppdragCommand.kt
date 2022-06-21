@@ -6,7 +6,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.abonnement.UtbetalingPayload
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.godkjenteStatuser
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,7 +17,6 @@ internal class LagreOppdragCommand(
     private val utbetalingId: UUID,
     private val type: Utbetalingtype,
     private val status: Utbetalingsstatus,
-    private val forrigeStatus: Utbetalingsstatus,
     private val opprettet: LocalDateTime,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
@@ -86,7 +84,6 @@ internal class LagreOppdragCommand(
 
     override fun execute(context: CommandContext): Boolean {
         lagOpptegnelse()
-        if (status !in godkjenteStatuser && forrigeStatus !in godkjenteStatuser) return true
         log.info("lagrer utbetaling $utbetalingId med status $status")
         lagre()
         return true
