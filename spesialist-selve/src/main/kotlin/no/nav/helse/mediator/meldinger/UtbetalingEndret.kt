@@ -96,11 +96,13 @@ internal class UtbetalingEndret(
             val fødselsnummer = packet["fødselsnummer"].asText()
             val orgnummer = packet["organisasjonsnummer"].asText()
             val utbetalingType : Utbetalingtype = Utbetalingtype.valueOf(packet["type"].asText())
+            val gjeldendeStatus = packet["gjeldendeStatus"].asText()
 
             sikkerLogg.info(
-                "Mottok utbetaling_endret for {}, {}",
+                "Mottok utbetaling_endret for {}, {} med status {}",
                 keyValue("fødselsnummer", fødselsnummer),
-                keyValue("utbetalingId", utbetalingId)
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("gjeldendeStatus", gjeldendeStatus)
             )
             mediator.utbetalingEndret(fødselsnummer, orgnummer, utbetalingId, utbetalingType, packet, context)
         }
