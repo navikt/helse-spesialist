@@ -468,10 +468,6 @@ internal class HendelseMediator(
         message: JsonMessage,
         context: MessageContext
     ) {
-        if (utbetalingType == Utbetalingtype.UTBETALING && !utbetalingDao.harVærtTilGodkjenning(utbetalingId)) {
-            sikkerLogg.info("Ignorerer utbetaling_endret for {}, har ikke vært til godkjenning", keyValue("utbetalingId", utbetalingId))
-            return
-        }
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
             log.warn(
                 "Fant ikke arbeidsgiver med {}, se sikkerlogg for mer informasjon",
