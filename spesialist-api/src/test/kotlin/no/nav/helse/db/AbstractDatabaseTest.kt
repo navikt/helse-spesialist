@@ -18,7 +18,7 @@ abstract class AbstractDatabaseTest {
             withReuse(true)
             withLabel("app-navn", "spesialist")
             start()
-            println("🎩 Databasen er startet opp, portnummer: $firstMappedPort, jdbcUrl: jdbc:postgresql://localhost:$firstMappedPort/test, credentials: test og test")
+            println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
         }
 
         val dataSource =
