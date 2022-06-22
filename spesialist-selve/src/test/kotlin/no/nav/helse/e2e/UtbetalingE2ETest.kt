@@ -68,15 +68,6 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `ignorerer utbetaling_endret når utbetalingen er av type UTBETALING og ikke har vært til godkjenning`() {
-        assertDoesNotThrow {
-            sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-        }
-        assertEquals(0, utbetalinger().size)
-        assertEquals(0, feilendeMeldinger().size)
-    }
-
-    @Test
     fun `utbetaling forkastet`() {
         vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret(
