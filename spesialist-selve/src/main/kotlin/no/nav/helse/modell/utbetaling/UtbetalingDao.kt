@@ -312,7 +312,7 @@ ORDER BY ui.id, u.opprettet DESC
             JOIN utbetaling_id ui ON ui.utbetaling_id = vui.utbetaling_id
             JOIN utbetaling u ON u.utbetaling_id_ref = ui.id
             WHERE vui.vedtaksperiode_id = :vedtaksperiodeId
-            ORDER BY u.id
+            ORDER BY u.id DESC
             LIMIT 2;
         """
         return sessionOf(dataSource).use {
