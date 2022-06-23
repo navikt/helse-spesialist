@@ -33,7 +33,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 :saksbehandler_oid,
                 CAST(:type as notattype)
             );
-        """.update(
+        """.updateAndReturnGeneratedKey(
             mapOf(
                 "oppgave_id" to oppgaveId,
                 "tekst" to tekst,

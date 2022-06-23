@@ -13,7 +13,7 @@ abstract class HelseDao(private val dataSource: DataSource) {
         session.run(queryOf(this, argMap).asUpdate)
     }
 
-    fun String.updateAndReturnGeneratedKey(argMap: Map<String, Any?> = emptyMap()) = sessionOf(dataSource).use { session ->
+    fun String.updateAndReturnGeneratedKey(argMap: Map<String, Any?> = emptyMap()) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.run(queryOf(this, argMap).asUpdateAndReturnGeneratedKey)
     }
 
@@ -29,5 +29,5 @@ abstract class HelseDao(private val dataSource: DataSource) {
     fun <T> Query.single(mapping: (Row) -> T?) = sessionOf(dataSource).use { session -> session.run(this.map { mapping(it) }.asSingle) }
     fun <T> Query.list(mapping: (Row) -> T?) = sessionOf(dataSource).use { session -> session.run(this.map { mapping(it) }.asList) }
     fun Query.update() = sessionOf(dataSource).use { session -> session.run(this.asUpdate) }
-    fun Query.updateAndReturnGeneratedKey() = sessionOf(dataSource).use { session -> session.run(this.asUpdateAndReturnGeneratedKey) }
+    fun Query.updateAndReturnGeneratedKey() = sessionOf(dataSource, returnGeneratedKey = true).use { session -> session.run(this.asUpdateAndReturnGeneratedKey) }
 }

@@ -77,12 +77,13 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
+        val notatId = notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
 
         oppgaveMediator.lagrePeriodehistorikk(
             retur.oppgavereferanse, periodehistorikkDao,
             saksbehandlerOid,
-            PeriodehistorikkType.TOTRINNSVURDERING_RETUR
+            PeriodehistorikkType.TOTRINNSVURDERING_RETUR,
+            notatId?.toInt()
         )
 
         hendelseMediator.sendMeldingOppgaveOppdatert(retur.oppgavereferanse)
