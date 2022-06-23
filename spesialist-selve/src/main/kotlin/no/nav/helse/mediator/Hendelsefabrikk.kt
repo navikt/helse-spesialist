@@ -49,6 +49,7 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -82,7 +83,8 @@ internal class Hendelsefabrikk(
     private val arbeidsforholdDao: ArbeidsforholdDao,
     private val utbetalingDao: UtbetalingDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val vergemålDao: VergemålDao
+    private val vergemålDao: VergemålDao,
+    private val periodehistorikkDao: PeriodehistorikkDao,
 ) : IHendelsefabrikk {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -149,7 +151,8 @@ internal class Hendelsefabrikk(
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             utbetalingDao = utbetalingDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            periodehistorikkDao = periodehistorikkDao,
         )
     }
 

@@ -34,6 +34,7 @@ import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
+import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.TrengerTotrinnsvurderingCommand
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
@@ -50,6 +51,7 @@ import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -91,7 +93,8 @@ internal class Godkjenningsbehov(
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     utbetalingDao: UtbetalingDao,
-    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao
+    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
+    periodehistorikkDao: PeriodehistorikkDao,
 ) : Hendelse, MacroCommand() {
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
         val utbetaling = snapshotDao.finnUtbetaling(
@@ -226,6 +229,12 @@ internal class Godkjenningsbehov(
             warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
+        ),
+        PersisterPeriodehistorikkCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            periodehistorikkDao = periodehistorikkDao,
+            utbetalingDao = utbetalingDao,
         )
     )
 

@@ -298,6 +298,35 @@ ORDER BY ui.id, u.opprettet DESC
             session.run(queryOf(statement, utbetalingId).map { it.int(1) > 0 }.asSingle)!!
         }
 
+    data class TidligereUtbetalingerForVedtaksperiodeDto(
+        val utbetalingId: UUID,
+        val id: Int,
+        val utbetalingsstatus: Utbetalingsstatus
+    )
+
+    internal fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto> {
+        @Language("PostgreSQL")
+        val statement = """
+            SELECT vui.utbetaling_id, u.id, u.status
+            FROM vedtaksperiode_utbetaling_id vui
+            JOIN utbetaling_id ui ON ui.utbetaling_id = vui.utbetaling_id
+            JOIN utbetaling u ON u.utbetaling_id_ref = ui.id
+            WHERE vui.vedtaksperiode_id = :vedtaksperiodeId
+            ORDER BY u.id
+            LIMIT 2;
+        """
+        return sessionOf(dataSource).use {
+            it.run(
+                queryOf(statement, mapOf("vedtaksperiodeId" to vedtaksperiodeId))
+                    .map { row -> TidligereUtbetalingerForVedtaksperiodeDto(
+                        id = row.int("id"),
+                        utbetalingId = row.uuid("utbetaling_id"),
+                        utbetalingsstatus = Utbetalingsstatus.valueOf(row.string("status"))
+                    )}.asList
+            )
+        }
+    }
+
     data class UtbetalingDto(
         val utbetalingId: UUID,
         val type: String,

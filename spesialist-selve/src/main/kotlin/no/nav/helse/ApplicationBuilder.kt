@@ -242,7 +242,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         ),
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
-        vergemålDao = vergemålDao
+        vergemålDao = vergemålDao,
+        periodehistorikkDao = periodehistorikkDao,
     )
 
     private val rapidsConnection =

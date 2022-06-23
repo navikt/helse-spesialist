@@ -44,6 +44,25 @@ class PeriodehistorikkDao(private val dataSource: DataSource) : HelseDao(dataSou
             )
         }
 
+    fun migrer(tidligereUtbetalingId: UUID, utbetalingId: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                UPDATE periodehistorikk 
+                SET utbetaling_id = :utbetalingId
+                WHERE utbetaling_id = :tidligereUtbetalingId
+        """
+            session.run(
+                queryOf(
+                    statement,
+                    mapOf(
+                        "utbetalingId" to utbetalingId,
+                        "tidligereUtbetalingId" to tidligereUtbetalingId,
+                    )
+                ).asUpdate
+            )
+        }
+
     companion object {
         fun periodehistorikkDto(it: Row) = PeriodehistorikkDto(
             id = it.int("id"),
