@@ -9,7 +9,6 @@ import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.person.Adressebeskyttelse
 import no.nav.helse.person.Kjønn
 import no.nav.helse.person.PersoninfoApiDto
@@ -310,7 +309,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnVedtaksperiodeIdForPeriodeMedDager(fødselsnummer: String, organisasjonsnummer: String, overstyrteDager: List<OverstyringDagDto>): UUID? =
+    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): UUID? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val query =
@@ -321,8 +320,10 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     JOIN arbeidsgiver a on a.id = v.arbeidsgiver_ref
                     WHERE p.fodselsnummer = :fodselsnummer
                     AND a.orgnummer = :orgnummer
-                    AND v.fom <= :dato::date
-                    AND v.tom >= :dato::date
+                    AND (o.status = 'Ferdigstilt'::oppgavestatus OR o.status = 'AvventerSaksbehandler'::oppgavestatus)
+                    ORDER BY 
+                        o.status DESC,
+                        v.fom DESC
                     LIMIT 1
                 """
             session.run(
@@ -330,8 +331,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     query,
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnummer" to organisasjonsnummer.toLong(),
-                        "dato" to overstyrteDager.first().dato
+                        "orgnummer" to organisasjonsnummer.toLong()
                     )
                 ).map { it.uuid("vedtaksperiode_id") }.asSingle
             )

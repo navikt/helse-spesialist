@@ -22,7 +22,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommand(
         }
         val forsteDag = overstyrteDager.first().dato
 
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(fødselsnummer, organisasjonsnummer, overstyrteDager)
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer, organisasjonsnummer)
 
         if(vedtaksperiodeId != null) {
             sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag")

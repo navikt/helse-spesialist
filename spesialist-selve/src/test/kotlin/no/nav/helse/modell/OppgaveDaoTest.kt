@@ -17,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.vedtaksperiode.Inntektskilde as InntektskildeForApi
 import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
 
@@ -578,67 +576,14 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `overstyr tidslinje - finner vedtaksperiodeId for periode med dager på fom`() {
-        val overstyrteDager = listOf(OverstyringDagDto(dato = FOM, type = Dagtype.Sykedag, grad = 100))
+    fun `overstyr tidslinje - finner vedtaksperiodeId `() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(
             VEDTAKSPERIODE,
-            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
-        )
-    }
-
-    @Test
-    fun `overstyr tidslinje - finner vedtaksperiodeId for periode med dager etter fom men før TOM`() {
-        val overstyrteDager = listOf(OverstyringDagDto(dato = TOM.minusDays(1), type = Dagtype.Sykedag, grad = 100))
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertEquals(
-            VEDTAKSPERIODE,
-            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
-        )
-    }
-
-    @Test
-    fun `overstyr tidslinje - finner vedtaksperiodeId for periode med dager på TOM`() {
-        val overstyrteDager = listOf(OverstyringDagDto(dato = TOM, type = Dagtype.Sykedag, grad = 100))
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertEquals(
-            VEDTAKSPERIODE,
-            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
-        )
-    }
-
-    @Test
-    fun `overstyr tidslinje - finner ikke vedtaksperiodeId for periode med dager før fom`() {
-        val overstyrteDager = listOf(OverstyringDagDto(dato = FOM.minusDays(1), type = Dagtype.Sykedag, grad = 100))
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertNotEquals(
-            VEDTAKSPERIODE,
-            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
-        )
-    }
-
-    @Test
-    fun `overstyr tidslinje - finner ikke vedtaksperiodeId for periode etter tom`() {
-        val overstyrteDager = listOf(OverstyringDagDto(dato = TOM.plusDays(1), type = Dagtype.Sykedag, grad = 100))
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertNotEquals(
-            VEDTAKSPERIODE,
-            oppgaveDao.finnVedtaksperiodeIdForPeriodeMedDager(FNR, ORGNUMMER, overstyrteDager)
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNUMMER)
         )
     }
 
@@ -646,7 +591,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         it.run(
             queryOf(
                 "SELECT totrinnsvurdering FROM oppgave"
-            ).map { it.boolean("totrinnsvurdering") }.asSingle
+            ).map { row -> row.boolean("totrinnsvurdering") }.asSingle
         )
     } ?: false
 
