@@ -323,7 +323,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     AND (o.status = 'Ferdigstilt'::oppgavestatus OR o.status = 'AvventerSaksbehandler'::oppgavestatus)
                     ORDER BY 
                         o.status DESC,
-                        v.fom DESC
+                        v.fom DESC,
+                        o.id DESC
                     LIMIT 1
                 """
             session.run(
@@ -352,7 +353,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     AND (o.status = 'Ferdigstilt'::oppgavestatus OR o.status = 'AvventerSaksbehandler'::oppgavestatus)
                     ORDER BY 
                         o.status DESC,
-                        v.fom DESC
+                        v.fom DESC,
+                        o.id DESC
                     LIMIT 1
                 """
             session.run(
