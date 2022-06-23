@@ -213,7 +213,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingDao = utbetalingDao,
         opptegnelseDao = opptegnelseDao,
         vergemålDao = vergemålDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+        periodehistorikkDao = periodehistorikkDao,
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,

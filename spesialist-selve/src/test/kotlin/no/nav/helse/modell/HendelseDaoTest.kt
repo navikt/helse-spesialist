@@ -52,7 +52,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
             vergemålDao = vergemålDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            periodehistorikkDao = periodehistorikkDao,
         )
     }
 
