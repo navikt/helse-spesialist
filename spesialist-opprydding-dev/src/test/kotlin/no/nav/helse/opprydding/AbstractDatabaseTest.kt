@@ -24,6 +24,8 @@ internal abstract class AbstractDatabaseTest {
             withReuse(true)
             withLabel("app-navn", "spesialist-opprydding")
             start()
+
+            println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
         }
 
         val dataSource =
@@ -110,9 +112,7 @@ internal abstract class AbstractDatabaseTest {
                 "feilende_meldinger",
                 "arbeidsgiver",
                 "arbeidsgiver_bransjer",
-                "arbeidsgiver_navn",
-                "periodehistorikk",
-                "overstyrt_vedtaksperiode"
+                "arbeidsgiver_navn"
             )
         )
         tabeller.forEach {

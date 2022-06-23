@@ -63,6 +63,7 @@ INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref
 INSERT INTO overstyrtdag(id, overstyring_ref, dato, dagtype, grad) VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
 INSERT INTO overstyring_inntekt(id, tidspunkt, person_ref, arbeidsgiver_ref, saksbehandler_ref, hendelse_ref, begrunnelse, manedlig_inntekt, skjaeringstidspunkt, forklaring) VALUES (${sequence_number}, now(), ${sequence_number}, ${sequence_number}, '${saksbehandler_oid}', '${hendelse_id}', 'BEGRUNNELSE', 1000, '2018-01-01', 'FORKLARING');
 INSERT INTO overstyring_arbeidsforhold(id, tidspunkt, person_ref, arbeidsgiver_ref, saksbehandler_ref, hendelse_ref, begrunnelse, forklaring, deaktivert, skjaeringstidspunkt) VALUES (${sequence_number}, now(), ${sequence_number}, ${sequence_number}, '${saksbehandler_oid}', '${hendelse_id}', 'BEGRUNNELSE', 'FORKLARING', false, '2018-01-01');
+INSERT INTO overstyrt_vedtaksperiode(id, vedtaksperiode_id, type, ferdigstilt) VALUES (${sequence_number}, '${vedtaksperiode_id}', 'Inntekt'::overstyringtype, false);
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref) VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
 INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag) VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP', 'NY', '2018-01-01');
@@ -72,6 +73,8 @@ INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffag
 INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, type, opprettet) VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000, ${sequence_number}, 'UTBETALING', now());
 
 INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref) VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
+
+INSERT INTO periodehistorikk(id, type, timestamp, utbetaling_id, saksbehandler_oid, notat_id) VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${utbetaling_id}', '${saksbehandler_oid}', ${sequence_number});
 
 INSERT INTO risikovurdering(id, vedtaksperiode_id, samlet_score, ufullstendig, opprettet) VALUES (${sequence_number}, '${vedtaksperiode_id}', 1000, false, now());
 INSERT INTO risikovurdering_arbeidsuforhetvurdering(id, risikovurdering_ref, tekst) VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
