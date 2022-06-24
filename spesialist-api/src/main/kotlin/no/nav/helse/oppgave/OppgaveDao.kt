@@ -371,7 +371,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnAktivVedtaksperiodeIdForSkjæringstidspunkt(fødselsnummer: String, skjæringstidspunkt: LocalDate): UUID? =
+    fun finnAktivVedtaksperiodeId(fødselsnummer: String): UUID? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val query =
@@ -380,17 +380,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     JOIN vedtak v on o.vedtak_ref = v.id
                     JOIN person p on p.id = v.person_ref
                     WHERE p.fodselsnummer = :fodselsnummer
-                    AND v.fom >= :skjaeringstidspunkt::date
                     AND o.status = 'AvventerSaksbehandler'::oppgavestatus
                     LIMIT 1
                 """
             session.run(
                 queryOf(
                     query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "skjaeringstidspunkt" to skjæringstidspunkt
-                    )
+                    mapOf("fodselsnummer" to fødselsnummer.toLong())
                 ).map { it.uuid("vedtaksperiode_id") }.asSingle
             )
         }

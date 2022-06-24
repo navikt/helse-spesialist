@@ -15,7 +15,7 @@ internal class PersisterTotrinnsvurderingArbeidsforholdCommand(
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     override fun execute(context: CommandContext): Boolean {
-        val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeIdForSkjæringstidspunkt(fødselsnummer, skjæringstidspunkt)
+        val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeId(fødselsnummer)
 
         if(vedtaksperiodeId != null) {
             sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer og skjæringstidspunkt $skjæringstidspunkt")

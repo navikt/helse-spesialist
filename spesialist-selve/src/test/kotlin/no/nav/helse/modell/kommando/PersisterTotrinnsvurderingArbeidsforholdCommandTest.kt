@@ -31,7 +31,7 @@ internal class PersisterTotrinnsvurderingArbeidsforholdCommandTest {
 
     @Test
     fun `lagrer overstyrt vedtaksperiode hvis vi finner aktiv vedtaksperiode for skjæringstidspunkt`() {
-        every { oppgaveDao.finnAktivVedtaksperiodeIdForSkjæringstidspunkt(FNR, SKJÆRINGSTIDSPUNKT) }.returns(VEDTAKSPERIODE_ID)
+        every { oppgaveDao.finnAktivVedtaksperiodeId(FNR) }.returns(VEDTAKSPERIODE_ID)
 
         val command = PersisterTotrinnsvurderingArbeidsforholdCommand(
             FNR,
@@ -48,7 +48,7 @@ internal class PersisterTotrinnsvurderingArbeidsforholdCommandTest {
 
     @Test
     fun `lagrer ikke overstyrt vedtaksperiode hvis vi ikke finner aktiv vedtaksperiode for skjæringstidspunkt`() {
-        every { oppgaveDao.finnAktivVedtaksperiodeIdForSkjæringstidspunkt(any(), any()) }.returns(null)
+        every { oppgaveDao.finnAktivVedtaksperiodeId(any()) }.returns(null)
 
         val command = PersisterTotrinnsvurderingArbeidsforholdCommand(
             FNR,

@@ -579,7 +579,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
-        val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeIdForSkjæringstidspunkt(FNR, FOM)
+        val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeId(FNR)
         assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
     }
 
