@@ -9,6 +9,7 @@ import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
+import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.reservasjon.ReservasjonDao
@@ -16,7 +17,6 @@ import no.nav.helse.saksbehandler.SaksbehandlerDao
 import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.oppgave.OppgaveDao
 
 internal class OverstyringTest {
     companion object {
@@ -97,7 +97,7 @@ internal class OverstyringTest {
 
     @Test
     fun `Persisterer overstyring`() {
-        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(),any()) } returns(null)
+        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(),any(),any()) } returns(null)
 
         overstyringMessage.execute(context)
 

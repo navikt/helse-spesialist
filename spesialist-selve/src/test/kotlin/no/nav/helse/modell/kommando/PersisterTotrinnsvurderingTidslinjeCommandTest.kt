@@ -40,7 +40,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
 
     @Test
     fun `lagrer overstyrt vedtaksperiode hvis vi finner vedtaksperiode som inneholder første overstyrt dag`() {
-        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNR) }.returns(VEDTAKSPERIODE_ID)
+        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNR, OVERSTYRTE_DAGER.first().dato) }.returns(VEDTAKSPERIODE_ID)
 
         val command = PersisterTotrinnsvurderingTidslinjeCommand(
             FNR,
@@ -58,7 +58,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
 
     @Test
     fun `lagrer ikke overstyrt vedtaksperiode hvis vi ikke finner vedtaksperiode som inneholder første overstyrt dag`() {
-        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any()) }.returns(null)
+        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any(), OVERSTYRTE_DAGER.first().dato) }.returns(null)
 
         val command = PersisterTotrinnsvurderingTidslinjeCommand(
             FNR,
@@ -75,7 +75,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
 
     @Test
     fun `Hopper ut tidlig hvis overstyrte dager er tom`() {
-        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any()) }.returns(null)
+        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any(), OVERSTYRTE_DAGER.first().dato) }.returns(null)
 
         val command = PersisterTotrinnsvurderingTidslinjeCommand(
             FNR,
@@ -86,7 +86,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
         command.execute(context)
 
         verify(exactly = 0) {
-            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any())
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any(), any())
         }
         verify(exactly = 0) {
             overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(any(), any())

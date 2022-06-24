@@ -1,6 +1,8 @@
 package no.nav.helse.modell
 
 import DatabaseIntegrationTest
+import java.time.LocalDate
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.kommando.CommandContext
@@ -9,14 +11,20 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgave
 import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.oppgave.Oppgavestatus.*
+import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.oppgave.Oppgavetype
 import no.nav.helse.person.Adressebeskyttelse
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 import no.nav.helse.vedtaksperiode.Inntektskilde as InntektskildeForApi
 import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
 
@@ -583,7 +591,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(
             VEDTAKSPERIODE,
-            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNUMMER)
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNUMMER, FOM)
         )
     }
 
