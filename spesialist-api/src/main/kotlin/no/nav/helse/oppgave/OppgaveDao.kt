@@ -309,7 +309,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): UUID? =
+    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String, førsteDag: LocalDate): UUID? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val query =
@@ -321,6 +321,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     WHERE p.fodselsnummer = :fodselsnummer
                     AND a.orgnummer = :orgnummer
                     AND (o.status = 'Ferdigstilt'::oppgavestatus OR o.status = 'AvventerSaksbehandler'::oppgavestatus)
+                    AND v.tom >= :foersteDag::date
                     ORDER BY 
                         o.status DESC,
                         v.fom DESC,
@@ -332,7 +333,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     query,
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnummer" to organisasjonsnummer.toLong()
+                        "orgnummer" to organisasjonsnummer.toLong(),
+                        "foersteDag" to førsteDag
                     )
                 ).map { it.uuid("vedtaksperiode_id") }.asSingle
             )
