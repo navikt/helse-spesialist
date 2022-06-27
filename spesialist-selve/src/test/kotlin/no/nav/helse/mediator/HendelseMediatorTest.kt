@@ -3,18 +3,21 @@ package no.nav.helse.mediator
 import AbstractE2ETest
 import io.mockk.every
 import io.mockk.mockk
+import java.util.UUID
+import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import java.util.*
 import no.nav.helse.oppgave.OppgaveMediator
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-internal class HendelseMediatorTest: AbstractE2ETest() {
+internal class HendelseMediatorTest : AbstractE2ETest() {
 
     private val mediator = HendelseMediator(
         rapidsConnection = testRapid,
@@ -111,7 +114,8 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         every { oppgaveMediatorMock.erBeslutteroppgave(oppgaveId) } returns true
         every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns SAKSBEHANDLER_OID
 
-        val kanIkkeAttestere = mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+        val kanIkkeAttestere =
+            mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
 
         assertTrue(kanIkkeAttestere)
     }
@@ -123,7 +127,8 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         every { oppgaveMediatorMock.erBeslutteroppgave(oppgaveId) } returns true
         every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns UUID.randomUUID()
 
-        val kanIkkeAttestere = mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+        val kanIkkeAttestere =
+            mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
 
         assertFalse(kanIkkeAttestere)
     }
@@ -135,7 +140,8 @@ internal class HendelseMediatorTest: AbstractE2ETest() {
         every { oppgaveMediatorMock.erBeslutteroppgave(oppgaveId) } returns true
         every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns null
 
-        val kanIkkeAttestere = mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+        val kanIkkeAttestere =
+            mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
 
         assertFalse(kanIkkeAttestere)
     }

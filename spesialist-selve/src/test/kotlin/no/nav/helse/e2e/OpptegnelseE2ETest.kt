@@ -1,9 +1,17 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.call.body
+import io.ktor.client.request.accept
+import io.ktor.client.request.prepareGet
+import io.ktor.client.request.preparePost
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.abonnement.OpptegnelseDto
 import no.nav.helse.abonnement.OpptegnelseMediator
 import no.nav.helse.abonnement.opptegnelseApi
@@ -15,8 +23,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 private class OpptegnelseE2ETest : AbstractE2ETest() {
     private val SAKSBEHANDLER_ID = UUID.randomUUID()

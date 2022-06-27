@@ -3,7 +3,27 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import java.time.LocalDate
-import java.util.UUID
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
+import no.nav.helse.Meldingssender.sendOverstyrtInntekt
+import no.nav.helse.Meldingssender.sendOverstyrteDager
+import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.ORGNR_GHOST
+import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
+import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.schema.Arbeidsforholdoverstyring
@@ -234,14 +254,5 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(1, (overstyringer.first() as Dagoverstyring).dager.size)
         assertEquals(15000.0, (overstyringer[1] as Inntektoverstyring).inntekt.manedligInntekt)
         assertEquals(true, (overstyringer[2] as Arbeidsforholdoverstyring).deaktivert)
-    }
-
-    private fun assertSaksbehandlerOppgavpprettet(hendelseId: UUID) {
-        val saksbehandlerOppgaver = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-        assertEquals(
-            1,
-            saksbehandlerOppgaver.filter { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) }.size
-        )
-        assertTrue(saksbehandlerOppgaver.any { it.oppgavereferanse == testRapid.inspektør.oppgaveId(hendelseId) })
     }
 }

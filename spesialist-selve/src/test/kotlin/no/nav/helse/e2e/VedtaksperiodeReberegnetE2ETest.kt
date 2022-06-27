@@ -6,6 +6,23 @@ import java.util.UUID
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -127,7 +144,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
         val (oid, påVent) = finnOidOgPåVentForTildeling(OPPGAVEID)!!
         assertEquals(saksbehandlerOid, oid)
-        assertEquals(true, påVent) { "Ny oppgave skal være lagt på vent etter reberegning"}
+        assertEquals(true, påVent) { "Ny oppgave skal være lagt på vent etter reberegning" }
     }
 
     @Test

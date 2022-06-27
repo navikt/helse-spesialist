@@ -4,23 +4,33 @@ import AbstractE2ETest
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
-import io.ktor.server.testing.*
+import io.ktor.server.testing.TestApplicationEngine
+import java.util.UUID
+import kotlinx.coroutines.runBlocking
+import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
+import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
+import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
 import no.nav.helse.rapids_rivers.asLocalDate
-import org.junit.jupiter.api.Test
-import java.util.*
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest : AbstractE2ETest() {
 

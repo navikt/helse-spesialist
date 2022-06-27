@@ -1,3 +1,7 @@
+import no.nav.helse.TestRapidHelpers.behov
+import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.TestRapidHelpers.løsning
+import no.nav.helse.TestRapidHelpers.siste
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -8,54 +12,50 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
-import no.nav.helse.SaksbehandlerTilganger
+import no.nav.helse.Meldingssender
 import no.nav.helse.abonnement.AbonnementDao
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.januar
-import no.nav.helse.mediator.FeilendeMeldingerDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.PersonQuery
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
-import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
-import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.mediator.graphql.hentsnapshot.Alder
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLAktivitet
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.TestRapidHelpers.oppgaver
+import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.snapshot
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.AktivVedtaksperiodeJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -66,10 +66,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.notat.NotatDao
@@ -77,7 +73,6 @@ import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.oppgave.Oppgavestatus
 import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
@@ -86,11 +81,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.snapshotMedWarnings
 import no.nav.helse.tildeling.TildelingDao
 import no.nav.helse.vedtaksperiode.VarselDao
-import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -99,41 +91,11 @@ import org.junit.jupiter.api.BeforeEach
 import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
-    protected val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
-    private val DEFAULT_FØDSELSNUMER = "12020052345"
-    protected var FØDSELSNUMMER = DEFAULT_FØDSELSNUMER
-
-    protected val AKTØR = "999999999"
-    protected val ORGNR = "222222222"
-    protected val ORGNR_GHOST = "666666666"
-
-    protected val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
-    protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
-    protected val SAKSBEHANDLER_IDENT = "X999999"
-    protected val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
-    protected val SAKSBEHANDLERTILGANGER_UTEN_TILGANGER =
-        SaksbehandlerTilganger(
-            gruppetilganger = emptyList(),
-            kode7Saksbehandlergruppe = UUID.randomUUID(),
-            riskSaksbehandlergruppe = UUID.randomUUID(),
-            beslutterSaksbehandlergruppe = UUID.randomUUID()
-        )
-
-    protected val SNAPSHOT_MED_WARNINGS = snapshotMedWarnings(
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        orgnr = ORGNR,
-        fnr = FØDSELSNUMMER,
-        aktørId = AKTØR
-    )
-
-    protected val SNAPSHOT_UTEN_WARNINGS = snapshot()
 
     protected companion object {
         internal val objectMapper = jacksonObjectMapper()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
-        internal val UTBETALING_ID = UUID.randomUUID()
-        internal val UTBETALING_ID2 = UUID.randomUUID()
     }
 
     private val commandContextDao = CommandContextDao(dataSource)
@@ -143,7 +105,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
-    private val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
 
     protected val varselDao = VarselDao(dataSource)
@@ -156,7 +117,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val tildelingDao = TildelingDao(dataSource)
     protected val risikovurderingDao = RisikovurderingDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
-    protected val overstyringDao = OverstyringDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
@@ -248,391 +208,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     @BeforeEach
     internal fun resetTestSetup() {
         testRapid.reset()
+        Meldingssender.testRapid = testRapid
     }
-
-    @AfterEach
-    internal fun after() {
-        FØDSELSNUMMER = DEFAULT_FØDSELSNUMER
-    }
-
-    private fun nyHendelseId() = UUID.randomUUID()
-
-    protected fun sendVedtaksperiodeForkastet(orgnr: String, vedtaksperiodeId: UUID): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
-    }
-
-    protected fun sendVedtaksperiodeEndret(
-        orgnr: String = "orgnr",
-        vedtaksperiodeId: UUID,
-        forrigeTilstand: String = "FORRIGE_TILSTAND",
-        gjeldendeTilstand: String = "GJELDENDE_TILSTAND"
-    ): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagVedtaksperiodeEndret(
-                id,
-                vedtaksperiodeId,
-                orgnr,
-                forrigeTilstand,
-                gjeldendeTilstand
-            )
-        )
-    }
-
-    protected fun sendAdressebeskyttelseEndret(): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(meldingsfabrikk.lagAdressebeskyttelseEndret(id))
-    }
-
-    protected fun sendGodkjenningsbehov(
-        orgnr: String,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        periodeFom: LocalDate = LocalDate.now(),
-        periodeTom: LocalDate = LocalDate.now(),
-        skjæringstidspunkt: LocalDate = LocalDate.now(),
-        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-        fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = AKTØR,
-        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        aktiveVedtaksperioder: List<AktivVedtaksperiodeJson> = listOf(
-            AktivVedtaksperiodeJson(
-                orgnr,
-                vedtaksperiodeId,
-                periodetype
-            )
-        ),
-        orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
-        utbetalingtype: Utbetalingtype = UTBETALING
-    ): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagGodkjenningsbehov(
-                id = id,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                orgnummer = orgnr,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom,
-                skjæringstidspunkt = skjæringstidspunkt,
-                periodetype = periodetype,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                inntektskilde = inntektskilde,
-                aktiveVedtaksperioder = aktiveVedtaksperioder,
-                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                utbetalingtype = utbetalingtype
-            )
-        )
-    }
-
-    protected fun sendArbeidsgiverinformasjonløsning(
-        hendelseId: UUID,
-        orgnummer: String,
-        vedtaksperiodeId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId(),
-        navn: String = "En arbeidsgiver",
-        bransjer: List<String> = listOf("En bransje", "En annen bransje"),
-        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
-    ): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
-                    id = id,
-                    hendelseId = hendelseId,
-                    contextId = contextId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    orgnummer = orgnummer,
-                    navn = navn,
-                    bransjer = bransjer,
-                    ekstraArbeidsgivere = ekstraArbeidsgivere
-                )
-            )
-        }
-
-    protected fun håndterAnnullering(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
-        hendelseMediator.håndter(annulleringDto, saksbehandler)
-    }
-
-    protected fun sendArbeidsforholdløsning(
-        hendelseId: UUID,
-        orgnr: String,
-        vedtaksperiodeId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId(),
-        løsning: List<Arbeidsforholdløsning.Løsning> = listOf(
-            Arbeidsforholdløsning.Løsning(
-                stillingstittel = "en-stillingstittel",
-                stillingsprosent = 100,
-                startdato = LocalDate.now(),
-                sluttdato = null
-            )
-        )
-    ): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagArbeidsforholdløsning(
-                    id = id,
-                    hendelseId = hendelseId,
-                    contextId = contextId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    organisasjonsnummer = orgnr,
-                    løsning
-                )
-            )
-        }
-
-    protected fun sendHentPersoninfoLøsning(
-        hendelseId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId(),
-        adressebeskyttelse: String = "Ugradert"
-    ): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagHentPersoninfoløsning(
-                    id,
-                    hendelseId,
-                    contextId,
-                    adressebeskyttelse
-                )
-            )
-        }
-
-    protected fun sendKomposittbehov(
-        hendelseId: UUID,
-        behov: List<String>,
-        vedtaksperiodeId: UUID,
-        organisasjonsnummer: String = "orgnr",
-        contextId: UUID = testRapid.inspektør.contextId(),
-        detaljer: Map<String, Any>
-    ): UUID = nyHendelseId().also { id ->
-        testRapid.sendTestMessage(
-            meldingsfabrikk.lagFullstendigBehov(
-                id,
-                hendelseId,
-                contextId,
-                vedtaksperiodeId,
-                organisasjonsnummer,
-                behov,
-                detaljer
-            )
-        )
-    }
-
-    protected fun sendPersoninfoløsning(
-        hendelseId: UUID,
-        orgnr: String,
-        vedtaksperiodeId: UUID,
-        contextId: UUID = testRapid.inspektør.contextId(),
-        enhet: String = "0301",
-        adressebeskyttelse: String = "Ugradert"
-    ): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagPersoninfoløsning(
-                    id,
-                    hendelseId,
-                    contextId,
-                    vedtaksperiodeId,
-                    orgnr,
-                    enhet,
-                    adressebeskyttelse
-                )
-            )
-        }
-
-    protected fun sendOverstyrteDager(
-        dager: List<OverstyringDagDto>,
-        orgnr: String = ORGNR,
-        saksbehandlerEpost: String = SAKSBEHANDLER_EPOST,
-        saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
-        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT
-    ): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagOverstyringTidslinje(
-                    id = id,
-                    dager = dager,
-                    organisasjonsnummer = orgnr,
-                    saksbehandlerEpost = saksbehandlerEpost,
-                    saksbehandlerOid = saksbehandlerOid,
-                    saksbehandlerident = saksbehandlerIdent,
-                )
-            )
-        }
-
-    protected fun sendOverstyrtInntekt(
-        orgnr: String = ORGNR,
-        månedligInntekt: Double = 25000.0,
-        skjæringstidspunkt: LocalDate,
-        forklaring: String = "testforklaring"
-    ): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagOverstyringInntekt(
-                    id = id,
-                    organisasjonsnummer = orgnr,
-                    månedligInntekt = månedligInntekt,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    saksbehandlerEpost = SAKSBEHANDLER_EPOST,
-                    forklaring = forklaring
-                )
-            )
-        }
-
-    protected fun sendOverstyrtArbeidsforhold(
-        skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
-    ): UUID =
-        nyHendelseId().also {
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagOverstyringArbeidsforhold(
-                    organisasjonsnummer = ORGNR,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    overstyrteArbeidsforhold = overstyrteArbeidsforhold
-                )
-            )
-        }
-
-
-    protected fun sendRevurderingAvvist(fødselsnummer: String, errors: List<String>): UUID =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagRevurderingAvvist(
-                    id = id,
-                    fødselsnummer = fødselsnummer,
-                    errors = errors
-                )
-            )
-        }
-
-    protected fun sendGosysOppgaveEndret(fødselsnummer: String, aktørId: String) =
-        nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagGosysOppgaveEndret(
-                    id = id,
-                    fødselsnummer = fødselsnummer,
-                    aktørId = aktørId
-                )
-            )
-        }
-
-    protected fun sendDigitalKontaktinformasjonløsning(
-        godkjenningsmeldingId: UUID,
-        erDigital: Boolean = true,
-        contextId: UUID = testRapid.inspektør.contextId()
-    ): UUID {
-        return nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    erDigital
-                )
-            )
-        }
-    }
-
-    protected fun sendÅpneGosysOppgaverløsning(
-        godkjenningsmeldingId: UUID,
-        antall: Int = 0,
-        oppslagFeilet: Boolean = false,
-        contextId: UUID = testRapid.inspektør.contextId()
-    ): UUID {
-        return nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagÅpneGosysOppgaverløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    antall,
-                    oppslagFeilet
-                )
-            )
-        }
-    }
-
-    protected fun sendRisikovurderingløsning(
-        godkjenningsmeldingId: UUID,
-        vedtaksperiodeId: UUID,
-        kanGodkjennesAutomatisk: Boolean = true,
-        contextId: UUID = testRapid.inspektør.contextId(),
-        funn: List<Risikofunn> = emptyList()
-    ): UUID {
-        return nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagRisikovurderingløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    vedtaksperiodeId,
-                    kanGodkjennesAutomatisk,
-                    funn
-                )
-            )
-        }
-    }
-
-    protected fun sendEgenAnsattløsning(
-        godkjenningsmeldingId: UUID,
-        erEgenAnsatt: Boolean,
-        fødselsnummer: String = FØDSELSNUMMER,
-        contextId: UUID = testRapid.inspektør.contextId()
-    ): UUID {
-        return nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagEgenAnsattløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    erEgenAnsatt,
-                    fødselsnummer,
-                )
-            )
-        }
-    }
-
-    protected fun sendVergemålløsning(
-        godkjenningsmeldingId: UUID,
-        vergemål: VergemålJson = VergemålJson(),
-        contextId: UUID = testRapid.inspektør.contextId()
-    ): UUID {
-        return nyHendelseId().also { id ->
-            testRapid.sendTestMessage(
-                meldingsfabrikk.lagVergemålløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    vergemål
-                )
-            )
-        }
-    }
-
-    protected fun sendSaksbehandlerløsning(
-        oppgaveId: Long,
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        saksbehandlerOid: UUID,
-        godkjent: Boolean,
-        begrunnelser: List<String>? = null,
-        kommentar: String? = null
-    ): UUID {
-        hendelseMediator.håndter(
-            godkjenningDTO = GodkjenningDTO(
-                oppgaveId,
-                godkjent,
-                saksbehandlerIdent,
-                if (godkjent) null else "årsak",
-                begrunnelser,
-                kommentar
-            ),
-            epost = saksbehandlerEpost,
-            oid = saksbehandlerOid
-        )
-        assertEquals("AvventerSystem", testRapid.inspektør.siste("oppgave_oppdatert").path("status").asText())
-        val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
-        testRapid.sendTestMessage(løsning.toString())
-        return UUID.fromString(løsning.path("@id").asText())
-    }
-
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
@@ -684,154 +261,36 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun sendUtbetalingEndret(
-        type: String,
-        status: Utbetalingsstatus,
-        orgnr: String,
-        arbeidsgiverFagsystemId: String,
-        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
-        forrigeStatus: Utbetalingsstatus = status,
-        fødselsnummer: String = FØDSELSNUMMER,
-        utbetalingId: UUID
-    ) {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "utbetaling_endret",
-    "@id": "${UUID.randomUUID()}",
-    "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "$utbetalingId",
-    "fødselsnummer": "$fødselsnummer",
-    "type": "$type",
-    "forrigeStatus": "$forrigeStatus",
-    "gjeldendeStatus": "$status",
-    "organisasjonsnummer": "$orgnr",
-    "arbeidsgiverOppdrag": {
-      "mottaker": "$orgnr",
-      "fagområde": "SPREF",
-      "endringskode": "NY",
-      "fagsystemId": "$arbeidsgiverFagsystemId",
-      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
-      "linjer": [
-        {
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "totalbeløp": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": "asdfg",
-          "delytelseId": 2,
-          "refDelytelseId": 1,
-          "datoStatusFom": "${LocalDate.now()}",
-          "endringskode": "NY",
-          "klassekode": "SPREFAG-IOP",
-          "statuskode": "OPPH"
-        },
-        {
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "totalbeløp": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": null,
-          "delytelseId": 3,
-          "refDelytelseId": null,
-          "datoStatusFom": null,
-          "endringskode": "NY",
-          "klassekode": "SPREFAG-IOP",
-          "statuskode": null
-        }
-      ]
-    },
-    "personOppdrag": {
-      "mottaker": "$FØDSELSNUMMER",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "fagsystemId": "$personFagsystemId",
-      "linjer": []
-    }
-}"""
-
-        testRapid.sendTestMessage(json)
-    }
-
-    protected fun sendPersonUtbetalingEndret(
-        type: String,
-        status: Utbetalingsstatus,
-        orgnr: String,
-        arbeidsgiverFagsystemId: String = "DFGKJDWOAWODOAWOW",
-        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
-        forrigeStatus: Utbetalingsstatus = status,
-        fødselsnummer: String = FØDSELSNUMMER,
-        utbetalingId: UUID
-    ) {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "utbetaling_endret",
-    "@id": "${UUID.randomUUID()}",
-    "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "$utbetalingId",
-    "fødselsnummer": "$fødselsnummer",
-    "type": "$type",
-    "forrigeStatus": "$forrigeStatus",
-    "gjeldendeStatus": "$status",
-    "organisasjonsnummer": "$orgnr",
-    "arbeidsgiverOppdrag": {
-      "mottaker": "$orgnr",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "fagsystemId": "$arbeidsgiverFagsystemId",
-      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
-      "linjer": []
-    },
-    "personOppdrag": {
-      "mottaker": "$FØDSELSNUMMER",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "fagsystemId": "$personFagsystemId",
-      "linjer": [{
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "totalbeløp": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": "asdfg",
-          "delytelseId": 2,
-          "refDelytelseId": 1,
-          "datoStatusFom": null,
-          "endringskode": "NY",
-          "klassekode": "SPATORD",
-          "statuskode": null
-        }]
-    }
-}"""
-
-        testRapid.sendTestMessage(json)
-    }
-
-    protected fun sendUtbetalingAnnullert(
-        arbeidsgiverFagsystemId: String = "ASDJ12IA312KLS",
-        personFagsystemId: String = "BSDJ12IA312KLS",
-        saksbehandlerEpost: String = "saksbehandler_epost"
-    ) {
-        @Language("JSON")
-        val json = """
-            {
-                "@event_name": "utbetaling_annullert",
-                "@id": "${UUID.randomUUID()}",
-                "fødselsnummer": "$FØDSELSNUMMER",
-                "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
-                "personFagsystemId": "$personFagsystemId",
-                "utbetalingId": "$UTBETALING_ID",
-                "tidspunkt": "${LocalDateTime.now()}",
-                "epost": "$saksbehandlerEpost"
-            }"""
-
-        testRapid.sendTestMessage(json)
+    /**
+     * Denne bidrar, på godt og vondt, til en slags integrasjonstesting mellom API og selve, siden den stort sett kalles
+     * fra tester som tester selve, men trigger noe oppførsel fra API-siden, som de forskjellige testene asserter på
+     * (at status er "AvventerSystem", blant annet).
+     */
+    protected fun sendSaksbehandlerløsningFraAPI(
+        oppgaveId: Long,
+        saksbehandlerIdent: String,
+        saksbehandlerEpost: String,
+        saksbehandlerOid: UUID,
+        godkjent: Boolean,
+        begrunnelser: List<String>? = null,
+        kommentar: String? = null
+    ): UUID {
+        hendelseMediator.håndter(
+            godkjenningDTO = GodkjenningDTO(
+                oppgaveId,
+                godkjent,
+                saksbehandlerIdent,
+                if (godkjent) null else "årsak",
+                begrunnelser,
+                kommentar
+            ),
+            epost = saksbehandlerEpost,
+            oid = saksbehandlerOid
+        )
+        assertEquals("AvventerSystem", testRapid.inspektør.siste("oppgave_oppdatert").path("status").asText())
+        val løsning = testRapid.inspektør.siste("saksbehandler_løsning")
+        testRapid.sendTestMessage(løsning.toString())
+        return UUID.fromString(løsning.path("@id").asText())
     }
 
     protected fun assertHendelse(hendelseId: UUID) {
@@ -968,33 +427,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(type, oppgaver[indeks]?.type)
     }
 
-    private fun TestRapid.RapidInspector.oppgaver(): Map<Int, OppgaveSnapshot> {
-        val oppgaveindekser = mutableListOf<Long>()
-        val oppgaver = mutableMapOf<Int, MutableList<JsonNode>>()
-        hendelser("oppgave_opprettet")
-            .forEach {
-                oppgaveindekser.add(it.path("oppgaveId").asLong())
-                oppgaver[oppgaveindekser.size - 1] = mutableListOf(it)
-            }
-        hendelser("oppgave_oppdatert")
-            .forEach { oppgave ->
-                val indeks = oppgaveindekser.indexOf(oppgave.path("oppgaveId").asLong())
-                oppgaver[indeks]?.add(oppgave)
-            }
-        return oppgaver
-            .mapValues { (_, oppgaver) ->
-                OppgaveSnapshot(
-                    type = oppgaver.first().path("type").asText(),
-                    statuser = oppgaver.map { Oppgavestatus.valueOf(it.path("status").asText()) }
-                )
-            }
-    }
-
-    private data class OppgaveSnapshot(
-        val statuser: List<Oppgavestatus>,
-        val type: String
-    )
-
     protected fun assertIngenOppgave() {
         assertEquals(0, testRapid.inspektør.hendelser("oppgave_opprettet").size)
     }
@@ -1036,7 +468,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         periodeTom: LocalDate = 31.januar,
         risikofunn: List<Risikofunn> = emptyList()
     ): UUID {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot
+        every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -1046,28 +478,29 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             periodeFom = periodeFom,
             periodeTom = periodeTom
         )
+        val contextId = contextId(godkjenningsmeldingId)
         sendPersoninfoløsning(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = godkjenningsmeldingId,
-            contextId = contextId(godkjenningsmeldingId)
+            contextId = contextId
         )
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            contextId = contextId(godkjenningsmeldingId)
+            contextId = contextId
         )
         sendArbeidsforholdløsning(
             hendelseId = godkjenningsmeldingId,
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            contextId = contextId(godkjenningsmeldingId)
+            contextId = contextId
         )
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false,
-            contextId = contextId(godkjenningsmeldingId)
+            contextId = contextId
         )
         sendVergemålløsning(
             godkjenningsmeldingId = godkjenningsmeldingId
@@ -1075,208 +508,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true,
-            contextId = contextId(godkjenningsmeldingId)
+            contextId = contextId
         )
         sendÅpneGosysOppgaverløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
-            contextId = contextId(godkjenningsmeldingId)
+            contextId = contextId
         )
         sendRisikovurderingløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = vedtaksperiodeId,
             kanGodkjennesAutomatisk = kanAutomatiseres,
-            contextId = contextId(godkjenningsmeldingId),
+            contextId = contextId,
             funn = risikofunn
         )
         return godkjenningsmeldingId
     }
 
-    protected fun snapshot(
-        versjon: Int = 1,
-        fødselsnummer: String = FØDSELSNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
-        arbeidsgiverbeløp: Int = 30000,
-        personbeløp: Int = 0,
-        aktivitetslogg: List<GraphQLAktivitet> = emptyList()
-    ): GraphQLClientResponse<HentSnapshot.Result> =
-        object : GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(
-                GraphQLPerson(
-                    aktorId = AKTØR,
-                    fodselsnummer = fødselsnummer,
-                    versjon = versjon,
-                    arbeidsgivere = listOf(
-                        GraphQLArbeidsgiver(
-                            organisasjonsnummer = ORGNR,
-                            ghostPerioder = emptyList(),
-                            generasjoner = listOf(
-                                GraphQLGenerasjon(
-                                    id = UUID.randomUUID().toString(),
-                                    perioder = listOf(
-                                        GraphQLBeregnetPeriode(
-                                            id = UUID.randomUUID().toString(),
-                                            vedtaksperiodeId = vedtaksperiodeId.toString(),
-                                            utbetaling = GraphQLUtbetaling(
-                                                id = utbetalingId.toString(),
-                                                arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
-                                                arbeidsgiverNettoBelop = arbeidsgiverbeløp,
-                                                personFagsystemId = "EN_FAGSYSTEMID",
-                                                personNettoBelop = personbeløp,
-                                                statusEnum = GraphQLUtbetalingstatus.UBETALT,
-                                                typeEnum = no.nav.helse.mediator.graphql.enums.Utbetalingtype.UTBETALING,
-                                                vurdering = null,
-                                                personoppdrag = null,
-                                                arbeidsgiveroppdrag = null
-                                            ),
-                                            erForkastet = false,
-                                            fom = "2020-01-01",
-                                            tom = "2020-01-31",
-                                            inntektstype = GraphQLInntektstype.ENARBEIDSGIVER,
-                                            opprettet = "2020-01-31",
-                                            periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
-                                            tidslinje = emptyList(),
-                                            aktivitetslogg = aktivitetslogg,
-                                            beregningId = UUID.randomUUID().toString(),
-                                            forbrukteSykedager = null,
-                                            gjenstaendeSykedager = null,
-                                            hendelser = emptyList(),
-                                            maksdato = "2021-01-01",
-                                            periodevilkar = GraphQLPeriodevilkar(
-                                                alder = Alder(
-                                                    alderSisteSykedag = 30,
-                                                    oppfylt = true,
-                                                ),
-                                                soknadsfrist = Soknadsfrist(
-                                                    sendtNav = "2020-01-31",
-                                                    soknadFom = "2020-01-01",
-                                                    soknadTom = "2020-01-31",
-                                                    oppfylt = true,
-                                                ),
-                                                sykepengedager = Sykepengedager(
-                                                    forbrukteSykedager = null,
-                                                    gjenstaendeSykedager = null,
-                                                    maksdato = "2021-01-01",
-                                                    skjaeringstidspunkt = "2020-01-01",
-                                                    oppfylt = true,
-                                                )
-                                            ),
-                                            skjaeringstidspunkt = "2020-01-01",
-                                            refusjon = null,
-                                            vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
-                                            periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
-                                        )
-                                    )
-                                )
-                            ),
-                        )
-                    ),
-                    dodsdato = null,
-                    vilkarsgrunnlaghistorikk = emptyList(),
-                )
-            )
-        }
-
-//    """{
-//  "versjon": $versjon,
-//  "aktørId": "$AKTØR",
-//  "fødselsnummer": "$fødselsnummer",
-//  "arbeidsgivere": [
-//    {
-//      "organisasjonsnummer": "$ORGNR",
-//      "id": "${UUID.randomUUID()}",
-//      "vedtaksperioder": [
-//        {
-//          "id": "$vedtaksperiodeId",
-//          "aktivitetslogg": [],
-//          "utbetaling": {
-//            "utbetalingId": "$utbetalingId",
-//            "utbetalingstidslinje": ${utbetalingstidslinje.map
-//    {
-//        (dato, personbeløp, arbeidsgiverbeløp) ->
-//        """
-//                       {
-//                            "dato": "$dato",
-//                            "arbeidsgiverbeløp": $arbeidsgiverbeløp,
-//                            "personbeløp": $personbeløp
-//                        }
-//                        """
-//    } },
-//            "personOppdrag": {
-//              "utbetalingslinjer": ${personOppdragLinjer.map
-//    {
-//        """
-//                            {
-//                                "fom": "${it.start}",
-//                                "tom": "${it.endInclusive}"
-//                             }
-//                            """
-//    }}
-//            },
-//            "arbeidsgiverOppdrag": {
-//              "utbetalingslinjer": ${arbeidsgiverOppdragLinjer.map
-//    {
-//        """
-//                            {
-//                                "fom": "${it.start}",
-//                                "tom": "${it.endInclusive}"
-//                             }
-//                            """
-//    }}
-//            }
-//          }
-//        }
-//      ],
-//      "utbetalingshistorikk": []
-//    }
-//  ],
-//  "inntektsgrunnlag": {}
-//}"""
-
-    protected fun TestRapid.RapidInspector.meldinger() =
-        (0 until size).map { index -> message(index) }
-
-    protected fun TestRapid.RapidInspector.hendelser(type: String) =
-        meldinger().filter { it.path("@event_name").asText() == type }
-
-    private fun TestRapid.RapidInspector.siste(type: String) =
-        hendelser(type).last()
-
-    protected fun TestRapid.RapidInspector.behov() =
-        hendelser("behov")
-            .filterNot { it.hasNonNull("@løsning") }
-            .flatMap { it.path("@behov").map(JsonNode::asText) }
-
-    protected fun TestRapid.RapidInspector.løsning(behov: String): JsonNode =
-        hendelser("behov")
-            .filter { it.hasNonNull("@løsning") }
-            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
-            .path("@løsning").path(behov)
-
-    protected fun TestRapid.RapidInspector.contextId(): UUID =
-        (hendelser("behov")
-            .lastOrNull { it.hasNonNull("contextId") }
-            ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
-            .path("contextId")
-            .asText()
-            .let { UUID.fromString(it) }
-
-    protected fun TestRapid.RapidInspector.oppgaveId() =
-        hendelser("oppgave_opprettet")
-            .last()
-            .path("oppgaveId")
-            .asLong()
-
-    protected fun TestRapid.RapidInspector.contextId(hendelseId: UUID): UUID =
-        hendelser("behov")
-            .last { it.hasNonNull("contextId") && it.path("hendelseId").asText() == hendelseId.toString() }
-            .path("contextId")
-            .asText()
-            .let { UUID.fromString(it) }
-
-    protected fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID): String =
-        hendelser("oppgave_opprettet")
-            .last { it.path("hendelseId").asText() == hendelseId.toString() }
-            .path("oppgaveId")
-            .asText()
 }

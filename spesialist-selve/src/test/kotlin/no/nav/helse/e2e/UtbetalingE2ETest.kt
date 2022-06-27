@@ -4,6 +4,13 @@ import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.Meldingssender.sendPersonUtbetalingEndret
+import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
@@ -15,7 +22,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-
 
 internal class UtbetalingE2ETest : AbstractE2ETest() {
 
@@ -38,7 +44,13 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         val ET_ANNET_ORGNR = "2"
         vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         assertDoesNotThrow {
-            sendUtbetalingEndret("UTBETALING", GODKJENT, ET_ANNET_ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+            sendUtbetalingEndret(
+                "UTBETALING",
+                GODKJENT,
+                ET_ANNET_ORGNR,
+                arbeidsgiverFagsystemId,
+                utbetalingId = UTBETALING_ID
+            )
         }
         assertEquals(0, utbetalinger().size)
         assertEquals(1, feilendeMeldinger().size)
@@ -48,20 +60,34 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `lagrer utbetaling etter utbetaling_endret når utbetalingen har vært til godkjenning og vi kjenner arbeidsgiver`() {
         settOppBruker()
         assertDoesNotThrow {
-            sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+            sendUtbetalingEndret(
+                "UTBETALING",
+                GODKJENT,
+                ORGNR,
+                arbeidsgiverFagsystemId,
+                utbetalingId = UTBETALING_ID
+            )
         }
         assertEquals(1, utbetalinger().size)
         assertEquals(0, feilendeMeldinger().size)
     }
 
     @Test
-    fun `lagrer utbetaling med annen type enn UTBETALING, forventer ikke at utbetalingen har vært til godkjenning`(){
+    fun `lagrer utbetaling med annen type enn UTBETALING, forventer ikke at utbetalingen har vært til godkjenning`() {
         settOppBruker()
         assertDoesNotThrow {
-            sendUtbetalingEndret("FERIEPENGER", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
-            sendUtbetalingEndret("ETTERUTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
-            sendUtbetalingEndret("ANNULLERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
-            sendUtbetalingEndret("REVURDERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID())
+            sendUtbetalingEndret(
+                "FERIEPENGER", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+            )
+            sendUtbetalingEndret(
+                "ETTERUTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+            )
+            sendUtbetalingEndret(
+                "ANNULLERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+            )
+            sendUtbetalingEndret(
+                "REVURDERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+            )
         }
         assertEquals(4, utbetalinger().size)
         assertEquals(0, feilendeMeldinger().size)
@@ -146,11 +172,15 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             INNER JOIN oppdrag o2 ON (o2.id = ui.person_fagsystem_id_ref)
             WHERE p.fodselsnummer = :fodselsnummer AND a.orgnummer = :orgnummer
             """
-        return sessionOf(dataSource).use  {
-            it.run(queryOf(statement, mapOf(
-                "fodselsnummer" to FØDSELSNUMMER.toLong(),
-                "orgnummer" to ORGNR.toLong()
-            )).map { row -> row.long("utbetaling_id_ref") }.asList)
+        return sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    statement, mapOf(
+                        "fodselsnummer" to FØDSELSNUMMER.toLong(),
+                        "orgnummer" to ORGNR.toLong()
+                    )
+                ).map { it.long("utbetaling_id_ref") }.asList
+            )
         }
     }
 

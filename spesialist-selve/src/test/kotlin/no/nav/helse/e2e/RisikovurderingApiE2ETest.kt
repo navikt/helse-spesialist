@@ -1,20 +1,37 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.request.accept
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.mockk.every
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.UTBETALING_ID2
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.oppgaveApi
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.oppgave.OppgaveMediator
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 private class RisikovurderingApiE2ETest : AbstractE2ETest() {
     private companion object {
@@ -46,7 +63,10 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         val respons =
             AbstractApiTest.TestServer {
                 oppgaveApi(
-                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao), riskQaGruppe, kode7Gruppe, beslutterGruppe
+                    OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao),
+                    riskQaGruppe,
+                    kode7Gruppe,
+                    beslutterGruppe
                 )
             }
                 .withAuthenticatedServer {
@@ -57,7 +77,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
                     }
                 }.execute()
 
-        Assertions.assertEquals(HttpStatusCode.OK, respons.status)
+        assertEquals(HttpStatusCode.OK, respons.status)
         val json = runBlocking {
             objectMapper.readTree(respons.bodyAsText())
         }

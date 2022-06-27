@@ -5,6 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.snapshot
 import org.junit.jupiter.api.Test
 
 internal class VersjoneringAvSnapshotTest : AbstractE2ETest() {

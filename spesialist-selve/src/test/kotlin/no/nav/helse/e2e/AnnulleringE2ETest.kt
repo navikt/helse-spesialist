@@ -1,8 +1,11 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import no.nav.helse.Testdata.FØDSELSNUMMER
 import io.mockk.every
 import java.util.UUID
+import no.nav.helse.Meldingssender.sendUtbetalingAnnullert
+import no.nav.helse.Testdata.snapshot
 import org.junit.jupiter.api.Test
 
 internal class AnnulleringE2ETest : AbstractE2ETest() {

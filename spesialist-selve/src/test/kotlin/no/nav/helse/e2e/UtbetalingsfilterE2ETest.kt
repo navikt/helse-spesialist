@@ -3,6 +3,12 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
+import no.nav.helse.Testdata.SAKSBEHANDLER_OID
+import no.nav.helse.Testdata._MODIFISERTBART_FØDSELSNUMMER
+import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import org.junit.jupiter.api.Test
@@ -30,7 +36,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             personbeløp = 1500,
         )
         assertVedtak(vedtaksperiodeId)
-        sendSaksbehandlerløsning(
+        sendSaksbehandlerløsningFraAPI(
             testRapid.inspektør.oppgaveId(),
             SAKSBEHANDLER_IDENT,
             SAKSBEHANDLER_EPOST,
@@ -91,7 +97,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
         arbeidsgiverbeløp: Int = 0,
         risikofunn: List<Risikofunn> = emptyList()
     ) {
-        FØDSELSNUMMER = fødselsnummer
+        _MODIFISERTBART_FØDSELSNUMMER = fødselsnummer
         vedtaksperiode(
             fødselsnummer = fødselsnummer,
             utbetalingId = utbetalingId,

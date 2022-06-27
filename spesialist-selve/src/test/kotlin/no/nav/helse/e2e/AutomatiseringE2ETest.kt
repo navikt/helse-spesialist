@@ -2,14 +2,32 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import java.util.UUID
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.oppgave.Oppgavestatus
-import org.junit.jupiter.api.Test
-import java.util.*
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class AutomatiseringE2ETest : AbstractE2ETest() {
     private companion object {
@@ -81,7 +99,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         val vedtaksperiodeGodkjentEvent =
             testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull()
         assertNotNull(vedtaksperiodeGodkjentEvent)
-        if(vedtaksperiodeGodkjentEvent != null) {
+        if (vedtaksperiodeGodkjentEvent != null) {
             val vedtaksperiodeGodkjentEventBoolean: Boolean =
                 vedtaksperiodeGodkjentEvent["automatiskBehandling"].asBoolean()
             assertTrue(vedtaksperiodeGodkjentEventBoolean)
@@ -192,7 +210,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val løsningId = sendSaksbehandlerløsning(
+        val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
             saksbehandlerEpost = SAKSBEHANDLEREPOST,
@@ -269,7 +287,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             kanGodkjennesAutomatisk = false,
             funn = funn
         )
-        val løsningId = sendSaksbehandlerløsning(
+        val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
             saksbehandlerEpost = SAKSBEHANDLEREPOST,
@@ -291,7 +309,12 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavestatuser(
+            0,
+            Oppgavestatus.AvventerSaksbehandler,
+            Oppgavestatus.AvventerSystem,
+            Oppgavestatus.Ferdigstilt
+        )
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
         assertWarning(
             """
@@ -350,7 +373,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val løsningId = sendSaksbehandlerløsning(
+        val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
             saksbehandlerEpost = SAKSBEHANDLEREPOST,
@@ -372,7 +395,12 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavestatuser(
+            0,
+            Oppgavestatus.AvventerSaksbehandler,
+            Oppgavestatus.AvventerSystem,
+            Oppgavestatus.Ferdigstilt
+        )
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 
@@ -422,7 +450,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val løsningId = sendSaksbehandlerløsning(
+        val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
             saksbehandlerEpost = SAKSBEHANDLEREPOST,
@@ -444,7 +472,12 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertTilstand(løsningId, "NY", "FERDIG")
-        assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.AvventerSystem, Oppgavestatus.Ferdigstilt)
+        assertOppgavestatuser(
+            0,
+            Oppgavestatus.AvventerSaksbehandler,
+            Oppgavestatus.AvventerSystem,
+            Oppgavestatus.Ferdigstilt
+        )
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
     }
 }

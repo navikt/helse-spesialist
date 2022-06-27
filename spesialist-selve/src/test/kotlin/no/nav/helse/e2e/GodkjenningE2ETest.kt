@@ -7,6 +7,31 @@ import io.mockk.every
 import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendKomposittbehov
+import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Meldingssender.sendVedtaksperiodeForkastet
+import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.TestRapidHelpers.behov
+import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.TestRapidHelpers.løsning
+import no.nav.helse.TestRapidHelpers.meldinger
+import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
@@ -140,7 +165,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         val løsningId =
-            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+            sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
         assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
@@ -194,7 +219,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         val løsningId =
-            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+            sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
         testRapid.inspektør.also { inspektør ->
             assertEquals(godkjenningsmeldingId.toString(), inspektør.field(0, "@forårsaket_av").path("id").asText())
@@ -252,7 +277,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
         val vedtaksperiodeGodkjentEvent = testRapid.inspektør.hendelser("vedtaksperiode_godkjent").firstOrNull()
         assertNotNull(vedtaksperiodeGodkjentEvent)
@@ -300,7 +325,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val begrunnelser = listOf("Fortjener ikke penger", "Skulker sannsynligvis")
         val kommentar = "Jeg har tatt meg litt frihet i vurderingen"
         val løsningId =
-            sendSaksbehandlerløsning(
+            sendSaksbehandlerløsningFraAPI(
                 OPPGAVEID,
                 SAKSBEHANDLERIDENT,
                 SAKSBEHANDLEREPOST,
@@ -430,7 +455,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendSaksbehandlerløsning(
+        sendSaksbehandlerløsningFraAPI(
             OPPGAVEID,
             SAKSBEHANDLERIDENT,
             SAKSBEHANDLEREPOST,
@@ -499,7 +524,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendSaksbehandlerløsning(
+        sendSaksbehandlerløsningFraAPI(
             OPPGAVEID,
             SAKSBEHANDLERIDENT,
             SAKSBEHANDLEREPOST,
@@ -715,7 +740,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             snapshot = SNAPSHOT_MED_WARNINGS // Legger på warning for at saken ikke skal automatiseres
         )
         val løsningId =
-            sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+            sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         assertTilstand(løsningId, "NY", "FERDIG")
     }
 
@@ -723,9 +748,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `avbryter suspendert kommando når godkjenningsbehov kommer inn på nytt`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val hendelseId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        håndterVergeflyt(
-            snapshot = null
-        )
+        håndterVergeflyt(snapshot = null)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
     }
 
@@ -787,7 +810,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
         val saksbehandler = reservasjonDao.hentReservertTil(FØDSELSNUMMER)!!
 
@@ -827,7 +850,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId2,
             vedtaksperiodeId = VEDTAKSPERIODE_ID2,
         )
-        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
 
         val tildeling = tildelingDao.tildelingForOppgave(OPPGAVEID)
         assertEquals(SAKSBEHANDLEREPOST, tildeling?.epost)
@@ -958,7 +981,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
         assertThrows<NoSuchElementException> { testRapid.inspektør.løsning("Godkjenning") }
-        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         val godkjenning = testRapid.inspektør.løsning("Godkjenning")
         assertTrue(godkjenning["godkjent"].booleanValue())
         assertFalse(godkjenning["automatiskBehandling"].booleanValue())
@@ -975,7 +998,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
         assertThrows<NoSuchElementException> { testRapid.inspektør.løsning("Godkjenning") }
-        sendSaksbehandlerløsning(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
+        sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         val godkjenning = testRapid.inspektør.løsning("Godkjenning")
         assertTrue(godkjenning["godkjent"].booleanValue())
         assertFalse(godkjenning["automatiskBehandling"].booleanValue())

@@ -1,10 +1,14 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import java.util.UUID
+import no.nav.helse.Meldingssender.sendAdressebeskyttelseEndret
+import no.nav.helse.Meldingssender.sendHentPersoninfoLøsning
+import no.nav.helse.TestRapidHelpers.behov
+import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.person.Adressebeskyttelse
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
@@ -18,6 +22,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         sendHentPersoninfoLøsning(hendelseId, adressebeskyttelse = "Fortrolig")
         assertEquals(Adressebeskyttelse.Fortrolig, personDao.findAdressebeskyttelse(FØDSELSNUMMER))
     }
+
     @Test
     fun `oppdaterer ikke adressebeskyttelse dersom vi ikke kjenner til fødselsnummer`() {
         sendAdressebeskyttelseEndret()
