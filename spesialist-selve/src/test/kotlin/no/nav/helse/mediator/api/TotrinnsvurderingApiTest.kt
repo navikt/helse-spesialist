@@ -34,7 +34,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val tildelingMediator = mockk<TildelingMediator>(relaxed = true)
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
 
-    private val SAKSBEHANDLER_OID = UUID.randomUUID()
+    private val saksbehandler_oid = UUID.randomUUID()
 
     private val totrinnsvurderingDto = TotrinnsvurderingDto(oppgavereferanse = 1L)
     private val returDtoMedNotat = TotrinnsvurderingReturDto(
@@ -64,7 +64,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody<TotrinnsvurderingDto>(objectMapper.valueToTree(totrinnsvurderingDto))
-                authentication(SAKSBEHANDLER_OID)
+                authentication(saksbehandler_oid)
             }.execute()
         }
 
@@ -74,7 +74,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 erBeslutterOppgave = true,
                 erReturOppgave = false,
                 totrinnsvurdering = false,
-                tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
+                tidligereSaksbehandlerOid = saksbehandler_oid
             )
         }
         verify(exactly = 1) {
@@ -87,7 +87,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             oppgaveMediator.lagrePeriodehistorikk(
                 totrinnsvurderingDto.oppgavereferanse,
                 periodehistorikkDao,
-                SAKSBEHANDLER_OID,
+                saksbehandler_oid,
                 PeriodehistorikkType.TOTRINNSVURDERING_TIL_GODKJENNING
             )
         }
@@ -102,7 +102,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody<TotrinnsvurderingReturDto>(objectMapper.valueToTree(returDtoMedNotat))
-                authentication(SAKSBEHANDLER_OID)
+                authentication(saksbehandler_oid)
             }.execute()
         }
 
@@ -112,7 +112,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 erBeslutterOppgave = false,
                 erReturOppgave = true,
                 totrinnsvurdering = true,
-                tidligereSaksbehandlerOid = SAKSBEHANDLER_OID
+                tidligereSaksbehandlerOid = saksbehandler_oid
             )
         }
         verify(exactly = 1) {
@@ -125,7 +125,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             notatMediator.lagreForOppgaveId(
                 returDtoMedNotat.oppgavereferanse,
                 returDtoMedNotat.notat.tekst,
-                SAKSBEHANDLER_OID,
+                saksbehandler_oid,
                 returDtoMedNotat.notat.type
             )
         }
@@ -140,7 +140,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
-                authentication(SAKSBEHANDLER_OID)
+                authentication(saksbehandler_oid)
             }.execute()
         }
 
@@ -155,7 +155,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(objectMapper.writeValueAsString("{oppgavereferanse: 1L}"))
-                authentication(SAKSBEHANDLER_OID)
+                authentication(saksbehandler_oid)
             }.execute()
         }
 
