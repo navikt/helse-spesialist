@@ -320,7 +320,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     JOIN arbeidsgiver a on a.id = v.arbeidsgiver_ref
                     WHERE p.fodselsnummer = :fodselsnummer
                     AND a.orgnummer = :orgnummer
-                    AND (o.status = 'Ferdigstilt'::oppgavestatus OR o.status = 'AvventerSaksbehandler'::oppgavestatus)
+                    AND o.status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
                     AND v.tom >= :foersteDag::date
                     ORDER BY 
                         o.status DESC,
