@@ -67,7 +67,6 @@ internal fun Route.totrinnsvurderingApi(
         sikkerLog.info("OppgaveId ${retur.oppgavereferanse} sendes i retur av $saksbehandlerOid")
 
         val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse)
-        tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid)
 
         oppgaveMediator.setBeslutterOppgave(
             oppgaveId = retur.oppgavereferanse,
@@ -76,6 +75,8 @@ internal fun Route.totrinnsvurderingApi(
             totrinnsvurdering= true,
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
+
+        tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid)
 
         val notatId = notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
 
