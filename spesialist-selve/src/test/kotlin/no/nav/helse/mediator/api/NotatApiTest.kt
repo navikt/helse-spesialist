@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.notat.NotatDto
-import no.nav.helse.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatDto
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.notat.NotatType
+import no.nav.helse.spesialist.api.notat.NotatType
 import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)

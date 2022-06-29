@@ -13,8 +13,8 @@ import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.person.Adressebeskyttelse
-import no.nav.helse.person.Kjønn
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

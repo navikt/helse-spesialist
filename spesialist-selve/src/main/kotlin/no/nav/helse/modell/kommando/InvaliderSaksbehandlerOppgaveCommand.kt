@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 
 internal class InvaliderSaksbehandlerOppgaveCommand(
     private val fødselsnummer: String,

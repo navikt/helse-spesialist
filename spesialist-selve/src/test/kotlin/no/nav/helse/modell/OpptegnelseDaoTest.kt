@@ -2,11 +2,11 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
-import no.nav.helse.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
-import no.nav.helse.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
-import no.nav.helse.abonnement.UtbetalingPayload
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.NY_SAKSBEHANDLEROPPGAVE
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType.UTBETALING_ANNULLERING_OK
+import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*

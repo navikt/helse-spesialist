@@ -6,7 +6,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
 
 class OverstyringDao(private val dataSource: DataSource) {

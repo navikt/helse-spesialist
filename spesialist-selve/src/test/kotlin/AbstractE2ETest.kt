@@ -35,9 +35,6 @@ import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.abonnement.AbonnementDao
-import no.nav.helse.abonnement.OpptegnelseDao
-import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
@@ -66,27 +63,29 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.notat.NotatDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.reservasjon.ReservasjonDao
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.tildeling.TildelingDao
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.abonnement.AbonnementDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
@@ -116,7 +115,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
-    protected val opptegnelseDao = OpptegnelseDao(dataSource)
+    protected val opptegnelseDao = OpptegnelseApiDao(dataSource)
     protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)

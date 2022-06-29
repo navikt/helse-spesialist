@@ -8,11 +8,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.oppgave.GosysOppgaveEndretCommandData
-import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.GosysOppgaveEndretCommandData
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.helse.tildeling.TildelingApiDto
-import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 

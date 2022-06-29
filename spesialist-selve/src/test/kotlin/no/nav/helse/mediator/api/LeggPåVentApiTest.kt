@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.feilhåndtering.FeilDto
-import no.nav.helse.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.FeilDto
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import java.util.*
-import no.nav.helse.notat.NotatMediator
-import no.nav.helse.notat.NotatType
+import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random.Default.nextLong

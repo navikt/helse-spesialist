@@ -12,9 +12,9 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.feilhåndtering.modellfeilForRest
+import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
-import no.nav.helse.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("LeggPåVentApi")

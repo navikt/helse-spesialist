@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 import java.util.*
 

@@ -10,9 +10,13 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.testing.*
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.behandlingsstatistikk.*
-import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.Companion.toSpeilMap
-import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDto
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkType
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingstatistikkForSpeilDto
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.Companion.toSpeilMap
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
+import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

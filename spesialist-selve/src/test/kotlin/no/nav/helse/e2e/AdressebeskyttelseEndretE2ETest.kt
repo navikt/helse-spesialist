@@ -6,7 +6,7 @@ import no.nav.helse.Meldingssender.sendAdressebeskyttelseEndret
 import no.nav.helse.Meldingssender.sendHentPersoninfoLøsning
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.Testdata.FØDSELSNUMMER
-import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

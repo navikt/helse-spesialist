@@ -5,17 +5,17 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.notat.NotatDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.person.PersonApiDao
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.tildeling.TildelingDao
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

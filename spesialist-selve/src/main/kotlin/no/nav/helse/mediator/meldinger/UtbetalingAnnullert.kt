@@ -9,7 +9,7 @@ import no.nav.helse.modell.kommando.OppdaterSnapshotUtenÅLagreWarningsCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.*
 import no.nav.helse.rapids_rivers.River.PacketListener
-import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime

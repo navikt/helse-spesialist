@@ -9,11 +9,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.feilhåndtering.FeilDto
-import no.nav.helse.feilhåndtering.OppgaveAlleredeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.FeilDto
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.objectMapper
-import no.nav.helse.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

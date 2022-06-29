@@ -33,7 +33,7 @@ object Testdata {
     const val SAKSBEHANDLER_IDENT = "X999999"
     const val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
     val SAKSBEHANDLERTILGANGER_UTEN_TILGANGER =
-        SaksbehandlerTilganger(
+        no.nav.helse.spesialist.api.SaksbehandlerTilganger(
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             riskSaksbehandlergruppe = UUID.randomUUID(),

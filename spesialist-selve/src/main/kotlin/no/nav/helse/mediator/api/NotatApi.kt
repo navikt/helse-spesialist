@@ -12,10 +12,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.notat.NotatMediator
+import no.nav.helse.spesialist.api.notat.NotatMediator
 import org.slf4j.LoggerFactory
 import java.util.*
-import no.nav.helse.notat.NotatType
+import no.nav.helse.spesialist.api.notat.NotatType
 
 private val log = LoggerFactory.getLogger("NotatApi")
 

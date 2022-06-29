@@ -4,8 +4,8 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import java.util.*
 
 internal class OppdaterOppgavestatusCommand(

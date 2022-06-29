@@ -26,12 +26,12 @@ import no.nav.helse.Testdata.UTBETALING_ID2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
-import no.nav.helse.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

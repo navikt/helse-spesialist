@@ -11,13 +11,13 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.oppgave.Oppgavestatus.Invalidert
-import no.nav.helse.oppgave.Oppgavetype
-import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.oppgave.Oppgave
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.vedtaksperiode.Inntektskilde as InntektskildeForApi
-import no.nav.helse.vedtaksperiode.Periodetype as PeriodetypeForApi
+import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde as InntektskildeForApi
+import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype as PeriodetypeForApi
 
 class OppgaveDaoTest : DatabaseIntegrationTest() {
     private companion object {

@@ -35,14 +35,6 @@ import java.net.ProxySelector
 import java.net.URI
 import java.net.URL
 import java.util.UUID
-import no.nav.helse.abonnement.AbonnementDao
-import no.nav.helse.abonnement.OpptegnelseDao
-import no.nav.helse.abonnement.OpptegnelseMediator
-import no.nav.helse.abonnement.opptegnelseApi
-import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
-import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
@@ -73,26 +65,33 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.notat.NotatDao
-import no.nav.helse.notat.NotatMediator
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.reservasjon.ReservasjonDao
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.tildeling.TildelingDao
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
+import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import kotlin.random.Random.Default.nextInt
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
-import no.nav.helse.abonnement.OpptegnelseDao as OpptegnelseApiDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao as OpptegnelseApiDao
 
 private val auditLog = LoggerFactory.getLogger("auditLogger")
 private val logg = LoggerFactory.getLogger("ApplicationBuilder")
@@ -169,7 +168,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val utbetalingDao = UtbetalingDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
-    private val abonnementDao = AbonnementDao(dataSource)
+    private val abonnementDao = no.nav.helse.spesialist.api.abonnement.AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)

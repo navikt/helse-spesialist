@@ -12,6 +12,8 @@ import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringInntektCommand
+import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingInntektCommand
+import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -20,14 +22,12 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.reservasjon.ReservasjonDao
-import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingInntektCommand
-import no.nav.helse.modell.kommando.PubliserOverstyringCommand
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 
 /**
  * Tar vare på overstyring av inntekt fra saksbehandler og sletter den opprinnelige oppgaven i påvente av nytt

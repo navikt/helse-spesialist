@@ -30,9 +30,9 @@ import no.nav.helse.mediator.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.mediator.api.graphql.schema.Dagoverstyring
 import no.nav.helse.mediator.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.mediator.api.graphql.schema.Person
-import no.nav.helse.oppgave.OppgaveDto
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.oppgave.OppgaveDto
+import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue

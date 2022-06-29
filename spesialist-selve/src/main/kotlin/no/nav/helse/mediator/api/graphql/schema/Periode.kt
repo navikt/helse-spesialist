@@ -16,14 +16,14 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
-import no.nav.helse.notat.NotatDao
-import no.nav.helse.notat.NotatType
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatType
 import no.nav.helse.objectMapper
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import no.nav.helse.mediator.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 enum class Behandlingstype { BEHANDLET, UBEREGNET, VENTER, VENTER_PA_INFORMASJON }

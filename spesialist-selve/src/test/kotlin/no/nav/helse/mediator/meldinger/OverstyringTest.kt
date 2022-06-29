@@ -8,11 +8,11 @@ import java.util.UUID
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringDagDto
-import no.nav.helse.reservasjon.ReservasjonDao
-import no.nav.helse.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 internal class OverstyringTest {

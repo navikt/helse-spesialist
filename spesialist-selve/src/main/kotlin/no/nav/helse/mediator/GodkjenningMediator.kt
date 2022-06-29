@@ -1,9 +1,9 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.abonnement.GodkjenningsbehovPayload.Companion.lagre
-import no.nav.helse.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage

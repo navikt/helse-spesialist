@@ -6,10 +6,10 @@ import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.abonnement.OpptegnelseDto
-import no.nav.helse.abonnement.OpptegnelseMediator
-import no.nav.helse.abonnement.OpptegnelseType
-import no.nav.helse.abonnement.opptegnelseApi
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDto
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.*

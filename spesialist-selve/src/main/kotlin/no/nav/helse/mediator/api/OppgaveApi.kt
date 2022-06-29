@@ -7,11 +7,11 @@ import io.ktor.server.routing.get
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.SaksbehandlerTilganger
 import no.nav.helse.getGrupper
 import no.nav.helse.getNAVident
-import no.nav.helse.oppgave.OppgaveDto
-import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.oppgave.OppgaveDto
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 
 internal fun Route.oppgaveApi(

@@ -2,7 +2,7 @@ package no.nav.helse.mediator.api.graphql.schema
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.format.DateTimeFormatter
-import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGhostPeriode
@@ -10,15 +10,15 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
-import no.nav.helse.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.objectMapper
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.person.PersonApiDao
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.tildeling.TildelingDao
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 enum class Kjonn { Mann, Kvinne, Ukjent }
 

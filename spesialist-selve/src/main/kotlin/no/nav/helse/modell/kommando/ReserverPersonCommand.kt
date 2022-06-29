@@ -1,6 +1,6 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*

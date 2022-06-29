@@ -8,9 +8,9 @@ import java.util.UUID
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.overstyring.OverstyringType
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.overstyring.OverstyringType
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

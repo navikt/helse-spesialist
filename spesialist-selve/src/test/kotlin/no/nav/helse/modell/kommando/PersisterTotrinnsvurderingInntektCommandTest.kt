@@ -8,11 +8,11 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
-import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.overstyring.OverstyringType
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.overstyring.OverstyringType
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

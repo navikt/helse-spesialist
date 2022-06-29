@@ -4,11 +4,11 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.feilhåndtering.OppgaveAlleredeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.tildeling.TildelingApiDto
-import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*

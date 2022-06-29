@@ -6,8 +6,8 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
-import no.nav.helse.person.Adressebeskyttelse
-import no.nav.helse.person.Kjønn
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.intellij.lang.annotations.Language
 
 internal class PersonDao(private val dataSource: DataSource) {

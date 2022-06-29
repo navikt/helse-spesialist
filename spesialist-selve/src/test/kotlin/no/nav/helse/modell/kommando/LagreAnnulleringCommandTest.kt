@@ -6,8 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.januar
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*

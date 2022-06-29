@@ -10,7 +10,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.feilhåndtering.modellfeilForRest
+import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import no.nav.helse.modell.tildeling.TildelingMediator
 import org.slf4j.LoggerFactory
 import java.util.*

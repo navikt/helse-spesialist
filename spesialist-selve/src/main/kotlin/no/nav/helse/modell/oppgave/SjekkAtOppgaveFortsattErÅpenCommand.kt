@@ -3,7 +3,7 @@ package no.nav.helse.modell.oppgave
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

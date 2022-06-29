@@ -3,8 +3,8 @@ package no.nav.helse.mediator
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.abonnement.OpptegnelseDao
-import no.nav.helse.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.BeforeEach

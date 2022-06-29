@@ -1,23 +1,23 @@
 package no.nav.helse.mediator.api.graphql.schema
 
 import java.time.format.DateTimeFormatter
-import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUberegnetPeriode
-import no.nav.helse.notat.NotatDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.Dagtype
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.overstyring.OverstyringArbeidsforholdDto
-import no.nav.helse.overstyring.OverstyringDto
-import no.nav.helse.overstyring.OverstyringInntektDto
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 data class Arbeidsforhold(
     val stillingstittel: String,

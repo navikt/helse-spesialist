@@ -9,9 +9,9 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilSykmeldt
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.oppgave.Oppgave
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.slf4j.LoggerFactory
 
 internal class OpprettSaksbehandleroppgaveCommand(

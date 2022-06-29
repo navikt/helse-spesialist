@@ -4,8 +4,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.person.Adressebeskyttelse
-import no.nav.helse.person.Kjønn
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Test
 
 internal class HentPersoninfoløsningTest {

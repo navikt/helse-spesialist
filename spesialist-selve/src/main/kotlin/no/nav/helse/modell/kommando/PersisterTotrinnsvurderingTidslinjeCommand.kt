@@ -2,14 +2,14 @@ package no.nav.helse.modell.kommando
 
 import java.util.UUID
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
-import no.nav.helse.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn.Companion.nyestePeriode
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.overstyring.OverstyringDagDto
-import no.nav.helse.overstyring.OverstyringType.Dager
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn.Companion.nyestePeriode
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import no.nav.helse.spesialist.api.overstyring.OverstyringType.Dager
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import org.slf4j.LoggerFactory
 
 internal class PersisterTotrinnsvurderingTidslinjeCommand(

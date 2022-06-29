@@ -8,8 +8,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.person.Adressebeskyttelse
-import no.nav.helse.person.Kjønn
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test

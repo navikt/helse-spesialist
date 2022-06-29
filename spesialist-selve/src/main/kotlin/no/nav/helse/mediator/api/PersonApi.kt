@@ -16,7 +16,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator: OppgaveMediator) {

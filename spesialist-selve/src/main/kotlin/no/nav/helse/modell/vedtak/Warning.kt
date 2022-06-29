@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.person.SnapshotDto
+import no.nav.helse.spesialist.api.person.SnapshotDto
 import java.util.*
 
 internal class Warning(

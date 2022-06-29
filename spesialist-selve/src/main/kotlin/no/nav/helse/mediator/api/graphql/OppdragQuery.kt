@@ -5,7 +5,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.api.graphql.schema.Oppdrag
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.person.PersonApiDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
 
 class OppdragQuery(
     personApiDao: PersonApiDao,

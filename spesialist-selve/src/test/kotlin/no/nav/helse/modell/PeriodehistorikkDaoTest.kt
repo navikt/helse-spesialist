@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import java.util.UUID
-import no.nav.helse.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

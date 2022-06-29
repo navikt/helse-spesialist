@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
@@ -42,15 +42,15 @@ import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.notat.NotatDao
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.person.PersonApiDao
-import no.nav.helse.risikovurdering.RisikovurderingApiDao
-import no.nav.helse.tildeling.TildelingDao
-import no.nav.helse.vedtaksperiode.EnhetDto
-import no.nav.helse.vedtaksperiode.VarselDao
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 fun main() = runBlocking {
     Toggle.GraphQLApi.enable()
@@ -74,7 +74,7 @@ fun main() = runBlocking {
         every {
             personApiDao.personHarAdressebeskyttelse(
                 any(),
-                no.nav.helse.person.Adressebeskyttelse.Ugradert
+                no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert
             )
         } returns true
         every { personApiDao.finnEnhet(any()) } returns EnhetDto("1234", "Bømlo")

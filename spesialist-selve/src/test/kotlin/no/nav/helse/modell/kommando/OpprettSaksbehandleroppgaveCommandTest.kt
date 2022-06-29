@@ -13,10 +13,10 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.person.Adressebeskyttelse
-import no.nav.helse.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.oppgave.Oppgave
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,10 +1,10 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.abonnement.OpptegnelseDao
-import no.nav.helse.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.abonnement.UtbetalingPayload
+import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDate

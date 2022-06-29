@@ -14,10 +14,10 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.tildeling.TildelingMediator
-import no.nav.helse.notat.NotatMediator
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")

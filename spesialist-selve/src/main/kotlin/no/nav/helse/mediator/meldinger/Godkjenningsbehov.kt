@@ -47,9 +47,9 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.oppgave.OppgaveMediator
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems

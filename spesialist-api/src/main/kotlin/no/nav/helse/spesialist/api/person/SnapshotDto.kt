@@ -1,0 +1,14 @@
+package no.nav.helse.spesialist.api.person
+
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverDto
+import java.time.LocalDate
+
+data class SnapshotDto(
+    val aktørId: String,
+    val fødselsnummer: String,
+    val dødsdato: LocalDate?,
+    val arbeidsgivere: List<ArbeidsgiverDto>,
+    val inntektsgrunnlag: JsonNode,
+    val vilkårsgrunnlagHistorikk: JsonNode?
+)

@@ -1,8 +1,8 @@
 package no.nav.helse.mediator.api.modell
 
 import io.ktor.server.auth.jwt.JWTPrincipal
-import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 import java.util.*
 
 internal class Saksbehandler(

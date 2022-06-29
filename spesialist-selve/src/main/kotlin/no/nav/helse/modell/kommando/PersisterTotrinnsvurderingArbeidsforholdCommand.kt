@@ -1,9 +1,9 @@
 package no.nav.helse.modell.kommando
 
 import java.time.LocalDate
-import no.nav.helse.oppgave.OppgaveDao
-import no.nav.helse.overstyring.OverstyringType
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.overstyring.OverstyringType
+import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import org.slf4j.LoggerFactory
 
 internal class PersisterTotrinnsvurderingArbeidsforholdCommand(

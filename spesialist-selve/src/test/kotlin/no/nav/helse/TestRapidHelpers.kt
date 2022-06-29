@@ -2,7 +2,7 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 
 object TestRapidHelpers {

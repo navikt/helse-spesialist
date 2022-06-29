@@ -1,8 +1,8 @@
 package no.nav.helse.modell.leggpåvent
 
-import no.nav.helse.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
 internal class LeggPåVentMediator(
     private val tildelingDao: TildelingDao,

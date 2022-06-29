@@ -6,7 +6,7 @@ import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
 import org.intellij.lang.annotations.Language
 
 internal class AutomatiseringDao(val dataSource: DataSource) {

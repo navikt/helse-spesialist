@@ -2,15 +2,15 @@ package no.nav.helse.mediator
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDao
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto.BehandlingerDto
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkDto.OppgavestatistikkDto
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkMediator
-import no.nav.helse.behandlingsstatistikk.BehandlingsstatistikkType
-import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
-import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
-import no.nav.helse.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDto
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDto.BehandlingerDto
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDto.OppgavestatistikkDto
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkType
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PerPeriodetype
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingstatistikkForSpeilDto.PeriodetypeForSpeil.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -11,13 +11,13 @@ import no.nav.helse.Testdata.UTBETALING_ID2
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.oppgave.Oppgave
-import no.nav.helse.oppgave.Oppgavestatus
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSystem
-import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.oppgave.Oppgavestatus.Invalidert
-import no.nav.helse.oppgave.Oppgavetype
+import no.nav.helse.spesialist.api.oppgave.Oppgave
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

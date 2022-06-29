@@ -38,10 +38,10 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemå
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.oppgave.Oppgavestatus.AvventerSystem
-import no.nav.helse.oppgave.Oppgavestatus.Ferdigstilt
-import no.nav.helse.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.snapshotMedWarnings
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

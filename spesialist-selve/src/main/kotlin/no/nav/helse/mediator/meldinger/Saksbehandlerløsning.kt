@@ -8,7 +8,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
-import no.nav.helse.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems

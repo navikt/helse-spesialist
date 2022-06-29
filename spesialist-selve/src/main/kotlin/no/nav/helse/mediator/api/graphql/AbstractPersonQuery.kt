@@ -5,8 +5,8 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
-import no.nav.helse.person.Adressebeskyttelse
-import no.nav.helse.person.PersonApiDao
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.PersonApiDao
 
 abstract class AbstractPersonQuery(
     protected val personApiDao: PersonApiDao,

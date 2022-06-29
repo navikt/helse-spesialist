@@ -6,7 +6,7 @@ import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 
 internal class AutomatiseringForEksisterendeOppgaveCommand(

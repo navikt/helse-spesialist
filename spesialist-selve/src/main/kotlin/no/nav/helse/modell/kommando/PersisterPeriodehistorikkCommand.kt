@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import java.util.UUID
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import org.slf4j.LoggerFactory
 
 internal class PersisterPeriodehistorikkCommand(
