@@ -309,11 +309,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String, førsteDag: LocalDate): UUID? =
+    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String, førsteDag: LocalDate): NyesteVedtaksperiodeTotrinn? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val query =
-                """ SELECT v.vedtaksperiode_id
+                """ SELECT v.vedtaksperiode_id, v.fom
                     FROM oppgave o
                     JOIN vedtak v on o.vedtak_ref = v.id
                     JOIN person p on p.id = v.person_ref
@@ -336,15 +336,20 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                         "orgnummer" to organisasjonsnummer.toLong(),
                         "foersteDag" to førsteDag
                     )
-                ).map { it.uuid("vedtaksperiode_id") }.asSingle
+                ).map { row ->
+                    NyesteVedtaksperiodeTotrinn(
+                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                        fom = row.localDate("fom")
+                    )
+                }.asSingle
             )
         }
 
-    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(fødselsnummer: String, organisasjonsnummer: String, skjæringstidspunkt: LocalDate): UUID? =
+    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(fødselsnummer: String, organisasjonsnummer: String, skjæringstidspunkt: LocalDate): NyesteVedtaksperiodeTotrinn? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val query =
-                """ SELECT v.vedtaksperiode_id
+                """ SELECT v.vedtaksperiode_id, v.fom
                     FROM oppgave o
                     JOIN vedtak v on o.vedtak_ref = v.id
                     JOIN person p on p.id = v.person_ref
@@ -367,9 +372,19 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                         "orgnummer" to organisasjonsnummer.toLong(),
                         "skjaeringstidspunkt" to skjæringstidspunkt
                     )
-                ).map { it.uuid("vedtaksperiode_id") }.asSingle
+                ).map { row ->
+                    NyesteVedtaksperiodeTotrinn(
+                        vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                        fom = row.localDate("fom")
+                    )
+                }.asSingle
             )
         }
+
+    data class NyesteVedtaksperiodeTotrinn(
+        val vedtaksperiodeId: UUID,
+        val fom: LocalDate
+    )
 
     fun finnAktivVedtaksperiodeId(fødselsnummer: String): UUID? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->

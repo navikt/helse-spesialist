@@ -18,13 +18,23 @@ internal class PersisterTotrinnsvurderingInntektCommand(
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     override fun execute(context: CommandContext): Boolean {
+        val nyesteManueltBehandletUtbetalteEllerAktiveVedtaksperiode =
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(
+                fødselsnummer,
+                organisasjonsnummer,
+                skjæringstidspunkt
+            )
+        val automatisertVedtaksperiode =
+            automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer, organisasjonsnummer)
 
         val vedtaksperiodeId =
-            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(fødselsnummer, organisasjonsnummer, skjæringstidspunkt)?.also {
-                sikkerLogg.info("Fant vedtaksperiodeId via oppgave for $fødselsnummer og orgnr $organisasjonsnummer")
-            } ?: automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer, organisasjonsnummer)?.also {
-                sikkerLogg.info("Fant vedtaksperiodeId via automatisering for $fødselsnummer og orgnr $organisasjonsnummer")
-            }
+            if ((nyesteManueltBehandletUtbetalteEllerAktiveVedtaksperiode?.fom ?: LocalDate.MIN).isAfter(
+                    automatisertVedtaksperiode?.fom ?: LocalDate.MIN
+                )
+            ) {
+                nyesteManueltBehandletUtbetalteEllerAktiveVedtaksperiode?.vedtaksperiodeId
+            } else automatisertVedtaksperiode?.vedtaksperiodeId
+
 
         if(vedtaksperiodeId != null) {
             sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og skjæringstidspunkt $skjæringstidspunkt")

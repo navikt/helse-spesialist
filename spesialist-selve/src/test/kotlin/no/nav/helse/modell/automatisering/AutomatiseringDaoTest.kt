@@ -155,7 +155,7 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         automatiseringDao.automatisert(VEDTAKSPERIODE, hendelseId2, UTBETALING_ID)
 
-        val vedtaksperiodeId = automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(FNR, ORGNUMMER)
+        val vedtaksperiodeId = automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(FNR, ORGNUMMER)?.vedtaksperiodeId
 
         assertEquals(VEDTAKSPERIODE, vedtaksperiodeId)
     }

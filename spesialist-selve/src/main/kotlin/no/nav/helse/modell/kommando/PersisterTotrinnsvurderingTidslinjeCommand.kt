@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -23,15 +24,18 @@ internal class PersisterTotrinnsvurderingTidslinjeCommand(
             return true
         }
         val forsteDag = overstyrteDager.first().dato
-
+        val nyesteManueltBehandletUtbetalteEllerAktiveVedtaksperiode =
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer, organisasjonsnummer, forsteDag)
+        val automatisertVedtaksperiode =
+            automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer, organisasjonsnummer)
 
         val vedtaksperiodeId =
-            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer, organisasjonsnummer, forsteDag)?.also {
-                    sikkerLogg.info("Fant vedtaksperiodeId via oppgave for $fødselsnummer og orgnr $organisasjonsnummer")
-                } ?: automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer, organisasjonsnummer)?.also {
-                sikkerLogg.info("Fant vedtaksperiodeId via automatisering for $fødselsnummer og orgnr $organisasjonsnummer")
-            }
-
+            if ((nyesteManueltBehandletUtbetalteEllerAktiveVedtaksperiode?.fom ?: LocalDate.MIN).isAfter(
+                    automatisertVedtaksperiode?.fom ?: LocalDate.MIN
+                )
+            ) {
+                nyesteManueltBehandletUtbetalteEllerAktiveVedtaksperiode?.vedtaksperiodeId
+            } else automatisertVedtaksperiode?.vedtaksperiodeId
 
         if (vedtaksperiodeId != null) {
             sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag")

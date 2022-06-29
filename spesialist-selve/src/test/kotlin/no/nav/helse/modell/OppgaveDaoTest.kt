@@ -534,7 +534,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId_2 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_2)!!
         oppgaveDao.updateOppgave(oppgaveId_2, Ferdigstilt)
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
         assertEquals(vedtaksperiodeId, vedtaksperiodeId_2)
     }
 
@@ -548,7 +548,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
         assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
     }
 
@@ -568,7 +568,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_2, fom = TOM.plusDays(1), tom = TOM.plusDays(10))
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_2)
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)
+        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
         assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
     }
 
@@ -591,7 +591,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(
             VEDTAKSPERIODE,
-            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNUMMER, FOM)
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
         )
     }
 

@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.modell.automatisering.AutomatiseringDao
@@ -42,7 +43,8 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
 
     @Test
     fun `lagrer overstyrt vedtaksperiode hvis vi finner vedtaksperiode som inneholder første overstyrt dag`() {
-        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNR, OVERSTYRTE_DAGER.first().dato) }.returns(VEDTAKSPERIODE_ID)
+        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNR, OVERSTYRTE_DAGER.first().dato) }.returns(
+            OppgaveDao.NyesteVedtaksperiodeTotrinn(VEDTAKSPERIODE_ID, LocalDate.now()))
 
         val command = PersisterTotrinnsvurderingTidslinjeCommand(
             FNR,

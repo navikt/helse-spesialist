@@ -1,12 +1,13 @@
 package no.nav.helse.modell.automatisering
 
 import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 internal class AutomatiseringDao(val dataSource: DataSource) {
     internal fun manuellSaksbehandling(problems: List<String>, vedtaksperiodeId: UUID, hendelseId: UUID, utbetalingId: UUID) =
@@ -160,11 +161,11 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
         )
     }
 
-    internal fun finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): UUID? =
+    internal fun finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): NyesteVedtaksperiodeTotrinn? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val query =
-                """ SELECT v.vedtaksperiode_id
+                """ SELECT v.vedtaksperiode_id, v.fom
                     FROM automatisering a
                     JOIN vedtak v on a.vedtaksperiode_ref = v.id
                     JOIN person p on p.id = v.person_ref
@@ -182,7 +183,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "orgnummer" to organisasjonsnummer.toLong()
                     )
-                ).map { it.uuid("vedtaksperiode_id") }.asSingle
+                ).map { row -> NyesteVedtaksperiodeTotrinn(row.uuid("vedtaksperiode_id"), row.localDate("fom")) }.asSingle
             )
         }
 
