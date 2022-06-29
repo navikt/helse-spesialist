@@ -45,7 +45,7 @@ internal class TildelingMediator(
     internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandler_oid: UUID?) {
         fjernTildeling(oppgaveId)
         if(saksbehandler_oid != null) {
-            sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler ")
+            sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandler_oid")
             tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandler_oid)
         }
     }
