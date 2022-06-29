@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.overstyring.OverstyringType
@@ -12,6 +13,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommand(
     private val overstyrteDager: List<OverstyringDagDto>,
     private val oppgaveDao: OppgaveDao,
     private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
+    private val automatiseringDao: AutomatiseringDao
 ) : Command {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -22,9 +24,16 @@ internal class PersisterTotrinnsvurderingTidslinjeCommand(
         }
         val forsteDag = overstyrteDager.first().dato
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer, organisasjonsnummer, forsteDag)
 
-        if(vedtaksperiodeId != null) {
+        val vedtaksperiodeId =
+            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer, organisasjonsnummer, forsteDag)?.also {
+                    sikkerLogg.info("Fant vedtaksperiodeId via oppgave for $fødselsnummer og orgnr $organisasjonsnummer")
+                } ?: automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer, organisasjonsnummer)?.also {
+                sikkerLogg.info("Fant vedtaksperiodeId via automatisering for $fødselsnummer og orgnr $organisasjonsnummer")
+            }
+
+
+        if (vedtaksperiodeId != null) {
             sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag")
             overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(vedtaksperiodeId, OverstyringType.Dager)
         } else {

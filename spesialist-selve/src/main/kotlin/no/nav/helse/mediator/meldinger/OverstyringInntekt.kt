@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
@@ -51,6 +52,7 @@ internal class OverstyringInntekt(
     overstyringDao: OverstyringDao,
     oppgaveDao: OppgaveDao,
     overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
+    automatiseringDao: AutomatiseringDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -79,6 +81,7 @@ internal class OverstyringInntekt(
             skjæringstidspunkt = skjæringstidspunkt,
             oppgaveDao = oppgaveDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            automatiseringDao = automatiseringDao,
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao)
     )

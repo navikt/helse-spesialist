@@ -72,6 +72,7 @@ internal class OverstyringTest {
         vergemålDao = mockk(relaxed = true),
         overstyrtVedtaksperiodeDao = mockk(relaxed = true),
         periodehistorikkDao = mockk(relaxed = true),
+        automatiseringDao = mockk(relaxed = true),
     )
 
     private val overstyringMessage = hendelsefabrikk.overstyringTidslinje(

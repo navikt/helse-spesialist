@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
@@ -30,6 +31,7 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val overstyrtVedtaksperiodeDao = mockk<OverstyrtVedtaksperiodeDao>(relaxed = true)
+    private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
 
     private val context = CommandContext(UUID.randomUUID())
 
@@ -47,7 +49,8 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
             ORGNR,
             OVERSTYRTE_DAGER,
             oppgaveDao,
-            overstyrtVedtaksperiodeDao
+            overstyrtVedtaksperiodeDao,
+            automatiseringDao
         )
         command.execute(context)
 
@@ -59,13 +62,15 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
     @Test
     fun `lagrer ikke overstyrt vedtaksperiode hvis vi ikke finner vedtaksperiode som inneholder første overstyrt dag`() {
         every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(), any(), OVERSTYRTE_DAGER.first().dato) }.returns(null)
+        every { automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(any(), any()) }.returns(null)
 
         val command = PersisterTotrinnsvurderingTidslinjeCommand(
             FNR,
             ORGNR,
             OVERSTYRTE_DAGER,
             oppgaveDao,
-            overstyrtVedtaksperiodeDao)
+            overstyrtVedtaksperiodeDao,
+            automatiseringDao)
         command.execute(context)
 
         verify(exactly = 0) {
@@ -82,7 +87,8 @@ internal class PersisterTotrinnsvurderingTidslinjeCommandTest {
             ORGNR,
             listOf(),
             oppgaveDao,
-            overstyrtVedtaksperiodeDao)
+            overstyrtVedtaksperiodeDao,
+            automatiseringDao)
         command.execute(context)
 
         verify(exactly = 0) {

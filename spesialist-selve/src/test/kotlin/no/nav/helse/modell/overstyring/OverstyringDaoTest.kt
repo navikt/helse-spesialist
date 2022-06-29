@@ -161,6 +161,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             overstyringDao = overstyringDao,
             oppgaveDao = oppgaveDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            automatiseringDao = automatiseringDao,
         )
     )
 }

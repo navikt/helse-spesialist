@@ -147,6 +147,20 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         assertEquals(0, problemerEtterInaktivering.size)
     }
 
+    @Test
+    fun `automatisering og revurdering`() {
+        val hendelseId2 = UUID.randomUUID()
+        testhendelse(hendelseId = hendelseId2)
+
+        automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
+        automatiseringDao.automatisert(VEDTAKSPERIODE, hendelseId2, UTBETALING_ID)
+
+        val vedtaksperiodeId = automatiseringDao.finnSisteAutomatiserteVedtaksperiodeId(FNR, ORGNUMMER)
+
+        assertEquals(VEDTAKSPERIODE, vedtaksperiodeId)
+    }
+
+
     private fun insertAutomatisering(
         automatisert: Boolean,
         stikkprøve: Boolean,

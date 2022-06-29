@@ -40,6 +40,7 @@ import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.oppgaver
+import no.nav.helse.Testdata
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -175,6 +176,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vergemålDao = vergemålDao,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         periodehistorikkDao = periodehistorikkDao,
+        automatiseringDao = automatiseringDao,
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,

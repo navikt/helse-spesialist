@@ -32,6 +32,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
@@ -85,6 +86,7 @@ internal class Hendelsefabrikk(
     private val opptegnelseDao: OpptegnelseDao,
     private val vergemålDao: VergemålDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
+    private val automatiseringDao: AutomatiseringDao,
 ) : IHendelsefabrikk {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -263,6 +265,7 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao,
         oppgaveDao = oppgaveDao,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+        automatiseringDao = automatiseringDao,
     )
 
     override fun overstyringTidslinje(json: String): OverstyringTidslinje {
@@ -314,7 +317,8 @@ internal class Hendelsefabrikk(
         opprettet = opprettet,
         oppgaveDao = oppgaveDao,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-        json = json
+        json = json,
+        automatiseringDao = automatiseringDao
     )
 
     override fun overstyringArbeidsforhold(

@@ -160,6 +160,32 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
         )
     }
 
+    internal fun finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): UUID? =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                """ SELECT v.vedtaksperiode_id
+                    FROM automatisering a
+                    JOIN vedtak v on a.vedtaksperiode_ref = v.id
+                    JOIN person p on p.id = v.person_ref
+                    JOIN arbeidsgiver ag on ag.id = v.arbeidsgiver_ref
+                    WHERE p.fodselsnummer = :fodselsnummer
+                    AND ag.orgnummer = :orgnummer
+                    ORDER BY       
+                        v.fom DESC
+                    LIMIT 1
+                """
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnummer" to organisasjonsnummer.toLong()
+                    )
+                ).map { it.uuid("vedtaksperiode_id") }.asSingle
+            )
+        }
+
     private fun tilAutomatiseringDto(problemer: List<String>, row: Row) =
         AutomatiseringDto(
             automatisert = row.boolean("automatisert"),
