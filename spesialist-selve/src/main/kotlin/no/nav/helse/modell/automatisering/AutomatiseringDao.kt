@@ -172,6 +172,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                     JOIN arbeidsgiver ag on ag.id = v.arbeidsgiver_ref
                     WHERE p.fodselsnummer = :fodselsnummer
                     AND ag.orgnummer = :orgnummer
+                    AND a.automatisert = true
                     ORDER BY       
                         v.fom DESC
                     LIMIT 1
