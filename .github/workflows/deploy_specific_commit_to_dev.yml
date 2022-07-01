@@ -15,7 +15,7 @@ jobs:
             - name: create docker tag
               run: echo "TAG=$(echo ${{ github.event.inputs.commitHash }} | cut -c1-7)" >> $GITHUB_ENV
         outputs:
-            image: docker.pkg.github.com/${{ github.repository }}/spesialist-selve:${{ env.TAG }}
+            image: ghcr.io/${{ github.repository }}/spesialist-selve:${{ env.TAG }}
             tag: ${{ env.TAG }}
 
     build:
@@ -40,7 +40,7 @@ jobs:
             -   name: Login to GitHub Pkg Registry
                 uses: docker/login-action@v2
                 with:
-                    registry: docker.pkg.github.com
+                    registry: ghcr.io
                     username: ${{ github.actor }}
                     password: ${{ secrets.GITHUB_TOKEN }}
             - name: push docker image

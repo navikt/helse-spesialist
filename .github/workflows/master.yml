@@ -18,7 +18,7 @@ jobs:
             - name: create docker tag
               run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
         outputs:
-            image: docker.pkg.github.com/${{ github.repository }}/spesialist-selve:${{ env.TAG }}
+            image: ghcr.io/${{ github.repository }}/spesialist:${{ env.TAG }}
 
     build:
         name: build docker image
@@ -39,7 +39,7 @@ jobs:
               run: docker build . --pull -t ${{ needs.set_version.outputs.image }}
             - name: push docker image
               run: |
-                  docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} https://docker.pkg.github.com
+                  docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
                   docker push ${{ needs.set_version.outputs.image }}
 
     snyk:
@@ -54,7 +54,7 @@ jobs:
                   ORG_GRADLE_PROJECT_githubUser: x-access-token
                   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  args: --debug --project-name=spesialist-selve --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
+                  args: --project-name=spesialist --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
                   command: monitor
 
     deployDev:
