@@ -1,15 +1,15 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
-import no.nav.helse.modell.vedtak.Warning
-import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.rapids_rivers.*
-import no.nav.helse.tellWarning
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import org.slf4j.LoggerFactory
 
 internal class DigitalKontaktinformasjonløsning(
     private val opprettet: LocalDateTime,
@@ -18,21 +18,6 @@ internal class DigitalKontaktinformasjonløsning(
 ) {
     internal fun lagre(digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao) {
         digitalKontaktinformasjonDao.lagre(fødselsnummer, erDigital, opprettet)
-    }
-
-    internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
-        if (erDigital) return
-        val melding =
-            "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform"
-        warningDao.leggTilWarning(
-            vedtaksperiodeId,
-            Warning(
-                melding,
-                WarningKilde.Spesialist,
-                LocalDateTime.now(),
-            )
-        )
-        tellWarning(melding)
     }
 
     internal class DigitalKontaktinformasjonRiver(

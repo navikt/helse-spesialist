@@ -172,9 +172,7 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId
         ),
         DigitalKontaktinformasjonCommand(
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            warningDao = warningDao,
-            vedtaksperiodeId = vedtaksperiodeId
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
         ),
         ÅpneGosysOppgaverCommand(
             aktørId = aktørId,

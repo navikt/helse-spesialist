@@ -1,16 +1,12 @@
 package no.nav.helse.modell.dkif
 
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
-import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class DigitalKontaktinformasjonCommand(
     private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
-    private val warningDao: WarningDao,
-    private val vedtaksperiodeId: UUID
 ) : Command {
 
     private companion object {
@@ -29,7 +25,6 @@ internal class DigitalKontaktinformasjonCommand(
             return false
         }
         løsning.lagre(digitalKontaktinformasjonDao)
-        løsning.evaluer(warningDao, vedtaksperiodeId)
         return true
     }
 }
