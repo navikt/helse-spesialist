@@ -292,7 +292,6 @@ internal class HendelseMediator(
         førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
-        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         context: MessageContext
     ) {
@@ -316,7 +315,6 @@ internal class HendelseMediator(
                 førstegangsbehandling,
                 utbetalingtype,
                 inntektskilde,
-                aktiveVedtaksperioder,
                 orgnummereMedRelevanteArbeidsforhold,
                 message.toJson()
             ), context

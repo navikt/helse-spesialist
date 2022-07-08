@@ -28,10 +28,10 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
-import no.nav.helse.Testdata.UTBETALING_ID
-import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
+import no.nav.helse.Testdata.UTBETALING_ID
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.graphql.HentSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
@@ -870,7 +870,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         val orgnummere =
             testRapid.inspektør.meldinger().last()["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
-        assertEquals(listOf(ORGNR) + orgnummereMedRelevanteArbeidsforhold, orgnummere)
+        assertTrue((listOf(ORGNR) + orgnummereMedRelevanteArbeidsforhold).containsAll(orgnummere))
     }
 
     @Test
@@ -892,7 +892,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTrue("HentPersoninfoV2" in sisteMelding.path("@behov").map { it.asText() })
         val orgnummere = sisteMelding["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
         val identer = sisteMelding["HentPersoninfoV2"]["ident"].map { it.asText() }
-        assertEquals(listOf(ORGNR, orgnr1), orgnummere)
+        assertTrue(listOf(ORGNR, orgnr1).containsAll(orgnummere))
         assertEquals(listOf(fnr1), identer)
     }
 

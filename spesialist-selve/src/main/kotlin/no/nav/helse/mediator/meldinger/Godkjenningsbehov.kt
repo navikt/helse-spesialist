@@ -7,8 +7,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.graphql.SnapshotClient
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.fromNode
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode.Companion.orgnummere
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
@@ -74,7 +72,6 @@ internal class Godkjenningsbehov(
     førstegangsbehandling: Boolean,
     utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
-    aktiveVedtaksperioder: List<AktivVedtaksperiode>,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
     private val json: String,
     personDao: PersonDao,
@@ -129,7 +126,7 @@ internal class Godkjenningsbehov(
             personDao = personDao
         ),
         KlargjørArbeidsgiverCommand(
-            orgnummere = (aktiveVedtaksperioder.orgnummere() + orgnummereMedRelevanteArbeidsforhold).distinct(),
+            orgnummere = orgnummereMedRelevanteArbeidsforhold + organisasjonsnummer,
             arbeidsgiverDao = arbeidsgiverDao
         ),
         KlargjørArbeidsforholdCommand(
@@ -262,8 +259,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.skjæringstidspunkt",
                         "Godkjenning.periodetype",
                         "Godkjenning.førstegangsbehandling",
-                        "Godkjenning.inntektskilde",
-                        "Godkjenning.aktiveVedtaksperioder"
+                        "Godkjenning.inntektskilde"
                     )
                     it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
                     it.interestedIn("Godkjenning.arbeidsforholdId", "Godkjenning.orgnummereMedRelevanteArbeidsforhold")
@@ -302,30 +298,11 @@ internal class Godkjenningsbehov(
                 førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
-                aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),
                 orgnummereMedRelevanteArbeidsforhold = packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
                     .takeUnless(JsonNode::isMissingOrNull)
                     ?.map { it.asText() } ?: emptyList(),
                 context = context
             )
-        }
-    }
-
-    internal data class AktivVedtaksperiode(
-        private val orgnummer: String,
-        private val vedtaksperiodeId: UUID,
-        private val periodetype: Periodetype) {
-
-        companion object {
-            internal fun List<AktivVedtaksperiode>.orgnummere() = map { it.orgnummer }
-
-            internal fun fromNode(json: JsonNode) = json.map {
-                AktivVedtaksperiode(
-                    orgnummer = it["orgnummer"].asText(),
-                    vedtaksperiodeId = UUID.fromString(it["vedtaksperiodeId"].asText()),
-                    periodetype = enumValueOf(it["periodetype"].asText())
-                )
-            }
         }
     }
 }

@@ -118,7 +118,6 @@ internal class Hendelsefabrikk(
         førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
-        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         json: String
     ): Godkjenningsbehov {
@@ -135,6 +134,7 @@ internal class Hendelsefabrikk(
             førstegangsbehandling = førstegangsbehandling,
             utbetalingtype = utbetalingtype,
             inntektskilde = inntektskilde,
+            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
@@ -152,8 +152,6 @@ internal class Hendelsefabrikk(
             oppgaveMediator = oppgaveMediator,
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
-            aktiveVedtaksperioder = aktiveVedtaksperioder,
-            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             utbetalingDao = utbetalingDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
             periodehistorikkDao = periodehistorikkDao,
@@ -181,9 +179,6 @@ internal class Hendelsefabrikk(
             førstegangsbehandling = førstegangsbehandling,
             utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
             inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
-            aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(
-                jsonNode.path("Godkjenning").path("aktiveVedtaksperioder")
-            ),
             orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning").path("orgnummereMedRelevanteArbeidsforhold")
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             json = json

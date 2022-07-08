@@ -36,7 +36,7 @@ internal class GodkjenningsbehovRiverTest {
 
     @Test
     fun `leser Godkjenningbehov`() {
-        val relevanteArbeidsforhold = listOf("HALLO⁉")
+        val relevanteArbeidsforhold = listOf(ORGNR)
         testRapid.sendTestMessage(testmeldingfabrikk.lagGodkjenningsbehov(
             id = HENDELSE,
             vedtaksperiodeId = VEDTAKSPERIODE,
@@ -64,7 +64,6 @@ internal class GodkjenningsbehovRiverTest {
             true,
             Utbetalingtype.UTBETALING,
             Inntektskilde.FLERE_ARBEIDSGIVERE,
-            listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Periodetype.FØRSTEGANGSBEHANDLING)),
             relevanteArbeidsforhold,
             any()
         ) }

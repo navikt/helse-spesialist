@@ -83,7 +83,6 @@ internal interface IHendelsefabrikk {
         førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
-        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         json: String
     ): Godkjenningsbehov

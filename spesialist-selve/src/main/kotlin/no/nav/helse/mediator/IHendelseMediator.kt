@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -77,7 +76,6 @@ internal interface IHendelseMediator {
         førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
-        aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         context: MessageContext
     )

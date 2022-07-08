@@ -6,8 +6,9 @@ internal class KlargjørArbeidsgiverCommand(
     orgnummere: List<String>,
     arbeidsgiverDao: ArbeidsgiverDao
 ) : MacroCommand() {
+    private val arbeidsgivere = orgnummere.distinct()
     override val commands: List<Command> = listOf(
-        OpprettArbeidsgiverCommand(orgnummere, arbeidsgiverDao),
-        OppdaterArbeidsgiverCommand(orgnummere, arbeidsgiverDao)
+        OpprettArbeidsgiverCommand(arbeidsgivere, arbeidsgiverDao),
+        OppdaterArbeidsgiverCommand(arbeidsgivere, arbeidsgiverDao)
     )
 }

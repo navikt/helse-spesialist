@@ -6,13 +6,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -24,13 +22,7 @@ internal class RisikoCommandTest {
 
     private companion object {
         private const val ORGNUMMER = "123456789"
-        private val PERIODETYPE = Periodetype.FØRSTEGANGSBEHANDLING
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-        private val AKTIV_VEDTAKSPERIODE = AktivVedtaksperiode(
-            ORGNUMMER,
-            VEDTAKSPERIODE_ID,
-            PERIODETYPE
-        )
 
         private val RISIKOVURDERING_DAO = mockk<RisikovurderingDao>()
         private val WARNING_DAO = mockk<WarningDao>()
@@ -115,7 +107,6 @@ internal class RisikoCommandTest {
         risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
         warningDao: WarningDao = WARNING_DAO,
         organisasjonsnummer: String = ORGNUMMER,
-        periodetype: Periodetype = PERIODETYPE,
         førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
         vedtaksperiodeId = vedtaksperiodeId,
