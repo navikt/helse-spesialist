@@ -4,6 +4,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov.AktivVedtaksperiode
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
@@ -12,13 +14,11 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class RisikoCommandTest {
 
@@ -58,6 +58,7 @@ internal class RisikoCommandTest {
         assertTrue(context.harBehov())
         assertEquals(1, context.behov().size)
         assertEquals("Risikovurdering", context.behov().keys.first())
+        assertTrue(context.behov().getValue("Risikovurdering").keys.contains("førstegangsbehandling"))
     }
 
     @Test
@@ -114,12 +115,13 @@ internal class RisikoCommandTest {
         risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
         warningDao: WarningDao = WARNING_DAO,
         organisasjonsnummer: String = ORGNUMMER,
-        periodetype: Periodetype = PERIODETYPE
+        periodetype: Periodetype = PERIODETYPE,
+        førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao,
         organisasjonsnummer = organisasjonsnummer,
-        periodetype = periodetype
+        førstegangsbehandling = førstegangsbehandling
     )
 }

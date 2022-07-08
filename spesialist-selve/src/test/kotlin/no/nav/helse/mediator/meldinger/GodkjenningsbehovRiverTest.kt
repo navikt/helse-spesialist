@@ -2,6 +2,8 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -9,8 +11,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class GodkjenningsbehovRiverTest {
     private companion object {
@@ -61,6 +61,7 @@ internal class GodkjenningsbehovRiverTest {
             UTBETALING_ID,
             null,
             Periodetype.FØRSTEGANGSBEHANDLING,
+            true,
             Utbetalingtype.UTBETALING,
             Inntektskilde.FLERE_ARBEIDSGIVERE,
             listOf(Godkjenningsbehov.AktivVedtaksperiode(ORGNR, VEDTAKSPERIODE, Periodetype.FØRSTEGANGSBEHANDLING)),

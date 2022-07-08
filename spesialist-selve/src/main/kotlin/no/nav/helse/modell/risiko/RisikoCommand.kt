@@ -1,23 +1,22 @@
 package no.nav.helse.modell.risiko
 
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class RisikoCommand(
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
     private val organisasjonsnummer: String,
-    private val periodetype: Periodetype
+    private val førstegangsbehandling: Boolean
 ) : Command {
 
     override fun execute(context: CommandContext) = behandle(context)
@@ -33,7 +32,7 @@ internal class RisikoCommand(
             context.behov("Risikovurdering", mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "organisasjonsnummer" to organisasjonsnummer,
-                "periodetype" to periodetype
+                "førstegangsbehandling" to førstegangsbehandling
             ))
             return false
         }

@@ -71,6 +71,7 @@ internal class Godkjenningsbehov(
     periodeFom: LocalDate,
     periodeTom: LocalDate,
     periodetype: Periodetype,
+    førstegangsbehandling: Boolean,
     utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
@@ -136,7 +137,7 @@ internal class Godkjenningsbehov(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             arbeidsforholdDao = arbeidsforholdDao,
-            periodetype = periodetype
+            førstegangsbehandling = førstegangsbehandling
         ),
         KlargjørVedtaksperiodeCommand(
             snapshotClient = snapshotClient,
@@ -185,7 +186,7 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
             organisasjonsnummer = organisasjonsnummer,
-            periodetype = periodetype
+            førstegangsbehandling = førstegangsbehandling
         ),
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,
@@ -260,6 +261,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.periodeTom",
                         "Godkjenning.skjæringstidspunkt",
                         "Godkjenning.periodetype",
+                        "Godkjenning.førstegangsbehandling",
                         "Godkjenning.inntektskilde",
                         "Godkjenning.aktiveVedtaksperioder"
                     )
@@ -297,6 +299,7 @@ internal class Godkjenningsbehov(
                 utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
                 arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
+                førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 aktiveVedtaksperioder = fromNode(packet["Godkjenning.aktiveVedtaksperioder"]),

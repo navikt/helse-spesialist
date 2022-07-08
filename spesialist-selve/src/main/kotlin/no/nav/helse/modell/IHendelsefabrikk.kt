@@ -80,6 +80,7 @@ internal interface IHendelsefabrikk {
         arbeidsforholdId: String?,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
+        førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,

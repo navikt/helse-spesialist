@@ -115,6 +115,7 @@ internal class Hendelsefabrikk(
         arbeidsforholdId: String?,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
+        førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
@@ -131,6 +132,7 @@ internal class Hendelsefabrikk(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             periodetype = periodetype,
+            førstegangsbehandling = førstegangsbehandling,
             utbetalingtype = utbetalingtype,
             inntektskilde = inntektskilde,
             json = json,
@@ -160,6 +162,9 @@ internal class Hendelsefabrikk(
 
     override fun godkjenning(json: String): Godkjenningsbehov {
         val jsonNode = mapper.readTree(json)
+        val periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText())
+        val førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling")
+            .asBoolean(periodetype == Periodetype.FØRSTEGANGSBEHANDLING) // bruker default-value enn så lenge for å kunne parse eldre godkjenningsbehov
         return godkjenning(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
@@ -172,7 +177,8 @@ internal class Hendelsefabrikk(
             arbeidsforholdId = jsonNode.path("Godkjenning").path("arbeidsforholdId")
                 .takeUnless(JsonNode::isMissingOrNull)?.asText(),
             skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
-            periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
+            periodetype = periodetype,
+            førstegangsbehandling = førstegangsbehandling,
             utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
             inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
             aktiveVedtaksperioder = Godkjenningsbehov.AktivVedtaksperiode.fromNode(

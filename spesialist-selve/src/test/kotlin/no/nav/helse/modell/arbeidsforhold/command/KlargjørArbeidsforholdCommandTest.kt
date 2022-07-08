@@ -4,17 +4,16 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class KlargjørArbeidsforholdCommandTest {
     private companion object {
@@ -37,7 +36,7 @@ internal class KlargjørArbeidsforholdCommandTest {
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         arbeidsforholdDao = arbeidsforholdDao,
-        periodetype = Periodetype.FORLENGELSE
+        førstegangsbehandling = false
     )
 
     @BeforeEach
@@ -131,7 +130,7 @@ internal class KlargjørArbeidsforholdCommandTest {
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
             arbeidsforholdDao = arbeidsforholdDao,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING
+            førstegangsbehandling = true
         )
         arbeidsforholdFinnes(LocalDate.now().minusDays(1))
         assertFalse(førstegangsCommand.execute(context))
@@ -159,7 +158,7 @@ internal class KlargjørArbeidsforholdCommandTest {
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
             arbeidsforholdDao = arbeidsforholdDao,
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING
+            førstegangsbehandling = true
         )
         arbeidsforholdFinnes()
         assertTrue(førstegangsCommand.execute(context))

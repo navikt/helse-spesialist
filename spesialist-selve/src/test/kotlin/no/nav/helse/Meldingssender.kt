@@ -1,10 +1,10 @@
 package no.nav.helse
 
-import no.nav.helse.TestRapidHelpers.contextId
-import no.nav.helse.Testdata.FØDSELSNUMMER
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.TestRapidHelpers.contextId
+import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -50,6 +50,7 @@ internal object Meldingssender {
         periodeTom: LocalDate = LocalDate.now(),
         skjæringstidspunkt: LocalDate = LocalDate.now(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        førstegangsbehandling: Boolean = true,
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = Testdata.AKTØR,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
@@ -73,6 +74,7 @@ internal object Meldingssender {
                 periodeTom = periodeTom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 periodetype = periodetype,
+                førstegangsbehandling = førstegangsbehandling,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 inntektskilde = inntektskilde,

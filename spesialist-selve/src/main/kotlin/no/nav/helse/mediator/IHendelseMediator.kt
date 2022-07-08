@@ -74,6 +74,7 @@ internal interface IHendelseMediator {
         utbetalingId: UUID,
         arbeidsforholdId: String?,
         periodetype: Periodetype,
+        førstegangsbehandling: Boolean,
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Godkjenningsbehov.AktivVedtaksperiode>,
