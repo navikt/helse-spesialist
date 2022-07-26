@@ -30,6 +30,7 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest : AbstractE2ETest() {
@@ -112,10 +113,12 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             assertEquals(SAKSBEHANDLER_EPOST, event["saksbehandlerEpost"].asText())
             assertEquals(ORGNR, event["organisasjonsnummer"].asText())
             assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
-            assertEquals("en begrunnelse", event["overstyrteArbeidsforhold"].toList().single()["begrunnelse"].asText())
-            assertEquals("en forklaring", event["overstyrteArbeidsforhold"].toList().single()["forklaring"].asText())
-            assertEquals("6667", event["overstyrteArbeidsforhold"].toList().single()["orgnummer"].asText())
-            assertEquals(false, event["overstyrteArbeidsforhold"].toList().single()["orgnummer"].asBoolean())
+
+            val overstyrtArbeidsforhold = event["overstyrteArbeidsforhold"].toList().single()
+            assertEquals("en begrunnelse", overstyrtArbeidsforhold["begrunnelse"].asText())
+            assertEquals("en forklaring", overstyrtArbeidsforhold["forklaring"].asText())
+            assertEquals("6667", overstyrtArbeidsforhold["orgnummer"].asText())
+            assertEquals(false, overstyrtArbeidsforhold["orgnummer"].asBoolean())
         }
     }
 
@@ -131,7 +134,11 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 begrunnelse = "en begrunnelse",
                 forklaring = "en forklaring",
                 månedligInntekt = 25000.0,
-                skjæringstidspunkt = 1.januar
+                skjæringstidspunkt = 1.januar,
+                subsumsjon = SubsumsjonDto(
+                    paragraf = "8-28",
+                    ledd = "3",
+                )
             )
 
             val response = runBlocking {
@@ -163,7 +170,9 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             assertEquals("en forklaring", event["forklaring"].asText())
             assertEquals(25000.0, event["månedligInntekt"].asDouble())
             assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
-
+            assertEquals("8-28", event["subsumsjon"]["paragraf"].asText())
+            assertEquals("3", event["subsumsjon"]["ledd"].asText())
+            assertNull(event["subsumsjon"]["bokstav"])
         }
     }
 

@@ -8,6 +8,7 @@ import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.SubsumsjonJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -110,6 +111,7 @@ internal object Meldingssender {
         månedligInntekt: Double = 25000.0,
         skjæringstidspunkt: LocalDate,
         forklaring: String = "testbortforklaring",
+        subsumsjon: SubsumsjonJson?
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
@@ -119,7 +121,8 @@ internal object Meldingssender {
                     månedligInntekt = månedligInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
                     saksbehandlerEpost = Testdata.SAKSBEHANDLER_EPOST,
-                    forklaring = forklaring
+                    forklaring = forklaring,
+                    subsumsjon = subsumsjon
                 )
             )
         }

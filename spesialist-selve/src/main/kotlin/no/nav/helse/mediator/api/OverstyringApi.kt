@@ -62,7 +62,8 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
             begrunnelse = overstyring.begrunnelse,
             forklaring = overstyring.forklaring,
             månedligInntekt = overstyring.månedligInntekt,
-            skjæringstidspunkt = overstyring.skjæringstidspunkt
+            skjæringstidspunkt = overstyring.skjæringstidspunkt,
+            subsumsjon = overstyring.subsumsjon
         )
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
@@ -122,6 +123,19 @@ data class OverstyrTidslinjeKafkaDto(
     }
 }
 
+data class SubsumsjonDto(
+    val paragraf: String,
+    val ledd: String? = null,
+    val bokstav: String? = null,
+) {
+
+    fun toMap(): Map<String, Any> = listOfNotNull(
+        "paragraf" to paragraf,
+        ledd?.let { "ledd" to ledd },
+        bokstav?.let { "bokstav" to bokstav },
+    ).toMap()
+}
+
 data class OverstyrInntektDTO(
     val organisasjonsnummer: String,
     val fødselsnummer: String,
@@ -129,7 +143,8 @@ data class OverstyrInntektDTO(
     val begrunnelse: String,
     val forklaring: String,
     val månedligInntekt: Double,
-    val skjæringstidspunkt: LocalDate
+    val skjæringstidspunkt: LocalDate,
+    val subsumsjon: SubsumsjonDto?,
 )
 
 data class OverstyrInntektKafkaDto(
@@ -140,10 +155,12 @@ data class OverstyrInntektKafkaDto(
     val begrunnelse: String,
     val forklaring: String,
     val månedligInntekt: Double,
-    val skjæringstidspunkt: LocalDate
+    val skjæringstidspunkt: LocalDate,
+    val subsumsjon: SubsumsjonDto?,
 ) {
     fun somKafkaMessage() = JsonMessage.newMessage(
-        "saksbehandler_overstyrer_inntekt", mapOf(
+        "saksbehandler_overstyrer_inntekt",
+        listOfNotNull(
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "organisasjonsnummer" to organisasjonsnummer,
@@ -154,8 +171,10 @@ data class OverstyrInntektKafkaDto(
             "saksbehandlerIdent" to saksbehandler.ident,
             "saksbehandlerEpost" to saksbehandler.epost,
             "månedligInntekt" to månedligInntekt,
-        "skjæringstidspunkt" to skjæringstidspunkt
-    ))
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            subsumsjon?.let { "subsumsjon" to subsumsjon.toMap() },
+        ).toMap()
+    )
 }
 
 data class OverstyrArbeidsforholdDto(

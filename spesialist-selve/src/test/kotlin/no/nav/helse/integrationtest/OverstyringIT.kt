@@ -89,7 +89,8 @@ internal class OverstyringIT : AbstractE2ETest() {
                 begrunnelse = "en begrunnelse",
                 forklaring = "en forklaring",
                 månedligInntekt = 25000.0,
-                skjæringstidspunkt = 1.januar
+                skjæringstidspunkt = 1.januar,
+                subsumsjon = null
             )
 
             val response = runBlocking {

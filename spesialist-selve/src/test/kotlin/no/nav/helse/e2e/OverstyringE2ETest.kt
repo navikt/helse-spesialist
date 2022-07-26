@@ -21,9 +21,9 @@ import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.SAKSBEHANDLERTILGANGER_UTEN_TILGANGER
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.schema.Arbeidsforholdoverstyring
@@ -84,7 +84,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val hendelseId = sendOverstyrtInntekt(
             månedligInntekt = 25000.0,
             skjæringstidspunkt = 1.januar,
-            forklaring = "vår egen forklaring"
+            forklaring = "vår egen forklaring",
+            subsumsjon = null
         )
 
         val overstyringer = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR)
@@ -205,7 +206,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             månedligInntekt = 15000.0,
             skjæringstidspunkt = LocalDate.now(),
-            forklaring = "forklaring"
+            forklaring = "forklaring",
+            subsumsjon = null
         )
         sendOverstyrtArbeidsforhold(
             skjæringstidspunkt = LocalDate.of(2018, 1, 1),

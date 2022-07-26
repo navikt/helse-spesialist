@@ -508,9 +508,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         saksbehandlerEpost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
         månedligInntekt: Double = 25000.0,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        subsumsjon: SubsumsjonJson?
     ) = nyHendelse(
-        id, "saksbehandler_overstyrer_inntekt", mapOf(
+        id, "saksbehandler_overstyrer_inntekt", mutableMapOf<String, Any>(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
@@ -521,8 +522,21 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "saksbehandlerNavn" to saksbehandlerNavn,
             "saksbehandlerEpost" to saksbehandlerEpost,
             "månedligInntekt" to månedligInntekt,
-            "skjæringstidspunkt" to skjæringstidspunkt
-        )
+            "skjæringstidspunkt" to skjæringstidspunkt,
+        ).apply {
+            subsumsjon?.let {
+                this["subsumsjon"] = mutableMapOf(
+                    "paragraf" to subsumsjon.paragraf
+                ).apply {
+                    subsumsjon.ledd?.let { ledd ->
+                        this["ledd"] = ledd
+                    }
+                    subsumsjon.bokstav?.let { bokstav ->
+                        this["bokstav"] = bokstav
+                    }
+                }
+            }
+        }
     )
 
     fun lagOverstyringArbeidsforhold(
@@ -650,6 +664,12 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@event_name" to navn,
         "@id" to id,
         "@opprettet" to LocalDateTime.now()
+    )
+
+    data class SubsumsjonJson(
+        val paragraf: String,
+        val ledd: String?,
+        val bokstav: String?
     )
 
     data class AktivVedtaksperiodeJson(

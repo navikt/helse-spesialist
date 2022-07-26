@@ -27,7 +27,8 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         sendOverstyrtInntekt(
             månedligInntekt = 25000.0,
             skjæringstidspunkt = 1.januar,
-            forklaring = "vår egen forklaring"
+            forklaring = "vår egen forklaring",
+            subsumsjon = null
         )
         val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
 
