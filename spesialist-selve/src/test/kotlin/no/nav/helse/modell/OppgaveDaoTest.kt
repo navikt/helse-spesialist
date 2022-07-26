@@ -5,6 +5,8 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.februar
+import no.nav.helse.januar
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -36,6 +38,9 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
 
     @BeforeEach
     fun setupDaoTest() {
+        sessionOf(dataSource).use {
+            it.run(queryOf("SELECT truncate_tables()").asExecute)
+        }
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(CommandContextDao(dataSource), TESTHENDELSE)
     }
@@ -534,8 +539,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         val oppgaveId_2 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_2)!!
         oppgaveDao.updateOppgave(oppgaveId_2, Ferdigstilt)
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
-        assertEquals(vedtaksperiodeId, vedtaksperiodeId_2)
+        val vedtaksperiodeIdFerdigstilt = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId
+        val vedtaksperiodeIdTilGodkjenning = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
+        assertEquals(vedtaksperiodeIdFerdigstilt, vedtaksperiodeId_2)
+        assertNull(vedtaksperiodeIdTilGodkjenning)
     }
 
     @Test
@@ -548,8 +555,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
-        assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
+        val vedtaksperiodeIdFerdigstilt = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId
+        val vedtaksperiodeIdTilGodkjenning = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
+        assertEquals(vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId_1)
+        assertNull(vedtaksperiodeIdFerdigstilt)
     }
 
     @Test
@@ -568,8 +577,10 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_2, fom = TOM.plusDays(1), tom = TOM.plusDays(10))
         opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_2)
 
-        val vedtaksperiodeId = oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
-        assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
+        val vedtaksperiodeIdFerdigstilt = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId
+        val vedtaksperiodeIdTilGodkjenning = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
+        assertEquals(vedtaksperiodeIdFerdigstilt, vedtaksperiodeId_1)
+        assertEquals(vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId_2)
     }
 
     @Test
@@ -584,15 +595,46 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `overstyr tidslinje - finner vedtaksperiodeId `() {
+    fun `overstyr tidslinje - finner vedtaksperiodeId`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         assertEquals(
             VEDTAKSPERIODE,
-            oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(FNR, ORGNUMMER, FOM)?.vedtaksperiodeId
+            oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
         )
+        assertNull(oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId)
+    }
+
+    @Test
+    fun `overstyr tidslinje - forlengelse`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(
+            vedtaksperiodeId,
+            1.januar,
+            31.januar,
+            Periodetype.FØRSTEGANGSBEHANDLING
+        )
+        opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId)
+        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, null, null)
+
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        opprettVedtaksperiode(
+            vedtaksperiodeId2,
+            1.februar,
+            28.februar,
+            Periodetype.FORLENGELSE
+        )
+        opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId2)
+
+        assertEquals(vedtaksperiodeId2, oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 31.januar, AvventerSaksbehandler)?.vedtaksperiodeId)
+        assertEquals(vedtaksperiodeId, oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 31.januar, Ferdigstilt)?.vedtaksperiodeId)
+        assertEquals(vedtaksperiodeId2, oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 28.februar, AvventerSaksbehandler)?.vedtaksperiodeId)
+        assertNull(oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 28.februar, Ferdigstilt))
     }
 
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {

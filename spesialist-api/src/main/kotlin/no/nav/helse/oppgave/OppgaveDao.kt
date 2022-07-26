@@ -309,8 +309,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String, førsteDag: LocalDate): NyesteVedtaksperiodeTotrinn? =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    fun finnNyesteVedtaksperiodeIdMedStatus(fødselsnummer: String, organisasjonsnummer: String, førsteDag: LocalDate, oppgavestatus: Oppgavestatus): NyesteVedtaksperiodeTotrinn? =
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 """ SELECT v.vedtaksperiode_id, v.fom
@@ -320,10 +320,9 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     JOIN arbeidsgiver a on a.id = v.arbeidsgiver_ref
                     WHERE p.fodselsnummer = :fodselsnummer
                     AND a.orgnummer = :orgnummer
-                    AND o.status IN('AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
+                    AND o.status = :status::oppgavestatus
                     AND v.tom >= :foersteDag::date
                     ORDER BY 
-                        o.status DESC,
                         v.fom DESC,
                         o.id DESC
                     LIMIT 1
@@ -334,7 +333,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "orgnummer" to organisasjonsnummer.toLong(),
-                        "foersteDag" to førsteDag
+                        "foersteDag" to førsteDag,
+                        "status" to oppgavestatus.name
                     )
                 ).map { row ->
                     NyesteVedtaksperiodeTotrinn(
@@ -345,8 +345,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnNyesteUtbetalteEllerAktiveVedtaksperiodeIdForSkjæringstidspunkt(fødselsnummer: String, organisasjonsnummer: String, skjæringstidspunkt: LocalDate): NyesteVedtaksperiodeTotrinn? =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    fun finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(fødselsnummer: String, organisasjonsnummer: String, skjæringstidspunkt: LocalDate, oppgavestatus: Oppgavestatus): NyesteVedtaksperiodeTotrinn? =
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 """ SELECT v.vedtaksperiode_id, v.fom
@@ -357,9 +357,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     WHERE p.fodselsnummer = :fodselsnummer
                     AND a.orgnummer = :orgnummer
                     AND v.fom >= :skjaeringstidspunkt::date
-                    AND (o.status = 'Ferdigstilt'::oppgavestatus OR o.status = 'AvventerSaksbehandler'::oppgavestatus)
+                    AND o.status = :status::oppgavestatus
                     ORDER BY 
-                        o.status DESC,
                         v.fom DESC,
                         o.id DESC
                     LIMIT 1
@@ -370,7 +369,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     mapOf(
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "orgnummer" to organisasjonsnummer.toLong(),
-                        "skjaeringstidspunkt" to skjæringstidspunkt
+                        "skjaeringstidspunkt" to skjæringstidspunkt,
+                        "status" to oppgavestatus.name
                     )
                 ).map { row ->
                     NyesteVedtaksperiodeTotrinn(
@@ -381,10 +381,18 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    data class NyesteVedtaksperiodeTotrinn(
+    class NyesteVedtaksperiodeTotrinn(
         val vedtaksperiodeId: UUID,
         val fom: LocalDate
-    )
+    ) {
+        companion object {
+            fun nyestePeriode(first: NyesteVedtaksperiodeTotrinn, second: NyesteVedtaksperiodeTotrinn): NyesteVedtaksperiodeTotrinn =
+                if(first.erEtter(second)) first else second
+
+            fun NyesteVedtaksperiodeTotrinn.erEtter(other: NyesteVedtaksperiodeTotrinn): Boolean =
+                fom.isAfter(other.fom)
+        }
+    }
 
     fun finnAktivVedtaksperiodeId(fødselsnummer: String): UUID? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->

@@ -98,7 +98,7 @@ internal class OverstyringTest {
 
     @Test
     fun `Persisterer overstyring`() {
-        every { oppgaveDao.finnNyesteUtbetalteEllerAktiveVedtaksperiodeId(any(),any(),any()) } returns(null)
+        every { oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(any(),any(),any(), any()) } returns(null)
 
         overstyringMessage.execute(context)
 

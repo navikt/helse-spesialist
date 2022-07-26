@@ -134,8 +134,8 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         val automatiseringFørInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
         val problemerFørInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRef, HENDELSE_ID)
 
-        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(3))
-        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(3))
+        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(5))
+        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(5))
 
         val automatiseringEtterInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
         val problemerEtterInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRef, HENDELSE_ID)

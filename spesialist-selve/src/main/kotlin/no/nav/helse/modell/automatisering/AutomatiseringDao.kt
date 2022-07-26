@@ -162,7 +162,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
     }
 
     internal fun finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): NyesteVedtaksperiodeTotrinn? =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 """ SELECT v.vedtaksperiode_id, v.fom
@@ -184,7 +184,12 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "orgnummer" to organisasjonsnummer.toLong()
                     )
-                ).map { row -> NyesteVedtaksperiodeTotrinn(row.uuid("vedtaksperiode_id"), row.localDate("fom")) }.asSingle
+                ).map { row ->
+                    NyesteVedtaksperiodeTotrinn(
+                        row.uuid("vedtaksperiode_id"),
+                        row.localDate("fom")
+                    )
+                }.asSingle
             )
         }
 
