@@ -64,10 +64,10 @@ internal class PersisterTotrinnsvurderingTidslinjeCommand(
         )
 
         if (vedtaksperiodeId != null) {
-            sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag")
+            sikkerLogg.info("Totrinns tidslinje: Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag")
             overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(vedtaksperiodeId, Dager)
         } else {
-            sikkerLogg.info("Fant ikke vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag ")
+            sikkerLogg.info("Totrinns tidslinje: Fant ikke vedtaksperiodeId for fnr $fødselsnummer, orgnr $organisasjonsnummer og første overstyrte dag $forsteDag ")
         }
 
         return true

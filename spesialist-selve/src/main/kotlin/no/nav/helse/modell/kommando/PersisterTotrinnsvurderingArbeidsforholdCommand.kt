@@ -18,10 +18,10 @@ internal class PersisterTotrinnsvurderingArbeidsforholdCommand(
         val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeId(fødselsnummer)
 
         if(vedtaksperiodeId != null) {
-            sikkerLogg.info("Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer og skjæringstidspunkt $skjæringstidspunkt")
+            sikkerLogg.info("Totrinns arbeidsforhold: Fant vedtaksperiodeId $vedtaksperiodeId for fnr $fødselsnummer og skjæringstidspunkt $skjæringstidspunkt")
             overstyrtVedtaksperiodeDao.lagreOverstyrtVedtaksperiode(vedtaksperiodeId, OverstyringType.Arbeidsforhold)
         } else {
-            sikkerLogg.info("Fant ikke vedtaksperiodeId for fnr $fødselsnummer og skjæringstidspunkt $skjæringstidspunkt")
+            sikkerLogg.info("Totrinns arbeidsforhold: Fant ikke vedtaksperiodeId for fnr $fødselsnummer og skjæringstidspunkt $skjæringstidspunkt")
         }
 
         return true
