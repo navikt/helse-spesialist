@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
@@ -13,8 +12,6 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.snapshot
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -40,49 +37,25 @@ internal class VedtaksperiodeForkastetTest {
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
     private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
-    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
-    private val testhendelsefabrikk =
-        Hendelsefabrikk(
-            hendelseDao = mockk(),
-            arbeidsgiverDao = mockk(),
-            personDao = personDao,
-            vedtakDao = vedtakDao,
-            warningDao = warningDao,
-            oppgaveDao = oppgaveDao,
-            commandContextDao = commandContextDao,
-            snapshotDao = snapshotDao,
-            reservasjonDao = mockk(),
-            tildelingDao = mockk(),
-            saksbehandlerDao = mockk(),
-            overstyringDao = mockk(),
-            risikovurderingDao = risikovurderingDao,
-            digitalKontaktinformasjonDao = mockk(),
-            åpneGosysOppgaverDao = mockk(),
-            egenAnsattDao = mockk(),
-            snapshotClient = graphQLClient,
-            oppgaveMediator = oppgaveMediator,
-            godkjenningMediator = mockk(relaxed = true),
-            overstyringMediator = mockk(),
-            automatisering = mockk(relaxed = true),
-            arbeidsforholdDao = mockk(relaxed = true),
-            utbetalingDao = mockk(relaxed = true),
-            opptegnelseDao = mockk(relaxed = true),
-            vergemålDao = mockk(relaxed = true),
-            overstyrtVedtaksperiodeDao = mockk(relaxed = true),
-            periodehistorikkDao = mockk(relaxed = true),
-            automatiseringDao = mockk(relaxed = true),
-        )
     private val context = CommandContext(CONTEXT)
-    private val vedtaksperiodeForkastetMessage = testhendelsefabrikk.vedtaksperiodeForkastet(
-        testmeldingfabrikk.lagVedtaksperiodeForkastet(
+    private val vedtaksperiodeForkastetMessage = VedtaksperiodeForkastet(
+        id = HENDELSE,
+        vedtaksperiodeId = VEDTAKSPERIODE,
+        fødselsnummer = FNR,
+        json = testmeldingfabrikk.lagVedtaksperiodeForkastet(
             HENDELSE,
             VEDTAKSPERIODE
-        )
+        ),
+        commandContextDao = commandContextDao,
+        warningDao = warningDao,
+        oppgaveMediator = oppgaveMediator,
+        snapshotClient = graphQLClient,
+        snapshotDao = snapshotDao,
+        personDao = personDao
     )
 
     @BeforeEach
