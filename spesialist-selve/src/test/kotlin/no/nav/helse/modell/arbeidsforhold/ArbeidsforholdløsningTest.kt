@@ -2,7 +2,7 @@ package no.nav.helse.modell.arbeidsforhold
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
@@ -21,7 +21,7 @@ internal class ArbeidsforholdløsningTest {
     }
 
     private val dao = mockk<ArbeidsforholdDao>(relaxed = true)
-    private val mediator = mockk<IHendelseMediator>(relaxed = true)
+    private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val rapid = TestRapid()
     private val meldingsfabrikk = Testmeldingfabrikk(FØDSELSNUMMER, AKTØRID)
 

@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.egenansatt.EgenAnsattCommand
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
@@ -35,7 +35,7 @@ internal class InnhentSkjermetinfo(
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator,
+        private val mediator: HendelseMediator,
         private val personDao: PersonDao,
         private val egenAnsattDao: EgenAnsattDao,
     ) : PacketListener {

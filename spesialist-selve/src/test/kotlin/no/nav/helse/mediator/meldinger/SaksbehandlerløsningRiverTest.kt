@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ internal class SaksbehandlerløsningRiverTest {
         private const val AKTØR = "1234567891234"
     }
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
-    private val mediator = mockk<IHendelseMediator>(relaxed = true)
+    private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid().apply {
         Saksbehandlerløsning.SaksbehandlerløsningRiver(this, mediator)
     }

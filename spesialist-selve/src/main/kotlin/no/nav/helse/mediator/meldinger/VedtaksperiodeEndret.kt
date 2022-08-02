@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
@@ -47,7 +47,7 @@ internal class VedtaksperiodeEndret(
 
     internal class VedtaksperiodeEndretRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : River.PacketListener {
 
         private val log = LoggerFactory.getLogger(this::class.java)

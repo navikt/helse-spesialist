@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
@@ -32,7 +32,7 @@ internal class HentEnhetløsning(private val enhetNr: String) {
         personDao.updateEnhet(fødselsnummer, enhetNr.toInt())
 
     internal class HentEnhetRiver(rapidsConnection: RapidsConnection,
-                                  private val mediator: IHendelseMediator
+                                  private val mediator: HendelseMediator
     ) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 

@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.person.Adressebeskyttelse
@@ -72,7 +72,7 @@ internal class HentPersoninfoløsning(
             )
         }
     }
-    internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
+    internal class PersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         init {
             River(rapidsConnection)
@@ -100,7 +100,7 @@ internal class HentPersoninfoløsning(
         }
     }
 
-    internal class FlerePersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
+    internal class FlerePersoninfoRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         init {
             River(rapidsConnection)

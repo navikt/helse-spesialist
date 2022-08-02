@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
@@ -48,7 +48,7 @@ internal class Saksbehandlerløsning(
     override fun vedtaksperiodeId() = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
     override fun toJson() = json
 
-    internal class SaksbehandlerløsningRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
+    internal class SaksbehandlerløsningRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         init {
             River(rapidsConnection)

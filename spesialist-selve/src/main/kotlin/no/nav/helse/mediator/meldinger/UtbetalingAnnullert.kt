@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.LagreAnnulleringCommand
 import no.nav.helse.modell.kommando.MacroCommand
@@ -50,7 +50,7 @@ internal class UtbetalingAnnullert(
 
     internal class UtbetalingAnnullertRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : PacketListener {
         private val log = LoggerFactory.getLogger("UtbetalingAnnullert")
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

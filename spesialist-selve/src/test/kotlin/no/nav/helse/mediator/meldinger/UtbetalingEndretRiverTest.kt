@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -11,7 +11,7 @@ import java.util.*
 
 internal class UtbetalingEndretRiverTest {
 
-    private val mediator = mockk<IHendelseMediator>(relaxed = true)
+    private val mediator = mockk<HendelseMediator>(relaxed = true)
     private val testRapid = TestRapid()
 
     init {

@@ -92,7 +92,7 @@ internal class HendelseMediator(
     private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: Hendelsefabrikk
-) : IHendelseMediator {
+) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -134,7 +134,7 @@ internal class HendelseMediator(
     private var løsninger: Løsninger? = null
 
     // samler opp løsninger
-    override fun løsning(
+    fun løsning(
         hendelseId: UUID,
         contextId: UUID,
         behovId: UUID,
@@ -235,7 +235,7 @@ internal class HendelseMediator(
         rapidsConnection.publish(fnr, rawJson)
     }
 
-    override fun adressebeskyttelseEndret(
+    fun adressebeskyttelseEndret(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -244,7 +244,7 @@ internal class HendelseMediator(
         utfør(fødselsnummer, hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
     }
 
-    override fun vedtaksperiodeEndret(
+    fun vedtaksperiodeEndret(
         message: JsonMessage,
         id: UUID,
         vedtaksperiodeId: UUID,
@@ -260,7 +260,7 @@ internal class HendelseMediator(
         return utfør(hendelse, context)
     }
 
-    override fun vedtaksperiodeForkastet(
+    fun vedtaksperiodeForkastet(
         message: JsonMessage,
         id: UUID,
         vedtaksperiodeId: UUID,
@@ -275,7 +275,7 @@ internal class HendelseMediator(
         return utfør(hendelse, context)
     }
 
-    override fun godkjenningsbehov(
+    fun godkjenningsbehov(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
@@ -320,7 +320,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun saksbehandlerløsning(
+    fun saksbehandlerløsning(
         message: JsonMessage,
         id: UUID,
         godkjenningsbehovhendelseId: UUID,
@@ -355,7 +355,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun overstyringTidslinje(
+    fun overstyringTidslinje(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -384,7 +384,7 @@ internal class HendelseMediator(
         ), context)
     }
 
-    override fun overstyringInntekt(
+    fun overstyringInntekt(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -419,7 +419,7 @@ internal class HendelseMediator(
         )
     }
 
-    override fun overstyringArbeidsforhold(
+    fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -452,14 +452,14 @@ internal class HendelseMediator(
 
 
 
-    override fun utbetalingAnnullert(
+    fun utbetalingAnnullert(
         message: JsonMessage,
         context: MessageContext
     ) {
         utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
     }
 
-    override fun utbetalingEndret(
+    fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,
         utbetalingId: UUID,
@@ -489,19 +489,19 @@ internal class HendelseMediator(
         utfør(fødselsnummer, hendelsefabrikk.utbetalingEndret(message.toJson()), context)
     }
 
-    override fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
+    fun oppdaterPersonsnapshot(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.oppdaterPersonsnapshot(message.toJson()), context)
     }
 
-    override fun innhentSkjermetinfo(message: JsonMessage, context: MessageContext) {
+    fun innhentSkjermetinfo(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.innhentSkjermetinfo(message.toJson()), context)
     }
 
-    override fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {
+    fun avbrytSaksbehandling(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.vedtaksperiodeReberegnet(message.toJson()), context)
     }
 
-    override fun gosysOppgaveEndret(message: JsonMessage, context: MessageContext) {
+    fun gosysOppgaveEndret(message: JsonMessage, context: MessageContext) {
         utfør(hendelsefabrikk.gosysOppgaveEndret(message.toJson()), context)
     }
 

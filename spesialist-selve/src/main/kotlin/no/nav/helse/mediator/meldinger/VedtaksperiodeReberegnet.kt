@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
@@ -37,7 +37,7 @@ internal class VedtaksperiodeReberegnet(
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : no.nav.helse.rapids_rivers.River.PacketListener {
         private val log = LoggerFactory.getLogger(this::class.java)
 

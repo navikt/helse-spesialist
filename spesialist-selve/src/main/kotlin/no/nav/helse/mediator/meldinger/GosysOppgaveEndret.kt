@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringForEksisterendeOppgaveCommand
@@ -69,7 +69,7 @@ internal class GosysOppgaveEndret(
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator,
+        private val mediator: HendelseMediator,
         private val oppgaveDao: OppgaveDao,
         private val tildelingDao: TildelingDao
     ) : no.nav.helse.rapids_rivers.River.PacketListener {

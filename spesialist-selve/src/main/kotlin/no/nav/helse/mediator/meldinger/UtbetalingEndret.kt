@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.abonnement.OpptegnelseDao
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
@@ -67,7 +67,7 @@ internal class UtbetalingEndret(
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : PacketListener {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 

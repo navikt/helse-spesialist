@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
@@ -21,7 +21,7 @@ internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonN
         }
     }
 
-    internal class InfotrygdutbetalingerRiver(rapidsConnection: RapidsConnection, private val mediator: IHendelseMediator) : River.PacketListener {
+    internal class InfotrygdutbetalingerRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         init {
             River(rapidsConnection)

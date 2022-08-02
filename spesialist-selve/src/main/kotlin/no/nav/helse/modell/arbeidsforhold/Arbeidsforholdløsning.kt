@@ -1,7 +1,7 @@
 package no.nav.helse.modell.arbeidsforhold
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.mediator.IHendelseMediator
+import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -44,7 +44,7 @@ internal class Arbeidsforholdløsning(
 
     internal class ArbeidsforholdRiver(
         rapidsConnection: RapidsConnection,
-        private val mediator: IHendelseMediator
+        private val mediator: HendelseMediator
     ) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
         private val behov = "Arbeidsforhold"
