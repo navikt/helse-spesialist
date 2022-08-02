@@ -37,19 +37,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     @Test
     fun `overstyr tidslinje`() {
         with(TestApplicationEngine()) {
-            application.install(ContentNegotiation) {
-                register(
-                    ContentType.Application.Json,
-                    JacksonConverter(objectMapper)
-                )
-            }
-            application.azureAdAppAuthentication(azureAdConfig)
-            application.routing {
-                authenticate("oidc") {
-                    overstyringApi(hendelseMediator)
-                }
-
-            }
+            setUpApplication()
             val overstyring = OverstyrTidslinjeDTO(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
@@ -81,18 +69,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     @Test
     fun `overstyr arbeidsforhold`() {
         with(TestApplicationEngine()) {
-            application.install(ContentNegotiation) {
-                register(
-                    ContentType.Application.Json,
-                    JacksonConverter(objectMapper)
-                )
-            }
-            application.azureAdAppAuthentication(azureAdConfig)
-            application.routing {
-                authenticate("oidc") {
-                    overstyringApi(hendelseMediator)
-                }
-            }
+            setUpApplication()
 
             val overstyring = OverstyrArbeidsforholdDto(
                 organisasjonsnummer = ORGNR,
@@ -145,18 +122,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     @Test
     fun `overstyr inntekt`() {
         with(TestApplicationEngine()) {
-            application.install(ContentNegotiation) {
-                register(
-                    ContentType.Application.Json,
-                    JacksonConverter(objectMapper)
-                )
-            }
-            application.azureAdAppAuthentication(azureAdConfig)
-            application.routing {
-                authenticate("oidc") {
-                    overstyringApi(hendelseMediator)
-                }
-            }
+            setUpApplication()
 
             val overstyring = OverstyrInntektDTO(
                 organisasjonsnummer = ORGNR,
@@ -198,6 +164,21 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             assertEquals(25000.0, event["månedligInntekt"].asDouble())
             assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
 
+        }
+    }
+
+    private fun TestApplicationEngine.setUpApplication() {
+        application.install(ContentNegotiation) {
+            register(
+                ContentType.Application.Json,
+                JacksonConverter(objectMapper)
+            )
+        }
+        application.azureAdAppAuthentication(azureAdConfig)
+        application.routing {
+            authenticate("oidc") {
+                overstyringApi(hendelseMediator)
+            }
         }
     }
 }
