@@ -65,6 +65,7 @@ internal class OverstyringTest {
         snapshotClient = mockk(),
         oppgaveMediator = mockk(),
         godkjenningMediator = mockk(relaxed = true),
+        overstyringMediator = mockk(relaxed = true),
         automatisering = mockk(relaxed = true),
         arbeidsforholdDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),

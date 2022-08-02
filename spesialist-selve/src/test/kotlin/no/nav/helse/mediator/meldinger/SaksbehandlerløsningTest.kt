@@ -75,6 +75,7 @@ internal class SaksbehandlerløsningTest {
         snapshotClient = graphQLClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
+        overstyringMediator = mockk(),
         automatisering = mockk(relaxed = true),
         arbeidsforholdDao = mockk(relaxed = true),
         utbetalingDao = mockk(relaxed = true),

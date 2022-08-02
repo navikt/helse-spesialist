@@ -67,6 +67,7 @@ internal class VedtaksperiodeForkastetTest {
             snapshotClient = graphQLClient,
             oppgaveMediator = oppgaveMediator,
             godkjenningMediator = mockk(relaxed = true),
+            overstyringMediator = mockk(),
             automatisering = mockk(relaxed = true),
             arbeidsforholdDao = mockk(relaxed = true),
             utbetalingDao = mockk(relaxed = true),

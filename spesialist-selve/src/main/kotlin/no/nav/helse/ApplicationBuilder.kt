@@ -46,6 +46,7 @@ import no.nav.helse.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.annulleringApi
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SnapshotClient
@@ -203,50 +204,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             nextInt(divisor) == 0
         } ?: false
     })
-
-
-    private val hendelsefabrikk = Hendelsefabrikk(
-        hendelseDao = hendelseDao,
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao,
-        warningDao = warningDao,
-        commandContextDao = commandContextDao,
-        oppgaveDao = oppgaveDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-        reservasjonDao = reservasjonDao,
-        tildelingDao = tildelingDao,
-        saksbehandlerDao = saksbehandlerDao,
-        overstyringDao = overstyringDao,
-        risikovurderingDao = risikovurderingDao,
-        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-        egenAnsattDao = egenAnsattDao,
-        arbeidsforholdDao = arbeidsforholdDao,
-        snapshotDao = snapshotDao,
-        snapshotClient = snapshotClient,
-        oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
-        automatisering = Automatisering(
-            warningDao = warningDao,
-            risikovurderingDao = risikovurderingDao,
-            automatiseringDao = AutomatiseringDao(dataSource),
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            egenAnsattDao = egenAnsattDao,
-            personDao = personDao,
-            vedtakDao = vedtakDao,
-            plukkTilManuell = plukkTilManuell,
-            vergemålDao = vergemålDao,
-            snapshotDao = snapshotDao,
-        ),
-        utbetalingDao = utbetalingDao,
-        opptegnelseDao = opptegnelseDao,
-        vergemålDao = vergemålDao,
-        periodehistorikkDao = periodehistorikkDao,
-        automatiseringDao = AutomatiseringDao(dataSource)
-    )
-
+    
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
@@ -322,10 +280,59 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator), notatMediator)
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
-                    totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator, hendelseMediator)
+                    totrinnsvurderingApi(
+                        oppgaveMediator,
+                        periodehistorikkDao,
+                        notatMediator,
+                        tildelingMediator,
+                        hendelseMediator
+                    )
                 }
             }
         }.build()
+
+    private val hendelsefabrikk = Hendelsefabrikk(
+        hendelseDao = hendelseDao,
+        personDao = personDao,
+        arbeidsgiverDao = arbeidsgiverDao,
+        vedtakDao = vedtakDao,
+        warningDao = warningDao,
+        commandContextDao = commandContextDao,
+        oppgaveDao = oppgaveDao,
+        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+        reservasjonDao = reservasjonDao,
+        tildelingDao = tildelingDao,
+        saksbehandlerDao = saksbehandlerDao,
+        overstyringDao = overstyringDao,
+        risikovurderingDao = risikovurderingDao,
+        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+        egenAnsattDao = egenAnsattDao,
+        arbeidsforholdDao = arbeidsforholdDao,
+        snapshotDao = snapshotDao,
+        snapshotClient = snapshotClient,
+        oppgaveMediator = oppgaveMediator,
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
+        automatisering = Automatisering(
+            warningDao = warningDao,
+            risikovurderingDao = risikovurderingDao,
+            automatiseringDao = AutomatiseringDao(dataSource),
+            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
+            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            egenAnsattDao = egenAnsattDao,
+            personDao = personDao,
+            vedtakDao = vedtakDao,
+            plukkTilManuell = plukkTilManuell,
+            vergemålDao = vergemålDao,
+            snapshotDao = snapshotDao,
+        ),
+        utbetalingDao = utbetalingDao,
+        opptegnelseDao = opptegnelseDao,
+        vergemålDao = vergemålDao,
+        periodehistorikkDao = periodehistorikkDao,
+        automatiseringDao = AutomatiseringDao(dataSource),
+        overstyringMediator = OverstyringMediator(rapidsConnection)
+    )
 
     init {
         rapidsConnection.register(this)

@@ -41,6 +41,7 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
+import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.graphql.PersonQuery
 import no.nav.helse.mediator.api.graphql.SnapshotClient
@@ -157,6 +158,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
+        overstyringMediator = OverstyringMediator(testRapid),
         automatisering = Automatisering(
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,

@@ -512,18 +512,20 @@ internal class HendelseMediator(
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
         overstyringsteller.labels("opplysningstype", "tidslinje").inc()
-        val overstyring = JsonMessage.newMessage("overstyr_tidslinje", mutableMapOf(
-            "fødselsnummer" to overstyringMessage.fødselsnummer,
-            "aktørId" to overstyringMessage.aktørId,
-            "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
-            "dager" to overstyringMessage.dager,
-            "begrunnelse" to overstyringMessage.begrunnelse,
-            "saksbehandlerOid" to overstyringMessage.saksbehandlerOid,
-            "saksbehandlerNavn" to overstyringMessage.saksbehandlerNavn,
-            "saksbehandlerIdent" to overstyringMessage.saksbehandlerIdent,
-            "saksbehandlerEpost" to overstyringMessage.saksbehandlerEpost,
-        )).also {
-            sikkerLogg.info("Publiserer overstyring:\n${it.toJson()}")
+        val overstyring = JsonMessage.newMessage(
+            "saksbehandler_overstyrer_tidslinje", mutableMapOf(
+                "fødselsnummer" to overstyringMessage.fødselsnummer,
+                "aktørId" to overstyringMessage.aktørId,
+                "organisasjonsnummer" to overstyringMessage.organisasjonsnummer,
+                "dager" to overstyringMessage.dager,
+                "begrunnelse" to overstyringMessage.begrunnelse,
+                "saksbehandlerOid" to overstyringMessage.saksbehandlerOid,
+                "saksbehandlerNavn" to overstyringMessage.saksbehandlerNavn,
+                "saksbehandlerIdent" to overstyringMessage.saksbehandlerIdent,
+                "saksbehandlerEpost" to overstyringMessage.saksbehandlerEpost,
+            )
+        ).also {
+            sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
         }
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
     }

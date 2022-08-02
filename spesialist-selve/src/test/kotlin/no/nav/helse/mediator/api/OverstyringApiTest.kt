@@ -62,7 +62,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             }
 
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_tidslinje").size)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_tidslinje").size)
         }
     }
 

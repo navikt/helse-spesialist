@@ -87,6 +87,7 @@ internal class Hendelsefabrikk(
     private val vergemålDao: VergemålDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val automatiseringDao: AutomatiseringDao,
+    private val overstyringMediator: OverstyringMediator,
 ) : IHendelsefabrikk {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -267,6 +268,7 @@ internal class Hendelsefabrikk(
         oppgaveDao = oppgaveDao,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         automatiseringDao = automatiseringDao,
+        overstyringMediator = overstyringMediator,
     )
 
     override fun overstyringTidslinje(json: String): OverstyringTidslinje {

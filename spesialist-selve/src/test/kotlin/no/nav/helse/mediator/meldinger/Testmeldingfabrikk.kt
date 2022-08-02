@@ -485,7 +485,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         saksbehandlerEpost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent"
     ) = nyHendelse(
-        id, "overstyr_tidslinje", mapOf(
+        id, "saksbehandler_overstyrer_tidslinje", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,

@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import io.mockk.mockk
+import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import java.util.*
 
 internal class HendelseDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -47,6 +47,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             snapshotClient = graphQLClient,
             oppgaveMediator = mockk(),
             godkjenningMediator = mockk(relaxed = true),
+            overstyringMediator = mockk(),
             automatisering = mockk(relaxed = true),
             arbeidsforholdDao = arbeidsforholdDao,
             utbetalingDao = utbetalingDao,
