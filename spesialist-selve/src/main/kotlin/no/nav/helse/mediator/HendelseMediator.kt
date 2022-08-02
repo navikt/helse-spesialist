@@ -45,7 +45,6 @@ import no.nav.helse.mediator.meldinger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -92,7 +91,7 @@ internal class HendelseMediator(
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
-    private val hendelsefabrikk: IHendelsefabrikk
+    private val hendelsefabrikk: Hendelsefabrikk
 ) : IHendelseMediator {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)

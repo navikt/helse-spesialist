@@ -9,6 +9,7 @@ import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
 import java.util.*
 import javax.sql.DataSource
+import no.nav.helse.mediator.Hendelsefabrikk
 
 internal class HendelseDao(private val dataSource: DataSource) {
     internal fun opprett(hendelse: Hendelse) {
@@ -84,7 +85,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         } ?: false
     }
 
-    internal fun finn(id: UUID, hendelsefabrikk: IHendelsefabrikk) = sessionOf(dataSource).use { session ->
+    internal fun finn(id: UUID, hendelsefabrikk: Hendelsefabrikk) = sessionOf(dataSource).use { session ->
         session.run(queryOf("SELECT type,data FROM hendelse WHERE id = ?", id).map { row ->
             fraHendelsetype(enumValueOf(row.string("type")), row.string("data"), hendelsefabrikk)
         }.asSingle)
@@ -93,7 +94,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     private fun fraHendelsetype(
         hendelsetype: Hendelsetype,
         json: String,
-        hendelsefabrikk: IHendelsefabrikk
+        hendelsefabrikk: Hendelsefabrikk
     ): Hendelse =
         when (hendelsetype) {
             ADRESSEBESKYTTELSE_ENDRET -> hendelsefabrikk.adressebeskyttelseEndret(json)

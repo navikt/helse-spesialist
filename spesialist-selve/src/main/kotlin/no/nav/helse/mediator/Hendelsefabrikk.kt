@@ -25,7 +25,6 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
-import no.nav.helse.modell.IHendelsefabrikk
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -88,7 +87,7 @@ internal class Hendelsefabrikk(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val automatiseringDao: AutomatiseringDao,
     private val overstyringMediator: OverstyringMediator,
-) : IHendelsefabrikk {
+) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
     internal companion object {
@@ -104,7 +103,7 @@ internal class Hendelsefabrikk(
             }
     }
 
-    override fun godkjenning(
+    fun godkjenning(
         id: UUID,
         fødselsnummer: String,
         aktørId: String,
@@ -159,7 +158,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun godkjenning(json: String): Godkjenningsbehov {
+    fun godkjenning(json: String): Godkjenningsbehov {
         val jsonNode = mapper.readTree(json)
         val periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText())
         val førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling")
@@ -186,7 +185,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun saksbehandlerløsning(
+    fun saksbehandlerløsning(
         id: UUID,
         godkjenningsbehovhendelseId: UUID,
         fødselsnummer: String,
@@ -219,7 +218,7 @@ internal class Hendelsefabrikk(
         godkjenningMediator = godkjenningMediator
     )
 
-    override fun saksbehandlerløsning(json: String): Saksbehandlerløsning {
+    fun saksbehandlerløsning(json: String): Saksbehandlerløsning {
         val jsonNode = mapper.readTree(json)
         return saksbehandlerløsning(
             id = UUID.fromString(jsonNode["@id"].asText()),
@@ -238,7 +237,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun overstyringTidslinje(
+    fun overstyringTidslinje(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -271,7 +270,7 @@ internal class Hendelsefabrikk(
         overstyringMediator = overstyringMediator,
     )
 
-    override fun overstyringTidslinje(json: String): OverstyringTidslinje {
+    fun overstyringTidslinje(json: String): OverstyringTidslinje {
         val jsonNode = mapper.readTree(json)
         return overstyringTidslinje(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -288,7 +287,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun overstyringInntekt(
+    fun overstyringInntekt(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -325,7 +324,7 @@ internal class Hendelsefabrikk(
         overstyringMediator = overstyringMediator,
     )
 
-    override fun overstyringArbeidsforhold(
+    fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,
         oid: UUID,
@@ -356,7 +355,7 @@ internal class Hendelsefabrikk(
         json = json
     )
 
-    override fun overstyringArbeidsforhold(json: String): OverstyringArbeidsforhold {
+    fun overstyringArbeidsforhold(json: String): OverstyringArbeidsforhold {
         val jsonNode = mapper.readTree(json)
         return overstyringArbeidsforhold(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -380,7 +379,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun overstyringInntekt(json: String): OverstyringInntekt {
+    fun overstyringInntekt(json: String): OverstyringInntekt {
         val jsonNode = mapper.readTree(json)
         return overstyringInntekt(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -399,10 +398,10 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
+    fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
         AdressebeskyttelseEndret(id, fødselsnummer, json, personDao)
 
-    override fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
+    fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
         val jsonNode = mapper.readTree(json)
         return AdressebeskyttelseEndret(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -412,7 +411,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun vedtaksperiodeEndret(
+    fun vedtaksperiodeEndret(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
@@ -430,7 +429,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun vedtaksperiodeEndret(json: String): VedtaksperiodeEndret {
+    fun vedtaksperiodeEndret(json: String): VedtaksperiodeEndret {
         val jsonNode = mapper.readTree(json)
         return vedtaksperiodeEndret(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -440,7 +439,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun vedtaksperiodeForkastet(
+    fun vedtaksperiodeForkastet(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
@@ -460,7 +459,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun vedtaksperiodeForkastet(json: String): VedtaksperiodeForkastet {
+    fun vedtaksperiodeForkastet(json: String): VedtaksperiodeForkastet {
         val jsonNode = mapper.readTree(json)
         return vedtaksperiodeForkastet(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -470,7 +469,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun utbetalingAnnullert(json: String): UtbetalingAnnullert {
+    fun utbetalingAnnullert(json: String): UtbetalingAnnullert {
         val jsonNode = mapper.readTree(json)
         return UtbetalingAnnullert(
             id = UUID.fromString(jsonNode["@id"].asText()),
@@ -486,7 +485,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun utbetalingEndret(json: String): UtbetalingEndret {
+    fun utbetalingEndret(json: String): UtbetalingEndret {
         val jsonNode = mapper.readTree(json)
         return UtbetalingEndret(
             id = UUID.fromString(jsonNode.path("@id").asText()),
@@ -534,7 +533,7 @@ internal class Hendelsefabrikk(
         }
     )
 
-    override fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot {
+    fun oppdaterPersonsnapshot(json: String): OppdaterPersonsnapshot {
         val jsonNode = mapper.readTree(json)
         return OppdaterPersonsnapshot(
             id = UUID.fromString(jsonNode["@id"].asText()),
@@ -545,7 +544,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun innhentSkjermetinfo(json: String): InnhentSkjermetinfo {
+    fun innhentSkjermetinfo(json: String): InnhentSkjermetinfo {
         val jsonNode = mapper.readTree(json)
         return InnhentSkjermetinfo(
             id = UUID.fromString(jsonNode["@id"].asText()),
@@ -555,7 +554,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
+    fun vedtaksperiodeReberegnet(json: String): VedtaksperiodeReberegnet {
         val jsonNode = mapper.readTree(json)
         return VedtaksperiodeReberegnet(
             id = UUID.fromString(jsonNode["@id"].asText()),
@@ -569,7 +568,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun gosysOppgaveEndret(json: String): GosysOppgaveEndret {
+    fun gosysOppgaveEndret(json: String): GosysOppgaveEndret {
         val jsonNode = mapper.readTree(json)
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
 
@@ -595,7 +594,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun revurderingAvvist(json: String): RevurderingAvvist {
+    fun revurderingAvvist(json: String): RevurderingAvvist {
         val jsonNode = mapper.readTree(json)
         return RevurderingAvvist(
             id = UUID.fromString(jsonNode["@id"].asText()),
@@ -606,7 +605,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    override fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist {
+    fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist {
         return RevurderingAvvist(UUID.randomUUID(), fødselsnummer, errors, json, opptegnelseDao)
     }
 }

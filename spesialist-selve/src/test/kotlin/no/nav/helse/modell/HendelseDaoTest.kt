@@ -22,7 +22,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
 
     private val testmeldingfabrikk = Testmeldingfabrikk(FNR, AKTØR)
     private val graphQLClient = mockk<SnapshotClient>(relaxed = true)
-    private lateinit var hendelsefabrikk: IHendelsefabrikk
+    private lateinit var hendelsefabrikk: Hendelsefabrikk
     private lateinit var vedtaksperiodeForkastet: VedtaksperiodeForkastet
 
     @BeforeAll
