@@ -142,17 +142,18 @@ data class OverstyrInntektKafkaDto(
     val månedligInntekt: Double,
     val skjæringstidspunkt: LocalDate
 ) {
-    fun somKafkaMessage() = JsonMessage.newMessage("overstyr_inntekt", mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "begrunnelse" to begrunnelse,
-        "forklaring" to forklaring,
-        "saksbehandlerOid" to saksbehandler.oid,
-        "saksbehandlerNavn" to saksbehandler.navn,
-        "saksbehandlerIdent" to saksbehandler.ident,
-        "saksbehandlerEpost" to saksbehandler.epost,
-        "månedligInntekt" to månedligInntekt,
+    fun somKafkaMessage() = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_inntekt", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "begrunnelse" to begrunnelse,
+            "forklaring" to forklaring,
+            "saksbehandlerOid" to saksbehandler.oid,
+            "saksbehandlerNavn" to saksbehandler.navn,
+            "saksbehandlerIdent" to saksbehandler.ident,
+            "saksbehandlerEpost" to saksbehandler.epost,
+            "månedligInntekt" to månedligInntekt,
         "skjæringstidspunkt" to skjæringstidspunkt
     ))
 }

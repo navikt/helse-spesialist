@@ -321,7 +321,8 @@ internal class Hendelsefabrikk(
         oppgaveDao = oppgaveDao,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         json = json,
-        automatiseringDao = automatiseringDao
+        automatiseringDao = automatiseringDao,
+        overstyringMediator = overstyringMediator,
     )
 
     override fun overstyringArbeidsforhold(

@@ -510,7 +510,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         månedligInntekt: Double = 25000.0,
         skjæringstidspunkt: LocalDate
     ) = nyHendelse(
-        id, "overstyr_inntekt", mapOf(
+        id, "saksbehandler_overstyrer_inntekt", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.overstyring
 
 import DatabaseIntegrationTest
+import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
@@ -162,6 +163,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             oppgaveDao = oppgaveDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
             automatiseringDao = automatiseringDao,
+            overstyringMediator = mockk(),
         )
     )
 }

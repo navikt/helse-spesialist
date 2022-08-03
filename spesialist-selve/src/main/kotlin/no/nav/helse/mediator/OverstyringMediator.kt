@@ -11,7 +11,7 @@ internal class OverstyringMediator(
     internal fun sendOverstyring(packet: JsonNode) {
         val fnr = packet["fødselsnummer"].asText()
         val rawJson = objectMapper.writeValueAsString(packet)
-        sikkerLogg.info("Publiserer overstyring for fnr=${fnr}, melding=${rawJson}")
+        sikkerLogg.info("Publiserer overstyring for fnr=${fnr}:\n${rawJson}")
         rapidsConnection.publish(fnr, rawJson)
     }
 

@@ -83,7 +83,11 @@ internal class OverstyringTidslinje(
             automatiseringDao = automatiseringDao,
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao),
-        PubliserOverstyringCommand(json = json, overstyringMediator = overstyringMediator)
+        PubliserOverstyringCommand(
+            eventName = "overstyr_tidslinje",
+            json = json,
+            overstyringMediator = overstyringMediator
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer

@@ -28,6 +28,7 @@ import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.mediator.api.OverstyrInntektDTO
 import no.nav.helse.mediator.api.OverstyrTidslinjeDTO
 import no.nav.helse.mediator.api.overstyringApi
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,6 +72,45 @@ internal class OverstyringIT : AbstractE2ETest() {
             )
             assertEquals("Invalidert", oppgaveStatus())
             assertEquals(1, testRapid.inspektør.hendelser("overstyr_tidslinje").size)
+        }
+    }
+
+    @Test
+    fun `overstyr inntekt`() {
+        with(TestApplicationEngine()) {
+            setUpApplication()
+            settOppBruker()
+
+            val overstyring = OverstyrInntektDTO(
+                organisasjonsnummer = ORGNR,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                begrunnelse = "en begrunnelse",
+                forklaring = "en forklaring",
+                månedligInntekt = 25000.0,
+                skjæringstidspunkt = 1.januar
+            )
+
+            val response = runBlocking {
+                client.post("/api/overstyr/inntekt") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT
+                    )
+                    setBody(objectMapper.writeValueAsString(overstyring))
+                }
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").size)
+            testRapid.sendTestMessage(
+                testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").first().toString()
+            )
+            assertEquals("Invalidert", oppgaveStatus())
+            assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
         }
     }
 

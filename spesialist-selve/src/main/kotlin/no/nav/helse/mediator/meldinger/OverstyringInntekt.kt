@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
@@ -24,6 +25,7 @@ import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingInntektCommand
+import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 
@@ -53,6 +55,7 @@ internal class OverstyringInntekt(
     oppgaveDao: OppgaveDao,
     overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
     automatiseringDao: AutomatiseringDao,
+    overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -83,7 +86,12 @@ internal class OverstyringInntekt(
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
             automatiseringDao = automatiseringDao,
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao)
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao),
+        PubliserOverstyringCommand(
+            eventName = "overstyr_inntekt",
+            json = json,
+            overstyringMediator = overstyringMediator
+        )
     )
 
     override fun fødselsnummer() = fødselsnummer
@@ -99,7 +107,7 @@ internal class OverstyringInntekt(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.demandValue("@event_name", "overstyr_inntekt")
+                    it.demandValue("@event_name", "saksbehandler_overstyrer_inntekt")
                     it.requireKey("@opprettet")
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")
