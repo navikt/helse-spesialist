@@ -101,8 +101,8 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
             assertEquals(HttpStatusCode.OK, response.status)
 
-            assertEquals(1, testRapid.inspektør.hendelser("overstyr_arbeidsforhold").size)
-            val event = testRapid.inspektør.hendelser("overstyr_arbeidsforhold").first()
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").size)
+            val event = testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first()
 
             assertNotNull(event["@id"].asText())
             assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())

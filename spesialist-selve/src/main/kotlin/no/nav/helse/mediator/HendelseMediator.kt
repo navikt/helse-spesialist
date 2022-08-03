@@ -543,7 +543,7 @@ internal class HendelseMediator(
         overstyringsteller.labels("opplysningstype", "arbeidsforhold").inc()
 
         val overstyring = overstyringMessage.somKafkaMessage().also {
-            sikkerLogg.info("Publiserer overstyring av arbeidsforhold:\n${it.toJson()}")
+            sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
         }
 
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())

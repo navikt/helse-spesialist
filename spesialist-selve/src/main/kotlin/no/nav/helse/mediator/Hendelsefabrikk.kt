@@ -352,7 +352,8 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao,
         oppgaveDao = oppgaveDao,
         overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-        json = json
+        json = json,
+        overstyringMediator = overstyringMediator,
     )
 
     fun overstyringArbeidsforhold(json: String): OverstyringArbeidsforhold {

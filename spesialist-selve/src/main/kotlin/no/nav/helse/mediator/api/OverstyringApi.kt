@@ -181,15 +181,17 @@ data class OverstyrArbeidsforholdKafkaDto(
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
 ) {
-    fun somKafkaMessage() = JsonMessage.newMessage("overstyr_arbeidsforhold", mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId,
-        "organisasjonsnummer" to organisasjonsnummer,
-        "saksbehandlerOid" to saksbehandler.oid,
-        "saksbehandlerNavn" to saksbehandler.navn,
-        "saksbehandlerIdent" to saksbehandler.ident,
-        "saksbehandlerEpost" to saksbehandler.epost,
-        "skjæringstidspunkt" to skjæringstidspunkt,
-        "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
-    ))
+    fun somKafkaMessage() = JsonMessage.newMessage(
+        "saksbehandler_overstyrer_arbeidsforhold", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "saksbehandlerOid" to saksbehandler.oid,
+            "saksbehandlerNavn" to saksbehandler.navn,
+            "saksbehandlerIdent" to saksbehandler.ident,
+            "saksbehandlerEpost" to saksbehandler.epost,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "overstyrteArbeidsforhold" to overstyrteArbeidsforhold,
+        )
+    )
 }

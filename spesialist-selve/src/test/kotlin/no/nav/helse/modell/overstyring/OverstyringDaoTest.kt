@@ -115,7 +115,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
             oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,

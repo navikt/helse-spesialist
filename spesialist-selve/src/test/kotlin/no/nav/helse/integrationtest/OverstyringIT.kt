@@ -28,6 +28,7 @@ import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrInntektDTO
 import no.nav.helse.mediator.api.OverstyrTidslinjeDTO
 import no.nav.helse.mediator.api.overstyringApi
@@ -111,6 +112,51 @@ internal class OverstyringIT : AbstractE2ETest() {
             )
             assertEquals("Invalidert", oppgaveStatus())
             assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
+        }
+    }
+
+    @Test
+    fun `overstyr arbeidsforhold`() {
+        with(TestApplicationEngine()) {
+            setUpApplication()
+            settOppBruker()
+
+            val overstyring = OverstyrArbeidsforholdDto(
+                organisasjonsnummer = ORGNR,
+                fødselsnummer = FØDSELSNUMMER,
+                aktørId = AKTØR,
+                skjæringstidspunkt = 1.januar,
+                overstyrteArbeidsforhold = listOf(
+                    OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
+                        orgnummer = "6667",
+                        deaktivert = true,
+                        begrunnelse = "en begrunnelse",
+                        forklaring = "en forklaring"
+                    )
+                )
+            )
+
+            val response = runBlocking {
+                client.post("/api/overstyr/arbeidsforhold") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT
+                    )
+                    setBody(objectMapper.writeValueAsString(overstyring))
+                }
+            }
+
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").size)
+            testRapid.sendTestMessage(
+                testRapid.inspektør.hendelser("saksbehandler_overstyrer_arbeidsforhold").first().toString()
+            )
+            assertEquals("Invalidert", oppgaveStatus())
+            assertEquals(1, testRapid.inspektør.hendelser("overstyr_arbeidsforhold").size)
         }
     }
 

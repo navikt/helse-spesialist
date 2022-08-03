@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
@@ -24,6 +25,7 @@ import no.nav.helse.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingArbeidsforholdCommand
+import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 
@@ -44,6 +46,7 @@ internal class OverstyringArbeidsforhold(
     overstyringDao: OverstyringDao,
     oppgaveDao: OppgaveDao,
     overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
+    overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettSaksbehandlerCommand(
@@ -69,7 +72,12 @@ internal class OverstyringArbeidsforhold(
             oppgaveDao = oppgaveDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, organisasjonsnummer, saksbehandlerDao)
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, organisasjonsnummer, saksbehandlerDao),
+        PubliserOverstyringCommand(
+            eventName = "overstyr_arbeidsforhold",
+            json = json,
+            overstyringMediator = overstyringMediator
+        )
     )
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
@@ -84,7 +92,7 @@ internal class OverstyringArbeidsforhold(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.demandValue("@event_name", "overstyr_arbeidsforhold")
+                    it.demandValue("@event_name", "saksbehandler_overstyrer_arbeidsforhold")
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")
                     it.requireKey("organisasjonsnummer")
