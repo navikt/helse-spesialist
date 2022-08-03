@@ -1,4 +1,15 @@
--- Fjern utdaterte rader som peker på samme vedtak som en nyere rad:
+-- Må først fjerne duplikate rader i dev, de tas ikke av neste spørringπ
+DELETE
+FROM reserver_person a
+    USING
+        (SELECT max(ctid) as ctid, person_ref
+         FROM reserver_person
+         GROUP BY person_ref, gyldig_til
+         HAVING COUNT(*) > 1) b
+WHERE a.person_ref = b.person_ref
+  AND a.ctid <> b.ctid;
+
+-- Fjern eldre reservasjonsrader enn nyeste
 with slettes as
          (select resper.gyldig_til,
                  resper.person_ref,
