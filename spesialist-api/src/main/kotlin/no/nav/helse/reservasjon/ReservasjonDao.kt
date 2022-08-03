@@ -47,9 +47,9 @@ class ReservasjonDao(dataSource: DataSource) : HelseDao(dataSource) {
         """ SELECT r.* FROM reserver_person r
                 JOIN person p ON p.id = r.person_ref
             WHERE p.fodselsnummer = :fnr AND r.gyldig_til > now(); """
-            .single(mapOf("fnr" to fødselsnummer.toLong())) {
+            .list(mapOf("fnr" to fødselsnummer.toLong())) {
                 Reservasjonsinfo(it.uuid("saksbehandler_ref"), it.boolean("sett_på_vent_flagg"))
-            }
+            }.firstOrNull()
 }
 
 data class Reservasjonsinfo(
