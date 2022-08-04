@@ -1,5 +1,5 @@
 # Ignore everything
 **
 
-# Except installDist
-!build/libs/**
+# Except jar files
+!spesialist-selve/build/libs/**
