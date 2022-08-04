@@ -11,21 +11,21 @@ on:
             - master
 
 jobs:
-    set_version:
-        name: set image name
-        runs-on: ubuntu-latest
-        steps:
-            - name: create docker tag
-              run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
-        outputs:
-            image: ghcr.io/${{ github.repository }}/spesialist:${{ env.TAG }}
 
     build:
         name: build docker image
         runs-on: ubuntu-latest
-        needs: set_version
         steps:
             - uses: actions/checkout@v3
+
+            - name: Create image name
+              uses: actions/github-script@v6
+              id: image_name
+              with:
+                result-encoding: string
+                script: |
+                  const tag = context.sha.substring(0, 7)
+                  return `ghcr.io/${context.repo.repo}/spesialist:${tag}`
 
             - uses: actions/setup-java@v3
               with:
@@ -55,7 +55,7 @@ jobs:
               uses: docker/build-push-action@v3
               with:
                   context: .
-                  tags: ${{ needs.set_version.outputs.image }}
+                  tags: ${{ steps.image_name.outputs.result }}
                   push: true
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
