@@ -77,7 +77,7 @@ jobs:
 
     deployDev:
         name: deploy to dev
-        needs: [set_version, build]
+        needs: [build]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -86,7 +86,7 @@ jobs:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: dev-gcp
                   RESOURCE: deploy/dev.yml
-                  IMAGE: ${{ needs.set_version.outputs.image }}
+                  IMAGE: ${{ steps.image_name.outputs.result }}
 
     deployProd:
         name: deploy to prod
@@ -99,4 +99,4 @@ jobs:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: prod-gcp
                   RESOURCE: deploy/prod.yml
-                  IMAGE: ${{ needs.set_version.outputs.image }}
+                  IMAGE: ${{ steps.image_name.outputs.result }}
