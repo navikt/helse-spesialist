@@ -90,7 +90,7 @@ jobs:
 
     deployProd:
         name: deploy to prod
-        needs: [set_version, build, deployDev]
+        needs: [build, deployDev]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
