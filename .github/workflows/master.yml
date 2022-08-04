@@ -25,7 +25,8 @@ jobs:
                 result-encoding: string
                 script: |
                   const tag = context.sha.substring(0, 7)
-                  return `ghcr.io/${context.repo.repo}/spesialist:${tag}`
+                  const repoAndAppPart = `${context.repo.owner}/${context.repo.repo}/spesialist`
+                  return `ghcr.io/${repoAndAppPart}:${tag}`
 
             - uses: actions/setup-java@v3
               with:
