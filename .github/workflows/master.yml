@@ -11,22 +11,29 @@ on:
             - master
 
 jobs:
+    image_name:
+      name: Set image name
+      runs-on: ubuntu-latest
+      steps:
+        - name: Create image name
+          uses: actions/github-script@v6
+          id: image_name_func
+          with:
+            result-encoding: string
+            script: |
+              const tag = context.sha.substring(0, 7)
+              const repoAndAppPart = `${context.repo.owner}/${context.repo.repo}/spesialist`
+              return `ghcr.io/${repoAndAppPart}:${tag}`
+
+      outputs:
+        image:  ${{ steps.image_name_func.outputs.result }}
 
     build:
-        name: build docker image
+        name: Build image
         runs-on: ubuntu-latest
+        needs: image_name
         steps:
             - uses: actions/checkout@v3
-
-            - name: Create image name
-              uses: actions/github-script@v6
-              id: image_name
-              with:
-                result-encoding: string
-                script: |
-                  const tag = context.sha.substring(0, 7)
-                  const repoAndAppPart = `${context.repo.owner}/${context.repo.repo}/spesialist`
-                  return `ghcr.io/${repoAndAppPart}:${tag}`
 
             - uses: actions/setup-java@v3
               with:
@@ -56,7 +63,7 @@ jobs:
               uses: docker/build-push-action@v3
               with:
                   context: .
-                  tags: ${{ steps.image_name.outputs.result }}
+                  tags: ${{ needs.image_name.outputs.image }}
                   push: true
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
@@ -78,7 +85,7 @@ jobs:
 
     deployDev:
         name: deploy to dev
-        needs: [build]
+        needs: [image_name, build]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -87,11 +94,11 @@ jobs:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: dev-gcp
                   RESOURCE: deploy/dev.yml
-                  IMAGE: ${{ steps.image_name.outputs.result }}
+                  IMAGE: ${{ needs.image_name.outputs.image }}
 
     deployProd:
         name: deploy to prod
-        needs: [build, deployDev]
+        needs: [image_name, build, deployDev]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -100,4 +107,4 @@ jobs:
                   APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                   CLUSTER: prod-gcp
                   RESOURCE: deploy/prod.yml
-                  IMAGE: ${{ steps.image_name.outputs.result }}
+                  IMAGE: ${{ needs.image_name.outputs.image }}
