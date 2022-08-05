@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import javax.sql.DataSource
 import no.nav.helse.abonnement.OpptegnelseDao
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.SnapshotClient
@@ -59,33 +60,34 @@ import no.nav.helse.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 internal class Hendelsefabrikk(
-    private val hendelseDao: HendelseDao,
-    private val personDao: PersonDao,
-    private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val vedtakDao: VedtakDao,
-    private val warningDao: WarningDao,
-    private val oppgaveDao: OppgaveDao,
-    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
-    private val commandContextDao: CommandContextDao,
-    private val reservasjonDao: ReservasjonDao,
-    private val tildelingDao: TildelingDao,
-    private val saksbehandlerDao: SaksbehandlerDao,
-    private val overstyringDao: OverstyringDao,
-    private val risikovurderingDao: RisikovurderingDao,
-    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
-    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
-    private val snapshotDao: SnapshotDao,
-    private val egenAnsattDao: EgenAnsattDao,
+    dataSource: DataSource,
+    private val hendelseDao: HendelseDao = HendelseDao(dataSource),
+    private val personDao: PersonDao = PersonDao(dataSource),
+    private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
+    private val vedtakDao: VedtakDao = VedtakDao(dataSource),
+    private val warningDao: WarningDao = WarningDao(dataSource),
+    private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
+    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource),
+    private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
+    private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
+    private val tildelingDao: TildelingDao = TildelingDao(dataSource),
+    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
+    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
+    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource),
+    private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
+    private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
+    private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val snapshotClient: SnapshotClient,
     private val oppgaveMediator: OppgaveMediator,
     private val godkjenningMediator: GodkjenningMediator,
     private val automatisering: Automatisering,
-    private val arbeidsforholdDao: ArbeidsforholdDao,
-    private val utbetalingDao: UtbetalingDao,
-    private val opptegnelseDao: OpptegnelseDao,
-    private val vergemålDao: VergemålDao,
-    private val periodehistorikkDao: PeriodehistorikkDao,
-    private val automatiseringDao: AutomatiseringDao,
+    private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
+    private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
+    private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
+    private val vergemålDao: VergemålDao = VergemålDao(dataSource),
+    private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val automatiseringDao: AutomatiseringDao = AutomatiseringDao(dataSource),
     private val overstyringMediator: OverstyringMediator,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")

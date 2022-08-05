@@ -51,19 +51,15 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -99,36 +95,33 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             .registerModule(JavaTimeModule())
     }
 
-    private val commandContextDao = CommandContextDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
-    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
 
-    protected val varselDao = VarselDao(dataSource)
-    protected val personApiDao = PersonApiDao(dataSource)
+    private val varselDao = VarselDao(dataSource)
+    private val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
-    protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
-    protected val vedtakDao = VedtakDao(dataSource)
-    protected val warningDao = WarningDao(dataSource)
+    private val vedtakDao = VedtakDao(dataSource)
+    private val warningDao = WarningDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
-    protected val risikovurderingDao = RisikovurderingDao(dataSource)
-    protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
+    private val risikovurderingDao = RisikovurderingDao(dataSource)
+    private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
     protected val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
-    protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
+    private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val utbetalingDao = UtbetalingDao(dataSource)
     protected val opptegnelseDao = OpptegnelseDao(dataSource)
     protected val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     protected val abonnementDao = AbonnementDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val reservasjonDao = ReservasjonDao(dataSource)
-    protected val notatDao = NotatDao(dataSource)
-    protected val vergemålDao = VergemålDao(dataSource)
+    private val notatDao = NotatDao(dataSource)
+    private val vergemålDao = VergemålDao(dataSource)
     protected val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
@@ -139,22 +132,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
-        hendelseDao = hendelseDao,
-        personDao = personDao,
-        arbeidsgiverDao = ArbeidsgiverDao(dataSource),
-        vedtakDao = vedtakDao,
-        warningDao = warningDao,
-        oppgaveDao = oppgaveDao,
-        commandContextDao = commandContextDao,
-        reservasjonDao = reservasjonDao,
-        tildelingDao = tildelingDao,
-        saksbehandlerDao = saksbehandlerDao,
-        overstyringDao = OverstyringDao(dataSource),
-        risikovurderingDao = risikovurderingDao,
-        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-        åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-        egenAnsattDao = egenAnsattDao,
-        snapshotDao = snapshotDao,
+        dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
@@ -171,13 +149,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vergemålDao = vergemålDao,
             snapshotDao = snapshotDao,
         ) { false },
-        arbeidsforholdDao = arbeidsforholdDao,
-        utbetalingDao = utbetalingDao,
-        opptegnelseDao = opptegnelseDao,
-        vergemålDao = vergemålDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-        periodehistorikkDao = periodehistorikkDao,
-        automatiseringDao = automatiseringDao,
     )
     internal val hendelseMediator = HendelseMediator(
         rapidsConnection = testRapid,

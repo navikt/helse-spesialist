@@ -58,13 +58,9 @@ import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
-import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
-import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
-import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
@@ -72,7 +68,6 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
@@ -83,7 +78,6 @@ import no.nav.helse.notat.NotatMediator
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.oppgave.OppgaveMediator
 import no.nav.helse.overstyring.OverstyringApiDao
-import no.nav.helse.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.person.PersonApiDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -165,19 +159,14 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val risikovurderingDao = RisikovurderingDao(dataSource)
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
-    private val commandContextDao = CommandContextDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
     private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
-    private val overstyringDao = OverstyringDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
-    private val arbeidsgiverDao = ArbeidsgiverDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
-    private val hendelseDao = HendelseDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
     private val utbetalingDao = UtbetalingDao(dataSource)
-    private val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     private val abonnementDao = AbonnementDao(dataSource)
@@ -186,7 +175,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val snapshotDao = SnapshotDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
-    private val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
@@ -204,7 +192,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             nextInt(divisor) == 0
         } ?: false
     })
-    
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
@@ -291,47 +279,30 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
         }.build()
 
-    private val hendelsefabrikk = Hendelsefabrikk(
-        hendelseDao = hendelseDao,
-        personDao = personDao,
-        arbeidsgiverDao = arbeidsgiverDao,
-        vedtakDao = vedtakDao,
+    val automatiseringDao = AutomatiseringDao(dataSource)
+    val automatisering = Automatisering(
         warningDao = warningDao,
-        commandContextDao = commandContextDao,
-        oppgaveDao = oppgaveDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-        reservasjonDao = reservasjonDao,
-        tildelingDao = tildelingDao,
-        saksbehandlerDao = saksbehandlerDao,
-        overstyringDao = overstyringDao,
         risikovurderingDao = risikovurderingDao,
+        automatiseringDao = automatiseringDao,
         digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
-        arbeidsforholdDao = arbeidsforholdDao,
+        personDao = personDao,
+        vedtakDao = vedtakDao,
+        plukkTilManuell = plukkTilManuell,
+        vergemålDao = vergemålDao,
         snapshotDao = snapshotDao,
+    )
+
+    val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao)
+    val overstyringMediator = OverstyringMediator(rapidsConnection)
+    private val hendelsefabrikk = Hendelsefabrikk(
+        dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
-        automatisering = Automatisering(
-            warningDao = warningDao,
-            risikovurderingDao = risikovurderingDao,
-            automatiseringDao = AutomatiseringDao(dataSource),
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            egenAnsattDao = egenAnsattDao,
-            personDao = personDao,
-            vedtakDao = vedtakDao,
-            plukkTilManuell = plukkTilManuell,
-            vergemålDao = vergemålDao,
-            snapshotDao = snapshotDao,
-        ),
-        utbetalingDao = utbetalingDao,
-        opptegnelseDao = opptegnelseDao,
-        vergemålDao = vergemålDao,
-        periodehistorikkDao = periodehistorikkDao,
-        automatiseringDao = AutomatiseringDao(dataSource),
-        overstyringMediator = OverstyringMediator(rapidsConnection)
+        godkjenningMediator = godkjenningMediator,
+        automatisering = automatisering,
+        overstyringMediator = overstyringMediator,
     )
 
     init {

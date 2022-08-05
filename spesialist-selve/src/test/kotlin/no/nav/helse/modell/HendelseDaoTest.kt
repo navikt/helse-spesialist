@@ -28,34 +28,12 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
     @BeforeAll
     fun setup() {
         hendelsefabrikk = Hendelsefabrikk(
-            hendelseDao = hendelseDao,
-            personDao = personDao,
-            arbeidsgiverDao = arbeidsgiverDao,
-            vedtakDao = vedtakDao,
-            warningDao = warningDao,
-            oppgaveDao = oppgaveDao,
-            commandContextDao = commandContextDao,
-            snapshotDao = snapshotDao,
-            reservasjonDao = reservasjonDao,
-            tildelingDao = tildelingDao,
-            saksbehandlerDao = saksbehandlerDao,
-            overstyringDao = overstyringDao,
-            risikovurderingDao = risikovurderingDao,
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
-            åpneGosysOppgaverDao = åpneGosysOppgaverDao,
-            egenAnsattDao = egenAnsattDao,
+            dataSource = dataSource,
             snapshotClient = graphQLClient,
             oppgaveMediator = mockk(),
             godkjenningMediator = mockk(relaxed = true),
             overstyringMediator = mockk(),
             automatisering = mockk(relaxed = true),
-            arbeidsforholdDao = arbeidsforholdDao,
-            utbetalingDao = utbetalingDao,
-            opptegnelseDao = opptegnelseDao,
-            vergemålDao = vergemålDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            periodehistorikkDao = periodehistorikkDao,
-            automatiseringDao = automatiseringDao,
         )
     }
 

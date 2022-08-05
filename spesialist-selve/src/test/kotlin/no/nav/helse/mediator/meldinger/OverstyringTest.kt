@@ -8,16 +8,13 @@ import java.util.UUID
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.overstyring.OverstyringDao
-import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.oppgave.OppgaveDao
 import no.nav.helse.overstyring.Dagtype
 import no.nav.helse.overstyring.OverstyringDagDto
 import no.nav.helse.reservasjon.ReservasjonDao
 import no.nav.helse.saksbehandler.SaksbehandlerDao
-import no.nav.helse.tildeling.TildelingDao
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
 internal class OverstyringTest {
     companion object {
         private val ID = UUID.randomUUID()
@@ -41,39 +38,20 @@ internal class OverstyringTest {
 
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
-    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
-    private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>()
+
     private val hendelsefabrikk = Hendelsefabrikk(
-        hendelseDao = mockk(),
-        personDao = mockk(),
-        arbeidsgiverDao = mockk(),
-        vedtakDao = mockk(),
-        warningDao = mockk(),
+        dataSource = mockk(relaxed = true),
         oppgaveDao = oppgaveDao,
-        commandContextDao = mockk(),
-        snapshotDao = mockk(),
         reservasjonDao = reservasjonDao,
-        tildelingDao = tildelingDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
-        risikovurderingDao = risikovurderingDao,
-        digitalKontaktinformasjonDao = mockk(),
-        åpneGosysOppgaverDao = mockk(),
-        egenAnsattDao = mockk(),
         snapshotClient = mockk(),
         oppgaveMediator = mockk(),
-        godkjenningMediator = mockk(relaxed = true),
+        godkjenningMediator = mockk(),
+        automatisering = mockk(),
         overstyringMediator = mockk(relaxed = true),
-        automatisering = mockk(relaxed = true),
-        arbeidsforholdDao = mockk(relaxed = true),
-        utbetalingDao = mockk(relaxed = true),
-        opptegnelseDao = mockk(relaxed = true),
-        vergemålDao = mockk(relaxed = true),
-        overstyrtVedtaksperiodeDao = mockk(relaxed = true),
-        periodehistorikkDao = mockk(relaxed = true),
-        automatiseringDao = mockk(relaxed = true),
     )
 
     private val overstyringMessage = hendelsefabrikk.overstyringTidslinje(
