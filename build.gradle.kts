@@ -1,6 +1,6 @@
 val junitJupiterVersion = "5.8.2"
 val ktorVersion = "2.0.1"
-val graphqlKotlinVersion = "5.4.1"
+val graphqlKotlinVersion = "6.1.0"
 val jvmTargetVersion = "17"
 val rapidsAndRiversVersion = "2022.05.25-08.39.8025c775ad8e"
 val logbackSyslog4jVersion = "1.0.0"
