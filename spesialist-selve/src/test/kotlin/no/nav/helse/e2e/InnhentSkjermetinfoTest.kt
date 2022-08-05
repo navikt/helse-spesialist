@@ -5,7 +5,6 @@ import io.mockk.every
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
-import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.TestRapidHelpers.behov
@@ -23,19 +22,6 @@ internal class InnhentSkjermetinfoTest : AbstractE2ETest() {
 
     @Test
     fun `Ignorerer hendelsen for ukjente personer`() {
-        sendInnhentSkjermetinfo()
-        assertEquals(0, testRapid.inspektør.behov().size)
-    }
-
-    @Test
-    fun `Ignorerer skjermetinfo for kjente personer vi har skjermetinfo for`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UUID.randomUUID())
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
-
-        testRapid.reset()
         sendInnhentSkjermetinfo()
         assertEquals(0, testRapid.inspektør.behov().size)
     }

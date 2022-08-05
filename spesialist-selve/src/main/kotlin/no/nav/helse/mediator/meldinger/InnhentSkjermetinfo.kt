@@ -37,7 +37,6 @@ internal class InnhentSkjermetinfo(
         rapidsConnection: RapidsConnection,
         private val mediator: HendelseMediator,
         private val personDao: PersonDao,
-        private val egenAnsattDao: EgenAnsattDao,
     ) : PacketListener {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
@@ -63,9 +62,6 @@ internal class InnhentSkjermetinfo(
             when {
                 personDao.findPersonByFødselsnummer(fødselsnummer) == null -> {
                     logger("Ignorerer innhent_skjermetinfo for {} pga: person fins ikke i databasen, {}")
-                }
-                egenAnsattDao.erEgenAnsatt(fødselsnummer) != null -> {
-                    logger("Ignorerer innhent_skjermetinfo for {} pga: skjermetinfo fins i databasen, {}")
                 }
                 else -> {
                     logger("Mottok hendelse innhent_skjermetinfo for {}, {}")

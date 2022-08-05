@@ -48,7 +48,6 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -79,7 +78,6 @@ internal class HendelseMediator(
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
-    private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
@@ -127,7 +125,7 @@ internal class HendelseMediator(
             VedtaksperiodeReberegnet.River(it, this)
             RevurderingAvvist.River(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
-            InnhentSkjermetinfo.River(it, this, personDao, egenAnsattDao)
+            InnhentSkjermetinfo.River(it, this, personDao)
         }
     }
 
