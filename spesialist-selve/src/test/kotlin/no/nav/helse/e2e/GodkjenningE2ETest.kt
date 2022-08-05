@@ -22,7 +22,6 @@ import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.TestRapidHelpers.løsning
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
@@ -50,7 +49,6 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
@@ -948,9 +946,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling og avviser godkjenning på person med verge`() {
         håndterVergeflyt(VergemålJson(vergemål = listOf(Vergemål(voksen))))
-        val godkjenning = testRapid.inspektør.løsning("Godkjenning")
-        assertFalse(godkjenning["godkjent"].booleanValue())
-        assertEquals("Vergemål", godkjenning["begrunnelser"].first().asText())
+        assertGodkjenningsbehovløsning(godkjent = false, saksbehandlerIdent = AUTOMATISK_BEHANDLET) {
+            assertEquals("Vergemål", it["begrunnelser"].first().asText())
+        }
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
     }
@@ -958,8 +956,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter ikke saksbehandling for person uten verge`() {
         håndterVergeflyt(VergemålJson())
-        val godkjenning = testRapid.inspektør.løsning("Godkjenning")
-        assertTrue(godkjenning["godkjent"].booleanValue())
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = AUTOMATISK_BEHANDLET)
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
     }
@@ -979,11 +976,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
-        assertThrows<NoSuchElementException> { testRapid.inspektør.løsning("Godkjenning") }
+        assertGodkjenningsbehovIkkeLøst()
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        val godkjenning = testRapid.inspektør.løsning("Godkjenning")
-        assertTrue(godkjenning["godkjent"].booleanValue())
-        assertFalse(godkjenning["automatiskBehandling"].booleanValue())
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
         assertWarning("Registert fullmakt på personen.", VEDTAKSPERIODE_ID)
     }
 
@@ -996,11 +991,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
-        assertThrows<NoSuchElementException> { testRapid.inspektør.løsning("Godkjenning") }
+        assertGodkjenningsbehovIkkeLøst()
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        val godkjenning = testRapid.inspektør.løsning("Godkjenning")
-        assertTrue(godkjenning["godkjent"].booleanValue())
-        assertFalse(godkjenning["automatiskBehandling"].booleanValue())
+        assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = SAKSBEHANDLERIDENT)
         assertWarning("Registert fullmakt på personen.", VEDTAKSPERIODE_ID)
     }
 

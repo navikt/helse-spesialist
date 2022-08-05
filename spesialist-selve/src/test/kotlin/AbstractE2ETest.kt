@@ -25,6 +25,7 @@ import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.løsning
+import no.nav.helse.TestRapidHelpers.løsninger
 import no.nav.helse.TestRapidHelpers.oppgaver
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
@@ -318,12 +319,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         saksbehandlerIdent: String,
         block: (JsonNode) -> Unit = {}
     ) {
-        assertLøsning("Godkjenning") {
-            assertTrue(it.path("godkjent").isBoolean)
-            assertEquals(godkjent, it.path("godkjent").booleanValue())
-            assertEquals(saksbehandlerIdent, it.path("saksbehandlerIdent").textValue())
-            assertNotNull(it.path("godkjenttidspunkt").asLocalDateTime())
-            block(it)
+        testRapid.inspektør.løsning("Godkjenning").apply {
+            assertTrue(path("godkjent").isBoolean)
+            assertEquals(godkjent, path("godkjent").booleanValue())
+            assertEquals(saksbehandlerIdent, path("saksbehandlerIdent").textValue())
+            assertNotNull(path("godkjenttidspunkt").asLocalDateTime())
+            block(this)
         }
     }
 
@@ -349,8 +350,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    private fun assertLøsning(behov: String, assertBlock: (JsonNode) -> Unit) {
-        testRapid.inspektør.løsning(behov).also(assertBlock)
+    protected fun assertGodkjenningsbehovIkkeLøst() {
+        assertEquals(0, testRapid.inspektør.løsninger().size)
     }
 
     protected fun assertBehov(vararg behov: String) {

@@ -20,6 +20,15 @@ object TestRapidHelpers {
             .filterNot { it.hasNonNull("@løsning") }
             .flatMap { it.path("@behov").map(JsonNode::asText) }
 
+    fun TestRapid.RapidInspector.løsninger() =
+        hendelser("behov")
+            .filter { it.hasNonNull("@løsning") }
+
+    fun TestRapid.RapidInspector.løsning(behov: String): JsonNode =
+        løsninger()
+            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
+            .path("@løsning").path(behov)
+
     fun TestRapid.RapidInspector.contextId(): UUID =
         (hendelser("behov")
             .lastOrNull { it.hasNonNull("contextId") }
@@ -73,11 +82,5 @@ object TestRapidHelpers {
         val statuser: List<Oppgavestatus>,
         val type: String
     )
-
-    fun TestRapid.RapidInspector.løsning(behov: String): JsonNode =
-        hendelser("behov")
-            .filter { it.hasNonNull("@løsning") }
-            .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
-            .path("@løsning").path(behov)
 
 }
