@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-      - https://spesialist.dev.intern.nav.no
+    - https://spesialist.dev.intern.nav.no
   strategy:
     type: Recreate
   liveness:
@@ -91,3 +91,9 @@ spec:
       value: "true"
     - name: SPLEIS_API_URL
       value: "https://spleis-api.dev.intern.nav.no/"
+    - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
+      value: "https://digdir-krr-proxy.dev.intern.nav.no"
+    - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
+      value: "api://18e2c7bc-e47c-4918-96fc-97d8e0c52a76/.default"
+    - name: RESERVASJONSREGISTERET_API_ENABLED
+      value: "true"
