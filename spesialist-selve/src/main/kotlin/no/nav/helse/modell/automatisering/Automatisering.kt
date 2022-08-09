@@ -101,9 +101,6 @@ internal class Automatisering(
         )
     }
 
-    internal fun harBlittAutomatiskBehandlet(vedtaksperiodeId: UUID, hendelseId: UUID) =
-        automatiseringDao.hentAktivAutomatisering(vedtaksperiodeId, hendelseId)?.automatisert ?: false
-
     private fun valider(vararg valideringer: AutomatiseringValidering) =
         valideringer.toList()
             .filterNot(AutomatiseringValidering::erAautomatiserbar)

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import java.net.ServerSocket
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.spesialist.api.notat.NotatType
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class NotatApiTest: AbstractApiTest() {
-    private val httpPort = ServerSocket(0).use { it.localPort }
     private lateinit var notatMediator: NotatMediator
 
     private val vedtaksperiodeId1 = "8624dbae-0c42-445b-a869-a3023e6ca3f7"
@@ -34,7 +32,7 @@ internal class NotatApiTest: AbstractApiTest() {
 
     @BeforeAll
     fun setup() {
-        notatMediator = mockk<NotatMediator>(relaxed = true)
+        notatMediator = mockk(relaxed = true)
         setupServer {
             notaterApi(notatMediator)
         }

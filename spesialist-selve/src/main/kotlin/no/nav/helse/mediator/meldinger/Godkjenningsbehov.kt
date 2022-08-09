@@ -130,7 +130,6 @@ internal class Godkjenningsbehov(
             arbeidsgiverDao = arbeidsgiverDao
         ),
         KlargjørArbeidsforholdCommand(
-            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             arbeidsforholdDao = arbeidsforholdDao,
@@ -214,8 +213,6 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             personDao = personDao,
             risikovurderingDao = risikovurderingDao,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom,
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype,
             snapshotDao = snapshotDao,

@@ -8,7 +8,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
 
 internal class OppdaterArbeidsforholdCommand(
-    private val aktørId: String,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,

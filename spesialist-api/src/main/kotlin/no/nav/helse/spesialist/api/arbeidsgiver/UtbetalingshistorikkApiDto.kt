@@ -1,6 +1,5 @@
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.api.arbeidsgiver.UtbetalingshistorikkElementDto
-import no.nav.helse.spesialist.api.objectMapper
+package no.nav.helse.spesialist.api.arbeidsgiver
+
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -61,67 +60,4 @@ data class UtbetalingshistorikkElementApiDto(
         val begrunnelser: List<String>?
     )
 
-    companion object {
-        fun toSpeilMap(utbetalingshistorikk: List<JsonNode>): List<UtbetalingshistorikkElementApiDto> =
-            utbetalingshistorikk.map {
-                return@map objectMapper.treeToValue(it, UtbetalingshistorikkElementDto::class.java).let { element ->
-                    UtbetalingshistorikkElementApiDto(
-                        beregningId = element.beregningId,
-                        vilkårsgrunnlagHistorikkId = element.vilkårsgrunnlagHistorikkId,
-                        tidsstempel = element.tidsstempel,
-                        beregnettidslinje = element.beregnettidslinje.map { dag ->
-                            Sykdomstidslinjedag(
-                                dagen = dag.dagen,
-                                type = dag.type,
-                                kilde = Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
-                                grad = dag.grad
-                            )
-                        },
-                        hendelsetidslinje = element.hendelsetidslinje.map { dag ->
-                            Sykdomstidslinjedag(
-                                dagen = dag.dagen,
-                                type = dag.type,
-                                kilde = Sykdomstidslinjedag.Kilde(dag.kilde.type, dag.kilde.kildeId),
-                                grad = dag.grad
-                            )
-                        },
-                        utbetaling = Utbetaling(
-                            utbetalingstidslinje = element.utbetaling.utbetalingstidslinje.map { dag ->
-                                Utbetalingsdag(
-                                    type = dag.type,
-                                    inntekt = dag.inntekt,
-                                    dato = dag.dato,
-                                    utbetaling = dag.utbetaling,
-                                    personbeløp = dag.personbeløp,
-                                    arbeidsgiverbeløp = dag.arbeidsgiverbeløp,
-                                    refusjonsbeløp = dag.refusjonsbeløp,
-                                    grad = dag.grad,
-                                    totalGrad = dag.totalGrad,
-                                    begrunnelser = dag.begrunnelser
-                                )
-                            },
-                            type = element.utbetaling.type,
-                            status = element.utbetaling.status,
-                            gjenståendeSykedager = element.utbetaling.gjenståendeSykedager,
-                            forbrukteSykedager = element.utbetaling.forbrukteSykedager,
-                            arbeidsgiverNettoBeløp = element.utbetaling.arbeidsgiverNettoBeløp,
-                            arbeidsgiverFagsystemId = element.utbetaling.arbeidsgiverFagsystemId,
-                            personNettoBeløp = element.utbetaling.personNettoBeløp,
-                            personFagsystemId = element.utbetaling.personFagsystemId,
-                            maksdato = element.utbetaling.maksdato,
-                            beregningId = element.utbetaling.beregningId,
-                            tidsstempel = element.utbetaling.tidsstempel,
-                            vurdering = element.utbetaling.vurdering?.let { vurdering ->
-                                Utbetaling.Vurdering(
-                                    godkjent = vurdering.godkjent,
-                                    tidsstempel = vurdering.tidsstempel,
-                                    automatisk = vurdering.automatisk,
-                                    ident = vurdering.ident
-                                )
-                            }
-                        )
-                    )
-                }
-            }
-    }
 }

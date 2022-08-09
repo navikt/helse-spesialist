@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -21,8 +20,6 @@ internal class AutomatiseringCommandTest {
         private val utbetalingId = UUID.randomUUID()
         private const val fødselsnummer = "12345678910"
         private val hendelseId = UUID.randomUUID()
-        private val periodeFom = 1.januar
-        private val periodeTom = 31.januar
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)

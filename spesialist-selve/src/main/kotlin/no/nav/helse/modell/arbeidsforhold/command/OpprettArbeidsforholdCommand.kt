@@ -7,7 +7,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
 
 internal class OpprettArbeidsforholdCommand(
-    private val aktørId: String,
     private val fødselsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
     private val organisasjonsnummer: String

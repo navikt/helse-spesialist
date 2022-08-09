@@ -122,21 +122,6 @@ internal class VedtakDao(private val dataSource: DataSource) {
             }.asSingle)
         }
 
-    internal fun oppdaterInntektskilde(vedtaksperiodeId: UUID, inntektskilde: Inntektskilde) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                "UPDATE saksbehandleroppgavetype SET inntektskilde = :inntektskilde WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)"
-            session.run(
-                queryOf(
-                    statement, mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId,
-                        "inntektskilde" to inntektskilde.name
-                    )
-                ).asUpdate
-            )
-        }
-
     internal fun erAutomatiskGodkjent(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = """

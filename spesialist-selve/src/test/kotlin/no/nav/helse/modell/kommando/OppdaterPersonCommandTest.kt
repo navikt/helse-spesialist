@@ -4,28 +4,22 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class OppdaterPersonCommandTest {
     private companion object {
         private const val FNR = "12345678911"
-        private const val FORNAVN = "LITEN"
-        private const val MELLOMNAVN = "STOR"
-        private const val ETTERNAVN = "TRANFLASKE"
-        private val FØDSELSDATO = LocalDate.EPOCH
-        private val KJØNN = Kjønn.Ukjent
-        private val ADRESSEBESKYTTELSE = Adressebeskyttelse.StrengtFortrolig
     }
 
     private val dao = mockk<PersonDao>(relaxed = true)

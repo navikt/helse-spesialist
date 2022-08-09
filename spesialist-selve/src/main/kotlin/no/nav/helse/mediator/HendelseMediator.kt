@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
@@ -50,11 +49,9 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgave
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
@@ -76,7 +73,6 @@ internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
-    private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val arbeidsgiverDao: ArbeidsgiverDao = ArbeidsgiverDao(dataSource),
@@ -224,13 +220,6 @@ internal class HendelseMediator(
         Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).also { (key, message) ->
             rapidsConnection.publish(key, message.toJson())
         }
-    }
-
-    internal fun sendMeldingPåTopic(melding: JsonNode) {
-        val fnr = melding["fødselsnummer"].asText()
-        val rawJson = objectMapper.writeValueAsString(melding)
-        sikkerLogg.info("Manuell publisering av melding for fnr=${fnr}, melding=${rawJson}")
-        rapidsConnection.publish(fnr, rawJson)
     }
 
     fun adressebeskyttelseEndret(
@@ -460,8 +449,6 @@ internal class HendelseMediator(
     fun utbetalingEndret(
         fødselsnummer: String,
         organisasjonsnummer: String,
-        utbetalingId: UUID,
-        utbetalingType: Utbetalingtype,
         message: JsonMessage,
         context: MessageContext
     ) {

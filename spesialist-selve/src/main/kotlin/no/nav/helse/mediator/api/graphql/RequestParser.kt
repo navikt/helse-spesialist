@@ -7,7 +7,7 @@ import io.ktor.server.request.receiveText
 import no.nav.helse.objectMapper
 import java.io.IOException
 
-internal class RequestParser() : GraphQLRequestParser<ApplicationRequest> {
+internal class RequestParser : GraphQLRequestParser<ApplicationRequest> {
 
     override suspend fun parseRequest(request: ApplicationRequest): GraphQLServerRequest = try {
         val rawRequest = request.call.receiveText()

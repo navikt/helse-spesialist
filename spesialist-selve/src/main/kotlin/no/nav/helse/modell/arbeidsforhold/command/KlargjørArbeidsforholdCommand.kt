@@ -5,7 +5,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 
 internal class KlargjørArbeidsforholdCommand(
-    aktørId: String,
     fødselsnummer: String,
     organisasjonsnummer: String,
     arbeidsforholdDao: ArbeidsforholdDao,
@@ -13,13 +12,11 @@ internal class KlargjørArbeidsforholdCommand(
 ) : MacroCommand() {
     override val commands: List<Command> = listOf(
         OpprettArbeidsforholdCommand(
-            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             arbeidsforholdDao = arbeidsforholdDao,
             organisasjonsnummer = organisasjonsnummer
         ),
         OppdaterArbeidsforholdCommand(
-            aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             arbeidsforholdDao = arbeidsforholdDao,

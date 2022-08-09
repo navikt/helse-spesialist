@@ -291,13 +291,6 @@ ORDER BY ui.id, u.opprettet DESC
             session.run(queryOf(statement, utbetalingId, vedtaksperiodeId).asUpdate)
         }
 
-    fun harVærtTilGodkjenning(utbetalingId: UUID): Boolean =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "SELECT COUNT(1) FROM vedtaksperiode_utbetaling_id WHERE utbetaling_id = ?"
-            session.run(queryOf(statement, utbetalingId).map { it.int(1) > 0 }.asSingle)!!
-        }
-
     data class TidligereUtbetalingerForVedtaksperiodeDto(
         val utbetalingId: UUID,
         val id: Int,

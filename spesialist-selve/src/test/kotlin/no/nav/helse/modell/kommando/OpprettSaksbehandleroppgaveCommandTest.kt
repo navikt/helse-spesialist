@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.januar
 import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.modell.SnapshotDao
@@ -46,8 +45,6 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UTBETALING_ID,
         utbetalingtype = Utbetalingtype.UTBETALING,
-        periodeFom = 1.januar,
-        periodeTom = 31.januar,
         snapshotDao = snapshotDao,
     )
 

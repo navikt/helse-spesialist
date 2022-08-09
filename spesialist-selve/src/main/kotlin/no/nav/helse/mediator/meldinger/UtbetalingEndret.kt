@@ -14,7 +14,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.gyldigeStatuser
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -79,7 +78,6 @@ internal class UtbetalingEndret(
                         "@id", "fødselsnummer", "organisasjonsnummer",
                         "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId"
                     )
-                    it.requireAny("type", Utbetalingtype.gyldigeTyper.values())
                     it.requireAny("forrigeStatus", gyldigeStatuser.values())
                     it.requireAny("gjeldendeStatus", gyldigeStatuser.values())
                     it.require("@opprettet", JsonNode::asLocalDateTime)
@@ -95,7 +93,6 @@ internal class UtbetalingEndret(
             val utbetalingId = UUID.fromString(packet["utbetalingId"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
             val orgnummer = packet["organisasjonsnummer"].asText()
-            val utbetalingType : Utbetalingtype = Utbetalingtype.valueOf(packet["type"].asText())
             val gjeldendeStatus = packet["gjeldendeStatus"].asText()
 
             sikkerLogg.info(
@@ -104,7 +101,7 @@ internal class UtbetalingEndret(
                 keyValue("utbetalingId", utbetalingId),
                 keyValue("gjeldendeStatus", gjeldendeStatus)
             )
-            mediator.utbetalingEndret(fødselsnummer, orgnummer, utbetalingId, utbetalingType, packet, context)
+            mediator.utbetalingEndret(fødselsnummer, orgnummer, packet, context)
         }
     }
 }

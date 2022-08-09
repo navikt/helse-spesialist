@@ -10,9 +10,7 @@ import java.util.UUID
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
-import no.nav.helse.mediator.meldinger.utgående.VedtaksperiodeAvvist
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,7 +27,6 @@ internal class KlargjørPersonCommandTest {
         private const val MELLOMNAVN = "Mellomnavn"
         private const val ETTERNAVN = "Nordmann"
         private const val ENHET_OSLO = "0301"
-        private const val ENHET_UTLAND = "2101"
         private val FØDSELSDATO = LocalDate.EPOCH
         private val KJØNN = Kjønn.Kvinne
         private val ADRESSEBESKYTTELSE = Adressebeskyttelse.Ugradert
@@ -125,14 +122,6 @@ internal class KlargjørPersonCommandTest {
         assertTrue(command.execute(context))
         assertEquals(0, context.meldinger().size)
     }
-
-    private fun vedtaksperiodeAvvist() = VedtaksperiodeAvvist(
-        UUID.randomUUID(),
-        "",
-        emptyList(),
-        Periodetype.FØRSTEGANGSBEHANDLING,
-        mockk(relaxed = true)
-    )
 
     private fun assertHarBehov(forventetBehov: List<String>) {
         assertTrue(context.harBehov())

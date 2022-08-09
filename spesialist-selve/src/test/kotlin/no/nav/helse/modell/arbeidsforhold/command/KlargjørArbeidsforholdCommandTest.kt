@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 
 internal class KlargjørArbeidsforholdCommandTest {
     private companion object {
-        const val AKTØR_ID = "00000123123123"
         const val FØDSELSNUMMER = "12345678910"
         const val ORGANISASJONSNUMMER = "987654321"
         const val PERSONID = 1L
@@ -32,7 +31,6 @@ internal class KlargjørArbeidsforholdCommandTest {
 
     private lateinit var context: CommandContext
     private val command = KlargjørArbeidsforholdCommand(
-        aktørId = AKTØR_ID,
         fødselsnummer = FØDSELSNUMMER,
         organisasjonsnummer = ORGANISASJONSNUMMER,
         arbeidsforholdDao = arbeidsforholdDao,
@@ -126,7 +124,6 @@ internal class KlargjørArbeidsforholdCommandTest {
     @Test
     fun `oppdaterer arbeidsforhold for førstegangsbehandling som er oppdatert for en dag siden eller mer`() {
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
-            aktørId = AKTØR_ID,
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
             arbeidsforholdDao = arbeidsforholdDao,
@@ -154,7 +151,6 @@ internal class KlargjørArbeidsforholdCommandTest {
     @Test
     fun `oppdaterer ikke arbeidsforhold for førstegangsbehandling som er oppdatert for mindre enn en dag siden`() {
         val førstegangsCommand = KlargjørArbeidsforholdCommand(
-            aktørId = AKTØR_ID,
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = ORGANISASJONSNUMMER,
             arbeidsforholdDao = arbeidsforholdDao,

@@ -45,10 +45,6 @@ internal class PersonApiTest {
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
-    private val FØDSELSNUMMER = "20046913337"
-    private val AKTØRID = "01017011111111"
-    private val KODE7_SAKSBEHANDLER_GROUP = UUID.randomUUID()
-    private val SKJERMEDE_PERSONER_GROUP = UUID.randomUUID()
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -22,8 +21,6 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val hendelseId: UUID,
     private val personDao: PersonDao,
     private val risikovurderingDao: RisikovurderingDao,
-    private val periodeFom: LocalDate,
-    private val periodeTom: LocalDate,
     private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype,
     private val snapshotDao: SnapshotDao,

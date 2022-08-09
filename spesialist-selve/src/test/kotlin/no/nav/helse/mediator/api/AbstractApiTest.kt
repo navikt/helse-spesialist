@@ -41,7 +41,7 @@ abstract class AbstractApiTest {
     companion object {
         private val requiredGroup: UUID = UUID.randomUUID()
         internal val clientId = "client_id"
-        private val epostadresse = "sara.saksbehandler@nav.no";
+        private val epostadresse = "sara.saksbehandler@nav.no"
         internal val issuer = "https://jwt-provider-domain"
         internal val jwtStub = JwtStub()
         internal val azureAdConfig =

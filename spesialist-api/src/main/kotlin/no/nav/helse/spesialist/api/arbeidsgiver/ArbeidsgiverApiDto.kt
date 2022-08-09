@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.arbeidsgiver
 
-import UtbetalingshistorikkElementApiDto
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDto
 import java.time.LocalDate

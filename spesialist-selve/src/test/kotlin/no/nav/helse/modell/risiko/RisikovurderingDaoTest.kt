@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -102,11 +101,11 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             forventetData: JsonNode,
             forventetOpprettet: LocalDateTime
         ) {
-            Assertions.assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
-            Assertions.assertEquals(forventetKanGodkjennesAutomatisk, kanGodkjennesAutomatisk)
-            Assertions.assertEquals(forventetKreverSupersaksbehandler, kreverSupersaksbehandler)
-            Assertions.assertEquals(forventetData, data)
-            Assertions.assertEquals(forventetOpprettet, opprettet)
+            assertEquals(forventetVedtaksperiodeId, vedtaksperiodeId)
+            assertEquals(forventetKanGodkjennesAutomatisk, kanGodkjennesAutomatisk)
+            assertEquals(forventetKreverSupersaksbehandler, kreverSupersaksbehandler)
+            assertEquals(forventetData, data)
+            assertEquals(forventetOpprettet, opprettet)
         }
     }
 }
