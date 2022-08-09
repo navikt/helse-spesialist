@@ -5,6 +5,7 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
@@ -31,6 +32,7 @@ class PersonQuery(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val snapshotMediator: SnapshotMediator,
+    private val reservasjonClient: ReservasjonClient,
 ) : AbstractPersonQuery(personApiDao, egenAnsattDao) {
 
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -72,6 +74,7 @@ class PersonQuery(
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
+                reservasjonClient = reservasjonClient,
             )
         }
 

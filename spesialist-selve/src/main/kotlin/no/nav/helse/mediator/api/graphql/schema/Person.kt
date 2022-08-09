@@ -2,7 +2,8 @@ package no.nav.helse.mediator.api.graphql.schema
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.format.DateTimeFormatter
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import kotlinx.coroutines.runBlocking
+import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGhostPeriode
@@ -10,8 +11,9 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
-import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -36,13 +38,19 @@ data class Saksbehandler(
     val ident: String?
 )
 
+data class Reservasjon(
+    val kanVarsles: Boolean,
+    val reservert: Boolean,
+)
+
 data class Personinfo(
     val fornavn: String,
     val mellomnavn: String?,
     val etternavn: String,
     val fodselsdato: LocalDate?,
     val kjonn: Kjonn?,
-    val adressebeskyttelse: Adressebeskyttelse
+    val adressebeskyttelse: Adressebeskyttelse,
+    val reservasjon: Reservasjon?
 )
 
 data class Enhet(
@@ -69,6 +77,7 @@ data class Person(
     private val oppgaveDao: OppgaveDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
+    private val reservasjonClient: ReservasjonClient,
 ) {
     fun versjon(): Int = snapshot.versjon
 
@@ -89,7 +98,10 @@ data class Person(
             Kjønn.Ukjent -> Kjonn.Ukjent
             else -> null
         },
-        adressebeskyttelse = personinfo.adressebeskyttelse
+        adressebeskyttelse = personinfo.adressebeskyttelse,
+        reservasjon = runBlocking {
+            reservasjonClient.hentReservasjonsstatus(snapshot.fodselsnummer)
+        }
     )
 
     fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }

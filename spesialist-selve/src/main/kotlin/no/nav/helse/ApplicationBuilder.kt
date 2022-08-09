@@ -39,6 +39,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.mediator.api.annulleringApi
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SnapshotClient
@@ -117,7 +118,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             )
         }
     }
-    private val spleisClient = HttpClient(Apache) {
+    private val httpClient = HttpClient(Apache) {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, JacksonConverter())
         }
@@ -134,10 +135,16 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         httpClient = azureAdClient
     )
     private val snapshotClient = SnapshotClient(
-        httpClient = spleisClient,
+        httpClient = httpClient,
         accessTokenClient = accessTokenClient,
         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
         spleisClientId = env.getValue("SPLEIS_CLIENT_ID")
+    )
+    private val reservasjonClient = ReservasjonClient(
+        httpClient = httpClient,
+        accessTokenClient = accessTokenClient,
+        apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+        scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
     )
     private val azureConfig = AzureAdAppConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
@@ -247,6 +254,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
                 beslutterGruppeId = env.beslutterGruppeId(),
                 snapshotMediator = snapshotMediator,
+                reservasjonClient = reservasjonClient,
             )
             routing {
                 authenticate("oidc") {

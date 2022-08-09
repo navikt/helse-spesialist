@@ -108,6 +108,7 @@ class GraphQLApiTest : AbstractApiTest() {
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
             snapshotMediator = snapshotMediator,
+            reservasjonClient = mockk(relaxed = true),
         ).build()
 
         server = GraphQLServer(
@@ -207,7 +208,7 @@ class GraphQLApiTest : AbstractApiTest() {
         etternavn = "Skywalker",
         fødselsdato = LocalDate.EPOCH,
         kjønn = Kjønn.Mann,
-        adressebeskyttelse = Adressebeskyttelse.Ugradert
+        adressebeskyttelse = Adressebeskyttelse.Ugradert,
     )
 
     private fun enPeriode() = GraphQLBeregnetPeriode(

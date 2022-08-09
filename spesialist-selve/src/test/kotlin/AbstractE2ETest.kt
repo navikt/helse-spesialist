@@ -41,6 +41,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.GodkjenningDTO
+import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.mediator.api.graphql.PersonQuery
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
@@ -162,7 +163,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshotClient = snapshotClient,
     )
 
-
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
 
     internal val personQuery = PersonQuery(
@@ -176,7 +176,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveDao = oppgaveDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
-        snapshotMediator = snapshotMediator
+        snapshotMediator = snapshotMediator,
+        reservasjonClient = mockk(relaxed = true),
     )
 
     @BeforeEach

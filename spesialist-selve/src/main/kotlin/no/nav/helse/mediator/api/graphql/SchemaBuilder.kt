@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.toSchema
 import graphql.schema.GraphQLSchema
+import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -29,6 +30,7 @@ internal class SchemaBuilder(
     val periodehistorikkDao: PeriodehistorikkDao,
     val snapshotMediator: SnapshotMediator,
     val notatDao: NotatDao,
+    val reservasjonClient: ReservasjonClient,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
@@ -53,6 +55,7 @@ internal class SchemaBuilder(
                         periodehistorikkDao = periodehistorikkDao,
                         snapshotMediator = snapshotMediator,
                         notatDao = notatDao,
+                        reservasjonClient = reservasjonClient,
                     )
                 ),
                 TopLevelObject(

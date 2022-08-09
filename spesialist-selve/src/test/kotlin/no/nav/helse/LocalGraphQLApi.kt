@@ -14,6 +14,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.Toggle
+import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.mediator.api.graphQLApi
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
@@ -68,6 +69,7 @@ fun main() = runBlocking {
         val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
         val notatDao = mockk<NotatDao>(relaxed = true)
+        val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
 
         every { snapshotDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo to enPerson)
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
@@ -105,6 +107,7 @@ fun main() = runBlocking {
             beslutterGruppeId = UUID.randomUUID(),
             notatDao = notatDao,
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
+            reservasjonClient = reservasjonClient,
         )
     }
 }

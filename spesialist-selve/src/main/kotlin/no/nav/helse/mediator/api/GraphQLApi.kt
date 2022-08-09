@@ -49,6 +49,7 @@ internal fun Application.graphQLApi(
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
+    reservasjonClient: ReservasjonClient,
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -63,6 +64,7 @@ internal fun Application.graphQLApi(
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
         snapshotMediator = snapshotMediator,
+        reservasjonClient = reservasjonClient,
     ).build()
 
     val server = GraphQLServer(
