@@ -51,13 +51,23 @@ internal class Automatisering(
     ) {
         val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
 
+        val utfallslogger = { tekst: String ->
+            sikkerLogg.info(
+                tekst,
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("utbetalingtype", utbetalingtype),
+                problemer
+            )
+        }
+
         when {
             utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() -> {
-                if (problemer.isNotEmpty()) sikkerLogg.info("automatiserer ikke {} {} {} fordi {}", keyValue("utbetalingtype", utbetalingtype), keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("utbetalingId", utbetalingId), problemer)
+                if (problemer.isNotEmpty()) utfallslogger("Automatiserer ikke {} ({}, {}) fordi: {}")
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             }
             plukkTilManuell() -> {
-                sikkerLogg.info("automatiserer ikke, plukket ut til stikkprøve {} {} {}", keyValue("utbetalingtype", utbetalingtype), keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("utbetalingId", utbetalingId))
+                utfallslogger("Automatiserer ikke {}, plukket ut til stikkprøve ({}, {})")
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
                 logger.info(
                     "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
@@ -65,7 +75,7 @@ internal class Automatisering(
                 )
             }
             else -> {
-                sikkerLogg.info("automatiserer {} {} {}", keyValue("utbetalingtype", utbetalingtype), keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("utbetalingId", utbetalingId))
+                utfallslogger("Automatiserer {} ({}, {})")
                 onAutomatiserbar()
                 automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
             }
