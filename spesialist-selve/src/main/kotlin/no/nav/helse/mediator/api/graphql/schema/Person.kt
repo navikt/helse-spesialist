@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api.graphql.schema
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.runBlocking
@@ -38,6 +39,7 @@ data class Saksbehandler(
     val ident: String?
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Reservasjon(
     val kanVarsles: Boolean,
     val reservert: Boolean,
