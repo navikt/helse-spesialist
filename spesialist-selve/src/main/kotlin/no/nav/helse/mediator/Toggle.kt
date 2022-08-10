@@ -7,5 +7,4 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object GraphQLApi : Toggle("GRAPHQL_ENABLED")
     object GraphQLPlayground : Toggle("GRAPHQL_PLAYGROUND_ENABLED")
-    object Reservasjonsregisteret : Toggle("RESERVASJONSREGISTERET_API_ENABLED")
 }

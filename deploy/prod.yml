@@ -98,4 +98,4 @@ spec:
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
       value: "https://digdir-krr-proxy.intern.nav.no"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
-      value: "api://18e2c7bc-e47c-4918-96fc-97d8e0c52a76/.default"
+      value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
