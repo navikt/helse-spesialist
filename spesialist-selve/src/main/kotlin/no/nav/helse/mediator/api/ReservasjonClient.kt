@@ -6,6 +6,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.prometheus.client.Histogram
 import java.util.UUID
 import no.nav.helse.AccessTokenClient
 import no.nav.helse.mediator.api.graphql.schema.Reservasjon
@@ -20,7 +21,15 @@ class ReservasjonClient(
 ) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
+    companion object {
+        private val responstidReservasjonsstatus: Histogram = Histogram.build()
+            .name("responstid_hent_reservasjonsstatus")
+            .help("Responstid for kall til digdir-krr-proxy")
+            .register()
+    }
+
     internal suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
+        val timer = responstidReservasjonsstatus.startTimer()
         try {
             val accessToken = accessTokenClient.hentAccessToken(scope)
             val callId = UUID.randomUUID().toString()
@@ -33,6 +42,8 @@ class ReservasjonClient(
             }.body()
         } catch (e: Exception) {
             sikkerLogg.error("Feil under kall til Kontakt- og reservasjonsregisteret:", e)
+        } finally {
+            timer.observeDuration()
         }
 
         return null
