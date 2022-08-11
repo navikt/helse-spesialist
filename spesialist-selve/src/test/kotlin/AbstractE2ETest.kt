@@ -41,7 +41,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.mediator.api.graphql.PersonQuery
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
@@ -56,7 +55,6 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
@@ -96,7 +94,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             .registerModule(JavaTimeModule())
     }
 
-    private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
@@ -142,7 +139,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
             automatiseringDao = automatiseringDao,
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
             personDao = personDao,

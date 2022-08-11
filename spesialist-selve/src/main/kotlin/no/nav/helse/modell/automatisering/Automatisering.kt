@@ -7,7 +7,6 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.delvisRefusjon
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
@@ -22,7 +21,6 @@ internal class Automatisering(
     private val warningDao: WarningDao,
     private val risikovurderingDao: RisikovurderingDao,
     private val automatiseringDao: AutomatiseringDao,
-    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val vergemålDao: VergemålDao,
@@ -66,6 +64,7 @@ internal class Automatisering(
                 if (problemer.isNotEmpty()) utfallslogger("Automatiserer ikke {} ({}, {}) fordi: {}")
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             }
+
             plukkTilManuell() -> {
                 utfallslogger("Automatiserer ikke {}, plukket ut til stikkprøve ({}, {})")
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
@@ -74,6 +73,7 @@ internal class Automatisering(
                     keyValue("vedtaksperiodeId", vedtaksperiodeId)
                 )
             }
+
             else -> {
                 utfallslogger("Automatiserer {} ({}, {})")
                 onAutomatiserbar()
@@ -87,7 +87,6 @@ internal class Automatisering(
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
         val warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId)
-        val erDigital = digitalKontaktinformasjonDao.erDigital(fødselsnummer)
         val erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
@@ -98,7 +97,6 @@ internal class Automatisering(
         return valider(
             risikovurdering,
             validering("Har varsler") { warnings.isEmpty() },
-            validering("Bruker er reservert eller mangler oppdatert samtykke i DKIF") { erDigital ?: false },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
                 antallÅpneGosysoppgaver?.let { it == 0 } ?: false
             },

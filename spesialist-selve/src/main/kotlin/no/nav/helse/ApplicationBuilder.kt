@@ -57,7 +57,6 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
@@ -166,7 +165,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
     private val tildelingDao = TildelingDao(dataSource)
-    private val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val overstyringApiDao = OverstyringApiDao(dataSource)
     private val reservasjonDao = ReservasjonDao(dataSource)
@@ -291,7 +289,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         warningDao = warningDao,
         risikovurderingDao = risikovurderingDao,
         automatiseringDao = automatiseringDao,
-        digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
         åpneGosysOppgaverDao = åpneGosysOppgaverDao,
         egenAnsattDao = egenAnsattDao,
         personDao = personDao,

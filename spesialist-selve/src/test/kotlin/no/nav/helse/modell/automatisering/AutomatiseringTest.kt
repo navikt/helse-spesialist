@@ -48,7 +48,6 @@ internal class AutomatiseringTest {
             warningDao = warningDaoMock,
             risikovurderingDao = risikovurderingDaoMock,
             automatiseringDao = automatiseringDaoMock,
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDaoMock,
             åpneGosysOppgaverDao = åpneGosysOppgaverDaoMock,
             egenAnsattDao = egenAnsattDao,
             personDao = personDaoMock,
@@ -110,18 +109,6 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
-    }
-
-    @Test
-    fun `vedtaksperiode hvor bruker ikke er digital er ikke automatiserbar`() {
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns false
-        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
-    }
-
-    @Test
-    fun `vedtaksperiode med ukjent dkif-status er ikke automatiserbar`() {
-        every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns null
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), UUID.randomUUID(), Utbetalingtype.UTBETALING) { fail("Denne skal ikke kalles") }
     }
 
