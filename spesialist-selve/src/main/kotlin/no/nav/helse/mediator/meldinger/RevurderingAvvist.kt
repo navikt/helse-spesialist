@@ -1,16 +1,19 @@
 package no.nav.helse.mediator.meldinger
 
+import java.util.UUID
+import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
-import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.spesialist.api.abonnement.RevurderingAvvistPayload
-import no.nav.helse.rapids_rivers.*
-import no.nav.helse.rapids_rivers.River.PacketListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class RevurderingAvvist(
     override val id: UUID,
@@ -18,7 +21,7 @@ internal class RevurderingAvvist(
     private val errors: List<String>,
     private val json: String,
     private val opptegnelseDao: OpptegnelseDao
-) : Hendelse, Command {
+) : Hendelse {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID? = null
