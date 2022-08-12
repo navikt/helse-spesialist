@@ -96,7 +96,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
-    private val egenAnsattDao = EgenAnsattDao(dataSource)
+    protected val egenAnsattDao = EgenAnsattDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
 
     private val varselDao = VarselDao(dataSource)

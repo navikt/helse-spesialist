@@ -2,40 +2,38 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import io.mockk.every
+import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
-import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-
-internal class InnhentSkjermetinfoTest : AbstractE2ETest() {
+internal class EndretSkjermetinfoTest : AbstractE2ETest() {
 
     @Test
     fun `Ignorerer hendelsen for ukjente personer`() {
-        sendInnhentSkjermetinfo()
-        assertEquals(0, testRapid.inspektør.behov().size)
+        sendEndretSkjermetinfo(true)
+        assertNull(egenAnsattDao.erEgenAnsatt(FØDSELSNUMMER))
     }
 
     @Test
     fun `Etterspør skjermetinfo for kjente personer hvor skjermetinfo mangler i basen`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UUID.randomUUID())
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsforholdløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
 
-        testRapid.reset()
-        sendInnhentSkjermetinfo()
-        assertEquals(1, testRapid.inspektør.behov().size)
+        sendEndretSkjermetinfo(false)
+        assertFalse(egenAnsattDao.erEgenAnsatt(FØDSELSNUMMER)!!)
+        sendEndretSkjermetinfo(true)
+        assertTrue(egenAnsattDao.erEgenAnsatt(FØDSELSNUMMER)!!)
     }
 
     @BeforeEach
@@ -43,12 +41,14 @@ internal class InnhentSkjermetinfoTest : AbstractE2ETest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot()
     }
 
-    private fun sendInnhentSkjermetinfo() {
+    private fun sendEndretSkjermetinfo(skjermet: Boolean) {
         @Language("JSON")
         val json = """{
-          "@event_name": "innhent_skjermetinfo",
+          "@event_name": "endret_skjermetinfo",
           "@id": "${UUID.randomUUID()}",
-          "fødselsnummer": "$FØDSELSNUMMER"
+          "fødselsnummer": "$FØDSELSNUMMER",
+          "skjermet": "$skjermet",
+          "@opprettet": "${LocalDateTime.now()}"
         }"""
         testRapid.sendTestMessage(json)
     }
