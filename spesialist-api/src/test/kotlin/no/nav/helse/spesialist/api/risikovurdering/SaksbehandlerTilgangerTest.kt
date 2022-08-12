@@ -10,6 +10,7 @@ internal class SaksbehandlerTilgangerTest {
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
     private val riskSaksbehandlergruppe = UUID.randomUUID()
     private val beslutterSaksbehandlergruppe = UUID.randomUUID()
+    private val skjermedePersonerSaksbehandlergruppe = UUID.randomUUID()
 
     @Test
     fun `uten gruppetilhørighet har man ingen tilganger`() {
@@ -17,11 +18,13 @@ internal class SaksbehandlerTilgangerTest {
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
         )
-        assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
 
     @Test
@@ -30,11 +33,13 @@ internal class SaksbehandlerTilgangerTest {
             gruppetilganger = listOf(kode7Saksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
         )
-        assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
 
     @Test
@@ -43,11 +48,13 @@ internal class SaksbehandlerTilgangerTest {
             gruppetilganger = listOf(riskSaksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
         )
-        assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
 
     @Test
@@ -56,23 +63,47 @@ internal class SaksbehandlerTilgangerTest {
             gruppetilganger = listOf(beslutterSaksbehandlergruppe),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
         )
-        assertFalse(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
         assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
+    }
+
+    @Test
+    fun `med skjermede personer-gruppetilgang skal man kunne løse skjermede personer-oppgaver`() {
+        val saksbehandlerTilganger = SaksbehandlerTilganger(
+            gruppetilganger = listOf(skjermedePersonerSaksbehandlergruppe),
+            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+            riskSaksbehandlergruppe = riskSaksbehandlergruppe,
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+        )
+        assertFalse(saksbehandlerTilganger.harTilgangTilKode7())
+        assertFalse(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
+        assertFalse(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
 
     @Test
     fun `med alle gruppetilganger skal man kunne løse alle oppgaver`() {
         val saksbehandlerTilganger = SaksbehandlerTilganger(
-            gruppetilganger = listOf(riskSaksbehandlergruppe, kode7Saksbehandlergruppe, beslutterSaksbehandlergruppe),
+            gruppetilganger = listOf(
+                riskSaksbehandlergruppe,
+                kode7Saksbehandlergruppe,
+                beslutterSaksbehandlergruppe,
+                skjermedePersonerSaksbehandlergruppe
+            ),
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
             riskSaksbehandlergruppe = riskSaksbehandlergruppe,
-            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe
+            beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
         )
-        assertTrue(saksbehandlerTilganger.harTilgangTilKode7Oppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilKode7())
         assertTrue(saksbehandlerTilganger.harTilgangTilRiskOppgaver())
         assertTrue(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver())
+        assertTrue(saksbehandlerTilganger.harTilgangTilSkjermedePersoner())
     }
 }

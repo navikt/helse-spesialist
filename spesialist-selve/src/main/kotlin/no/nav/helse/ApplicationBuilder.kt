@@ -248,9 +248,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 oppgaveDao = oppgaveDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
+                reservasjonClient = reservasjonClient,
                 skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
                 kode7Saksbehandlergruppe = env.kode7GruppeId(),
                 beslutterGruppeId = env.beslutterGruppeId(),
+                riskGruppeId = env.riskGruppeId(),
                 snapshotMediator = snapshotMediator,
                 reservasjonClient = reservasjonClient,
             )
@@ -261,6 +263,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         riskSupersaksbehandlergruppe = env.riskGruppeId(),
                         kode7Saksbehandlergruppe = env.kode7GruppeId(),
                         beslutterSaksbehandlergruppe = env.beslutterGruppeId(),
+                        skjermedePersonerSaksbehandlergruppe = env.skjermedePersonerGruppeId(),
                     )
                     personApi(
                         hendelseMediator = hendelseMediator,

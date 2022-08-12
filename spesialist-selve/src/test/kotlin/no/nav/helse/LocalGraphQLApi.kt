@@ -102,10 +102,12 @@ fun main() = runBlocking {
             utbetalingDao = utbetalingDao,
             oppgaveDao = oppgaveDao,
             periodehistorikkDao = periodehistorikkDao,
+            notatDao = notatDao,
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             beslutterGruppeId = UUID.randomUUID(),
-            notatDao = notatDao,
+            riskGruppeId = UUID.randomUUID(),
+            reservasjonClient = reservasjonClient,
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
             reservasjonClient = reservasjonClient,
         )

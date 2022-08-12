@@ -30,7 +30,8 @@ import no.nav.helse.mediator.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.mediator.api.graphql.schema.Dagoverstyring
 import no.nav.helse.mediator.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.mediator.api.graphql.schema.Person
-import no.nav.helse.spesialist.api.oppgave.OppgaveDto
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,7 +41,7 @@ import org.junit.jupiter.api.Test
 
 internal class OverstyringE2ETest : AbstractE2ETest() {
 
-    private fun List<OppgaveDto>.ingenOppgaveMedId(id: String) = none { it.oppgavereferanse == id }
+    private fun List<OppgaveForOversiktsvisningDto>.ingenOppgaveMedId(id: String) = none { it.oppgavereferanse == id }
     private fun assertIngenOppgaver(id: String) {
         oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).ingenOppgaveMedId(id)
     }
@@ -168,9 +169,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             LocalDate.of(2018, 1, 31)
         )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
-        every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeKode7") } returns true
-        every { dataFetchingEnvironment.graphQlContext.get<Boolean>("kanSeSkjermedePersoner") } returns true
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
+        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>("tilganger") } returns saksbehandlerTilganger
 
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(

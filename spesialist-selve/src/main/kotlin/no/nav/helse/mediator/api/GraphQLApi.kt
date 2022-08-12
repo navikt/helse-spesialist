@@ -45,9 +45,11 @@ internal fun Application.graphQLApi(
     oppgaveDao: OppgaveDao,
     periodehistorikkDao: PeriodehistorikkDao,
     notatDao: NotatDao,
+    reservasjonClient: ReservasjonClient,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
+    riskGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
     reservasjonClient: ReservasjonClient,
 ) {
@@ -63,13 +65,19 @@ internal fun Application.graphQLApi(
         oppgaveDao = oppgaveDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
+        reservasjonClient = reservasjonClient,
         snapshotMediator = snapshotMediator,
         reservasjonClient = reservasjonClient,
     ).build()
 
     val server = GraphQLServer(
         requestParser = RequestParser(),
-        contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId, beslutterGruppeId),
+        contextFactory = ContextFactory(
+            kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
+            skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
+            beslutterSaksbehandlergruppe = beslutterGruppeId,
+            riskSaksbehandlergruppe = riskGruppeId,
+        ),
         requestHandler = GraphQLRequestHandler(
             GraphQL.newGraphQL(schema).build()
         )

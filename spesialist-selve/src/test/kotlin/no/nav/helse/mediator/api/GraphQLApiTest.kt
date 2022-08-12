@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.ContextFactory
 import no.nav.helse.mediator.api.graphql.RequestParser
 import no.nav.helse.mediator.api.graphql.SchemaBuilder
-import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.api.graphql.SnapshotMediator
 import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
 import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
@@ -50,7 +49,6 @@ import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.notat.NotatDao
@@ -71,7 +69,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 
 @TestInstance(Lifecycle.PER_CLASS)
 class GraphQLApiTest : AbstractApiTest() {
-    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
     private val personApiDao = mockk<PersonApiDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>()
@@ -84,17 +81,17 @@ class GraphQLApiTest : AbstractApiTest() {
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatDao = mockk<NotatDao>(relaxed = true)
 
-    private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
 
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
     private val skjermedePersonerGruppeId = UUID.randomUUID()
     private val beslutterGruppeId = UUID.randomUUID()
+    private val riskSaksbehandlergruppe = UUID.randomUUID()
 
     private lateinit var server: GraphQLServer<ApplicationRequest>
 
     @BeforeAll
-    private fun setup() {
+    fun setup() {
         val schema = SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattDao = egenAnsattDao,
@@ -113,7 +110,7 @@ class GraphQLApiTest : AbstractApiTest() {
 
         server = GraphQLServer(
             requestParser = RequestParser(),
-            contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId, beslutterGruppeId),
+            contextFactory = ContextFactory(kode7Saksbehandlergruppe, skjermedePersonerGruppeId, beslutterGruppeId, riskSaksbehandlergruppe),
             requestHandler = GraphQLRequestHandler(
                 GraphQL.newGraphQL(schema).build()
             )

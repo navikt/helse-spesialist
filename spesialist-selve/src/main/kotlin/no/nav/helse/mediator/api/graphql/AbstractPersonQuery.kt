@@ -5,6 +5,7 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
 
@@ -14,11 +15,12 @@ abstract class AbstractPersonQuery(
 ) : Query {
 
     protected fun isForbidden(fnr: String, env: DataFetchingEnvironment): Boolean {
-        val kanSeSkjermede = env.graphQlContext.get<Boolean>("kanSeSkjermedePersoner")
+        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
+        val kanSeSkjermede = tilganger.harTilgangTilSkjermedePersoner()
         val erSkjermet = egenAnsattDao.erEgenAnsatt(fnr) ?: return true
         if (erSkjermet && !kanSeSkjermede) return true
 
-        val kanSeKode7 = env.graphQlContext.get<Boolean>("kanSeKode7")
+        val kanSeKode7 = tilganger.harTilgangTilKode7()
         val erFortrolig = personApiDao.personHarAdressebeskyttelse(fnr, Adressebeskyttelse.Fortrolig)
         val erUgradert = personApiDao.personHarAdressebeskyttelse(fnr, Adressebeskyttelse.Ugradert)
         return (!kanSeKode7 && erFortrolig) || (!erFortrolig && !erUgradert)

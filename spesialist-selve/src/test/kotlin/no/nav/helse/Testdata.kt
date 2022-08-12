@@ -37,7 +37,8 @@ object Testdata {
             gruppetilganger = emptyList(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             riskSaksbehandlergruppe = UUID.randomUUID(),
-            beslutterSaksbehandlergruppe = UUID.randomUUID()
+            beslutterSaksbehandlergruppe = UUID.randomUUID(),
+            skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
         )
     internal val UTBETALING_ID = UUID.randomUUID()
     internal val UTBETALING_ID2 = UUID.randomUUID()
