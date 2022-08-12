@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.oppgave
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Row
@@ -19,14 +20,76 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
 
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
+
+    fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT id, er_beslutter_oppgave, er_retur_oppgave, totrinnsvurdering, tidligere_saksbehandler_oid
+            FROM oppgave
+            WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                AND status = 'AvventerSaksbehandler'::oppgavestatus
+        """.trimIndent()
+        return query.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) {
+            OppgaveForPeriodevisningDto(
+                id = it.string("id"),
+                erBeslutter = it.boolean("er_beslutter_oppgave"),
+                erRetur = it.boolean("er_retur_oppgave"),
+                trengerTotrinnsvurdering = it.boolean("trengerTotrinnsvurdering"),
+                tidligereSaksbehandler = it.string("tidligere_saksbehandler_oid"),
+            )
+        }
+    }
+
     fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA =
                 if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
             val gyldigeAdressebeskyttelser =
-                if (saksbehandlerTilganger.harTilgangTilKode7Oppgaver()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
+                if (saksbehandlerTilganger.harTilgangTilKode7()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
                 else "AND pi.adressebeskyttelse = 'Ugradert'"
-            val eventuellEkskluderingAvBeslutterOppgaver = if(saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
+            val eventuellEkskluderingAvBeslutterOppgaver =
+                if (saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
+
+            @Language("PostgreSQL")
+            val query = """
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutter_oppgave, o.er_retur_oppgave, o.totrinnsvurdering, o.tidligere_saksbehandler_oid , s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+                   pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
+                   (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
+            FROM oppgave o
+                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                INNER JOIN person p ON v.person_ref = p.id
+                INNER JOIN person_info pi ON p.info_ref = pi.id
+                LEFT JOIN enhet e ON p.enhet_ref = e.id
+                LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
+                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+            WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+                $eventuellEkskluderingAvRiskQA
+                $gyldigeAdressebeskyttelser
+                $eventuellEkskluderingAvBeslutterOppgaver
+            ORDER BY
+                CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
+                CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
+                CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
+                opprettet ASC
+                ;
+            """
+            session.run(
+                queryOf(query)
+                    .map(::saksbehandleroppgaveDto)
+                    .asList
+            )
+        }
+
+    fun finnOppgaver(tilganger: SaksbehandlerTilganger, fra: LocalDateTime, antall: Int) =
+        sessionOf(dataSource).use { session ->
+            val eventuellEkskluderingAvRiskQA =
+                if (tilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
+            val gyldigeAdressebeskyttelser =
+                if (tilganger.harTilgangTilKode7()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
+                else "AND pi.adressebeskyttelse = 'Ugradert'"
+            val eventuellEkskluderingAvBeslutterOppgaver =
+                if (tilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
 
             @Language("PostgreSQL")
             val query = """
@@ -309,7 +372,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnNyesteVedtaksperiodeIdMedStatus(fødselsnummer: String, organisasjonsnummer: String, førsteDag: LocalDate, oppgavestatus: Oppgavestatus): NyesteVedtaksperiodeTotrinn? =
+    fun finnNyesteVedtaksperiodeIdMedStatus(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        førsteDag: LocalDate,
+        oppgavestatus: Oppgavestatus
+    ): NyesteVedtaksperiodeTotrinn? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
@@ -345,7 +413,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(fødselsnummer: String, organisasjonsnummer: String, skjæringstidspunkt: LocalDate, oppgavestatus: Oppgavestatus): NyesteVedtaksperiodeTotrinn? =
+    fun finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        skjæringstidspunkt: LocalDate,
+        oppgavestatus: Oppgavestatus
+    ): NyesteVedtaksperiodeTotrinn? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
@@ -386,8 +459,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         val fom: LocalDate
     ) {
         companion object {
-            fun nyestePeriode(first: NyesteVedtaksperiodeTotrinn, second: NyesteVedtaksperiodeTotrinn): NyesteVedtaksperiodeTotrinn =
-                if(first.erEtter(second)) first else second
+            fun nyestePeriode(
+                first: NyesteVedtaksperiodeTotrinn,
+                second: NyesteVedtaksperiodeTotrinn
+            ): NyesteVedtaksperiodeTotrinn =
+                if (first.erEtter(second)) first else second
 
             fun NyesteVedtaksperiodeTotrinn.erEtter(other: NyesteVedtaksperiodeTotrinn): Boolean =
                 fom.isAfter(other.fom)
@@ -448,7 +524,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    private fun saksbehandleroppgaveDto(it: Row) = OppgaveDto(
+    private fun saksbehandleroppgaveDto(it: Row) = OppgaveForOversiktsvisningDto(
         oppgavereferanse = it.string("oppgave_id"),
         oppgavetype = it.string("oppgavetype"),
         opprettet = it.localDateTime("opprettet"),

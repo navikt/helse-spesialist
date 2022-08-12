@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import java.time.LocalDateTime
 import java.util.*
 
-data class OppgaveDto (
+data class OppgaveForOversiktsvisningDto (
     val oppgavereferanse: String,
     val oppgavetype: String,
     val opprettet: LocalDateTime,
@@ -27,8 +27,12 @@ data class OppgaveDto (
     val tidligereSaksbehandlerOid: UUID?
 )
 
-data class OppgavereferanseDto(
-    val oppgavereferanse: Long
+data class OppgaveForPeriodevisningDto(
+    val id: String,
+    val erBeslutter: Boolean,
+    val erRetur: Boolean,
+    val trengerTotrinnsvurdering: Boolean,
+    val tidligereSaksbehandler: String,
 )
 
 enum class Oppgavestatus {

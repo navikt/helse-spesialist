@@ -26,6 +26,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -51,7 +52,7 @@ internal fun Application.graphQLApi(
     beslutterGruppeId: UUID,
     riskGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
-    reservasjonClient: ReservasjonClient,
+    oppgaveMediator: OppgaveMediator,
 ) {
     val schema = SchemaBuilder(
         personApiDao = personApiDao,
@@ -67,7 +68,7 @@ internal fun Application.graphQLApi(
         notatDao = notatDao,
         reservasjonClient = reservasjonClient,
         snapshotMediator = snapshotMediator,
-        reservasjonClient = reservasjonClient,
+        oppgaveMediator = oppgaveMediator,
     ).build()
 
     val server = GraphQLServer(

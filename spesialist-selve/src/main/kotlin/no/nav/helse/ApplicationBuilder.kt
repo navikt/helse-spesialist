@@ -254,7 +254,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 beslutterGruppeId = env.beslutterGruppeId(),
                 riskGruppeId = env.riskGruppeId(),
                 snapshotMediator = snapshotMediator,
-                reservasjonClient = reservasjonClient,
+                oppgaveMediator = oppgaveMediator,
             )
             routing {
                 authenticate("oidc") {

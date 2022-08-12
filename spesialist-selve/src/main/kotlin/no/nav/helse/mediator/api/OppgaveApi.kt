@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.getGrupper
 import no.nav.helse.getNAVident
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.oppgave.OppgaveDto
+import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 
@@ -18,11 +18,12 @@ internal fun Route.oppgaveApi(
     oppgaveMediator: OppgaveMediator,
     riskSupersaksbehandlergruppe: UUID,
     kode7Saksbehandlergruppe: UUID,
-    beslutterSaksbehandlergruppe: UUID
+    beslutterSaksbehandlergruppe: UUID,
+    skjermedePersonerSaksbehandlergruppe: UUID,
 ) {
     val log = LoggerFactory.getLogger("OppgaveApi")
 
-    fun loggDebuginfoOmSaker(oppgaver: List<OppgaveDto>, ident: String) {
+    fun loggDebuginfoOmSaker(oppgaver: List<OppgaveForOversiktsvisningDto>, ident: String) {
         val antallSakerByType = oppgaver.fold(mutableMapOf<String, Int>()) { acc, oppgave ->
             acc.apply { merge("${oppgave.oppgavetype} - ${oppgave.type}", 1, Int::plus) }
         }

@@ -106,6 +106,7 @@ class GraphQLApiTest : AbstractApiTest() {
             notatDao = notatDao,
             snapshotMediator = snapshotMediator,
             reservasjonClient = mockk(relaxed = true),
+            oppgaveMediator = mockk(relaxed = true),
         ).build()
 
         server = GraphQLServer(

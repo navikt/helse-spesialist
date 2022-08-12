@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.oppgave
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
@@ -26,7 +27,11 @@ class OppgaveMediator(
     private val oppgaverTilTotrinnsvurdering = mutableSetOf<Oppgave>()
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) = oppgaveDao.finnOppgaver(saksbehandlerTilganger)
+    fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisningDto> =
+        oppgaveDao.finnOppgaver(saksbehandlerTilganger)
+
+    fun hentOppgaver(tilganger: SaksbehandlerTilganger, fra: LocalDateTime, antall: Int): List<OppgaveForOversiktsvisningDto> =
+        oppgaveDao.finnOppgaver(tilganger, fra, antall)
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)

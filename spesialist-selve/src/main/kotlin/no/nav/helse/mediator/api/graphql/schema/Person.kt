@@ -9,7 +9,6 @@ import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.objectMapper
@@ -18,6 +17,7 @@ import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -100,7 +100,13 @@ data class Person(
             Kjønn.Ukjent -> Kjonn.Ukjent
             else -> null
         },
-        adressebeskyttelse = personinfo.adressebeskyttelse,
+        adressebeskyttelse = when (personinfo.adressebeskyttelse) {
+            no.nav.helse.modell.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
+            no.nav.helse.modell.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig
+            no.nav.helse.modell.Adressebeskyttelse.StrengtFortrolig -> Adressebeskyttelse.StrengtFortrolig
+            no.nav.helse.modell.Adressebeskyttelse.StrengtFortroligUtland -> Adressebeskyttelse.StrengtFortroligUtland
+            no.nav.helse.modell.Adressebeskyttelse.Ukjent -> Adressebeskyttelse.Ukjent
+        },
         reservasjon = runBlocking {
             reservasjonClient.hentReservasjonsstatus(snapshot.fodselsnummer)
         }

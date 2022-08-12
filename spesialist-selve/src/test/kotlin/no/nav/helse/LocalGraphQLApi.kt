@@ -109,7 +109,7 @@ fun main() = runBlocking {
             riskGruppeId = UUID.randomUUID(),
             reservasjonClient = reservasjonClient,
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
-            reservasjonClient = reservasjonClient,
+            oppgaveMediator = mockk(relaxed = true)
         )
     }
 }
