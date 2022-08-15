@@ -58,8 +58,8 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Periodetype.FORLENGELSE,
-            utbetalingId = utbetalingId
+            utbetalingId = utbetalingId,
+            periodetype = Periodetype.FORLENGELSE
         )
         sendPersoninfoløsning(
             orgnr = ORGNR,

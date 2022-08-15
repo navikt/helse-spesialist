@@ -74,13 +74,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         fødselsnummer: String = this.fødselsnummer,
         aktørId: String = this.aktørId,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        aktiveVedtaksperioder: List<AktivVedtaksperiodeJson> = listOf(
-            AktivVedtaksperiodeJson(
-                orgnummer,
-                vedtaksperiodeId,
-                periodetype
-            )
-        ),
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()
     ) =
         nyHendelse(
@@ -100,7 +93,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                     "førstegangsbehandling" to førstegangsbehandling,
                     "utbetalingtype" to utbetalingtype.name,
                     "inntektskilde" to inntektskilde.name,
-                    "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiodeJson::toBody),
                     "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold
                 )
             )
@@ -660,18 +652,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         val ledd: String?,
         val bokstav: String?
     )
-
-    data class AktivVedtaksperiodeJson(
-        val orgnummer: String,
-        val vedtaksperiodeId: UUID,
-        val periodetype: Periodetype
-    ) {
-        fun toBody() = mapOf(
-            "orgnummer" to orgnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "periodetype" to periodetype.name
-        )
-    }
 
     data class ArbeidsgiverinformasjonJson(
         private val orgnummer: String,

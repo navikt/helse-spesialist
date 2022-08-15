@@ -55,13 +55,6 @@ internal object Meldingssender {
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = Testdata.AKTØR,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        aktiveVedtaksperioder: List<Testmeldingfabrikk.AktivVedtaksperiodeJson> = listOf(
-            Testmeldingfabrikk.AktivVedtaksperiodeJson(
-                orgnr,
-                vedtaksperiodeId,
-                periodetype
-            )
-        ),
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
     ): UUID = uuid.also { id ->
@@ -79,7 +72,6 @@ internal object Meldingssender {
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 inntektskilde = inntektskilde,
-                aktiveVedtaksperioder = aktiveVedtaksperioder,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 utbetalingtype = utbetalingtype
             )

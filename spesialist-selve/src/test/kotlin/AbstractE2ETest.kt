@@ -443,11 +443,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            periodetype = Periodetype.FORLENGELSE,
             utbetalingId = utbetalingId,
-            fødselsnummer = fødselsnummer,
             periodeFom = periodeFom,
-            periodeTom = periodeTom
+            periodeTom = periodeTom,
+            periodetype = Periodetype.FORLENGELSE,
+            fødselsnummer = fødselsnummer
         )
         val contextId = contextId(godkjenningsmeldingId)
         sendPersoninfoløsning(
