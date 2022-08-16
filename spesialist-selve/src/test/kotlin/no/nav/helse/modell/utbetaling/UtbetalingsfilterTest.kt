@@ -49,7 +49,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `delvis refusjon kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(delvisRefusjon = true), listOf("Utbetalingsfilter: Utbetalingen består av delvis refusjon"))
+        assertKanIkkeUtbetales(utbetalingsfilter(delvisRefusjon = true), listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon"))
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & feil periodetype kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(periodetype = INFOTRYGDFORLENGELSE), listOf("Utbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse"))
+        assertKanIkkeUtbetales(utbetalingsfilter(periodetype = INFOTRYGDFORLENGELSE), listOf("Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse"))
     }
 
     @Test
@@ -69,17 +69,17 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & feil fødselsdato kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(fødselsnummer = "21111111111"), listOf("Utbetalingsfilter: Fødselsdag passer ikke"))
+        assertKanIkkeUtbetales(utbetalingsfilter(fødselsnummer = "21111111111"), listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'"))
     }
 
     @Test
     fun `ingen refusjon & inntektskilde fra flere arbeidsgivere kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(inntektskilde = FLERE_ARBEIDSGIVERE), listOf("Utbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver"))
+        assertKanIkkeUtbetales(utbetalingsfilter(inntektskilde = FLERE_ARBEIDSGIVERE), listOf("Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver"))
     }
 
     @Test
     fun `ingen refusjon & warnings på vedtaksperiode kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(warnings = toWarnings), listOf("Utbetalingsfilter: Vedtaksperioden har warnings"))
+        assertKanIkkeUtbetales(utbetalingsfilter(warnings = toWarnings), listOf("Brukerutbetalingsfilter: Vedtaksperioden har warnings"))
     }
 
     @Test
@@ -98,11 +98,11 @@ internal class UtbetalingsfilterTest {
             inntektskilde = FLERE_ARBEIDSGIVERE,
             utbetalingtype = UTBETALING
         ), listOf(
-            "Utbetalingsfilter: Utbetalingen består av delvis refusjon",
-            "Utbetalingsfilter: Fødselsdag passer ikke",
-            "Utbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse",
-            "Utbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver",
-            "Utbetalingsfilter: Vedtaksperioden har warnings"
+            "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
+            "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'",
+            "Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse",
+            "Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver",
+            "Brukerutbetalingsfilter: Vedtaksperioden har warnings"
         ))
     }
 
@@ -140,7 +140,7 @@ internal class UtbetalingsfilterTest {
         private fun assertKanIkkeUtbetales(filter: Utbetalingsfilter, forventedeÅrsaker: List<String>) {
             assertFalse(filter.kanUtbetales)
             assertTrue(filter.kanIkkeUtbetales)
-            assertEquals(filter.årsaker(), forventedeÅrsaker)
+            assertEquals(forventedeÅrsaker, filter.årsaker())
             assertFalse(filter.plukketUtForUtbetalingTilSykmeldt)
         }
     }

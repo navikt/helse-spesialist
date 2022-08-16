@@ -25,7 +25,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
-        assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Utbetalingsfilter: Fødselsdag passer ikke"))
+        assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'"))
         assertIkkeEtterspurtBehov("EgenAnsatt")
     }
 
@@ -57,7 +57,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
-        assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Utbetalingsfilter: Utbetalingen består av delvis refusjon"))
+        assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon"))
         assertIkkeEtterspurtBehov("EgenAnsatt")
     }
 
@@ -76,7 +76,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
         )
         assertVedtak(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
-        assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Utbetalingsfilter: Vedtaksperioden har warnings"))
+        assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Brukerutbetalingsfilter: Vedtaksperioden har warnings"))
     }
 
     @Test

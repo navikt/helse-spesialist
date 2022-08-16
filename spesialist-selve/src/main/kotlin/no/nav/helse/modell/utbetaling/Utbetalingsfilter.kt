@@ -19,12 +19,12 @@ internal class Utbetalingsfilter(
     private val utbetalingtype: Utbetalingtype
 ) {
     private val årsaker = mutableListOf<String>()
-    private fun nyÅrsak(årsak: String) = årsaker.add("Utbetalingsfilter: $årsak")
+    private fun nyÅrsak(årsak: String) = årsaker.add("Brukerutbetalingsfilter: $årsak")
 
     private fun evaluer(): Boolean{
         if (!harUtbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
         if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
-        if (!fødselsnummer.startsWith("31")) nyÅrsak("Fødselsdag passer ikke")
+        if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
         // Unngå ping-pong om en av de utvalgte utbetalingene til sykmeldt revurderes og får warning
