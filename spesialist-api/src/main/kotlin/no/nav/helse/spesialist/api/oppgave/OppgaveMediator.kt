@@ -38,7 +38,7 @@ class OppgaveMediator(
         val oppgaver: List<OppgaveForOversiktsvisningDto> = oppgaveDao.finnOppgaver(tilganger, fra, antall)
         return Paginering(
             elementer = oppgaver,
-            peker = oppgaver.first().opprettet,
+            peker = oppgaver.last().opprettet,
             sidestørrelse = oppgaver.size,
             nåværendeSide = 0,
             totaltAntallSider = 0,
