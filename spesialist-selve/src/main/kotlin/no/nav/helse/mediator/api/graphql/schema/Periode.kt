@@ -16,17 +16,15 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatType
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import no.nav.helse.mediator.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
-
-enum class Behandlingstype { BEHANDLET, UBEREGNET, VENTER, VENTER_PA_INFORMASJON }
 
 enum class Inntektstype { ENARBEIDSGIVER, FLEREARBEIDSGIVERE }
 
@@ -302,12 +300,16 @@ data class BeregnetPeriode(
     override fun vedtaksperiodeId(): UUID = periode.vedtaksperiodeId
     override fun periodetilstand(): Periodetilstand = periodetilstand(periode.periodetilstand)
 
+    @Deprecated("erBeslutterOppgave bør hentes fra periodens oppgave")
     fun erBeslutterOppgave(): Boolean = oppgaveDao.erBeslutteroppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
+    @Deprecated("erReturOppgave bør hentes fra periodens oppgave")
     fun erReturOppgave(): Boolean = oppgaveDao.erReturOppgave(java.util.UUID.fromString(vedtaksperiodeId()))
 
+    @Deprecated("trengerTotrinnsvurdering bør hentes fra periodens oppgave")
     fun trengerTotrinnsvurdering(): Boolean = oppgaveDao.trengerTotrinnsvurdering(java.util.UUID.fromString(vedtaksperiodeId()))
 
+    @Deprecated("tidligereSaksbehandlerOid bør hentes fra periodens oppgave")
     fun tidligereSaksbehandlerOid(): UUID? = oppgaveDao.hentTidligereSaksbehandlerOid(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 
     fun notater(): List<Notat> = notatDao.finnNotater(java.util.UUID.fromString(vedtaksperiodeId())).map {
@@ -430,8 +432,20 @@ data class BeregnetPeriode(
         )
     }
 
+    @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =
         oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
+
+    fun oppgave(): OppgaveForPeriodevisning? =
+        oppgaveDao.finnPeriodeoppgave(java.util.UUID.fromString(vedtaksperiodeId()))?.let {
+            OppgaveForPeriodevisning(
+                id = it.id,
+                erBeslutter = it.erBeslutter,
+                erRetur = it.erRetur,
+                trengerTotrinnsvurdering = it.trengerTotrinnsvurdering,
+                tidligereSaksbehandler = it.tidligereSaksbehandler,
+            )
+        }
 }
 
 private fun GraphQLOppdrag.tilSimulering(): Simulering =
