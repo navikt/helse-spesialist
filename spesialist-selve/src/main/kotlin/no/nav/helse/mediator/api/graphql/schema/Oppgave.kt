@@ -49,15 +49,16 @@ data class OppgaveForPeriodevisning(
     val tidligereSaksbehandler: String,
 )
 
-data class Pagination(
-    val cursor: String, // Base64-encoded datetime
-    val currentPage: Int,
-    val totalPages: Int,
+data class Paginering(
+    val peker: String?, // Base64-encoded datetime
+    val side: Int,
+    val elementerPerSide: Int,
+    val antallSider: Int,
 )
 
 data class Oppgaver(
     val oppgaver: List<OppgaveForOversiktsvisning>,
-    val pagination: Pagination,
+    val paginering: Paginering,
 )
 
 internal fun List<OppgaveForOversiktsvisningDto>.tilOppgaver(): List<OppgaveForOversiktsvisning> {

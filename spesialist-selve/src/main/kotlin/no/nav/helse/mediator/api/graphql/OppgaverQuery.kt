@@ -6,15 +6,16 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import no.nav.helse.mediator.api.graphql.schema.Oppgaver
-import no.nav.helse.mediator.api.graphql.schema.Pagination
+import no.nav.helse.mediator.api.graphql.schema.Paginering
 import no.nav.helse.mediator.api.graphql.schema.tilOppgaver
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 
 class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
 
-    fun oppgaver(first: Int, after: String, env: DataFetchingEnvironment): DataFetcherResult<Oppgaver> {
+    fun oppgaver(first: Int, after: String?, env: DataFetchingEnvironment): DataFetcherResult<Oppgaver> {
         val cursor = try {
             LocalDateTime.parse(after)
         } catch (exception: Exception) {
@@ -22,12 +23,16 @@ class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
         }
 
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
+
+        val paginering = oppgaveMediator.hentOppgaver(tilganger = tilganger, fra = cursor, antall = first)
+
         val oppgaver = Oppgaver(
-            oppgaver = oppgaveMediator.hentOppgaver(tilganger, cursor, first).tilOppgaver(),
-            pagination = Pagination(
-                cursor = after,
-                currentPage = 1,
-                totalPages = 1
+            oppgaver = paginering.elementer.tilOppgaver(),
+            paginering = Paginering(
+                peker = paginering.peker.format(DateTimeFormatter.ISO_DATE_TIME),
+                side = paginering.nåværendeSide,
+                antallSider = paginering.totaltAntallSider,
+                elementerPerSide = paginering.sidestørrelse,
             )
         )
 

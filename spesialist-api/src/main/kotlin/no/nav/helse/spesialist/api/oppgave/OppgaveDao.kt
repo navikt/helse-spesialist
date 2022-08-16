@@ -81,7 +81,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnOppgaver(tilganger: SaksbehandlerTilganger, fra: LocalDateTime, antall: Int) =
+    fun finnOppgaver(tilganger: SaksbehandlerTilganger, fra: LocalDateTime?, antall: Int): List<OppgaveForOversiktsvisningDto> =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA =
                 if (tilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
@@ -108,15 +108,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 $eventuellEkskluderingAvRiskQA
                 $gyldigeAdressebeskyttelser
                 $eventuellEkskluderingAvBeslutterOppgaver
+                AND o.opprettet > :fra
             ORDER BY
                 CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
                 opprettet ASC
-                ;
+            LIMIT :antall
+            ;
             """
             session.run(
-                queryOf(query)
+                queryOf(query, mapOf("fra" to fra, "antall" to antall))
                     .map(::saksbehandleroppgaveDto)
                     .asList
             )

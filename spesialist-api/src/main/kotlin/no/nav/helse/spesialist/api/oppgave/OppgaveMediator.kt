@@ -2,15 +2,15 @@ package no.nav.helse.spesialist.api.oppgave
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.postgresql.util.PSQLException
@@ -30,8 +30,20 @@ class OppgaveMediator(
     fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisningDto> =
         oppgaveDao.finnOppgaver(saksbehandlerTilganger)
 
-    fun hentOppgaver(tilganger: SaksbehandlerTilganger, fra: LocalDateTime, antall: Int): List<OppgaveForOversiktsvisningDto> =
-        oppgaveDao.finnOppgaver(tilganger, fra, antall)
+    fun hentOppgaver(
+        tilganger: SaksbehandlerTilganger,
+        fra: LocalDateTime?,
+        antall: Int
+    ): Paginering<OppgaveForOversiktsvisningDto, LocalDateTime> {
+        val oppgaver: List<OppgaveForOversiktsvisningDto> = oppgaveDao.finnOppgaver(tilganger, fra, antall)
+        return Paginering(
+            elementer = oppgaver,
+            peker = oppgaver.first().opprettet,
+            sidestørrelse = oppgaver.size,
+            nåværendeSide = 0,
+            totaltAntallSider = 0,
+        )
+    }
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)
@@ -98,7 +110,13 @@ class OppgaveMediator(
         avventerSystem(oppgave, saksbehandlerIdent, oid)
     }
 
-    fun opprett(contextId: UUID, vedtaksperiodeId: UUID, utbetalingId: UUID, navn: Oppgavetype, hendelseId: UUID): Long? {
+    fun opprett(
+        contextId: UUID,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        navn: Oppgavetype,
+        hendelseId: UUID
+    ): Long? {
         if (oppgaveDao.harGyldigOppgave(utbetalingId)) return null
         return oppgaveDao.opprettOppgave(contextId, navn, vedtaksperiodeId, utbetalingId).also { oppgaveId ->
             oppgaverForPublisering[oppgaveId] = "oppgave_opprettet"
@@ -136,10 +154,12 @@ class OppgaveMediator(
         messageContext: MessageContext,
         doAlso: () -> Unit = {}
     ) {
-        if (oppgaver.size > 1) log.info("""
+        if (oppgaver.size > 1) log.info(
+            """
             Oppgaveliste har ${oppgaver.size} oppgaver (hendelsesId: $hendelseId og contextId: $contextId):
             ${oppgaver.joinToString()}
-        """.trimIndent())
+        """.trimIndent()
+        )
 
         oppgaver.forEach { oppgave -> oppgave.lagre(this, contextId, hendelseId) }
         doAlso()
@@ -164,7 +184,13 @@ class OppgaveMediator(
         erReturOppgave: Boolean,
         totrinnsvurdering: Boolean,
         tidligereSaksbehandlerOid: UUID
-    ) = oppgaveDao.setBeslutterOppgave(oppgaveId, erBeslutterOppgave, erReturOppgave, totrinnsvurdering, tidligereSaksbehandlerOid)
+    ) = oppgaveDao.setBeslutterOppgave(
+        oppgaveId,
+        erBeslutterOppgave,
+        erReturOppgave,
+        totrinnsvurdering,
+        tidligereSaksbehandlerOid
+    )
 
     fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
 
@@ -180,3 +206,11 @@ class OppgaveMediator(
         }
     }
 }
+
+data class Paginering<V, P>(
+    val elementer: List<V>,
+    val peker: P,
+    val sidestørrelse: Int,
+    val nåværendeSide: Int,
+    val totaltAntallSider: Int,
+)
