@@ -26,6 +26,12 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
     }
 
     @Test
+    fun `Ignorerer hendelsen for fødselsnummer som ikke lar seg caste til long`() {
+        sendEndretSkjermetinfo(true, "123456789XX")
+        assertNull(egenAnsattDao.erEgenAnsatt(FØDSELSNUMMER))
+    }
+
+    @Test
     fun `Etterspør skjermetinfo for kjente personer hvor skjermetinfo mangler i basen`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UUID.randomUUID())
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
@@ -41,12 +47,12 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot()
     }
 
-    private fun sendEndretSkjermetinfo(skjermet: Boolean) {
+    private fun sendEndretSkjermetinfo(skjermet: Boolean, fødselsnummer: String = FØDSELSNUMMER) {
         @Language("JSON")
         val json = """{
           "@event_name": "endret_skjermetinfo",
           "@id": "${UUID.randomUUID()}",
-          "fødselsnummer": "$FØDSELSNUMMER",
+          "fødselsnummer": "$fødselsnummer",
           "skjermet": "$skjermet",
           "@opprettet": "${LocalDateTime.now()}"
         }"""

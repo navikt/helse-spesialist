@@ -54,6 +54,12 @@ internal class EndretSkjermetinfo(
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val id = UUID.fromString(packet["@id"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
+            try {
+                fødselsnummer.toLong()
+            } catch (e: Exception) {
+                sikkerLogg.warn("Mottok ugyldig fødselsnummer $fødselsnummer, skipper videre håndtering")
+                return
+            }
             val erEgenAnsatt = packet["skjermet"].asBoolean()
             val opprettet = packet["@opprettet"]::asLocalDateTime.invoke()
             val logger = { msg: String ->
