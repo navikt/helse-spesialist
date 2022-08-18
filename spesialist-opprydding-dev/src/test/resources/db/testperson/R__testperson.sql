@@ -59,10 +59,11 @@ INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type) VALUES (${seque
 INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id, siste_sekvensnummer) VALUES ('${saksbehandler_oid}', ${sequence_number}, 1);
 
 INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt) VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
-INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref, hendelse_id, saksbehandler_ref) VALUES (${sequence_number}, 'BEGRUNNELSE', now(), ${sequence_number}, ${sequence_number}, '${hendelse_id}', '${saksbehandler_oid}');
-INSERT INTO overstyrtdag(id, overstyring_ref, dato, dagtype, grad) VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
-INSERT INTO overstyring_inntekt(id, tidspunkt, person_ref, arbeidsgiver_ref, saksbehandler_ref, hendelse_ref, begrunnelse, manedlig_inntekt, skjaeringstidspunkt, forklaring) VALUES (${sequence_number}, now(), ${sequence_number}, ${sequence_number}, '${saksbehandler_oid}', '${hendelse_id}', 'BEGRUNNELSE', 1000, '2018-01-01', 'FORKLARING');
-INSERT INTO overstyring_arbeidsforhold(id, tidspunkt, person_ref, arbeidsgiver_ref, saksbehandler_ref, hendelse_ref, begrunnelse, forklaring, deaktivert, skjaeringstidspunkt) VALUES (${sequence_number}, now(), ${sequence_number}, ${sequence_number}, '${saksbehandler_oid}', '${hendelse_id}', 'BEGRUNNELSE', 'FORKLARING', false, '2018-01-01');
+
+INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref, hendelse_ref, saksbehandler_ref) VALUES (${sequence_number}, 'BEGRUNNELSE', now(), ${sequence_number}, ${sequence_number}, '${hendelse_id}', '${saksbehandler_oid}');
+INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad) VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
+INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring) VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING');
+INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt) VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01');
 INSERT INTO overstyrt_vedtaksperiode(id, vedtaksperiode_id, type, ferdigstilt) VALUES (${sequence_number}, '${vedtaksperiode_id}', 'Inntekt'::overstyringtype, false);
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref) VALUES (${sequence_number}, now(), '${saksbehandler_oid}');

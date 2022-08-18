@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -56,6 +57,26 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Finner opprettede tidslinjeoverstyringer`() {
         opprettPerson()
+        hendelseDao.opprett(OverstyringTidslinje(
+            id = ID,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            orgnummer = ORGNUMMER,
+            begrunnelse = BEGRUNNELSE,
+            overstyrteDager = OVERSTYRTE_DAGER,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            automatiseringDao = automatiseringDao,
+            overstyringMediator = mockk(),
+        ))
         overstyringDao.persisterOverstyringTidslinje(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 

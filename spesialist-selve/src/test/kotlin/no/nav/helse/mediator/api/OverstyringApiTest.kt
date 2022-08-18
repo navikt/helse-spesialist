@@ -19,6 +19,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
 import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
@@ -71,14 +72,14 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     fun `overstyr arbeidsforhold`() {
         with(TestApplicationEngine()) {
             setUpApplication()
-
+            settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
             val overstyring = OverstyrArbeidsforholdDto(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = listOf(
                     OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
-                        orgnummer = "6667",
+                        orgnummer = ORGNR_GHOST,
                         deaktivert = true,
                         begrunnelse = "en begrunnelse",
                         forklaring = "en forklaring"
@@ -115,7 +116,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             val overstyrtArbeidsforhold = event["overstyrteArbeidsforhold"].toList().single()
             assertEquals("en begrunnelse", overstyrtArbeidsforhold["begrunnelse"].asText())
             assertEquals("en forklaring", overstyrtArbeidsforhold["forklaring"].asText())
-            assertEquals("6667", overstyrtArbeidsforhold["orgnummer"].asText())
+            assertEquals(ORGNR_GHOST, overstyrtArbeidsforhold["orgnummer"].asText())
             assertEquals(false, overstyrtArbeidsforhold["orgnummer"].asBoolean())
         }
     }

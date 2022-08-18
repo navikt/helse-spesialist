@@ -20,8 +20,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
                     return@transaction
                 }
                 it.slettOverstyring(personId)
-                it.slettOverstyringInntekt(personId)
-                it.slettOverstyringArbeidsforhold(personId)
                 it.slettReserverPerson(personId)
                 it.slettOpptegnelse(personId)
                 it.slettPeriodehistorikk(personId)
@@ -107,26 +105,28 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.slettOverstyring(personRef: Int) {
         slettOverstyrtDag(personRef)
+        slettOverstyringInntekt(personRef)
+        slettOverstyringArbeidsforhold(personRef)
         @Language("PostgreSQL")
         val query = "DELETE FROM overstyring WHERE person_ref = ?"
         run(queryOf(query, personRef).asExecute)
     }
 
-    private fun TransactionalSession.slettOverstyrtDag(overstyringRef: Int) {
+    private fun TransactionalSession.slettOverstyrtDag(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM overstyrtdag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
-        run(queryOf(query, overstyringRef).asExecute)
+        val query = "DELETE FROM overstyring_dag WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
+        run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettOverstyringInntekt(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM overstyring_inntekt WHERE person_ref = ?"
+        val query = "DELETE FROM overstyring_inntekt WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettOverstyringArbeidsforhold(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM overstyring_arbeidsforhold WHERE person_ref = ?"
+        val query = "DELETE FROM overstyring_arbeidsforhold WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 

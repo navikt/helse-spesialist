@@ -20,7 +20,7 @@ internal class PersisterOverstyringArbeidsforholdCommand(
             overstyringDao.persisterOverstyringArbeidsforhold(
                 hendelseId = eventId,
                 fødselsnummer = fødselsnummer,
-                orgnummer = it.orgnummer,
+                organisasjonsnummer = it.orgnummer,
                 deaktivert = it.deaktivert,
                 begrunnelse = it.begrunnelse,
                 forklaring = it.forklaring,

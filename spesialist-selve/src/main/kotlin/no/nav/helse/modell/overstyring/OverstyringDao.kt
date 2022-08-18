@@ -22,7 +22,7 @@ class OverstyringDao(private val dataSource: DataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                INSERT INTO overstyring(hendelse_ref, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
                 SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
                 FROM arbeidsgiver ag,
                      person p
@@ -32,9 +32,10 @@ class OverstyringDao(private val dataSource: DataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringDagQuery = """
-                INSERT INTO overstyrtdag(overstyring_ref, dato, dagtype, grad)
+                INSERT INTO overstyring_dag(overstyring_ref, dato, dagtype, grad)
                 VALUES (:overstyring_ref, :dato, :dagtype, :grad)
             """.trimIndent()
+
             val overstyringRef = session.run(
                 queryOf(
                     opprettOverstyringQuery,
@@ -80,29 +81,44 @@ class OverstyringDao(private val dataSource: DataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring_inntekt(hendelse_ref, person_ref, arbeidsgiver_ref, saksbehandler_ref, begrunnelse, forklaring, manedlig_inntekt, skjaeringstidspunkt, tidspunkt)
-                SELECT :hendelse_id, p.id, ag.id, :saksbehandler_ref, :begrunnelse, :forklaring, :manedlig_inntekt, :skjaeringstidspunkt, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
                 FROM arbeidsgiver ag,
                      person p
                 WHERE p.fodselsnummer = :fodselsnummer
                   AND ag.orgnummer = :orgnr
             """.trimIndent()
-            session.run(
+
+            @Language("PostgreSQL")
+            val opprettOverstyringInntektQuery = """
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, skjaeringstidspunkt, overstyring_ref)
+                VALUES (:forklaring, :manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref)
+            """.trimIndent()
+
+            val overstyringRef = session.run(
                 queryOf(
                     opprettOverstyringQuery,
                     mapOf(
                         "hendelse_id" to hendelseId,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to organisasjonsnummer.toLong(),
-                        "saksbehandler_ref" to saksbehandlerRef,
                         "begrunnelse" to begrunnelse,
+                        "saksbehandler_ref" to saksbehandlerRef,
+                        "tidspunkt" to tidspunkt,
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnr" to organisasjonsnummer.toLong()
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
+
+            session.run(
+                queryOf(
+                    opprettOverstyringInntektQuery,
+                    mapOf(
                         "forklaring" to forklaring,
                         "manedlig_inntekt" to månedligInntekt,
                         "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "tidspunkt" to tidspunkt
-
+                        "overstyring_ref" to overstyringRef
                     )
-                ).asUpdateAndReturnGeneratedKey
+                ).asUpdate
             )
         }
     }
@@ -110,7 +126,7 @@ class OverstyringDao(private val dataSource: DataSource) {
     fun persisterOverstyringArbeidsforhold(
         hendelseId: UUID,
         fødselsnummer: String,
-        orgnummer: String,
+        organisasjonsnummer: String,
         begrunnelse: String,
         forklaring: String,
         deaktivert: Boolean,
@@ -121,29 +137,44 @@ class OverstyringDao(private val dataSource: DataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring_arbeidsforhold(hendelse_ref, person_ref, arbeidsgiver_ref, saksbehandler_ref, begrunnelse, forklaring, deaktivert, skjaeringstidspunkt, tidspunkt)
-                SELECT :hendelse_id, p.id, ag.id, :saksbehandler_ref, :begrunnelse, :forklaring, :deaktivert, :skjaeringstidspunkt, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
                 FROM arbeidsgiver ag,
                      person p
                 WHERE p.fodselsnummer = :fodselsnummer
                   AND ag.orgnummer = :orgnr
             """.trimIndent()
-            session.run(
+
+            @Language("PostgreSQL")
+            val opprettOverstyringArbeidsforholdQuery = """
+                INSERT INTO overstyring_arbeidsforhold(forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref)
+                VALUES (:forklaring, :deaktivert, :skjaeringstidspunkt, :overstyring_ref)
+            """.trimIndent()
+
+            val overstyringRef = session.run(
                 queryOf(
                     opprettOverstyringQuery,
                     mapOf(
                         "hendelse_id" to hendelseId,
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to orgnummer.toLong(),
-                        "saksbehandler_ref" to saksbehandlerRef,
                         "begrunnelse" to begrunnelse,
+                        "saksbehandler_ref" to saksbehandlerRef,
+                        "tidspunkt" to tidspunkt,
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnr" to organisasjonsnummer.toLong()
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
+
+            session.run(
+                queryOf(
+                    opprettOverstyringArbeidsforholdQuery,
+                    mapOf(
                         "forklaring" to forklaring,
                         "deaktivert" to deaktivert,
                         "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "tidspunkt" to tidspunkt
-
+                        "overstyring_ref" to overstyringRef
                     )
-                ).asUpdateAndReturnGeneratedKey
+                ).asUpdate
             )
         }
     }

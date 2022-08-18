@@ -1,27 +1,28 @@
 package no.nav.helse.spesialist.api.overstyring
 
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 class OverstyringApiDao(private val dataSource: DataSource) {
     fun finnOverstyringerAvTidslinjer(fødselsnummer: String, organisasjonsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+                INNER JOIN overstyring_dag od ON o.id = od.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
+                INNER JOIN arbeidsgiver a ON a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-            WHERE p.fodselsnummer = ?AND a.orgnummer = ?
+            WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
         session.run(
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                 .map { overstyringRow ->
                     val id = overstyringRow.long("id")
                     OverstyringDto(
-                        hendelseId = UUID.fromString(overstyringRow.string("hendelse_id")),
+                        hendelseId = UUID.fromString(overstyringRow.string("hendelse_ref")),
                         fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         begrunnelse = overstyringRow.string("begrunnelse"),
@@ -30,7 +31,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                         saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                         overstyrteDager = session.run(
                             queryOf(
-                                "SELECT * FROM overstyrtdag WHERE overstyring_ref = ?", id
+                                "SELECT * FROM overstyring_dag WHERE overstyring_ref = ?", id
                             ).map { overstyringDagRow ->
                                 OverstyringDagDto(
                                     dato = overstyringDagRow.localDate("dato"),
@@ -50,9 +51,10 @@ class OverstyringApiDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use {
             @Language("PostgreSQL")
             val finnOverstyringQuery = """
-            SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring_inntekt o
+            SELECT o.*, oi.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
+                INNER JOIN overstyring_inntekt oi ON o.id = oi.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
+                INNER JOIN arbeidsgiver a ON a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
                 INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
@@ -82,9 +84,10 @@ class OverstyringApiDao(private val dataSource: DataSource) {
     ): List<OverstyringArbeidsforholdDto> = sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
-            SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring_arbeidsforhold o
+            SELECT o.*, oa.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o 
+                INNER JOIN overstyring_arbeidsforhold oa ON o.id = oa.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN arbeidsgiver a on a.id = o.arbeidsgiver_ref
+                INNER JOIN arbeidsgiver a ON a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
                 INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?

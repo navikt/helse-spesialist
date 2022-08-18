@@ -20,6 +20,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
 import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
@@ -120,7 +121,7 @@ internal class OverstyringIT : AbstractE2ETest() {
     fun `overstyr arbeidsforhold`() {
         with(TestApplicationEngine()) {
             setUpApplication()
-            settOppBruker()
+            settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
 
             val overstyring = OverstyrArbeidsforholdDto(
                 fødselsnummer = FØDSELSNUMMER,
@@ -128,7 +129,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = listOf(
                     OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
-                        orgnummer = "6667",
+                        orgnummer = ORGNR_GHOST,
                         deaktivert = true,
                         begrunnelse = "en begrunnelse",
                         forklaring = "en forklaring"
