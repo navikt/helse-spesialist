@@ -34,7 +34,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 id = it.string("id"),
                 erBeslutter = it.boolean("er_beslutter_oppgave"),
                 erRetur = it.boolean("er_retur_oppgave"),
-                trengerTotrinnsvurdering = it.boolean("trengerTotrinnsvurdering"),
+                trengerTotrinnsvurdering = it.boolean("totrinnsvurdering"),
                 tidligereSaksbehandler = it.string("tidligere_saksbehandler_oid"),
             )
         }
@@ -81,7 +81,41 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun finnOppgaver(tilganger: SaksbehandlerTilganger, fra: LocalDateTime?, antall: Int): List<OppgaveForOversiktsvisningDto> =
+    fun getAntallOppgaver(tilganger: SaksbehandlerTilganger): Int =
+        sessionOf(dataSource).use { session ->
+            val eventuellEkskluderingAvRiskQA =
+                if (tilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
+            val gyldigeAdressebeskyttelser =
+                if (tilganger.harTilgangTilKode7()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
+                else "AND pi.adressebeskyttelse = 'Ugradert'"
+            val eventuellEkskluderingAvBeslutterOppgaver =
+                if (tilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
+
+            @Language("PostgreSQL")
+            val query = """
+            SELECT COUNT(o.id) as antall
+            FROM oppgave o
+                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                INNER JOIN person p ON v.person_ref = p.id
+                INNER JOIN person_info pi ON p.info_ref = pi.id
+                LEFT JOIN enhet e ON p.enhet_ref = e.id
+                LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
+                LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+            WHERE status = 'AvventerSaksbehandler'::oppgavestatus
+                $eventuellEkskluderingAvRiskQA
+                $gyldigeAdressebeskyttelser
+                $eventuellEkskluderingAvBeslutterOppgaver
+            ;
+            """
+            session.run(queryOf(query).map { row -> row.int("antall") }.asSingle) ?: 0
+        }
+
+    fun finnOppgaver(
+        tilganger: SaksbehandlerTilganger,
+        fra: LocalDateTime?,
+        antall: Int
+    ): List<OppgaveForOversiktsvisningDto> =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA =
                 if (tilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
