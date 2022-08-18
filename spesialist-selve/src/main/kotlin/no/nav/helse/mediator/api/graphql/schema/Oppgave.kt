@@ -46,7 +46,7 @@ data class OppgaveForPeriodevisning(
     val erBeslutter: Boolean,
     val erRetur: Boolean,
     val trengerTotrinnsvurdering: Boolean,
-    val tidligereSaksbehandler: String,
+    val tidligereSaksbehandler: String?,
 )
 
 data class Paginering(

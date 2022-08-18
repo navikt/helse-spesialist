@@ -32,7 +32,7 @@ data class OppgaveForPeriodevisningDto(
     val erBeslutter: Boolean,
     val erRetur: Boolean,
     val trengerTotrinnsvurdering: Boolean,
-    val tidligereSaksbehandler: String,
+    val tidligereSaksbehandler: String?,
 )
 
 enum class Oppgavestatus {

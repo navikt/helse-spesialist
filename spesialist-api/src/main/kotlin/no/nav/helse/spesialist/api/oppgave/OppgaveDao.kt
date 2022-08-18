@@ -35,7 +35,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 erBeslutter = it.boolean("er_beslutter_oppgave"),
                 erRetur = it.boolean("er_retur_oppgave"),
                 trengerTotrinnsvurdering = it.boolean("totrinnsvurdering"),
-                tidligereSaksbehandler = it.string("tidligere_saksbehandler_oid"),
+                tidligereSaksbehandler = it.stringOrNull("tidligere_saksbehandler_oid"),
             )
         }
     }
