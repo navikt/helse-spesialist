@@ -47,7 +47,7 @@ internal class Automatisering(
         utbetalingtype: Utbetalingtype,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, utbetalingtype)
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
@@ -60,8 +60,8 @@ internal class Automatisering(
         }
 
         when {
-            utbetalingtype === Utbetalingtype.REVURDERING || problemer.isNotEmpty() -> {
-                if (problemer.isNotEmpty()) utfallslogger("Automatiserer ikke {} ({}, {}) fordi: {}")
+            problemer.isNotEmpty() -> {
+                utfallslogger("Automatiserer ikke {} ({}, {}) fordi: {}")
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             }
 
@@ -82,7 +82,12 @@ internal class Automatisering(
         }
     }
 
-    private fun vurder(fødselsnummer: String, vedtaksperiodeId: UUID, utbetalingId: UUID): List<String> {
+    private fun vurder(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        utbetalingtype: Utbetalingtype
+    ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
                 ?: validering("Mangler vilkårsvurdering for arbeidsuførhet, aktivitetsplikt eller medvirkning") { false }
@@ -106,6 +111,7 @@ internal class Automatisering(
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
             validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
             validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() },
+            validering("Utbetalingen er revurdering") { utbetalingtype != Utbetalingtype.REVURDERING },
         )
     }
 

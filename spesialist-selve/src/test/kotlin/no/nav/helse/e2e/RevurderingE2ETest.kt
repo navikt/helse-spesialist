@@ -113,6 +113,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID
         )
 
+        sendUtbetalingEndret(
+            "REVURDERING",
+            Utbetalingsstatus.IKKE_GODKJENT,
+            ORGNR,
+            "EN_FAGSYSTEMID",
+            utbetalingId = UTBETALING_ID2
+        )
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
