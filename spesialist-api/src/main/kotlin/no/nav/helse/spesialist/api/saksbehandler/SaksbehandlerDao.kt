@@ -35,7 +35,7 @@ class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource)
                 epost = row.string("epost"),
                 ident = row.string("ident"))}
 
-    fun invaliderSaksbehandleroppgaver(fødselsnummer: String, orgnummer: String) =
+    fun invaliderSaksbehandleroppgaver(fødselsnummer: String) =
         sessionOf(dataSource).use { session: Session ->
             @Language("PostgreSQL")
             val finnOppgaveIder = """
@@ -44,8 +44,7 @@ class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource)
                          JOIN oppgave o ON o.vedtak_ref = v.id
                          JOIN person p ON v.person_ref = p.id
                          JOIN arbeidsgiver a ON v.arbeidsgiver_ref = a.id
-                WHERE a.orgnummer = :orgnummer
-                  AND p.fodselsnummer = :fodselsnummer
+                WHERE p.fodselsnummer = :fodselsnummer
                   AND o.status = 'AvventerSaksbehandler'::oppgavestatus;
             """
 
@@ -54,7 +53,7 @@ class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource)
             session.run(
                 queryOf(
                     finnOppgaveIder,
-                    mapOf("orgnummer" to orgnummer.toLong(), "fodselsnummer" to fødselsnummer.toLong())
+                    mapOf("fodselsnummer" to fødselsnummer.toLong())
                 ).map { it.long("id") }.asList
             ).forEach { id -> session.run(queryOf(invaliderOppgave, mapOf("id" to id)).asUpdate) }
         }

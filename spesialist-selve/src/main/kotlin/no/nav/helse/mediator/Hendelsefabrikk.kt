@@ -333,7 +333,6 @@ internal class Hendelsefabrikk(
         navn: String,
         ident: String,
         epost: String,
-        organisasjonsnummer: String,
         overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
@@ -345,7 +344,6 @@ internal class Hendelsefabrikk(
         navn = navn,
         ident = ident,
         epost = epost,
-        organisasjonsnummer = organisasjonsnummer,
         overstyrteArbeidsforhold = overstyrteArbeidsforhold,
         skjæringstidspunkt = skjæringstidspunkt,
         opprettet = opprettet,
@@ -367,7 +365,6 @@ internal class Hendelsefabrikk(
             navn = jsonNode.path("saksbehandlerNavn").asText(),
             ident = jsonNode.path("saksbehandlerIdent").asText(),
             epost = jsonNode.path("saksbehandlerEpost").asText(),
-            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
             overstyrteArbeidsforhold = jsonNode.path("overstyrteArbeidsforhold").map {
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     it["orgnummer"].asText(),

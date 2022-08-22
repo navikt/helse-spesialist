@@ -99,7 +99,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLEREPOST,
             ident = SAKSBEHANDLER_IDENT,
-            organisasjonsnummer = ORGNUMMER,
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(

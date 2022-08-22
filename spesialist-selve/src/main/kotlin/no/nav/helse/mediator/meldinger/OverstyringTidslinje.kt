@@ -82,7 +82,7 @@ internal class OverstyringTidslinje(
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
             automatiseringDao = automatiseringDao,
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, orgnummer, saksbehandlerDao),
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_tidslinje",
             json = json,

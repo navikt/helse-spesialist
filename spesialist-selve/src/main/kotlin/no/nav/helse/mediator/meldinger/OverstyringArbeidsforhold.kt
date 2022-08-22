@@ -36,7 +36,6 @@ internal class OverstyringArbeidsforhold(
     navn: String,
     epost: String,
     ident: String,
-    organisasjonsnummer: String,
     overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
@@ -72,7 +71,7 @@ internal class OverstyringArbeidsforhold(
             oppgaveDao = oppgaveDao,
             overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, organisasjonsnummer, saksbehandlerDao),
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_arbeidsforhold",
             json = json,
@@ -95,7 +94,6 @@ internal class OverstyringArbeidsforhold(
                     it.demandValue("@event_name", "saksbehandler_overstyrer_arbeidsforhold")
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")
-                    it.requireKey("organisasjonsnummer")
                     it.requireKey("skjæringstidspunkt")
                     it.requireKey("saksbehandlerIdent")
                     it.requireKey("saksbehandlerOid")
@@ -132,7 +130,6 @@ internal class OverstyringArbeidsforhold(
                 navn = packet["saksbehandlerNavn"].asText(),
                 ident = packet["saksbehandlerIdent"].asText(),
                 epost = packet["saksbehandlerEpost"].asText(),
-                organisasjonsnummer = packet["organisasjonsnummer"].asText(),
                 overstyrteArbeidsforhold = packet["overstyrteArbeidsforhold"].map {
                     OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                         it["orgnummer"].asText(),
