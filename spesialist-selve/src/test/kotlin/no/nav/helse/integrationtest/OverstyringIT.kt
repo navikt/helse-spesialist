@@ -123,7 +123,6 @@ internal class OverstyringIT : AbstractE2ETest() {
             settOppBruker()
 
             val overstyring = OverstyrArbeidsforholdDto(
-                organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 skjæringstidspunkt = 1.januar,

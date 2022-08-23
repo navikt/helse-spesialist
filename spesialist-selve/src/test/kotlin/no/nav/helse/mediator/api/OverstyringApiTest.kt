@@ -73,7 +73,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             setUpApplication()
 
             val overstyring = OverstyrArbeidsforholdDto(
-                organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 skjæringstidspunkt = 1.januar,
@@ -111,7 +110,6 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             assertEquals(SAKSBEHANDLER_NAVN, event["saksbehandlerNavn"].asText())
             assertEquals(SAKSBEHANDLER_IDENT, event["saksbehandlerIdent"].asText())
             assertEquals(SAKSBEHANDLER_EPOST, event["saksbehandlerEpost"].asText())
-            assertEquals(ORGNR, event["organisasjonsnummer"].asText())
             assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
 
             val overstyrtArbeidsforhold = event["overstyrteArbeidsforhold"].toList().single()

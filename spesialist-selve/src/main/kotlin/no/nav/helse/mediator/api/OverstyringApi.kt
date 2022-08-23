@@ -76,7 +76,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val message = OverstyrArbeidsforholdKafkaDto(
             saksbehandler = saksbehandler.toDto(),
-            organisasjonsnummer = overstyring.organisasjonsnummer,
             fødselsnummer = overstyring.fødselsnummer,
             aktørId = overstyring.aktørId,
             skjæringstidspunkt = overstyring.skjæringstidspunkt,
@@ -179,7 +178,6 @@ data class OverstyrInntektKafkaDto(
 
 data class OverstyrArbeidsforholdDto(
     val fødselsnummer: String,
-    val organisasjonsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
@@ -195,7 +193,6 @@ data class OverstyrArbeidsforholdDto(
 data class OverstyrArbeidsforholdKafkaDto(
     val saksbehandler: SaksbehandlerDto,
     val fødselsnummer: String,
-    val organisasjonsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>
@@ -204,7 +201,6 @@ data class OverstyrArbeidsforholdKafkaDto(
         "saksbehandler_overstyrer_arbeidsforhold", mapOf(
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
-            "organisasjonsnummer" to organisasjonsnummer,
             "saksbehandlerOid" to saksbehandler.oid,
             "saksbehandlerNavn" to saksbehandler.navn,
             "saksbehandlerIdent" to saksbehandler.ident,
