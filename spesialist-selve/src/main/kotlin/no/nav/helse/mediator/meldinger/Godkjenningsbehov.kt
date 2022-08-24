@@ -202,7 +202,6 @@ internal class Godkjenningsbehov(
             hendelseId = id,
             automatisering = automatisering,
             godkjenningsbehovJson = json,
-            utbetalingtype = utbetalingtype,
             godkjenningMediator = godkjenningMediator,
         ),
         OpprettSaksbehandleroppgaveCommand(

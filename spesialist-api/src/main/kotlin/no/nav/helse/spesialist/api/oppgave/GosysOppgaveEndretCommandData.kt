@@ -8,7 +8,6 @@ data class GosysOppgaveEndretCommandData(
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
     val utbetalingId: UUID,
-    val utbetalingType: String,
     val hendelseId: UUID,
     val godkjenningsbehovJson: String,
 )

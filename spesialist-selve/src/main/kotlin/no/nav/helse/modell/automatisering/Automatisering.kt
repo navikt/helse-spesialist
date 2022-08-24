@@ -8,10 +8,10 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.erRevurdering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -44,17 +44,15 @@ internal class Automatisering(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
         utbetalingId: UUID,
-        utbetalingtype: Utbetalingtype,
         onAutomatiserbar: () -> Unit
     ) {
-        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId, utbetalingtype)
+        val problemer = vurder(fødselsnummer, vedtaksperiodeId, utbetalingId)
 
         val utfallslogger = { tekst: String ->
             sikkerLogg.info(
                 tekst,
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("utbetalingId", utbetalingId),
-                keyValue("utbetalingtype", utbetalingtype),
                 problemer
             )
         }
@@ -85,8 +83,7 @@ internal class Automatisering(
     private fun vurder(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-        utbetalingtype: Utbetalingtype
+        utbetalingId: UUID
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
@@ -111,7 +108,7 @@ internal class Automatisering(
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
             validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
             validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() },
-            validering("Utbetalingen er revurdering") { utbetalingtype != Utbetalingtype.REVURDERING },
+            validering("Utbetalingen er revurdering") { !vedtaksperiodensUtbetaling.erRevurdering() },
         )
     }
 

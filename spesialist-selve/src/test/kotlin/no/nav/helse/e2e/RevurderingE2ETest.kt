@@ -21,14 +21,15 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.UTBETALING_ID2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
-import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.Testdata.snapshotMedRevurderingUtbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -120,6 +121,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
             "EN_FAGSYSTEMID",
             utbetalingId = UTBETALING_ID2
         )
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotMedRevurderingUtbetaling(utbetalingId = UTBETALING_ID2)
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,

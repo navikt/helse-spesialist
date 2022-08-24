@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.api.oppgave.GosysOppgaveEndretCommandData
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -63,7 +62,6 @@ internal class GosysOppgaveEndretRiverTest {
             periodeFom = LocalDate.now(),
             periodeTom = LocalDate.now(),
             utbetalingId = UUID.randomUUID(),
-            utbetalingType = Utbetalingtype.UTBETALING.name,
             hendelseId = UUID.randomUUID(),
             godkjenningsbehovJson = "{}",
         )

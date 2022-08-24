@@ -12,7 +12,6 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.api.oppgave.GosysOppgaveEndretCommandData
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
@@ -61,7 +60,6 @@ internal class GosysOppgaveEndret(
             hendelseId = gosysOppgaveEndretCommandData.hendelseId,
             automatisering = automatisering,
             godkjenningsbehovJson = gosysOppgaveEndretCommandData.godkjenningsbehovJson,
-            utbetalingtype = Utbetalingtype.valueOf(gosysOppgaveEndretCommandData.utbetalingType),
             godkjenningMediator = godkjenningMediator,
             oppgaveMediator = oppgaveMediator
         )

@@ -7,6 +7,7 @@ import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.graphql.enums.Utbetalingtype
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
@@ -157,3 +158,5 @@ internal fun GraphQLUtbetaling?.utbetalingTilSykmeldt() = this != null && person
 internal fun GraphQLUtbetaling?.utbetalingTilArbeidsgiver() = this != null && arbeidsgiverNettoBelop != 0
 
 internal fun GraphQLUtbetaling?.delvisRefusjon() = utbetalingTilSykmeldt() && utbetalingTilArbeidsgiver()
+
+internal fun GraphQLUtbetaling?.erRevurdering() = this?.typeEnum == Utbetalingtype.REVURDERING

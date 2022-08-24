@@ -60,6 +60,18 @@ object Testdata {
         utbetalingId: UUID = UUID.randomUUID(),
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
+        utbetaling: GraphQLUtbetaling = GraphQLUtbetaling(
+            id = utbetalingId.toString(),
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
+            arbeidsgiverNettoBelop = arbeidsgiverbeløp,
+            personFagsystemId = "EN_FAGSYSTEMID",
+            personNettoBelop = personbeløp,
+            statusEnum = GraphQLUtbetalingstatus.UBETALT,
+            typeEnum = Utbetalingtype.UTBETALING,
+            vurdering = null,
+            personoppdrag = null,
+            arbeidsgiveroppdrag = null
+        ),
         aktivitetslogg: List<GraphQLAktivitet> = emptyList()
     ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
@@ -79,18 +91,7 @@ object Testdata {
                                         GraphQLBeregnetPeriode(
                                             id = UUID.randomUUID().toString(),
                                             vedtaksperiodeId = vedtaksperiodeId.toString(),
-                                            utbetaling = GraphQLUtbetaling(
-                                                id = utbetalingId.toString(),
-                                                arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
-                                                arbeidsgiverNettoBelop = arbeidsgiverbeløp,
-                                                personFagsystemId = "EN_FAGSYSTEMID",
-                                                personNettoBelop = personbeløp,
-                                                statusEnum = GraphQLUtbetalingstatus.UBETALT,
-                                                typeEnum = Utbetalingtype.UTBETALING,
-                                                vurdering = null,
-                                                personoppdrag = null,
-                                                arbeidsgiveroppdrag = null
-                                            ),
+                                            utbetaling = utbetaling,
                                             erForkastet = false,
                                             fom = "2020-01-01",
                                             tom = "2020-01-31",
@@ -139,4 +140,28 @@ object Testdata {
             )
         }
 
+    fun snapshotMedRevurderingUtbetaling(
+        versjon: Int = 1,
+        fødselsnummer: String = FØDSELSNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID,
+        arbeidsgiverbeløp: Int = 30000,
+        personbeløp: Int = 0,
+        aktivitetslogg: List<GraphQLAktivitet> = emptyList()
+    ): GraphQLClientResponse<HentSnapshot.Result> =
+        snapshot(
+            versjon, fødselsnummer, vedtaksperiodeId, utbetalingId,
+            utbetaling = GraphQLUtbetaling(
+                id = utbetalingId.toString(),
+                arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
+                arbeidsgiverNettoBelop = arbeidsgiverbeløp,
+                personFagsystemId = "EN_FAGSYSTEMID",
+                personNettoBelop = personbeløp,
+                statusEnum = GraphQLUtbetalingstatus.UBETALT,
+                typeEnum = Utbetalingtype.REVURDERING,
+            ),
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+            aktivitetslogg = aktivitetslogg
+        )
 }
