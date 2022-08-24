@@ -38,6 +38,7 @@ internal class VedtaksperiodeEndret(
             fødselsnummer = fødselsnummer,
             warningDao = warningDao,
             personDao = personDao,
+            json = json
         )
     )
 

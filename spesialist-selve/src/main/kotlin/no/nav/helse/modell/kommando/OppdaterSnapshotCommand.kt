@@ -6,6 +6,7 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.objectMapper
 import org.slf4j.LoggerFactory
 
 internal class OppdaterSnapshotCommand(
@@ -15,6 +16,7 @@ internal class OppdaterSnapshotCommand(
     private val fødselsnummer: String,
     private val warningDao: WarningDao,
     private val personDao: PersonDao,
+    private val json: String
 ) : Command {
 
     private companion object {
@@ -27,6 +29,10 @@ internal class OppdaterSnapshotCommand(
     }
 
     private fun oppdaterSnapshot(): Boolean {
+        if (objectMapper.readTree(json)["aktørId"]?.asText() == "1000041572215") {
+            sikkerlogger.warn("Henter ikke nytt snapshot for aktørId=1000041572215")
+            return true
+        }
         log.info("oppdaterer snapshot for vedtaksperiodeId=$vedtaksperiodeId")
         sikkerlogger.info("Oppdaterer snapshot for vedtaksperiodeId=$vedtaksperiodeId, fødselsnummer=$fødselsnummer")
         return snapshotClient.hentSnapshot(fnr = fødselsnummer).data?.person?.let { person ->

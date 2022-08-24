@@ -45,6 +45,7 @@ internal class VedtaksperiodeForkastet(
             fødselsnummer = fødselsnummer,
             warningDao = warningDao,
             personDao = personDao,
+            json = json
         )
     )
 
