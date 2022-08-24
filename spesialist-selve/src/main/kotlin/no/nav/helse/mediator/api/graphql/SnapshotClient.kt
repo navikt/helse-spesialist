@@ -82,7 +82,7 @@ class SnapshotClient(
         val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
-        val response = httpClient.preparePost(spleisUrl.resolve("graphql").toURL()) {
+        val response = httpClient.preparePost(spleisUrl.resolve("/graphql").toURL()) {
             header("Authorization", "Bearer $accessToken")
             header("callId", callId)
             contentType(ContentType.Application.Json)
