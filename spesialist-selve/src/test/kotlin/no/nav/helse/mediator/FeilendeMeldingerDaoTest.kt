@@ -31,7 +31,21 @@ internal class FeilendeMeldingerDaoTest: DatabaseIntegrationTest() {
             assertNotNull(it.opprettet)
             assertEquals(id, UUID.fromString(it.json["@id"].asText()))
         }
+    }
 
+    @Test
+    fun `feiler ikke om vi forsøker å lagre samme melding flere ganger`() {
+        val hendelse = "duplikat_hendelse"
+        val id = UUID.randomUUID()
+        @Language("JSON")
+        val json = """
+            {
+              "@id": "${UUID.randomUUID()}",
+              "@event_name": "duplikat_hendelse"
+            }
+        """
+        feilendeMeldingerDao.lagre(id, hendelse, json)
+        feilendeMeldingerDao.lagre(id, hendelse, json)
     }
 
     private fun feilendeMeldinger(): List<FeiletMelding> {

@@ -13,7 +13,7 @@ Det er ikke noen nåværende funksjonalitet for å gjøre noe med dem, men det e
 internal class FeilendeMeldingerDao(private val dataSource: DataSource) {
     internal fun lagre(id: UUID, eventName: String, blob: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
-        val statement = "INSERT INTO feilende_meldinger (id, event_name, blob) VALUES (?, ?, ?::json)"
+        val statement = "INSERT INTO feilende_meldinger (id, event_name, blob) VALUES (?, ?, ?::json) ON CONFLICT (id) DO NOTHING"
         session.run(queryOf(statement, id, eventName, blob).asExecute)
     }
 }
