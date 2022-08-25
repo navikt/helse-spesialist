@@ -10,7 +10,7 @@ SELECT o.hendelse_id,
        }'::json
 FROM overstyring o
          JOIN person p ON p.id = o.person_ref
-WHERE hendelse_id in (
+WHERE o.hendelse_id in (
                       '63de7175-0585-432b-adf8-c9b50ee0e077',
                       'bb2b7d24-cae7-4630-9f84-11f3e33e6856',
                       'fe992607-7aa1-47c2-8844-eae8b854ff3a',
