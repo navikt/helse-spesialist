@@ -11,11 +11,12 @@ class OverstyringApiDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val finnOverstyringQuery = """
             SELECT o.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
-                INNER JOIN overstyring_dag od ON o.id = od.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = o.arbeidsgiver_ref
                 INNER JOIN saksbehandler s ON s.oid = o.saksbehandler_ref
-            WHERE p.fodselsnummer = ? AND a.orgnummer = ?
+            WHERE p.fodselsnummer = ? 
+            AND a.orgnummer = ?
+            AND o.id IN (SELECT overstyring_ref FROM overstyring_dag)
         """
         session.run(
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())

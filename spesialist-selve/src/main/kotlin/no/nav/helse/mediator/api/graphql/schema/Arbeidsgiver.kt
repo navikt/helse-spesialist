@@ -125,10 +125,10 @@ data class Arbeidsgiver(
     fun overstyringer(): List<Overstyring> =
         overstyringApiDao.finnOverstyringerAvTidslinjer(fødselsnummer, organisasjonsnummer)
             .map { it.tilDagoverstyring() } +
-                overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
-                    .map { it.tilInntektoverstyring() } +
-                overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
-                    .map { it.tilArbeidsforholdoverstyring() }
+        overstyringApiDao.finnOverstyringerAvInntekt(fødselsnummer, organisasjonsnummer)
+            .map { it.tilInntektoverstyring() } +
+        overstyringApiDao.finnOverstyringerAvArbeidsforhold(fødselsnummer, organisasjonsnummer)
+            .map { it.tilArbeidsforholdoverstyring() }
 
     fun arbeidsforhold(): List<Arbeidsforhold> =
         arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
