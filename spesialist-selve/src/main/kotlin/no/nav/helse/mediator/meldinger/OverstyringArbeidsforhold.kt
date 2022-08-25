@@ -58,7 +58,7 @@ internal class OverstyringArbeidsforhold(
         ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),
         PersisterOverstyringArbeidsforholdCommand(
             oid = oid,
-            eventId = id,
+            hendelseId = id,
             fødselsnummer = fødselsnummer,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -74,8 +74,10 @@ internal class OverstyringArbeidsforhold(
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_arbeidsforhold",
+            hendelseId = id,
             json = json,
-            overstyringMediator = overstyringMediator
+            overstyringMediator = overstyringMediator,
+            overstyringDao = overstyringDao,
         )
     )
     override fun fødselsnummer(): String = fødselsnummer

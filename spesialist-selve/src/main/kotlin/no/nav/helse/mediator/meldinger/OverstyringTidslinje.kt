@@ -66,7 +66,7 @@ internal class OverstyringTidslinje(
         ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),
         PersisterOverstyringTidslinjeCommand(
             oid = oid,
-            eventId = id,
+            hendelseId = id,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
             begrunnelse = begrunnelse,
@@ -85,8 +85,10 @@ internal class OverstyringTidslinje(
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_tidslinje",
+            hendelseId = id,
             json = json,
-            overstyringMediator = overstyringMediator
+            overstyringMediator = overstyringMediator,
+            overstyringDao = overstyringDao,
         )
     )
 

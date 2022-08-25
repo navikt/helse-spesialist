@@ -23,6 +23,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         private val PERSON_KJØNN = Kjønn.Ukjent
         private const val ARBEIDSGIVER_NAVN = "Skrue Mc Duck"
         private val ID = UUID.randomUUID()
+        private val EKSTERN_HENDELSE_ID = UUID.randomUUID()
         private const val FØDSELSNUMMER = "12020052345"
         private const val DEAKTIVERT = true
         private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
@@ -77,7 +78,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             automatiseringDao = automatiseringDao,
             overstyringMediator = mockk(),
         ))
-        overstyringDao.persisterOverstyringTidslinje(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
+        overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvTidslinjer(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
@@ -95,7 +96,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     fun `Finner opprettede inntektoverstyringer`() {
         opprettPerson()
         overstyrInntekt(ID)
-        overstyringDao.persisterOverstyringInntekt(ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, FORKLARING, OID, INNTEKT, SKJÆRINGSTIDSPUNKT, OPPRETTET)
+        overstyringDao.persisterOverstyringInntekt(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, FORKLARING, OID, INNTEKT, SKJÆRINGSTIDSPUNKT, OPPRETTET)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
@@ -140,6 +141,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         ))
         overstyringDao.persisterOverstyringArbeidsforhold(
             ID,
+            EKSTERN_HENDELSE_ID,
             FØDSELSNUMMER,
             ORGNUMMER,
             BEGRUNNELSE,

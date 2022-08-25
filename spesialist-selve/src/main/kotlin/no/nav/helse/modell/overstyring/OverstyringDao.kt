@@ -6,12 +6,21 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
 
-class OverstyringDao(private val dataSource: DataSource) {
+class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
+
+    // Skal ikke kunne være null for fremtidige overstyringer. Vær obs hvis den skal brukes på eldre data.
+    fun finnEksternHendelseIdFraHendelseId(hendelseId: UUID) = requireNotNull(
+        """ SELECT ekstern_hendelse_id FROM overstyring o
+            WHERE o.hendelse_ref = :hendelseId
+        """.single(mapOf("hendelseId" to hendelseId)) { row -> row.uuid("ekstern_hendelse_id") })
+
     fun persisterOverstyringTidslinje(
         hendelseId: UUID,
+        eksternHendelseId: UUID,
         fødselsnummer: String,
         organisasjonsnummer: String,
         begrunnelse: String,
@@ -22,8 +31,8 @@ class OverstyringDao(private val dataSource: DataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
                 FROM arbeidsgiver ag,
                      person p
                 WHERE p.fodselsnummer = :fodselsnummer
@@ -41,6 +50,7 @@ class OverstyringDao(private val dataSource: DataSource) {
                     opprettOverstyringQuery,
                     mapOf(
                         "hendelse_id" to hendelseId,
+                        "ekstern_hendelse_id" to eksternHendelseId,
                         "fodselsnummer" to fødselsnummer.toLong(),
                         "orgnr" to organisasjonsnummer.toLong(),
                         "begrunnelse" to begrunnelse,
@@ -69,6 +79,7 @@ class OverstyringDao(private val dataSource: DataSource) {
 
     fun persisterOverstyringInntekt(
         hendelseId: UUID,
+        eksternHendelseId: UUID,
         fødselsnummer: String,
         organisasjonsnummer: String,
         begrunnelse: String,
@@ -81,8 +92,8 @@ class OverstyringDao(private val dataSource: DataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
                 FROM arbeidsgiver ag,
                      person p
                 WHERE p.fodselsnummer = :fodselsnummer
@@ -100,6 +111,7 @@ class OverstyringDao(private val dataSource: DataSource) {
                     opprettOverstyringQuery,
                     mapOf(
                         "hendelse_id" to hendelseId,
+                        "ekstern_hendelse_id" to eksternHendelseId,
                         "begrunnelse" to begrunnelse,
                         "saksbehandler_ref" to saksbehandlerRef,
                         "tidspunkt" to tidspunkt,
@@ -125,6 +137,7 @@ class OverstyringDao(private val dataSource: DataSource) {
 
     fun persisterOverstyringArbeidsforhold(
         hendelseId: UUID,
+        eksternHendelseId: UUID,
         fødselsnummer: String,
         organisasjonsnummer: String,
         begrunnelse: String,
@@ -137,8 +150,8 @@ class OverstyringDao(private val dataSource: DataSource) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val opprettOverstyringQuery = """
-                INSERT INTO overstyring(hendelse_ref, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
-                SELECT :hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
                 FROM arbeidsgiver ag,
                      person p
                 WHERE p.fodselsnummer = :fodselsnummer
@@ -156,6 +169,7 @@ class OverstyringDao(private val dataSource: DataSource) {
                     opprettOverstyringQuery,
                     mapOf(
                         "hendelse_id" to hendelseId,
+                        "ekstern_hendelse_id" to eksternHendelseId,
                         "begrunnelse" to begrunnelse,
                         "saksbehandler_ref" to saksbehandlerRef,
                         "tidspunkt" to tidspunkt,

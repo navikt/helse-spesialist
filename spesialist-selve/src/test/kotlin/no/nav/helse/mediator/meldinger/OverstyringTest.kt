@@ -54,7 +54,7 @@ internal class OverstyringTest {
         overstyringMediator = mockk(relaxed = true),
     )
 
-    private val overstyringMessage = hendelsefabrikk.overstyringTidslinje(
+    private val overstyringAvTidslinjeMessage = hendelsefabrikk.overstyringTidslinje(
         id = ID,
         fødselsnummer = FØDSELSNUMMER,
         oid = OID,
@@ -76,16 +76,18 @@ internal class OverstyringTest {
     }
 
     @Test
-    fun `Persisterer overstyring`() {
+    fun `Persisterer overstyring av tidslinje`() {
         every { oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(any(),any(),any(), any()) } returns(null)
 
-        overstyringMessage.execute(context)
+        overstyringAvTidslinjeMessage.execute(context)
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
         verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
+        verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
         verify(exactly = 1) {
             overstyringDao.persisterOverstyringTidslinje(
                 hendelseId = ID,
+                eksternHendelseId = any(), // Vi kan ikke asserte denne fordi den blir generert inne i context
                 fødselsnummer = FØDSELSNUMMER,
                 organisasjonsnummer = ORGNUMMER,
                 begrunnelse = BEGRUNNELSE,

@@ -7,7 +7,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 
 internal class PersisterOverstyringInntektCommand(
     private val oid: UUID,
-    private val eventId: UUID,
+    private val hendelseId: UUID,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val begrunnelse: String,
@@ -19,7 +19,8 @@ internal class PersisterOverstyringInntektCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         overstyringDao.persisterOverstyringInntekt(
-            hendelseId = eventId,
+            hendelseId = hendelseId,
+            eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             begrunnelse = begrunnelse,

@@ -68,7 +68,7 @@ internal class OverstyringInntekt(
         ReserverPersonCommand(oid, fødselsnummer, reservasjonDao),
         PersisterOverstyringInntektCommand(
             oid = oid,
-            eventId = id,
+            hendelseId = id,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = orgnummer,
             begrunnelse = begrunnelse,
@@ -89,8 +89,10 @@ internal class OverstyringInntekt(
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_inntekt",
+            hendelseId = id,
             json = json,
-            overstyringMediator = overstyringMediator
+            overstyringMediator = overstyringMediator,
+            overstyringDao = overstyringDao,
         )
     )
 

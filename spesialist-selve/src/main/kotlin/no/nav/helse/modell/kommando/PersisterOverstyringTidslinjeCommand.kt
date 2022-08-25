@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 
 internal class PersisterOverstyringTidslinjeCommand(
     private val oid: UUID,
-    private val eventId: UUID,
+    private val hendelseId: UUID,
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val begrunnelse: String,
@@ -17,7 +17,8 @@ internal class PersisterOverstyringTidslinjeCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         overstyringDao.persisterOverstyringTidslinje(
-            hendelseId = eventId,
+            hendelseId = hendelseId,
+            eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             begrunnelse = begrunnelse,

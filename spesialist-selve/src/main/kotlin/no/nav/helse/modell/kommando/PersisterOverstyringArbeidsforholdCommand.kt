@@ -8,7 +8,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 
 internal class PersisterOverstyringArbeidsforholdCommand(
     private val oid: UUID,
-    private val eventId: UUID,
+    private val hendelseId: UUID,
     private val fødselsnummer: String,
     private val overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
     private val skjæringstidspunkt: LocalDate,
@@ -18,7 +18,8 @@ internal class PersisterOverstyringArbeidsforholdCommand(
     override fun execute(context: CommandContext): Boolean {
         overstyrteArbeidsforhold.forEach {
             overstyringDao.persisterOverstyringArbeidsforhold(
-                hendelseId = eventId,
+                hendelseId = hendelseId,
+                eksternHendelseId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = it.orgnummer,
                 deaktivert = it.deaktivert,
