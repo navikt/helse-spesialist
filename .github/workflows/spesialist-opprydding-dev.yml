@@ -10,6 +10,7 @@ on:
       - 'build.gradle.kts'
       - '.github/workflows/spesialist-opprydding-dev.yml'
       - 'deploy/dev-opprydding.yml'
+      - '.dockerignore'
 
 jobs:
   set_version:
