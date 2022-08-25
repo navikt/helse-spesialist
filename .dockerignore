@@ -3,3 +3,4 @@
 
 # Except jar files
 !spesialist-selve/build/libs/**
+!spesialist-opprydding-dev/build/libs/**
