@@ -201,7 +201,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
                 allowHeader(HttpHeaders.AccessControlAllowOrigin)
-                allowHost("speil.nais.adeo.no", listOf("https"))
                 allowHost("spesialist.dev.intern.nav.no", listOf("https"))
             }
             install(CallId) {
