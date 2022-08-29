@@ -33,7 +33,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         forrigeTilstand: String = "FORRIGE_TILSTAND",
-        gjeldendeTilstand: String = "GJELDENDE_TILSTAND"
+        gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
+        forårsaketAvId: UUID = UUID.randomUUID(),
     ) =
         nyHendelse(
             id, "vedtaksperiode_endret", mapOf(
@@ -42,7 +43,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "gjeldendeTilstand" to gjeldendeTilstand,
-                "forrigeTilstand" to forrigeTilstand
+                "forrigeTilstand" to forrigeTilstand,
+                "@forårsaket_av" to mapOf(
+                    "id" to forårsaketAvId
+                )
             )
         )
 

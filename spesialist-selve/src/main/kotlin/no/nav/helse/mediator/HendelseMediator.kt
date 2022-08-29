@@ -7,7 +7,6 @@ import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.annulleringsteller
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
@@ -21,13 +20,13 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
 import no.nav.helse.mediator.meldinger.EgenAnsattløsning
+import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
-import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -53,17 +52,18 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.overstyringsteller
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgave
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
-import no.nav.helse.overstyringsteller
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
@@ -238,9 +238,10 @@ internal class HendelseMediator(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
+        forårsaketAvId: UUID,
         context: MessageContext
     ) {
-        val hendelse = hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, message.toJson())
+        val hendelse = hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, forårsaketAvId, message.toJson())
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
             sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")

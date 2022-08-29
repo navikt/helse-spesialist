@@ -9,9 +9,9 @@ import javax.sql.DataSource
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
-import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -415,17 +415,20 @@ internal class Hendelsefabrikk(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
+        forårsaketAvId: UUID,
         json: String
     ): VedtaksperiodeEndret {
         return VedtaksperiodeEndret(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
+            forårsaketAvId = forårsaketAvId,
             json = json,
             warningDao = warningDao,
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             personDao = personDao,
+            overstyringDao = overstyringDao,
         )
     }
 
@@ -435,6 +438,7 @@ internal class Hendelsefabrikk(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            forårsaketAvId = UUID.fromString(jsonNode.path("@forårsaket_av.id").asText()),
             json = json
         )
     }

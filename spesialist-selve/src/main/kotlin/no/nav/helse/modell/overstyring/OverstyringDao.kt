@@ -12,6 +12,29 @@ import org.intellij.lang.annotations.Language
 
 class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
+    fun kobleOverstyringOgVedtaksperiode(vedtaksperiodeId: UUID, overstyringHendelseId: UUID) =
+        """ INSERT INTO overstyringer_for_vedtaksperioder (vedtaksperiode_id, overstyring_ref)
+            SELECT :vedtaksperiode_id, o.id
+            FROM overstyring o
+            WHERE o.ekstern_hendelse_id = :overstyring_hendelse_id
+            ON CONFLICT DO NOTHING
+        """.update(
+            mapOf(
+                "vedtaksperiode_id" to vedtaksperiodeId,
+                "overstyring_hendelse_id" to overstyringHendelseId,
+            )
+        )
+
+    fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
+        """ SELECT 1 FROM overstyringer_for_vedtaksperioder
+            WHERE vedtaksperiode_id = :vedtaksperiode_id
+        """.single(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { row -> row.boolean(1) } ?: false
+
+    fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =
+        """ SELECT 1 from overstyring 
+            WHERE ekstern_hendelse_id = :eksternHendelseId
+        """.single(mapOf("eksternHendelseId" to eksternHendelseId)) { row -> row.boolean(1) } ?: false
+
     // Skal ikke kunne være null for fremtidige overstyringer. Vær obs hvis den skal brukes på eldre data.
     fun finnEksternHendelseIdFraHendelseId(hendelseId: UUID) = requireNotNull(
         """ SELECT ekstern_hendelse_id FROM overstyring o

@@ -65,6 +65,7 @@ INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad) VALUES (${
 INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring) VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING');
 INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt) VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01');
 INSERT INTO overstyrt_vedtaksperiode(id, vedtaksperiode_id, type, ferdigstilt) VALUES (${sequence_number}, '${vedtaksperiode_id}', 'Inntekt'::overstyringtype, false);
+INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number});
 
 INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref) VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
 INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag) VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP', 'NY', '2018-01-01');

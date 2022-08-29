@@ -12,6 +12,8 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverstyringDaoTest : DatabaseIntegrationTest() {
@@ -53,6 +55,65 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         val navn_ref = personDao.insertPersoninfo(PERSON_FORNAVN, null, PERSON_ETTERNAVN, PERSON_FØDSELSDATO, PERSON_KJØNN, ADRESSEBESKYTTELSE)
         val infotrygdutbetaling_ref = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
         personDao.insertPerson(FØDSELSNUMMER, AKTØR_ID, navn_ref, 420, infotrygdutbetaling_ref)
+    }
+
+    @Test
+    fun `Kan koble overstyringhendelse og vedtaksperiode`() {
+        opprettPerson()
+        hendelseDao.opprett(OverstyringTidslinje(
+            id = ID,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            orgnummer = ORGNUMMER,
+            begrunnelse = BEGRUNNELSE,
+            overstyrteDager = OVERSTYRTE_DAGER,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            automatiseringDao = automatiseringDao,
+            overstyringMediator = mockk(),
+        ))
+        overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
+        overstyringDao.kobleOverstyringOgVedtaksperiode(VEDTAKSPERIODE, EKSTERN_HENDELSE_ID)
+
+        assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
+        assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(UUID.randomUUID()))
+    }
+
+    @Test
+    fun `Finnes ekstern_hendelse_id i overstyringtabell`() {
+        opprettPerson()
+        hendelseDao.opprett(OverstyringTidslinje(
+            id = ID,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            orgnummer = ORGNUMMER,
+            begrunnelse = BEGRUNNELSE,
+            overstyrteDager = OVERSTYRTE_DAGER,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            automatiseringDao = automatiseringDao,
+            overstyringMediator = mockk(),
+        ))
+        overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
+
+        assertTrue(overstyringDao.finnesEksternHendelseId(EKSTERN_HENDELSE_ID))
+        assertFalse(overstyringDao.finnesEksternHendelseId(UUID.randomUUID()))
     }
 
     @Test
