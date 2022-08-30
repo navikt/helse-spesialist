@@ -2,10 +2,13 @@ package no.nav.helse.e2e
 
 import AbstractE2ETest
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendOverstyrteDager
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -29,6 +32,16 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             skjæringstidspunkt = 1.januar,
             forklaring = "vår egen forklaring",
             subsumsjon = null
+        )
+        val ekstern_hendelse_id = testRapid.inspektør.hendelser("overstyr_inntekt").first().let {
+            UUID.fromString(it.path("@id").asText())
+        }
+        sendVedtaksperiodeEndret(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "FORRIGE_TILSTAND",
+            gjeldendeTilstand = "GJELDENDE_TILSTAND",
+            forårsaketAvId = ekstern_hendelse_id
         )
         val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
 
@@ -62,6 +75,17 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                 )
             )
         )
+        val ekstern_hendelse_id = testRapid.inspektør.hendelser("overstyr_arbeidsforhold").first().let {
+            UUID.fromString(it.path("@id").asText())
+        }
+        sendVedtaksperiodeEndret(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "FORRIGE_TILSTAND",
+            gjeldendeTilstand = "GJELDENDE_TILSTAND",
+            forårsaketAvId = ekstern_hendelse_id
+        )
+
         val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
@@ -92,6 +116,17 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                 )
             )
         )
+        val ekstern_hendelse_id = testRapid.inspektør.hendelser("overstyr_tidslinje").first().let {
+            UUID.fromString(it.path("@id").asText())
+        }
+        sendVedtaksperiodeEndret(
+            orgnr = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "FORRIGE_TILSTAND",
+            gjeldendeTilstand = "GJELDENDE_TILSTAND",
+            forårsaketAvId = ekstern_hendelse_id
+        )
+
         val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(

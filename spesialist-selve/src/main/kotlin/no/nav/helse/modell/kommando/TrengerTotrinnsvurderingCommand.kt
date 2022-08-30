@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
@@ -14,7 +15,7 @@ internal class TrengerTotrinnsvurderingCommand(
     private val vedtaksperiodeId: UUID,
     private val warningDao: WarningDao,
     private val oppgaveMediator: OppgaveMediator,
-    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
+    private val overstyringDao: OverstyringDao,
 ) : Command {
 
     private companion object {
@@ -63,7 +64,7 @@ internal class TrengerTotrinnsvurderingCommand(
 
     // Overstyringer og Revurderinger
     private fun finnOverstyringerMedType(): List<OverstyringType> {
-        val vedtaksperiodeOverstyringtyper = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(vedtaksperiodeId)
+        val vedtaksperiodeOverstyringtyper = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
 
         logg.info("Vedtaksperioden: $vedtaksperiodeId har blitt overstyrt eller revurdert med typer: $vedtaksperiodeOverstyringtyper")
 

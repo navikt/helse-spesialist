@@ -6,11 +6,11 @@ import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
-import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -25,14 +25,14 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
-    private val overstyrtVedtaksperiodeDao = mockk<OverstyrtVedtaksperiodeDao>(relaxed = true)
+    private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private lateinit var context: CommandContext
 
     private val command = TrengerTotrinnsvurderingCommand(
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao
+        overstyringDao = overstyringDao
     )
 
     @BeforeEach
@@ -57,7 +57,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
 
     @Test
     fun `Setter trenger totrinnsvudering dersom oppgaven ikke har blitt overstyrt`() {
-        every { overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(any()) } returns listOf(OverstyringType.Dager)
+        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }

@@ -25,7 +25,8 @@ internal object Meldingssender {
         orgnr: String = "orgnr",
         vedtaksperiodeId: UUID,
         forrigeTilstand: String = "FORRIGE_TILSTAND",
-        gjeldendeTilstand: String = "GJELDENDE_TILSTAND"
+        gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
+        forårsaketAvId: UUID = UUID.randomUUID(),
     ): UUID = uuid.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVedtaksperiodeEndret(
@@ -33,7 +34,8 @@ internal object Meldingssender {
                 vedtaksperiodeId,
                 orgnr,
                 forrigeTilstand,
-                gjeldendeTilstand
+                gjeldendeTilstand,
+                forårsaketAvId,
             )
         )
     }

@@ -155,8 +155,8 @@ internal class Hendelsefabrikk(
             automatisering = automatisering,
             godkjenningMediator = godkjenningMediator,
             utbetalingDao = utbetalingDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
             periodehistorikkDao = periodehistorikkDao,
+            overstyringDao = overstyringDao,
         )
     }
 
