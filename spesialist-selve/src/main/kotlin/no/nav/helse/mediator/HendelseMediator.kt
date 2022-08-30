@@ -48,6 +48,7 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -88,6 +89,7 @@ internal class HendelseMediator(
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
+    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -192,6 +194,7 @@ internal class HendelseMediator(
 
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
         overstyrtVedtaksperiodeDao.ferdigstillOverstyringAvVedtaksperiode(vedtaksperiodeId)
+        overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
         if (erBeslutteroppgave && godkjenningDTO.godkjent) {
             internOppgaveMediator.lagrePeriodehistorikk(godkjenningDTO.oppgavereferanse, periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT)

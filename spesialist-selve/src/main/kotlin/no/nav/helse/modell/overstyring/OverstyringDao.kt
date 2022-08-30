@@ -12,6 +12,19 @@ import org.intellij.lang.annotations.Language
 
 class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
+    fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
+        """ UPDATE overstyring
+            SET ferdigstilt = true
+            WHERE id IN (
+                SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
+                WHERE vedtaksperiode_id = :vedtaksperiode_id
+            )
+        """.update(
+            mapOf(
+                "vedtaksperiode_id" to vedtaksperiodeId
+            )
+        )
+
     fun kobleOverstyringOgVedtaksperiode(vedtaksperiodeId: UUID, overstyringHendelseId: UUID) =
         """ INSERT INTO overstyringer_for_vedtaksperioder (vedtaksperiode_id, overstyring_ref)
             SELECT :vedtaksperiode_id, o.id
