@@ -10,6 +10,7 @@ import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.erRevurdering
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetalingTilSykmeldt
@@ -27,6 +28,7 @@ internal class Automatisering(
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
     private val snapshotDao: SnapshotDao,
+    private val overstyringDao: OverstyringDao,
     private val plukkTilManuell: PlukkTilManuell,
 ) {
     private companion object {
@@ -95,6 +97,7 @@ internal class Automatisering(
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
         val vedtaksperiodensUtbetaling = snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId)
+        val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
 
         return valider(
             risikovurdering,
@@ -109,6 +112,7 @@ internal class Automatisering(
             validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
             validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() },
             validering("Utbetalingen er revurdering") { !vedtaksperiodensUtbetaling.erRevurdering() },
+            validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
         )
     }
 

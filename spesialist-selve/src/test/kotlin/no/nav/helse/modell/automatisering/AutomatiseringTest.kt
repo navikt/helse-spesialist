@@ -15,6 +15,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -42,6 +43,7 @@ internal class AutomatiseringTest {
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val plukkTilManuellMock = mockk<PlukkTilManuell>()
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
+    private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
 
     private val automatisering =
         Automatisering(
@@ -55,6 +57,7 @@ internal class AutomatiseringTest {
             plukkTilManuell = plukkTilManuellMock,
             vergemålDao = vergemålDaoMock,
             snapshotDao = snapshotDao,
+            overstyringDao = overstyringDaoMock,
         )
 
     companion object {
@@ -72,6 +75,7 @@ internal class AutomatiseringTest {
         every { digitalKontaktinformasjonDaoMock.erDigital(any()) } returns true
         every { åpneGosysOppgaverDaoMock.harÅpneOppgaver(any()) } returns 0
         every { egenAnsattDao.erEgenAnsatt(any()) } returns false
+        every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
         every { plukkTilManuellMock() } returns false
     }
 
@@ -172,6 +176,13 @@ internal class AutomatiseringTest {
         )
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId) { fail("Denne skal ikke kalles") }
     }
+
+    @Test
+    fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
+        every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId) { fail("Denne skal ikke kalles") }
+    }
+
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0, type: no.nav.helse.mediator.graphql.enums.Utbetalingtype = UTBETALING ): GraphQLUtbetaling =
         GraphQLUtbetaling(

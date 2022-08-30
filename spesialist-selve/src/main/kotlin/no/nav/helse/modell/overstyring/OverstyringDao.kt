@@ -39,8 +39,10 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         )
 
     fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
-        """ SELECT 1 FROM overstyringer_for_vedtaksperioder
-            WHERE vedtaksperiode_id = :vedtaksperiode_id
+        """ SELECT 1 FROM overstyringer_for_vedtaksperioder ofv
+            JOIN overstyring o ON o.id = ofv.overstyring_ref
+            WHERE ofv.vedtaksperiode_id = :vedtaksperiode_id
+            AND o.ferdigstilt = false
         """.single(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { row -> row.boolean(1) } ?: false
 
     fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =

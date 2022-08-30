@@ -57,6 +57,7 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
@@ -122,6 +123,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val notatDao = NotatDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     protected val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
+    private val overstyringDao = OverstyringDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
@@ -146,6 +148,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtakDao = vedtakDao,
             vergemålDao = vergemålDao,
             snapshotDao = snapshotDao,
+            overstyringDao = overstyringDao,
         ) { false },
     )
     internal val hendelseMediator = HendelseMediator(

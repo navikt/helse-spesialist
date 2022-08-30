@@ -60,6 +60,7 @@ import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
+import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingMediator
@@ -179,6 +180,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val snapshotDao = SnapshotDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
+    private val overstyringDao = OverstyringDao(dataSource)
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
@@ -298,6 +300,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         plukkTilManuell = plukkTilManuell,
         vergemålDao = vergemålDao,
         snapshotDao = snapshotDao,
+        overstyringDao = overstyringDao,
     )
 
     val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao)

@@ -117,6 +117,37 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Vedtaksperiode har ikke pågående overstyring etter ferdigstilling`() {
+        opprettPerson()
+        hendelseDao.opprett(OverstyringTidslinje(
+            id = ID,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            orgnummer = ORGNUMMER,
+            begrunnelse = BEGRUNNELSE,
+            overstyrteDager = OVERSTYRTE_DAGER,
+            opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            overstyringDao = overstyringDao,
+            oppgaveDao = oppgaveDao,
+            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
+            automatiseringDao = automatiseringDao,
+            overstyringMediator = mockk(),
+        ))
+        overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
+        overstyringDao.kobleOverstyringOgVedtaksperiode(VEDTAKSPERIODE, EKSTERN_HENDELSE_ID)
+
+        assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
+        overstyringDao.ferdigstillOverstyringerForVedtaksperiode(VEDTAKSPERIODE)
+        assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
+    }
+
+    @Test
     fun `Finner opprettede tidslinjeoverstyringer`() {
         opprettPerson()
         hendelseDao.opprett(OverstyringTidslinje(
