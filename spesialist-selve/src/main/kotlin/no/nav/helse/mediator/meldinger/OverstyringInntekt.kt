@@ -6,13 +6,11 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringInntektCommand
-import no.nav.helse.modell.kommando.PersisterTotrinnsvurderingInntektCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -22,8 +20,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.slf4j.Logger
@@ -52,9 +48,6 @@ internal class OverstyringInntekt(
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
     overstyringDao: OverstyringDao,
-    oppgaveDao: OppgaveDao,
-    overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao,
-    automatiseringDao: AutomatiseringDao,
     overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
@@ -77,14 +70,6 @@ internal class OverstyringInntekt(
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
             overstyringDao = overstyringDao
-        ),
-        PersisterTotrinnsvurderingInntektCommand(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = orgnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            automatiseringDao = automatiseringDao,
         ),
         InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(

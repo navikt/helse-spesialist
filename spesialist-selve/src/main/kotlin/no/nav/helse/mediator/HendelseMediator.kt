@@ -62,7 +62,6 @@ import no.nav.helse.spesialist.api.oppgave.Oppgave
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -83,7 +82,6 @@ internal class HendelseMediator(
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
-    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao,
     private val oppgaveMediator: OppgaveMediator,
@@ -193,7 +191,6 @@ internal class HendelseMediator(
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
 
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
-        overstyrtVedtaksperiodeDao.ferdigstillOverstyringAvVedtaksperiode(vedtaksperiodeId)
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
         if (erBeslutteroppgave && godkjenningDTO.godkjent) {

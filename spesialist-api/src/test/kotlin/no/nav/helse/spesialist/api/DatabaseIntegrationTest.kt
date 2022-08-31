@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
@@ -33,7 +32,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
     protected val notatDao = NotatDao(dataSource)
     protected val personApiDao = PersonApiDao(dataSource)
-    protected val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
 
     protected fun nyVedtaksperiode() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         val (id, fom, tom) = PERIODE

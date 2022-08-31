@@ -75,9 +75,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            automatiseringDao = automatiseringDao,
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
@@ -105,9 +102,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            automatiseringDao = automatiseringDao,
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
@@ -134,9 +128,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            automatiseringDao = automatiseringDao,
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
@@ -165,9 +156,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            automatiseringDao = automatiseringDao,
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
@@ -227,8 +215,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringArbeidsforhold(
@@ -275,9 +261,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
             overstyringDao = overstyringDao,
-            oppgaveDao = oppgaveDao,
-            overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-            automatiseringDao = automatiseringDao,
             overstyringMediator = mockk(),
         )
     )

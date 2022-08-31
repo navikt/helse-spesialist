@@ -52,7 +52,6 @@ import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
-import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
@@ -67,7 +66,6 @@ internal class Hendelsefabrikk(
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val warningDao: WarningDao = WarningDao(dataSource),
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val overstyrtVedtaksperiodeDao: OverstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
@@ -87,7 +85,6 @@ internal class Hendelsefabrikk(
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
-    private val automatiseringDao: AutomatiseringDao = AutomatiseringDao(dataSource),
     private val overstyringMediator: OverstyringMediator,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
@@ -266,9 +263,6 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
-        oppgaveDao = oppgaveDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
-        automatiseringDao = automatiseringDao,
         overstyringMediator = overstyringMediator,
     )
 
@@ -319,10 +313,7 @@ internal class Hendelsefabrikk(
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
         opprettet = opprettet,
-        oppgaveDao = oppgaveDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         json = json,
-        automatiseringDao = automatiseringDao,
         overstyringMediator = overstyringMediator,
     )
 
@@ -350,8 +341,6 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
-        oppgaveDao = oppgaveDao,
-        overstyrtVedtaksperiodeDao = overstyrtVedtaksperiodeDao,
         json = json,
         overstyringMediator = overstyringMediator,
     )

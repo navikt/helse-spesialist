@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.meldinger
 
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
@@ -77,8 +76,6 @@ internal class OverstyringTest {
 
     @Test
     fun `Persisterer overstyring av tidslinje`() {
-        every { oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(any(),any(),any(), any()) } returns(null)
-
         overstyringAvTidslinjeMessage.execute(context)
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }

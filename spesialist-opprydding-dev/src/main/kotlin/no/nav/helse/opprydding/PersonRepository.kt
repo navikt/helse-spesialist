@@ -138,7 +138,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.slettVedtak(personRef: Int) {
-        slettOverstyrtVedtaksperiode(personRef)
         slettNotat(personRef)
         slettWarning(personRef)
         slettOppgave(personRef)
@@ -149,12 +148,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
         slettUtbetalingIdVedtaksperiodeId(personRef)
         @Language("PostgreSQL")
         val query = "DELETE FROM vedtak WHERE person_ref = ?"
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettOverstyrtVedtaksperiode(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM overstyrt_vedtaksperiode WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 

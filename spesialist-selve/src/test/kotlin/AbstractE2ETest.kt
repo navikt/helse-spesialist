@@ -73,7 +73,6 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
-import no.nav.helse.spesialist.api.overstyring.OverstyrtVedtaksperiodeDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -122,8 +121,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val reservasjonDao = ReservasjonDao(dataSource)
     private val notatDao = NotatDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
-    protected val overstyrtVedtaksperiodeDao = OverstyrtVedtaksperiodeDao(dataSource)
-    private val overstyringDao = OverstyringDao(dataSource)
+    protected val overstyringDao = OverstyringDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 

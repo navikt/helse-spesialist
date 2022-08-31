@@ -6,7 +6,6 @@ import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao.NyesteVedtaksperiodeTotrinn
 import org.intellij.lang.annotations.Language
 
 internal class AutomatiseringDao(val dataSource: DataSource) {
@@ -160,38 +159,6 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             ).map { it.long(1) }.asSingle
         )
     }
-
-    internal fun finnSisteAutomatiserteVedtaksperiodeId(fødselsnummer: String, organisasjonsnummer: String): NyesteVedtaksperiodeTotrinn? =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query =
-                """ SELECT v.vedtaksperiode_id, v.fom
-                    FROM automatisering a
-                    JOIN vedtak v on a.vedtaksperiode_ref = v.id
-                    JOIN person p on p.id = v.person_ref
-                    JOIN arbeidsgiver ag on ag.id = v.arbeidsgiver_ref
-                    WHERE p.fodselsnummer = :fodselsnummer
-                    AND ag.orgnummer = :orgnummer
-                    AND a.automatisert = true
-                    ORDER BY       
-                        v.fom DESC
-                    LIMIT 1
-                """
-            session.run(
-                queryOf(
-                    query,
-                    mapOf(
-                        "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnummer" to organisasjonsnummer.toLong()
-                    )
-                ).map { row ->
-                    NyesteVedtaksperiodeTotrinn(
-                        row.uuid("vedtaksperiode_id"),
-                        row.localDate("fom")
-                    )
-                }.asSingle
-            )
-        }
 
     private fun tilAutomatiseringDto(problemer: List<String>, row: Row) =
         AutomatiseringDto(

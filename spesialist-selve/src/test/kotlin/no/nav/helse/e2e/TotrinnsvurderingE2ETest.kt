@@ -43,7 +43,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             gjeldendeTilstand = "GJELDENDE_TILSTAND",
             forårsaketAvId = ekstern_hendelse_id
         )
-        val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
+        val overstyrtType = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
             orgnr = ORGNR,
@@ -86,7 +86,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             forårsaketAvId = ekstern_hendelse_id
         )
 
-        val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
+        val overstyrtType = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
             orgnr = ORGNR,
@@ -127,7 +127,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             forårsaketAvId = ekstern_hendelse_id
         )
 
-        val overstyrtType = overstyrtVedtaksperiodeDao.hentVedtaksperiodeOverstyrtTyper(VEDTAKSPERIODE_ID)
+        val overstyrtType = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
             orgnr = ORGNR,

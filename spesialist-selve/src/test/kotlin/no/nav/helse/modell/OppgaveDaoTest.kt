@@ -5,8 +5,6 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.februar
-import no.nav.helse.januar
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -519,122 +517,6 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, false, tidligereSaksbehandlerOid)
 
         assertEquals(tidligereSaksbehandlerOid, oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `overstyr inntekt - utbetalt 2 perioder, finner vedtaksperiodeId_2`() {
-        val vedtaksperiodeId_1 = UUID.randomUUID()
-        val vedtaksperiodeId_2 = UUID.randomUUID()
-
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
-        val oppgaveId_1 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_1)!!
-        oppgaveDao.updateOppgave(oppgaveId_1, Ferdigstilt)
-
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_2, fom = TOM.plusDays(1), tom = TOM.plusDays(10))
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_2)
-        val oppgaveId_2 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_2)!!
-        oppgaveDao.updateOppgave(oppgaveId_2, Ferdigstilt)
-
-        val vedtaksperiodeIdFerdigstilt = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId
-        val vedtaksperiodeIdTilGodkjenning = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
-        assertEquals(vedtaksperiodeIdFerdigstilt, vedtaksperiodeId_2)
-        assertNull(vedtaksperiodeIdTilGodkjenning)
-    }
-
-    @Test
-    fun `overstyr inntekt - ingen utbetalte perioder, finner for aktiv oppgave`() {
-        val vedtaksperiodeId_1 = UUID.randomUUID()
-
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
-
-        val vedtaksperiodeIdFerdigstilt = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId
-        val vedtaksperiodeIdTilGodkjenning = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
-        assertEquals(vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId_1)
-        assertNull(vedtaksperiodeIdFerdigstilt)
-    }
-
-    @Test
-    fun `overstyr inntekt - utbetalt 1 av 2 perioder, finner vedtaksperiodeId_1`() {
-        val vedtaksperiodeId_1 = UUID.randomUUID()
-        val vedtaksperiodeId_2 = UUID.randomUUID()
-
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
-        val oppgaveId_1 = oppgaveDao.finnOppgaveId(vedtaksperiodeId_1)!!
-        oppgaveDao.updateOppgave(oppgaveId_1, Ferdigstilt)
-
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_2, fom = TOM.plusDays(1), tom = TOM.plusDays(10))
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_2)
-
-        val vedtaksperiodeIdFerdigstilt = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId
-        val vedtaksperiodeIdTilGodkjenning = oppgaveDao.finnNyesteVedtaksperiodeIdMedStatusForSkjæringstidspunkt(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
-        assertEquals(vedtaksperiodeIdFerdigstilt, vedtaksperiodeId_1)
-        assertEquals(vedtaksperiodeIdTilGodkjenning, vedtaksperiodeId_2)
-    }
-
-    @Test
-    fun `overstyr arbeidsforhold - finner neste aktive vedtaksperiode for skjæringstidspunkt`() {
-        val vedtaksperiodeId_1 = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId_1)
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId_1)
-        val vedtaksperiodeId = oppgaveDao.finnAktivVedtaksperiodeId(FNR)
-        assertEquals(vedtaksperiodeId, vedtaksperiodeId_1)
-    }
-
-    @Test
-    fun `overstyr tidslinje - finner vedtaksperiodeId`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        assertEquals(
-            VEDTAKSPERIODE,
-            oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, FOM, AvventerSaksbehandler)?.vedtaksperiodeId
-        )
-        assertNull(oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, FOM, Ferdigstilt)?.vedtaksperiodeId)
-    }
-
-    @Test
-    fun `overstyr tidslinje - forlengelse`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettVedtaksperiode(
-            vedtaksperiodeId,
-            1.januar,
-            31.januar,
-            Periodetype.FØRSTEGANGSBEHANDLING
-        )
-        opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId)
-        oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt, null, null)
-
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        opprettVedtaksperiode(
-            vedtaksperiodeId2,
-            1.februar,
-            28.februar,
-            Periodetype.FORLENGELSE
-        )
-        opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId2)
-
-        assertEquals(vedtaksperiodeId2, oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 31.januar, AvventerSaksbehandler)?.vedtaksperiodeId)
-        assertEquals(vedtaksperiodeId, oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 31.januar, Ferdigstilt)?.vedtaksperiodeId)
-        assertEquals(vedtaksperiodeId2, oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 28.februar, AvventerSaksbehandler)?.vedtaksperiodeId)
-        assertNull(oppgaveDao.finnNyesteVedtaksperiodeIdMedStatus(FNR, ORGNUMMER, 28.februar, Ferdigstilt))
     }
 
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
