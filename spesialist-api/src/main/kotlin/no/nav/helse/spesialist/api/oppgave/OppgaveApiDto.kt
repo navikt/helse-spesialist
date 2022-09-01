@@ -8,6 +8,11 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import java.time.LocalDateTime
 import java.util.*
 
+data class PaginertOppgave(
+    val oppgave: OppgaveForOversiktsvisningDto,
+    val radnummer: Int,
+)
+
 data class OppgaveForOversiktsvisningDto (
     val oppgavereferanse: String,
     val oppgavetype: String,

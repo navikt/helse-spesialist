@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
+import kotlin.math.ceil
 
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
@@ -35,15 +36,20 @@ class OppgaveMediator(
         fra: LocalDateTime?,
         antall: Int
     ): Paginering<OppgaveForOversiktsvisningDto, LocalDateTime> {
-        val oppgaver: List<OppgaveForOversiktsvisningDto> = oppgaveDao.finnOppgaver(tilganger, fra, antall)
+        val oppgaverForSiden: List<PaginertOppgave> =
+            oppgaveDao.finnOppgaver(tilganger, fra, antall)
+        val totaltAntallOppgaver = getAntallOppgaver(tilganger)
         return Paginering(
-            elementer = oppgaver,
-            peker = oppgaver.last().opprettet,
-            sidestørrelse = oppgaver.size,
-            nåværendeSide = 0,
-            totaltAntallSider = 0,
+            elementer = oppgaverForSiden.map { it.oppgave },
+            peker = oppgaverForSiden.last().oppgave.opprettet,
+            sidestørrelse = oppgaverForSiden.size,
+            nåværendeSide = ceil(totaltAntallOppgaver.toDouble() / oppgaverForSiden.first().radnummer).toInt(),
+            totaltAntallSider = ceil(totaltAntallOppgaver.toDouble() / oppgaverForSiden.size).toInt(),
         )
     }
+
+    private fun getAntallOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): Int =
+        oppgaveDao.getAntallOppgaver(saksbehandlerTilganger)
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)

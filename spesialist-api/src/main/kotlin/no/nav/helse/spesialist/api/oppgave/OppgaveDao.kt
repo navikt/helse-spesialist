@@ -114,7 +114,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         tilganger: SaksbehandlerTilganger,
         fra: LocalDateTime?,
         antall: Int
-    ): List<OppgaveForOversiktsvisningDto> =
+    ): List<PaginertOppgave> =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA =
                 if (tilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
@@ -126,7 +126,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val query = """
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutter_oppgave, o.er_retur_oppgave, o.totrinnsvurdering, o.tidligere_saksbehandler_oid , s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+            SELECT row_number() over (), o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutter_oppgave, o.er_retur_oppgave, o.totrinnsvurdering, o.tidligere_saksbehandler_oid , s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                    pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                    (SELECT COUNT(DISTINCT melding) from warning w where w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
             FROM oppgave o
@@ -152,7 +152,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             """
             session.run(
                 queryOf(query, mapOf("fra" to fra, "antall" to antall))
-                    .map(::saksbehandleroppgaveDto)
+                    .map {
+                        val oppgave = saksbehandleroppgaveDto(it)
+                        val radnummer = it.int("row_number")
+                        PaginertOppgave(oppgave, radnummer)
+                    }
                     .asList
             )
         }
