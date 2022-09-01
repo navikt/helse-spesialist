@@ -43,8 +43,8 @@ class OppgaveMediator(
             elementer = oppgaverForSiden.map { it.oppgave },
             peker = oppgaverForSiden.last().oppgave.opprettet,
             sidestørrelse = oppgaverForSiden.size,
-            nåværendeSide = ceil(totaltAntallOppgaver.toDouble() / oppgaverForSiden.first().radnummer).toInt(),
-            totaltAntallSider = ceil(totaltAntallOppgaver.toDouble() / oppgaverForSiden.size).toInt(),
+            nåværendeSide = ceil(oppgaverForSiden.first().radnummer.toDouble() / antall).toInt(),
+            totaltAntallSider = ceil(totaltAntallOppgaver.toDouble() / antall).toInt(),
         )
     }
 
