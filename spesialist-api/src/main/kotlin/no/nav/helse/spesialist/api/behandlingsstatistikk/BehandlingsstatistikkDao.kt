@@ -1,12 +1,114 @@
 package no.nav.helse.spesialist.api.behandlingsstatistikk
 
+import java.time.LocalDate
+import javax.sql.DataSource
 import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
-import java.time.LocalDate
-import javax.sql.DataSource
+import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
+import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import org.intellij.lang.annotations.Language
 
 class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
+
+    fun getAutomatiseringerPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT s.type, s.inntektskilde, count(distinct a.id)
+            FROM automatisering a
+                     INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
+            WHERE a.opprettet >= :fom
+              AND a.automatisert = true
+            GROUP BY s.type, s.inntektskilde;
+        """.trimIndent()
+
+        return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom))
+    }
+
+    fun getTilgjengeligeOppgaverPerInntektOgPeriodetype(): StatistikkPerInntektOgPeriodetype {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT s.type, s.inntektskilde, count(distinct o.id)
+            FROM oppgave o
+                     INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
+            WHERE o.status = 'AvventerSaksbehandler'
+            GROUP BY s.type, s.inntektskilde;
+        """.trimIndent()
+
+        return getStatistikkPerInntektOgPeriodetype(query)
+    }
+
+    fun getManueltUtførteOppgaverPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT s.type, s.inntektskilde, count(distinct o.id)
+            FROM oppgave o
+                     INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
+            WHERE o.status = 'Ferdigstilt'
+              AND o.oppdatert >= :fom
+              AND o.type = 'SØKNAD'
+            GROUP BY s.type, s.inntektskilde;
+        """.trimIndent()
+
+        return getStatistikkPerInntektOgPeriodetype(query, mapOf("fom" to fom))
+    }
+
+    fun getManueltUtførteOppgaverPerOppgavetype(fom: LocalDate): Map<Oppgavetype, Int> {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT o.type, count(distinct o.id)
+            FROM oppgave o
+            WHERE o.status = 'Ferdigstilt'
+              AND o.oppdatert >= :fom
+              AND o.type <> 'SØKNAD'
+            GROUP BY o.type;
+        """.trimIndent()
+
+        return query
+            .list(mapOf("fom" to fom)) { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
+            .reduce(Map<Oppgavetype, Int>::plus)
+    }
+
+    fun getTilgjengeligeOppgaverPerOppgavetype(): Map<Oppgavetype, Int> {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT o.type, count(distinct o.id)
+            FROM oppgave o
+            WHERE o.status = 'AvventerSaksbehandler'
+              AND o.type <> 'SØKNAD'
+            GROUP BY o.type;
+        """.trimIndent()
+
+        return query
+            .list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
+            .reduce(Map<Oppgavetype, Int>::plus)
+    }
+
+    private fun getStatistikkPerInntektOgPeriodetype(
+        query: String,
+        paramMap: Map<String, Any> = emptyMap()
+    ): StatistikkPerInntektOgPeriodetype {
+        val rader = query.list(paramMap) {
+            InntektOgPeriodetyperad(
+                inntekttype = Inntektskilde.valueOf(it.string("inntektskilde")),
+                periodetype = Periodetype.valueOf(it.string("type")),
+                antall = it.int("count")
+            )
+        }
+
+        val perInntekttype = Inntektskilde.values().map { inntektskilde ->
+            mapOf(inntektskilde to rader.filter { it.inntekttype == inntektskilde }.sumOf { it.antall })
+        }.reduce(Map<Inntektskilde, Int>::plus)
+
+        val perPeriodetype = Periodetype.values().map { periodetype ->
+            mapOf(periodetype to rader.filter { it.periodetype == periodetype }.sumOf { it.antall })
+        }.reduce(Map<Periodetype, Int>::plus)
+
+        return StatistikkPerInntektOgPeriodetype(
+            perInntekttype = perInntekttype,
+            perPeriodetype = perPeriodetype,
+        )
+    }
 
     fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
 
@@ -89,7 +191,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT COUNT(1) as antall
             FROM annullert_av_saksbehandler
             WHERE annullert_tidspunkt >= :fom
-        """.single(mapOf("fom" to fom)){ it.int("antall") })
+        """.single(mapOf("fom" to fom)) { it.int("antall") })
 
     private fun perStatistikktype(row: Row): Pair<BehandlingsstatistikkType, Int> {
         val oppgavetype: Oppgavetype = Oppgavetype.valueOf(row.string("type"))
