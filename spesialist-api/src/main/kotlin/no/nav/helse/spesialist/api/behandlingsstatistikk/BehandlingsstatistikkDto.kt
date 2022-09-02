@@ -21,6 +21,26 @@ data class BehandlingsstatistikkDto(
     )
 }
 
+data class Antall(
+    val automatisk: Int,
+    val manuelt: Int,
+    val tilgjengelig: Int,
+)
+
+data class Behandlingsstatistikk(
+    val enArbeidsgiver: Antall,
+    val flereArbeidsgivere: Antall,
+    val forstegangsbehandling: Antall,
+    val forlengelser: Antall,
+    val utbetalingTilSykmeldt: Antall,
+    val faresignaler: Antall,
+    val fortroligAdresse: Antall,
+    val stikkprover: Antall,
+    val revurdering: Antall,
+    val delvisRefusjon: Antall,
+    val beslutter: Antall,
+)
+
 data class StatistikkPerInntektOgPeriodetype(
     val perInntekttype: Map<Inntektskilde, Int>,
     val perPeriodetype: Map<Periodetype, Int>

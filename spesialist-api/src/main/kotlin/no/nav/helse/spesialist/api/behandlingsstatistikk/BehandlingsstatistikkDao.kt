@@ -11,6 +11,29 @@ import org.intellij.lang.annotations.Language
 
 class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
 
+    fun getAntallTilgjengeligeBeslutteroppgaver(): Int {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT count(distinct o.id)
+            FROM oppgave o
+            WHERE o.status = 'AvventerSaksbehandler'
+            AND o.er_beslutter_oppgave = true;
+        """
+        return query.single { it.int("count") } ?: 0
+    }
+
+    fun getAntallFullførteBeslutteroppgaver(fom: LocalDate): Int {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT count(distinct o.id)
+            FROM oppgave o
+            WHERE o.status = 'Ferdigstilt'
+            AND o.er_beslutter_oppgave = true
+            AND o.oppdatert >= :fom;
+        """
+        return query.single(mapOf("fom" to fom)) { it.int("count") } ?: 0
+    }
+
     fun getAutomatiseringerPerInntektOgPeriodetype(fom: LocalDate): StatistikkPerInntektOgPeriodetype {
         @Language("PostgreSQL")
         val query = """
