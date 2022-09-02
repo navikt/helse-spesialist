@@ -62,6 +62,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             JOIN overstyring o ON o.id = ofv.overstyring_ref
             WHERE ofv.vedtaksperiode_id = :vedtaksperiode_id
             AND o.ferdigstilt = false
+            LIMIT 1
         """.single(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { row -> row.boolean(1) } ?: false
 
     fun finnesEksternHendelseId(eksternHendelseId: UUID): Boolean =
