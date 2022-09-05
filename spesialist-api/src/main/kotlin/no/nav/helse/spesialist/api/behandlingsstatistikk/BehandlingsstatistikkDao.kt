@@ -89,7 +89,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
 
         return query
             .list(mapOf("fom" to fom)) { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
-            .reduce(Map<Oppgavetype, Int>::plus)
+            .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
     }
 
     fun getTilgjengeligeOppgaverPerOppgavetype(): Map<Oppgavetype, Int> {
@@ -104,7 +104,7 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
 
         return query
             .list { mapOf(Oppgavetype.valueOf(it.string("type")) to it.int("count")) }
-            .reduce(Map<Oppgavetype, Int>::plus)
+            .fold(emptyMap(), Map<Oppgavetype, Int>::plus)
     }
 
     private fun getStatistikkPerInntektOgPeriodetype(
