@@ -64,7 +64,7 @@ class TestApplication(private val port: Int = randomPort()) {
             }
         )
 
-        app.start(wait = false)
+        app.start(wait = true)
     }
 
     private class KtorConfig(private val httpPort: Int = 8080) {

@@ -8,6 +8,7 @@ import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
@@ -33,10 +34,12 @@ internal class SchemaBuilder(
     val notatDao: NotatDao,
     val reservasjonClient: ReservasjonClient,
     val oppgaveMediator: OppgaveMediator,
+    val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
 ) {
     fun build(): GraphQLSchema {
         val schemaConfig = SchemaGeneratorConfig(
             supportedPackages = listOf(
+                "no.nav.helse.spesialist.api.grapqhl",
                 "no.nav.helse.mediator.api.graphql",
                 "no.nav.helse.mediator.graphql"
             )
@@ -70,6 +73,11 @@ internal class SchemaBuilder(
                 TopLevelObject(
                     OppgaverQuery(
                         oppgaveMediator = oppgaveMediator,
+                    )
+                ),
+                TopLevelObject(
+                    BehandlingsstatistikkQuery(
+                        behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                     )
                 )
             )

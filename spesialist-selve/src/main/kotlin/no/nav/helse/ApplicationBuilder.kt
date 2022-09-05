@@ -182,6 +182,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
 
+    private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
+
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
         tildelingDao,
@@ -256,6 +258,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 riskGruppeId = env.riskGruppeId(),
                 snapshotMediator = snapshotMediator,
                 oppgaveMediator = oppgaveMediator,
+                behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             )
             routing {
                 authenticate("oidc") {

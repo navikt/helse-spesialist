@@ -107,6 +107,7 @@ class GraphQLApiTest : AbstractApiTest() {
             snapshotMediator = snapshotMediator,
             reservasjonClient = mockk(relaxed = true),
             oppgaveMediator = mockk(relaxed = true),
+            behandlingsstatistikkMediator = mockk(relaxed = true),
         ).build()
 
         server = GraphQLServer(

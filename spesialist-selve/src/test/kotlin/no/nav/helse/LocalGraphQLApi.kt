@@ -43,6 +43,9 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -70,6 +73,7 @@ fun main() = runBlocking {
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
         val notatDao = mockk<NotatDao>(relaxed = true)
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
+        val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
 
         every { snapshotDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo to enPerson)
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
@@ -83,6 +87,19 @@ fun main() = runBlocking {
         every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson.fodselsnummer
         every { utbetalingDao.findUtbetalinger(any()) } returns emptyList()
         every { oppgaveDao.finnOppgaveId(any<UUID>()) } returns 123456789L
+        every { behandlingsstatistikkMediator.getBehandlingsstatistikk() } returns BehandlingsstatistikkResponse(
+            enArbeidsgiver = Statistikk(485, 104, 789),
+            flereArbeidsgivere = Statistikk(254, 58, 301),
+            forstegangsbehandling = Statistikk(201, 75, 405),
+            forlengelser = Statistikk(538, 87, 685),
+            utbetalingTilSykmeldt = Statistikk(0, 21, 63),
+            faresignaler = Statistikk(0, 12, 2),
+            fortroligAdresse = Statistikk(0, 1, 0),
+            stikkprover = Statistikk(0, 10, 6),
+            revurdering = Statistikk(0, 105, 204),
+            delvisRefusjon = Statistikk(0, 64, 64),
+            beslutter = Statistikk(0, 150, 204),
+        )
 
         install(ContentNegotiation) {
             register(
@@ -109,7 +126,8 @@ fun main() = runBlocking {
             riskGruppeId = UUID.randomUUID(),
             reservasjonClient = reservasjonClient,
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
-            oppgaveMediator = mockk(relaxed = true)
+            oppgaveMediator = mockk(relaxed = true),
+            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         )
     }
 }
