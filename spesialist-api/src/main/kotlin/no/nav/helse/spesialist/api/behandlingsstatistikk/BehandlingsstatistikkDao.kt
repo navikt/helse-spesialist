@@ -69,7 +69,6 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
                      INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
             WHERE o.status = 'Ferdigstilt'
               AND o.oppdatert >= :fom
-              AND o.type = 'SØKNAD'
             GROUP BY s.type, s.inntektskilde;
         """.trimIndent()
 
