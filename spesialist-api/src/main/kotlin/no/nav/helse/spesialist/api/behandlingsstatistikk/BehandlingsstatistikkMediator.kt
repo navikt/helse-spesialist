@@ -58,6 +58,11 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
             flereArbeidsgivere = flereArbeidsgivere(),
             forstegangsbehandling = forstegangsbehandling(),
             forlengelser = forlengelser(),
+            utbetalingTilArbeidsgiver = Statistikk(
+                enArbeidsgiver().automatisk + flereArbeidsgivere().automatisk,
+                manueltUtførteOppgavetyper[Oppgavetype.SØKNAD] ?: 0,
+                tilgjengeligeOppgavetyper[Oppgavetype.SØKNAD] ?: 0,
+            ),
             utbetalingTilSykmeldt = Statistikk(
                 0,
                 manueltUtførteOppgavetyper[Oppgavetype.UTBETALING_TIL_SYKMELDT] ?: 0,

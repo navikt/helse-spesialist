@@ -82,7 +82,6 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             FROM oppgave o
             WHERE o.status = 'Ferdigstilt'
               AND o.oppdatert >= :fom
-              AND o.type <> 'SØKNAD'
             GROUP BY o.type;
         """.trimIndent()
 
@@ -97,7 +96,6 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT o.type, count(distinct o.id)
             FROM oppgave o
             WHERE o.status = 'AvventerSaksbehandler'
-              AND o.type <> 'SØKNAD'
             GROUP BY o.type;
         """.trimIndent()
 

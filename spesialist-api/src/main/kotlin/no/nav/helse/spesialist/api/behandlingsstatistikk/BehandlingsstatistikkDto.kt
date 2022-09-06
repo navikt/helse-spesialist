@@ -32,6 +32,7 @@ data class BehandlingsstatistikkResponse(
     val flereArbeidsgivere: Statistikk,
     val forstegangsbehandling: Statistikk,
     val forlengelser: Statistikk,
+    val utbetalingTilArbeidsgiver: Statistikk,
     val utbetalingTilSykmeldt: Statistikk,
     val faresignaler: Statistikk,
     val fortroligAdresse: Statistikk,
