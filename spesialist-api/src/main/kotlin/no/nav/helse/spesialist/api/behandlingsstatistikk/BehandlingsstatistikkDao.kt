@@ -132,6 +132,18 @@ class BehandlingsstatistikkDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
+    fun getAntallAnnulleringer(fom: LocalDate): Int {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT count(distinct u.id) as annulleringer
+            FROM utbetaling u
+            WHERE u.status = 'ANNULLERT'
+              AND u.opprettet >= :fom;
+        """.trimIndent()
+
+        return query.single(mapOf("fom" to fom)) { it.int("annulleringer") } ?: 0
+    }
+
     fun oppgavestatistikk(fom: LocalDate = LocalDate.now()): BehandlingsstatistikkDto {
 
         val godkjentManueltPerPeriodetype = godkjentManueltPerPeriodetype(fom)

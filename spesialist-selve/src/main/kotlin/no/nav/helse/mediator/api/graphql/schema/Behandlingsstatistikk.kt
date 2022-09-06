@@ -33,6 +33,8 @@ data class Behandlingsstatistikk(
     fun delvisRefusjon(): Antall = behandlingsstatistikkResponse.delvisRefusjon.tilAntall()
 
     fun beslutter(): Antall = behandlingsstatistikkResponse.beslutter.tilAntall()
+
+    fun antallAnnulleringer(): Int = behandlingsstatistikkResponse.antallAnnulleringer
 }
 
 private fun Statistikk.tilAntall(): Antall =

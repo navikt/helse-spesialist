@@ -39,6 +39,7 @@ data class BehandlingsstatistikkResponse(
     val revurdering: Statistikk,
     val delvisRefusjon: Statistikk,
     val beslutter: Statistikk,
+    val antallAnnulleringer: Int,
 )
 
 data class StatistikkPerInntektOgPeriodetype(

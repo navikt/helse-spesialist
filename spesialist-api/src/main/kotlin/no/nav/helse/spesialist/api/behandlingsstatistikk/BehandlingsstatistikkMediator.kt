@@ -93,6 +93,7 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
                 behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(fom),
                 behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver()
             ),
+            antallAnnulleringer = behandlingsstatistikkDao.getAntallAnnulleringer(fom),
         )
     }
 
