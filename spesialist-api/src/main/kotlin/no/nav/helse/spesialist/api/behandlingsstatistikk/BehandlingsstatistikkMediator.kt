@@ -38,15 +38,20 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
 
         val forlengelser = {
             Statistikk(
-                automatisk = (automatiseringer.perPeriodetype[Periodetype.FORLENGELSE]
-                    ?: 0) + (automatiseringer.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
-                    ?: 0) + (automatiseringer.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0),
-                manuelt = (manueltUtførteOppgaver.perPeriodetype[Periodetype.FORLENGELSE]
-                    ?: 0) + (manueltUtførteOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
-                    ?: 0) + (manueltUtførteOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0),
-                tilgjengelig = (tilgjengeligeOppgaver.perPeriodetype[Periodetype.FORLENGELSE]
-                    ?: 0) + (tilgjengeligeOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE]
-                    ?: 0) + (tilgjengeligeOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0),
+                automatisk = (automatiseringer.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
+                        + (automatiseringer.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
+                manuelt = (manueltUtførteOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
+                        + (manueltUtførteOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
+                tilgjengelig = (tilgjengeligeOppgaver.perPeriodetype[Periodetype.FORLENGELSE] ?: 0)
+                        + (tilgjengeligeOppgaver.perPeriodetype[Periodetype.INFOTRYGDFORLENGELSE] ?: 0),
+            )
+        }
+
+        val forlengelseIt = {
+            Statistikk(
+                automatisk = automatiseringer.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
+                manuelt = manueltUtførteOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
+                tilgjengelig = tilgjengeligeOppgaver.perPeriodetype[Periodetype.OVERGANG_FRA_IT] ?: 0,
             )
         }
 
@@ -58,6 +63,7 @@ class BehandlingsstatistikkMediator(private val behandlingsstatistikkDao: Behand
             flereArbeidsgivere = flereArbeidsgivere(),
             forstegangsbehandling = forstegangsbehandling(),
             forlengelser = forlengelser(),
+            forlengelseIt = forlengelseIt(),
             utbetalingTilArbeidsgiver = Statistikk(
                 enArbeidsgiver().automatisk + flereArbeidsgivere().automatisk,
                 manueltUtførteOppgavetyper[Oppgavetype.SØKNAD] ?: 0,

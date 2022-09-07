@@ -92,6 +92,7 @@ fun main() = runBlocking {
             flereArbeidsgivere = Statistikk(254, 58, 301),
             forstegangsbehandling = Statistikk(201, 75, 405),
             forlengelser = Statistikk(538, 87, 685),
+            forlengelseIt = Statistikk(2, 10, 0),
             utbetalingTilArbeidsgiver = Statistikk(123, 12, 1),
             utbetalingTilSykmeldt = Statistikk(0, 21, 63),
             faresignaler = Statistikk(0, 12, 2),

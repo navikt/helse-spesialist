@@ -20,6 +20,8 @@ data class Behandlingsstatistikk(
 
     fun forlengelser(): Antall = behandlingsstatistikkResponse.forlengelser.tilAntall()
 
+    fun forlengelseIt(): Antall = behandlingsstatistikkResponse.forlengelseIt.tilAntall()
+
     fun utbetalingTilArbeidsgiver(): Antall = behandlingsstatistikkResponse.utbetalingTilArbeidsgiver.tilAntall()
 
     fun utbetalingTilSykmeldt(): Antall = behandlingsstatistikkResponse.utbetalingTilSykmeldt.tilAntall()
