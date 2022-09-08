@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.oppgave
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -162,6 +163,53 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     .asList
             )
         }
+
+    fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate = LocalDate.now()): List<FerdigstiltOppgaveDto> {
+        return queryize("""
+            SELECT o.id                                                     as oppgave_id,
+                   o.type                                                   as oppgavetype,
+                   o.oppdatert                                              as ferdigstilt_tidspunkt,
+                   pi.fornavn                                               as søker_fornavn,
+                   pi.mellomnavn                                            as søker_mellomnavn,
+                   pi.etternavn                                             as søker_etternavn,
+                   p.aktor_id                                               as søker_aktør_id,
+                   sot.type                                                 as periodetype,
+                   sot.inntektskilde                                        as inntektstype,
+                   e.navn                                                   as bosted,
+                   (SELECT count(distinct melding)
+                    FROM warning w
+                    WHERE w.vedtak_ref = o.vedtak_ref
+                      AND (w.inaktiv_fra is null OR w.inaktiv_fra > now())) as antall_varsler
+            FROM oppgave o
+                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                     INNER JOIN person p ON v.person_ref = p.id
+                     INNER JOIN person_info pi ON p.info_ref = pi.id
+                     LEFT JOIN enhet e ON p.enhet_ref = e.id
+                     LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
+                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                     LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+            WHERE o.status = 'Ferdigstilt'
+              AND o.oppdatert >= :fom
+              AND s.ident = :ident
+            ORDER BY o.oppdatert;
+        """.trimIndent()).list(mapOf("ident" to behandletAvIdent, "fom" to fom)) {
+            FerdigstiltOppgaveDto(
+                id = it.string("oppgave_id"),
+                type = Oppgavetype.valueOf(it.string("oppgavetype")),
+                ferdigstiltTidspunkt = it.localDateTime("ferdigstilt_tidspunkt"),
+                personinfo = Personnavn(
+                    fornavn = it.string("soker_fornavn"),
+                    mellomnavn = it.stringOrNull("soker_mellomnavn"),
+                    etternavn = it.string("soker_etternavn"),
+                ),
+                aktørId = it.string("soker_aktor_id"),
+                antallVarsler = it.int("antall_varsler"),
+                periodetype = Periodetype.valueOf(it.string("periodetype")),
+                inntektskilde = Inntektskilde.valueOf(it.string("inntektstype")),
+                bosted = it.string("bosted"),
+            )
+        }
+    }
 
     fun finnOppgaveId(vedtaksperiodeId: UUID) =
         """ SELECT id FROM oppgave

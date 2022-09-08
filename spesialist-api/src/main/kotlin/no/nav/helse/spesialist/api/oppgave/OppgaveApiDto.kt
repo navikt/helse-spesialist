@@ -46,3 +46,21 @@ enum class Oppgavestatus {
     Invalidert,
     Ferdigstilt
 }
+
+data class Personnavn(
+    val fornavn: String,
+    val etternavn: String,
+    val mellomnavn: String?,
+)
+
+data class FerdigstiltOppgaveDto(
+    val id: String,
+    val type: Oppgavetype,
+    val ferdigstiltTidspunkt: LocalDateTime,
+    val personinfo: Personnavn,
+    val aktørId: String,
+    val antallVarsler: Int,
+    val periodetype: Periodetype,
+    val inntektskilde: Inntektskilde,
+    val bosted: String,
+)
