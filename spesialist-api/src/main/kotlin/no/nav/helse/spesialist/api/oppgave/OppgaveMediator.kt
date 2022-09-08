@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.oppgave
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.rapids_rivers.MessageContext
@@ -46,6 +47,10 @@ class OppgaveMediator(
             nåværendeSide = ceil(oppgaverForSiden.first().radnummer.toDouble() / antall).toInt(),
             totaltAntallSider = ceil(totaltAntallOppgaver.toDouble() / antall).toInt(),
         )
+    }
+
+    fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
+        return oppgaveDao.hentFerdigstilteOppgaver(behandletAvIdent, fom)
     }
 
     private fun getAntallOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): Int =

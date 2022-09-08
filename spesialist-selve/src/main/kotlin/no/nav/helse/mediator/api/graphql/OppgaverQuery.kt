@@ -5,15 +5,30 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import no.nav.helse.mediator.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.mediator.api.graphql.schema.Oppgaver
 import no.nav.helse.mediator.api.graphql.schema.Paginering
+import no.nav.helse.mediator.api.graphql.schema.tilFerdigstilteOppgaver
 import no.nav.helse.mediator.api.graphql.schema.tilOppgaver
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 
 class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
+
+    fun ferdigstilteOppgaver(behandletAvIdent: String, fom: String?): DataFetcherResult<List<FerdigstiltOppgave>> {
+        val fraOgMed = try {
+            LocalDate.parse(fom)
+        } catch (_: Exception) {
+            null
+        }
+
+        val oppgaver = oppgaveMediator.hentFerdigstilteOppgaver(behandletAvIdent, fraOgMed).tilFerdigstilteOppgaver()
+
+        return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
+    }
 
     fun oppgaver(first: Int, after: String?, env: DataFetchingEnvironment): DataFetcherResult<Oppgaver> {
         val cursor = try {

@@ -164,7 +164,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate = LocalDate.now()): List<FerdigstiltOppgaveDto> {
+    fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
         return queryize("""
             SELECT o.id                                                     as oppgave_id,
                    o.type                                                   as oppgavetype,
@@ -192,7 +192,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
               AND o.oppdatert >= :fom
               AND s.ident = :ident
             ORDER BY o.oppdatert;
-        """.trimIndent()).list(mapOf("ident" to behandletAvIdent, "fom" to fom)) {
+        """.trimIndent()).list(mapOf("ident" to behandletAvIdent, "fom" to (fom ?: LocalDate.now()))) {
             FerdigstiltOppgaveDto(
                 id = it.string("oppgave_id"),
                 type = Oppgavetype.valueOf(it.string("oppgavetype")),
