@@ -69,6 +69,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -103,6 +104,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val varselDao = VarselDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
     protected val oppgaveDao = OppgaveDao(dataSource)
+    protected val oppgaveApiDao = OppgaveApiDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     protected val personDao = PersonDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
@@ -129,7 +131,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
-    protected val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+    protected val oppgaveMediator =
+        OppgaveMediator(oppgaveDao, oppgaveApiDao, tildelingDao, reservasjonDao, opptegnelseDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
@@ -150,11 +153,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         ) { false },
     )
     internal val hendelseMediator = HendelseMediator(
-        rapidsConnection = testRapid,
         dataSource = dataSource,
+        rapidsConnection = testRapid,
+        opptegnelseDao = opptegnelseDao,
         oppgaveMediator = oppgaveMediator,
-        hendelsefabrikk = hendelsefabrikk,
-        opptegnelseDao = opptegnelseDao
+        hendelsefabrikk = hendelsefabrikk
     )
     internal val snapshotMediator = SnapshotMediator(
         snapshotDao = snapshotDao,
@@ -179,6 +182,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         risikovurderingApiDao = risikovurderingApiDao,
         varselDao = varselDao,
         oppgaveDao = oppgaveDao,
+        oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
         snapshotMediator = snapshotMediator,

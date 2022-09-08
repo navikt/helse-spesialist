@@ -1,19 +1,14 @@
 package no.nav.helse.spesialist.api.oppgave
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.spesialist.api.person.PersoninfoApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import java.time.LocalDateTime
-import java.util.*
 
-data class PaginertOppgave(
-    val oppgave: OppgaveForOversiktsvisningDto,
-    val radnummer: Int,
-)
-
-data class OppgaveForOversiktsvisningDto (
+data class OppgaveForOversiktsvisningDto(
     val oppgavereferanse: String,
     val oppgavetype: String,
     val opprettet: LocalDateTime,

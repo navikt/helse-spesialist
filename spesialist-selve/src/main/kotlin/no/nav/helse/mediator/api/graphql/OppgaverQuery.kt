@@ -16,8 +16,9 @@ import no.nav.helse.mediator.api.graphql.schema.tilFerdigstilteOppgaver
 import no.nav.helse.mediator.api.graphql.schema.tilOppgaver
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 
-class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
+class OppgaverQuery(private val oppgaveMediator: OppgaveMediator, private val oppgaveService: OppgaveService) : Query {
 
     fun behandledeOppgaver(
         behandletAvIdent: String,
@@ -46,7 +47,7 @@ class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
 
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
 
-        val paginering = oppgaveMediator.hentOppgaver(tilganger = tilganger, fra = cursor, antall = first)
+        val paginering = oppgaveService.hentOppgaver(tilganger = tilganger, fra = cursor, antall = first)
 
         val oppgaver = Oppgaver(
             oppgaver = paginering.elementer.tilOppgaver(),

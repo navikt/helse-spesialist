@@ -77,8 +77,11 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.experimental.OppgavePagineringDao
+import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -159,6 +162,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val personApiDao = PersonApiDao(dataSource)
     private val varselDao = VarselDao(dataSource)
     private val oppgaveDao = OppgaveDao(dataSource)
+    private val oppgaveApiDao = OppgaveApiDao(dataSource)
+    private val oppgavePagineringDao = OppgavePagineringDao(dataSource)
     private val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     private val vedtakDao = VedtakDao(dataSource)
     private val warningDao = WarningDao(dataSource)
@@ -186,6 +191,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
 
     private val oppgaveMediator = OppgaveMediator(
         oppgaveDao,
+        oppgaveApiDao,
         tildelingDao,
         reservasjonDao,
         opptegnelseDao
@@ -249,6 +255,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 varselDao = varselDao,
                 utbetalingDao = utbetalingDao,
                 oppgaveDao = oppgaveDao,
+                oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
                 reservasjonClient = reservasjonClient,
@@ -258,6 +265,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 riskGruppeId = env.riskGruppeId(),
                 snapshotMediator = snapshotMediator,
                 oppgaveMediator = oppgaveMediator,
+                oppgaveService = OppgaveService(oppgavePagineringDao),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             )
             routing {

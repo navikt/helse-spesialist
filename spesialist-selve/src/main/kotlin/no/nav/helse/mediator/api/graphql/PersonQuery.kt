@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.schema.Person
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -29,6 +30,7 @@ class PersonQuery(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
+    private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val snapshotMediator: SnapshotMediator,
@@ -72,6 +74,7 @@ class PersonQuery(
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
                 oppgaveDao = oppgaveDao,
+                oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
                 reservasjonClient = reservasjonClient,

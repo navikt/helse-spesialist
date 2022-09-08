@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -70,6 +71,7 @@ fun main() = runBlocking {
         val varselDao = VarselDao(dataSource)
         val utbetalingDao = mockk<UtbetalingDao>(relaxed = true)
         val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+        val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
         val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
         val notatDao = mockk<NotatDao>(relaxed = true)
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
@@ -121,6 +123,7 @@ fun main() = runBlocking {
             varselDao = varselDao,
             utbetalingDao = utbetalingDao,
             oppgaveDao = oppgaveDao,
+            oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
             skjermedePersonerGruppeId = UUID.randomUUID(),
@@ -130,6 +133,7 @@ fun main() = runBlocking {
             reservasjonClient = reservasjonClient,
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
             oppgaveMediator = mockk(relaxed = true),
+            oppgaveService = mockk(relaxed = true),
             behandlingsstatistikkMediator = behandlingsstatistikkMediator,
         )
     }

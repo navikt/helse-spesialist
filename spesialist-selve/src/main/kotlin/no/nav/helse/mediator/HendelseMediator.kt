@@ -59,6 +59,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.oppgave.Oppgave
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -73,6 +74,7 @@ internal class HendelseMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
+    private val oppgaveApiDao: OppgaveApiDao = OppgaveApiDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
@@ -185,7 +187,7 @@ internal class HendelseMediator(
         )
         rapidsConnection.publish(fødselsnummer, godkjenningMessage.toJson())
 
-        val internOppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
+        val internOppgaveMediator = OppgaveMediator(oppgaveDao, oppgaveApiDao, tildelingDao, reservasjonDao, opptegnelseDao)
         internOppgaveMediator.reserverOppgave(reserverPersonOid, fødselsnummer)
         internOppgaveMediator.avventerSystem(godkjenningDTO.oppgavereferanse, godkjenningDTO.saksbehandlerIdent, oid)
         internOppgaveMediator.lagreOppgaver(rapidsConnection, hendelseId, contextId)
