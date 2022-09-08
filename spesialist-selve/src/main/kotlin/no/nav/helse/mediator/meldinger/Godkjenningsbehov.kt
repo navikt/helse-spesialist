@@ -48,14 +48,14 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
 import no.nav.helse.modell.vergemal.VergemålDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
-import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

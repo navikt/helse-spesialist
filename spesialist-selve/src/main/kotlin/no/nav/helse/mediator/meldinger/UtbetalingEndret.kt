@@ -8,6 +8,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -22,8 +23,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

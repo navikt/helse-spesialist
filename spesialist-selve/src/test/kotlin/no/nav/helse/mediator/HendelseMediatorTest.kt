@@ -10,7 +10,7 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.modell.Saksbehandler
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -4,17 +4,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.spesialist.api.oppgave.Oppgave
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 

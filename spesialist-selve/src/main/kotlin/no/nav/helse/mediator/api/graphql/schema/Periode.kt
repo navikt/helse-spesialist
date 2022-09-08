@@ -16,11 +16,11 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatType
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao

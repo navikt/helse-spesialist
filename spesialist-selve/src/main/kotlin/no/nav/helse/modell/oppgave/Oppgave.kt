@@ -1,10 +1,12 @@
-package no.nav.helse.spesialist.api.oppgave
+package no.nav.helse.modell.oppgave
 
 import java.util.Objects
 import java.util.UUID
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 
 class Oppgave private constructor(
@@ -168,8 +170,4 @@ class Oppgave private constructor(
     override fun toString(): String {
         return "Oppgave(type=$type, status=$status, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
     }
-}
-
-enum class Oppgavetype {
-    SØKNAD, STIKKPRØVE, RISK_QA, REVURDERING, FORTROLIG_ADRESSE, UTBETALING_TIL_SYKMELDT, DELVIS_REFUSJON
 }

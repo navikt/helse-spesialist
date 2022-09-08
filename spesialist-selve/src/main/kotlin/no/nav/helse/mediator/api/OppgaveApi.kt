@@ -10,12 +10,12 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.getGrupper
 import no.nav.helse.getNAVident
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
 
 internal fun Route.oppgaveApi(
-    oppgaveMediator: OppgaveMediator,
+    oppgaveApiDao: OppgaveApiDao,
     riskSupersaksbehandlergruppe: UUID,
     kode7Saksbehandlergruppe: UUID,
     beslutterSaksbehandlergruppe: UUID,
@@ -40,7 +40,7 @@ Saker til $ident:
 
     get("/api/oppgaver") {
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
-            oppgaveMediator.hentOppgaver(
+            oppgaveApiDao.finnOppgaver(
                 saksbehandlerTilganger = SaksbehandlerTilganger(
                     gruppetilganger = getGrupper(),
                     kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,

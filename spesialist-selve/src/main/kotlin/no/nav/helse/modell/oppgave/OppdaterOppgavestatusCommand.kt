@@ -1,12 +1,13 @@
 package no.nav.helse.modell.oppgave
 
+import java.util.UUID
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
-import java.util.*
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 
 internal class OppdaterOppgavestatusCommand(
     private val utbetalingId: UUID,

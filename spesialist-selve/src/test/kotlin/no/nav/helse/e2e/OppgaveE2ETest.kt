@@ -8,10 +8,10 @@ import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.UTBETALING_ID2
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.spesialist.api.oppgave.Oppgave
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem

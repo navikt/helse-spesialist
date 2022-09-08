@@ -9,11 +9,11 @@ import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.spesialist.api.oppgave.Oppgave
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue

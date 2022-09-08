@@ -57,6 +57,7 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -70,8 +71,7 @@ import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -132,7 +132,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
 
     protected val oppgaveMediator =
-        OppgaveMediator(oppgaveDao, oppgaveApiDao, tildelingDao, reservasjonDao, opptegnelseDao)
+        OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
     protected val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,

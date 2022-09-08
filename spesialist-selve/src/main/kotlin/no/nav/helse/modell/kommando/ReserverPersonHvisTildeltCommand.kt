@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.Logger

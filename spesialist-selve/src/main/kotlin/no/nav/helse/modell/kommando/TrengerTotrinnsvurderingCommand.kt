@@ -7,7 +7,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
 

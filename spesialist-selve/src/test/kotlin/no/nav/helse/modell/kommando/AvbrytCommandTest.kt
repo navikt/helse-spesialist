@@ -3,12 +3,12 @@ package no.nav.helse.modell.kommando
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class AvbrytCommandTest {
 

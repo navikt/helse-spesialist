@@ -13,8 +13,8 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems

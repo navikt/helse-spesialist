@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.api.graphql.ContextFactory
 import no.nav.helse.mediator.api.graphql.RequestParser
 import no.nav.helse.mediator.api.graphql.SchemaBuilder
@@ -50,11 +49,12 @@ import no.nav.helse.modell.Adressebeskyttelse
 import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
+import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert

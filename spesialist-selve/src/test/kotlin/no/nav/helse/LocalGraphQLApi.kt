@@ -41,14 +41,14 @@ import no.nav.helse.modell.Kjønn
 import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
-import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
+import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -126,11 +126,11 @@ fun main() = runBlocking {
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
+            reservasjonClient = reservasjonClient,
             skjermedePersonerGruppeId = UUID.randomUUID(),
             kode7Saksbehandlergruppe = UUID.randomUUID(),
             beslutterGruppeId = UUID.randomUUID(),
             riskGruppeId = UUID.randomUUID(),
-            reservasjonClient = reservasjonClient,
             snapshotMediator = SnapshotMediator(snapshotDao, mockk(relaxed = true)),
             oppgaveMediator = mockk(relaxed = true),
             oppgaveService = mockk(relaxed = true),

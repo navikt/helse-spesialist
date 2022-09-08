@@ -29,7 +29,6 @@ import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.oppgaveApi
 import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -65,7 +64,7 @@ private class RisikovurderingApiE2ETest : AbstractE2ETest() {
         val respons =
             AbstractApiTest.TestServer {
                 oppgaveApi(
-                    OppgaveMediator(oppgaveDao, oppgaveApiDao, tildelingDao, reservasjonDao, opptegnelseDao),
+                    oppgaveApiDao,
                     riskQaGruppe,
                     kode7Gruppe,
                     beslutterGruppe,

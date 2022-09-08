@@ -4,11 +4,10 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.oppgave.Oppgave
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -32,12 +31,11 @@ internal class OppgaveTest {
     }
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
     private val vedtakDao = mockk<VedtakDao>()
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val oppgaveMediator = OppgaveMediator(oppgaveDao, oppgaveApiDao, tildelingDao, reservasjonDao, opptegnelseDao)
+    private val oppgaveMediator = OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)
 
     private val oppgave = Oppgave.søknad(VEDTAKSPERIODE_ID, UTBETALING_ID)
 

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import java.util.UUID
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class AvbrytOppgaveCommand(
     private val vedtaksperiodeId: UUID,

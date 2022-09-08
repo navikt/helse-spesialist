@@ -1,11 +1,14 @@
-package no.nav.helse.spesialist.api.oppgave
+package no.nav.helse.modell.oppgave
 
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommandData
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.intellij.lang.annotations.Language
 
 class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.oppgave
+package no.nav.helse.modell.gosysoppgaver
 
 import java.time.LocalDate
 import java.util.UUID

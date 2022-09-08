@@ -1,14 +1,14 @@
-package no.nav.helse.spesialist.api.oppgave
+package no.nav.helse.modell.oppgave
 
-import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory
 
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
-    private val oppgaveApiDao: OppgaveApiDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao
@@ -27,13 +26,6 @@ class OppgaveMediator(
     private val oppgaverForPublisering = mutableMapOf<Long, String>()
     private val oppgaverTilTotrinnsvurdering = mutableSetOf<Oppgave>()
     private val log = LoggerFactory.getLogger(this::class.java)
-
-    fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisningDto> =
-        oppgaveApiDao.finnOppgaver(saksbehandlerTilganger)
-
-    fun hentBehandledeOppgaver(behandletAvIdent: String, behandletAvOid: UUID, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
-        return oppgaveApiDao.hentBehandledeOppgaver(behandletAvIdent, behandletAvOid, fom)
-    }
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)

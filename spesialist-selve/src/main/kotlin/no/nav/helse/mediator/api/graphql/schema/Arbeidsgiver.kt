@@ -1,16 +1,16 @@
 package no.nav.helse.mediator.api.graphql.schema
 
 import java.time.format.DateTimeFormatter
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto

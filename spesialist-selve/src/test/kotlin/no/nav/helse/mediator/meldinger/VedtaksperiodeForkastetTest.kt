@@ -11,9 +11,9 @@ import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.snapshot
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

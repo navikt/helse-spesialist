@@ -26,8 +26,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
+import java.util.UUID
 import no.nav.helse.modell.CommandContextDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
-import java.util.*
+import no.nav.helse.modell.oppgave.OppgaveMediator
 
 internal class AvbrytCommand(
     vedtaksperiodeId: UUID,
