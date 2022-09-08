@@ -47,6 +47,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -140,6 +141,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal val personDao = PersonDao(dataSource)
     internal val oppgaveDao = OppgaveDao(dataSource)
+    internal val oppgaveApiDao = OppgaveApiDao(dataSource)
     internal val periodehistorikkDao = PeriodehistorikkDao(dataSource)
     internal val arbeidsforholdDao = ArbeidsforholdDao(dataSource)
     internal val arbeidsgiverDao = ArbeidsgiverDao(dataSource)

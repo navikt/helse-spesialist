@@ -19,6 +19,7 @@ import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatType
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -287,6 +288,7 @@ data class BeregnetPeriode(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
+    private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
 ) : Periode {
@@ -437,7 +439,7 @@ data class BeregnetPeriode(
         oppgaveDao.finnOppgaveId(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 
     fun oppgave(): OppgaveForPeriodevisning? =
-        oppgaveDao.finnPeriodeoppgave(java.util.UUID.fromString(vedtaksperiodeId()))?.let {
+        oppgaveApiDao.finnPeriodeoppgave(java.util.UUID.fromString(vedtaksperiodeId()))?.let {
             OppgaveForPeriodevisning(
                 id = it.id,
                 erBeslutter = it.erBeslutter,

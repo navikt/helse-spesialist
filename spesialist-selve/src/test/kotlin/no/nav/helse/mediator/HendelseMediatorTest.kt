@@ -20,20 +20,20 @@ import org.junit.jupiter.api.assertThrows
 internal class HendelseMediatorTest : AbstractE2ETest() {
 
     private val mediator = HendelseMediator(
-        rapidsConnection = testRapid,
         dataSource = dataSource,
+        rapidsConnection = testRapid,
+        opptegnelseDao = opptegnelseDao,
         oppgaveMediator = oppgaveMediator,
-        hendelsefabrikk = hendelsefabrikk,
-        opptegnelseDao = opptegnelseDao
+        hendelsefabrikk = hendelsefabrikk
     )
 
     private val oppgaveMediatorMock = mockk<OppgaveMediator>(relaxed = true)
     private val mediatorWithMock = HendelseMediator(
-        rapidsConnection = testRapid,
         dataSource = dataSource,
+        rapidsConnection = testRapid,
+        opptegnelseDao = opptegnelseDao,
         oppgaveMediator = oppgaveMediatorMock,
-        hendelsefabrikk = hendelsefabrikk,
-        opptegnelseDao = opptegnelseDao
+        hendelsefabrikk = hendelsefabrikk
     )
 
     @Test

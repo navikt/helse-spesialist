@@ -14,6 +14,7 @@ import no.nav.helse.modell.PersoninfoDto
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -77,6 +78,7 @@ data class Person(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
+    private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
     private val reservasjonClient: ReservasjonClient,
@@ -136,6 +138,7 @@ data class Person(
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
             oppgaveDao = oppgaveDao,
+            oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,
         )

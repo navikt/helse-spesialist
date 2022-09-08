@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.oppgave
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -16,10 +15,10 @@ import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
-import kotlin.math.ceil
 
 class OppgaveMediator(
     private val oppgaveDao: OppgaveDao,
+    private val oppgaveApiDao: OppgaveApiDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao
@@ -30,31 +29,11 @@ class OppgaveMediator(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun hentOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisningDto> =
-        oppgaveDao.finnOppgaver(saksbehandlerTilganger)
-
-    fun hentOppgaver(
-        tilganger: SaksbehandlerTilganger,
-        fra: LocalDateTime?,
-        antall: Int
-    ): Paginering<OppgaveForOversiktsvisningDto, LocalDateTime> {
-        val oppgaverForSiden: List<PaginertOppgave> =
-            oppgaveDao.finnOppgaver(tilganger, fra, antall)
-        val totaltAntallOppgaver = getAntallOppgaver(tilganger)
-        return Paginering(
-            elementer = oppgaverForSiden.map { it.oppgave },
-            peker = oppgaverForSiden.last().oppgave.opprettet,
-            sidestørrelse = oppgaverForSiden.size,
-            nåværendeSide = ceil(oppgaverForSiden.first().radnummer.toDouble() / antall).toInt(),
-            totaltAntallSider = ceil(totaltAntallOppgaver.toDouble() / antall).toInt(),
-        )
-    }
+        oppgaveApiDao.finnOppgaver(saksbehandlerTilganger)
 
     fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
-        return oppgaveDao.hentFerdigstilteOppgaver(behandletAvIdent, fom)
+        return oppgaveApiDao.hentFerdigstilteOppgaver(behandletAvIdent, fom)
     }
-
-    private fun getAntallOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): Int =
-        oppgaveDao.getAntallOppgaver(saksbehandlerTilganger)
 
     fun opprett(oppgave: Oppgave) {
         nyOppgave(oppgave)
@@ -217,11 +196,3 @@ class OppgaveMediator(
         }
     }
 }
-
-data class Paginering<V, P>(
-    val elementer: List<V>,
-    val peker: P,
-    val sidestørrelse: Int,
-    val nåværendeSide: Int,
-    val totaltAntallSider: Int,
-)

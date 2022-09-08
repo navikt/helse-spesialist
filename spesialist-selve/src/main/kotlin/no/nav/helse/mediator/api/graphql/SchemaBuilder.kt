@@ -10,8 +10,10 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -29,11 +31,13 @@ internal class SchemaBuilder(
     val varselDao: VarselDao,
     val utbetalingDao: UtbetalingDao,
     val oppgaveDao: OppgaveDao,
+    val oppgaveApiDao: OppgaveApiDao,
     val periodehistorikkDao: PeriodehistorikkDao,
     val snapshotMediator: SnapshotMediator,
     val notatDao: NotatDao,
     val reservasjonClient: ReservasjonClient,
     val oppgaveMediator: OppgaveMediator,
+    val oppgaveService: OppgaveService,
     val behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
 ) {
     fun build(): GraphQLSchema {
@@ -57,6 +61,7 @@ internal class SchemaBuilder(
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
                         oppgaveDao = oppgaveDao,
+                        oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkDao = periodehistorikkDao,
                         snapshotMediator = snapshotMediator,
                         notatDao = notatDao,
@@ -73,6 +78,7 @@ internal class SchemaBuilder(
                 TopLevelObject(
                     OppgaverQuery(
                         oppgaveMediator = oppgaveMediator,
+                        oppgaveService = oppgaveService,
                     )
                 ),
                 TopLevelObject(

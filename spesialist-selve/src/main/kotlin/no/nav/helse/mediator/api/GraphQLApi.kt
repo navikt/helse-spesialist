@@ -26,8 +26,10 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
@@ -45,6 +47,7 @@ internal fun Application.graphQLApi(
     varselDao: VarselDao,
     utbetalingDao: UtbetalingDao,
     oppgaveDao: OppgaveDao,
+    oppgaveApiDao: OppgaveApiDao,
     periodehistorikkDao: PeriodehistorikkDao,
     notatDao: NotatDao,
     reservasjonClient: ReservasjonClient,
@@ -54,6 +57,7 @@ internal fun Application.graphQLApi(
     riskGruppeId: UUID,
     snapshotMediator: SnapshotMediator,
     oppgaveMediator: OppgaveMediator,
+    oppgaveService: OppgaveService,
     behandlingsstatistikkMediator: BehandlingsstatistikkMediator,
 ) {
     val schema = SchemaBuilder(
@@ -66,11 +70,13 @@ internal fun Application.graphQLApi(
         varselDao = varselDao,
         utbetalingDao = utbetalingDao,
         oppgaveDao = oppgaveDao,
+        oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,
         reservasjonClient = reservasjonClient,
         snapshotMediator = snapshotMediator,
         oppgaveMediator = oppgaveMediator,
+        oppgaveService = oppgaveService,
         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
     ).build()
 

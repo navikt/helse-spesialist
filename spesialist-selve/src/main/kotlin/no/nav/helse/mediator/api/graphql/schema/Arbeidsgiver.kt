@@ -9,6 +9,7 @@ import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -98,6 +99,7 @@ data class Arbeidsgiver(
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
     private val oppgaveDao: OppgaveDao,
+    private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
 ) {
@@ -113,6 +115,7 @@ data class Arbeidsgiver(
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
                         oppgaveDao = oppgaveDao,
+                        oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkDao = periodehistorikkDao,
                         notatDao = notatDao
                     )
