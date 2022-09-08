@@ -38,6 +38,8 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -284,6 +286,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
             }
             ?: fail { "Kunne ikke opprette vedtak" }
+    }
+
+    protected fun opprettWarning(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        melding: String = "Advarsel advarsel"
+    ) {
+        warningDao.leggTilWarning(vedtaksperiodeId, Warning(melding, WarningKilde.Spleis, LocalDateTime.now()))
     }
 
     protected fun opprettOppgave(

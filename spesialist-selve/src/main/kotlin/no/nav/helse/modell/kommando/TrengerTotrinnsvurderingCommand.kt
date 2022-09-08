@@ -6,6 +6,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
@@ -31,7 +32,7 @@ internal class TrengerTotrinnsvurderingCommand(
         if(overstyringer.contains(OverstyringType.Inntekt)) årsaker.add("Overstyring av inntekt")
         if(overstyringer.contains(OverstyringType.Arbeidsforhold)) årsaker.add("Overstyring av annet arbeidsforhold")
 
-        return "Beslutteroppgave: ${formaterTekst(årsaker)}"
+        return "$BESLUTTEROPPGAVE_PREFIX ${formaterTekst(årsaker)}"
     }
 
     override fun execute(context: CommandContext): Boolean {

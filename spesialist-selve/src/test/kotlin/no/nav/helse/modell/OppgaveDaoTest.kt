@@ -9,6 +9,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.oppgave.Oppgave
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
@@ -517,6 +518,19 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, false, tidligereSaksbehandlerOid)
 
         assertEquals(tidligereSaksbehandlerOid, oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
+    }
+
+    @Test
+    fun `ikke tell varsler som er beslutteroppgaver`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID)
+        opprettWarning(melding = "$BESLUTTEROPPGAVE_PREFIX Dette er feil")
+        opprettWarning()
+
+        val oppgave = oppgaveDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first()
+        assertEquals(1, oppgave.antallVarsler)
     }
 
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
