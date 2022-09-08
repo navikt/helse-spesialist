@@ -11,11 +11,11 @@ internal class OppdaterArbeidsgiverCommand(
     // ignorerer fnr/aktørId/dnr ettersom bransje/navn er ganske så statisk for dem
     private val orgnummere = orgnummere.filter { it.length == 9 }
 
-    override fun execute(context: CommandContext): Boolean {
-        val trengerOppdateringer = (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty()
-        if (trengerOppdateringer) return true
-        return behandle(context)
-    }
+    override fun execute(context: CommandContext) =
+        when {
+            (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty() -> true
+            else -> behandle(context)
+        }
 
     override fun resume(context: CommandContext): Boolean {
         return behandle(context)
@@ -32,6 +32,7 @@ internal class OppdaterArbeidsgiverCommand(
 
     private fun behandle(context: CommandContext): Boolean {
         val løsning = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
+        if (!løsning.harSvarForAlle(ikkeOppdaterteBransjer() + ikkeOppdaterteNavn())) return trengerMerInformasjon(context)
         løsning.oppdater(arbeidsgiverDao)
         return true
     }

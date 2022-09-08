@@ -4,13 +4,14 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class OppdaterArbeidsgiverCommandTest {
     private companion object {
@@ -19,12 +20,8 @@ internal class OppdaterArbeidsgiverCommandTest {
 
     private val dao = mockk<ArbeidsgiverDao>(relaxed = true)
 
-    private lateinit var context: CommandContext
-    private val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
-
     @BeforeEach
     fun setup() {
-        context = CommandContext(UUID.randomUUID())
         clearMocks(dao)
     }
 
@@ -32,16 +29,79 @@ internal class OppdaterArbeidsgiverCommandTest {
     fun `oppdaterer ikke når informasjonen er ny`() {
         every { dao.findNavnSistOppdatert(ORGNR) } returns LocalDate.now()
         every { dao.findBransjerSistOppdatert(ORGNR) } returns LocalDate.now()
+
+        val context = CommandContext(UUID.randomUUID())
+        løsning(ORGNR).also(context::add)
+        val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
+
         assertTrue(command.execute(context))
         verify(exactly = 0) { dao.updateNavn(any(), any()) }
     }
 
     @Test
     fun `sender behov om oppdatering når informasjonen er gammel`() {
+        val ghostOrgnr = "orgnr2"
+        val context = CommandContext(UUID.randomUUID())
+
         every { dao.findNavnSistOppdatert(ORGNR) } returns LocalDate.now().minusYears(1)
         every { dao.findBransjerSistOppdatert(ORGNR) } returns LocalDate.now().minusYears(1)
+
+        løsning(ghostOrgnr).also(context::add)
+
+        val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, ghostOrgnr), dao)
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
         verify(exactly = 0) { dao.updateNavn(any(), any()) }
     }
+
+    @Test
+    fun `sender behov om løsning ikke inneholder etterspurt info`() {
+        val orgnrMedUtdatertNavn = "111555111"
+        val orgnrMedUtdatertBransje = "222777222"
+        val context = CommandContext(UUID.randomUUID())
+
+        every { dao.findNavnSistOppdatert(orgnrMedUtdatertNavn) } returns LocalDate.now().minusYears(1)
+        every { dao.findBransjerSistOppdatert(orgnrMedUtdatertBransje) } returns LocalDate.now().minusYears(1)
+
+        val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, orgnrMedUtdatertNavn, orgnrMedUtdatertBransje), dao)
+
+        assertFalse(command.execute(context))
+        assertTrue(context.harBehov())
+        assertTrue(
+            context.behov().any {
+                it.value.values.any { behovdetalj ->
+                    (behovdetalj as List<*>).containsAll(listOf(orgnrMedUtdatertNavn, orgnrMedUtdatertBransje))
+                }
+            }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
+
+        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+    }
+
+    @Test
+    fun `etterspør informasjon om løsning bare inneholder svar for et annet orgnr`() {
+        val orgnrMedUtdatertNavn = "111555111"
+        val orgnrMedOppdaterteData = "222777222"
+        val context = CommandContext(UUID.randomUUID())
+
+        every { dao.findNavnSistOppdatert(orgnrMedUtdatertNavn) } returns LocalDate.now().minusYears(1)
+
+        løsning(orgnrMedOppdaterteData).also(context::add)
+
+        val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, orgnrMedUtdatertNavn, orgnrMedOppdaterteData), dao)
+
+        assertFalse(command.execute(context))
+        assertTrue(context.harBehov())
+        assertTrue(
+            context.behov().any {
+                it.value.values.any { behovdetalj ->
+                    (behovdetalj as List<*>).containsAll(listOf(orgnrMedUtdatertNavn))
+                }
+            }) { "Ønsket orgnr $orgnrMedUtdatertNavn mangler i behovet: ${context.behov()}" }
+
+        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+    }
+
+    private fun løsning(vararg orgnumre: String) = Arbeidsgiverinformasjonløsning(orgnumre.map { arbeidsgiverinfo(it) })
+
+    private fun arbeidsgiverinfo(orgnr: String) = Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(orgnr, "et irrelevant navn", emptyList())
 }

@@ -1,10 +1,14 @@
 package no.nav.helse.mediator.meldinger
 
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<ArbeidsgiverDto>) {
     internal fun opprett(arbeidsgiverDao: ArbeidsgiverDao) {
@@ -19,6 +23,8 @@ internal class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<A
             arbeidsgiverDao.updateBransjer(it.orgnummer, it.bransjer)
         }
     }
+
+    internal fun harSvarForAlle(orgnumre: List<String>) = arbeidsgivere.map { it.orgnummer }.containsAll(orgnumre)
 
     internal class ArbeidsgiverRiver(
         rapidsConnection: RapidsConnection,
