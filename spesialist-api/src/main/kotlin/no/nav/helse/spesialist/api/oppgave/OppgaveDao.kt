@@ -48,6 +48,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 else "AND pi.adressebeskyttelse = 'Ugradert'"
             val eventuellEkskluderingAvBeslutterOppgaver =
                 if (saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
+            // bruk av const direkte i @Language-annotert sql fører til snodige fantom-compile-feil i IntelliJ
             val beslutterOppgaveHackyWorkaround = BESLUTTEROPPGAVE_PREFIX
 
             @Language("PostgreSQL")
