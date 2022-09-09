@@ -1,20 +1,24 @@
 package no.nav.helse.mediator.meldinger
 
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
-import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.spesialist.api.oppgave.OppgaveDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class VedtaksperiodeReberegnet(
     override val id: UUID,
@@ -25,14 +29,32 @@ internal class VedtaksperiodeReberegnet(
     oppgaveMediator: OppgaveMediator,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
+    periodehistorikkDao: PeriodehistorikkDao,
+    oppgaveDao: OppgaveDao,
+    utbetalingDao: UtbetalingDao,
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer() = fødselsnummer
     override fun toJson(): String = json
 
     override val commands: List<Command> = listOf(
-        ReserverPersonHvisTildeltCommand(fødselsnummer, reservasjonDao, tildelingDao),
-        AvbrytCommand(vedtaksperiodeId, commandContextDao, oppgaveMediator)
+        ReserverPersonHvisTildeltCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
+            oppgaveDao = oppgaveDao
+        ),
+        VedtaksperiodeReberegnetPeriodehistorikk(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingDao = utbetalingDao,
+            periodehistorikkDao = periodehistorikkDao
+        ),
+        AvbrytCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            commandContextDao = commandContextDao,
+            oppgaveMediator = oppgaveMediator
+        )
     )
 
     internal class River(

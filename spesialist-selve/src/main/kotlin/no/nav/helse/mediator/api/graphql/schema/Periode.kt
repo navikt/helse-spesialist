@@ -163,7 +163,7 @@ data class Notat(
 data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,
     val timestamp: LocalDateTime,
-    val saksbehandler_ident: String,
+    val saksbehandler_ident: String?,
     val notat_id: Int?
 )
 
