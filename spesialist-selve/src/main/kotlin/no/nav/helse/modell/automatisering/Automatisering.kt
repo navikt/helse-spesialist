@@ -61,12 +61,12 @@ internal class Automatisering(
 
         when {
             problemer.isNotEmpty() -> {
-                utfallslogger("Automatiserer ikke {} ({}, {}) fordi: {}")
+                utfallslogger("Automatiserer ikke {} ({}) fordi: {}")
                 automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId)
             }
 
             plukkTilManuell() -> {
-                utfallslogger("Automatiserer ikke {}, plukket ut til stikkprøve ({}, {})")
+                utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve")
                 automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId)
                 logger.info(
                     "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
@@ -75,7 +75,7 @@ internal class Automatisering(
             }
 
             else -> {
-                utfallslogger("Automatiserer {} ({}, {})")
+                utfallslogger("Automatiserer {} ({})")
                 onAutomatiserbar()
                 automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
             }
