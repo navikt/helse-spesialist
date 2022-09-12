@@ -37,19 +37,6 @@ class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
         return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
     }
 
-    @Deprecated("Bruk heller behandledeOppgaver")
-    fun ferdigstilteOppgaver(behandletAvIdent: String, fom: String?): DataFetcherResult<List<FerdigstiltOppgave>> {
-        val fraOgMed = try {
-            LocalDate.parse(fom)
-        } catch (_: Exception) {
-            null
-        }
-
-        val oppgaver = oppgaveMediator.hentBehandledeOppgaver(behandletAvIdent, "", fraOgMed).tilFerdigstilteOppgaver()
-
-        return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
-    }
-
     fun oppgaver(first: Int, after: String?, env: DataFetchingEnvironment): DataFetcherResult<Oppgaver> {
         val cursor = try {
             LocalDateTime.parse(after)
