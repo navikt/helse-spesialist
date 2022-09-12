@@ -14,7 +14,7 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -27,7 +27,7 @@ internal fun Route.totrinnsvurderingApi(
     oppgaveMediator: OppgaveMediator,
     periodehistorikkDao: PeriodehistorikkDao,
     notatMediator: NotatMediator,
-    tildelingMediator: TildelingMediator,
+    tildelingService: TildelingService,
     hendelseMediator: HendelseMediator,
 ) {
     post("/api/totrinnsvurdering") {
@@ -37,7 +37,7 @@ internal fun Route.totrinnsvurderingApi(
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
         val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(totrinnsvurdering.oppgavereferanse)
-        tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, tidligereSaksbehandlerOid)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, tidligereSaksbehandlerOid)
 
         oppgaveMediator.setBeslutterOppgave(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
@@ -76,7 +76,7 @@ internal fun Route.totrinnsvurderingApi(
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
-        tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid)
 
         val notatId = notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
 

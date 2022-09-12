@@ -64,7 +64,7 @@ import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -156,7 +156,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     )
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
-    private lateinit var tildelingMediator: TildelingMediator
+    private lateinit var tildelingService: TildelingService
 
     private val personDao = PersonDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -281,7 +281,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         oppgaveMediator = oppgaveMediator
                     )
                     overstyringApi(hendelseMediator)
-                    tildelingApi(tildelingMediator)
+                    tildelingApi(tildelingService)
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentService(tildelingDao, hendelseMediator), notatMediator)
@@ -291,7 +291,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         oppgaveMediator,
                         periodehistorikkDao,
                         notatMediator,
-                        tildelingMediator,
+                        tildelingService,
                         hendelseMediator
                     )
                 }
@@ -333,7 +333,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk
         )
-        tildelingMediator = TildelingMediator(
+        tildelingService = TildelingService(
             saksbehandlerDao,
             tildelingDao,
             hendelseMediator

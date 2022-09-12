@@ -13,7 +13,7 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.notat.NotatType
@@ -31,7 +31,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
-    private val tildelingMediator = mockk<TildelingMediator>(relaxed = true)
+    private val tildelingService = mockk<TildelingService>(relaxed = true)
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
 
     private val saksbehandler_oid = UUID.randomUUID()
@@ -48,13 +48,13 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeAll
     fun setupTotrinnsvurdering() {
         setupServer {
-            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator, hendelseMediator)
+            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
         }
     }
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingMediator, hendelseMediator)
+        clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
     }
 
     @Test
@@ -78,7 +78,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             )
         }
         verify(exactly = 1) {
-            tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
                 totrinnsvurderingDto.oppgavereferanse,
                 any()
             )
@@ -116,7 +116,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             )
         }
         verify(exactly = 1) {
-            tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
+            tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
                 returDtoMedNotat.oppgavereferanse,
                 any()
             )

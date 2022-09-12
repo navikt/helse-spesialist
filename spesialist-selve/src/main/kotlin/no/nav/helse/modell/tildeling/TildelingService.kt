@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
-internal class TildelingMediator(
+internal class TildelingService(
     private val saksbehandlerDao: SaksbehandlerDao,
     private val tildelingDao: TildelingDao,
     private val hendelseMediator: HendelseMediator

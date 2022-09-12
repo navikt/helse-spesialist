@@ -14,7 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import org.junit.jupiter.api.BeforeEach
 
-internal class TildelingMediatorTest {
+internal class TildelingServiceTest {
 
     companion object {
         const val navn = "Sara Saksbehandler"
@@ -26,7 +26,7 @@ internal class TildelingMediatorTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>()
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
-    private val tildelingMediator = TildelingMediator(saksbehandlerDao, tildelingDao, hendelseMediator)
+    private val tildelingService = TildelingService(saksbehandlerDao, tildelingDao, hendelseMediator)
 
     @BeforeEach
     fun setup() {
@@ -39,7 +39,7 @@ internal class TildelingMediatorTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns eksisterendeTildeling
 
         assertThrows<OppgaveAlleredeTildelt> {
-            tildelingMediator.tildelOppgaveTilSaksbehandler(
+            tildelingService.tildelOppgaveTilSaksbehandler(
                 oppgaveId = oppgaveref,
                 saksbehandlerreferanse = eksisterendeTildeling.oid,
                 epostadresse = eksisterendeTildeling.epost,
@@ -55,7 +55,7 @@ internal class TildelingMediatorTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns null
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) } returns true
 
-        tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, SAKSBEHANDLER)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, SAKSBEHANDLER)
 
         verify(exactly = 1) { tildelingDao.slettTildeling(oppgaveref) }
         verify(exactly = 1) { hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveref, SAKSBEHANDLER) }
@@ -67,7 +67,7 @@ internal class TildelingMediatorTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns null
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) } returns true
 
-        tildelingMediator.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, null)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, null)
 
         verify(exactly = 1) { tildelingDao.slettTildeling(oppgaveref) }
         verify(exactly = 0) { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) }

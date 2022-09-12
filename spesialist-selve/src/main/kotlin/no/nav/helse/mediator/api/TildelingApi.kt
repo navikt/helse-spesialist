@@ -11,13 +11,13 @@ import io.ktor.server.routing.post
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
-import no.nav.helse.modell.tildeling.TildelingMediator
+import no.nav.helse.modell.tildeling.TildelingService
 import org.slf4j.LoggerFactory
 import java.util.*
 
 private val log = LoggerFactory.getLogger("TildelingApi")
 
-internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
+internal fun Route.tildelingApi(tildelingService: TildelingService) {
     post("/api/tildeling/{oppgavereferanse}") {
         modellfeilForRest {
             val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
@@ -34,7 +34,7 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
             val ident = accessToken.payload.getClaim("NAVident").asString()
 
             withContext(Dispatchers.IO) {
-                tildelingMediator.tildelOppgaveTilSaksbehandler(
+                tildelingService.tildelOppgaveTilSaksbehandler(
                     oppgaveId,
                     saksbehandlerreferanse,
                     epostadresse,
@@ -54,7 +54,7 @@ internal fun Route.tildelingApi(tildelingMediator: TildelingMediator) {
             log.warn("DELETE - oppgavereferanse er null i path parameter")
             return@delete
         }
-        withContext(Dispatchers.IO) { tildelingMediator.fjernTildeling(oppgaveId) }
+        withContext(Dispatchers.IO) { tildelingService.fjernTildeling(oppgaveId) }
 
         call.respond(HttpStatusCode.OK)
     }
