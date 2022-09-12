@@ -59,6 +59,7 @@ data class Personnavn(
 data class FerdigstiltOppgave(
     val id: String,
     val type: Oppgavetype,
+    val ferdigstiltAv: String,
     val ferdigstiltTidspunkt: LocalDateTime,
     val personnavn: Personnavn,
     val aktorId: String,
@@ -160,6 +161,7 @@ internal fun List<FerdigstiltOppgaveDto>.tilFerdigstilteOppgaver(): List<Ferdigs
         FerdigstiltOppgave(
             id = it.id,
             type = it.type.tilOppgavetype(),
+            ferdigstiltAv = it.ferdigstiltAv,
             ferdigstiltTidspunkt = it.ferdigstiltTidspunkt.format(DateTimeFormatter.ISO_DATE_TIME),
             personnavn = Personnavn(
                 fornavn = it.personinfo.fornavn,
