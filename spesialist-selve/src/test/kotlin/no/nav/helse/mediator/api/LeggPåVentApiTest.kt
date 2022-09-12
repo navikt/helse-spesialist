@@ -10,7 +10,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.feilhåndtering.FeilDto
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
+import no.nav.helse.modell.leggpåvent.LeggPåVentService
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -30,19 +30,19 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private val leggPåVentMediator: LeggPåVentMediator = mockk(relaxed = true)
+    private val leggPåVentService: LeggPåVentService = mockk(relaxed = true)
     private val notatMediator: NotatMediator = mockk(relaxed = true)
 
     @BeforeAll
     fun setupTildeling() {
         setupServer {
-            leggPåVentApi(leggPåVentMediator, notatMediator)
+            leggPåVentApi(leggPåVentService, notatMediator)
         }
     }
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(leggPåVentMediator, notatMediator)
+        clearMocks(leggPåVentService, notatMediator)
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            leggPåVentMediator.leggOppgavePåVent(oppgavereferanse)
+            leggPåVentService.leggOppgavePåVent(oppgavereferanse)
         }
         verify(exactly = 1) {
             notatMediator.lagreForOppgaveId(oppgavereferanse, notattekst, SAKSBEHANDLER_OID, NotatType.PaaVent)
@@ -84,13 +84,13 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            leggPåVentMediator.fjernPåVent(oppgavereferanse)
+            leggPåVentService.fjernPåVent(oppgavereferanse)
         }
     }
 
     @Test
     fun `gir feil hvis bruker forsøker å legge en oppgave på vent før den er tildelt bruker`() {
-        every { leggPåVentMediator.leggOppgavePåVent(any()) } throws OppgaveIkkeTildelt(1L)
+        every { leggPåVentService.leggOppgavePåVent(any()) } throws OppgaveIkkeTildelt(1L)
         val oppgavereferanse = nextLong()
         val response = runBlocking {
             client.preparePost("/api/leggpaavent/${oppgavereferanse}") {

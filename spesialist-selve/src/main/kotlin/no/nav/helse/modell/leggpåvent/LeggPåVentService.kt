@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 
-internal class LeggPåVentMediator(
+internal class LeggPåVentService(
     private val tildelingDao: TildelingDao,
     private val hendelseMediator: HendelseMediator
 ) {

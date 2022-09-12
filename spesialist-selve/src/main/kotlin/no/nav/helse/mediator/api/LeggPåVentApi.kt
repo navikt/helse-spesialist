@@ -13,13 +13,13 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
-import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
+import no.nav.helse.modell.leggpåvent.LeggPåVentService
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("LeggPåVentApi")
 
-internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator, notatMediator: NotatMediator) {
+internal fun Route.leggPåVentApi(leggPåVentService: LeggPåVentService, notatMediator: NotatMediator) {
     post("/api/leggpaavent/{oppgavereferanse}") {
         modellfeilForRest {
             val oppgaveId = call.parameters["oppgavereferanse"]?.toLongOrNull()
@@ -36,7 +36,7 @@ internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator, nota
 
             withContext(Dispatchers.IO) {
                 notatMediator.lagreForOppgaveId(oppgaveId, notat.tekst, saksbehandlerOid, notat.type)
-                leggPåVentMediator.leggOppgavePåVent(oppgaveId)
+                leggPåVentService.leggOppgavePåVent(oppgaveId)
             }
             call.respond(HttpStatusCode.OK)
         }
@@ -49,7 +49,7 @@ internal fun Route.leggPåVentApi(leggPåVentMediator: LeggPåVentMediator, nota
             log.warn("DELETE - oppgavereferanse er null i path parameter")
             return@delete
         }
-        withContext(Dispatchers.IO) { leggPåVentMediator.fjernPåVent(oppgaveId) }
+        withContext(Dispatchers.IO) { leggPåVentService.fjernPåVent(oppgaveId) }
 
         call.respond(HttpStatusCode.OK)
     }

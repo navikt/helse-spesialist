@@ -59,7 +59,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
-import no.nav.helse.modell.leggpåvent.LeggPåVentMediator
+import no.nav.helse.modell.leggpåvent.LeggPåVentService
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -284,7 +284,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     tildelingApi(tildelingMediator)
                     annulleringApi(hendelseMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
-                    leggPåVentApi(LeggPåVentMediator(tildelingDao, hendelseMediator), notatMediator)
+                    leggPåVentApi(LeggPåVentService(tildelingDao, hendelseMediator), notatMediator)
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
                     totrinnsvurderingApi(
