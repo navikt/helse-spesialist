@@ -327,11 +327,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     init {
         rapidsConnection.register(this)
         hendelseMediator = HendelseMediator(
-            rapidsConnection = rapidsConnection,
             dataSource = dataSource,
+            rapidsConnection = rapidsConnection,
+            opptegnelseDao = opptegnelseDao,
             oppgaveMediator = oppgaveMediator,
-            hendelsefabrikk = hendelsefabrikk,
-            opptegnelseDao = opptegnelseDao
+            hendelsefabrikk = hendelsefabrikk
         )
         tildelingMediator = TildelingMediator(
             saksbehandlerDao,

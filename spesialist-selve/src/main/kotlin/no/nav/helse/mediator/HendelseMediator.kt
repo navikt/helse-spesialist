@@ -60,7 +60,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -74,7 +73,6 @@ internal class HendelseMediator(
     private val dataSource: DataSource,
     private val rapidsConnection: RapidsConnection,
     private val oppgaveDao: OppgaveDao = OppgaveDao(dataSource),
-    private val oppgaveApiDao: OppgaveApiDao = OppgaveApiDao(dataSource),
     private val vedtakDao: VedtakDao = VedtakDao(dataSource),
     private val personDao: PersonDao = PersonDao(dataSource),
     private val commandContextDao: CommandContextDao = CommandContextDao(dataSource),
