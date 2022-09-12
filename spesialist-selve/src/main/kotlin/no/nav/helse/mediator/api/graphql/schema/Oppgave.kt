@@ -59,7 +59,6 @@ data class Personnavn(
 data class FerdigstiltOppgave(
     val id: String,
     val type: Oppgavetype,
-    val ferdigstiltAv: String,
     val ferdigstiltTidspunkt: LocalDateTime,
     val personnavn: Personnavn,
     val aktorId: String,
@@ -67,6 +66,7 @@ data class FerdigstiltOppgave(
     val periodetype: Periodetype,
     val inntektstype: Inntektstype,
     val bosted: String,
+    val ferdigstiltAv: String?,
 )
 
 data class Paginering(
