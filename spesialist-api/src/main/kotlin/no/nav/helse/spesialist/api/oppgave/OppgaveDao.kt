@@ -166,7 +166,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun hentBehandledeOppgaver(
         behandletAvIdent: String,
-        behandletAvOid: String,
+        behandletAvOid: UUID,
         fom: LocalDate?
     ): List<FerdigstiltOppgaveDto> {
         val erFerdigstiltAvSaksbehandler =

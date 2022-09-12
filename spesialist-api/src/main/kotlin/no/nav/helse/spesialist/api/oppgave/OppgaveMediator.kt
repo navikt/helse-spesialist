@@ -49,7 +49,7 @@ class OppgaveMediator(
         )
     }
 
-    fun hentBehandledeOppgaver(behandletAvIdent: String, behandletAvOid: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
+    fun hentBehandledeOppgaver(behandletAvIdent: String, behandletAvOid: UUID, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
         return oppgaveDao.hentBehandledeOppgaver(behandletAvIdent, behandletAvOid, fom)
     }
 

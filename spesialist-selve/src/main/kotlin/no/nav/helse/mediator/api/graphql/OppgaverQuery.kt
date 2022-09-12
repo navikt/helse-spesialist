@@ -8,6 +8,7 @@ import graphql.schema.DataFetchingEnvironment
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.mediator.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.mediator.api.graphql.schema.Oppgaver
 import no.nav.helse.mediator.api.graphql.schema.Paginering
@@ -18,14 +19,20 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 
 class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
 
-    fun behandledeOppgaver(behandletAvIdent: String, behandletAvOid: String, fom: String?): DataFetcherResult<List<FerdigstiltOppgave>> {
+    fun behandledeOppgaver(
+        behandletAvIdent: String,
+        behandletAvOid: String,
+        fom: String?
+    ): DataFetcherResult<List<FerdigstiltOppgave>> {
         val fraOgMed = try {
             LocalDate.parse(fom)
         } catch (_: Exception) {
             null
         }
 
-        val oppgaver = oppgaveMediator.hentBehandledeOppgaver(behandletAvIdent, behandletAvOid, fraOgMed).tilFerdigstilteOppgaver()
+        val oppgaver =
+            oppgaveMediator.hentBehandledeOppgaver(behandletAvIdent, UUID.fromString(behandletAvOid), fraOgMed)
+                .tilFerdigstilteOppgaver()
 
         return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
     }
