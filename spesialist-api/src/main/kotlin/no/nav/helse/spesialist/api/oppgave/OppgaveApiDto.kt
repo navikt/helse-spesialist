@@ -63,4 +63,5 @@ data class FerdigstiltOppgaveDto(
     val periodetype: Periodetype,
     val inntektskilde: Inntektskilde,
     val bosted: String,
+    val ferdigstiltAv: String,
 )

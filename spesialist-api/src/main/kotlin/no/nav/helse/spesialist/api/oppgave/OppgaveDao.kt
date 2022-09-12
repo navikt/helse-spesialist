@@ -164,51 +164,66 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> = queryize(
-        """
-        SELECT o.id                                                     as oppgave_id,
-               o.type                                                   as oppgavetype,
-               o.oppdatert                                              as ferdigstilt_tidspunkt,
-               pi.fornavn                                               as soker_fornavn,
-               pi.mellomnavn                                            as soker_mellomnavn,
-               pi.etternavn                                             as soker_etternavn,
-               p.aktor_id                                               as soker_aktor_id,
-               sot.type                                                 as periodetype,
-               sot.inntektskilde                                        as inntektstype,
-               e.navn                                                   as bosted,
-               (SELECT count(distinct melding)
-                FROM warning w
-                WHERE w.vedtak_ref = o.vedtak_ref
-                  AND (w.inaktiv_fra is null OR w.inaktiv_fra > now())) as antall_varsler
-        FROM oppgave o
-                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
-                 INNER JOIN person p ON v.person_ref = p.id
-                 INNER JOIN person_info pi ON p.info_ref = pi.id
-                 LEFT JOIN enhet e ON p.enhet_ref = e.id
-                 LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
-                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-                 LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-        WHERE (o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem')
-          AND o.oppdatert >= :fom
-          AND s.ident = :ident
-        ORDER BY o.oppdatert;
-    """.trimIndent()
-    ).list(mapOf("ident" to behandletAvIdent, "fom" to (fom ?: LocalDate.now()))) {
-        FerdigstiltOppgaveDto(
-            id = it.string("oppgave_id"),
-            type = Oppgavetype.valueOf(it.string("oppgavetype")),
-            ferdigstiltTidspunkt = it.localDateTime("ferdigstilt_tidspunkt"),
-            personinfo = Personnavn(
-                fornavn = it.string("soker_fornavn"),
-                mellomnavn = it.stringOrNull("soker_mellomnavn"),
-                etternavn = it.string("soker_etternavn"),
-            ),
-            aktørId = it.string("soker_aktor_id"),
-            antallVarsler = it.int("antall_varsler"),
-            periodetype = Periodetype.valueOf(it.string("periodetype")),
-            inntektskilde = Inntektskilde.valueOf(it.string("inntektstype")),
-            bosted = it.string("bosted"),
-        )
+    fun hentBehandledeOppgaver(
+        behandletAvIdent: String,
+        behandletAvOid: String,
+        fom: LocalDate?
+    ): List<FerdigstiltOppgaveDto> {
+        val erFerdigstiltAvSaksbehandler =
+            "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.ident = :ident)"
+        val erTidligereBehandletAvSaksbehandler =
+            "((o.er_beslutter_oppgave = true OR o.er_retur_oppgave = true) AND o.tidligere_saksbehandler_oid = :oid)"
+
+        return queryize(
+            """
+            SELECT o.id                                                     as oppgave_id,
+                   o.type                                                   as oppgavetype,
+                   o.status,
+                   o.er_beslutter_oppgave,
+                   s2.navn                                                  as ferdigstilt_av,
+                   o.oppdatert                                              as ferdigstilt_tidspunkt,
+                   pi.fornavn                                               as soker_fornavn,
+                   pi.mellomnavn                                            as soker_mellomnavn,
+                   pi.etternavn                                             as soker_etternavn,
+                   p.aktor_id                                               as soker_aktor_id,
+                   sot.type                                                 as periodetype,
+                   sot.inntektskilde                                        as inntektstype,
+                   e.navn                                                   as bosted,
+                   (SELECT count(distinct melding)
+                    FROM warning w
+                    WHERE w.vedtak_ref = o.vedtak_ref
+                      AND (w.inaktiv_fra is null OR w.inaktiv_fra > now())) as antall_varsler
+            FROM oppgave o
+                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                     INNER JOIN person p ON v.person_ref = p.id
+                     INNER JOIN person_info pi ON p.info_ref = pi.id
+                     LEFT JOIN enhet e ON p.enhet_ref = e.id
+                     LEFT JOIN saksbehandleroppgavetype sot ON v.id = sot.vedtak_ref
+                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                     LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
+                     LEFT JOIN saksbehandler s2 on o.ferdigstilt_av = s2.ident
+            WHERE ($erFerdigstiltAvSaksbehandler OR $erTidligereBehandletAvSaksbehandler)
+              AND o.oppdatert >= :fom
+            ORDER BY o.oppdatert;
+        """.trimIndent()
+        ).list(mapOf("ident" to behandletAvIdent, "oid" to behandletAvOid, "fom" to (fom ?: LocalDate.now()))) {
+            FerdigstiltOppgaveDto(
+                id = it.string("oppgave_id"),
+                type = Oppgavetype.valueOf(it.string("oppgavetype")),
+                ferdigstiltTidspunkt = it.localDateTime("ferdigstilt_tidspunkt"),
+                ferdigstiltAv = it.string("ferdigstilt_av"),
+                personinfo = Personnavn(
+                    fornavn = it.string("soker_fornavn"),
+                    mellomnavn = it.stringOrNull("soker_mellomnavn"),
+                    etternavn = it.string("soker_etternavn"),
+                ),
+                aktørId = it.string("soker_aktor_id"),
+                antallVarsler = it.int("antall_varsler"),
+                periodetype = Periodetype.valueOf(it.string("periodetype")),
+                inntektskilde = Inntektskilde.valueOf(it.string("inntektstype")),
+                bosted = it.string("bosted"),
+            )
+        }
     }
 
     fun finnOppgaveId(vedtaksperiodeId: UUID) =

@@ -49,8 +49,8 @@ class OppgaveMediator(
         )
     }
 
-    fun hentFerdigstilteOppgaver(behandletAvIdent: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
-        return oppgaveDao.hentFerdigstilteOppgaver(behandletAvIdent, fom)
+    fun hentBehandledeOppgaver(behandletAvIdent: String, behandletAvOid: String, fom: LocalDate?): List<FerdigstiltOppgaveDto> {
+        return oppgaveDao.hentBehandledeOppgaver(behandletAvIdent, behandletAvOid, fom)
     }
 
     private fun getAntallOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): Int =

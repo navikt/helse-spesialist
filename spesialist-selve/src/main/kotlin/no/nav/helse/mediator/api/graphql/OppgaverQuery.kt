@@ -18,6 +18,19 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveMediator
 
 class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
 
+    fun behandledeOppgaver(behandletAvIdent: String, behandletAvOid: String, fom: String?): DataFetcherResult<List<FerdigstiltOppgave>> {
+        val fraOgMed = try {
+            LocalDate.parse(fom)
+        } catch (_: Exception) {
+            null
+        }
+
+        val oppgaver = oppgaveMediator.hentBehandledeOppgaver(behandletAvIdent, behandletAvOid, fraOgMed).tilFerdigstilteOppgaver()
+
+        return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
+    }
+
+    @Deprecated("Bruk heller behandledeOppgaver")
     fun ferdigstilteOppgaver(behandletAvIdent: String, fom: String?): DataFetcherResult<List<FerdigstiltOppgave>> {
         val fraOgMed = try {
             LocalDate.parse(fom)
@@ -25,7 +38,7 @@ class OppgaverQuery(private val oppgaveMediator: OppgaveMediator) : Query {
             null
         }
 
-        val oppgaver = oppgaveMediator.hentFerdigstilteOppgaver(behandletAvIdent, fraOgMed).tilFerdigstilteOppgaver()
+        val oppgaver = oppgaveMediator.hentBehandledeOppgaver(behandletAvIdent, "", fraOgMed).tilFerdigstilteOppgaver()
 
         return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
     }
