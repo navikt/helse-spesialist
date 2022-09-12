@@ -211,7 +211,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 id = it.string("oppgave_id"),
                 type = Oppgavetype.valueOf(it.string("oppgavetype")),
                 ferdigstiltTidspunkt = it.localDateTime("ferdigstilt_tidspunkt"),
-                ferdigstiltAv = it.string("ferdigstilt_av"),
+                ferdigstiltAv = it.stringOrNull("ferdigstilt_av"),
                 personinfo = Personnavn(
                     fornavn = it.string("soker_fornavn"),
                     mellomnavn = it.stringOrNull("soker_mellomnavn"),
