@@ -30,13 +30,11 @@ internal class LeggPåVentApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private lateinit var leggPåVentMediator: LeggPåVentMediator
-    private lateinit var notatMediator: NotatMediator
+    private val leggPåVentMediator: LeggPåVentMediator = mockk(relaxed = true)
+    private val notatMediator: NotatMediator = mockk(relaxed = true)
 
     @BeforeAll
     fun setupTildeling() {
-        leggPåVentMediator = mockk(relaxed = true)
-        notatMediator = mockk(relaxed = true)
         setupServer {
             leggPåVentApi(leggPåVentMediator, notatMediator)
         }

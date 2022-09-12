@@ -148,7 +148,7 @@ class OppgaveMediator(
         oppgaver.clear()
         oppgaverTilTotrinnsvurdering.onEach { oppgave -> oppgave.trengerTotrinnsvurdering(this) }.clear()
         oppgaverForPublisering.onEach { (oppgaveId, eventName) ->
-            messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao).second.toJson())
+            messageContext.publish(Oppgave.lagMelding(oppgaveId, eventName, oppgaveDao = oppgaveDao).second.toJson())
         }.clear()
     }
 

@@ -212,14 +212,12 @@ internal class HendelseMediator(
         saksbehandlerreferanse: UUID,
     ): Boolean {
         val suksess = oppgaveMediator.tildel(oppgaveId, saksbehandlerreferanse)
-        if (suksess) Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).also { (key, message) ->
-            rapidsConnection.publish(key, message.toJson())
-        }
+        if (suksess) sendMeldingOppgaveOppdatert(oppgaveId)
         return suksess
     }
 
-    internal fun sendMeldingOppgaveOppdatert(oppgaveId: Long) {
-        Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", oppgaveDao).also { (key, message) ->
+    internal fun sendMeldingOppgaveOppdatert(oppgaveId: Long, påVent: Boolean? = null) {
+        Oppgave.lagMelding(oppgaveId, "oppgave_oppdatert", påVent, oppgaveDao).also { (key, message) ->
             rapidsConnection.publish(key, message.toJson())
         }
     }

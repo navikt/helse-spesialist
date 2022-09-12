@@ -13,6 +13,7 @@ import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -46,6 +47,23 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
         mediator.håndter(GodkjenningDTO(oppgavereferanse, true, saksbehandlerIdent, null, null, null), epost, oid)
         assertTrue(testRapid.inspektør.hendelser("saksbehandler_løsning").isNotEmpty())
         assertEquals("AvventerSystem", testRapid.inspektør.hendelser("oppgave_oppdatert").last()["status"].asText())
+    }
+
+    @Test
+    fun `oppgave_oppdater inneholder påVent-flagg i noen tilfeller`() {
+        fun påVentNode() = testRapid.inspektør.hendelser("oppgave_oppdatert").last()["påVent"]
+
+        settOppBruker()
+        val oppgavereferanse = oppgaveDao.finnOppgaveId(FØDSELSNUMMER)!!
+
+        mediator.sendMeldingOppgaveOppdatert(oppgavereferanse)
+        assertNull(påVentNode())
+
+        mediator.sendMeldingOppgaveOppdatert(oppgavereferanse, påVent = true)
+        assertEquals("true", påVentNode().asText())
+
+        mediator.sendMeldingOppgaveOppdatert(oppgavereferanse, påVent = false)
+        assertEquals("false", påVentNode().asText())
     }
 
     @Test

@@ -27,7 +27,7 @@ internal class TildelingMediator(
         tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandlerreferanse)
     }
 
-    internal fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID) {
+    private fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID) {
         val kanIkkeAttestere = hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)
         val erDev = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
         if (kanIkkeAttestere && !erDev) {

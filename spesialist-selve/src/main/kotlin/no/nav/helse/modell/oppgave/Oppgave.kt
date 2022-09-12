@@ -54,6 +54,7 @@ class Oppgave private constructor(
         fun lagMelding(
             oppgaveId: Long,
             eventName: String,
+            påVent: Boolean? = null,
             oppgaveDao: OppgaveDao
         ): Pair<String, JsonMessage> {
             val hendelseId = oppgaveDao.finnHendelseId(oppgaveId)
@@ -74,7 +75,8 @@ class Oppgave private constructor(
                 erBeslutterOppgave = erBeslutterOppgave,
                 erReturOppgave = erReturOppgave,
                 ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
-                ferdigstiltAvOid = oppgave.ferdigstiltAvOid
+                ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
+                påVent = påVent,
             )
         }
 
@@ -90,6 +92,7 @@ class Oppgave private constructor(
             erReturOppgave: Boolean,
             ferdigstiltAvIdent: String? = null,
             ferdigstiltAvOid: UUID? = null,
+            påVent: Boolean? = null,
         ): JsonMessage {
             return JsonMessage.newMessage(eventName, mutableMapOf(
                 "@forårsaket_av" to mapOf(
@@ -106,6 +109,7 @@ class Oppgave private constructor(
             ).apply {
                 ferdigstiltAvIdent?.also { put("ferdigstiltAvIdent", it) }
                 ferdigstiltAvOid?.also { put("ferdigstiltAvOid", it) }
+                påVent?.also { put("påVent", it) }
             })
         }
     }
