@@ -36,6 +36,9 @@ import no.nav.helse.mediator.api.overstyringApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+/**
+ * Tester samspillet mellom API og selve, altså "integrasjonen" mellom dem 😀
+ */
 internal class OverstyringIT : AbstractE2ETest() {
 
     @Test
@@ -51,7 +54,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
                     OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", grad = null)
-                )
+                ),
             )
 
             val response = runBlocking {
@@ -61,7 +64,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                         oid = SAKSBEHANDLER_OID,
                         epost = SAKSBEHANDLER_EPOST,
                         navn = SAKSBEHANDLER_NAVN,
-                        ident = SAKSBEHANDLER_IDENT
+                        ident = SAKSBEHANDLER_IDENT,
                     )
                     setBody(objectMapper.writeValueAsString(overstyring))
                 }
@@ -91,7 +94,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                 forklaring = "en forklaring",
                 månedligInntekt = 25000.0,
                 skjæringstidspunkt = 1.januar,
-                subsumsjon = null
+                subsumsjon = null,
             )
 
             val response = runBlocking {
@@ -101,7 +104,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                         oid = SAKSBEHANDLER_OID,
                         epost = SAKSBEHANDLER_EPOST,
                         navn = SAKSBEHANDLER_NAVN,
-                        ident = SAKSBEHANDLER_IDENT
+                        ident = SAKSBEHANDLER_IDENT,
                     )
                     setBody(objectMapper.writeValueAsString(overstyring))
                 }
@@ -132,7 +135,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                         orgnummer = ORGNR_GHOST,
                         deaktivert = true,
                         begrunnelse = "en begrunnelse",
-                        forklaring = "en forklaring"
+                        forklaring = "en forklaring",
                     )
                 )
             )
@@ -144,7 +147,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                         oid = SAKSBEHANDLER_OID,
                         epost = SAKSBEHANDLER_EPOST,
                         navn = SAKSBEHANDLER_NAVN,
-                        ident = SAKSBEHANDLER_IDENT
+                        ident = SAKSBEHANDLER_IDENT,
                     )
                     setBody(objectMapper.writeValueAsString(overstyring))
                 }
@@ -172,7 +175,7 @@ internal class OverstyringIT : AbstractE2ETest() {
         application.install(ContentNegotiation) {
             register(
                 ContentType.Application.Json,
-                JacksonConverter(objectMapper)
+                JacksonConverter(objectMapper),
             )
         }
         application.azureAdAppAuthentication(AbstractApiTest.azureAdConfig)
