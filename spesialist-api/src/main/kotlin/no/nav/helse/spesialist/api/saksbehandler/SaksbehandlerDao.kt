@@ -49,7 +49,8 @@ class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource)
             """
 
             @Language("PostgreSQL")
-            val invaliderOppgave = "UPDATE oppgave SET status = 'Invalidert'::oppgavestatus WHERE id=:id;"
+            val invaliderOppgave =
+                "UPDATE oppgave SET status = 'Invalidert'::oppgavestatus, oppdatert = now() WHERE id=:id;"
             session.run(
                 queryOf(
                     finnOppgaveIder,
