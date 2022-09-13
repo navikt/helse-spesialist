@@ -22,7 +22,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? {
         @Language("PostgreSQL")
         val query = """
-            SELECT id, er_beslutter_oppgave, er_retur_oppgave, totrinnsvurdering, tidligere_saksbehandler_oid
+            SELECT id, er_beslutteroppgave, er_returoppgave, er_totrinnsoppgave, tidligere_saksbehandler_oid
             FROM oppgave
             WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
                 AND status = 'AvventerSaksbehandler'::oppgavestatus
@@ -30,9 +30,9 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         return query.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) {
             OppgaveForPeriodevisningDto(
                 id = it.string("id"),
-                erBeslutter = it.boolean("er_beslutter_oppgave"),
-                erRetur = it.boolean("er_retur_oppgave"),
-                trengerTotrinnsvurdering = it.boolean("totrinnsvurdering"),
+                erBeslutter = it.boolean("er_beslutteroppgave"),
+                erRetur = it.boolean("er_returoppgave"),
+                trengerTotrinnsvurdering = it.boolean("er_totrinnsoppgave"),
                 tidligereSaksbehandler = it.stringOrNull("tidligere_saksbehandler_oid"),
             )
         }
@@ -46,13 +46,13 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 if (saksbehandlerTilganger.harTilgangTilKode7()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
                 else "AND pi.adressebeskyttelse = 'Ugradert'"
             val eventuellEkskluderingAvBeslutterOppgaver =
-                if (saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutter_oppgave = false"
+                if (saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutteroppgave = false"
             // bruk av const direkte i @Language-annotert sql fører til snodige fantom-compile-feil i IntelliJ
             val beslutterOppgaveHackyWorkaround = BESLUTTEROPPGAVE_PREFIX
 
             @Language("PostgreSQL")
             val query = """
-            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutter_oppgave, o.er_retur_oppgave, o.totrinnsvurdering, o.tidligere_saksbehandler_oid , s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
+            SELECT o.id as oppgave_id, o.type AS oppgavetype, o.opprettet, o.er_beslutteroppgave, o.er_returoppgave, o.er_totrinnsoppgave, o.tidligere_saksbehandler_oid , s.epost, s.navn as saksbehandler_navn, s.oid, v.vedtaksperiode_id, v.fom, v.tom, pi.fornavn, pi.mellomnavn, pi.etternavn, pi.fodselsdato,
                    pi.kjonn, pi.adressebeskyttelse, p.aktor_id, p.fodselsnummer, sot.type as saksbehandleroppgavetype, sot.inntektskilde, e.id AS enhet_id, e.navn AS enhet_navn, t.på_vent,
                    (SELECT COUNT(DISTINCT melding) from warning w where w.melding not like '$beslutterOppgaveHackyWorkaround%' and w.vedtak_ref = o.vedtak_ref and (w.inaktiv_fra is null or w.inaktiv_fra > now())) AS antall_varsler
             FROM oppgave o
@@ -90,14 +90,14 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         val erFerdigstiltAvSaksbehandler =
             "((o.status = 'Ferdigstilt' OR o.status = 'AvventerSystem') AND s.ident = :ident)"
         val erTidligereBehandletAvSaksbehandler =
-            "((o.er_beslutter_oppgave = true OR o.er_retur_oppgave = true) AND o.tidligere_saksbehandler_oid = :oid)"
+            "((o.er_beslutteroppgave = true OR o.er_returoppgave = true) AND o.tidligere_saksbehandler_oid = :oid)"
 
         return queryize(
             """
             SELECT o.id                                                     as oppgave_id,
                    o.type                                                   as oppgavetype,
                    o.status,
-                   o.er_beslutter_oppgave,
+                   o.er_beslutteroppgave,
                    s2.navn                                                  as ferdigstilt_av,
                    o.oppdatert                                              as ferdigstilt_tidspunkt,
                    pi.fornavn                                               as soker_fornavn,
@@ -174,9 +174,9 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                     påVent = it.boolean("på_vent")
                 )
             },
-            erBeslutterOppgave = it.boolean("er_beslutter_oppgave"),
-            erReturOppgave = it.boolean("er_retur_oppgave"),
-            trengerTotrinnsvurdering = it.boolean("totrinnsvurdering"),
+            erBeslutterOppgave = it.boolean("er_beslutteroppgave"),
+            erReturOppgave = it.boolean("er_returoppgave"),
+            trengerTotrinnsvurdering = it.boolean("er_totrinnsoppgave"),
             tidligereSaksbehandlerOid = it.uuidOrNull("tidligere_saksbehandler_oid")
         )
     }

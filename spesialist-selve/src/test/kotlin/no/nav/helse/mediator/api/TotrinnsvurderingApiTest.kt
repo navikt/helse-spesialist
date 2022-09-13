@@ -69,11 +69,8 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         verify(exactly = 1) {
-            oppgaveMediator.setBeslutterOppgave(
+            oppgaveMediator.setBeslutteroppgave(
                 oppgaveId = totrinnsvurderingDto.oppgavereferanse,
-                erBeslutterOppgave = true,
-                erReturOppgave = false,
-                totrinnsvurdering = false,
                 tidligereSaksbehandlerOid = saksbehandler_oid
             )
         }
@@ -107,12 +104,9 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         }
 
         verify(exactly = 1) {
-            oppgaveMediator.setBeslutterOppgave(
+            oppgaveMediator.setReturoppgave(
                 oppgaveId = returDtoMedNotat.oppgavereferanse,
-                erBeslutterOppgave = false,
-                erReturOppgave = true,
-                totrinnsvurdering = true,
-                tidligereSaksbehandlerOid = saksbehandler_oid
+                beslutterSaksbehandlerOid = saksbehandler_oid
             )
         }
         verify(exactly = 1) {
@@ -144,7 +138,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -159,7 +153,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
@@ -173,7 +167,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
@@ -187,7 +181,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
 
-        verify(exactly = 0) { oppgaveMediator.setBeslutterOppgave(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveMediator.setBeslutteroppgave(any(), any()) }
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 }

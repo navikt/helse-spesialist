@@ -345,7 +345,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave(contextId = CONTEXT_ID)
         opprettSaksbehandler()
-        oppgaveDao.setBeslutterOppgave(oppgaveId, true, false, false, tidligereSaksbehandlerOid)
+        oppgaveDao.setBeslutteroppgave(oppgaveId, tidligereSaksbehandlerOid)
 
         assertEquals(tidligereSaksbehandlerOid, oppgaveDao.hentTidligereSaksbehandlerOid(VEDTAKSPERIODE))
     }
@@ -353,8 +353,8 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
         it.run(
             queryOf(
-                "SELECT totrinnsvurdering FROM oppgave"
-            ).map { row -> row.boolean("totrinnsvurdering") }.asSingle
+                "SELECT er_totrinnsoppgave FROM oppgave"
+            ).map { row -> row.boolean("er_totrinnsoppgave") }.asSingle
         )
     } ?: false
 

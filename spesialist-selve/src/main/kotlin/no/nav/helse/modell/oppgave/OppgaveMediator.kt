@@ -160,21 +160,25 @@ class OppgaveMediator(
 
     fun setTrengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.setTrengerTotrinnsvurdering(oppgaveId)
 
-    fun setBeslutterOppgave(
+    fun setBeslutteroppgave(
         oppgaveId: Long,
-        erBeslutterOppgave: Boolean,
-        erReturOppgave: Boolean,
-        totrinnsvurdering: Boolean,
-        tidligereSaksbehandlerOid: UUID
-    ) = oppgaveDao.setBeslutterOppgave(
+        tidligereSaksbehandlerOid: UUID,
+    ) = oppgaveDao.setBeslutteroppgave(
         oppgaveId,
-        erBeslutterOppgave,
-        erReturOppgave,
-        totrinnsvurdering,
         tidligereSaksbehandlerOid
     )
 
+    fun setReturoppgave(
+        oppgaveId: Long,
+        beslutterSaksbehandlerOid: UUID,
+    ) = oppgaveDao.setReturoppgave(
+        oppgaveId,
+        beslutterSaksbehandlerOid
+    )
+
     fun finnTidligereSaksbehandler(oppgaveId: Long) = oppgaveDao.finnTidligereSaksbehandler(oppgaveId)
+
+    fun finnBeslutterSaksbehandler(oppgaveId: Long) = oppgaveDao.finnBeslutterSaksbehandler(oppgaveId)
 
     fun lagrePeriodehistorikk(
         oppgaveId: Long,

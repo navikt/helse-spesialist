@@ -36,14 +36,11 @@ internal fun Route.totrinnsvurderingApi(
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
-        val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(totrinnsvurdering.oppgavereferanse)
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, tidligereSaksbehandlerOid)
+        val beslutterSaksbehandlerOid = oppgaveMediator.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, beslutterSaksbehandlerOid)
 
-        oppgaveMediator.setBeslutterOppgave(
+        oppgaveMediator.setBeslutteroppgave(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
-            erBeslutterOppgave = true,
-            erReturOppgave = false,
-            totrinnsvurdering = false,
             tidligereSaksbehandlerOid = saksbehandlerOid
         )
 
@@ -68,12 +65,9 @@ internal fun Route.totrinnsvurderingApi(
 
         val tidligereSaksbehandlerOid = oppgaveMediator.finnTidligereSaksbehandler(retur.oppgavereferanse)
 
-        oppgaveMediator.setBeslutterOppgave(
+        oppgaveMediator.setReturoppgave(
             oppgaveId = retur.oppgavereferanse,
-            erBeslutterOppgave = false,
-            erReturOppgave = true,
-            totrinnsvurdering= true,
-            tidligereSaksbehandlerOid = saksbehandlerOid
+            beslutterSaksbehandlerOid = saksbehandlerOid
         )
 
         tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid)

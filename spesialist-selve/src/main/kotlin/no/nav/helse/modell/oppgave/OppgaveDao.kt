@@ -21,17 +21,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
 
     fun trengerTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean =
-        """ SELECT totrinnsvurdering FROM oppgave
+        """ SELECT er_totrinnsoppgave FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             AND status = 'AvventerSaksbehandler'::oppgavestatus   
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("totrinnsvurdering") } ?: false
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_totrinnsoppgave") } ?: false
 
     fun trengerTotrinnsvurdering(oppgaveId: Long): Boolean =
-        """ SELECT totrinnsvurdering FROM oppgave
+        """ SELECT er_totrinnsoppgave FROM oppgave
             WHERE id = :oppgaveId
             AND status = 'AvventerSaksbehandler'::oppgavestatus   
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("totrinnsvurdering") } ?: false
+        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_totrinnsoppgave") } ?: false
 
     fun hentTidligereSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? =
         """ SELECT tidligere_saksbehandler_oid FROM oppgave
@@ -41,30 +41,30 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
 
     fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean =
-        """ SELECT er_beslutter_oppgave FROM oppgave
+        """ SELECT er_beslutteroppgave FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             AND status = 'AvventerSaksbehandler'::oppgavestatus  
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutter_oppgave") } ?: false
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutteroppgave") } ?: false
 
     fun erBeslutteroppgave(oppgaveId: Long): Boolean =
-        """ SELECT er_beslutter_oppgave FROM oppgave
+        """ SELECT er_beslutteroppgave FROM oppgave
             WHERE id=:oppgaveId
             AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutter_oppgave") } ?: false
+        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutteroppgave") } ?: false
 
     fun erReturOppgave(vedtaksperiodeId: UUID): Boolean =
-        """ SELECT er_retur_oppgave FROM oppgave
+        """ SELECT er_returoppgave FROM oppgave
             WHERE vedtak_ref =
                 (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
             AND status = 'AvventerSaksbehandler'::oppgavestatus    
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_retur_oppgave") } ?: false
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_returoppgave") } ?: false
 
     fun erReturoppgave(oppgaveId: Long): Boolean =
-        """ SELECT er_retur_oppgave FROM oppgave
+        """ SELECT er_returoppgave FROM oppgave
             WHERE id=:oppgaveId
             AND status = 'AvventerSaksbehandler'::oppgavestatus
-        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_retur_oppgave") } ?: false
+        """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_returoppgave") } ?: false
 
     fun finnOppgaveIdUansettStatus(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId
@@ -169,22 +169,34 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             .single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") })
     { "Kunne ikke finne vedtak for vedtaksperiodeId $vedtaksperiodeId" }
 
-    fun setBeslutterOppgave(
+    fun setBeslutteroppgave(
         oppgaveId: Long,
-        erBeslutterOppgave: Boolean,
-        erReturOppgave: Boolean,
-        totrinnsvurdering: Boolean,
         tidligereSaksbehandlerOID: UUID
     ) =
         """ UPDATE oppgave
-            SET er_beslutter_oppgave=:er_beslutter_oppgave, er_retur_oppgave=:er_retur_oppgave, totrinnsvurdering=:totrinnsvurdering, tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
+            SET er_beslutteroppgave=true, 
+                er_returoppgave=false, 
+                tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
             WHERE id=:oppgave_id
         """.update(
             mapOf(
-                "er_beslutter_oppgave" to erBeslutterOppgave,
-                "er_retur_oppgave" to erReturOppgave,
-                "totrinnsvurdering" to totrinnsvurdering,
                 "tidligere_saksbehandler_oid" to tidligereSaksbehandlerOID,
+                "oppgave_id" to oppgaveId
+            )
+        )
+
+    fun setReturoppgave(
+        oppgaveId: Long,
+        beslutterSaksbehandlerOid: UUID
+    ) =
+        """ UPDATE oppgave
+            SET er_beslutteroppgave=false, 
+                er_returoppgave=true, 
+                beslutter_saksbehandler_oid=:beslutter_saksbehandler_oid
+            WHERE id=:oppgave_id
+        """.update(
+            mapOf(
+                "beslutter_saksbehandler_oid" to beslutterSaksbehandlerOid,
                 "oppgave_id" to oppgaveId
             )
         )
@@ -193,6 +205,11 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         SELECT tidligere_saksbehandler_oid FROM oppgave
         WHERE id=:oppgave_id
     """.single(mapOf("oppgave_id" to oppgaveId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
+
+    fun finnBeslutterSaksbehandler(oppgaveId: Long) = """
+        SELECT beslutter_saksbehandler_oid FROM oppgave
+        WHERE id=:oppgave_id
+    """.single(mapOf("oppgave_id" to oppgaveId)) { it.uuidOrNull("beslutter_saksbehandler_oid") }
 
     fun updateOppgave(
         oppgaveId: Long,
@@ -266,7 +283,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             @Language("PostgreSQL")
             val query =
                 """ UPDATE oppgave
-                    SET totrinnsvurdering=true
+                    SET er_totrinnsoppgave=true
                     WHERE vedtak_ref = 
                     (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)
                     AND status = 'AvventerSaksbehandler'::oppgavestatus
@@ -284,7 +301,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             @Language("PostgreSQL")
             val query =
                 """ UPDATE oppgave
-                    SET totrinnsvurdering=true
+                    SET er_totrinnsoppgave=true
                     WHERE id = ?
             """
             it.run(
