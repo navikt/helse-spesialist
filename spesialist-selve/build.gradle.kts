@@ -1,5 +1,6 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
+import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 val graphQLKotlinVersion = "5.5.0"
@@ -44,6 +45,18 @@ val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
         dependsOn("graphqlIntrospectSchema")
     }
 }
+
+val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
+    packages.set(
+        listOf(
+            "no.nav.helse.mediator.api.graphql",
+            "no.nav.helse.mediator.api.graphql.schema",
+            "no.nav.helse.mediator.graphql"
+        )
+    )
+}
+
+graphqlGenerateSDL.enabled = false
 
 tasks {
     named<Jar>("jar") {
