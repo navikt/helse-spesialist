@@ -33,7 +33,7 @@ class NotatMediator(
             sikkerLogg.warn("saksbehandler med oid=${saksbehandler_oid} kan ikke feilregistrere notat oppført av annen saksbehandler med oid=${notat.saksbehandlerOid}")
             return false
         }
-        notatDao.feilregistrer(notatId, saksbehandler_oid)
+        notatDao.feilregistrerNotat(notatId)
         sikkerLogg.info("notat med id=${notatId} ble feilregistrert: {}", notat)
         return true
     }

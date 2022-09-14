@@ -147,6 +147,12 @@ data class Periodevilkar(
     val sykepengedager: Sykepengedager
 )
 
+data class Kommentar(
+    val id: Int,
+    val tekst: String,
+    val feilregistrert_tidspunkt: LocalDateTime?,
+)
+
 data class Notat(
     val id: Int,
     val tekst: String,
@@ -158,7 +164,8 @@ data class Notat(
     val vedtaksperiodeId: UUID,
     val feilregistrert: Boolean,
     val feilregistrert_tidspunkt: LocalDateTime?,
-    val type: NotatType
+    val type: NotatType,
+    val kommentarer: List<Kommentar>,
 )
 
 data class PeriodeHistorikkElement(
@@ -326,7 +333,14 @@ data class BeregnetPeriode(
             vedtaksperiodeId = it.vedtaksperiodeId.toString(),
             feilregistrert = it.feilregistrert,
             feilregistrert_tidspunkt = it.feilregistrert_tidspunkt.toString(),
-            type = it.type
+            type = it.type,
+            kommentarer = it.kommentarer.map { kommentar ->
+                Kommentar(
+                    id = kommentar.id,
+                    tekst = kommentar.tekst,
+                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt.toString(),
+                )
+            }
         )
     }
 

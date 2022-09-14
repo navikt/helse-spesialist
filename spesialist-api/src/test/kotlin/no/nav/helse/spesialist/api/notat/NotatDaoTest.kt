@@ -77,7 +77,7 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
         val notater = notatDao.finnNotater(listOf(vedtaksperiodeId))
 
         val notatId = notater[vedtaksperiodeId]?.get(0)!!.id
-        notatDao.feilregistrer(notatId, oid)
+        notatDao.feilregistrerNotat(notatId)
 
         val feilregistrerteNotater = notatDao.finnNotater(listOf(vedtaksperiodeId))
 

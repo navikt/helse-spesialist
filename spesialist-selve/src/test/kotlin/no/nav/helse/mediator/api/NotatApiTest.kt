@@ -22,7 +22,7 @@ import no.nav.helse.spesialist.api.notat.NotatType
 import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)
-internal class NotatApiTest: AbstractApiTest() {
+internal class NotatApiTest : AbstractApiTest() {
     private lateinit var notatMediator: NotatMediator
 
     private val vedtaksperiodeId1 = "8624dbae-0c42-445b-a869-a3023e6ca3f7"
@@ -49,10 +49,12 @@ internal class NotatApiTest: AbstractApiTest() {
             client.preparePost("/api/notater/$vedtaksperiodeId1") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody(mapOf(
-                    "tekst" to "en-tekst",
-                    "type" to "Generelt"
-                ))
+                setBody(
+                    mapOf(
+                        "tekst" to "en-tekst",
+                        "type" to "Generelt"
+                    )
+                )
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }
@@ -65,7 +67,7 @@ internal class NotatApiTest: AbstractApiTest() {
 
     @Test
     fun `feilregistrering av notat`() {
-        every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)} returns true
+        every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID) } returns true
         val response = runBlocking {
             client.preparePut("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
                 accept(ContentType.Application.Json)
@@ -81,7 +83,7 @@ internal class NotatApiTest: AbstractApiTest() {
 
     @Test
     fun `feilregistrering av annen saksbehandler sitt originale notat`() {
-        every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID)} returns false
+        every { notatMediator.feilregistrer(notatId, SAKSBEHANDLER_OID) } returns false
         val response = runBlocking {
             client.preparePut("/api/notater/$vedtaksperiodeId1/feilregistrer/$notatId") {
                 accept(ContentType.Application.Json)
@@ -102,10 +104,12 @@ internal class NotatApiTest: AbstractApiTest() {
             client.preparePost("/api/notater/null") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                setBody(mapOf(
-                    "tekst" to "en-tekst",
-                    "type" to "Generelt"
-                ))
+                setBody(
+                    mapOf(
+                        "tekst" to "en-tekst",
+                        "type" to "Generelt"
+                    )
+                )
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }
@@ -117,39 +121,47 @@ internal class NotatApiTest: AbstractApiTest() {
     }
 
     @Test
-    fun `flere query params med samme navn er lov`() = runBlocking{
+    fun `flere query params med samme navn er lov`() = runBlocking {
         val periode_1_id = UUID.fromString(vedtaksperiodeId1)
         val periode_2_id = UUID.fromString(vedtaksperiodeId2)
         every { notatMediator.finn(listOf(periode_1_id, periode_2_id)) } returns mapOf(
-            periode_1_id to listOf(NotatDto(
-                id = 1,
-                tekst = "yo!",
-                opprettet = LocalDateTime.now(),
-                saksbehandlerOid = SAKSBEHANDLER_OID,
-                saksbehandlerNavn = "per",
-                saksbehandlerEpost = "noen@example.com",
-                saksbehandlerIdent = "S199999",
-                vedtaksperiodeId = periode_1_id,
-                feilregistrert = false,
-                feilregistrert_tidspunkt = null,
-                type=NotatType.PaaVent)),
-            periode_2_id to listOf(NotatDto(
-                id = 2,
-                tekst = "sup?",
-                opprettet = LocalDateTime.now(),
-                saksbehandlerOid = SAKSBEHANDLER_OID,
-                saksbehandlerNavn = "per",
-                saksbehandlerEpost = "noen@example.com",
-                saksbehandlerIdent = "S199999",
-                vedtaksperiodeId = periode_2_id,
-                feilregistrert = false,
-                feilregistrert_tidspunkt = null,
-                type=NotatType.PaaVent
-            ))
+            periode_1_id to listOf(
+                NotatDto(
+                    id = 1,
+                    tekst = "yo!",
+                    opprettet = LocalDateTime.now(),
+                    saksbehandlerOid = SAKSBEHANDLER_OID,
+                    saksbehandlerNavn = "per",
+                    saksbehandlerEpost = "noen@example.com",
+                    saksbehandlerIdent = "S199999",
+                    vedtaksperiodeId = periode_1_id,
+                    feilregistrert = false,
+                    feilregistrert_tidspunkt = null,
+                    type = NotatType.PaaVent,
+                    kommentarer = emptyList(),
+                )
+            ),
+            periode_2_id to listOf(
+                NotatDto(
+                    id = 2,
+                    tekst = "sup?",
+                    opprettet = LocalDateTime.now(),
+                    saksbehandlerOid = SAKSBEHANDLER_OID,
+                    saksbehandlerNavn = "per",
+                    saksbehandlerEpost = "noen@example.com",
+                    saksbehandlerIdent = "S199999",
+                    vedtaksperiodeId = periode_2_id,
+                    feilregistrert = false,
+                    feilregistrert_tidspunkt = null,
+                    type = NotatType.PaaVent,
+                    kommentarer = emptyList(),
+                )
+            )
         )
-        val response = client.prepareGet("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2"){
-            authentication(SAKSBEHANDLER_OID)
-        }.execute().body<Map<UUID, List<NotatDto>>>()
+        val response =
+            client.prepareGet("/api/notater?vedtaksperiode_id=$vedtaksperiodeId1&vedtaksperiode_id=$vedtaksperiodeId2") {
+                authentication(SAKSBEHANDLER_OID)
+            }.execute().body<Map<UUID, List<NotatDto>>>()
         assertEquals(2, response.size)
     }
 
