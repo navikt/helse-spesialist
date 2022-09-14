@@ -29,6 +29,16 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         )
     )
 
+    fun leggTilKommentar(notatId: Int, tekst: String): KommentarDto? = queryize(
+        """
+            insert into kommentarer (tekst, notat_ref)
+            values (:tekst, :notatId)
+            returning *
+        """
+    ).single(mapOf("tekst" to tekst, "notatId" to notatId)) {
+        mapKommentarDto(it)
+    }
+
     fun opprettNotatForOppgaveId(
         oppgaveId: Long,
         tekst: String,
