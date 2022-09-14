@@ -7,12 +7,12 @@ import graphql.schema.GraphQLSchema
 import no.nav.helse.mediator.api.ReservasjonClient
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -85,6 +85,11 @@ internal class SchemaBuilder(
                     BehandlingsstatistikkQuery(
                         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                     )
+                )
+            ),
+            mutations = listOf(
+                TopLevelObject(
+                    NotatMutation(notatDao = notatDao)
                 )
             )
         )
