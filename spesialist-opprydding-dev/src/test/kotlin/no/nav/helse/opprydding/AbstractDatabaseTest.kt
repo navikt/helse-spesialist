@@ -112,7 +112,8 @@ internal abstract class AbstractDatabaseTest {
                 "feilende_meldinger",
                 "arbeidsgiver",
                 "arbeidsgiver_bransjer",
-                "arbeidsgiver_navn"
+                "arbeidsgiver_navn",
+                "kommentarer"
             )
         )
         tabeller.forEach {
