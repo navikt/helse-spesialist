@@ -21,6 +21,12 @@ import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingsfilterTest {
 
+
+    @Test
+    fun `rthing`() {
+
+    }
+
     @Test
     fun `ingen utbetaling kan utbetales`() {
         assertKanUtbetales(Utbetalingsfilter(

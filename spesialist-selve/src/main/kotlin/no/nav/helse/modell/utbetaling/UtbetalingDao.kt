@@ -10,6 +10,19 @@ import java.util.*
 import javax.sql.DataSource
 
 class UtbetalingDao(private val dataSource: DataSource) {
+
+    fun erUtbetaltFør(utbetalingId: UUID): Boolean {
+        @Language("PostgreSQL")
+        val statement = """
+            select 1 from utbetaling_id
+             join oppdrag on oppdrag.id = utbetaling_id.arbeidsgiver_fagsystem_id_ref or oppdrag.id = utbetaling_id.person_fagsystem_id_ref
+             where utbetaling_id.utbetaling_id = :utbetalingId
+             and oppdrag.endringskode = 'ENDR'
+        """.trimIndent()
+        return sessionOf(dataSource).use {
+            it.run(queryOf(statement, mapOf("utbetalingId" to utbetalingId)).map { it }.asList).isNotEmpty()
+        }
+    }
     internal fun finnUtbetalingIdRef(utbetalingId: UUID): Long? {
         @Language("PostgreSQL")
         val statement = "SELECT id FROM utbetaling_id WHERE utbetaling_id = ? LIMIT 1;"

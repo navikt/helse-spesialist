@@ -311,15 +311,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun lagArbeidsgiveroppdrag(fagsystemId: String = fagsystemId()) =
-        utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", "NY", LocalDate.now().plusDays(169))!!
+    protected fun lagArbeidsgiveroppdrag(fagsystemId: String = fagsystemId(), endringskode: String = "NY") =
+        utbetalingDao.nyttOppdrag(fagsystemId, ORGNUMMER, "SPREF", endringskode, LocalDate.now().plusDays(169))!!
 
     protected fun lagPersonoppdrag(fagsystemId: String = fagsystemId()) =
         utbetalingDao.nyttOppdrag(fagsystemId, FNR, "SPREF", "NY", LocalDate.now().plusDays(169))!!
 
-    protected fun lagUtbetalingId(arbeidsgiverOppdragId: Long, personOppdragId: Long): Long =
+    protected fun lagUtbetalingId(arbeidsgiverOppdragId: Long, personOppdragId: Long, utbetalingId: UUID = UUID.randomUUID()): Long =
         utbetalingDao.opprettUtbetalingId(
-            utbetalingId = UUID.randomUUID(),
+            utbetalingId = utbetalingId,
             fødselsnummer = FNR,
             orgnummer = ORGNUMMER,
             type = Utbetalingtype.UTBETALING,

@@ -9,6 +9,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -16,6 +17,20 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertDoesNotThrow
 
 class UtbetalingDaoTest : DatabaseIntegrationTest() {
+
+    @Test
+    fun `Utbetalinger som har minst ett ENDR-innslag i oppdrag er endringer`() {
+        nyPerson()
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId = lagPersonoppdrag(personFagsystemId)
+        val arbeidsgiverOppdragId2 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId, "ENDR")
+        val utbetalingId = UUID.randomUUID()
+        lagUtbetalingId(arbeidsgiverOppdragId2, personOppdragId, utbetalingId)
+
+        assertTrue(utbetalingDao.erUtbetaltFør(utbetalingId))
+    }
 
     @Test
     fun `hent utbetalinger for en person`() {
