@@ -25,57 +25,83 @@ class UtbetalingDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Utbetalinger uten ENDR-innslag er ikke endringer`() {
+    fun `Annen utbetaling påvirker ikke sjekken`() {
+        nyPerson()
+
+        // Urelatert utbetaling
+        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(fagsystemId())
+        val personOppdragId1 = lagPersonoppdrag(fagsystemId())
+        val utbetaling_idId1 = lagUtbetalingId(arbeidsgiveroppdragId1, personOppdragId1, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId1, UTBETALT, LocalDateTime.now(), "{}")
+
+        // Gjeldende utbetaling
+        val arbeidsgiverFagsystemId = fagsystemId()
+        val personFagsystemId = fagsystemId()
+        val arbeidsgiveroppdragId2 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId2 = lagPersonoppdrag(personFagsystemId)
+        val utbetalingId2 = UUID.randomUUID()
+        val utbetaling_idId2 = lagUtbetalingId(arbeidsgiveroppdragId2, personOppdragId2, utbetalingId2)
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId2, IKKE_UTBETALT, LocalDateTime.now(), "{}")
+
+        assertFalse(utbetalingDao.erUtbetaltFør(utbetalingId2))
+    }
+
+    @Test
+    fun `Ingen tidligere utbetaling`() {
         nyPerson()
         val arbeidsgiverFagsystemId = fagsystemId()
         val personFagsystemId = fagsystemId()
+
+        // Første periode: til arbeidsgiver, ikke noe til person
+        val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val personOppdragId = lagPersonoppdrag(personFagsystemId)
-        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, utbetalingId)
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId, personOppdragId, utbetalingId)
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, IKKE_UTBETALT, LocalDateTime.now(), "{}")
 
         assertFalse(utbetalingDao.erUtbetaltFør(utbetalingId))
     }
 
     @Test
-    fun `Utbetalinger som har minst ett ENDR-innslag i oppdrag er endringer`() {
+    fun `Bytte fra AG til person er endring`() {
         nyPerson()
         val arbeidsgiverFagsystemId = fagsystemId()
         val personFagsystemId = fagsystemId()
-        lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        val personOppdragId = lagPersonoppdrag(personFagsystemId)
-        val arbeidsgiverOppdragId2 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId, "ENDR")
+
+        // Første periode: til arbeidsgiver, ikke noe til person
+        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId1, personOppdragId1, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, UTBETALT, LocalDateTime.now(), "{}")
+
+        // Neste periode, mottaker 100 % byttet
+        val arbeidsgiverOppdragId2 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId, endringskode = "UEND")
+        val personOppdragId2 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        lagUtbetalingId(arbeidsgiverOppdragId2, personOppdragId, utbetalingId)
+        lagUtbetalingId(arbeidsgiverOppdragId2, personOppdragId2, utbetalingId)
 
         assertTrue(utbetalingDao.erUtbetaltFør(utbetalingId))
     }
 
     @Test
-    fun `Utbetalinger som har minst ett ENDR-innslag i personoppdraget er endringer`() {
+    fun `Overstyring, ny versjon av utbetalingen er ikke endring`() {
         nyPerson()
         val arbeidsgiverFagsystemId = fagsystemId()
         val personFagsystemId = fagsystemId()
-        lagPersonoppdrag(personFagsystemId)
-        val personOppdragId = lagPersonoppdrag(personFagsystemId, "ENDR")
-        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+
+        // Første utkast: til arbeidsgiver, ikke noe til person
+        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
+        val utbetaling_idId = lagUtbetalingId(arbeidsgiveroppdragId1, personOppdragId1, UUID.randomUUID())
+        utbetalingDao.nyUtbetalingStatus(utbetaling_idId, FORKASTET, LocalDateTime.now(), "{}")
+
+        // Neste utkast
+        val arbeidsgiverOppdragId2 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
+        val personOppdragId2 = lagPersonoppdrag(personFagsystemId)
         val utbetalingId = UUID.randomUUID()
-        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, utbetalingId)
+        lagUtbetalingId(arbeidsgiverOppdragId2, personOppdragId2, utbetalingId)
 
-        assertTrue(utbetalingDao.erUtbetaltFør(utbetalingId))
-    }
-
-    @Test
-    fun `Annen utbetaling påvirker ikke sjekken`() {
-        nyPerson()
-        val arbeidsgiverFagsystemId = fagsystemId()
-        val personFagsystemId = fagsystemId()
-        lagPersonoppdrag(personFagsystemId)
-        val personOppdragId = lagPersonoppdrag(personFagsystemId, "ENDR")
-        val arbeidsgiverOppdragId = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UUID.randomUUID())
-
-        assertFalse(utbetalingDao.erUtbetaltFør(UUID.randomUUID()))
+        assertFalse(utbetalingDao.erUtbetaltFør(utbetalingId))
     }
 
     @Test

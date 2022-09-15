@@ -16,14 +16,15 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingsfilterTest {
 
-
+    @Disabled
     @Test
-    fun `rthing`() {
+    fun `Overgang fra ikke refusjon til delvis refusjon går ok gjennom filteret`() {
 
     }
 

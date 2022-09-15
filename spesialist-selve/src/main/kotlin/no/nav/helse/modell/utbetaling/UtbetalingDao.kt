@@ -15,9 +15,11 @@ class UtbetalingDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             select 1 from utbetaling_id
-             join oppdrag on oppdrag.id = utbetaling_id.arbeidsgiver_fagsystem_id_ref or oppdrag.id = utbetaling_id.person_fagsystem_id_ref
+             join oppdrag oppdrag_1 on oppdrag_1.id = utbetaling_id.arbeidsgiver_fagsystem_id_ref or oppdrag_1.id = utbetaling_id.person_fagsystem_id_ref
+             join oppdrag oppdrag_2 on oppdrag_2.fagsystem_id = oppdrag_1.fagsystem_id
+             join utbetaling_id utbetaling_id_2 on utbetaling_id_2.arbeidsgiver_fagsystem_id_ref = oppdrag_2.id or utbetaling_id_2.person_fagsystem_id_ref = oppdrag_2.id  
+             join utbetaling on utbetaling_id_2.id = utbetaling.utbetaling_id_ref and status = 'UTBETALT' 
              where utbetaling_id.utbetaling_id = :utbetalingId
-             and oppdrag.endringskode = 'ENDR'
         """.trimIndent()
         return sessionOf(dataSource).use {
             it.run(queryOf(statement, mapOf("utbetalingId" to utbetalingId)).map { it }.asList).isNotEmpty()
