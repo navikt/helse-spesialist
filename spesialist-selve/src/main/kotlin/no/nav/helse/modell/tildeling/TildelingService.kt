@@ -28,12 +28,13 @@ internal class TildelingService(
     }
 
     private fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID) {
-        val kanIkkeAttestere = hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)
         val erDev = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
-        if (kanIkkeAttestere && !erDev) {
-            throw RuntimeException("Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning")
+        if (!erDev) {
+            val kanIkkeAttestere = hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)
+            if (kanIkkeAttestere) {
+                throw RuntimeException("Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning")
+            }
         }
-
         val suksess = hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
         if (!suksess) {
             val eksisterendeTildeling = tildelingDao.tildelingForOppgave(oppgaveId)
