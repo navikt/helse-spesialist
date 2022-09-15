@@ -3,6 +3,7 @@ package no.nav.helse.mediator.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.format.DateTimeFormatter
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
@@ -150,6 +151,8 @@ data class Periodevilkar(
 data class Kommentar(
     val id: Int,
     val tekst: String,
+    val opprettet: LocalDateTime,
+    val saksbehandlerident: String,
     val feilregistrert_tidspunkt: LocalDateTime?,
 )
 
@@ -338,6 +341,8 @@ data class BeregnetPeriode(
                 Kommentar(
                     id = kommentar.id,
                     tekst = kommentar.tekst,
+                    opprettet = kommentar.opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
+                    saksbehandlerident = kommentar.saksbehandlerident,
                     feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt.toString(),
                 )
             }

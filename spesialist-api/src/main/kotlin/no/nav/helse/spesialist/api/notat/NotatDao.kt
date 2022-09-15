@@ -29,13 +29,13 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         )
     )
 
-    fun leggTilKommentar(notatId: Int, tekst: String): KommentarDto? = queryize(
+    fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): KommentarDto? = queryize(
         """
-            insert into kommentarer (tekst, notat_ref)
-            values (:tekst, :notatId)
+            insert into kommentarer (tekst, notat_ref, saksbehandlerident)
+            values (:tekst, :notatId, :saksbehandlerident)
             returning *
         """
-    ).single(mapOf("tekst" to tekst, "notatId" to notatId)) {
+    ).single(mapOf("tekst" to tekst, "notatId" to notatId, "saksbehandlerident" to saksbehandlerident)) {
         mapKommentarDto(it)
     }
 
@@ -144,6 +144,8 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     private fun mapKommentarDto(it: Row): KommentarDto = KommentarDto(
         id = it.int("id"),
         tekst = it.string("tekst"),
+        opprettet = it.localDateTime("opprettet"),
+        saksbehandlerident = it.string("saksbehandlerident"),
         feilregistrertTidspunkt = it.localDateTimeOrNull("feilregistrert_tidspunkt"),
     )
 

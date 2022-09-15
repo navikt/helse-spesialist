@@ -7,6 +7,8 @@ import java.util.*
 data class KommentarDto(
     val id: Int,
     val tekst: String,
+    val opprettet: LocalDateTime,
+    val saksbehandlerident: String,
     val feilregistrertTidspunkt: LocalDateTime?,
 )
 
