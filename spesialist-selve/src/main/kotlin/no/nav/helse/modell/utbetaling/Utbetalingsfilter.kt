@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 internal class Utbetalingsfilter(
     private val fødselsnummer: String,
     private val delvisRefusjon: Boolean,
+    private val erUtbetaltFør: Boolean,
     private val harUtbetalingTilSykmeldt: Boolean,
     private val periodetype: Periodetype,
     private val inntektskilde: Inntektskilde,
@@ -35,6 +36,7 @@ internal class Utbetalingsfilter(
             }
             nyÅrsak("Vedtaksperioden har warnings")
         }
+        if (årsaker.isNotEmpty() && erUtbetaltFør) sikkerLogg.info("Kandidat for å beholde hos oss. Avvisningsgrunner: ${årsaker.joinToString()}")
         return årsaker.isEmpty()
     }
 
