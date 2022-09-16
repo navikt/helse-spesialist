@@ -324,6 +324,8 @@ data class BeregnetPeriode(
     @Deprecated("tidligereSaksbehandlerOid bør hentes fra periodens oppgave")
     fun tidligereSaksbehandlerOid(): UUID? = oppgaveDao.hentTidligereSaksbehandlerOid(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
 
+    fun beslutterSaksbehandlerOid(): UUID? = oppgaveDao.hentBeslutterSaksbehandlerOid(java.util.UUID.fromString(vedtaksperiodeId()))?.toString()
+
     fun notater(): List<Notat> = notatDao.finnNotater(java.util.UUID.fromString(vedtaksperiodeId())).map {
         Notat(
             id = it.id,

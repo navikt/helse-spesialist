@@ -40,6 +40,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
              AND status = 'AvventerSaksbehandler'::oppgavestatus   
         """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
 
+    fun hentBeslutterSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? =
+        """ SELECT beslutter_saksbehandler_oid FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+             AND status = 'AvventerSaksbehandler'::oppgavestatus   
+        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("beslutter_saksbehandler_oid") }
+
     fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean =
         """ SELECT er_beslutteroppgave FROM oppgave
             WHERE vedtak_ref =
