@@ -427,6 +427,7 @@ enum GraphQLPeriodetilstand {
   TilUtbetaling
   UtbetalingFeilet
   Utbetalt
+  UtbetaltVenterPaAnnenPeriode
   VenterPaAnnenPeriode
 }
 

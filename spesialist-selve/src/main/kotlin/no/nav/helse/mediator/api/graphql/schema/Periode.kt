@@ -51,6 +51,7 @@ enum class Periodetilstand {
     ManglerInformasjon,
     TilGodkjenning,
     VenterPaEnAnnenPeriode,
+    UtbetaltVenterPaEnAnnenPeriode,
     Ukjent
 }
 
@@ -240,6 +241,7 @@ interface Periode {
         GraphQLPeriodetilstand.TILGODKJENNING -> Periodetilstand.TilGodkjenning
         GraphQLPeriodetilstand.UTBETALINGFEILET -> Periodetilstand.UtbetalingFeilet
         GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> Periodetilstand.VenterPaEnAnnenPeriode
+        GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> Periodetilstand.UtbetaltVenterPaEnAnnenPeriode
         else -> Periodetilstand.Ukjent
     }
 
