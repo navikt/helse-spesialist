@@ -1,5 +1,6 @@
 package no.nav.helse.modell.utbetaling
 
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -36,7 +37,12 @@ internal class Utbetalingsfilter(
             }
             nyÅrsak("Vedtaksperioden har warnings")
         }
-        if (årsaker.isNotEmpty() && erUtbetaltFør) sikkerLogg.info("Kandidat for å beholde hos oss. Avvisningsgrunner: ${årsaker.joinToString()}")
+        if (årsaker.isNotEmpty() && erUtbetaltFør) {
+            if (Toggle.BeholdForlengelseMedOvergangTilUTS.enabled) {
+                return true
+            }
+            sikkerLogg.info("Kandidat for å beholde hos oss. Avvisningsgrunner: ${årsaker.joinToString()}")
+        }
         return årsaker.isEmpty()
     }
 
