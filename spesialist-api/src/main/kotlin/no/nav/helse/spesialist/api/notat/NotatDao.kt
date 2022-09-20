@@ -117,7 +117,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     private fun finnKommentarer(notatId: Int): List<KommentarDto> = queryize(
         """
-            select n.id, n.tekst, n.feilregistrert_tidspunkt
+            select k.id, k.tekst, k.feilregistrert_tidspunkt, k.opprettet, k.saksbehandlerident
             from kommentarer k
             inner join notat n on n.id = k.notat_ref
             where n.id = :notatId
