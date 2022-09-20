@@ -41,7 +41,9 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
                 OverstyrTidslinjeKafkaDto.Dag(
                     dato = it.dato,
                     type = enumValueOf(it.type),
-                    grad = it.grad
+                    fraType = enumValueOf(it.fraType),
+                    grad = it.grad,
+                    fraGrad = it.fraGrad
                 )
             }
         )
@@ -62,6 +64,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
             begrunnelse = overstyring.begrunnelse,
             forklaring = overstyring.forklaring,
             månedligInntekt = overstyring.månedligInntekt,
+            fraMånedligInntekt = overstyring.fraMånedligInntekt,
             skjæringstidspunkt = overstyring.skjæringstidspunkt,
             subsumsjon = overstyring.subsumsjon
         )
@@ -99,7 +102,9 @@ class OverstyrTidslinjeDTO(
     class OverstyringdagDTO(
         val dato: LocalDate,
         val type: String,
-        val grad: Int?
+        val fraType: String,
+        val grad: Int?,
+        val fraGrad: Int?
     )
 }
 
@@ -117,7 +122,9 @@ data class OverstyrTidslinjeKafkaDto(
     data class Dag(
         val dato: LocalDate,
         val type: Type,
-        val grad: Int?
+        val fraType: Type,
+        val grad: Int?,
+        val fraGrad: Int?
     ) {
         enum class Type { Sykedag, Feriedag, Egenmeldingsdag, Permisjonsdag }
     }
@@ -144,6 +151,7 @@ data class OverstyrInntektDTO(
     val begrunnelse: String,
     val forklaring: String,
     val månedligInntekt: Double,
+    val fraMånedligInntekt: Double,
     val skjæringstidspunkt: LocalDate,
     val subsumsjon: SubsumsjonDto?,
 )
@@ -156,6 +164,7 @@ data class OverstyrInntektKafkaDto(
     val begrunnelse: String,
     val forklaring: String,
     val månedligInntekt: Double,
+    val fraMånedligInntekt: Double,
     val skjæringstidspunkt: LocalDate,
     val subsumsjon: SubsumsjonDto?,
 ) {
@@ -172,6 +181,7 @@ data class OverstyrInntektKafkaDto(
             "saksbehandlerIdent" to saksbehandler.ident,
             "saksbehandlerEpost" to saksbehandler.epost,
             "månedligInntekt" to månedligInntekt,
+            "fraMånedligInntekt" to fraMånedligInntekt,
             "skjæringstidspunkt" to skjæringstidspunkt,
             subsumsjon?.let { "subsumsjon" to subsumsjon.toMap() },
         ).toMap()
