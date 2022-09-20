@@ -92,7 +92,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             UPDATE arbeidsgiver_bransjer
-            SET bransjer=:bransjer, oppdatert=:oppdatert
+            SET bransjer=:bransjer
             WHERE id=(SELECT bransjer_ref FROM arbeidsgiver WHERE orgnummer=:orgnummer);
         """
 
@@ -101,7 +101,6 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
                 statement,
                 mapOf(
                     "bransjer" to objectMapper.writeValueAsString(bransjer),
-                    "oppdatert" to LocalDateTime.now(),
                     "orgnummer" to orgnummer.toLong()
                 )
             ).asUpdate

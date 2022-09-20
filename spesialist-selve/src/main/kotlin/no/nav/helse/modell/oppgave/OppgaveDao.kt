@@ -224,7 +224,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         ferdigstiltAv: String? = null,
         oid: UUID? = null
     ) =
-        """UPDATE oppgave SET oppdatert=now(), ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId"""
+        """UPDATE oppgave SET ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId"""
             .update(
                 mapOf(
                     "ferdigstiltAv" to ferdigstiltAv,
