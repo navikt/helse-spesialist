@@ -3,7 +3,6 @@ package no.nav.helse.mediator.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.format.DateTimeFormatter
 import no.nav.helse.mediator.graphql.LocalDate
 import no.nav.helse.mediator.graphql.LocalDateTime
 import no.nav.helse.mediator.graphql.UUID
@@ -345,7 +344,7 @@ data class BeregnetPeriode(
                 Kommentar(
                     id = kommentar.id,
                     tekst = kommentar.tekst,
-                    opprettet = kommentar.opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
+                    opprettet = kommentar.opprettet.toString(),
                     saksbehandlerident = kommentar.saksbehandlerident,
                     feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt.toString(),
                 )

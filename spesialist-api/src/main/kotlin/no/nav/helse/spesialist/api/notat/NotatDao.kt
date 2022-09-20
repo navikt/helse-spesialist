@@ -78,7 +78,7 @@ class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """ 
             SELECT * FROM notat n
             JOIN saksbehandler s on s.oid = n.saksbehandler_oid
-            WHERE n.vedtaksperiode_id=:vedtaksperiode_id
+            WHERE n.vedtaksperiode_id = :vedtaksperiode_id::uuid
         """
     ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId)) { mapNotatDto(it) }
 
