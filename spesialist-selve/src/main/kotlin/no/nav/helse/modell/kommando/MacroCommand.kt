@@ -19,13 +19,13 @@ internal abstract class MacroCommand : Command {
 
     final override fun execute(context: CommandContext): Boolean {
         require(commands.isNotEmpty())
-        logg.info("Utfører ${this::class.simpleName}")
+        logg.info("Utfører makro-kommando ${this::class.simpleName}")
         context.register(this)
         return run(context, commands)
     }
 
     final override fun resume(context: CommandContext): Boolean {
-        logg.info("Gjenopptar ${this::class.simpleName}")
+        logg.info("Gjenopptar ${this::class.simpleName}, sti: ${context.sti()}")
         context.register(this)
         if (!runCommand(context, commands[currentIndex], Command::resume)) return false
         return run(context, commands.subList(currentIndex, commands.size))
@@ -46,8 +46,12 @@ internal abstract class MacroCommand : Command {
     }
 
     private fun runCommand(context: CommandContext, command: Command, commandAction: Command.(CommandContext) -> Boolean): Boolean {
-        logg.info("Utfører ${command::class.simpleName}")
-        if (!commandAction(command, context)) return false.also { context.suspendert(currentIndex) }
+        if (!commandAction(command, context)) {
+            context.suspendert(currentIndex)
+            logg.info("Kommando ${command::class.simpleName} suspenderte, nåværende sti: ${context.sti()}")
+            return false
+        }
+        logg.info("Kommando ${command::class.simpleName} er ferdig")
         currentIndex += 1
         return true
     }

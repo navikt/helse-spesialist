@@ -575,7 +575,12 @@ internal class HendelseMediator(
             val hendelse = hendelseDao.finn(hendelseId, hendelsefabrikk)
             val commandContext = commandContextDao.finnSuspendert(contextId)
             if (hendelse == null || commandContext == null) {
-                log.info("finner ikke hendelse med id=$hendelseId eller command context med id=$contextId; ignorerer melding")
+                mutableListOf<String>().let {
+                    if (hendelse == null) it += "Finner ikke hendelse med id=$hendelseId"
+                    if (commandContext == null) it += "Command context $contextId er ikke suspendert"
+                    log.info("Ignorerer melding fordi: " + it.joinToString())
+                }
+
                 return null
             }
             Løsninger(messageContext, hendelse, contextId, commandContext).also { løsninger = it }

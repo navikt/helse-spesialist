@@ -22,7 +22,7 @@ internal class OppdaterArbeidsforholdCommand(
         return when {
             skalOppdateres(sistOppdatert) -> behandle(context)
             else -> {
-                logg.info("Arbeidsforhold allerede oppdatert")
+                logg.info("Arbeidsforhold er allerede oppdatert")
                 true
             }
         }
