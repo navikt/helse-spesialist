@@ -346,7 +346,7 @@ data class BeregnetPeriode(
                     tekst = kommentar.tekst,
                     opprettet = kommentar.opprettet.toString(),
                     saksbehandlerident = kommentar.saksbehandlerident,
-                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt.toString(),
+                    feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt?.toString(),
                 )
             }
         )
