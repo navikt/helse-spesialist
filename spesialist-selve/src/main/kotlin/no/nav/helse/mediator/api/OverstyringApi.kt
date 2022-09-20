@@ -95,6 +95,7 @@ class OverstyrTidslinjeDTO(
     val begrunnelse: String,
     val dager: List<OverstyringdagDTO>
 ) {
+    @JsonIgnoreProperties
     class OverstyringdagDTO(
         val dato: LocalDate,
         val type: String,
@@ -135,6 +136,7 @@ data class SubsumsjonDto(
     ).toMap()
 }
 
+@JsonIgnoreProperties
 data class OverstyrInntektDTO(
     val organisasjonsnummer: String,
     val fødselsnummer: String,
@@ -176,12 +178,14 @@ data class OverstyrInntektKafkaDto(
     )
 }
 
+@JsonIgnoreProperties
 data class OverstyrArbeidsforholdDto(
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
 ) {
+    @JsonIgnoreProperties
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
         val deaktivert: Boolean,
