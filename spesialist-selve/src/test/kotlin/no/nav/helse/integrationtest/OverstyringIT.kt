@@ -53,7 +53,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", grad = null)
+                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
                 ),
             )
 
@@ -93,6 +93,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                 begrunnelse = "en begrunnelse",
                 forklaring = "en forklaring",
                 månedligInntekt = 25000.0,
+                fraMånedligInntekt = 25001.0,
                 skjæringstidspunkt = 1.januar,
                 subsumsjon = null,
             )

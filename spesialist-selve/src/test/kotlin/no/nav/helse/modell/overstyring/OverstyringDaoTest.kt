@@ -42,7 +42,9 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             OverstyringDagDto(
                 dato = LocalDate.of(2020, 1, 1),
                 type = Dagtype.Sykedag,
-                grad = 100
+                grad = 100,
+                fraType = Dagtype.Feriedag,
+                fraGrad = null
             )
         )
         private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
@@ -176,7 +178,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     fun `Finner opprettede inntektoverstyringer`() {
         opprettPerson()
         overstyrInntekt(ID)
-        overstyringDao.persisterOverstyringInntekt(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, FORKLARING, OID, INNTEKT, SKJÆRINGSTIDSPUNKT, OPPRETTET)
+        overstyringDao.persisterOverstyringInntekt(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, FORKLARING, OID, INNTEKT, INNTEKT+1, SKJÆRINGSTIDSPUNKT, OPPRETTET)
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
@@ -255,6 +257,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             begrunnelse = BEGRUNNELSE,
             forklaring = FORKLARING,
             månedligInntekt = INNTEKT,
+            fraMånedligInntekt = INNTEKT + 1,
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             opprettet = OPPRETTET,
             json = "{}",

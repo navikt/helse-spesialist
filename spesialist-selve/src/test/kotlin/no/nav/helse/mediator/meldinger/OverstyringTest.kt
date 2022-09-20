@@ -29,7 +29,9 @@ internal class OverstyringTest {
             OverstyringDagDto(
                 dato = LocalDate.of(2020, 1, 1),
                 type = Dagtype.Sykedag,
-                grad = 100
+                grad = 100,
+                fraType = Dagtype.Feriedag,
+                fraGrad = null
             )
         )
         private val OPPRETTET = LocalDate.now().atStartOfDay()

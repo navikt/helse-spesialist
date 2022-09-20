@@ -50,6 +50,7 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -95,8 +96,10 @@ internal class Hendelsefabrikk(
             map {
                 OverstyringDagDto(
                     dato = it.path("dato").asLocalDate(),
-                    type = enumValueOf(it.path("type").asText()),
-                    grad = it.path("grad").asInt()
+                    type = enumValueOf<Dagtype>(it.path("type").asText()),
+                    fraType = enumValueOf<Dagtype>(it.path("fraType").asText()),
+                    grad = it.path("grad").asInt(),
+                    fraGrad = it.path("fraGrad").asInt()
                 )
             }
     }
@@ -293,6 +296,7 @@ internal class Hendelsefabrikk(
         begrunnelse: String,
         forklaring: String,
         månedligInntekt: Double,
+        fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String
@@ -307,6 +311,7 @@ internal class Hendelsefabrikk(
         begrunnelse = begrunnelse,
         forklaring = forklaring,
         månedligInntekt = månedligInntekt,
+        fraMånedligInntekt = fraMånedligInntekt,
         skjæringstidspunkt = skjæringstidspunkt,
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
@@ -380,6 +385,7 @@ internal class Hendelsefabrikk(
             begrunnelse = jsonNode.path("begrunnelse").asText(),
             forklaring = jsonNode.path("forklaring").asText(),
             månedligInntekt = jsonNode.path("månedligInntekt").asDouble(),
+            fraMånedligInntekt = jsonNode.path("fraMånedligInntekt").asDouble(),
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json

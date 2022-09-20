@@ -103,6 +103,7 @@ internal object Meldingssender {
     fun sendOverstyrtInntekt(
         orgnr: String = Testdata.ORGNR,
         månedligInntekt: Double = 25000.0,
+        fraMånedligInntekt: Double = 25001.0,
         skjæringstidspunkt: LocalDate,
         forklaring: String = "testbortforklaring",
         subsumsjon: SubsumsjonJson?
@@ -113,6 +114,7 @@ internal object Meldingssender {
                     id = id,
                     organisasjonsnummer = orgnr,
                     månedligInntekt = månedligInntekt,
+                    fraMånedligInntekt = fraMånedligInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
                     saksbehandlerEpost = Testdata.SAKSBEHANDLER_EPOST,
                     forklaring = forklaring,

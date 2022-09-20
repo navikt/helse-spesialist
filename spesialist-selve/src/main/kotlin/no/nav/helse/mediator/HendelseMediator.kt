@@ -383,6 +383,7 @@ internal class HendelseMediator(
         begrunnelse: String,
         forklaring: String,
         månedligInntekt: Double,
+        fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
@@ -400,6 +401,7 @@ internal class HendelseMediator(
                 begrunnelse = begrunnelse,
                 forklaring = forklaring,
                 månedligInntekt = månedligInntekt,
+                fraMånedligInntekt = fraMånedligInntekt,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
                 json = json

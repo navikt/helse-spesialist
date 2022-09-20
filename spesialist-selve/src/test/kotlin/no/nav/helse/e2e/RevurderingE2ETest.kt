@@ -153,7 +153,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
 
-        sendOverstyrteDager(listOf(OverstyringDagDto(LocalDate.now(), Dagtype.Feriedag, null)))
+        sendOverstyrteDager(listOf(OverstyringDagDto(LocalDate.now(), Dagtype.Feriedag, Dagtype.Sykedag, null, 100)))
 
         // Behind the scenes: Saksbehandler har også hooket opp en opptegnelse
         speilOppretterAbonnement()

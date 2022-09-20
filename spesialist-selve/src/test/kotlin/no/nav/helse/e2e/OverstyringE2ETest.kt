@@ -55,7 +55,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,
-                    grad = null
+                    grad = null,
+                    fraType = Dagtype.Sykedag,
+                    fraGrad = 100
                 )
             )
         )
@@ -84,6 +86,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val godkjenningsbehovId = settOppBruker()
         val hendelseId = sendOverstyrtInntekt(
             månedligInntekt = 25000.0,
+            fraMånedligInntekt = 25001.0,
             skjæringstidspunkt = 1.januar,
             forklaring = "vår egen forklaring",
             subsumsjon = null
@@ -198,13 +201,16 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,
-                    grad = null
+                    grad = null,
+                    fraType = Dagtype.Sykedag,
+                    fraGrad = 100
                 )
             )
         )
         sendOverstyrtInntekt(
             orgnr = ORGNR,
             månedligInntekt = 15000.0,
+            fraMånedligInntekt = 15001.0,
             skjæringstidspunkt = LocalDate.now(),
             forklaring = "forklaring",
             subsumsjon = null

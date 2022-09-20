@@ -20,7 +20,9 @@ data class OverstyringDto(
 data class OverstyringDagDto(
     val dato: LocalDate,
     val type: Dagtype,
-    val grad: Int?
+    val fraType: Dagtype?,
+    val grad: Int?,
+    val fraGrad: Int?
 )
 
 data class OverstyringInntektDto(
@@ -33,6 +35,7 @@ data class OverstyringInntektDto(
     val saksbehandlerNavn: String,
     val saksbehandlerIdent: String?,
     val månedligInntekt: Double,
+    val fraMånedligInntekt: Double?,
     val skjæringstidspunkt: LocalDate,
 )
 

@@ -504,6 +504,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         saksbehandlerEpost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
         månedligInntekt: Double = 25000.0,
+        fraMånedligInntekt: Double = 25001.0,
         skjæringstidspunkt: LocalDate,
         subsumsjon: SubsumsjonJson?
     ) = nyHendelse(
@@ -518,6 +519,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "saksbehandlerNavn" to saksbehandlerNavn,
             "saksbehandlerEpost" to saksbehandlerEpost,
             "månedligInntekt" to månedligInntekt,
+            "fraMånedligInntekt" to fraMånedligInntekt,
             "skjæringstidspunkt" to skjæringstidspunkt,
         ).apply {
             subsumsjon?.let {

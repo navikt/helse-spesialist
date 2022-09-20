@@ -37,7 +37,11 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                                 OverstyringDagDto(
                                     dato = overstyringDagRow.localDate("dato"),
                                     type = enumValueOf(overstyringDagRow.string("dagtype")),
-                                    grad = overstyringDagRow.intOrNull("grad")
+                                    fraType = overstyringDagRow.stringOrNull("fra_dagtype")?.let {
+                                        enumValueOf<Dagtype>(it)
+                                    },
+                                    grad = overstyringDagRow.intOrNull("grad"),
+                                    fraGrad = overstyringDagRow.intOrNull("fra_grad")
                                 )
                             }.asList
                         )
@@ -73,6 +77,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             saksbehandlerNavn = overstyringRow.string("navn"),
                             saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                             månedligInntekt = overstyringRow.double("manedlig_inntekt"),
+                            fraMånedligInntekt = overstyringRow.doubleOrNull("fra_manedlig_inntekt"),
                             skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt")
                         )
                     }.asList

@@ -99,8 +99,8 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringDagQuery = """
-                INSERT INTO overstyring_dag(overstyring_ref, dato, dagtype, grad)
-                VALUES (:overstyring_ref, :dato, :dagtype, :grad)
+                INSERT INTO overstyring_dag(overstyring_ref, dato, dagtype, grad, fra_dagtype, fra_grad)
+                VALUES (:overstyring_ref, :dato, :dagtype, :grad, :fra_dagtype, :fra_grad)
             """.trimIndent()
 
             val overstyringRef = session.run(
@@ -126,7 +126,9 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                                 "overstyring_ref" to overstyringRef,
                                 "dato" to dag.dato,
                                 "dagtype" to dag.type.toString(),
-                                "grad" to dag.grad
+                                "grad" to dag.grad,
+                                "fra_dagtype" to dag.fraType.toString(),
+                                "fra_grad" to dag.fraGrad
                             )
                         ).asUpdate
                     )
@@ -144,6 +146,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         forklaring: String,
         saksbehandlerRef: UUID,
         månedligInntekt: Double,
+        fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         tidspunkt: LocalDateTime
     ) {
@@ -160,8 +163,8 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringInntektQuery = """
-                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, skjaeringstidspunkt, overstyring_ref)
-                VALUES (:forklaring, :manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref)
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref)
+                VALUES (:forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref)
             """.trimIndent()
 
             val overstyringRef = session.run(
@@ -185,6 +188,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                     mapOf(
                         "forklaring" to forklaring,
                         "manedlig_inntekt" to månedligInntekt,
+                        "fra_manedlig_inntekt" to fraMånedligInntekt,
                         "skjaeringstidspunkt" to skjæringstidspunkt,
                         "overstyring_ref" to overstyringRef
                     )

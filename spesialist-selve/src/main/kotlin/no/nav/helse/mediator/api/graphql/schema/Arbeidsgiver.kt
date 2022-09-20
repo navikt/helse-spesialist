@@ -49,7 +49,9 @@ data class Dagoverstyring(
     data class OverstyrtDag(
         val dato: LocalDate,
         val type: Dagtype,
-        val grad: Int?
+        val fraType: Dagtype?,
+        val grad: Int?,
+        val fraGrad: Int?
     )
 }
 
@@ -63,6 +65,7 @@ data class Inntektoverstyring(
     data class OverstyrtInntekt(
         val forklaring: String,
         val manedligInntekt: Double,
+        val fraManedligInntekt: Double?,
         val skjaeringstidspunkt: LocalDateTime
     )
 }
@@ -156,7 +159,9 @@ private fun OverstyringDto.tilDagoverstyring() = Dagoverstyring(
         Dagoverstyring.OverstyrtDag(
             dato = dag.dato.format(DateTimeFormatter.ISO_DATE),
             type = dag.type,
-            grad = dag.grad
+            fraType = dag.fraType,
+            grad = dag.grad,
+            fraGrad = dag.fraGrad
         )
     }
 )
@@ -172,6 +177,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
     inntekt = Inntektoverstyring.OverstyrtInntekt(
         forklaring = forklaring,
         manedligInntekt = månedligInntekt,
+        fraManedligInntekt = fraMånedligInntekt,
         skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE)
     )
 )
