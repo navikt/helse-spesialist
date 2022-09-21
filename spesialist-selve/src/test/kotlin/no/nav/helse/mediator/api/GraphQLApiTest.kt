@@ -63,6 +63,8 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -205,6 +207,62 @@ class GraphQLApiTest : AbstractApiTest() {
         assertEquals("2022-05-01", objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["virkningstidspunkt"].asText())
     }
 
+    @Test
+    fun `Infinity avviksprosent gir error`() = ugyldigAvvikprosent(Double.POSITIVE_INFINITY)
+
+    @Test
+    fun `Nan avviksprosent gir error`() = ugyldigAvvikprosent(Double.NaN)
+
+    private fun ugyldigAvvikprosent(avviksprosent: Double?) {
+        val fødselsnummer = "12345678910"
+        every { personApiDao.finnesPersonMedFødselsnummer(fødselsnummer) } returns true
+        every { personApiDao.personHarAdressebeskyttelse(fødselsnummer, Ugradert) } returns true
+        every { snapshotMediator.hentSnapshot(fødselsnummer) } returns Pair(
+            enPersoninfo,
+            enPerson(fødselsnummer, avviksprosent)
+        )
+
+
+        val queryString = """
+            {
+                person(fnr:"$fødselsnummer") {
+                    vilkarsgrunnlaghistorikk {
+                        id,
+                        grunnlag {
+                            skjaeringstidspunkt
+                             ... on VilkarsgrunnlagSpleis {
+                                avviksprosent
+                             }
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+
+        val body = runBlocking {
+            val response = client.preparePost("/graphql") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                authentication(UUID.randomUUID())
+                setBody(mapOf("query" to queryString))
+            }.execute()
+            response.body<String>()
+        }
+
+        val errors = objectMapper.readTree(body)["errors"]
+        val forventet = objectMapper.readTree("""
+            {
+                "message": "Can't serialize value (/person/vilkarsgrunnlaghistorikk[0]/grunnlag[0]/avviksprosent) : Expected type 'Float' but was 'Double'.",
+                "path": ["person", "vilkarsgrunnlaghistorikk", 0, "grunnlag", 0, "avviksprosent"]
+            }
+        """)
+        assertEquals(forventet, errors.first())
+        val grunnlag = objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"]
+        assertNotNull(grunnlag)
+        assertNull(grunnlag["avviksprosent"])
+    }
+
     private val enPersoninfo = PersoninfoDto(
         fornavn = "Luke",
         mellomnavn = null,
@@ -326,7 +384,7 @@ class GraphQLApiTest : AbstractApiTest() {
         generasjoner = listOf(enGenerasjon())
     )
 
-    private fun enPerson(fødselsnummer: String) = GraphQLPerson(
+    private fun enPerson(fødselsnummer: String, avviksprosent: Double? = 0.0) = GraphQLPerson(
         aktorId = "jedi-master",
         arbeidsgivere = listOf(enArbeidsgiver()),
         dodsdato = null,
@@ -342,7 +400,7 @@ class GraphQLApiTest : AbstractApiTest() {
                 skjaeringstidspunkt = "2022-05-02",
                 sykepengegrunnlag = 100.0,
                 antallOpptjeningsdagerErMinst = 0,
-                avviksprosent = 0.0,
+                avviksprosent = avviksprosent,
                 grunnbelop = 0,
                 sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(100_000, 600_000, "2022-05-01"),
                 oppfyllerKravOmMedlemskap = false,
