@@ -15,7 +15,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
     internal fun slett(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
             session.transaction {
-                val personId = it.finnPerson(fødselsnummer) ?: kotlin.run {
+                val personId = it.finnPerson(fødselsnummer) ?: run {
                     sikkerlogg.info("Fant ikke person med fødselsnummer $fødselsnummer, avbryter sletting")
                     return@transaction
                 }
@@ -33,6 +33,8 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettVergemål(personId)
                 it.slettHendelse(fødselsnummer)
                 it.slettPerson(personId)
+
+                sikkerlogg.info("Person med fødselsnummer $fødselsnummer ble slettet")
             }
         }
     }
