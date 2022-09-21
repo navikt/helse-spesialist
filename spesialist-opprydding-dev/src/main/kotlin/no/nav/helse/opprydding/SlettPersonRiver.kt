@@ -5,6 +5,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 internal class SlettPersonRiver(
     rapidsConnection: RapidsConnection,
@@ -24,9 +26,11 @@ internal class SlettPersonRiver(
         }.register(this)
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val fødselsnummer = packet["fødselsnummer"].asText()
         sikkerlogg.info("Sletter person med fødselsnummer: $fødselsnummer")
-        personRepository.slett(fødselsnummer)
+        val tidBrukt = measureTime { personRepository.slett(fødselsnummer) }
+        sikkerlogg.info("Person med fødselsnummer $fødselsnummer ble slettet på $tidBrukt")
     }
 }
