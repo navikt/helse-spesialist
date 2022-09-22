@@ -19,16 +19,17 @@ internal class ReserverPersonHvisTildeltCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        val tildelingDto = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
+        val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
         val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(vedtaksperiodeId)
         val saksbehandlerOid: UUID =
             if (erBeslutteroppgave) oppgaveDao.finnOppgaveId(vedtaksperiodeId)?.let {
                 oppgaveDao.finnTidligereSaksbehandler(it)
-            } ?: tildelingDto.oid
-            else tildelingDto.oid
+            } ?: tildeltSaksbehandler.oid
+            else tildeltSaksbehandler.oid
+        val påVent = if(erBeslutteroppgave) false else tildeltSaksbehandler.påVent
 
-        sikkerLogg.info("Oppretter reservasjon for $fødselsnummer til ${tildelingDto.navn} pga eksisterende tildeling")
-        reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer, tildelingDto.påVent)
+        sikkerLogg.info("Oppretter reservasjon for $fødselsnummer til $saksbehandlerOid pga eksisterende tildeling")
+        reservasjonDao.reserverPerson(saksbehandlerOid, fødselsnummer, påVent)
 
         return true
     }
