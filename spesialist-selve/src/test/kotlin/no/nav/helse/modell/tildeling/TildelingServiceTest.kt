@@ -50,6 +50,22 @@ internal class TildelingServiceTest {
     }
 
     @Test
+    fun `får ikke lov å ta sak etter å ha sendt den til beslutter, eller vice versa`() {
+        val saksbehandler = UUID.randomUUID()
+        every { hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveref, saksbehandler) } returns true
+
+        assertThrows<IllegalStateException> {
+            tildelingService.tildelOppgaveTilSaksbehandler(
+                oppgaveId = oppgaveref,
+                saksbehandlerreferanse = saksbehandler,
+                epostadresse = "eksisterendeTildeling.epost",
+                navn = "navn",
+                ident = "Z999999"
+            )
+        }
+    }
+
+    @Test
     fun `hvis det finnes en tidligere_saksbehandler blir tildeling fjernet og tidligere saksbehandler tildelt`() {
         every { tildelingDao.slettTildeling(oppgaveref) } returns 1
         every { tildelingDao.tildelingForOppgave(any()) } returns null

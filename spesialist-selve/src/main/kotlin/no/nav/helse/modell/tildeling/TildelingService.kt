@@ -28,12 +28,8 @@ internal class TildelingService(
     }
 
     private fun tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId: Long, saksbehandlerreferanse: UUID) {
-        val erDev = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
-        if (!erDev) {
-            val kanIkkeAttestere = hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)
-            if (kanIkkeAttestere) {
-                throw RuntimeException("Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning")
-            }
+        check(kanTildele(oppgaveId, saksbehandlerreferanse)) {
+            "Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning"
         }
         val suksess = hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveId, saksbehandlerreferanse)
         if (!suksess) {
@@ -43,9 +39,13 @@ internal class TildelingService(
         }
     }
 
+    private fun kanTildele(oppgaveId: Long, saksbehandlerreferanse: UUID) =
+        "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
+                || !hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)
+
     internal fun fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveId: Long, saksbehandler_oid: UUID?) {
         fjernTildeling(oppgaveId)
-        if(saksbehandler_oid != null) {
+        if (saksbehandler_oid != null) {
             sikkerLog.info("Fjerner gammel tildeling og tildeler oppgave $oppgaveId til saksbehandler $saksbehandler_oid")
             tildelOppgaveTilEksisterendeSaksbehandler(oppgaveId, saksbehandler_oid)
         }
