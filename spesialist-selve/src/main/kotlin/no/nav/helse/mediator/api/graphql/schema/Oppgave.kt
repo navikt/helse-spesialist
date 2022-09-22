@@ -40,6 +40,7 @@ data class OppgaveForOversiktsvisning(
     val tildeling: Tildeling?,
     val periodetype: Periodetype?,
     val tidligereSaksbehandler: UUID?,
+    val sistSendt: LocalDateTime?,
 )
 
 data class OppgaveForPeriodevisning(
@@ -151,7 +152,8 @@ internal fun List<OppgaveForOversiktsvisningDto>.tilOppgaver(): List<OppgaveForO
             erRetur = oppgave.erReturOppgave,
             erBeslutter = oppgave.erBeslutterOppgave,
             trengerTotrinnsvurdering = oppgave.trengerTotrinnsvurdering,
-            tidligereSaksbehandler = oppgave.tidligereSaksbehandlerOid?.toString()
+            tidligereSaksbehandler = oppgave.tidligereSaksbehandlerOid?.toString(),
+            sistSendt = oppgave.sistSendt?.format(DateTimeFormatter.ISO_DATE_TIME),
         )
     }
 }

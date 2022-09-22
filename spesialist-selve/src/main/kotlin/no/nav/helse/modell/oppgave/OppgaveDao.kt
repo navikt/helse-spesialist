@@ -183,7 +183,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """ UPDATE oppgave
             SET er_beslutteroppgave=true, 
                 er_returoppgave=false, 
-                tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid
+                tidligere_saksbehandler_oid=:tidligere_saksbehandler_oid,
+                sist_sendt=now()
             WHERE id=:oppgave_id
         """.update(
             mapOf(
@@ -199,7 +200,8 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         """ UPDATE oppgave
             SET er_beslutteroppgave=false, 
                 er_returoppgave=true, 
-                beslutter_saksbehandler_oid=:beslutter_saksbehandler_oid
+                beslutter_saksbehandler_oid=:beslutter_saksbehandler_oid,
+                sist_sendt=now()
             WHERE id=:oppgave_id
         """.update(
             mapOf(

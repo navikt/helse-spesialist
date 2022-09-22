@@ -24,7 +24,8 @@ data class OppgaveForOversiktsvisningDto(
     val erBeslutterOppgave: Boolean,
     val erReturOppgave: Boolean,
     val trengerTotrinnsvurdering: Boolean,
-    val tidligereSaksbehandlerOid: UUID?
+    val tidligereSaksbehandlerOid: UUID?,
+    val sistSendt: LocalDateTime?
 )
 
 data class OppgaveForPeriodevisningDto(
