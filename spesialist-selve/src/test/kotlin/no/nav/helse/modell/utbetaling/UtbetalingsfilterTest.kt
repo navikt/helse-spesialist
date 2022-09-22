@@ -1,6 +1,9 @@
 package no.nav.helse.modell.utbetaling
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import java.time.LocalDateTime
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtak.Warning
@@ -16,17 +19,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingsfilterTest {
-
-    @Disabled
-    @Test
-    fun `Overgang fra ikke refusjon til delvis refusjon går ok gjennom filteret`() {
-
-    }
 
     @Test
     fun `ingen utbetaling kan utbetales`() {
@@ -74,6 +70,29 @@ internal class UtbetalingsfilterTest {
                 utbetalingtype = UTBETALING,
             ), false
         )
+    }
+
+    @Test
+    fun `endring, endring fra full refusjon til delvis, kan utbetales gitt toggle`() {
+        fun utbetalingsfilter() = Utbetalingsfilter(
+            fødselsnummer = "21111111111",
+            delvisRefusjon = true,
+            erUtbetaltFør = true,
+            harUtbetalingTilSykmeldt = true,
+            periodetype = FORLENGELSE,
+            inntektskilde = EN_ARBEIDSGIVER,
+            warnings = emptyList(),
+            utbetalingtype = UTBETALING,
+        )
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(), listOf(
+                "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
+                "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'"
+            )
+        )
+        Toggle.BeholdForlengelseMedOvergangTilUTS.enable()
+        assertKanUtbetales(utbetalingsfilter(), true)
+        Toggle.BeholdForlengelseMedOvergangTilUTS.disable()
     }
 
     @Test
