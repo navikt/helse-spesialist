@@ -30,49 +30,58 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen utbetaling kan utbetales`() {
-        assertKanUtbetales(Utbetalingsfilter(
-            fødselsnummer = "21111111111",
-            delvisRefusjon = false,
-            erUtbetaltFør = false,
-            harUtbetalingTilSykmeldt = false,
-            periodetype = OVERGANG_FRA_IT,
-            inntektskilde = FLERE_ARBEIDSGIVERE,
-            warnings = toWarnings,
-            utbetalingtype = UTBETALING,
-        ), false)
+        assertKanUtbetales(
+            Utbetalingsfilter(
+                fødselsnummer = "21111111111",
+                delvisRefusjon = false,
+                erUtbetaltFør = false,
+                harUtbetalingTilSykmeldt = false,
+                periodetype = OVERGANG_FRA_IT,
+                inntektskilde = FLERE_ARBEIDSGIVERE,
+                warnings = toWarnings,
+                utbetalingtype = UTBETALING,
+            ), false
+        )
     }
 
     @Test
     fun `ny, med full refusjon, kan utbetales`() {
-        assertKanUtbetales(Utbetalingsfilter(
-            fødselsnummer = "21111111111",
-            delvisRefusjon = false,
-            erUtbetaltFør = false,
-            harUtbetalingTilSykmeldt = false,
-            periodetype = OVERGANG_FRA_IT,
-            inntektskilde = FLERE_ARBEIDSGIVERE,
-            warnings = toWarnings,
-            utbetalingtype = UTBETALING,
-        ), false)
+        assertKanUtbetales(
+            Utbetalingsfilter(
+                fødselsnummer = "21111111111",
+                delvisRefusjon = false,
+                erUtbetaltFør = false,
+                harUtbetalingTilSykmeldt = false,
+                periodetype = OVERGANG_FRA_IT,
+                inntektskilde = FLERE_ARBEIDSGIVERE,
+                warnings = toWarnings,
+                utbetalingtype = UTBETALING,
+            ), false
+        )
     }
 
     @Test
     fun `endring, med full refusjon, kan utbetales`() {
-        assertKanUtbetales(Utbetalingsfilter(
-            fødselsnummer = "21111111111",
-            delvisRefusjon = false,
-            erUtbetaltFør = true,
-            harUtbetalingTilSykmeldt = false,
-            periodetype = OVERGANG_FRA_IT,
-            inntektskilde = FLERE_ARBEIDSGIVERE,
-            warnings = toWarnings,
-            utbetalingtype = UTBETALING,
-        ), false)
+        assertKanUtbetales(
+            Utbetalingsfilter(
+                fødselsnummer = "21111111111",
+                delvisRefusjon = false,
+                erUtbetaltFør = true,
+                harUtbetalingTilSykmeldt = false,
+                periodetype = OVERGANG_FRA_IT,
+                inntektskilde = FLERE_ARBEIDSGIVERE,
+                warnings = toWarnings,
+                utbetalingtype = UTBETALING,
+            ), false
+        )
     }
 
     @Test
     fun `delvis refusjon kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(delvisRefusjon = true), listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon"))
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(delvisRefusjon = true),
+            listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon")
+        )
     }
 
     @Test
@@ -82,7 +91,10 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & feil periodetype kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(periodetype = INFOTRYGDFORLENGELSE), listOf("Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse"))
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(periodetype = INFOTRYGDFORLENGELSE),
+            listOf("Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse")
+        )
     }
 
     @Test
@@ -92,17 +104,26 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `ingen refusjon & feil fødselsdato kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(fødselsnummer = "21111111111"), listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'"))
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(fødselsnummer = "21111111111"),
+            listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'")
+        )
     }
 
     @Test
     fun `ingen refusjon & inntektskilde fra flere arbeidsgivere kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(inntektskilde = FLERE_ARBEIDSGIVERE), listOf("Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver"))
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(inntektskilde = FLERE_ARBEIDSGIVERE),
+            listOf("Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver")
+        )
     }
 
     @Test
     fun `ingen refusjon & warnings på vedtaksperiode kan ikke utbetales`() {
-        assertKanIkkeUtbetales(utbetalingsfilter(warnings = toWarnings), listOf("Brukerutbetalingsfilter: Vedtaksperioden har warnings"))
+        assertKanIkkeUtbetales(
+            utbetalingsfilter(warnings = toWarnings),
+            listOf("Brukerutbetalingsfilter: Vedtaksperioden har warnings")
+        )
     }
 
     @Test
@@ -112,22 +133,24 @@ internal class UtbetalingsfilterTest {
 
     @Test
     fun `passerer ingen av kriteriene i filteret`() {
-        assertKanIkkeUtbetales(Utbetalingsfilter(
-            fødselsnummer = "21111111111",
-            delvisRefusjon = true,
-            erUtbetaltFør = false,
-            harUtbetalingTilSykmeldt = true,
-            periodetype = OVERGANG_FRA_IT,
-            inntektskilde = FLERE_ARBEIDSGIVERE,
-            warnings = toWarnings,
-            utbetalingtype = UTBETALING,
-        ), listOf(
-            "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
-            "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'",
-            "Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse",
-            "Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver",
-            "Brukerutbetalingsfilter: Vedtaksperioden har warnings"
-        ))
+        assertKanIkkeUtbetales(
+            Utbetalingsfilter(
+                fødselsnummer = "21111111111",
+                delvisRefusjon = true,
+                erUtbetaltFør = false,
+                harUtbetalingTilSykmeldt = true,
+                periodetype = OVERGANG_FRA_IT,
+                inntektskilde = FLERE_ARBEIDSGIVERE,
+                warnings = toWarnings,
+                utbetalingtype = UTBETALING,
+            ), listOf(
+                "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
+                "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'",
+                "Brukerutbetalingsfilter: Perioden er ikke førstegangsbehandling eller forlengelse",
+                "Brukerutbetalingsfilter: Inntektskilden er ikke for en arbeidsgiver",
+                "Brukerutbetalingsfilter: Vedtaksperioden har warnings"
+            )
+        )
     }
 
     private companion object {
