@@ -224,8 +224,23 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING`() {
+    fun `avbryter ikke om forrige tilstand er noe annet enn AVVENTER_GODKJENNING eller AVVENTER_GODKJENNING_REVURDERING`() {
         testIkkeAvbrutt("TIL_UTBETALING", "UBETALING_FEILET")
+    }
+
+    @Test
+    fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_INFOTRYGD`() {
+        testIkkeAvbrutt("AVVENTER_GODKJENNING_REVURDERING", "TIL_INFOTRYGD")
+    }
+
+    @Test
+    fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er AVSLUTTET`() {
+        testIkkeAvbrutt("AVVENTER_GODKJENNING_REVURDERING", "AVSLUTTET")
+    }
+
+    @Test
+    fun `avbryter ikke om forrige tilstand er AVVENTER_GODKJENNING_REVURDERING og gjeldende tilstand er TIL_UTBETALING`() {
+        testIkkeAvbrutt("AVVENTER_GODKJENNING_REVURDERING","TIL_UTBETALING")
     }
 
     @Test

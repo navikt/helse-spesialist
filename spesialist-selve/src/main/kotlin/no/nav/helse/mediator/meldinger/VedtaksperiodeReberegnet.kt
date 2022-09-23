@@ -67,7 +67,7 @@ internal class VedtaksperiodeReberegnet(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "vedtaksperiode_endret")
-                    it.demandValue("forrigeTilstand", "AVVENTER_GODKJENNING")
+                    it.demand("forrigeTilstand") { node -> check(node.asText().startsWith("AVVENTER_GODKJENNING")) }
                     it.rejectValues("gjeldendeTilstand", listOf("AVSLUTTET", "TIL_UTBETALING", "TIL_INFOTRYGD"))
                     it.requireKey(
                         "@id", "fødselsnummer", "vedtaksperiodeId"
