@@ -4,7 +4,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 val graphQLKotlinVersion = "5.5.0"
-val testcontainersVersion = "1.17.2"
+val testcontainersVersion = "1.17.3"
 val ktorVersion = "2.0.1"
 
 plugins {
