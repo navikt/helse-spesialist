@@ -5,7 +5,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 val graphQLKotlinVersion = "5.5.0"
 val testcontainersVersion = "1.17.3"
-val ktorVersion = "2.0.1"
+val ktorVersion = "2.1.1"
 
 plugins {
     kotlin("plugin.serialization") version "1.6.21"
