@@ -16,11 +16,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class BehandlingsstatistikkMediatorTest {
-    val behandlingsstatistikkDao = mockk<BehandlingsstatistikkDao>()
-    val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
+    private val behandlingsstatistikkDao = mockk<BehandlingsstatistikkDao>()
+    private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
     @BeforeEach
-    private fun beforeEach() {
+    fun beforeEach() {
         every { behandlingsstatistikkDao.oppgavestatistikk(any()) } returns
             BehandlingsstatistikkDto(
                 oppgaverTilGodkjenning = OppgavestatistikkDto(

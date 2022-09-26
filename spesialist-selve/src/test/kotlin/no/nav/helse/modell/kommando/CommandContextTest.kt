@@ -26,7 +26,7 @@ internal class CommandContextTest {
     private val commandContextDao = mockk<CommandContextDao>(relaxed = true)
 
     @BeforeEach
-    private fun setupEach() {
+    fun setupEach() {
         context = CommandContext(CONTEXT)
     }
 
@@ -123,8 +123,8 @@ internal class CommandContextTest {
 
     @Test
     fun `Henter ut første av en gitt type`() {
-        val testObject1 = TestObject1("object 1")
-        val testObject2 = TestObject1("object 2")
+        val testObject1 = TestObject1()
+        val testObject2 = TestObject1()
         context.add(testObject1)
         context.add(testObject2)
         assertEquals(testObject1, context.get<TestObject1>())
@@ -132,8 +132,8 @@ internal class CommandContextTest {
 
     @Test
     fun `Henter ut riktig type`() {
-        val testObject1 = TestObject1("object 1 type 1")
-        val testObject2 = TestObject2("object 1 type 2")
+        val testObject1 = TestObject1()
+        val testObject2 = TestObject2()
         context.add(testObject1)
         context.add(testObject2)
         assertEquals(testObject1, context.get<TestObject1>())
@@ -180,8 +180,8 @@ internal class CommandContextTest {
         ), context.behov())
     }
 
-    private class TestObject1(val data: String)
-    private class TestObject2(val data: String)
+    private class TestObject1
+    private class TestObject2
     private class TestCommand(
         private val executeAction: Command.() -> Boolean = { true },
         private val resumeAction: Command.() -> Boolean = { true }

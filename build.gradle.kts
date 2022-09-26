@@ -1,15 +1,15 @@
-val junitJupiterVersion = "5.8.2"
-val ktorVersion = "2.0.1"
+val junitJupiterVersion = "5.9.0"
+val ktorVersion = "2.1.1"
 val graphqlKotlinVersion = "5.4.1"
 val jvmTargetVersion = "17"
-val rapidsAndRiversVersion = "2022.05.25-08.39.8025c775ad8e"
+val rapidsAndRiversVersion = "2022092314391663936769.9d5d33074875"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.0.1"
-val flywayCoreVersion = "8.5.11"
-val kotliqueryVersion = "1.7.0"
+val flywayCoreVersion = "9.3.0"
+val kotliqueryVersion = "1.9.0"
 val kotlinTestVersion = "1.6.21"
-val mockkVersion = "1.12.4"
-val postgressqlVersion = "42.3.6"
+val mockkVersion = "1.12.8"
+val postgressqlVersion = "42.5.0"
 
 plugins {
     kotlin("jvm") version "1.6.21"
@@ -35,7 +35,7 @@ allprojects {
         }
         implementation("com.zaxxer:HikariCP:$hikariCPVersion")
         implementation("org.flywaydb:flyway-core:$flywayCoreVersion")
-        implementation("com.github.seratch:kotliquery:$kotliqueryVersion") //April, 2019
+        implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("io.ktor:ktor-client-cio:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
         {
