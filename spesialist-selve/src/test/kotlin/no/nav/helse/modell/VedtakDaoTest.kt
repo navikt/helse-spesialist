@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.sql.SQLException
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.postgresql.util.PSQLException
 
 internal class VedtakDaoTest : DatabaseIntegrationTest() {
 
@@ -40,7 +40,7 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
         val nyFom = LocalDate.now().minusMonths(1)
         val nyTom = LocalDate.now()
         val nySnapshotRef = snapshotDao.lagre(FNR, snapshot().data!!.person!!)
-        assertThrows<PSQLException> {
+        assertThrows<SQLException> {
             vedtakDao.opprett(
                 VEDTAKSPERIODE,
                 nyFom,

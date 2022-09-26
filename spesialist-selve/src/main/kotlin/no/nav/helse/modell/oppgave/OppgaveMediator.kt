@@ -1,5 +1,6 @@
 package no.nav.helse.modell.oppgave
 
+import java.sql.SQLException
 import java.util.UUID
 import no.nav.helse.modell.oppgave.Oppgave.Companion.loggOppgaverAvbrutt
 import no.nav.helse.rapids_rivers.MessageContext
@@ -13,7 +14,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
-import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 
 class OppgaveMediator(
@@ -119,7 +119,7 @@ class OppgaveMediator(
     fun reserverOppgave(saksbehandleroid: UUID, fødselsnummer: String) {
         try {
             reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
-        } catch (e: PSQLException) {
+        } catch (e: SQLException) {
             log.warn("Kunne ikke reservere person")
         }
     }
