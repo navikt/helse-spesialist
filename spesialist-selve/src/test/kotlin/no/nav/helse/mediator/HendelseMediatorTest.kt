@@ -133,7 +133,7 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
         every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns SAKSBEHANDLER_OID
 
         val kanIkkeAttestere =
-            mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+            mediatorWithMock.erBeslutteroppgave(oppgaveId) && mediatorWithMock.erTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
 
         assertTrue(kanIkkeAttestere)
     }
@@ -146,7 +146,7 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
         every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns UUID.randomUUID()
 
         val kanIkkeAttestere =
-            mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+            mediatorWithMock.erBeslutteroppgave(oppgaveId) && mediatorWithMock.erTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
 
         assertFalse(kanIkkeAttestere)
     }
@@ -159,7 +159,7 @@ internal class HendelseMediatorTest : AbstractE2ETest() {
         every { oppgaveMediatorMock.finnTidligereSaksbehandler(oppgaveId) } returns null
 
         val kanIkkeAttestere =
-            mediatorWithMock.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
+            mediatorWithMock.erBeslutteroppgave(oppgaveId) && mediatorWithMock.erTidligereSaksbehandler(oppgaveId, SAKSBEHANDLER_OID)
 
         assertFalse(kanIkkeAttestere)
     }

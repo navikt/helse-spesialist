@@ -50,6 +50,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -60,7 +61,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
@@ -198,14 +198,15 @@ internal class HendelseMediator(
         }
     }
 
-    internal fun erBeslutteroppgaveOgErTidligereSaksbehandler(
+    internal fun erTidligereSaksbehandler(
         oppgaveId: Long,
         saksbehandlerreferanse: UUID
     ): Boolean {
-        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(oppgaveId)
         val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(oppgaveId)
-        return erBeslutteroppgave && tidligereSaksbehandler == saksbehandlerreferanse
+        return tidligereSaksbehandler == saksbehandlerreferanse
     }
+
+    internal fun erBeslutteroppgave(oppgaveId: Long) = oppgaveMediator.erBeslutteroppgave(oppgaveId)
 
     internal fun tildelOppgaveTilSaksbehandler(
         oppgaveId: Long,

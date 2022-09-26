@@ -4,15 +4,16 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeTildelt
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import java.util.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class TildelingServiceTest {
 
@@ -26,7 +27,19 @@ internal class TildelingServiceTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>()
     private val hendelseMediator = mockk<HendelseMediator>(relaxed = true)
-    private val tildelingService = TildelingService(saksbehandlerDao, tildelingDao, hendelseMediator)
+    private val riskSaksbehandlergruppe = UUID.randomUUID()
+    private val kode7Saksbehandlergruppe = UUID.randomUUID()
+    private val beslutterSaksbehandlergruppe = UUID.randomUUID()
+    private val skjermedePersonerSaksbehandlergruppe = UUID.randomUUID()
+    private val tildelingService = TildelingService(
+        saksbehandlerDao,
+        tildelingDao,
+        hendelseMediator,
+        riskSaksbehandlergruppe,
+        kode7Saksbehandlergruppe,
+        beslutterSaksbehandlergruppe,
+        skjermedePersonerSaksbehandlergruppe
+    )
 
     @BeforeEach
     fun setup() {
@@ -44,7 +57,8 @@ internal class TildelingServiceTest {
                 saksbehandlerreferanse = eksisterendeTildeling.oid,
                 epostadresse = eksisterendeTildeling.epost,
                 navn = "navn",
-                ident = "Z999999"
+                ident = "Z999999",
+                gruppetilganger = emptyList()
             )
         }
     }
@@ -52,7 +66,8 @@ internal class TildelingServiceTest {
     @Test
     fun `får ikke lov å ta sak etter å ha sendt den til beslutter, eller vice versa`() {
         val saksbehandler = UUID.randomUUID()
-        every { hendelseMediator.erBeslutteroppgaveOgErTidligereSaksbehandler(oppgaveref, saksbehandler) } returns true
+        every { hendelseMediator.erBeslutteroppgave(oppgaveref) } returns true
+        every { hendelseMediator.erTidligereSaksbehandler(oppgaveref, saksbehandler) } returns true
 
         assertThrows<IllegalStateException> {
             tildelingService.tildelOppgaveTilSaksbehandler(
@@ -60,7 +75,45 @@ internal class TildelingServiceTest {
                 saksbehandlerreferanse = saksbehandler,
                 epostadresse = "eksisterendeTildeling.epost",
                 navn = "navn",
-                ident = "Z999999"
+                ident = "Z999999",
+                gruppetilganger = emptyList()
+            )
+        }
+    }
+
+    @Test
+    fun `får lov å tildele seg beslutteroppgave hvis man er i besluttergruppe`() {
+        val saksbehandler = UUID.randomUUID()
+        every { hendelseMediator.erBeslutteroppgave(oppgaveref) } returns true
+        every { hendelseMediator.erTidligereSaksbehandler(oppgaveref, saksbehandler) } returns false
+        every { hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveref, saksbehandler) } returns true
+
+        assertDoesNotThrow {
+            tildelingService.tildelOppgaveTilSaksbehandler(
+                oppgaveId = oppgaveref,
+                saksbehandlerreferanse = saksbehandler,
+                epostadresse = "eksisterendeTildeling.epost",
+                navn = "navn",
+                ident = "Z999999",
+                gruppetilganger = listOf(beslutterSaksbehandlergruppe)
+            )
+        }
+    }
+
+    @Test
+    fun `får ikke lov å tildele seg beslutteroppgave hvis man ikke er i besluttergruppe`() {
+        val saksbehandler = UUID.randomUUID()
+        every { hendelseMediator.erBeslutteroppgave(oppgaveref) } returns true
+        every { hendelseMediator.erTidligereSaksbehandler(oppgaveref, saksbehandler) } returns false
+
+        assertThrows<IllegalStateException> {
+            tildelingService.tildelOppgaveTilSaksbehandler(
+                oppgaveId = oppgaveref,
+                saksbehandlerreferanse = saksbehandler,
+                epostadresse = "eksisterendeTildeling.epost",
+                navn = "navn",
+                ident = "Z999999",
+                gruppetilganger = emptyList()
             )
         }
     }
@@ -71,7 +124,7 @@ internal class TildelingServiceTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns null
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) } returns true
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, SAKSBEHANDLER)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, SAKSBEHANDLER, emptyList())
 
         verify(exactly = 1) { tildelingDao.slettTildeling(oppgaveref) }
         verify(exactly = 1) { hendelseMediator.tildelOppgaveTilSaksbehandler(oppgaveref, SAKSBEHANDLER) }
@@ -83,7 +136,7 @@ internal class TildelingServiceTest {
         every { tildelingDao.tildelingForOppgave(any()) } returns null
         every { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) } returns true
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, null)
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(oppgaveref, null, emptyList())
 
         verify(exactly = 1) { tildelingDao.slettTildeling(oppgaveref) }
         verify(exactly = 0) { hendelseMediator.tildelOppgaveTilSaksbehandler(any(), any()) }

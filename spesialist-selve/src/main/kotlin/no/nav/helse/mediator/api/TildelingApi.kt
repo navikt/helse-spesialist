@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.api
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
@@ -8,12 +8,13 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
+import no.nav.helse.getGrupper
 import no.nav.helse.modell.tildeling.TildelingService
+import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import org.slf4j.LoggerFactory
-import java.util.*
 
 private val log = LoggerFactory.getLogger("TildelingApi")
 
@@ -39,7 +40,8 @@ internal fun Route.tildelingApi(tildelingService: TildelingService) {
                     saksbehandlerreferanse,
                     epostadresse,
                     navn,
-                    ident
+                    ident,
+                    getGrupper()
                 )
             }
             log.info("Oppgave $oppgaveId er tildelt til $ident")

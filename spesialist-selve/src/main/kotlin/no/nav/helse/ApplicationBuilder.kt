@@ -61,6 +61,7 @@ import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.leggpåvent.LeggPåVentService
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -79,7 +80,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkAp
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.experimental.OppgavePagineringDao
 import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
@@ -336,7 +336,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         tildelingService = TildelingService(
             saksbehandlerDao,
             tildelingDao,
-            hendelseMediator
+            hendelseMediator,
+            riskSaksbehandlergruppe = env.riskGruppeId(),
+            kode7Saksbehandlergruppe = env.kode7GruppeId(),
+            beslutterSaksbehandlergruppe = env.beslutterGruppeId(),
+            skjermedePersonerSaksbehandlergruppe = env.skjermedePersonerGruppeId(),
         )
     }
 

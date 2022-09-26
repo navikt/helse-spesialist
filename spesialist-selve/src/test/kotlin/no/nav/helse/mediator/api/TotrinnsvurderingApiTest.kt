@@ -77,6 +77,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         verify(exactly = 1) {
             tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
                 totrinnsvurderingDto.oppgavereferanse,
+                any(),
                 any()
             )
         }
@@ -112,6 +113,7 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
         verify(exactly = 1) {
             tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(
                 returDtoMedNotat.oppgavereferanse,
+                any(),
                 any()
             )
         }
