@@ -126,7 +126,7 @@ class OppgaveMediator(
 
     private fun tildelOppgaver(fødselsnummer: String) {
         reservasjonDao.hentReservasjonFor(fødselsnummer)?.let { (oid, settPåVent) ->
-            oppgaver.forEach { it.tildel(this, oid, settPåVent) }
+            oppgaver.forEach { it.tildelHvisIkkeStikkprøve(this, oid, settPåVent) }
         }
     }
 

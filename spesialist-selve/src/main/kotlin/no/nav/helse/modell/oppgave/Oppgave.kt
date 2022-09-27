@@ -146,8 +146,13 @@ class Oppgave private constructor(
         status = Oppgavestatus.Invalidert
     }
 
-    fun tildel(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, påVent: Boolean = false) {
+    fun tildelHvisIkkeStikkprøve(oppgaveMediator: OppgaveMediator, saksbehandleroid: UUID, påVent: Boolean = false) {
+        if (type == Oppgavetype.STIKKPRØVE) {
+            log.info("OppgaveId $id er stikkprøve og tildeles ikke på tross av reservasjon.")
+            return
+        }
         oppgaveMediator.tildel(checkNotNull(id), saksbehandleroid, påVent)
+        log.info("Oppgave $id tildeles $saksbehandleroid grunnet reservasjon.")
     }
 
     fun lagrePeriodehistorikk(

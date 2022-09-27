@@ -10,10 +10,10 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
@@ -85,10 +85,23 @@ internal class OppgaveMediatorTest {
         val oid = UUID.randomUUID()
         every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
         every { oppgaveDao.finn(0L) } returns søknadsoppgave
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
         mediator.opprett(søknadsoppgave)
         mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
         verify(exactly = 1) { tildelingDao.opprettTildeling(any(), oid, any()) }
-        assertOpptegnelseIkkeOpprettet()
+        assertAntallOpptegnelser(1)
+    }
+
+    @Test
+    fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
+        val oid = UUID.randomUUID()
+        every { reservasjonDao.hentReservasjonFor(TESTHENDELSE.fødselsnummer()) } returns Reservasjonsinfo(oid, false)
+        every { oppgaveDao.finn(0L) } returns stikkprøveoppgave
+        every { oppgaveDao.finnFødselsnummer(any()) } returns TESTHENDELSE.fødselsnummer()
+        mediator.opprett(stikkprøveoppgave)
+        mediator.lagreOgTildelOppgaver(TESTHENDELSE.id, TESTHENDELSE.fødselsnummer(), COMMAND_CONTEXT_ID, testRapid)
+        verify(exactly = 0) { tildelingDao.opprettTildeling(any(), any(), any()) }
+        assertAntallOpptegnelser(1)
     }
 
     @Test
