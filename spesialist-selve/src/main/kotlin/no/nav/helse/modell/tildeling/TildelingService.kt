@@ -47,7 +47,7 @@ internal class TildelingService(
             check(!hendelseMediator.erTidligereSaksbehandler(oppgaveId, saksbehandlerreferanse)) {
                 "Oppgave er beslutteroppgave, og kan ikke attesteres av samme saksbehandler som sendte til godkjenning"
             }
-            check(sakbehandlertilganger(gruppetilganger).harTilgangTilBeslutterOppgaver()) {
+            check(saksbehandlertilganger(gruppetilganger).harTilgangTilBeslutterOppgaver()) {
                 "Saksbehandler har ikke beslutter-tilgang"
             }
         }
@@ -63,7 +63,7 @@ internal class TildelingService(
 
     internal fun fjernTildeling(oppgaveId: Long) = tildelingDao.slettTildeling(oppgaveId)
 
-    private fun sakbehandlertilganger(gruppetilganger: List<UUID>) =
+    private fun saksbehandlertilganger(gruppetilganger: List<UUID>) =
         SaksbehandlerTilganger(
             gruppetilganger = gruppetilganger,
             kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,

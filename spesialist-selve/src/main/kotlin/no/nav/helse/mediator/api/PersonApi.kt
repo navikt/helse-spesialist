@@ -15,6 +15,7 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.harTilgangTilBeslutteroppgaver
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.slf4j.LoggerFactory
@@ -51,6 +52,22 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
                 status = HttpStatusCode.Conflict
             )
             return@post
+        }
+
+        val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
+        if(erBeslutteroppgave) {
+            // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
+            if(!oppgaveMediator.trengerTotrinnsvurdering(godkjenning.oppgavereferanse)) {
+                log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
+            }
+
+            if(!harTilgangTilBeslutteroppgaver() && "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME")) {
+                call.respondText(
+                    "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
+                    status = HttpStatusCode.Unauthorized
+                )
+                return@post
+            }
         }
 
         withContext(Dispatchers.IO) { hendelseMediator.håndter(godkjenning, epostadresse, oid) }

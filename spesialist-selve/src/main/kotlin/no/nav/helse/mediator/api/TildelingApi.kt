@@ -11,7 +11,7 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.getGrupper
+import no.nav.helse.gruppemedlemskap
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.feilhåndtering.modellfeilForRest
 import org.slf4j.LoggerFactory
@@ -41,7 +41,7 @@ internal fun Route.tildelingApi(tildelingService: TildelingService) {
                     epostadresse,
                     navn,
                     ident,
-                    getGrupper()
+                    gruppemedlemskap()
                 )
             }
             log.info("Oppgave $oppgaveId er tildelt til $ident")

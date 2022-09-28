@@ -12,7 +12,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
-import no.nav.helse.getGrupper
+import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
@@ -38,7 +38,7 @@ internal fun Route.totrinnsvurderingApi(
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
         val beslutterSaksbehandlerOid = oppgaveMediator.finnBeslutterSaksbehandler(totrinnsvurdering.oppgavereferanse)
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, beslutterSaksbehandlerOid, getGrupper())
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(totrinnsvurdering.oppgavereferanse, beslutterSaksbehandlerOid, gruppemedlemskap())
 
         oppgaveMediator.setBeslutteroppgave(
             oppgaveId = totrinnsvurdering.oppgavereferanse,
@@ -71,7 +71,7 @@ internal fun Route.totrinnsvurderingApi(
             beslutterSaksbehandlerOid = saksbehandlerOid
         )
 
-        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid, getGrupper())
+        tildelingService.fjernTildelingOgTildelNySaksbehandlerHvisFinnes(retur.oppgavereferanse, tidligereSaksbehandlerOid, gruppemedlemskap())
 
         val notatId = notatMediator.lagreForOppgaveId(retur.oppgavereferanse, retur.notat.tekst, saksbehandlerOid, retur.notat.type)
 

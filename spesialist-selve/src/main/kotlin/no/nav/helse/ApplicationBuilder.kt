@@ -373,7 +373,7 @@ fun Application.installErrorHandling() {
     }
 }
 
-internal fun PipelineContext<Unit, ApplicationCall>.getGrupper(): List<UUID> {
+internal fun PipelineContext<Unit, ApplicationCall>.gruppemedlemskap(): List<UUID> {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
 }
@@ -387,3 +387,22 @@ private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue(
 private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.beslutterGruppeId() = UUID.fromString(this.getValue("BESLUTTER_SAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.skjermedePersonerGruppeId() = UUID.fromString(this.getValue("SKJERMEDE_PERSONER_GROUP"))
+
+object tilgangsgrupper {
+    val beslutter by lazy { System.getenv().beslutterGruppeId() }
+    val kode7 by lazy { System.getenv().kode7GruppeId() }
+    val skjermedePersoner by lazy { System.getenv().skjermedePersonerGruppeId() }
+    val risk by lazy { System.getenv().riskGruppeId() }
+}
+
+internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilKode7(): Boolean =
+    gruppemedlemskap().contains(tilgangsgrupper.kode7)
+
+internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilRisk(): Boolean =
+    gruppemedlemskap().contains(tilgangsgrupper.risk)
+
+internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilBeslutteroppgaver(): Boolean =
+    gruppemedlemskap().contains(tilgangsgrupper.beslutter)
+
+internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilSkjermedePersoner(): Boolean =
+    gruppemedlemskap().contains(tilgangsgrupper.skjermedePersoner)

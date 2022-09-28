@@ -7,7 +7,7 @@ import io.ktor.server.routing.get
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.getGrupper
+import no.nav.helse.gruppemedlemskap
 import no.nav.helse.getNAVident
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -42,7 +42,7 @@ Saker til $ident:
         val saksbehandlerOppgaver = withContext(Dispatchers.IO) {
             oppgaveApiDao.finnOppgaver(
                 saksbehandlerTilganger = SaksbehandlerTilganger(
-                    gruppetilganger = getGrupper(),
+                    gruppetilganger = gruppemedlemskap(),
                     kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
                     riskSaksbehandlergruppe = riskSupersaksbehandlergruppe,
                     beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
