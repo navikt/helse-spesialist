@@ -492,6 +492,10 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
+    fun nyeVarsler(message: JsonMessage) {
+        // TODO
+    }
+
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
         overstyringsteller.labels("opplysningstype", "tidslinje").inc()
         val overstyring = JsonMessage.newMessage(

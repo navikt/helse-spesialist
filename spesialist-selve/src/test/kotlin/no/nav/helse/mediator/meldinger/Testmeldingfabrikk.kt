@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
@@ -10,8 +11,8 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import kotlin.random.Random.Default.nextLong
 
 internal class Testmeldingfabrikk(private val fødselsnummer: String, private val aktørId: String) {
@@ -69,9 +70,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         orgnummer: String = "orgnr",
-        periodeFom: LocalDate = LocalDate.now(),
-        periodeTom: LocalDate = LocalDate.now(),
-        skjæringstidspunkt: LocalDate = LocalDate.now(),
+        periodeFom: LocalDate = now(),
+        periodeTom: LocalDate = now(),
+        skjæringstidspunkt: LocalDate = now(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         førstegangsbehandling: Boolean = true,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
@@ -259,7 +260,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         arbeidsgiverFagsystemId: UUID = UUID.randomUUID(),
         personFagsystemId: UUID? = null,
         utbetalingId: UUID = UUID.randomUUID(),
-        annullertAvSaksbehandler: LocalDate = LocalDate.now(),
+        annullertAvSaksbehandler: LocalDate = now(),
         saksbehandlerEpost: String = "saksbehandler_epost"
     ) =
         nyHendelse(
@@ -564,9 +565,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         endringskode: String = "NY", // [NY, UENDR, ENDR]
         klassekode: String = "SPREFAG-IOP",
         statuskode: String = "OPPH",
-        datoStatusFom: LocalDate = LocalDate.now(),
-        fom: LocalDate = LocalDate.now(),
-        tom: LocalDate = LocalDate.now(),
+        datoStatusFom: LocalDate = now(),
+        fom: LocalDate = now(),
+        tom: LocalDate = now(),
         dagsats: Int = 111,
         lønn: Int = 111,
         grad: Double = 0.11,
@@ -595,7 +596,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         fagområde: String = "SPREF",
         mottaker: String = "mottaker",
         endringskode: String = "ENDR",
-        sisteArbeidsgiverdag: LocalDate = LocalDate.now(),
+        sisteArbeidsgiverdag: LocalDate = now(),
         linjer: List<Map<String, Any>> = listOf(lagOppdragLinje())
     ) =
         mapOf(
@@ -644,6 +645,47 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagNyeVarsler(id: UUID, vedtaksperiodeId: UUID, orgnummer: String, fnr: String): String {
+        return nyHendelse(id, "aktivitetslogg_nye_varsler",
+        mapOf(
+            "fødselsnummer" to fnr,
+            "varsler" to listOf(
+                lagVarsel(orgnummer = orgnummer, fnr = fnr)
+            )
+        ))
+    }
+
+    private fun lagVarsel(id: UUID = UUID.randomUUID(), kode: String = "RV_VV", vedaksperiodeId: UUID = UUID.randomUUID(), orgnummer: String, fnr: String): Map<String, Any> = mapOf(
+        "id" to id,
+        "kode" to kode,
+        "tittel" to "Eksempelvarsel",
+        "forklaring" to "Eksempelforklaring som forklarer",
+        "handling" to "Handling som burde tas",
+        "avviklet" to false,
+        "tidsstempel" to now(),
+        "kontekster" to listOf(
+            mapOf(
+                "konteksttype" to "Person",
+                "kontekstMap" to mapOf(
+                    "fødselsnummer" to fnr,
+                    "aktørId" to "2093088099680"
+                )
+            ),
+            mapOf(
+                "konteksttype" to "Arbeidsgiver",
+                "kontekstmap" to mapOf(
+                    "organisasjonsnummer" to orgnummer
+                )
+            ),
+            mapOf(
+                "konteksttype" to "Vedtaksperiode",
+                "kontekstmap" to mapOf(
+                    "vedtaksperiodeId" to vedaksperiodeId
+                )
+            )
+        )
+    )
+
     internal fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 
@@ -652,6 +694,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "@id" to id,
         "@opprettet" to LocalDateTime.now()
     )
+
 
     data class SubsumsjonJson(
         val paragraf: String,
