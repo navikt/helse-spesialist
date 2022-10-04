@@ -54,6 +54,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyringsteller
@@ -88,6 +89,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val varselDao: VarselDao = VarselDao(dataSource)
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -492,8 +494,8 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
-    fun nyeVarsler(message: JsonMessage) {
-        // TODO
+    fun nyeVarsler(id: UUID, kode: String, tittel: String, vedtaksperiodeId: UUID, utbetalingsId: UUID?) {
+        //varselDao.lagre(id, kode, tittel, vedtaksperiodeId, utbetalingsId)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {

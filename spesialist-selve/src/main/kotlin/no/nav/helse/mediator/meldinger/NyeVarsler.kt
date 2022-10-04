@@ -1,8 +1,10 @@
 package no.nav.helse.mediator.meldinger
 
+import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.meldinger.NyeVarsler.Kontekst.Companion.vedtaksperiodeId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -12,6 +14,32 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal class NyeVarsler {
+
+    data class Varsel(
+        val id: UUID,
+        val kode: String,
+        val tittel: String,
+        val forklaring: String,
+        val handling: String,
+        val avviklet: Boolean,
+        val tidsstempel: LocalDateTime,
+        val kontekster: List<Kontekst>
+    ) {
+        init {
+            require(kontekster.vedtaksperiodeId() != null) {"varsel: ($kode, $id) er ikke i kontekst av en vedtaksperiode"}
+        }
+    }
+
+    data class Kontekst(
+        val konteksttype: String,
+        val kontekstmap: Map<String, String>
+    ) {
+
+        companion object {
+            internal fun List<Kontekst>.vedtaksperiodeId() =
+                find { it.konteksttype == "Vedtaksperiode" }?.kontekstmap?.get("vedtaksperiodeId")
+        }
+    }
 
     internal class NyeVarslerRiver(
         rapidsConnection: RapidsConnection,
@@ -44,7 +72,7 @@ internal class NyeVarsler {
                 StructuredArguments.keyValue("hendelseId", hendelseId),
                 StructuredArguments.keyValue("hendelse", packet.toJson()),
             )
-            mediator.nyeVarsler(packet)
+            // mediator.nyeVarsler()
         }
 
     }
