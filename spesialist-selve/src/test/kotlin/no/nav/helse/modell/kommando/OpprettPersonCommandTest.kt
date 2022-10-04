@@ -52,6 +52,19 @@ internal class OpprettPersonCommandTest {
     }
 
     @Test
+    fun `oppretter ikke person når person er opprettet under påvente av informasjonsbehov`() {
+        personFinnesIkke()
+        context.add(HentPersoninfoløsning(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE))
+        context.add(HentEnhetløsning(ENHET_OSLO))
+        assertFalse(command.execute(context))
+        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+        personFinnes()
+        context.add(HentInfotrygdutbetalingerløsning(objectMapper.createObjectNode()))
+        assertTrue(command.resume(context))
+        verify(exactly = 0) { dao.insertPerson(FNR, any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `oppretter person`() {
         val personinfoId = 4691337L
         every { dao.insertPersoninfo(any(), any(), any(), any(), any(), any()) } returns personinfoId

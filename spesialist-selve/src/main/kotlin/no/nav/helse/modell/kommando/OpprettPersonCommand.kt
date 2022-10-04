@@ -18,7 +18,7 @@ internal class OpprettPersonCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) return ignorer()
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) return ignorer("Person finnes fra før")
         return behandle(context)
     }
 
@@ -26,15 +26,16 @@ internal class OpprettPersonCommand(
         return behandle(context)
     }
 
-    private fun ignorer(): Boolean {
-        logg.info("Person finnes fra før")
+    private fun ignorer(logmsg: String): Boolean {
+        logg.info(logmsg)
         return true
     }
 
     private fun behandle(context: CommandContext): Boolean {
         val enhet = context.get<HentEnhetløsning>() ?: return trengerMerInformasjon(context)
         val personinfo = context.get<HentPersoninfoløsning>() ?: return trengerMerInformasjon(context)
-        val infotrygdutbetalinger = context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
+        val infotrygdutbetalinger =
+            context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
         return opprettPerson(enhet, personinfo, infotrygdutbetalinger)
     }
 
@@ -56,6 +57,8 @@ internal class OpprettPersonCommand(
         personinfo: HentPersoninfoløsning,
         infotrygdutbetalinger: HentInfotrygdutbetalingerløsning,
     ): Boolean {
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) != null)
+            return ignorer("Person har blitt opprettet i påvente av svar på informasjonsbehov")
         logg.info("Oppretter person")
         val personinfoId: Long = personinfo.lagre(personDao)
         val infotrygdutbetalingerId: Long = infotrygdutbetalinger.lagre(personDao)
