@@ -494,8 +494,8 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
-    fun nyeVarsler(id: UUID, kode: String, tittel: String, vedtaksperiodeId: UUID, utbetalingsId: UUID?) {
-        //varselDao.lagre(id, kode, tittel, vedtaksperiodeId, utbetalingsId)
+    fun nyeVarsler(id: UUID, kode: String, vedtaksperiodeId: UUID) {
+        varselDao.lagre(id, kode, vedtaksperiodeId)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {

@@ -2,35 +2,43 @@ package no.nav.helse.modell.varsel
 
 import java.util.UUID
 import javax.sql.DataSource
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 
 internal class VarselDao(private val dataSource: DataSource) {
 
-    internal fun lagre(id: UUID, kode: String, tittel: String, vedtaksperiodeId: UUID, utbetalingsId: UUID?){
+    internal fun alleVarslerForVedtaksperiode(vedtaksperiodeId: UUID): List<Pair<String, String>> {
+        @Language("PostgreSQL")
+        val alleVarslerForVedtaksperiode = """
+            select unik_id, kode from selve_varsel where vedtaksperiode_id = ?
+            """
+
         sessionOf(dataSource).use { session ->
-            session.transaction { transactionalSession ->
-                transactionalSession.run {
-                    val kodeId = oppdaterVarselKoder(kode)
-                }
-            }
+            return session.run(
+                queryOf(
+                    alleVarslerForVedtaksperiode,
+                    vedtaksperiodeId
+                ).map { varsel -> Pair(varsel.string("unik_id"), varsel.string("kode")) }.asList
+            )
         }
     }
 
-    private fun TransactionalSession.oppdaterVarselKoder(kode: String): Long? {
+    internal fun lagre(id: UUID, kode: String, vedtaksperiodeId: UUID) {
         @Language("PostgreSQL")
-        val varselKodeOppdatering = """
-            INSERT INTO selve_varsel_kode(kode) VALUES(?)
-            ON CONFLICT DO NOTHING
-            RETURNING id
+        val nyttVarsel = """
+            insert into selve_varsel (unik_id, kode, vedtaksperiode_id)
+            values (?,?,?);
             """
-        return run(
-            queryOf(
-                varselKodeOppdatering,
-                kode
-            ).asUpdateAndReturnGeneratedKey
-        )
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    nyttVarsel,
+                    id,
+                    kode,
+                    vedtaksperiodeId
+                ).asUpdate
+            )
+        }
     }
 }
