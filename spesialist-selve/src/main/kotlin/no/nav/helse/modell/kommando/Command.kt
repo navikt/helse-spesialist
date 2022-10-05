@@ -5,3 +5,10 @@ internal interface Command {
     fun resume(context: CommandContext) = true
     fun undo(context: CommandContext) {}
 }
+
+internal fun ikkesuspenderendeCommand(block: () -> Unit) = object : Command {
+    override fun execute(context: CommandContext): Boolean {
+        block()
+        return true
+    }
+}

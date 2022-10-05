@@ -13,7 +13,11 @@ import java.util.*
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
+import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.PersonOppdatertPayload
 
 internal class OppdaterPersonsnapshot(
     override val id: UUID,
@@ -22,6 +26,7 @@ internal class OppdaterPersonsnapshot(
     snapshotClient: SnapshotClient,
     snapshotDao: SnapshotDao,
     personDao: PersonDao,
+    opptegnelseDao: OpptegnelseDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
@@ -30,6 +35,13 @@ internal class OppdaterPersonsnapshot(
             snapshotDao = snapshotDao
         ),
         OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao),
+        ikkesuspenderendeCommand {
+            opptegnelseDao.opprettOpptegnelse(
+                fødselsnummer,
+                PersonOppdatertPayload,
+                OpptegnelseType.PERSONDATA_OPPDATERT
+            )
+        },
     )
 
     override fun fødselsnummer(): String = fødselsnummer

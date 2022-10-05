@@ -540,6 +540,7 @@ internal class Hendelsefabrikk(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
             personDao = personDao,
+            opptegnelseDao = opptegnelseDao,
         )
     }
 
