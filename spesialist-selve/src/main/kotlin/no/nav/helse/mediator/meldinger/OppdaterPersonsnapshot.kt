@@ -12,20 +12,24 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
+import no.nav.helse.modell.kommando.OppdaterInfotrygdutbetalingerHardt
+import no.nav.helse.modell.person.PersonDao
 
 internal class OppdaterPersonsnapshot(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
     snapshotClient: SnapshotClient,
-    snapshotDao: SnapshotDao
+    snapshotDao: SnapshotDao,
+    personDao: PersonDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotUtenÅLagreWarningsCommand(
             fødselsnummer = fødselsnummer,
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao
-        )
+        ),
+        OppdaterInfotrygdutbetalingerHardt(fødselsnummer, personDao),
     )
 
     override fun fødselsnummer(): String = fødselsnummer

@@ -35,7 +35,15 @@ object TestRapidHelpers {
             ?: error("Prøver å finne contextId fra siste behov, men ingen behov er sendt ut"))
             .path("contextId")
             .asText()
-            .let { UUID.fromString(it) }
+            .let(UUID::fromString)
+
+    fun TestRapid.RapidInspector.hendelseId(): UUID =
+        (hendelser("behov")
+            .lastOrNull { it.hasNonNull("hendelseId") }
+            ?: error("Prøver å finne hendelseId fra siste behov, men ingen behov er sendt ut"))
+            .path("hendelseId")
+            .asText()
+            .let(UUID::fromString)
 
     fun TestRapid.RapidInspector.oppgaveId() =
         hendelser("oppgave_opprettet")
@@ -48,7 +56,7 @@ object TestRapidHelpers {
             .last { it.hasNonNull("contextId") && it.path("hendelseId").asText() == hendelseId.toString() }
             .path("contextId")
             .asText()
-            .let { UUID.fromString(it) }
+            .let(UUID::fromString)
 
     fun TestRapid.RapidInspector.oppgaveId(hendelseId: UUID): String =
         hendelser("oppgave_opprettet")

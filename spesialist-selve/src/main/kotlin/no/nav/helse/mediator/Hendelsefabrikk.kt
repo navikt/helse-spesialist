@@ -538,7 +538,8 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode["fødselsnummer"].asText(),
             json = json,
             snapshotClient = snapshotClient,
-            snapshotDao = snapshotDao
+            snapshotDao = snapshotDao,
+            personDao = personDao,
         )
     }
 
