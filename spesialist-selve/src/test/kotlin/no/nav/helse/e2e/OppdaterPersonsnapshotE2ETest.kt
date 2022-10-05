@@ -14,6 +14,7 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -31,8 +32,8 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdater personsnapshot oppdaterer alle snapshots på personen`() {
-        vedtaksperiode(vedtaksperiodeId1, snapshotV1, utbetalingId1)
-        vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2)
+        vedtaksperiode(vedtaksperiodeId1, snapshotV1, utbetalingId1, Periodetype.FØRSTEGANGSBEHANDLING)
+        vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2, Periodetype.FORLENGELSE)
 
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendOppdaterPersonsnapshot()
@@ -53,33 +54,43 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         testRapid.sendTestMessage(json)
     }
 
-    fun vedtaksperiode(vedtaksperiodeId: UUID, snapshot: GraphQLClientResponse<HentSnapshot.Result>, utbetalingId: UUID) {
+    fun vedtaksperiode(
+        vedtaksperiodeId: UUID,
+        snapshot: GraphQLClientResponse<HentSnapshot.Result>,
+        utbetalingId: UUID,
+        periodetype: Periodetype
+    ) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
-            periodetype = Periodetype.FORLENGELSE
+            periodetype = periodetype
         )
-        sendPersoninfoløsning(
-            orgnr = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId,
-            hendelseId = godkjenningsmeldingId
-        )
-        sendArbeidsgiverinformasjonløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
-        sendArbeidsforholdløsning(
-            hendelseId = godkjenningsmeldingId,
-            orgnr = ORGNR,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
+
+        if (periodetype == Periodetype.FØRSTEGANGSBEHANDLING) {
+            sendPersoninfoløsning(
+                orgnr = ORGNR,
+                vedtaksperiodeId = vedtaksperiodeId,
+                hendelseId = godkjenningsmeldingId
+            )
+            sendArbeidsgiverinformasjonløsning(
+                hendelseId = godkjenningsmeldingId,
+                orgnummer = ORGNR,
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+            sendArbeidsforholdløsning(
+                hendelseId = godkjenningsmeldingId,
+                orgnr = ORGNR,
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        }
+
         sendEgenAnsattløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
+        sendVergemålløsning(godkjenningsmeldingId = godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
