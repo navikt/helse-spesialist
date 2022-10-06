@@ -5,6 +5,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.NyeVarsler.Kontekst.Companion.vedtaksperiodeId
+import no.nav.helse.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -26,7 +27,7 @@ internal class NyeVarsler {
         val kontekster: List<Kontekst>
     ) {
         init {
-            require(kontekster.vedtaksperiodeId() != null) {"varsel: ($kode, $id) er ikke i kontekst av en vedtaksperiode"}
+            require(kontekster.vedtaksperiodeId() != null) { "varsel: ($kode, $id) er ikke i kontekst av en vedtaksperiode" }
         }
     }
 
@@ -72,7 +73,11 @@ internal class NyeVarsler {
                 StructuredArguments.keyValue("hendelseId", hendelseId),
                 StructuredArguments.keyValue("hendelse", packet.toJson()),
             )
-            // mediator.nyeVarsler()
+
+            val varsler = packet["varsler"].map { varsel ->
+                objectMapper.treeToValue(varsel, Varsel::class.java)
+            }
+            mediator.nyeVarsler(varsler)
         }
 
     }

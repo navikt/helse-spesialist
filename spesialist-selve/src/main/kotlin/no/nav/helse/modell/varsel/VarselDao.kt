@@ -4,6 +4,8 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.meldinger.NyeVarsler
+import no.nav.helse.mediator.meldinger.NyeVarsler.Kontekst.Companion.vedtaksperiodeId
 import org.intellij.lang.annotations.Language
 
 internal class VarselDao(private val dataSource: DataSource) {
@@ -24,21 +26,23 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun lagre(id: UUID, kode: String, vedtaksperiodeId: UUID) {
+    internal fun lagre(varsler: List<NyeVarsler.Varsel>) {
         @Language("PostgreSQL")
         val nyttVarsel = """
-            insert into selve_varsel (unik_id, kode, vedtaksperiode_id)
-            values (?,?,?);
-            """
+                    insert into selve_varsel (unik_id, kode, vedtaksperiode_id)
+                    values (?,?,?);
+                    """
         sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    nyttVarsel,
-                    id,
-                    kode,
-                    vedtaksperiodeId
-                ).asUpdate
-            )
+            varsler.forEach {
+                session.run(
+                    queryOf(
+                        nyttVarsel,
+                        it.id,
+                        it.kode,
+                        UUID.fromString(it.kontekster.vedtaksperiodeId())
+                    ).asUpdate
+                )
+            }
         }
     }
 }

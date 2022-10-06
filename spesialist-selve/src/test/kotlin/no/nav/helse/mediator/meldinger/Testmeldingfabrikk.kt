@@ -662,11 +662,11 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         "forklaring" to "Eksempelforklaring som forklarer",
         "handling" to "Handling som burde tas",
         "avviklet" to false,
-        "tidsstempel" to now(),
+        "tidsstempel" to LocalDateTime.now(),
         "kontekster" to listOf(
             mapOf(
                 "konteksttype" to "Person",
-                "kontekstMap" to mapOf(
+                "kontekstmap" to mapOf(
                     "fødselsnummer" to fnr,
                     "aktørId" to "2093088099680"
                 )

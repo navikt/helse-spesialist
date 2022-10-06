@@ -27,6 +27,7 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -494,8 +495,8 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
-    fun nyeVarsler(id: UUID, kode: String, vedtaksperiodeId: UUID) {
-        varselDao.lagre(id, kode, vedtaksperiodeId)
+    fun nyeVarsler(varsler: List<NyeVarsler.Varsel>) {
+        varselDao.lagre(varsler)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
