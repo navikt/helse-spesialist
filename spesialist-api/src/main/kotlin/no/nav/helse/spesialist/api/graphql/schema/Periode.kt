@@ -289,7 +289,7 @@ data class UberegnetPeriode(
     override fun skjaeringstidspunkt(): DateString = periode.skjaeringstidspunkt
 }
 
-
+@Suppress("unused")
 data class BeregnetPeriode(
     val id: UUIDString,
     private val periode: GraphQLBeregnetPeriode,

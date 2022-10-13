@@ -9,6 +9,7 @@ data class Antall(
     val tilgjengelig: Int,
 )
 
+@Suppress("unused")
 data class Behandlingsstatistikk(
     private val behandlingsstatistikkResponse: BehandlingsstatistikkResponse,
 ) {
