@@ -1,16 +1,16 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.api.graphql.SnapshotClient
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Warning
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 internal class OpprettVedtakCommand(
     private val snapshotClient: SnapshotClient,

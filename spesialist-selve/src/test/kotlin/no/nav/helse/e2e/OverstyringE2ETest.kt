@@ -26,10 +26,10 @@ import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.graphql.schema.Arbeidsforholdoverstyring
-import no.nav.helse.mediator.api.graphql.schema.Dagoverstyring
-import no.nav.helse.mediator.api.graphql.schema.Inntektoverstyring
-import no.nav.helse.mediator.api.graphql.schema.Person
+import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
 import no.nav.helse.spesialist.api.overstyring.Dagtype

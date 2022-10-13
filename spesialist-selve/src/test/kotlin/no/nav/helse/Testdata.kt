@@ -2,22 +2,22 @@ package no.nav.helse
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import java.util.UUID
-import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.enums.GraphQLInntektstype
-import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.mediator.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.mediator.graphql.enums.Utbetalingtype
-import no.nav.helse.mediator.graphql.hentsnapshot.Alder
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLAktivitet
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
-import no.nav.helse.mediator.graphql.hentsnapshot.Soknadsfrist
-import no.nav.helse.mediator.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.Alder
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLAktivitet
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 
 object Testdata {
     // Modifiserbare globale verdier fører ofte til spaghetti. Ved å bruke et stygt navn brer det forhåpentligvis ikke om seg

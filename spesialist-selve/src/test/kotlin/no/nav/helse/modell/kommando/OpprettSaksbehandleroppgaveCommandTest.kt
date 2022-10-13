@@ -5,8 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Oppgave
@@ -14,6 +12,9 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -101,7 +102,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
             personFagsystemId = "EN_FAGSYSTEMID",
             personNettoBelop = personbeløp,
             statusEnum = GraphQLUtbetalingstatus.GODKJENT,
-            typeEnum = no.nav.helse.mediator.graphql.enums.Utbetalingtype.UTBETALING,
+            typeEnum = GraphQLUtbetalingtype.UTBETALING,
             vurdering = null,
             personoppdrag = null,
             arbeidsgiveroppdrag = null,

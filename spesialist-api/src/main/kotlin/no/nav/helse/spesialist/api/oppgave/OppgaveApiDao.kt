@@ -19,6 +19,55 @@ import org.intellij.lang.annotations.Language
 
 class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
+    fun finnOppgaveId(vedtaksperiodeId: UUID) = queryize(
+        """ SELECT id FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
+        """
+    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.long("id") }
+
+    fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean = queryize(
+        """
+            SELECT er_beslutteroppgave FROM oppgave
+                    WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                    AND status = 'AvventerSaksbehandler'::oppgavestatus
+            """
+    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutteroppgave") } ?: false
+
+    fun erReturOppgave(vedtaksperiodeId: UUID): Boolean = queryize(
+        """ SELECT er_returoppgave FROM oppgave
+                WHERE vedtak_ref =
+                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                AND status = 'AvventerSaksbehandler'::oppgavestatus
+            """
+    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_returoppgave") } ?: false
+
+    fun hentBeslutterSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? = queryize(
+        """ SELECT beslutter_saksbehandler_oid FROM oppgave
+                WHERE vedtak_ref =
+                    (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                 AND status = 'AvventerSaksbehandler'::oppgavestatus   
+            """
+    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("beslutter_saksbehandler_oid") }
+
+    fun hentTidligereSaksbehandlerOid(vedtaksperiodeId: UUID): UUID? = queryize(
+        """ SELECT tidligere_saksbehandler_oid FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+             AND status = 'AvventerSaksbehandler'::oppgavestatus   
+        """
+    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.uuidOrNull("tidligere_saksbehandler_oid") }
+
+    fun trengerTotrinnsvurdering(vedtaksperiodeId: UUID): Boolean = queryize(
+        """ SELECT er_totrinnsoppgave FROM oppgave
+            WHERE vedtak_ref =
+                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+            AND status = 'AvventerSaksbehandler'::oppgavestatus   
+        """
+    ).single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_totrinnsoppgave") } ?: false
+
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto? {
         @Language("PostgreSQL")
         val query = """

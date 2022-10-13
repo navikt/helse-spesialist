@@ -1,6 +1,5 @@
 package no.nav.helse.modell.utbetaling
 
-import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
@@ -177,45 +176,6 @@ class UtbetalingDao(private val dataSource: DataSource) {
         }
     }
 
-    fun findUtbetalinger(fødselsnummer: String): List<UtbetalingDto> {
-        @Language("PostgreSQL")
-        val query = """
-SELECT DISTINCT ON (ui.id) *
-FROM utbetaling_id ui
-         JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
-         JOIN person p on ui.person_ref = p.id
-         JOIN arbeidsgiver a on ui.arbeidsgiver_ref = a.id
-         LEFT JOIN annullert_av_saksbehandler aas on u.annullert_av_saksbehandler_ref = aas.id
-         LEFT JOIN saksbehandler s on aas.saksbehandler_ref = s.oid
-         WHERE fodselsnummer = :fodselsnummer
-ORDER BY ui.id, u.opprettet DESC
-        """
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer.toLong()))
-                .map { row ->
-                    val personoppdrag = findOppdrag(session, row.long("person_fagsystem_id_ref"))
-                    val arbeidsgiveroppdrag = findOppdrag(session, row.long("arbeidsgiver_fagsystem_id_ref"))
-
-                    UtbetalingDto(
-                        utbetalingId = UUID.fromString(row.string("utbetaling_id")),
-                        type = row.string("type"),
-                        status = Utbetalingsstatus.valueOf(row.string("status")),
-                        personoppdrag = personoppdrag,
-                        arbeidsgiveroppdrag = arbeidsgiveroppdrag,
-                        annullertAvSaksbehandler = row.localDateTimeOrNull("annullert_tidspunkt")?.let {
-                            UtbetalingDto.AnnullertAvSaksbehandlerDto(
-                                annullertTidspunkt = it,
-                                saksbehandlerNavn = row.string("navn")
-                            )
-                        },
-                        totalbeløp = personoppdrag.totalbeløp() + arbeidsgiveroppdrag.totalbeløp()
-                    )
-                }
-                .asList)
-        }
-    }
-
     internal fun nyAnnullering(annullertTidspunkt: LocalDateTime, saksbehandlerRef: UUID): Long {
         @Language("PostgreSQL")
         val statement = """
@@ -234,38 +194,6 @@ ORDER BY ui.id, u.opprettet DESC
                 )
             ) { "Kunne ikke opprette annullering" }
         }
-    }
-
-    private fun findOppdrag(session: Session, fagsystemIdRef: Long): UtbetalingDto.OppdragDto? =
-        session.run(
-            queryOf(
-                "SELECT * FROM oppdrag WHERE id = :fagsystemIdRef",
-                mapOf("fagsystemIdRef" to fagsystemIdRef)
-            ).map { row ->
-                UtbetalingDto.OppdragDto(
-                    mottaker = row.string("mottaker"),
-                    fagsystemId = row.string("fagsystem_id"),
-                    linjer = findUtbetalingslinjer(session, row.long("id"))
-                )
-            }.asSingle
-        )
-
-    private fun findUtbetalingslinjer(
-        session: Session,
-        oppdragId: Long
-    ): List<UtbetalingDto.OppdragDto.UtbetalingLinje> {
-        @Language("PostgreSQL")
-        val query = "SELECT * FROM utbetalingslinje WHERE oppdrag_id=:oppdrag_id;"
-
-        return session.run(queryOf(query, mapOf("oppdrag_id" to oppdragId))
-            .map { row ->
-                UtbetalingDto.OppdragDto.UtbetalingLinje(
-                    fom = row.localDate("fom"),
-                    tom = row.localDate("tom"),
-                    totalbeløp = row.intOrNull("totalbeløp")
-                )
-            }
-            .asList)
     }
 
     fun leggTilAnnullertAvSaksbehandler(utbetalingId: UUID, annullertAvSaksbehandlerRef: Long) {
@@ -333,36 +261,5 @@ ORDER BY ui.id, u.opprettet DESC
                     )}.asList
             )
         }
-    }
-
-    data class UtbetalingDto(
-        val utbetalingId: UUID,
-        val type: String,
-        val status: Utbetalingsstatus,
-        val arbeidsgiveroppdrag: OppdragDto?,
-        val personoppdrag: OppdragDto?,
-        val annullertAvSaksbehandler: AnnullertAvSaksbehandlerDto? = null,
-        val totalbeløp: Int?
-    ) {
-        data class OppdragDto(
-            val fagsystemId: String,
-            val linjer: List<UtbetalingLinje>,
-            val mottaker: String
-        ) {
-            data class UtbetalingLinje(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val totalbeløp: Int?
-            )
-        }
-
-        data class AnnullertAvSaksbehandlerDto(
-            val annullertTidspunkt: LocalDateTime,
-            val saksbehandlerNavn: String
-        )
-    }
-
-    private fun UtbetalingDto.OppdragDto?.totalbeløp(): Int {
-        return this?.linjer?.sumOf { it.totalbeløp ?: 0 } ?: 0
     }
 }

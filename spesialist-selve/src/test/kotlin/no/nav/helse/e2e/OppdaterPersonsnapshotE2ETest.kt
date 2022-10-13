@@ -23,7 +23,7 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.mediator.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language

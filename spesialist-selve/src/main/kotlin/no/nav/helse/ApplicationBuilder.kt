@@ -39,11 +39,10 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.mediator.api.ReservasjonClient
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.mediator.api.annulleringApi
-import no.nav.helse.mediator.api.graphQLApi
-import no.nav.helse.mediator.api.graphql.SnapshotClient
-import no.nav.helse.mediator.api.graphql.SnapshotMediator
+import no.nav.helse.spesialist.api.graphql.graphQLApi
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
 import no.nav.helse.mediator.api.oppgaveApi
@@ -66,7 +65,6 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingService
-import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -77,6 +75,8 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
+import no.nav.helse.spesialist.api.client.AccessTokenClient
+import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -88,7 +88,10 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -176,13 +179,15 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val reservasjonDao = ReservasjonDao(dataSource)
     private val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     private val egenAnsattDao = EgenAnsattDao(dataSource)
-    private val utbetalingDao = UtbetalingDao(dataSource)
+    private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
+    private val utbetalingApiDao = UtbetalingApiDao(dataSource)
     private val opptegnelseDao = OpptegnelseDao(dataSource)
     private val opptegnelseApiDao = OpptegnelseApiDao(dataSource)
     private val abonnementDao = no.nav.helse.spesialist.api.abonnement.AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
+    private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
@@ -190,13 +195,16 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
     private val oppgaveMediator = OppgaveMediator(
-        oppgaveDao,
-        tildelingDao,
-        reservasjonDao,
-        opptegnelseDao
+        oppgaveDao = oppgaveDao,
+        tildelingDao = tildelingDao,
+        reservasjonDao = reservasjonDao,
+        opptegnelseDao = opptegnelseDao
     )
 
-    private val snapshotMediator = SnapshotMediator(snapshotDao, snapshotClient)
+    private val snapshotMediator = SnapshotMediator(
+        snapshotDao = snapshotApiDao,
+        snapshotClient = snapshotClient,
+    )
 
     private val plukkTilManuell: PlukkTilManuell = ({
         env["STIKKPROEVER_DIVISOR"]?.let {
@@ -246,14 +254,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             azureAdAppAuthentication(azureConfig)
             graphQLApi(
                 personApiDao = personApiDao,
-                egenAnsattDao = egenAnsattDao,
+                egenAnsattApiDao = egenAnsattApiDao,
                 tildelingDao = tildelingDao,
                 arbeidsgiverApiDao = arbeidsgiverApiDao,
                 overstyringApiDao = overstyringApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
-                utbetalingDao = utbetalingDao,
-                oppgaveDao = oppgaveDao,
+                utbetalingApiDao = utbetalingApiDao,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
@@ -263,7 +270,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 beslutterGruppeId = env.beslutterGruppeId(),
                 riskGruppeId = env.riskGruppeId(),
                 snapshotMediator = snapshotMediator,
-                oppgaveMediator = oppgaveMediator,
                 oppgaveService = OppgaveService(oppgavePagineringDao),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
             )
@@ -298,7 +304,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
         }.build()
 
-    val automatiseringDao = AutomatiseringDao(dataSource)
+    private val automatiseringDao = AutomatiseringDao(dataSource)
     val automatisering = Automatisering(
         warningDao = warningDao,
         risikovurderingDao = risikovurderingDao,
@@ -388,21 +394,9 @@ private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("
 private fun Map<String, String>.beslutterGruppeId() = UUID.fromString(this.getValue("BESLUTTER_SAKSBEHANDLER_GROUP"))
 private fun Map<String, String>.skjermedePersonerGruppeId() = UUID.fromString(this.getValue("SKJERMEDE_PERSONER_GROUP"))
 
-object tilgangsgrupper {
-    val beslutter by lazy { System.getenv().beslutterGruppeId() }
-    val kode7 by lazy { System.getenv().kode7GruppeId() }
-    val skjermedePersoner by lazy { System.getenv().skjermedePersonerGruppeId() }
-    val risk by lazy { System.getenv().riskGruppeId() }
+object Tilgangsgrupper {
+    val beslutter: UUID by lazy { System.getenv().beslutterGruppeId() }
 }
 
-internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilKode7(): Boolean =
-    gruppemedlemskap().contains(tilgangsgrupper.kode7)
-
-internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilRisk(): Boolean =
-    gruppemedlemskap().contains(tilgangsgrupper.risk)
-
 internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilBeslutteroppgaver(): Boolean =
-    gruppemedlemskap().contains(tilgangsgrupper.beslutter)
-
-internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilSkjermedePersoner(): Boolean =
-    gruppemedlemskap().contains(tilgangsgrupper.skjermedePersoner)
+    gruppemedlemskap().contains(Tilgangsgrupper.beslutter)

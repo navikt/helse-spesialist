@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -11,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 
 internal class KlargjørVedtaksperiodeCommand(
     snapshotClient: SnapshotClient,

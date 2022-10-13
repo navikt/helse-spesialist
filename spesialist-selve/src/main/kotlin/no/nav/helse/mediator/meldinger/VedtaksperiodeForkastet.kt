@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
@@ -20,6 +19,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

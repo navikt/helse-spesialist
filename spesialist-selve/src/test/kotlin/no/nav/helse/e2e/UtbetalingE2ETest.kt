@@ -8,9 +8,9 @@ import no.nav.helse.Meldingssender.sendPersonUtbetalingEndret
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT
@@ -117,22 +117,11 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `legger på totalbeløp på utbetaling`() {
-        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
-        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-
-        utbetalingDao.findUtbetalinger(FØDSELSNUMMER).first().let {
-            assertNotNull(it)
-            assertEquals(4000, it.totalbeløp)
-        }
-    }
-
-    @Test
     fun `feriepengeutbetalinger har riktig type på utbetaling`() {
         vedtaksperiode(utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
 
-        utbetalingDao.findUtbetalinger(FØDSELSNUMMER).first().let {
+        utbetalinger().first().let {
             assertNotNull(it)
             assertEquals("FERIEPENGER", it.type)
         }
@@ -146,8 +135,8 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = nyUtbetalingId)
 
-        assertEquals(2, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
-        assertTrue { utbetalingDao.findUtbetalinger(FØDSELSNUMMER).find { it.utbetalingId == nyUtbetalingId } != null }
+        assertEquals(2, utbetalinger().size)
+        assertTrue { utbetalinger().find { it.id == nyUtbetalingId } != null }
     }
 
     @Test
@@ -156,14 +145,14 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(utbetalingId = nyUtbetalingId)
         sendPersonUtbetalingEndret("UTBETALING", OVERFØRT, ORGNR, utbetalingId = nyUtbetalingId)
 
-        assertEquals(1, utbetalingDao.findUtbetalinger(FØDSELSNUMMER).size)
-        assertTrue { utbetalingDao.findUtbetalinger(FØDSELSNUMMER).find { it.utbetalingId == nyUtbetalingId } != null }
+        assertEquals(1, utbetalinger().size)
+        assertTrue { utbetalinger().find { it.id == nyUtbetalingId } != null }
     }
 
-    private fun utbetalinger(): List<Long> {
+    private fun utbetalinger(): List<UtbetalingTestDto> {
         @Language("PostgreSQL")
         val statement = """
-            SELECT u.*
+            SELECT u.*, ui.utbetaling_id, ui.type
             FROM utbetaling u
             INNER JOIN utbetaling_id ui ON (ui.id = u.utbetaling_id_ref)
             INNER JOIN person p ON (p.id = ui.person_ref)
@@ -179,7 +168,13 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
                         "fodselsnummer" to FØDSELSNUMMER.toLong(),
                         "orgnummer" to ORGNR.toLong()
                     )
-                ).map { it.long("utbetaling_id_ref") }.asList
+                ).map {
+                    UtbetalingTestDto(
+                        id = it.uuid("utbetaling_id"),
+                        idRef = it.long("utbetaling_id_ref"),
+                        type = it.string("type")
+                    )
+                }.asList
             )
         }
     }
@@ -192,3 +187,9 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         }
     }
 }
+
+private data class UtbetalingTestDto(
+    val id: UUID,
+    val idRef: Long,
+    val type: String,
+)

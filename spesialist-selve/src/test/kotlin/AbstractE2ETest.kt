@@ -41,11 +41,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.mediator.api.graphql.PersonQuery
-import no.nav.helse.mediator.api.graphql.SnapshotClient
-import no.nav.helse.mediator.api.graphql.SnapshotMediator
-import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -72,6 +68,9 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -79,6 +78,9 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -99,6 +101,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     private val automatiseringDao = AutomatiseringDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
+    private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
     private val snapshotDao = SnapshotDao(dataSource)
 
     private val varselDao = VarselDao(dataSource)
@@ -126,6 +129,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val overstyringDao = OverstyringDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
+    private val snapshotApiDao = SnapshotApiDao(dataSource)
+    protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
 
     protected val testRapid = TestRapid()
 
@@ -159,14 +164,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk
     )
-    internal val snapshotMediator = SnapshotMediator(
-        snapshotDao = snapshotDao,
-        snapshotClient = snapshotClient,
-    )
 
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
 
-    internal val saksbehandlerTilganger = mockk<SaksbehandlerTilganger>() {
+    internal val saksbehandlerTilganger = mockk<SaksbehandlerTilganger> {
         every { harTilgangTilSkjermedePersoner() } returns true
         every { harTilgangTilBeslutterOppgaver() } returns true
         every { harTilgangTilRiskOppgaver() } returns true
@@ -175,13 +176,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     internal val personQuery = PersonQuery(
         personApiDao = personApiDao,
-        egenAnsattDao = egenAnsattDao,
+        egenAnsattApiDao = egenAnsattApiDao,
         tildelingDao = tildelingDao,
         arbeidsgiverApiDao = arbeidsgiverApiDao,
         overstyringApiDao = overstyringApiDao,
         risikovurderingApiDao = risikovurderingApiDao,
         varselDao = varselDao,
-        oppgaveDao = oppgaveDao,
         oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,
         notatDao = notatDao,

@@ -5,10 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.mediator.graphql.enums.Utbetalingtype.REVURDERING
-import no.nav.helse.mediator.graphql.enums.Utbetalingtype.UTBETALING
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -24,6 +20,9 @@ import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
+import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -150,7 +149,7 @@ internal class AutomatiseringTest {
     fun `periode til revurdering skal ikke automatisk godkjennes`() {
         val hendelseId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        every { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = REVURDERING)
+        every { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) { fail("Denne skal ikke kalles") }
         verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
@@ -184,7 +183,7 @@ internal class AutomatiseringTest {
     }
 
 
-    private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0, type: no.nav.helse.mediator.graphql.enums.Utbetalingtype = UTBETALING ): GraphQLUtbetaling =
+    private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0, type: Utbetalingtype = Utbetalingtype.UTBETALING): GraphQLUtbetaling =
         GraphQLUtbetaling(
             id = utbetalingId.toString(),
             arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",

@@ -2,6 +2,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
 
 val testcontainersVersion = "1.17.3"
 val graphQLKotlinVersion = "5.5.0"
+val ktorVersion = "2.0.1"
 
 plugins {
     kotlin("plugin.serialization") version "1.6.21"
@@ -12,6 +13,7 @@ dependencies {
     implementation(project(":spesialist-felles"))
     implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
+    testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }
 val graphqlIntrospectSchema by tasks.getting(com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask::class) {
     endpoint.set("https://spleis-api.dev.intern.nav.no/graphql")
@@ -40,13 +42,11 @@ val graphqlGenerateClient by tasks.getting(com.expediagroup.graphql.plugin.gradl
 }
 
 val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
-    packages.set(
-        listOf(
-            "no.nav.helse.mediator.api.graphql",
-            "no.nav.helse.mediator.api.graphql.schema",
-            "no.nav.helse.mediator.graphql"
-        )
-    )
+    packages.set(listOf(
+        "no.nav.helse.spesialist.api.graphql.schema",
+        "no.nav.helse.spesialist.api.graphql.mutation",
+        "no.nav.helse.spesialist.api.graphql.query",
+    ))
 }
 
 graphqlGenerateSDL.enabled = false

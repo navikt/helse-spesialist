@@ -1,12 +1,12 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.mediator.api.graphql.SnapshotClient
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.slf4j.LoggerFactory
 
 internal class OppdaterSnapshotCommand(

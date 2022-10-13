@@ -6,11 +6,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.mediator.api.graphql.SnapshotClient
-import no.nav.helse.mediator.graphql.HentSnapshot
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

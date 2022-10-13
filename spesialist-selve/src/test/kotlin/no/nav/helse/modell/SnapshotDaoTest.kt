@@ -4,9 +4,9 @@ import DatabaseIntegrationTest
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 
 internal class SnapshotDaoTest : DatabaseIntegrationTest() {
 
@@ -41,7 +41,7 @@ internal class SnapshotDaoTest : DatabaseIntegrationTest() {
         }.asList)
     }
 
-    private fun globaltVersjonsnummer() = sessionOf(dataSource).use {
-        it.run(queryOf("SELECT versjon FROM global_snapshot_versjon").map { it.int("versjon") }.asSingle)
+    private fun globaltVersjonsnummer() = sessionOf(dataSource).use { session ->
+        session.run(queryOf("SELECT versjon FROM global_snapshot_versjon").map { it.int("versjon") }.asSingle)
     }
 }

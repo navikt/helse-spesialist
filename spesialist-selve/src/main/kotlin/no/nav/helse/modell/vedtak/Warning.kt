@@ -2,11 +2,11 @@ package no.nav.helse.modell.vedtak
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.mediator.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.spesialist.api.person.SnapshotDto
 import java.util.*
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 
 internal class Warning(
     private val melding: String,

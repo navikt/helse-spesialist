@@ -12,7 +12,6 @@ dependencies {
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
-    testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }
 
 tasks {
