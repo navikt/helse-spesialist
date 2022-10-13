@@ -38,6 +38,10 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
+import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse
+import no.nav.helse.spesialist.api.graphql.schema.Kjonn
+import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -72,7 +76,8 @@ fun main() = runBlocking {
         val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
         val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
 
-//        every { snapshotApiDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo to enPerson)
+        every { snapshotApiDao.utdatert(any()) } returns false
+        every { snapshotApiDao.hentSnapshotMedMetadata(any()) } returns (enPersoninfo() to enPerson())
         every { personApiDao.personHarAdressebeskyttelse(any(), any()) } returns false
         every {
             personApiDao.personHarAdressebeskyttelse(
@@ -80,8 +85,9 @@ fun main() = runBlocking {
                 no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert
             )
         } returns true
+        every { personApiDao.finnesPersonMedFødselsnummer(any()) } returns true
         every { personApiDao.finnEnhet(any()) } returns EnhetDto("1234", "Bømlo")
-        every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson.fodselsnummer
+        every { personApiDao.finnFødselsnummer(isNull(inverse = true)) } returns enPerson().fodselsnummer
         every { utbetalingApiDao.findUtbetalinger(any()) } returns emptyList()
         every { behandlingsstatistikkMediator.getBehandlingsstatistikk() } returns BehandlingsstatistikkResponse(
             enArbeidsgiver = Statistikk(485, 104, 789),
@@ -130,6 +136,19 @@ fun main() = runBlocking {
         )
     }
 }
+
+private fun enPersoninfo() = Personinfo(
+    fornavn = "Luke",
+    mellomnavn = null,
+    etternavn = "Skywalker",
+    fodselsdato = "2000-01-01",
+    kjonn = Kjonn.Kvinne,
+    adressebeskyttelse = Adressebeskyttelse.Ugradert,
+    reservasjon = Reservasjon(
+        kanVarsles = true,
+        reservert = false,
+    )
+)
 
 private fun enPeriode() = GraphQLBeregnetPeriode(
     erForkastet = false,
@@ -243,7 +262,7 @@ private fun enArbeidsgiver(organisasjonsnummer: String = "987654321") = GraphQLA
     generasjoner = listOf(enGenerasjon())
 )
 
-private val enPerson = GraphQLPerson(
+private fun enPerson() = GraphQLPerson(
     aktorId = "jedi-master",
     arbeidsgivere = listOf(enArbeidsgiver()),
     dodsdato = null,
