@@ -15,11 +15,13 @@ import no.nav.helse.spesialist.api.graphql.schema.Paginering
 import no.nav.helse.spesialist.api.graphql.schema.tilFerdigstilteOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.tilOppgaver
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 
 class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgaveService: OppgaveService) : Query {
 
+    @Suppress("unused")
     fun behandledeOppgaver(
         behandletAvIdent: String,
         behandletAvOid: String,
@@ -38,6 +40,15 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
         return DataFetcherResult.newResult<List<FerdigstiltOppgave>>().data(oppgaver).build()
     }
 
+    @Suppress("unused")
+    fun alleOppgaver(env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveForOversiktsvisning>> {
+        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
+        val oppgaver = oppgaveApiDao.finnOppgaver(tilganger).tilOppgaver()
+
+        return DataFetcherResult.newResult<List<OppgaveForOversiktsvisning>>().data(oppgaver).build()
+    }
+
+    @Suppress("unused")
     fun oppgaver(first: Int, after: String?, env: DataFetchingEnvironment): DataFetcherResult<Oppgaver> {
         val cursor = try {
             LocalDateTime.parse(after)
