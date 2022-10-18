@@ -37,6 +37,7 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
@@ -127,6 +128,7 @@ internal class HendelseMediator(
             RevurderingAvvist.River(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
+            VedtakFattet.River(it, this)
         }
     }
 

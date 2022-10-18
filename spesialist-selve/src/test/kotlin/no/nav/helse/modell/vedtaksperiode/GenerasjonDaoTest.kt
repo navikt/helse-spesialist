@@ -2,7 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
 import java.util.UUID
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
@@ -24,6 +24,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertEquals(1L, spørring1)
         assertEquals(spørring1, spørring2)
     }
+
     @Test
     fun `får ny generasjon når forrige er låst`() {
         val vedtaksperiodeId = UUID.randomUUID()

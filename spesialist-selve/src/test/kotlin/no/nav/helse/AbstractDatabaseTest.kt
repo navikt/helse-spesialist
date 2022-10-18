@@ -61,7 +61,7 @@ private fun createTruncateFunction(dataSource: DataSource) {
             DECLARE
             truncate_statement text;
             BEGIN
-                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' CASCADE'
+                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' RESTART IDENTITY CASCADE'
                     INTO truncate_statement
                 FROM pg_tables
                 WHERE schemaname='public'

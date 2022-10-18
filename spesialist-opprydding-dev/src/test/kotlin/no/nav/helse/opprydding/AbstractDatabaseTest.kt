@@ -114,7 +114,8 @@ internal abstract class AbstractDatabaseTest {
                 "arbeidsgiver_bransjer",
                 "arbeidsgiver_navn",
                 "kommentarer",
-                "selve_varsel"
+                "selve_varsel",
+                "selve_vedtaksperiode_generasjon"
             )
         )
         tabeller.forEach {
