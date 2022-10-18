@@ -34,4 +34,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertEquals(1L, spørring1)
         assertEquals(2L, spørring2)
     }
+
+    @Test
+    fun `sjekker at lås returnerer iden til raden`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val spørring1 = generasjonDao.finnUlåstEllerOpprett(vedtaksperiodeId)
+        val låstGenerasjon = generasjonDao.lås(vedtaksperiodeId)
+
+        assertEquals(1L, spørring1)
+        assertEquals(spørring1, låstGenerasjon)
+    }
 }

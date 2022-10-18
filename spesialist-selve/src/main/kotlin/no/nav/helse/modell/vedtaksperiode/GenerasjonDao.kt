@@ -16,13 +16,13 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun lås(vedtaksperiodeId: UUID) {
+    internal fun lås(vedtaksperiodeId: UUID): Long? {
         @Language("PostgreSQL")
         val query =
             "UPDATE selve_vedtaksperiode_generasjon SET låst = true, låst_tidspunkt = now() WHERE vedtaksperiode_id = ? AND låst = false;"
 
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).asUpdate)
+        return sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).asUpdateAndReturnGeneratedKey)
         }
     }
 

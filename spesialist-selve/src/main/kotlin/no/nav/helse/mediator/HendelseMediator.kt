@@ -148,7 +148,7 @@ internal class HendelseMediator(
             løsninger(context, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
                 ?: log.info(
                     "mottok løsning med behovId=$behovId som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, " +
-                        "eller fordi hendelsen $hendelseId er ukjent"
+                            "eller fordi hendelsen $hendelseId er ukjent"
                 )
         }
     }
@@ -159,7 +159,8 @@ internal class HendelseMediator(
         val fødselsnummer = hendelseDao.finnFødselsnummer(hendelseId)
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenningDTO.oppgavereferanse)
         val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(godkjenningDTO.oppgavereferanse)
-        val reserverPersonOid = if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler else oid
+        val reserverPersonOid =
+            if (erBeslutteroppgave && tidligereSaksbehandler != null) tidligereSaksbehandler else oid
         val godkjenningMessage = JsonMessage.newMessage("saksbehandler_løsning", mutableMapOf(
             "@forårsaket_av" to mapOf(
                 "event_name" to "behov",
@@ -175,9 +176,9 @@ internal class HendelseMediator(
             "saksbehandlerepost" to epost,
             "godkjenttidspunkt" to now()
         ).apply {
-                godkjenningDTO.årsak?.let { put("årsak", it) }
-                godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
-                godkjenningDTO.kommentar?.let { put("kommentar", it) }
+            godkjenningDTO.årsak?.let { put("årsak", it) }
+            godkjenningDTO.begrunnelser?.let { put("begrunnelser", it) }
+            godkjenningDTO.kommentar?.let { put("kommentar", it) }
         }).also {
             sikkerLogg.info("Publiserer saksbehandler-løsning: ${it.toJson()}")
         }
@@ -197,7 +198,12 @@ internal class HendelseMediator(
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
         if (erBeslutteroppgave && godkjenningDTO.godkjent) {
-            internOppgaveMediator.lagrePeriodehistorikk(godkjenningDTO.oppgavereferanse, periodehistorikkDao, oid, PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT)
+            internOppgaveMediator.lagrePeriodehistorikk(
+                godkjenningDTO.oppgavereferanse,
+                periodehistorikkDao,
+                oid,
+                PeriodehistorikkType.TOTRINNSVURDERING_ATTESTERT
+            )
         }
     }
 
@@ -243,7 +249,8 @@ internal class HendelseMediator(
         forårsaketAvId: UUID,
         context: MessageContext
     ) {
-        val hendelse = hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, forårsaketAvId, message.toJson())
+        val hendelse =
+            hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, forårsaketAvId, message.toJson())
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
             sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
@@ -361,19 +368,21 @@ internal class HendelseMediator(
         json: String,
         context: MessageContext
     ) {
-        utfør(fødselsnummer, hendelsefabrikk.overstyringTidslinje(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            oid = oid,
-            navn = navn,
-            ident = ident,
-            epost = epost,
-            orgnummer = orgnummer,
-            begrunnelse = begrunnelse,
-            overstyrteDager = overstyrteDager,
-            opprettet = opprettet,
-            json = json
-        ), context)
+        utfør(
+            fødselsnummer, hendelsefabrikk.overstyringTidslinje(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+                epost = epost,
+                orgnummer = orgnummer,
+                begrunnelse = begrunnelse,
+                overstyrteDager = overstyrteDager,
+                opprettet = opprettet,
+                json = json
+            ), context
+        )
     }
 
     fun overstyringInntekt(
@@ -420,7 +429,7 @@ internal class HendelseMediator(
         navn: String,
         ident: String,
         epost: String,
-        overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
@@ -441,7 +450,6 @@ internal class HendelseMediator(
             ), context
         )
     }
-
 
 
     fun utbetalingAnnullert(
@@ -491,8 +499,12 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.gosysOppgaveEndret(message.toJson()), context)
     }
 
-    fun revurderingAvvist(fødselsnummer: String, error: List<String>, json:String, context: MessageContext) {
+    fun revurderingAvvist(fødselsnummer: String, error: List<String>, json: String, context: MessageContext) {
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
+    }
+
+    fun vedtakFattet(fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
+        utfør(hendelsefabrikk.vedtakFattet(fødselsnummer, vedtaksperiodeId, json), context)
     }
 
     fun nyeVarsler(varsler: List<NyeVarsler.Varsel>) {
@@ -547,7 +559,8 @@ internal class HendelseMediator(
             "fødselsnummer" to annulleringDto.fødselsnummer,
             "organisasjonsnummer" to annulleringDto.organisasjonsnummer,
             "aktørId" to annulleringDto.aktørId,
-            "saksbehandler" to saksbehandler.json().toMutableMap().apply { put("ident", annulleringDto.saksbehandlerIdent) },
+            "saksbehandler" to saksbehandler.json().toMutableMap()
+                .apply { put("ident", annulleringDto.saksbehandlerIdent) },
             "fagsystemId" to annulleringDto.fagsystemId,
             "begrunnelser" to annulleringDto.begrunnelser,
             "gjelderSisteSkjæringstidspunkt" to annulleringDto.gjelderSisteSkjæringstidspunkt
@@ -567,9 +580,11 @@ internal class HendelseMediator(
     fun håndter(oppdaterPersonsnapshotDto: OppdaterPersonsnapshotDto) {
         rapidsConnection.publish(
             oppdaterPersonsnapshotDto.fødselsnummer,
-            JsonMessage.newMessage("oppdater_personsnapshot", mapOf(
-                "fødselsnummer" to oppdaterPersonsnapshotDto.fødselsnummer
-            )).toJson()
+            JsonMessage.newMessage(
+                "oppdater_personsnapshot", mapOf(
+                    "fødselsnummer" to oppdaterPersonsnapshotDto.fødselsnummer
+                )
+            ).toJson()
         )
         sikkerLogg.info("Publiserte event for å be om siste versjon av person: ${oppdaterPersonsnapshotDto.fødselsnummer}")
     }
@@ -675,7 +690,7 @@ internal class HendelseMediator(
             log.info("fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}")
             sikkerLogg.info(
                 "fortsetter utførelse av kommandokontekst pga. behov_id=${hendelse.id} med context_id=$contextId for hendelse_id=${hendelse.id}.\n" +
-                    "Innkommende melding:\n\t$message"
+                        "Innkommende melding:\n\t$message"
             )
             mediator.utfør(hendelse, commandContext, contextId, messageContex)
         }

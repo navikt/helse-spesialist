@@ -19,6 +19,7 @@ import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
@@ -49,6 +50,7 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -83,6 +85,7 @@ internal class Hendelsefabrikk(
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
+    private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val overstyringMediator: OverstyringMediator,
@@ -609,5 +612,8 @@ internal class Hendelsefabrikk(
 
     fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist {
         return RevurderingAvvist(UUID.randomUUID(), fødselsnummer, errors, json, opptegnelseDao)
+    }
+    fun vedtakFattet(fødselsnummer: String, vedtaksperiodeId: UUID, json:String): VedtakFattet {
+        return VedtakFattet(UUID.randomUUID(), fødselsnummer, vedtaksperiodeId, json, generasjonDao)
     }
 }
