@@ -55,7 +55,8 @@ internal class VedtakFattet(
 
             val fødselsnummer = packet["fødselsnummer"].asText()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-            mediator.vedtakFattet(fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
+            // Spesialist likte ikke
+            // mediator.vedtakFattet(fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
         }
     }
 
