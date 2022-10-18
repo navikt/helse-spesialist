@@ -38,6 +38,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -167,6 +168,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val feilendeMeldingerDao = FeilendeMeldingerDao(dataSource)
     internal val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     internal val vergemålDao = VergemålDao(dataSource)
+    internal val generasjonDao = GenerasjonDao(dataSource)
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
