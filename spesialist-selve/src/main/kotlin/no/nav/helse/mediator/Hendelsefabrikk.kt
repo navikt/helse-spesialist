@@ -426,6 +426,7 @@ internal class Hendelsefabrikk(
             snapshotClient = snapshotClient,
             personDao = personDao,
             overstyringDao = overstyringDao,
+            generasjonDao = generasjonDao
         )
     }
 

@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -10,8 +11,10 @@ import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
+import no.nav.helse.modell.kommando.VedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -32,6 +35,7 @@ internal class VedtaksperiodeEndret(
     snapshotClient: SnapshotClient,
     personDao: PersonDao,
     overstyringDao: OverstyringDao,
+    generasjonDao: GenerasjonDao,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSpeilSnapshotCommand(),
@@ -49,7 +53,15 @@ internal class VedtaksperiodeEndret(
             forårsaketAvId = forårsaketAvId,
             overstyringDao = overstyringDao,
         )
-    )
+    ).let {
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
+            it + VedtaksperiodeGenerasjonCommand(
+                vedtaksperiodeId = vedtaksperiodeId,
+                vedtaksperiodeEndretHendelseId = forårsaketAvId,
+                generasjonDao = generasjonDao
+            )
+        } else it
+    }
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = vedtaksperiodeId
@@ -89,7 +101,14 @@ internal class VedtaksperiodeEndret(
                 keyValue("eventId", id),
                 keyValue("forårsaketAvId", forårsaketAvId),
             )
-            mediator.vedtaksperiodeEndret(packet, id, vedtaksperiodeId, packet["fødselsnummer"].asText(), forårsaketAvId, context)
+            mediator.vedtaksperiodeEndret(
+                packet,
+                id,
+                vedtaksperiodeId,
+                packet["fødselsnummer"].asText(),
+                forårsaketAvId,
+                context
+            )
         }
     }
 }

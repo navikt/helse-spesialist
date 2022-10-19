@@ -54,12 +54,12 @@ internal class VedtakFattet(
             val fødselsnummer = packet["fødselsnummer"].asText()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val id = UUID.fromString(packet["@id"].asText())
-             mediator.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
+            mediator.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
         }
     }
 
     override fun execute(context: CommandContext): Boolean {
-        generasjonDao.lås(vedtaksperiodeId)?.also {
+        generasjonDao.låsGenerasjon(vedtaksperiodeId, id)?.also {
             sikkerLogg.info(
                 "Låser generasjon {} for {}",
                 keyValue("generasjonId", it),

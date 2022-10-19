@@ -58,6 +58,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -127,6 +128,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val notatDao = NotatDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
+    protected val generasjonDao = GenerasjonDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
