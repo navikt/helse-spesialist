@@ -62,6 +62,7 @@ INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type) VALUES (${seque
 INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id, siste_sekvensnummer) VALUES ('${saksbehandler_oid}', ${sequence_number}, 1);
 
 INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt) VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
+INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident) VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}');
 
 INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref, hendelse_ref, saksbehandler_ref) VALUES (${sequence_number}, 'BEGRUNNELSE', now(), ${sequence_number}, ${sequence_number}, '${hendelse_id}', '${saksbehandler_oid}');
 INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad) VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
