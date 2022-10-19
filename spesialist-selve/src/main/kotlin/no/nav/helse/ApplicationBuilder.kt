@@ -39,13 +39,9 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.mediator.api.annulleringApi
-import no.nav.helse.spesialist.api.graphql.graphQLApi
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
-import no.nav.helse.mediator.api.oppgaveApi
 import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
@@ -77,6 +73,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.behandlingsstatistikk.behandlingsstatistikkApi
 import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
+import no.nav.helse.spesialist.api.graphql.graphQLApi
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -85,10 +82,12 @@ import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.person.PersonApiDao
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotApiDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
@@ -275,13 +274,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             )
             routing {
                 authenticate("oidc") {
-                    oppgaveApi(
-                        oppgaveApiDao = oppgaveApiDao,
-                        riskSupersaksbehandlergruppe = env.riskGruppeId(),
-                        kode7Saksbehandlergruppe = env.kode7GruppeId(),
-                        beslutterSaksbehandlergruppe = env.beslutterGruppeId(),
-                        skjermedePersonerSaksbehandlergruppe = env.skjermedePersonerGruppeId(),
-                    )
                     personApi(
                         hendelseMediator = hendelseMediator,
                         oppgaveMediator = oppgaveMediator
@@ -382,11 +374,6 @@ fun Application.installErrorHandling() {
 internal fun PipelineContext<Unit, ApplicationCall>.gruppemedlemskap(): List<UUID> {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
-}
-
-internal fun PipelineContext<Unit, ApplicationCall>.getNAVident(): String {
-    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-    return accessToken.payload.getClaim("NAVident").asString()
 }
 
 private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue("KODE7_SAKSBEHANDLER_GROUP"))
