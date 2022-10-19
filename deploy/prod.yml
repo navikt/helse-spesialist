@@ -90,7 +90,7 @@ spec:
     - name: SPLEIS_CLIENT_ID
       value: api://prod-gcp.tbd.spleis-api/.default
     - name: STIKKPROEVER_DIVISOR #Kan settes til 1 for å slå av automatisering
-      value: "100"
+      value: "300"
     - name: GRAPHQL_ENABLED
       value: "true"
     - name: BEHOLD_FORELENGELSER_TIL_UTS
