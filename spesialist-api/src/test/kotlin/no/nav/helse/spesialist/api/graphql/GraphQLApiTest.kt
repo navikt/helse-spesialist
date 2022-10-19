@@ -19,16 +19,6 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `henter fødselsnummer`() {
-        opprettVedtaksperiode()
-
-        val query = queryize("""{ person(fnr:"$FØDSELSNUMMER") { fodselsnummer } }""")
-        val body = runQuery(query)
-
-        assertEquals(FØDSELSNUMMER, body["data"]["person"]["fodselsnummer"].asText())
-    }
-
-    @Test
     fun `henter sykepengegrunnlagsgrense`() {
         opprettVedtaksperiode()
 

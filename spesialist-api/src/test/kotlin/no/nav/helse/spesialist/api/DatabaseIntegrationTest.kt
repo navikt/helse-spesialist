@@ -67,15 +67,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
     protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
 
-    protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true) {
-        every { erEgenAnsatt(FØDSELSNUMMER) } returns false
-    }
-
-    protected val snapshotClient = mockk<SnapshotClient>(relaxed = true) {
-        every { hentSnapshot(FØDSELSNUMMER) } returns object : GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(snapshot())
-        }
-    }
+    protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
+    protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
 
@@ -306,7 +299,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0) = GraphQLPerson(
-        aktorId = "en-aktørid",
+        aktorId = AKTØRID,
         arbeidsgivere = emptyList(),
         dodsdato = null,
         fodselsnummer = fødselsnummer,
