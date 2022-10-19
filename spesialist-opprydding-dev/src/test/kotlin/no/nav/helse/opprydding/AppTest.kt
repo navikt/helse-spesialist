@@ -21,20 +21,19 @@ internal class AppTest: AbstractDatabaseTest() {
     @Test
     fun `slettemelding medfører at person slettes fra databasen`() {
         opprettPerson("123")
-        assertTabellinnhold { it >= 1 }
+        assertTabellinnhold { (it >= 1) to ">= 1" }
         testRapid.sendTestMessage(slettemelding("123"))
-        assertTabellinnhold { it == 0 }
+        assertTabellinnhold { (it == 0) to "0" }
     }
 
     @Test
     fun `sletter kun aktuelt fnr`() {
         opprettPerson("123")
         opprettPerson("1234", sequenceNumber = 2)
-        assertTabellinnhold { it >= 2 }
+        assertTabellinnhold { (it >= 2) to ">= 2" }
         testRapid.sendTestMessage(slettemelding("123"))
-        assertTabellinnhold { it == 1 }
+        assertTabellinnhold { (it == 1) to "1" }
     }
-
 
     @Language("JSON")
     private fun slettemelding(fødselsnummer: String) = """

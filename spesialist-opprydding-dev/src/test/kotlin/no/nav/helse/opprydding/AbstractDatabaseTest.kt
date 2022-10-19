@@ -49,7 +49,7 @@ internal abstract class AbstractDatabaseTest {
             DECLARE
             truncate_statement text;
             BEGIN
-                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' CASCADE'
+                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' RESTART IDENTITY CASCADE'
                     INTO truncate_statement
                 FROM pg_tables
                 WHERE schemaname='public'
@@ -101,7 +101,7 @@ internal abstract class AbstractDatabaseTest {
             .migrate()
     }
 
-    protected fun assertTabellinnhold(booleanExpressionBlock: (actualTabellCount: Int) -> Boolean) {
+    protected fun assertTabellinnhold(booleanExpressionBlock: (actualTabellCount: Int) -> Pair<Boolean, String>) {
         val tabeller = finnTabeller().toMutableList()
         tabeller.removeAll(
             listOf(
@@ -114,16 +114,18 @@ internal abstract class AbstractDatabaseTest {
                 "arbeidsgiver_bransjer",
                 "arbeidsgiver_navn",
                 "kommentarer",
-                "selve_varsel",
-                "selve_vedtaksperiode_generasjon"
+                "selve_varsel"
             )
         )
         tabeller.forEach {
             val tabellCount = finnTabellCount(it)
-            if (it in listOf("oppdrag", "utbetalingslinje"))
-                assertTrue(booleanExpressionBlock(tabellCount / 2)) { "$it has $tabellCount rows" }
-            else
-                assertTrue(booleanExpressionBlock(tabellCount)) { "$it has $tabellCount rows" }
+            if (it in listOf("oppdrag", "utbetalingslinje")) {
+                val (expression1, explanation1) = booleanExpressionBlock(tabellCount / 2)
+                assertTrue((expression1)) { "$it has $tabellCount rows, expected it to be $explanation1" }
+            } else {
+                val (expression2, explanation2) = booleanExpressionBlock(tabellCount)
+                assertTrue(expression2) { "$it has $tabellCount rows, expected it to be $explanation2" }
+            }
         }
     }
 

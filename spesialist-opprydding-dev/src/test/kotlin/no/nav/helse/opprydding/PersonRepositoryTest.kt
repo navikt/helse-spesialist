@@ -10,9 +10,9 @@ internal class PersonRepositoryTest: AbstractDatabaseTest() {
     @Test
     fun `sletting av person`() {
         opprettPerson(FØDSELSNUMMER)
-        assertTabellinnhold { it >= 1 }
+        assertTabellinnhold { (it >= 1) to ">= 1" }
         personRepository.slett(FØDSELSNUMMER)
-        assertTabellinnhold { it == 0 }
+        assertTabellinnhold { (it == 0) to "0" }
     }
 
     @Test
