@@ -9,8 +9,8 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `finner flere notater tilhørende samme vedtaksperiode`() {
         //given
-        val saksbehandler_oid = saksbehandler()
-        nyVedtaksperiode()
+        val saksbehandler_oid = opprettSaksbehandler()
+        opprettVedtaksperiode()
         val vedtaksperiodeId = PERIODE.first
         val tekster = listOf("Banan eple kake", "Eple kake banan")
 
@@ -33,8 +33,8 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `notater defaulter til type Generelt`() {
-        nyVedtaksperiode()
-        val oid = saksbehandler()
+        opprettVedtaksperiode()
+        val oid = opprettSaksbehandler()
         val vedtaksperiodeId = PERIODE.first
 
         notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
@@ -46,8 +46,8 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `lagre notat`() {
-        nyVedtaksperiode()
-        val oid = saksbehandler()
+        opprettVedtaksperiode()
+        val oid = opprettSaksbehandler()
         val vedtaksperiodeId = PERIODE.first
 
         val rowsAffected = notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)
@@ -57,8 +57,8 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `lagre påvent-notat`() {
-        nyVedtaksperiode()
-        val oid = saksbehandler()
+        opprettVedtaksperiode()
+        val oid = opprettSaksbehandler()
         val vedtaksperiodeId = PERIODE.first
 
         notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid, NotatType.PaaVent)
@@ -69,8 +69,8 @@ internal class NotatDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `feilregistrer notat`() {
-        nyVedtaksperiode()
-        val oid = saksbehandler()
+        opprettVedtaksperiode()
+        val oid = opprettSaksbehandler()
         val vedtaksperiodeId = PERIODE.first
 
         notatDao.opprettNotat(vedtaksperiodeId, "tekst", oid)

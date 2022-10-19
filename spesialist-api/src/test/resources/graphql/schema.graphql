@@ -1,0 +1,809 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+interface Hendelse {
+    id: String!
+    type: Hendelsetype!
+}
+
+interface Overstyring {
+    begrunnelse: String!
+    hendelseId: String!
+    saksbehandler: Saksbehandler!
+    timestamp: String!
+}
+
+interface Periode {
+    erForkastet: Boolean!
+    fom: String!
+    inntektstype: Inntektstype!
+    opprettet: String!
+    periodetilstand: Periodetilstand!
+    periodetype: Periodetype!
+    skjaeringstidspunkt: String!
+    tidslinje: [Dag!]!
+    tom: String!
+    vedtaksperiodeId: String!
+}
+
+interface Spennoppdrag {
+    fagsystemId: String!
+    linjer: [Utbetalingslinje!]!
+}
+
+interface Vilkarsgrunnlag {
+    inntekter: [Arbeidsgiverinntekt!]!
+    omregnetArsinntekt: Float!
+    sammenligningsgrunnlag: Float
+    skjaeringstidspunkt: String!
+    sykepengegrunnlag: Float!
+    vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
+}
+
+type Aktivitet {
+    alvorlighetsgrad: String!
+    melding: String!
+    tidsstempel: String!
+    vedtaksperiodeId: String!
+}
+
+type Alder {
+    alderSisteSykedag: Int!
+    oppfylt: Boolean!
+}
+
+type Annullering {
+    saksbehandler: String!
+    tidspunkt: String!
+}
+
+type Antall {
+    automatisk: Int!
+    manuelt: Int!
+    tilgjengelig: Int!
+}
+
+type Arbeidsforhold {
+    sluttdato: String
+    startdato: String!
+    stillingsprosent: Int!
+    stillingstittel: String!
+}
+
+type Arbeidsforholdoverstyring implements Overstyring {
+    begrunnelse: String!
+    deaktivert: Boolean!
+    forklaring: String!
+    hendelseId: String!
+    saksbehandler: Saksbehandler!
+    skjaeringstidspunkt: String!
+    timestamp: String!
+}
+
+type Arbeidsgiver {
+    arbeidsforhold: [Arbeidsforhold!]!
+    bransjer: [String!]!
+    generasjoner: [Generasjon!]!
+    ghostPerioder: [GhostPeriode!]!
+    navn: String!
+    organisasjonsnummer: String!
+    overstyringer: [Overstyring!]!
+}
+
+type Arbeidsgiverinntekt {
+    arbeidsgiver: String!
+    deaktivert: Boolean
+    omregnetArsinntekt: OmregnetArsinntekt
+    sammenligningsgrunnlag: Sammenligningsgrunnlag
+}
+
+type Arbeidsgiveroppdrag implements Spennoppdrag {
+    fagsystemId: String!
+    linjer: [Utbetalingslinje!]!
+    organisasjonsnummer: String!
+}
+
+type Behandlingsstatistikk {
+    antallAnnulleringer: Int!
+    beslutter: Antall!
+    delvisRefusjon: Antall!
+    enArbeidsgiver: Antall!
+    faresignaler: Antall!
+    flereArbeidsgivere: Antall!
+    forlengelseIt: Antall!
+    forlengelser: Antall!
+    forstegangsbehandling: Antall!
+    fortroligAdresse: Antall!
+    revurdering: Antall!
+    stikkprover: Antall!
+    utbetalingTilArbeidsgiver: Antall!
+    utbetalingTilSykmeldt: Antall!
+}
+
+type BeregnetPeriode implements Periode {
+    aktivitetslogg: [Aktivitet!]!
+    beregningId: String!
+    beslutterSaksbehandlerOid: String
+    erBeslutterOppgave: Boolean! @deprecated(reason: "erBeslutterOppgave bør hentes fra periodens oppgave")
+    erForkastet: Boolean!
+    erReturOppgave: Boolean! @deprecated(reason: "erReturOppgave bør hentes fra periodens oppgave")
+    fom: String!
+    forbrukteSykedager: Int
+    gjenstaendeSykedager: Int
+    hendelser: [Hendelse!]!
+    id: String!
+    inntektstype: Inntektstype!
+    maksdato: String!
+    notater: [Notat!]!
+    oppgave: OppgaveForPeriodevisning
+    oppgavereferanse: String @deprecated(reason: "Oppgavereferanse bør hentes fra periodens oppgave")
+    opprettet: String!
+    periodehistorikk: [PeriodeHistorikkElement!]!
+    periodetilstand: Periodetilstand!
+    periodetype: Periodetype!
+    periodevilkar: Periodevilkar!
+    refusjon: Refusjon
+    risikovurdering: Risikovurdering
+    skjaeringstidspunkt: String!
+    tidligereSaksbehandlerOid: String @deprecated(reason: "tidligereSaksbehandlerOid bør hentes fra periodens oppgave")
+    tidslinje: [Dag!]!
+    tom: String!
+    trengerTotrinnsvurdering: Boolean! @deprecated(reason: "trengerTotrinnsvurdering bør hentes fra periodens oppgave")
+    utbetaling: Utbetaling!
+    varsler: [String!]!
+    vedtaksperiodeId: String!
+    vilkarsgrunnlaghistorikkId: String!
+}
+
+type Boenhet {
+    id: String!
+    navn: String!
+}
+
+type Dag {
+    begrunnelser: [Begrunnelse!]
+    dato: String!
+    grad: Float
+    kilde: Kilde!
+    sykdomsdagtype: Sykdomsdagtype!
+    utbetalingsdagtype: Utbetalingsdagtype!
+    utbetalingsinfo: Utbetalingsinfo
+}
+
+type Dagoverstyring implements Overstyring {
+    begrunnelse: String!
+    dager: [OverstyrtDag!]!
+    hendelseId: String!
+    saksbehandler: Saksbehandler!
+    timestamp: String!
+}
+
+type Endring {
+    belop: Float!
+    dato: String!
+}
+
+type Enhet {
+    id: String!
+    navn: String!
+}
+
+type Faresignal {
+    beskrivelse: String!
+    kategori: [String!]!
+}
+
+type FerdigstiltOppgave {
+    aktorId: String!
+    antallVarsler: Int!
+    bosted: String!
+    ferdigstiltAv: String
+    ferdigstiltTidspunkt: String!
+    id: String!
+    inntektstype: Inntektstype!
+    periodetype: Periodetype!
+    personnavn: Personnavn!
+    type: Oppgavetype!
+}
+
+type Generasjon {
+    id: String!
+    perioder: [Periode!]!
+}
+
+type GhostPeriode {
+    deaktivert: Boolean!
+    fom: String!
+    id: String!
+    organisasjonsnummer: String!
+    skjaeringstidspunkt: String!
+    tom: String!
+    vilkarsgrunnlaghistorikkId: String
+}
+
+type Infotrygdutbetaling {
+    dagsats: Float!
+    fom: String!
+    grad: String!
+    organisasjonsnummer: String!
+    tom: String!
+    typetekst: String!
+}
+
+type InntektFraAOrdningen {
+    maned: String!
+    sum: Float!
+}
+
+type Inntektoverstyring implements Overstyring {
+    begrunnelse: String!
+    hendelseId: String!
+    inntekt: OverstyrtInntekt!
+    saksbehandler: Saksbehandler!
+    timestamp: String!
+}
+
+type Inntektsmelding implements Hendelse {
+    beregnetInntekt: Float!
+    id: String!
+    mottattDato: String!
+    type: Hendelsetype!
+}
+
+type Kilde {
+    id: String!
+    type: Kildetype!
+}
+
+type Kommentar {
+    feilregistrert_tidspunkt: String
+    id: Int!
+    opprettet: String!
+    saksbehandlerident: String!
+    tekst: String!
+}
+
+type Mutation {
+    feilregistrerKommentar(id: Int!): Boolean!
+    feilregistrerNotat(id: Int!): Boolean!
+    leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
+}
+
+type Notat {
+    feilregistrert: Boolean!
+    feilregistrert_tidspunkt: String
+    id: Int!
+    kommentarer: [Kommentar!]!
+    opprettet: String!
+    saksbehandlerEpost: String!
+    saksbehandlerIdent: String!
+    saksbehandlerNavn: String!
+    saksbehandlerOid: String!
+    tekst: String!
+    type: NotatType!
+    vedtaksperiodeId: String!
+}
+
+type OmregnetArsinntekt {
+    belop: Float!
+    inntektFraAOrdningen: [InntektFraAOrdningen!]
+    kilde: Inntektskilde!
+    manedsbelop: Float!
+}
+
+type Oppdrag {
+    annullering: Annullering
+    arbeidsgiveroppdrag: Arbeidsgiveroppdrag
+    personoppdrag: Personoppdrag
+    status: Oppdragsstatus!
+    totalbelop: Int
+    type: String!
+}
+
+type OppgaveForOversiktsvisning {
+    aktorId: String!
+    antallVarsler: Int!
+    boenhet: Boenhet!
+    erBeslutter: Boolean!
+    erRetur: Boolean!
+    flereArbeidsgivere: Boolean!
+    fodselsnummer: String!
+    id: String!
+    opprettet: String!
+    periodetype: Periodetype
+    personinfo: Personinfo!
+    sistSendt: String
+    tidligereSaksbehandler: String
+    tildeling: Tildeling
+    trengerTotrinnsvurdering: Boolean!
+    type: Oppgavetype!
+    vedtaksperiodeId: String!
+}
+
+type OppgaveForPeriodevisning {
+    erBeslutter: Boolean!
+    erRetur: Boolean!
+    id: String!
+    tidligereSaksbehandler: String
+    trengerTotrinnsvurdering: Boolean!
+}
+
+type Oppgaver {
+    oppgaver: [OppgaveForOversiktsvisning!]!
+    paginering: Paginering!
+}
+
+type OverstyrtDag {
+    dato: String!
+    fraGrad: Int
+    fraType: Dagtype
+    grad: Int
+    type: Dagtype!
+}
+
+type OverstyrtInntekt {
+    forklaring: String!
+    fraManedligInntekt: Float
+    manedligInntekt: Float!
+    skjaeringstidspunkt: String!
+}
+
+type Paginering {
+    antallSider: Int!
+    elementerPerSide: Int!
+    peker: String
+    side: Int!
+}
+
+type PeriodeHistorikkElement {
+    notat_id: Int
+    saksbehandler_ident: String
+    timestamp: String!
+    type: PeriodehistorikkType!
+}
+
+type Periodevilkar {
+    alder: Alder!
+    soknadsfrist: Soknadsfrist
+    sykepengedager: Sykepengedager!
+}
+
+type Person {
+    aktorId: String!
+    arbeidsgivere: [Arbeidsgiver!]!
+    dodsdato: String
+    enhet: Enhet!
+    fodselsnummer: String!
+    infotrygdutbetalinger: [Infotrygdutbetaling!]
+    personinfo: Personinfo!
+    tildeling: Tildeling
+    versjon: Int!
+    vilkarsgrunnlaghistorikk: [Vilkarsgrunnlaghistorikk!]!
+}
+
+type Personinfo {
+    adressebeskyttelse: Adressebeskyttelse!
+    etternavn: String!
+    fodselsdato: String
+    fornavn: String!
+    kjonn: Kjonn!
+    mellomnavn: String
+    reservasjon: Reservasjon
+}
+
+type Personnavn {
+    etternavn: String!
+    fornavn: String!
+    mellomnavn: String
+}
+
+type Personoppdrag implements Spennoppdrag {
+    fagsystemId: String!
+    fodselsnummer: String!
+    linjer: [Utbetalingslinje!]!
+}
+
+type Query {
+    alleOppgaver: [OppgaveForOversiktsvisning!]!
+    behandledeOppgaver(behandletAvIdent: String!, behandletAvOid: String!, fom: String): [FerdigstiltOppgave!]!
+    behandlingsstatistikk: Behandlingsstatistikk!
+    oppdrag(fnr: String!): [Oppdrag!]!
+    oppgaver(after: String, first: Int!): Oppgaver!
+    person(aktorId: String, fnr: String): Person
+}
+
+type Refusjon {
+    arbeidsgiverperioder: [Refusjonsperiode!]!
+    belop: Float
+    endringer: [Endring!]!
+    forsteFravaersdag: String
+    sisteRefusjonsdag: String
+}
+
+type Refusjonsperiode {
+    fom: String!
+    tom: String!
+}
+
+type Reservasjon {
+    kanVarsles: Boolean!
+    reservert: Boolean!
+}
+
+type Risikovurdering {
+    funn: [Faresignal!]
+    kontrollertOk: [Faresignal!]!
+}
+
+type Saksbehandler {
+    ident: String
+    navn: String!
+}
+
+type Sammenligningsgrunnlag {
+    belop: Float!
+    inntektFraAOrdningen: [InntektFraAOrdningen!]!
+}
+
+type Simulering {
+    fagsystemId: String!
+    perioder: [Simuleringsperiode!]
+    tidsstempel: String!
+    totalbelop: Int
+    utbetalingslinjer: [Simuleringslinje!]!
+}
+
+type Simuleringsdetaljer {
+    antallSats: Int!
+    belop: Int!
+    fom: String!
+    klassekode: String!
+    klassekodebeskrivelse: String!
+    konto: String!
+    refunderesOrgNr: String!
+    sats: Float!
+    tilbakeforing: Boolean!
+    tom: String!
+    typeSats: String!
+    uforegrad: Int!
+    utbetalingstype: String!
+}
+
+type Simuleringslinje {
+    dagsats: Int!
+    fom: String!
+    grad: Int!
+    tom: String!
+}
+
+type Simuleringsperiode {
+    fom: String!
+    tom: String!
+    utbetalinger: [Simuleringsutbetaling!]!
+}
+
+type Simuleringsutbetaling {
+    detaljer: [Simuleringsdetaljer!]!
+    feilkonto: Boolean!
+    forfall: String!
+    mottakerId: String!
+    mottakerNavn: String!
+}
+
+type SoknadArbeidsgiver implements Hendelse {
+    fom: String!
+    id: String!
+    rapportertDato: String!
+    sendtArbeidsgiver: String!
+    tom: String!
+    type: Hendelsetype!
+}
+
+type SoknadNav implements Hendelse {
+    fom: String!
+    id: String!
+    rapportertDato: String!
+    sendtNav: String!
+    tom: String!
+    type: Hendelsetype!
+}
+
+type Soknadsfrist {
+    oppfylt: Boolean!
+    sendtNav: String!
+    soknadFom: String!
+    soknadTom: String!
+}
+
+type Sykepengedager {
+    forbrukteSykedager: Int
+    gjenstaendeSykedager: Int
+    maksdato: String!
+    oppfylt: Boolean!
+    skjaeringstidspunkt: String!
+}
+
+type Sykepengegrunnlagsgrense {
+    grense: Int!
+    grunnbelop: Int!
+    virkningstidspunkt: String!
+}
+
+type Sykmelding implements Hendelse {
+    fom: String!
+    id: String!
+    rapportertDato: String!
+    tom: String!
+    type: Hendelsetype!
+}
+
+type Tildeling {
+    epost: String!
+    navn: String!
+    oid: String!
+    reservert: Boolean!
+}
+
+type UberegnetPeriode implements Periode {
+    erForkastet: Boolean!
+    fom: String!
+    id: String!
+    inntektstype: Inntektstype!
+    opprettet: String!
+    periodetilstand: Periodetilstand!
+    periodetype: Periodetype!
+    skjaeringstidspunkt: String!
+    tidslinje: [Dag!]!
+    tom: String!
+    vedtaksperiodeId: String!
+}
+
+type Utbetaling {
+    arbeidsgiverFagsystemId: String!
+    arbeidsgiverNettoBelop: Int!
+    arbeidsgiversimulering: Simulering
+    id: String!
+    personFagsystemId: String!
+    personNettoBelop: Int!
+    personsimulering: Simulering
+    status: Utbetalingstatus!
+    type: Utbetalingtype!
+    vurdering: Vurdering
+}
+
+type Utbetalingsinfo {
+    arbeidsgiverbelop: Int
+    inntekt: Int
+    personbelop: Int
+    refusjonsbelop: Int
+    totalGrad: Float
+    utbetaling: Int
+}
+
+type Utbetalingslinje {
+    fom: String!
+    tom: String!
+    totalbelop: Int!
+}
+
+type VilkarsgrunnlagInfotrygd implements Vilkarsgrunnlag {
+    inntekter: [Arbeidsgiverinntekt!]!
+    omregnetArsinntekt: Float!
+    sammenligningsgrunnlag: Float
+    skjaeringstidspunkt: String!
+    sykepengegrunnlag: Float!
+    vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
+}
+
+type VilkarsgrunnlagSpleis implements Vilkarsgrunnlag {
+    antallOpptjeningsdagerErMinst: Int!
+    avviksprosent: Float
+    grunnbelop: Int!
+    inntekter: [Arbeidsgiverinntekt!]!
+    omregnetArsinntekt: Float!
+    oppfyllerKravOmMedlemskap: Boolean
+    oppfyllerKravOmMinstelonn: Boolean!
+    oppfyllerKravOmOpptjening: Boolean!
+    opptjeningFra: String!
+    sammenligningsgrunnlag: Float
+    skjaeringstidspunkt: String!
+    sykepengegrunnlag: Float!
+    sykepengegrunnlagsgrense: Sykepengegrunnlagsgrense!
+    vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
+}
+
+type Vilkarsgrunnlaghistorikk {
+    grunnlag: [Vilkarsgrunnlag!]!
+    id: String!
+}
+
+type Vurdering {
+    automatisk: Boolean!
+    godkjent: Boolean!
+    ident: String!
+    tidsstempel: String!
+}
+
+enum Adressebeskyttelse {
+    Fortrolig
+    StrengtFortrolig
+    StrengtFortroligUtland
+    Ugradert
+    Ukjent
+}
+
+enum Begrunnelse {
+    EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
+    ETTER_DODSDATO
+    MANGLER_MEDLEMSKAP
+    MANGLER_OPPTJENING
+    MINIMUM_INNTEKT
+    MINIMUM_INNTEKT_OVER_67
+    MINIMUM_SYKDOMSGRAD
+    OVER_70
+    SYKEPENGEDAGER_OPPBRUKT
+    SYKEPENGEDAGER_OPPBRUKT_OVER_67
+    UKJENT
+}
+
+enum Dagtype {
+    Egenmeldingsdag
+    Feriedag
+    Permisjonsdag
+    Sykedag
+}
+
+enum Hendelsetype {
+    INNTEKTSMELDING
+    NY_SOKNAD
+    SENDT_SOKNAD_ARBEIDSGIVER
+    SENDT_SOKNAD_NAV
+    UKJENT
+}
+
+enum Inntektskilde {
+    AORDNINGEN
+    IKKE_RAPPORTERT
+    INFOTRYGD
+    INNTEKTSMELDING
+    SAKSBEHANDLER
+}
+
+enum Inntektstype {
+    ENARBEIDSGIVER
+    FLEREARBEIDSGIVERE
+}
+
+enum Kildetype {
+    INNTEKTSMELDING
+    SAKSBEHANDLER
+    SOKNAD
+    SYKMELDING
+    UKJENT
+}
+
+enum Kjonn {
+    Kvinne
+    Mann
+    Ukjent
+}
+
+enum NotatType {
+    Generelt
+    PaaVent
+    Retur
+}
+
+enum Oppdragsstatus {
+    ANNULLERT
+    FORKASTET
+    GODKJENT
+    GODKJENT_UTEN_UTBETALING
+    IKKE_GODKJENT
+    IKKE_UTBETALT
+    NY
+    OVERFORT
+    SENDT
+    UTBETALING_FEILET
+    UTBETALT
+}
+
+enum Oppgavetype {
+    DELVIS_REFUSJON
+    FORTROLIG_ADRESSE
+    REVURDERING
+    RISK_QA
+    SOKNAD
+    STIKKPROVE
+    UTBETALING_TIL_SYKMELDT
+}
+
+enum PeriodehistorikkType {
+    TOTRINNSVURDERING_ATTESTERT
+    TOTRINNSVURDERING_RETUR
+    TOTRINNSVURDERING_TIL_GODKJENNING
+    VEDTAKSPERIODE_REBEREGNET
+}
+
+enum Periodetilstand {
+    AnnulleringFeilet
+    Annullert
+    ForberederGodkjenning
+    IngenUtbetaling
+    ManglerInformasjon
+    RevurderingFeilet
+    TilAnnullering
+    TilGodkjenning
+    TilInfotrygd
+    TilUtbetaling
+    Ukjent
+    UtbetalingFeilet
+    Utbetalt
+    UtbetaltVenterPaEnAnnenPeriode
+    VenterPaEnAnnenPeriode
+}
+
+enum Periodetype {
+    FORLENGELSE
+    FORSTEGANGSBEHANDLING
+    INFOTRYGDFORLENGELSE
+    OVERGANG_FRA_IT
+}
+
+enum Sykdomsdagtype {
+    ARBEIDSDAG
+    ARBEIDSGIVERDAG
+    AVSLATT
+    FERIEDAG
+    FORELDET_SYKEDAG
+    FRISK_HELGEDAG
+    PERMISJONSDAG
+    SYKEDAG
+    SYK_HELGEDAG
+    UBESTEMTDAG
+}
+
+enum Utbetalingsdagtype {
+    ARBEIDSDAG
+    ARBEIDSGIVERPERIODEDAG
+    AVVIST_DAG
+    FERIEDAG
+    FORELDET_DAG
+    HELGEDAG
+    NAVDAG
+    NAVHELGDAG
+    UKJENT_DAG
+}
+
+enum Utbetalingstatus {
+    ANNULLERT
+    FORKASTET
+    GODKJENT
+    GODKJENTUTENUTBETALING
+    IKKEGODKJENT
+    OVERFORT
+    SENDT
+    UBETALT
+    UKJENT
+    UTBETALINGFEILET
+    UTBETALT
+}
+
+enum Utbetalingtype {
+    ANNULLERING
+    ETTERUTBETALING
+    FERIEPENGER
+    REVURDERING
+    UKJENT
+    UTBETALING
+}
+
+enum Vilkarsgrunnlagtype {
+    INFOTRYGD
+    SPLEIS
+    UKJENT
+}

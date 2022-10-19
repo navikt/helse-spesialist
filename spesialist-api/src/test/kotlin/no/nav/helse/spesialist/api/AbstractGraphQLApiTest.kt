@@ -1,36 +1,98 @@
 package no.nav.helse.spesialist.api
 
-import io.ktor.client.*
+import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
+import com.expediagroup.graphql.server.execution.GraphQLServer
+import graphql.GraphQL
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
+import io.ktor.server.cio.CIO
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
+import io.mockk.mockk
+import java.net.ServerSocket
+import java.util.UUID
+import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
+import no.nav.helse.spesialist.api.graphql.ContextFactory
+import no.nav.helse.spesialist.api.graphql.RequestParser
+import no.nav.helse.spesialist.api.graphql.SchemaBuilder
+import no.nav.helse.spesialist.api.graphql.routes
+import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
-import java.net.ServerSocket
-import java.util.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractApiTest {
+internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
-    private lateinit var server: TestServerRuntime
+    protected val kode7Saksbehandlergruppe = UUID.randomUUID()
+    protected val skjermedePersonerGruppeId = UUID.randomUUID()
+    protected val beslutterGruppeId = UUID.randomUUID()
+    protected val riskSaksbehandlergruppe = UUID.randomUUID()
+
+    protected val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
+    protected val oppgaveService = mockk<OppgaveService>(relaxed = true)
+    protected val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
+
     protected lateinit var client: HttpClient
 
-    protected fun setupServer(λ: Route.() -> Unit) {
+    private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
+    private lateinit var server: TestServerRuntime
+
+    protected fun setupGraphQLServer() {
+        val schema = SchemaBuilder(
+            personApiDao = personApiDao,
+            egenAnsattApiDao = egenAnsattApiDao,
+            tildelingDao = tildelingDao,
+            arbeidsgiverApiDao = arbeidsgiverApiDao,
+            overstyringApiDao = overstyringApiDao,
+            risikovurderingApiDao = risikovurderingApiDao,
+            varselDao = varselDao,
+            utbetalingApiDao = utbetalingApiDao,
+            oppgaveApiDao = oppgaveApiDao,
+            periodehistorikkDao = periodehistorikkDao,
+            notatDao = notatDao,
+            snapshotMediator = snapshotMediator,
+            reservasjonClient = reservasjonClient,
+            oppgaveService = oppgaveService,
+            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
+        ).build()
+
+        graphQLServer = GraphQLServer(
+            requestParser = RequestParser(),
+            contextFactory = ContextFactory(
+                kode7Saksbehandlergruppe,
+                skjermedePersonerGruppeId,
+                beslutterGruppeId,
+                riskSaksbehandlergruppe
+            ),
+            requestHandler = GraphQLRequestHandler(
+                GraphQL.newGraphQL(schema).build()
+            )
+        )
+
+        setupHttpServer {
+            routes(graphQLServer)
+        }
+    }
+
+    private fun setupHttpServer(λ: Route.() -> Unit) {
         server = TestServer(λ = λ).start()
         client = server.restClient()
     }
 
     @AfterAll
-    protected fun tearDown() {
+    protected fun tearDownHttpServer() {
         server.close()
     }
 
@@ -58,7 +120,7 @@ abstract class AbstractApiTest {
 
     }
 
-    class TestServer(
+    private class TestServer(
         private val httpPort: Int = ServerSocket(0).use { it.localPort },
         private val λ: Route.() -> Unit,
     ) {
@@ -68,7 +130,7 @@ abstract class AbstractApiTest {
 
     }
 
-    class TestServerRuntime(
+    private class TestServerRuntime(
         build: Route.() -> Unit,
         private val httpPort: Int
     ) : AutoCloseable {
@@ -122,4 +184,7 @@ abstract class AbstractApiTest {
             }
         }
     }
+
+    protected fun queryize(@Language("GraphQL") queryString: String) = queryString.trimIndent()
+
 }
