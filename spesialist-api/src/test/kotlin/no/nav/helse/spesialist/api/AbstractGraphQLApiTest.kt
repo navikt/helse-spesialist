@@ -2,13 +2,19 @@ package no.nav.helse.spesialist.api
 
 import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLServer
+import com.fasterxml.jackson.databind.JsonNode
 import graphql.GraphQL
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.accept
 import io.ktor.client.request.header
+import io.ktor.client.request.preparePost
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
@@ -20,6 +26,7 @@ import io.ktor.server.routing.routing
 import io.mockk.mockk
 import java.net.ServerSocket
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.RequestParser
@@ -183,6 +190,20 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 }
             }
         }
+    }
+
+    protected fun runQuery(query: String, group: UUID? = null): JsonNode {
+        val response = runBlocking {
+            val response = client.preparePost("/graphql") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                authentication(UUID.randomUUID(), group = group?.toString())
+                setBody(mapOf("query" to query))
+            }.execute()
+            response.body<String>()
+        }
+
+        return objectMapper.readTree(response)
     }
 
     protected fun queryize(@Language("GraphQL") queryString: String) = queryString.trimIndent()

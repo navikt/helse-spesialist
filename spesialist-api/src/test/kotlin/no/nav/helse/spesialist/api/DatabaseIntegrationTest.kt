@@ -40,12 +40,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected companion object {
         val NAVN = Triple("Ola", "Kari", "Nordhen")
         val ENHET = Pair(101, "Halden")
+        val PERIODE = Triple(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
+        val ARBEIDSFORHOLD = Quadruple(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+
         const val FØDSELSNUMMER = "01017011111"
         const val AKTØRID = "01017011111111"
         const val ARBEIDSGIVER_NAVN = "EN ARBEIDSGIVER"
         const val ORGANISASJONSNUMMER = "987654321"
-        val PERIODE = Triple(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
-        val ARBEIDSFORHOLD = Quadruple(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+
+        val SAKSBEHANDLER_OID = UUID.randomUUID()
+        const val SAKSBEHANDLER_NAVN = "Jan Banan"
+        const val SAKSBEHANDLER_EPOST = "jan.banan@nav.no"
+        const val SAKSBEHANDLER_IDENT = "B123456"
     }
 
     protected val varselDao = VarselDao(dataSource)
@@ -73,23 +79,35 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
 
-    protected fun opprettVedtaksperiode() = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        val (id, fom, tom) = PERIODE
-        val personid = opprettPerson()
-        val arbeidsgiverid = opprettArbeidsgiver()
-        val snapshotid = opprettSnapshot()
+    protected fun opprettVedtaksperiode(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            val (id, fom, tom) = PERIODE
+            val personid = opprettPerson(adressebeskyttelse)
+            val arbeidsgiverid = opprettArbeidsgiver()
+            val snapshotid = opprettSnapshot()
 
-        @Language("PostgreSQL")
-        val statement =
-            "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
-        session.run(
-            queryOf(
-                statement, id, fom, tom, arbeidsgiverid, personid, snapshotid
-            ).asUpdateAndReturnGeneratedKey
-        )?.also {
-            opprettArbeidsforhold(personid, arbeidsgiverid)
-            opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
-            opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, it)
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
+            session.run(
+                queryOf(
+                    statement, id, fom, tom, arbeidsgiverid, personid, snapshotid
+                ).asUpdateAndReturnGeneratedKey
+            )?.also {
+                opprettArbeidsforhold(personid, arbeidsgiverid)
+                opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
+                opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, it)
+            }
+        }
+
+    protected fun ferdigstillOppgave(vedtakRef: Long) {
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = """
+                UPDATE oppgave SET ferdigstilt_av = ?, ferdigstilt_av_oid = ?, status = 'Ferdigstilt', oppdatert = now()
+                WHERE oppgave.vedtak_ref = ?
+            """.trimIndent()
+            session.run(queryOf(statement, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, vedtakRef).asUpdate)
         }
     }
 
@@ -171,12 +189,16 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
 
     protected fun opprettSaksbehandler(
-        oid: UUID = UUID.randomUUID(),
-        navn: String = "Jan Banan",
-        epost: String = "janne.banan@nav.no",
-        ident: String = "Y12123"
+        oid: UUID = SAKSBEHANDLER_OID,
+        navn: String = SAKSBEHANDLER_NAVN,
+        epost: String = SAKSBEHANDLER_EPOST,
+        ident: String = SAKSBEHANDLER_IDENT
     ): UUID {
-        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost, ident)
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (?, ?, ?, ?)"
+            session.run(queryOf(statement, oid, navn, epost, ident).asUpdate)
+        }
         return oid
     }
 
@@ -241,17 +263,37 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun opprettOppgave(status: Oppgavestatus, oppgavetype: Oppgavetype, vedtakRef: Long) =
+    protected fun opprettOppgave(
+        status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
+        oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
+        vedtakRef: Long,
+        erBeslutter: Boolean = false
+    ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val statement =
-                "INSERT INTO oppgave(oppdatert, status, vedtak_ref, type) VALUES(now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype))"
+                "INSERT INTO oppgave(oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
             session.run(
                 queryOf(
                     statement,
                     status.name,
                     vedtakRef,
                     oppgavetype.name,
+                    erBeslutter,
+                ).asUpdateAndReturnGeneratedKey
+            )
+        }
+
+    protected fun tildelOppgave(oppgaveRef: Long, saksbehandlerOid: UUID) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement =
+                "INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref) VALUES(?, ?)"
+            session.run(
+                queryOf(
+                    statement,
+                    saksbehandlerOid,
+                    oppgaveRef,
                 ).asUpdate
             )
         }

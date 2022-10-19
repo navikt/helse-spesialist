@@ -1,13 +1,5 @@
 package no.nav.helse.spesialist.api.graphql
 
-import io.ktor.client.call.body
-import io.ktor.client.request.accept
-import io.ktor.client.request.preparePost
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import java.util.UUID
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,33 +21,18 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
     @Test
     fun `henter fødselsnummer`() {
         opprettVedtaksperiode()
-        val queryString = queryize(
-            """
-            {
-                person(fnr:"$FØDSELSNUMMER") {
-                    fodselsnummer
-                }
-            }
-        """
-        )
 
-        val body = runBlocking {
-            val response = client.preparePost("/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                authentication(UUID.randomUUID())
-                setBody(mapOf("query" to queryString))
-            }.execute()
-            response.body<String>()
-        }
+        val query = queryize("""{ person(fnr:"$FØDSELSNUMMER") { fodselsnummer } }""")
+        val body = runQuery(query)
 
-        assertEquals(FØDSELSNUMMER, objectMapper.readTree(body)["data"]["person"]["fodselsnummer"].asText())
+        assertEquals(FØDSELSNUMMER, body["data"]["person"]["fodselsnummer"].asText())
     }
 
     @Test
     fun `henter sykepengegrunnlagsgrense`() {
         opprettVedtaksperiode()
-        val queryString = queryize(
+
+        val query = queryize(
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
@@ -77,29 +54,12 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         """
         )
 
+        val body = runQuery(query)
+        val sykepengegrunnlagsgrense = body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]
 
-        val body = runBlocking {
-            val response = client.preparePost("/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                authentication(UUID.randomUUID())
-                setBody(mapOf("query" to queryString))
-            }.execute()
-            response.body<String>()
-        }
-
-        assertEquals(
-            100_000,
-            objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["grunnbelop"].asInt()
-        )
-        assertEquals(
-            600_000,
-            objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["grense"].asInt()
-        )
-        assertEquals(
-            "2020-01-01",
-            objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]["virkningstidspunkt"].asText()
-        )
+        assertEquals(100_000, sykepengegrunnlagsgrense["grunnbelop"].asInt())
+        assertEquals(600_000, sykepengegrunnlagsgrense["grense"].asInt())
+        assertEquals("2020-01-01", sykepengegrunnlagsgrense["virkningstidspunkt"].asText())
     }
 
     @Test
@@ -112,7 +72,7 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         mockSnapshot(avviksprosent = avviksprosent)
         opprettVedtaksperiode()
 
-        val queryString = queryize("""
+        val query = queryize("""
             {
                 person(fnr:"$FØDSELSNUMMER") {
                     vilkarsgrunnlaghistorikk {
@@ -128,18 +88,9 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
             }
         """)
 
-        val body = runBlocking {
-            val response = client.preparePost("/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                authentication(UUID.randomUUID())
-                setBody(mapOf("query" to queryString))
-            }.execute()
-            response.body<String>()
-        }
-
-        val errors = objectMapper.readTree(body)["errors"]
-        val forventet = objectMapper.readTree(
+        val body = runQuery(query)
+        val grunnlag = body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"]
+        val forventetError = objectMapper.readTree(
             """
             {
                 "message": "Can't serialize value (/person/vilkarsgrunnlaghistorikk[0]/grunnlag[0]/avviksprosent) : Expected type 'Float' but was 'Double'.",
@@ -147,8 +98,8 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
             }
         """
         )
-        assertEquals(forventet, errors.first())
-        val grunnlag = objectMapper.readTree(body)["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"]
+
+        assertEquals(forventetError, body["errors"].first())
         assertNotNull(grunnlag)
         assertNull(grunnlag["avviksprosent"])
     }
