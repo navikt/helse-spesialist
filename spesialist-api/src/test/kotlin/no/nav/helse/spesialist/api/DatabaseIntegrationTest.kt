@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrun
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.notat.NotatType
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -109,6 +110,43 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             @Language("PostgreSQL")
             val statement = "INSERT INTO saksbehandleroppgavetype(type, vedtak_ref, inntektskilde) VALUES (?, ?, ?)"
             session.run(queryOf(statement, type.toString(), vedtakRef, inntektskilde.toString()).asUpdate)
+        }
+
+    protected fun opprettNotat(
+        tekst: String = "Et notat",
+        saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
+        vedtaksperiodeId: UUID = PERIODE.first
+    ) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val statement = "INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type) VALUES (?, ?, ?, CAST(? as notattype))"
+            session.run(
+                queryOf(
+                    statement,
+                    tekst,
+                    saksbehandlerOid,
+                    vedtaksperiodeId,
+                    NotatType.Generelt.name,
+                ).asUpdateAndReturnGeneratedKey
+            )
+        }
+
+    protected fun opprettKommentar(
+        tekst: String = "En kommentar",
+        notatRef: Int,
+        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT,
+    ) =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val statement = "INSERT INTO kommentarer(tekst, notat_ref, saksbehandlerident) VALUES (?, ?, ?)"
+            session.run(
+                queryOf(
+                    statement,
+                    tekst,
+                    notatRef,
+                    saksbehandlerIdent,
+                ).asUpdateAndReturnGeneratedKey
+            )
         }
 
     protected fun vedtakId(vedtaksperiodeId: UUID = PERIODE.first) = sessionOf(dataSource).use { session ->
