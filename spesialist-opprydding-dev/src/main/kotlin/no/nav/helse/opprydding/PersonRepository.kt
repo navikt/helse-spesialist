@@ -144,6 +144,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
         slettNotat(personRef)
         slettWarning(personRef)
         slettOppgave(personRef)
+        slettVarsler(personRef)
         slettAutomatisering(personRef)
         slettRisikovurdering(personRef)
         slettAutomatiseringProblem(personRef)
@@ -165,6 +166,14 @@ internal class PersonRepository(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = """
              DELETE FROM selve_vedtaksperiode_generasjon svg USING vedtak v WHERE svg.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+        """
+        run(queryOf(query, personRef).asExecute)
+    }
+
+    private fun TransactionalSession.slettVarsler(personRef: Int) {
+        @Language("PostgreSQL")
+        val query = """
+             DELETE FROM selve_varsel sv USING vedtak v WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
