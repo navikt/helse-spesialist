@@ -505,8 +505,8 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.revurderingAvvist(fødselsnummer, error, json), context)
     }
 
-    fun vedtakFattet(fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
-        utfør(hendelsefabrikk.vedtakFattet(fødselsnummer, vedtaksperiodeId, json), context)
+    fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String, context: MessageContext) {
+        utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
     fun nyeVarsler(varsler: List<NyeVarsler.Varsel>) {

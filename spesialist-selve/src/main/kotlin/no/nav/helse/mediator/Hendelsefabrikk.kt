@@ -35,6 +35,7 @@ import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -42,6 +43,7 @@ import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -49,8 +51,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -613,7 +613,17 @@ internal class Hendelsefabrikk(
     fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist {
         return RevurderingAvvist(UUID.randomUUID(), fødselsnummer, errors, json, opptegnelseDao)
     }
-    fun vedtakFattet(fødselsnummer: String, vedtaksperiodeId: UUID, json:String): VedtakFattet {
-        return VedtakFattet(UUID.randomUUID(), fødselsnummer, vedtaksperiodeId, json, generasjonDao)
+    fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
+        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, generasjonDao)
+    }
+    fun vedtakFattet(json: String): VedtakFattet {
+        val jsonNode = mapper.readTree(json)
+        return VedtakFattet(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+            json,
+            generasjonDao
+        )
     }
 }

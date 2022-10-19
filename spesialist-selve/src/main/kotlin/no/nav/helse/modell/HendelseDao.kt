@@ -1,15 +1,15 @@
 package no.nav.helse.modell
 
+import java.util.*
+import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.meldinger.*
 import no.nav.helse.modell.HendelseDao.Hendelsetype.*
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
-import no.nav.helse.mediator.Hendelsefabrikk
 
 internal class HendelseDao(private val dataSource: DataSource) {
     internal fun opprett(hendelse: Hendelse) {
@@ -112,6 +112,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             REVURDERING_AVVIST -> hendelsefabrikk.revurderingAvvist(json)
             GOSYS_OPPGAVE_ENDRET -> hendelsefabrikk.gosysOppgaveEndret(json)
             ENDRET_SKJERMETINFO -> hendelsefabrikk.endretSkjermetinfo(json)
+            VEDTAK_FATTET -> hendelsefabrikk.vedtakFattet(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -130,6 +131,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is RevurderingAvvist -> REVURDERING_AVVIST
         is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
         is EndretSkjermetinfo -> ENDRET_SKJERMETINFO
+        is VedtakFattet -> VEDTAK_FATTET
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -137,6 +139,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
-        GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO
+        GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET
     }
 }

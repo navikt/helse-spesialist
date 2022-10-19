@@ -41,7 +41,6 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.GodkjenningDTO
-import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -54,6 +53,7 @@ import no.nav.helse.modell.automatisering.AutomatiseringDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
@@ -65,12 +65,12 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
-import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.graphql.query.PersonQuery
+import no.nav.helse.spesialist.api.notat.NotatDao
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.OverstyringApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -243,6 +243,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsmeldingId = oppgaveId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+    }
+
+    protected fun sendVedtakFattet(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID
+    ) {
+        Meldingssender.sendVedtakFattet(fødselsnummer, vedtaksperiodeId)
     }
 
     /**

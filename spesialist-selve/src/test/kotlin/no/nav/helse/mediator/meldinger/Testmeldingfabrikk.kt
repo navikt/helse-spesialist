@@ -378,6 +378,17 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
+    fun lagVedtakFattet(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String = this.fødselsnummer,
+        vedtaksperiodeId: UUID
+    ): String = nyHendelse(
+        id, "vedtak_fattet", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "vedtaksperiodeId" to "$vedtaksperiodeId"
+        )
+    )
+
     fun lagEgenAnsattløsning(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
@@ -650,7 +661,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         mapOf(
             "fødselsnummer" to fnr,
             "varsler" to listOf(
-                lagVarsel(orgnummer = orgnummer, fnr = fnr)
+                lagVarsel(orgnummer = orgnummer, fnr = fnr, vedaksperiodeId = vedtaksperiodeId)
             )
         ))
     }

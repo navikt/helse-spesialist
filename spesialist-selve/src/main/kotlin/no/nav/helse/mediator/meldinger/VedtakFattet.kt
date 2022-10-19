@@ -39,9 +39,7 @@ internal class VedtakFattet(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "vedtak_fattet")
-                    it.requireKey(
-                        "fødselsnummer", "vedtaksperiodeId"
-                    )
+                    it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId")
                 }
             }.register(this)
         }
@@ -55,8 +53,8 @@ internal class VedtakFattet(
 
             val fødselsnummer = packet["fødselsnummer"].asText()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
-            // Spesialist likte ikke
-            // mediator.vedtakFattet(fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
+            val id = UUID.fromString(packet["@id"].asText())
+             mediator.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, packet.toJson(), context)
         }
     }
 

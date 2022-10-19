@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -14,8 +15,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
 
 internal object Meldingssender {
@@ -469,6 +470,18 @@ internal object Meldingssender {
                 )
             )
         }
+    }
+
+    fun sendVedtakFattet(
+        fødselsnummer: String = FØDSELSNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+    ) {
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagVedtakFattet(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        )
     }
 
     fun sendEgenAnsattløsning(
