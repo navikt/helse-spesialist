@@ -14,6 +14,10 @@ class OppdragQuery(
 ) : AbstractPersonQuery(personApiDao, egenAnsattApiDao) {
 
     fun oppdrag(fnr: String, env: DataFetchingEnvironment): DataFetcherResult<List<Oppdrag>> {
+        if (!personApiDao.finnesPersonMedFødselsnummer(fnr)) {
+            return DataFetcherResult.newResult<List<Oppdrag>>().error(getNotFoundError(fnr)).build()
+        }
+
         if (isForbidden(fnr, env)) {
             return DataFetcherResult.newResult<List<Oppdrag>>().error(getForbiddenError(fnr)).build()
         }

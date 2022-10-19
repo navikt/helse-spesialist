@@ -42,17 +42,16 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
-    protected val kode7Saksbehandlergruppe = UUID.randomUUID()
-    protected val skjermedePersonerGruppeId = UUID.randomUUID()
-    protected val beslutterGruppeId = UUID.randomUUID()
-    protected val riskSaksbehandlergruppe = UUID.randomUUID()
+    protected val riskSaksbehandlergruppe: UUID = UUID.randomUUID()
+    protected val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
+    protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
+    protected val beslutterGruppeId: UUID = UUID.randomUUID()
 
-    protected val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
-    protected val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    protected val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
+    private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
+    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
+    private val behandlingsstatistikkMediator = mockk<BehandlingsstatistikkMediator>(relaxed = true)
 
-    protected lateinit var client: HttpClient
-
+    private lateinit var client: HttpClient
     private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
     private lateinit var server: TestServerRuntime
 

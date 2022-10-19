@@ -48,7 +48,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         const val ARBEIDSGIVER_NAVN = "EN ARBEIDSGIVER"
         const val ORGANISASJONSNUMMER = "987654321"
 
-        val SAKSBEHANDLER_OID = UUID.randomUUID()
+        val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
         const val SAKSBEHANDLER_NAVN = "Jan Banan"
         const val SAKSBEHANDLER_EPOST = "jan.banan@nav.no"
         const val SAKSBEHANDLER_IDENT = "B123456"
@@ -62,11 +62,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val personApiDao = PersonApiDao(dataSource)
     protected val tildelingDao = TildelingDao(dataSource)
     protected val overstyringApiDao = OverstyringApiDao(dataSource)
-    protected val utbetalingApiDao = UtbetalingApiDao(dataSource)
-    protected val snapshotApiDao = SnapshotApiDao(dataSource)
     protected val oppgaveApiDao = OppgaveApiDao(dataSource)
     protected val periodehistorikkDao = PeriodehistorikkDao(dataSource)
+    private val snapshotApiDao = SnapshotApiDao(dataSource)
 
+    protected val utbetalingApiDao = mockk<UtbetalingApiDao>(relaxed = true)
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
 
