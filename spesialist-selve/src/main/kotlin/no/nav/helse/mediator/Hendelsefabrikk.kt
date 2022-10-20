@@ -413,6 +413,7 @@ internal class Hendelsefabrikk(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
         forårsaketAvId: UUID,
+        forrigeTilstand: String,
         json: String
     ): VedtaksperiodeEndret {
         return VedtaksperiodeEndret(
@@ -420,6 +421,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             forårsaketAvId = forårsaketAvId,
+            forrigeTilstand = forrigeTilstand,
             json = json,
             warningDao = warningDao,
             snapshotDao = snapshotDao,
@@ -437,6 +439,7 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             forårsaketAvId = UUID.fromString(jsonNode.path("@forårsaket_av.id").asText()),
+            forrigeTilstand = jsonNode.path("forrigeTilstand").asText(),
             json = json
         )
     }

@@ -10,6 +10,7 @@ internal class VedtaksperiodeGenerasjonCommand(
     val vedtaksperiodeId: UUID,
     val vedtaksperiodeEndretHendelseId: UUID,
     val generasjonDao: GenerasjonDao,
+    val forrigeTilstand: String
 ) : Command {
 
     private companion object {
@@ -17,13 +18,15 @@ internal class VedtaksperiodeGenerasjonCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        generasjonDao.prøvOpprett(vedtaksperiodeId, vedtaksperiodeEndretHendelseId)?.also {
-            sikkerLogg.info(
-                "Opprettet ny generasjon = {} for vedtaksperiode = {} på grunn av vedtaksperiode_endret = {}",
-                keyValue("generasjonId", it),
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("vedtaksperiodeEndretHendelseId", vedtaksperiodeEndretHendelseId)
-            )
+        if (forrigeTilstand == "START" || generasjonDao.generasjon(vedtaksperiodeId) != null) {
+            generasjonDao.prøvOpprett(vedtaksperiodeId, vedtaksperiodeEndretHendelseId)?.also {
+                sikkerLogg.info(
+                    "Opprettet ny generasjon = {} for vedtaksperiode = {} på grunn av vedtaksperiode_endret = {}",
+                    keyValue("generasjonId", it),
+                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                    keyValue("vedtaksperiodeEndretHendelseId", vedtaksperiodeEndretHendelseId)
+                )
+            }
         }
 
         return true

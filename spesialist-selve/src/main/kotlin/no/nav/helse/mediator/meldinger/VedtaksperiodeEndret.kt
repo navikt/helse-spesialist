@@ -29,6 +29,7 @@ internal class VedtaksperiodeEndret(
     private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val forårsaketAvId: UUID,
+    private val forrigeTilstand: String,
     private val json: String,
     warningDao: WarningDao,
     snapshotDao: SnapshotDao,
@@ -58,7 +59,8 @@ internal class VedtaksperiodeEndret(
             it + VedtaksperiodeGenerasjonCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
                 vedtaksperiodeEndretHendelseId = forårsaketAvId,
-                generasjonDao = generasjonDao
+                generasjonDao = generasjonDao,
+                forrigeTilstand = forrigeTilstand
             )
         } else it
     }
@@ -83,6 +85,7 @@ internal class VedtaksperiodeEndret(
                     it.requireKey("fødselsnummer")
                     it.requireKey("@id")
                     it.requireKey("@forårsaket_av", "@forårsaket_av.id")
+                    it.interestedIn("forrigeTilstand")
                 }
             }.register(this)
         }
@@ -107,6 +110,7 @@ internal class VedtaksperiodeEndret(
                 vedtaksperiodeId,
                 packet["fødselsnummer"].asText(),
                 forårsaketAvId,
+                packet["forrigeTilstand"].asText(),
                 context
             )
         }
