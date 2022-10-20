@@ -4,15 +4,18 @@ import AbstractE2ETest
 import ToggleHelpers.disable
 import ToggleHelpers.enable
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
-import no.nav.helse.Testdata
+import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.Toggle
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
-
 
     @BeforeEach
     fun før() {
@@ -25,10 +28,34 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `vedtaksperiode_endret oppretter ny vedtaksperiode generasjon, når det ikke finnes eksisterende generasjoner`() {
+    fun `vedtaksperiode_endret oppretter ny generasjon når det ikke finnes eksisterende generasjoner`() {
         settOppBruker() // TODO Dette skal bort når vi oppretter personer før godkjenningsbehovet kommer inn
-        sendVedtaksperiodeEndret(Testdata.ORGNR, Testdata.VEDTAKSPERIODE_ID)
-        val førsteGenerasjon = generasjonDao.generasjon(Testdata.VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
+
         assertNotNull(førsteGenerasjon)
+    }
+
+    @Test
+    fun `vedtaksperiode_endret oppretter ikke ny generasjon når det finnes eksisterende ulåst generasjon`() {
+        settOppBruker() // TODO Dette skal bort når vi oppretter personer før godkjenningsbehovet kommer inn
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val skalFortsattVæreførsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
+
+        assertEquals(skalFortsattVæreførsteGenerasjon, førsteGenerasjon)
+    }
+
+    @Test
+    fun `vedtak_fattet låser generasjon, ny vedtaksperiode_endret vil da opprette ny generasjon`() {
+        settOppBruker() // TODO Dette skal bort når vi oppretter personer før godkjenningsbehovet kommer inn
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
+        sendVedtakFattet(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val andreGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
+
+        assertNotEquals(førsteGenerasjon, andreGenerasjon)
     }
 }
