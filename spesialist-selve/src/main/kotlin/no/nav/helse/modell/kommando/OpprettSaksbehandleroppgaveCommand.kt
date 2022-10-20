@@ -56,5 +56,5 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val harFortroligAdressebeskyttelse get() =
         personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
 
-    private val vedtaksperiodensUtbetaling get () = snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId)
+    private val vedtaksperiodensUtbetaling by lazy { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) }
 }
