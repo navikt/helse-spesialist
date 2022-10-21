@@ -241,6 +241,7 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
     fun `sjekker at det fins ferdigstilt oppgave`() {
         nyPerson()
         oppgaveDao.updateOppgave(oppgaveId, Ferdigstilt)
+        oppgaveDao.updateOppgave(2L, AvventerSaksbehandler)
 
         assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
     }

@@ -3,11 +3,11 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.WarningDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
 
@@ -56,10 +56,11 @@ internal class TrengerTotrinnsvurderingCommand(
     private fun harMedlemskapsVarsel(): Boolean {
         val medlemSkapVarsel = "Vurder lovvalg og medlemskap"
         val harMedlemskapsVarsel = warningDao.finnAktiveWarningsMedMelding(vedtaksperiodeId, medlemSkapVarsel).isNotEmpty()
+        val vedtaksperiodeHarFerdigstiltOppgave = oppgaveMediator.harFerdigstiltOppgave(vedtaksperiodeId)
 
         logg.info("Vedtaksperioden: $vedtaksperiodeId harMedlemskapsVarsel: $harMedlemskapsVarsel")
 
-        return harMedlemskapsVarsel
+        return harMedlemskapsVarsel && !vedtaksperiodeHarFerdigstiltOppgave
     }
 
     // Overstyringer og Revurderinger

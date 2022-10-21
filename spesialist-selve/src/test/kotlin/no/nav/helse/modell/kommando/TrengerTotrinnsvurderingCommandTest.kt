@@ -41,7 +41,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trenger totrinnsvudering dersom oppgaven har blitt overstyrt`() {
+    fun `Setter trengerTotrinnsvurdering dersom oppgaven har blitt overstyrt`() {
         every { warningDao.finnAktiveWarningsMedMelding(any(), any()) } returns listOf(
             Warning(
                 melding = "melding",
@@ -56,7 +56,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trenger totrinnsvudering dersom oppgaven ikke har blitt overstyrt`() {
+    fun `Setter trengerTotrinnsvurdering dersom oppgaven ikke har blitt overstyrt`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
@@ -65,7 +65,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trenger totrinnsvudering dersom oppgaven har aktive warnings med spesifikk melding`() {
+    fun `Setter trengerTotrinnsvurdering for lovvalg og medlemskap dersom vedtaksperioden har hatt oppgave som ikke har vært ferdigstilt før`() {
         val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
         every {
             warningDao.finnAktiveWarningsMedMelding(
@@ -73,6 +73,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
                 testWarningVurderMedlemskap
             )
         } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
+        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns false
 
         assertTrue(command.execute(context))
         verify(exactly = 1) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
@@ -80,7 +81,23 @@ internal class TrengerTotrinnsvurderingCommandTest {
     }
 
     @Test
-    fun `Setter trenger totrinnsvudering dersom oppgaven har ingen aktive warnings med spesifikk melding`() {
+    fun `Setter ikke trengerTotrinnsvurdering for lovvalg og medlemskap dersom vedtaksperioden har hatt oppgave som har vært ferdigstilt før`() {
+        val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
+        every {
+            warningDao.finnAktiveWarningsMedMelding(
+                VEDTAKSPERIODE_ID,
+                testWarningVurderMedlemskap
+            )
+        } returns listOf(Warning(testWarningVurderMedlemskap, WarningKilde.Spleis, LocalDateTime.now()))
+        every { oppgaveMediator.harFerdigstiltOppgave(VEDTAKSPERIODE_ID) } returns true
+
+        assertTrue(command.execute(context))
+        verify(exactly = 0) { oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering() }
+        verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKSPERIODE_ID, any()) }
+    }
+
+    @Test
+    fun `Setter ikke trengerTotrinnsvurdering dersom oppgaven ikke har aktive warnings med spesifikk melding`() {
         val testWarningVurderMedlemskap = "Vurder lovvalg og medlemskap"
         every {
             warningDao.finnAktiveWarningsMedMelding(

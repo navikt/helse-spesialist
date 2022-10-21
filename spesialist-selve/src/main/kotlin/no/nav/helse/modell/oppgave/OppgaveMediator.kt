@@ -191,4 +191,6 @@ class OppgaveMediator(
             it.lagrePeriodehistorikk(periodehistorikkDao, saksbehandleroid, type, notatId)
         }
     }
+
+    fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
 }
