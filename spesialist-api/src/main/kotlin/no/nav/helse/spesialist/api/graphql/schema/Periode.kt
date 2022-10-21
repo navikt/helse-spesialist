@@ -152,6 +152,11 @@ data class Kommentar(
     val feilregistrert_tidspunkt: DateTimeString?,
 )
 
+data class Notater(
+    val id: UUIDString,
+    val notater: List<Notat>,
+)
+
 data class Notat(
     val id: Int,
     val tekst: String,

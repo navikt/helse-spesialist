@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
+import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppdragQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -84,6 +85,9 @@ internal class SchemaBuilder(
                     BehandlingsstatistikkQuery(
                         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                     )
+                ),
+                TopLevelObject(
+                    NotatQuery(notatDao = notatDao)
                 )
             ),
             mutations = listOf(

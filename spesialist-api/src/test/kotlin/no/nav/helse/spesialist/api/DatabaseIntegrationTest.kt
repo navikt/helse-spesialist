@@ -73,11 +73,15 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
 
-    protected fun opprettVedtaksperiode(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) =
+    protected fun opprettVedtaksperiode(
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+        periode: Triple<UUID, LocalDate, LocalDate> = PERIODE
+    ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val (id, fom, tom) = PERIODE
+            val (id, fom, tom) = periode
             val personid = opprettPerson(adressebeskyttelse)
-            val arbeidsgiverid = opprettArbeidsgiver()
+            val arbeidsgiverid =
+                opprettArbeidsgiver()?.also { opprettArbeidsforhold(personid, it) } ?: finnArbeidsgiverId()
             val snapshotid = opprettSnapshot()
 
             @Language("PostgreSQL")
@@ -88,7 +92,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     statement, id, fom, tom, arbeidsgiverid, personid, snapshotid
                 ).asUpdateAndReturnGeneratedKey
             )?.also {
-                opprettArbeidsforhold(personid, arbeidsgiverid)
                 opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
                 opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, it)
             }
@@ -119,7 +122,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
-            val statement = "INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type) VALUES (?, ?, ?, CAST(? as notattype))"
+            val statement =
+                "INSERT INTO notat(tekst, saksbehandler_oid, vedtaksperiode_id, type) VALUES (?, ?, ?, CAST(? as notattype))"
             session.run(
                 queryOf(
                     statement,
@@ -206,18 +210,24 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             val navnid = opprettArbeidsgivernavn()
 
             @Language("PostgreSQL")
-            val statement = "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?)"
-            requireNotNull(
-                session.run(
-                    queryOf(
-                        statement,
-                        ORGANISASJONSNUMMER.toLong(),
-                        navnid,
-                        bransjeid
-                    ).asUpdateAndReturnGeneratedKey
-                )
+            val statement =
+                "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?) ON CONFLICT DO NOTHING"
+            session.run(
+                queryOf(
+                    statement,
+                    ORGANISASJONSNUMMER.toLong(),
+                    navnid,
+                    bransjeid
+                ).asUpdateAndReturnGeneratedKey
             )
         }
+
+    private fun finnArbeidsgiverId(): Int =
+        requireNotNull(sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "SELECT id FROM arbeidsgiver WHERE orgnummer = ?"
+            session.run(queryOf(statement, ORGANISASJONSNUMMER.toLong()).map { it.int("id") }.asSingle)
+        })
 
     protected fun opprettSaksbehandler(
         oid: UUID = SAKSBEHANDLER_OID,
@@ -371,7 +381,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     )
 
-    protected class Quadruple<out A, out B, out C, out D>(val first: A, val second: B, val third: C, val fourth: D) {
+    protected class Quadruple<out A, out B, out C, out D>(val first: A, private val second: B, private val third: C, private val fourth: D) {
         operator fun component1() = first
         operator fun component2() = second
         operator fun component3() = third
@@ -379,4 +389,5 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         override fun toString() = "($first, $second, $third, $fourth)"
     }
+
 }

@@ -289,6 +289,11 @@ type Notat {
     vedtaksperiodeId: String!
 }
 
+type Notater {
+    id: String!
+    notater: [Notat!]!
+}
+
 type OmregnetArsinntekt {
     belop: Float!
     inntektFraAOrdningen: [InntektFraAOrdningen!]
@@ -412,6 +417,7 @@ type Query {
     alleOppgaver: [OppgaveForOversiktsvisning!]!
     behandledeOppgaver(behandletAvIdent: String!, behandletAvOid: String!, fom: String): [FerdigstiltOppgave!]!
     behandlingsstatistikk: Behandlingsstatistikk!
+    notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
     oppgaver(after: String, first: Int!): Oppgaver!
     person(aktorId: String, fnr: String): Person
@@ -443,7 +449,6 @@ type Risikovurdering {
 type Saksbehandler {
     ident: String
     navn: String!
-    oid: String
 }
 
 type Sammenligningsgrunnlag {
