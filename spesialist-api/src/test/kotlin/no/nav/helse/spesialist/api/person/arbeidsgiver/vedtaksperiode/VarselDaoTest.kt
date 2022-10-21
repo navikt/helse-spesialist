@@ -12,14 +12,14 @@ internal class VarselDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Tom liste ved manglende varsler`() {
-        assertTrue(varselDao.finnAktiveVarsler(PERIODE.first).isEmpty())
+        assertTrue(varselDao.finnAktiveVarsler(PERIODE.id).isEmpty())
     }
 
     @Test
     fun `Finner varsler`() {
         opprettVedtaksperiode()
         nyttVarsel()
-        assertTrue(varselDao.finnAktiveVarsler(PERIODE.first).isNotEmpty())
+        assertTrue(varselDao.finnAktiveVarsler(PERIODE.id).isNotEmpty())
     }
 
     private fun nyttVarsel(varseltekst: String = "Et varsel") = sessionOf(dataSource).use { session ->

@@ -39,10 +39,10 @@ import org.intellij.lang.annotations.Language
 
 internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected companion object {
-        val NAVN = Triple("Ola", "Kari", "Nordhen")
-        val ENHET = Pair(101, "Halden")
-        val PERIODE = Triple(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
-        val ARBEIDSFORHOLD = Quadruple(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+        val NAVN = Navn("Ola", "Kari", "Nordhen")
+        val ENHET = Enhet(101, "Halden")
+        val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
+        val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
 
         const val FØDSELSNUMMER = "01017011111"
         const val AKTØRID = "01017011111111"
@@ -75,10 +75,9 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettVedtaksperiode(
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-        periode: Triple<UUID, LocalDate, LocalDate> = PERIODE
+        periode: Periode = PERIODE
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val (id, fom, tom) = periode
             val personid = opprettPerson(adressebeskyttelse)
             val arbeidsgiverid =
                 opprettArbeidsgiver()?.also { opprettArbeidsforhold(personid, it) } ?: finnArbeidsgiverId()
@@ -89,7 +88,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
             session.run(
                 queryOf(
-                    statement, id, fom, tom, arbeidsgiverid, personid, snapshotid
+                    statement, periode.id, periode.fom, periode.tom, arbeidsgiverid, personid, snapshotid
                 ).asUpdateAndReturnGeneratedKey
             )?.also {
                 opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
@@ -118,7 +117,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettNotat(
         tekst: String = "Et notat",
         saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
-        vedtaksperiodeId: UUID = PERIODE.first
+        vedtaksperiodeId: UUID = PERIODE.id
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -153,7 +152,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun vedtakId(vedtaksperiodeId: UUID = PERIODE.first) = sessionOf(dataSource).use { session ->
+    protected fun vedtakId(vedtaksperiodeId: UUID = PERIODE.id) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = "SELECT id FROM vedtak WHERE vedtaksperiode_id = ?"
         requireNotNull(session.run(queryOf(statement, vedtaksperiodeId).map { it.long("id") }.asSingle)) {
@@ -176,7 +175,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         FØDSELSNUMMER.toLong(),
                         AKTØRID.toLong(),
                         infotrygdutbetalingerid,
-                        ENHET.first,
+                        ENHET.id,
                         personinfoid
                     ).asUpdateAndReturnGeneratedKey
                 )
@@ -245,7 +244,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     private fun opprettArbeidsforhold(personid: Long, arbeidsgiverid: Long) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val (startdato, sluttdato, tittel, prosent) = ARBEIDSFORHOLD
             @Language("PostgreSQL")
             val statement =
                 "INSERT INTO arbeidsforhold(person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent) VALUES(?, ?, ?, ?, ?, ?)"
@@ -255,10 +253,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         statement,
                         personid,
                         arbeidsgiverid,
-                        startdato,
-                        sluttdato,
-                        tittel,
-                        prosent
+                        ARBEIDSFORHOLD.start,
+                        ARBEIDSFORHOLD.slutt,
+                        ARBEIDSFORHOLD.tittel,
+                        ARBEIDSFORHOLD.prosent,
                     ).asUpdateAndReturnGeneratedKey
                 )
             )
@@ -381,13 +379,27 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     )
 
-    protected class Quadruple<out A, out B, out C, out D>(val first: A, private val second: B, private val third: C, private val fourth: D) {
-        operator fun component1() = first
-        operator fun component2() = second
-        operator fun component3() = third
-        operator fun component4() = fourth
+    protected data class Navn(
+        val fornavn: String,
+        val mellomnavn: String?,
+        val etternavn: String,
+    )
 
-        override fun toString() = "($first, $second, $third, $fourth)"
-    }
+    protected data class Enhet(
+        val id: Int,
+        val navn: String,
+    )
 
+    protected class Periode(
+        val id: UUID,
+        val fom: LocalDate,
+        val tom: LocalDate,
+    )
+
+    protected class Arbeidsforhold(
+        val start: LocalDate,
+        val slutt: LocalDate,
+        val tittel: String,
+        val prosent: Int,
+    )
 }

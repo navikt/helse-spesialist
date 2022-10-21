@@ -16,7 +16,7 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `finner risikovurdering`() {
         risikovurdering()
-        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurdering(PERIODE.first))
+        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurdering(PERIODE.id))
         assertEquals(1, risikovurdering.funn.size)
         assertEquals(1, risikovurdering.kontrollertOk.size)
         assertEquals("En beskrivelse", risikovurdering.funn.first()["beskrivelse"].asText())
@@ -42,7 +42,7 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
             }
         """
         risikovurdering(data = data)
-        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurdering(PERIODE.first))
+        val risikovurdering = requireNotNull(risikovurderingApiDao.finnRisikovurdering(PERIODE.id))
         risikovurdering.also { dto ->
             assertEquals(listOf("jobb ok"), dto.kontrollertOk.map { it["beskrivelse"].asText() })
             assertEquals(listOf("arbeid"), dto.kontrollertOk.flatMap { it["kategori"].map(JsonNode::asText) })
@@ -58,7 +58,7 @@ internal class RisikovurderingApiDaoTest: DatabaseIntegrationTest() {
         assertNull(risikovurderingApiDao.finnRisikovurdering(UUID.randomUUID()))
     }
 
-    private fun risikovurdering(vedtaksperiodeId: UUID = PERIODE.first, data: String = riskrespons) = sessionOf(dataSource).use { session ->
+    private fun risikovurdering(vedtaksperiodeId: UUID = PERIODE.id, data: String = riskrespons) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val statement = "INSERT INTO risikovurdering_2021(vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data) VALUES(?, True, False, ?::json)"
         session.run(queryOf(statement, vedtaksperiodeId, data).asExecute)

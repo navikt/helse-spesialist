@@ -24,7 +24,7 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
         val query = queryize(
             """
             {
-                notater(forPerioder: ["${PERIODE.first}"]) {
+                notater(forPerioder: ["${PERIODE.id}"]) {
                     id
                     notater {
                         id
@@ -53,7 +53,7 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
 
         val notater = runQuery(query)["data"]["notater"].first()
 
-        assertEquals(PERIODE.first.toString(), notater["id"].asText())
+        assertEquals(PERIODE.id.toString(), notater["id"].asText())
         assertEquals(2, notater["notater"].size())
         assertTrue(notater["notater"].any { it["tekst"].asText() == "Et notat" })
         assertTrue(notater["notater"].any { it["tekst"].asText() == "Et annet notat" })
@@ -64,8 +64,8 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
         val førstePeriode = UUID.randomUUID()
         val andrePeriode = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(periode = Triple(førstePeriode, PERIODE.second, PERIODE.third))
-        opprettVedtaksperiode(periode = Triple(andrePeriode, PERIODE.second, PERIODE.third))
+        opprettVedtaksperiode(periode = Periode(førstePeriode, PERIODE.fom, PERIODE.tom))
+        opprettVedtaksperiode(periode = Periode(andrePeriode, PERIODE.fom, PERIODE.tom))
         opprettNotat(tekst = "Et notat", vedtaksperiodeId = førstePeriode)
         opprettNotat(tekst = "Et annet notat" , vedtaksperiodeId = førstePeriode)
         opprettNotat(tekst = "Et tredje notat", vedtaksperiodeId = andrePeriode)

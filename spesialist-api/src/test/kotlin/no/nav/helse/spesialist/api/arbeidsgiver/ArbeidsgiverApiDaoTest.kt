@@ -28,13 +28,12 @@ internal class ArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `finner arbeidsforhold`() {
-        val (startdato, sluttdato, tittel, prosent) = ARBEIDSFORHOLD
         opprettVedtaksperiode()
         val arbeidsforhold = arbeidsgiverApiDao.finnArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER)
         assertEquals(1, arbeidsforhold.size)
-        assertEquals(startdato, arbeidsforhold.first().startdato)
-        assertEquals(sluttdato, arbeidsforhold.first().sluttdato)
-        assertEquals(tittel, arbeidsforhold.first().stillingstittel)
-        assertEquals(prosent, arbeidsforhold.first().stillingsprosent)
+        assertEquals(ARBEIDSFORHOLD.start, arbeidsforhold.first().startdato)
+        assertEquals(ARBEIDSFORHOLD.slutt, arbeidsforhold.first().sluttdato)
+        assertEquals(ARBEIDSFORHOLD.tittel, arbeidsforhold.first().stillingstittel)
+        assertEquals(ARBEIDSFORHOLD.prosent, arbeidsforhold.first().stillingsprosent)
     }
 }

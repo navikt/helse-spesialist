@@ -61,7 +61,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
                 leggTilNotat(
                     tekst: "Dette er et notat",
                     type: Generelt,
-                    vedtaksperiodeId: "${PERIODE.first}",
+                    vedtaksperiodeId: "${PERIODE.id}",
                     saksbehandlerOid: "$SAKSBEHANDLER_OID"
                 )
             }
