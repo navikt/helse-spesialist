@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
@@ -55,7 +56,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private lateinit var graphQLServer: GraphQLServer<ApplicationRequest>
     private lateinit var server: TestServerRuntime
 
-    protected fun setupGraphQLServer() {
+    private fun setupGraphQLServer() {
         val schema = SchemaBuilder(
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
@@ -95,6 +96,11 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private fun setupHttpServer(λ: Route.() -> Unit) {
         server = TestServer(λ = λ).start()
         client = server.restClient()
+    }
+
+    @BeforeAll
+    fun setup() {
+        setupGraphQLServer()
     }
 
     @AfterAll

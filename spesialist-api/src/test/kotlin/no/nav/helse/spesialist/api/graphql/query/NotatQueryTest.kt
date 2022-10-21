@@ -4,15 +4,9 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 internal class NotatQueryTest : AbstractGraphQLApiTest() {
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
-    }
 
     @Test
     fun `henter notater`() {
@@ -67,7 +61,7 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(personId, arbeidsgiverId, Periode(førstePeriode, PERIODE.fom, PERIODE.tom))
         opprettVedtaksperiode(personId, arbeidsgiverId, Periode(andrePeriode, PERIODE.fom, PERIODE.tom))
         opprettNotat(tekst = "Et notat", vedtaksperiodeId = førstePeriode)
-        opprettNotat(tekst = "Et annet notat" , vedtaksperiodeId = førstePeriode)
+        opprettNotat(tekst = "Et annet notat", vedtaksperiodeId = førstePeriode)
         opprettNotat(tekst = "Et tredje notat", vedtaksperiodeId = andrePeriode)
 
         val notater = runQuery(

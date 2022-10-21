@@ -7,17 +7,11 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
-    }
 
     @Test
     fun `saksbehandlere som ikke er medlemmer av kode7 får ikke kode7-oppgaver`() {

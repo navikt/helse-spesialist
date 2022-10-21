@@ -7,18 +7,12 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonQueryTest : AbstractGraphQLApiTest() {
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
-    }
 
     @BeforeEach
     fun prepare() {

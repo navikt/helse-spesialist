@@ -5,18 +5,12 @@ import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractGraphQLApiTest() {
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
-    }
 
     @Test
     fun `henter sykepengegrunnlagsgrense`() {

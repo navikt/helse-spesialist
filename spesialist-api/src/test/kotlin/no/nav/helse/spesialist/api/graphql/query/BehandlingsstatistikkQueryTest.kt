@@ -2,15 +2,9 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 internal class BehandlingsstatistikkQueryTest : AbstractGraphQLApiTest() {
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
-    }
 
     @Test
     fun `henter behandlingsstatistikk`() {

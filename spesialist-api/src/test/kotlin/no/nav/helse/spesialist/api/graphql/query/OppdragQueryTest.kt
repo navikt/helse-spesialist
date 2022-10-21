@@ -11,15 +11,9 @@ import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDto
 import no.nav.helse.spesialist.api.utbetaling.Utbetalingsstatus
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 internal class OppdragQueryTest : AbstractGraphQLApiTest() {
-
-    @BeforeAll
-    fun setup() {
-        setupGraphQLServer()
-    }
 
     @AfterEach
     fun clear() {
