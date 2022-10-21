@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.notat
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

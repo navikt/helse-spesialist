@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.generator.execution.GraphQLContext
@@ -17,7 +19,7 @@ class ContextFactory(
     private val riskSaksbehandlergruppe: UUID,
 ) : GraphQLContextFactory<AuthorizedContext, ApplicationRequest> {
 
-    override suspend fun generateContextMap(request: ApplicationRequest): Map<*, Any> =
+    override suspend fun generateContextMap(request: ApplicationRequest): Map<String, Any> =
         mapOf(
             "tilganger" to SaksbehandlerTilganger(
                 gruppetilganger = request.getGrupper(),

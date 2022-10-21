@@ -18,7 +18,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.spesialist.api.notat.NotatType
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(Lifecycle.PER_CLASS)

@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.notat
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 
 data class KommentarDto(
     val id: Int,
@@ -28,8 +29,3 @@ data class NotatDto(
     val kommentarer: List<KommentarDto>,
 )
 
-enum class NotatType {
-    Retur,
-    Generelt,
-    PaaVent,
-}

@@ -16,8 +16,8 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatType
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype

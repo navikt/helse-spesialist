@@ -271,6 +271,7 @@ type Mutation {
     feilregistrerKommentar(id: Int!): Boolean!
     feilregistrerNotat(id: Int!): Boolean!
     leggTilKommentar(notatId: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
+    leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Int!
 }
 
 type Notat {
@@ -442,6 +443,7 @@ type Risikovurdering {
 type Saksbehandler {
     ident: String
     navn: String!
+    oid: String
 }
 
 type Sammenligningsgrunnlag {

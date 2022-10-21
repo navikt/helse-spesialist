@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.notat
 
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 
 class NotatMediator(
     private val notatDao: NotatDao,

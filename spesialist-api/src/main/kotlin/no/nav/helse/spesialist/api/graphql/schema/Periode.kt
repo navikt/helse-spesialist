@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Soknadsfrist
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.Sykepengedager
 import no.nav.helse.spesialist.api.notat.NotatDao
-import no.nav.helse.spesialist.api.notat.NotatType
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
@@ -167,6 +166,12 @@ data class Notat(
     val type: NotatType,
     val kommentarer: List<Kommentar>,
 )
+
+enum class NotatType {
+    Retur,
+    Generelt,
+    PaaVent,
+}
 
 data class PeriodeHistorikkElement(
     val type: PeriodehistorikkType,

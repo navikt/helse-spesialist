@@ -5,7 +5,9 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
 
 class NotatMutation(private val notatDao: NotatDao) : Mutation {
@@ -23,9 +25,15 @@ class NotatMutation(private val notatDao: NotatDao) : Mutation {
     }
 
     @Suppress("unused")
+    fun leggTilNotat(tekst: String, type: NotatType, vedtaksperiodeId: String, saksbehandlerOid: String): Int {
+        return notatDao.opprettNotat(UUID.fromString(vedtaksperiodeId), tekst, UUID.fromString(saksbehandlerOid), type)
+    }
+
+    @Suppress("unused")
     fun leggTilKommentar(notatId: Int, tekst: String, saksbehandlerident: String): DataFetcherResult<Kommentar?> {
         val kommentar = try {
-            notatDao.leggTilKommentar(notatId, tekst, saksbehandlerident) ?: return DataFetcherResult.newResult<Kommentar?>().data(null).build()
+            notatDao.leggTilKommentar(notatId, tekst, saksbehandlerident)
+                ?: return DataFetcherResult.newResult<Kommentar?>().data(null).build()
         } catch (e: Exception) {
             return DataFetcherResult.newResult<Kommentar?>().error(getNotFoundError(notatId)).build()
         }

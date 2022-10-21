@@ -51,6 +51,29 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `legger til notat`() {
+        opprettSaksbehandler()
+        opprettVedtaksperiode()
+
+        val query = queryize(
+            """
+            mutation LeggTilNotat {
+                leggTilNotat(
+                    tekst: "Dette er et notat",
+                    type: Generelt,
+                    vedtaksperiodeId: "${PERIODE.first}",
+                    saksbehandlerOid: "$SAKSBEHANDLER_OID"
+                )
+            }
+        """
+        )
+
+        val antallNyeNotater = runQuery(query)["data"]["leggTilNotat"].asInt()
+
+        assertEquals(1, antallNyeNotater)
+    }
+
+    @Test
     fun `legger til ny kommentar`() {
         opprettSaksbehandler()
         opprettVedtaksperiode()

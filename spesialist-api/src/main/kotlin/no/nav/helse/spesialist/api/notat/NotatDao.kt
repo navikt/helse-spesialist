@@ -6,6 +6,7 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import org.intellij.lang.annotations.Language
 
 class NotatDao(private val dataSource: DataSource) : HelseDao(dataSource) {
