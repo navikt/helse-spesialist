@@ -8,11 +8,17 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import no.nav.helse.spesialist.api.graphql.schema.Boenhet
+import no.nav.helse.spesialist.api.graphql.schema.Kjonn
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
+import no.nav.helse.spesialist.api.graphql.schema.Personinfo
+import no.nav.helse.spesialist.api.graphql.schema.Tildeling
+import no.nav.helse.spesialist.api.graphql.schema.tilAdressebeskyttelse
+import no.nav.helse.spesialist.api.graphql.schema.tilKjonn
+import no.nav.helse.spesialist.api.graphql.schema.tilOppgavetype
+import no.nav.helse.spesialist.api.graphql.schema.tilPeriodetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
-import no.nav.helse.spesialist.api.person.PersoninfoApiDto
-import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import org.intellij.lang.annotations.Language
@@ -87,7 +93,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger) =
+    fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisning> =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA =
                 if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
@@ -125,7 +131,7 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             """
             session.run(
                 queryOf(query)
-                    .map(::saksbehandleroppgaveDto)
+                    .map(::tilOppgaveForOversiktsvisning)
                     .asList
             )
         }
@@ -196,38 +202,39 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     companion object {
         private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 
-        internal fun saksbehandleroppgaveDto(it: Row) = OppgaveForOversiktsvisningDto(
-            oppgavereferanse = it.string("oppgave_id"),
-            oppgavetype = it.string("oppgavetype"),
-            opprettet = it.localDateTime("opprettet"),
-            vedtaksperiodeId = UUID.fromString(it.string("vedtaksperiode_id")),
-            personinfo = PersoninfoApiDto(
-                it.string("fornavn"),
-                it.stringOrNull("mellomnavn"),
-                it.string("etternavn"),
-                it.localDateOrNull("fodselsdato"),
-                it.stringOrNull("kjonn")?.let(Kjønn::valueOf),
-                it.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf)
+        internal fun tilOppgaveForOversiktsvisning(it: Row) = OppgaveForOversiktsvisning(
+            id = it.string("oppgave_id"),
+            type = Oppgavetype.valueOf(it.string("oppgavetype")).tilOppgavetype(),
+            opprettet = it.string("opprettet"),
+            vedtaksperiodeId = it.string("vedtaksperiode_id"),
+            personinfo = Personinfo(
+                fornavn = it.string("fornavn"),
+                mellomnavn = it.stringOrNull("mellomnavn"),
+                etternavn = it.string("etternavn"),
+                fodselsdato = it.string("fodselsdato"),
+                kjonn = it.stringOrNull("kjonn")?.let { Kjønn.valueOf(it).tilKjonn() } ?: Kjonn.Ukjent,
+                adressebeskyttelse = it.string("adressebeskyttelse").let(Adressebeskyttelse::valueOf)
+                    .tilAdressebeskyttelse(),
             ),
-            aktørId = it.long("aktor_id").toString(),
-            fødselsnummer = it.long("fodselsnummer").toFødselsnummer(),
+            aktorId = it.long("aktor_id").toString(),
+            fodselsnummer = it.long("fodselsnummer").toFødselsnummer(),
             antallVarsler = it.int("antall_varsler"),
-            type = it.stringOrNull("saksbehandleroppgavetype")?.let(Periodetype::valueOf),
-            inntektskilde = it.stringOrNull("inntektskilde")?.let(Inntektskilde::valueOf),
-            boenhet = EnhetDto(it.string("enhet_id"), it.string("enhet_navn")),
+            periodetype = it.stringOrNull("saksbehandleroppgavetype")?.let(Periodetype::valueOf)?.tilPeriodetype(),
+            flereArbeidsgivere = it.stringOrNull("inntektskilde") == Inntektskilde.FLERE_ARBEIDSGIVERE.name,
+            boenhet = Boenhet(id = it.string("enhet_id"), navn = it.string("enhet_navn")),
             tildeling = it.stringOrNull("epost")?.let { epost ->
-                TildelingApiDto(
+                Tildeling(
                     navn = it.string("saksbehandler_navn"),
                     epost = epost,
-                    oid = UUID.fromString(it.string("oid")),
-                    påVent = it.boolean("på_vent")
+                    oid = it.string("oid"),
+                    reservert = it.boolean("på_vent")
                 )
             },
-            erBeslutterOppgave = it.boolean("er_beslutteroppgave"),
-            erReturOppgave = it.boolean("er_returoppgave"),
+            erBeslutter = it.boolean("er_beslutteroppgave"),
+            erRetur = it.boolean("er_returoppgave"),
             trengerTotrinnsvurdering = it.boolean("er_totrinnsoppgave"),
-            tidligereSaksbehandlerOid = it.uuidOrNull("tidligere_saksbehandler_oid"),
-            sistSendt = it.localDateTimeOrNull("sist_sendt")
+            tidligereSaksbehandler = it.stringOrNull("tidligere_saksbehandler_oid"),
+            sistSendt = it.stringOrNull("sist_sendt"),
         )
     }
 }

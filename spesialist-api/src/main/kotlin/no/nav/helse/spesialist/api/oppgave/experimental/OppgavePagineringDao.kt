@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.api.oppgave.experimental
 
-import java.time.LocalDateTime
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao.Companion.saksbehandleroppgaveDto
-import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
+import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import org.intellij.lang.annotations.Language
 
 class OppgavePagineringDao(private val dataSource: DataSource) : HelseDao(dataSource) {
@@ -44,9 +43,9 @@ class OppgavePagineringDao(private val dataSource: DataSource) : HelseDao(dataSo
 
     fun finnOppgaver(
         tilganger: SaksbehandlerTilganger,
-        fra: LocalDateTime?,
-        antall: Int
-    ): List<PaginertOppgave> =
+        antall: Int,
+        side: Int,
+    ): List<OppgaveForOversiktsvisning> =
         sessionOf(dataSource).use { session ->
             val eventuellEkskluderingAvRiskQA =
                 if (tilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
@@ -73,7 +72,6 @@ class OppgavePagineringDao(private val dataSource: DataSource) : HelseDao(dataSo
                 $eventuellEkskluderingAvRiskQA
                 $gyldigeAdressebeskyttelser
                 $eventuellEkskluderingAvBeslutterOppgaver
-                AND o.opprettet > :fra
             ORDER BY
                 CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
@@ -83,18 +81,9 @@ class OppgavePagineringDao(private val dataSource: DataSource) : HelseDao(dataSo
             ;
             """
             session.run(
-                queryOf(query, mapOf("fra" to fra, "antall" to antall))
-                    .map {
-                        val oppgave = saksbehandleroppgaveDto(it)
-                        val radnummer = it.int("row_number")
-                        PaginertOppgave(oppgave, radnummer)
-                    }
+                queryOf(query, mapOf("antall" to antall))
+                    .map(OppgaveApiDao::tilOppgaveForOversiktsvisning)
                     .asList
             )
         }
 }
-
-data class PaginertOppgave(
-    val oppgave: OppgaveForOversiktsvisningDto,
-    val radnummer: Int,
-)

@@ -31,7 +31,7 @@ import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Inntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test
 
 internal class OverstyringE2ETest : AbstractE2ETest() {
 
-    private fun List<OppgaveForOversiktsvisningDto>.ingenOppgaveMedId(id: String) = none { it.oppgavereferanse == id }
+    private fun List<OppgaveForOversiktsvisning>.ingenOppgaveMedId(id: String) = none { it.id == id }
     private fun assertIngenOppgaver(id: String) {
         oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).ingenOppgaveMedId(id)
     }
@@ -77,7 +77,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         klargjørForGodkjenning(nyttGodkjenningsbehov)
 
         val oppgave =
-            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).find { it.fødselsnummer == FØDSELSNUMMER }
+            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).find { it.fodselsnummer == FØDSELSNUMMER }
         assertEquals(SAKSBEHANDLER_EPOST, oppgave!!.tildeling?.epost)
     }
 
@@ -120,7 +120,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         klargjørForGodkjenning(nyttGodkjenningsbehov)
 
         val oppgave = requireNotNull(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-            .find { it.fødselsnummer == FØDSELSNUMMER })
+            .find { it.fodselsnummer == FØDSELSNUMMER })
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
@@ -158,7 +158,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         klargjørForGodkjenning(nyttGodkjenningsbehov)
 
         val oppgave = requireNotNull(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
-            .find { it.fødselsnummer == FØDSELSNUMMER })
+            .find { it.fodselsnummer == FØDSELSNUMMER })
         assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
     }
 
@@ -252,7 +252,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         // TODO: bør ikke koble seg på daoer i E2E
         assertTrue(
-            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fødselsnummer == FØDSELSNUMMER })
+            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER).any { it.fodselsnummer == FØDSELSNUMMER })
 
         val snapshot: Person = personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!!
 

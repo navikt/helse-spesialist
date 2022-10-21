@@ -1,8 +1,9 @@
 package no.nav.helse.spesialist.api.oppgave.experimental
 
-import java.time.LocalDateTime
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
+import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
+import no.nav.helse.spesialist.api.graphql.schema.Oppgaver
+import no.nav.helse.spesialist.api.graphql.schema.Paginering
 import kotlin.math.ceil
 
 /**
@@ -14,18 +15,19 @@ class OppgaveService(
 
     fun hentOppgaver(
         tilganger: SaksbehandlerTilganger,
-        fra: LocalDateTime?,
-        antall: Int
-    ): Paginering<OppgaveForOversiktsvisningDto, LocalDateTime> {
-        val oppgaverForSiden: List<PaginertOppgave> =
-            oppgavePagineringDao.finnOppgaver(tilganger, fra, antall)
+        antall: Int,
+        side: Int,
+    ): Oppgaver {
+        val oppgaverForSiden: List<OppgaveForOversiktsvisning> =
+            oppgavePagineringDao.finnOppgaver(tilganger = tilganger, antall = antall, side = side)
         val totaltAntallOppgaver = getAntallOppgaver(tilganger)
-        return Paginering(
-            elementer = oppgaverForSiden.map { it.oppgave },
-            peker = oppgaverForSiden.last().oppgave.opprettet,
-            sidestørrelse = oppgaverForSiden.size,
-            nåværendeSide = ceil(oppgaverForSiden.first().radnummer.toDouble() / antall).toInt(),
-            totaltAntallSider = ceil(totaltAntallOppgaver.toDouble() / antall).toInt(),
+        return Oppgaver(
+            oppgaver = oppgaverForSiden,
+            paginering = Paginering(
+                side = side,
+                elementerPerSide = oppgaverForSiden.size,
+                antallSider = ceil(totaltAntallOppgaver.toDouble() / antall).toInt(),
+            )
         )
     }
 
@@ -33,11 +35,3 @@ class OppgaveService(
         oppgavePagineringDao.getAntallOppgaver(saksbehandlerTilganger)
 
 }
-
-data class Paginering<V, P>(
-    val elementer: List<V>,
-    val peker: P,
-    val sidestørrelse: Int,
-    val nåværendeSide: Int,
-    val totaltAntallSider: Int,
-)

@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import no.nav.helse.spesialist.api.person.Kjønn
+
 enum class Kjonn {
     Kvinne,
     Mann,
@@ -21,5 +23,19 @@ data class Personinfo(
     val fodselsdato: DateString?,
     val kjonn: Kjonn,
     val adressebeskyttelse: Adressebeskyttelse,
-    val reservasjon: Reservasjon?,
+    val reservasjon: Reservasjon? = null,
 )
+
+internal fun Kjønn.tilKjonn(): Kjonn = when (this) {
+    Kjønn.Mann -> Kjonn.Mann
+    Kjønn.Kvinne -> Kjonn.Kvinne
+    Kjønn.Ukjent -> Kjonn.Ukjent
+}
+
+internal fun no.nav.helse.spesialist.api.person.Adressebeskyttelse.tilAdressebeskyttelse(): Adressebeskyttelse = when (this) {
+    no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
+    no.nav.helse.spesialist.api.person.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig
+    no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortrolig -> Adressebeskyttelse.StrengtFortrolig
+    no.nav.helse.spesialist.api.person.Adressebeskyttelse.StrengtFortroligUtland -> Adressebeskyttelse.StrengtFortroligUtland
+    no.nav.helse.spesialist.api.person.Adressebeskyttelse.Ukjent -> Adressebeskyttelse.Ukjent
+}

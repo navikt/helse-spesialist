@@ -2,11 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import java.time.format.DateTimeFormatter
 import no.nav.helse.spesialist.api.oppgave.FerdigstiltOppgaveDto
-import no.nav.helse.spesialist.api.oppgave.OppgaveForOversiktsvisningDto
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
-import no.nav.helse.spesialist.api.graphql.schema.Adressebeskyttelse as GraphQLAdressebeskyttelse
 
 enum class Oppgavetype {
     SOKNAD,
@@ -71,7 +67,6 @@ data class FerdigstiltOppgave(
 )
 
 data class Paginering(
-    val peker: String?, // Base64-encoded datetime
     val side: Int,
     val elementerPerSide: Int,
     val antallSider: Int,
@@ -100,69 +95,6 @@ internal fun no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.tilPeriodety
         no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
         no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
     }
-
-internal fun List<OppgaveForOversiktsvisningDto>.tilOppgaver(): List<OppgaveForOversiktsvisning> {
-    return map { oppgave ->
-        OppgaveForOversiktsvisning(
-            id = oppgave.oppgavereferanse,
-            type = no.nav.helse.spesialist.api.oppgave.Oppgavetype.valueOf(oppgave.oppgavetype).tilOppgavetype(),
-            opprettet = oppgave.opprettet.format(DateTimeFormatter.ISO_DATE_TIME),
-            vedtaksperiodeId = oppgave.vedtaksperiodeId.toString(),
-            personinfo = Personinfo(
-                fornavn = oppgave.personinfo.fornavn,
-                mellomnavn = oppgave.personinfo.mellomnavn,
-                etternavn = oppgave.personinfo.etternavn,
-                fodselsdato = oppgave.personinfo.fødselsdato?.format(DateTimeFormatter.ISO_DATE),
-                kjonn = when (oppgave.personinfo.kjønn) {
-                    Kjønn.Mann -> Kjonn.Mann
-                    Kjønn.Kvinne -> Kjonn.Kvinne
-                    Kjønn.Ukjent -> Kjonn.Ukjent
-                    null -> Kjonn.Ukjent
-                },
-                adressebeskyttelse = when (oppgave.personinfo.adressebeskyttelse) {
-                    Adressebeskyttelse.Ugradert -> GraphQLAdressebeskyttelse.Ugradert
-                    Adressebeskyttelse.Fortrolig -> GraphQLAdressebeskyttelse.Fortrolig
-                    Adressebeskyttelse.StrengtFortrolig -> GraphQLAdressebeskyttelse.StrengtFortrolig
-                    Adressebeskyttelse.StrengtFortroligUtland -> GraphQLAdressebeskyttelse.StrengtFortroligUtland
-                    Adressebeskyttelse.Ukjent -> GraphQLAdressebeskyttelse.Ukjent
-                },
-                reservasjon = null,
-            ),
-            aktorId = oppgave.aktørId,
-            fodselsnummer = oppgave.fødselsnummer,
-            antallVarsler = oppgave.antallVarsler,
-            periodetype = when (oppgave.type) {
-                no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING -> Periodetype.FORSTEGANGSBEHANDLING
-                no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.FORLENGELSE -> Periodetype.FORLENGELSE
-                no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE -> Periodetype.INFOTRYGDFORLENGELSE
-                no.nav.helse.spesialist.api.vedtaksperiode.Periodetype.OVERGANG_FRA_IT -> Periodetype.OVERGANG_FRA_IT
-                null -> null
-            },
-            flereArbeidsgivere = when (oppgave.inntektskilde) {
-                Inntektskilde.EN_ARBEIDSGIVER -> false
-                Inntektskilde.FLERE_ARBEIDSGIVERE -> true
-                null -> false
-            },
-            boenhet = Boenhet(
-                id = oppgave.boenhet.id,
-                navn = oppgave.boenhet.navn,
-            ),
-            tildeling = oppgave.tildeling?.let { tildeling ->
-                Tildeling(
-                    navn = tildeling.navn,
-                    epost = tildeling.epost,
-                    oid = tildeling.oid.toString(),
-                    reservert = tildeling.påVent,
-                )
-            },
-            erRetur = oppgave.erReturOppgave,
-            erBeslutter = oppgave.erBeslutterOppgave,
-            trengerTotrinnsvurdering = oppgave.trengerTotrinnsvurdering,
-            tidligereSaksbehandler = oppgave.tidligereSaksbehandlerOid?.toString(),
-            sistSendt = oppgave.sistSendt?.format(DateTimeFormatter.ISO_DATE_TIME),
-        )
-    }
-}
 
 internal fun List<FerdigstiltOppgaveDto>.tilFerdigstilteOppgaver(): List<FerdigstiltOppgave> =
     map {

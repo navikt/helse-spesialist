@@ -6,6 +6,13 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.TestHendelse
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.RISK_QA
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.SOKNAD
+import no.nav.helse.spesialist.api.graphql.schema.Oppgavetype.STIKKPROVE
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORLENGELSE
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype.FORSTEGANGSBEHANDLING
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.spesialist.api.graphql.schema.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -13,8 +20,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde as InntektskildeForApi
-import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype as PeriodetypeForApi
 
 class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     private companion object {
@@ -34,7 +39,7 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
         val oppgave = oppgaver.first()
         assertTrue(oppgaver.isNotEmpty())
-        assertEquals(oppgaveId.toString(), oppgave.oppgavereferanse)
+        assertEquals(oppgaveId.toString(), oppgave.id)
     }
 
     @Test
@@ -47,8 +52,8 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
         assertTrue(oppgaver.isNotEmpty())
         val oppgave = oppgaver.first()
-        assertEquals("RISK_QA", oppgave.oppgavetype)
-        assertEquals(oppgaveId.toString(), oppgave.oppgavereferanse)
+        assertEquals(RISK_QA, oppgave.type)
+        assertEquals(oppgaveId.toString(), oppgave.id)
         assertTrue(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).isEmpty())
     }
 
@@ -128,28 +133,28 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiodeOgOppgave(Periodetype.OVERGANG_FRA_IT, Oppgavetype.STIKKPRØVE)
 
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
-        oppgaver.filter { it.oppgavetype == "RISK_QA" }.let { riskoppgaver ->
+        oppgaver.filter { it.type == RISK_QA }.let { riskoppgaver ->
             assertTrue(riskoppgaver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
                 "Oops, skulle ha vært sortert stigende , men er det ikke: $riskoppgaver"
             }
         }
-        oppgaver.filter { it.oppgavetype == "STIKKPRØVER" }.let { stikkprøver ->
+        oppgaver.filter { it.type == STIKKPROVE }.let { stikkprøver ->
             assertTrue(stikkprøver.map { it.opprettet }.zipWithNext { a, b -> a <= b }.all { it }) {
                 "Oops, skulle ha vært sortert stigende , men er det ikke: $stikkprøver"
             }
         }
         listOf(
-            "STIKKPRØVE" to PeriodetypeForApi.FORLENGELSE,
-            "STIKKPRØVE" to PeriodetypeForApi.OVERGANG_FRA_IT,
-            "RISK_QA" to PeriodetypeForApi.FORLENGELSE,
-            "RISK_QA" to PeriodetypeForApi.FØRSTEGANGSBEHANDLING,
-            "RISK_QA" to PeriodetypeForApi.OVERGANG_FRA_IT,
-            "RISK_QA" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
-            "SØKNAD" to PeriodetypeForApi.FØRSTEGANGSBEHANDLING,
-            "SØKNAD" to PeriodetypeForApi.INFOTRYGDFORLENGELSE,
+            STIKKPROVE to FORLENGELSE,
+            STIKKPROVE to OVERGANG_FRA_IT,
+            RISK_QA to FORLENGELSE,
+            RISK_QA to FORSTEGANGSBEHANDLING,
+            RISK_QA to OVERGANG_FRA_IT,
+            RISK_QA to INFOTRYGDFORLENGELSE,
+            SOKNAD to FORSTEGANGSBEHANDLING,
+            SOKNAD to INFOTRYGDFORLENGELSE,
         ).let { ønsketRekkefølge ->
-            assertEquals(ønsketRekkefølge.map { it.first }, oppgaver.map { it.oppgavetype })
-            assertEquals(ønsketRekkefølge.map { it.second }, oppgaver.map { it.type })
+            assertEquals(ønsketRekkefølge.map { it.first }, oppgaver.map { it.type })
+            assertEquals(ønsketRekkefølge.map { it.second }, oppgaver.map { it.periodetype })
         }
     }
 
@@ -177,10 +182,11 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
         assertEquals(
             false,
             oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN)
-                .first().tildeling?.påVent
+                .first().tildeling?.reservert
         )
         assertEquals(
-            SAKSBEHANDLER_OID, oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().tildeling?.oid
+            SAKSBEHANDLER_OID.toString(),
+            oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_INGEN).first().tildeling?.oid
         )
     }
 
@@ -188,8 +194,8 @@ class OppgaveApiDaoTest : DatabaseIntegrationTest() {
     fun `en oppgave har riktig oppgavetype og inntektskilde`() {
         nyPerson(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE)
         val oppgaver = oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_MED_RISK)
-        assertEquals(PeriodetypeForApi.FØRSTEGANGSBEHANDLING, oppgaver.first().type)
-        assertEquals(InntektskildeForApi.FLERE_ARBEIDSGIVERE, oppgaver.first().inntektskilde)
+        assertEquals(FORSTEGANGSBEHANDLING, oppgaver.first().periodetype)
+        assertTrue(oppgaver.first().flereArbeidsgivere)
     }
 
     @Test
