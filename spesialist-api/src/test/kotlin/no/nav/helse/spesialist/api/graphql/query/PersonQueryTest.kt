@@ -32,48 +32,43 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter person`() {
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
     }
 
     @Test
     fun `får 400-feil når man ikke oppgir fødselsnummer eller aktørid i query`() {
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: null) { aktorId } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ person(fnr: null) { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
     }
 
     @Test
     fun `får 404-feil når personen man søker etter ikke finnes`() {
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
     }
 
     @Test
     fun `kan slå opp kode7-personer med riktige tilganger`() {
-        opprettVedtaksperiode(Adressebeskyttelse.Fortrolig)
+        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query, kode7Saksbehandlergruppe)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", kode7Saksbehandlergruppe)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
     }
 
     @Test
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
-        opprettVedtaksperiode(Adressebeskyttelse.Fortrolig)
+        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -81,10 +76,9 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `kan slå opp skjermede personer med riktige tilganger`() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query, skjermedePersonerGruppeId)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", skjermedePersonerGruppeId)
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
     }
@@ -92,10 +86,9 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `får 403-feil ved oppslag av skjermede personer`() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -103,10 +96,9 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `får 501-feil når oppdatering av snapshot feiler`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } throws GraphQLException("Oops")
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")
 
         assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
     }

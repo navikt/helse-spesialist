@@ -17,7 +17,7 @@ internal class VarselDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Finner varsler`() {
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         nyttVarsel()
         assertTrue(varselDao.finnAktiveVarsler(PERIODE.id).isNotEmpty())
     }

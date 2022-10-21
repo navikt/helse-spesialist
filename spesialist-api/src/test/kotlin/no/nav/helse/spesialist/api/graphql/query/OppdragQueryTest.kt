@@ -28,11 +28,10 @@ internal class OppdragQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter oppdrag`() {
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         mockUtbetalinger()
 
-        val query = queryize("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
         val oppdrag = body["data"]["oppdrag"]
 
         assertEquals(1, oppdrag.size())
@@ -41,19 +40,17 @@ internal class OppdragQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 404-feil ved oppslag av person som ikke finnes`() {
-        val query = queryize("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
     }
 
     @Test
     fun `får 403-feil ved oppslag av kode7-personer uten riktige tilganger`() {
-        opprettVedtaksperiode(Adressebeskyttelse.Fortrolig)
+        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
         mockUtbetalinger()
 
-        val query = queryize("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -61,11 +58,10 @@ internal class OppdragQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `får 403-feil ved oppslag av skjermede personer uten riktige tilganger`() {
         every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         mockUtbetalinger()
 
-        val query = queryize("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ oppdrag(fnr: "$FØDSELSNUMMER") { status } }""")
 
         assertEquals(403, body["errors"].first()["extensions"]["code"].asInt())
     }

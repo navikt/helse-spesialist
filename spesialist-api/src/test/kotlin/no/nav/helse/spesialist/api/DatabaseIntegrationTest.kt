@@ -43,16 +43,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val ENHET = Enhet(101, "Halden")
         val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
         val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+        val SAKSBEHANDLER = Saksbehandler(UUID.randomUUID(), "Jan Banan", "jan.banan@nav.no", "B123456")
 
         const val FØDSELSNUMMER = "01017011111"
         const val AKTØRID = "01017011111111"
         const val ARBEIDSGIVER_NAVN = "EN ARBEIDSGIVER"
         const val ORGANISASJONSNUMMER = "987654321"
-
-        val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
-        const val SAKSBEHANDLER_NAVN = "Jan Banan"
-        const val SAKSBEHANDLER_EPOST = "jan.banan@nav.no"
-        const val SAKSBEHANDLER_IDENT = "B123456"
     }
 
     protected val varselDao = VarselDao(dataSource)
@@ -74,26 +70,33 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
 
     protected fun opprettVedtaksperiode(
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-        periode: Periode = PERIODE
+        personId: Long,
+        arbeidsgiverId: Long,
+        periode: Periode = PERIODE,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            val personid = opprettPerson(adressebeskyttelse)
-            val arbeidsgiverid =
-                opprettArbeidsgiver()?.also { opprettArbeidsforhold(personid, it) } ?: finnArbeidsgiverId()
             val snapshotid = opprettSnapshot()
 
             @Language("PostgreSQL")
             val statement =
                 "INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) VALUES(?, ?, ?, ?, ?, ?)"
-            session.run(
-                queryOf(
-                    statement, periode.id, periode.fom, periode.tom, arbeidsgiverid, personid, snapshotid
-                ).asUpdateAndReturnGeneratedKey
-            )?.also {
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            ).also {
                 opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
                 opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, it)
             }
+        }
+
+    private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val statement = "INSERT INTO saksbehandleroppgavetype(type, vedtak_ref, inntektskilde) VALUES (?, ?, ?)"
+            session.run(queryOf(statement, type.toString(), vedtakRef, inntektskilde.toString()).asUpdate)
         }
 
     protected fun ferdigstillOppgave(vedtakRef: Long) {
@@ -103,20 +106,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 UPDATE oppgave SET ferdigstilt_av = ?, ferdigstilt_av_oid = ?, status = 'Ferdigstilt', oppdatert = now()
                 WHERE oppgave.vedtak_ref = ?
             """.trimIndent()
-            session.run(queryOf(statement, SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, vedtakRef).asUpdate)
+            session.run(queryOf(statement, SAKSBEHANDLER.ident, SAKSBEHANDLER.oid, vedtakRef).asUpdate)
         }
     }
 
-    private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val statement = "INSERT INTO saksbehandleroppgavetype(type, vedtak_ref, inntektskilde) VALUES (?, ?, ?)"
-            session.run(queryOf(statement, type.toString(), vedtakRef, inntektskilde.toString()).asUpdate)
-        }
-
     protected fun opprettNotat(
         tekst: String = "Et notat",
-        saksbehandlerOid: UUID = SAKSBEHANDLER_OID,
+        saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
         vedtaksperiodeId: UUID = PERIODE.id
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
@@ -137,7 +133,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettKommentar(
         tekst: String = "En kommentar",
         notatRef: Int,
-        saksbehandlerIdent: String = SAKSBEHANDLER_IDENT,
+        saksbehandlerIdent: String = SAKSBEHANDLER.ident,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -160,7 +156,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
-    protected fun opprettPerson(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) =
+    protected fun opprettPerson(
+        fødselsnummer: String = FØDSELSNUMMER,
+        aktørId: String = AKTØRID,
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
+    ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val personinfoid = opprettPersoninfo(adressebeskyttelse)
             val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
@@ -172,8 +172,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 session.run(
                     queryOf(
                         statement,
-                        FØDSELSNUMMER.toLong(),
-                        AKTØRID.toLong(),
+                        fødselsnummer.toLong(),
+                        aktørId.toLong(),
                         infotrygdutbetalingerid,
                         ENHET.id,
                         personinfoid
@@ -203,7 +203,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun opprettArbeidsgiver(bransjer: List<String> = emptyList()) =
+    protected fun opprettArbeidsgiver(
+        organisasjonsnummer: String = ORGANISASJONSNUMMER,
+        bransjer: List<String> = emptyList()
+    ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val bransjeid = opprettBransjer(bransjer)
             val navnid = opprettArbeidsgivernavn()
@@ -211,13 +214,15 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             @Language("PostgreSQL")
             val statement =
                 "INSERT INTO arbeidsgiver(orgnummer, navn_ref, bransjer_ref) VALUES(?, ?, ?) ON CONFLICT DO NOTHING"
-            session.run(
-                queryOf(
-                    statement,
-                    ORGANISASJONSNUMMER.toLong(),
-                    navnid,
-                    bransjeid
-                ).asUpdateAndReturnGeneratedKey
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        statement,
+                        organisasjonsnummer.toLong(),
+                        navnid,
+                        bransjeid
+                    ).asUpdateAndReturnGeneratedKey
+                )
             )
         }
 
@@ -229,10 +234,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         })
 
     protected fun opprettSaksbehandler(
-        oid: UUID = SAKSBEHANDLER_OID,
-        navn: String = SAKSBEHANDLER_NAVN,
-        epost: String = SAKSBEHANDLER_EPOST,
-        ident: String = SAKSBEHANDLER_IDENT
+        oid: UUID = SAKSBEHANDLER.oid,
+        navn: String = SAKSBEHANDLER.navn,
+        epost: String = SAKSBEHANDLER.epost,
+        ident: String = SAKSBEHANDLER.ident,
     ): UUID {
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -242,7 +247,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         return oid
     }
 
-    private fun opprettArbeidsforhold(personid: Long, arbeidsgiverid: Long) =
+    protected fun opprettArbeidsforhold(personid: Long, arbeidsgiverid: Long) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
             val statement =
@@ -308,20 +313,21 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtakRef: Long,
         erBeslutter: Boolean = false
     ) =
-        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-            @Language("PostgreSQL")
-            val statement =
-                "INSERT INTO oppgave(oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
-            session.run(
-                queryOf(
-                    statement,
-                    status.name,
-                    vedtakRef,
-                    oppgavetype.name,
-                    erBeslutter,
-                ).asUpdateAndReturnGeneratedKey
-            )
-        }
+        requireNotNull(
+            sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+                @Language("PostgreSQL")
+                val statement =
+                    "INSERT INTO oppgave(oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
+                session.run(
+                    queryOf(
+                        statement,
+                        status.name,
+                        vedtakRef,
+                        oppgavetype.name,
+                        erBeslutter,
+                    ).asUpdateAndReturnGeneratedKey
+                )
+            })
 
     protected fun tildelOppgave(oppgaveRef: Long, saksbehandlerOid: UUID) =
         sessionOf(dataSource).use { session ->
@@ -390,16 +396,23 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val navn: String,
     )
 
-    protected class Periode(
+    protected data class Periode(
         val id: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
     )
 
-    protected class Arbeidsforhold(
+    protected data class Arbeidsforhold(
         val start: LocalDate,
         val slutt: LocalDate,
         val tittel: String,
         val prosent: Int,
+    )
+
+    protected data class Saksbehandler(
+        val oid: UUID,
+        val navn: String,
+        val ident: String,
+        val epost: String,
     )
 }

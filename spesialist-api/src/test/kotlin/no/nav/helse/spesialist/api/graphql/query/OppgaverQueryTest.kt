@@ -21,10 +21,9 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `saksbehandlere som ikke er medlemmer av kode7 får ikke kode7-oppgaver`() {
-        opprettVedtaksperiode(Adressebeskyttelse.Fortrolig)
+        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
-        val query = queryize("""{ alleOppgaver { type } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ alleOppgaver { type } }""")
         val antallOppgaver = body["data"]["alleOppgaver"].size()
 
         assertEquals(0, antallOppgaver)
@@ -32,10 +31,9 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `saksbehandlere som er medlemmer av kode7 får kode7-oppgaver`() {
-        opprettVedtaksperiode(Adressebeskyttelse.Fortrolig)
+        opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig), opprettArbeidsgiver())
 
-        val query = queryize("""{ alleOppgaver { type } }""")
-        val body = runQuery(query, kode7Saksbehandlergruppe)
+        val body = runQuery("""{ alleOppgaver { type } }""", kode7Saksbehandlergruppe)
         val antallOppgaver = body["data"]["alleOppgaver"].size()
 
         assertEquals(1, antallOppgaver)
@@ -43,12 +41,11 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `saksbehandlere som ikke er medlemmer av risk-gruppen får ikke risk-oppgaver`() {
-        val vedtakRef = opprettVedtaksperiode()!!
+        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, vedtakRef)
         opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.RISK_QA, vedtakRef)
 
-        val query = queryize("""{ alleOppgaver { type } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ alleOppgaver { type } }""")
         val oppgaver = body["data"]["alleOppgaver"]
 
         assertEquals(2, oppgaver.size())
@@ -57,12 +54,11 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `saksbehandlere som er medlemmer av risk-gruppen får risk-oppgaver`() {
-        val vedtakRef = opprettVedtaksperiode()!!
+        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, vedtakRef)
         opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.RISK_QA, vedtakRef)
 
-        val query = queryize("""{ alleOppgaver { type } }""")
-        val body = runQuery(query, riskSaksbehandlergruppe)
+        val body = runQuery("""{ alleOppgaver { type } }""", riskSaksbehandlergruppe)
         val oppgaver = body["data"]["alleOppgaver"]
 
         assertEquals(3, oppgaver.size())
@@ -71,11 +67,10 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `saksbehandlere som ikke er medlemmer av besluttergruppen får ikke beslutteroppgaver`() {
-        val vedtakRef = opprettVedtaksperiode()!!
+        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, vedtakRef, erBeslutter = true)
 
-        val query = queryize("""{ alleOppgaver { erBeslutter } }""")
-        val body = runQuery(query)
+        val body = runQuery("""{ alleOppgaver { erBeslutter } }""")
         val oppgaver = body["data"]["alleOppgaver"]
 
         assertEquals(1, oppgaver.size())
@@ -84,11 +79,10 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `saksbehandlere som er medlemmer av besluttergruppen får beslutteroppgaver`() {
-        val vedtakRef = opprettVedtaksperiode()!!
+        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, vedtakRef, erBeslutter = true)
 
-        val query = queryize("""{ alleOppgaver { erBeslutter } }""")
-        val body = runQuery(query, beslutterGruppeId)
+        val body = runQuery("""{ alleOppgaver { erBeslutter } }""", beslutterGruppeId)
         val oppgaver = body["data"]["alleOppgaver"]
 
         assertEquals(2, oppgaver.size())
@@ -98,17 +92,17 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `henter behandlede oppgaver`() {
         opprettSaksbehandler()
-        val vedtakRef = opprettVedtaksperiode()!!
-        val oppgaveRef = opprettOppgave(vedtakRef = vedtakRef)!!
-        tildelOppgave(oppgaveRef, SAKSBEHANDLER_OID)
+        val vedtakRef = opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oppgaveRef = opprettOppgave(vedtakRef = vedtakRef)
+        tildelOppgave(oppgaveRef, SAKSBEHANDLER.oid)
         ferdigstillOppgave(vedtakRef)
 
-        val query = queryize(
+        val body = runQuery(
             """
             {
                 behandledeOppgaver(
-                    behandletAvOid: "$SAKSBEHANDLER_OID", 
-                    behandletAvIdent: "$SAKSBEHANDLER_IDENT", 
+                    behandletAvOid: "${SAKSBEHANDLER.oid}", 
+                    behandletAvIdent: "${SAKSBEHANDLER.ident}", 
                     fom: "${LocalDateTime.now().minusDays(1)}"
                 ) {
                     ferdigstiltAv
@@ -116,7 +110,6 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
             }
         """
         )
-        val body = runQuery(query)
 
         assertEquals("Jan Banan", body["data"]["behandledeOppgaver"].first()["ferdigstiltAv"].asText())
     }

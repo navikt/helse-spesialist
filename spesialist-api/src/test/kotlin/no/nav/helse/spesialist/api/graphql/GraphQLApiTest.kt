@@ -20,9 +20,9 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter sykepengegrunnlagsgrense`() {
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize(
+        val body = runQuery(
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
@@ -43,9 +43,8 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
             }
         """
         )
-
-        val body = runQuery(query)
-        val sykepengegrunnlagsgrense = body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]
+        val sykepengegrunnlagsgrense =
+            body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]
 
         assertEquals(100_000, sykepengegrunnlagsgrense["grunnbelop"].asInt())
         assertEquals(600_000, sykepengegrunnlagsgrense["grense"].asInt())
@@ -60,9 +59,10 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     private fun ugyldigAvvikprosent(avviksprosent: Double) {
         mockSnapshot(avviksprosent = avviksprosent)
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize("""
+        val body = runQuery(
+            """
             {
                 person(fnr:"$FØDSELSNUMMER") {
                     vilkarsgrunnlaghistorikk {
@@ -76,9 +76,8 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
                     }
                 }
             }
-        """)
-
-        val body = runQuery(query)
+        """
+        )
         val grunnlag = body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"]
         val forventetError = objectMapper.readTree(
             """

@@ -14,7 +14,7 @@ internal class BehandlingsstatistikkQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter behandlingsstatistikk`() {
-        val query = queryize(
+        val body = runQuery(
             """
             {
                 behandlingsstatistikk {
@@ -27,7 +27,6 @@ internal class BehandlingsstatistikkQueryTest : AbstractGraphQLApiTest() {
             }
         """
         )
-        val body = runQuery(query)
         val behandlingsstatistikk = body["data"]["behandlingsstatistikk"]["enArbeidsgiver"]
 
         assertEquals(0, behandlingsstatistikk["automatisk"].asInt())

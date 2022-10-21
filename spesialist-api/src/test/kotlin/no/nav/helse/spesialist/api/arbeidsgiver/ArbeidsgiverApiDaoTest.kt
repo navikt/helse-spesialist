@@ -10,7 +10,7 @@ internal class ArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `finner bransjer`() {
         val bransjer = listOf("bransje 1", "bransje 2")
-        opprettArbeidsgiver(bransjer)
+        opprettArbeidsgiver(bransjer = bransjer)
         assertEquals(bransjer, arbeidsgiverApiDao.finnBransjer(ORGANISASJONSNUMMER))
     }
 
@@ -28,8 +28,13 @@ internal class ArbeidsgiverApiDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `finner arbeidsforhold`() {
-        opprettVedtaksperiode()
+        val personId = opprettPerson()
+        val arbeidsgiverId = opprettArbeidsgiver()
+        opprettVedtaksperiode(personId, arbeidsgiverId)
+        opprettArbeidsforhold(personId, arbeidsgiverId)
+
         val arbeidsforhold = arbeidsgiverApiDao.finnArbeidsforhold(FØDSELSNUMMER, ORGANISASJONSNUMMER)
+
         assertEquals(1, arbeidsforhold.size)
         assertEquals(ARBEIDSFORHOLD.start, arbeidsforhold.first().startdato)
         assertEquals(ARBEIDSFORHOLD.slutt, arbeidsforhold.first().sluttdato)

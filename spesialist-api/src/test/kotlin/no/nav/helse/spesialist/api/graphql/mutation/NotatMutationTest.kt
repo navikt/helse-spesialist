@@ -16,17 +16,16 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `feilregistrerer notat`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val notatId = opprettNotat()
 
-        val query = queryize(
+        val body = runQuery(
             """
             mutation FeilregistrerNotat {
                 feilregistrerNotat(id: $notatId)
             }
         """
         )
-        val body = runQuery(query)
 
         assertTrue(body["data"]["feilregistrerNotat"].asBoolean())
     }
@@ -34,18 +33,17 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `feilregistrerer kommentar`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val notatId = opprettNotat()!!
         val kommentarId = opprettKommentar(notatRef = notatId.toInt())
 
-        val query = queryize(
+        val body = runQuery(
             """
             mutation FeilregistrerKommentar {
                 feilregistrerKommentar(id: $kommentarId)
             }
         """
         )
-        val body = runQuery(query)
 
         assertTrue(body["data"]["feilregistrerKommentar"].asBoolean())
     }
@@ -53,22 +51,20 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `legger til notat`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize(
+        val antallNyeNotater = runQuery(
             """
             mutation LeggTilNotat {
                 leggTilNotat(
                     tekst: "Dette er et notat",
                     type: Generelt,
                     vedtaksperiodeId: "${PERIODE.id}",
-                    saksbehandlerOid: "$SAKSBEHANDLER_OID"
+                    saksbehandlerOid: "${SAKSBEHANDLER.oid}"
                 )
             }
         """
-        )
-
-        val antallNyeNotater = runQuery(query)["data"]["leggTilNotat"].asInt()
+        )["data"]["leggTilNotat"].asInt()
 
         assertEquals(1, antallNyeNotater)
     }
@@ -76,19 +72,18 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `legger til ny kommentar`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val notatId = opprettNotat()
 
-        val query = queryize(
+        val body = runQuery(
             """
             mutation LeggTilKommentar {
-                leggTilKommentar(notatId: $notatId, tekst: "En kommentar", saksbehandlerident: "$SAKSBEHANDLER_IDENT") {
+                leggTilKommentar(notatId: $notatId, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
                     tekst
                 }
             }
         """
         )
-        val body = runQuery(query)
 
         assertEquals("En kommentar", body["data"]["leggTilKommentar"]["tekst"].asText())
     }
@@ -96,18 +91,17 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `får 404-feil ved oppretting av kommentar dersom notat ikke finnes`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
-        val query = queryize(
+        val body = runQuery(
             """
             mutation LeggTilKommentar {
-                leggTilKommentar(notatId: 1, tekst: "En kommentar", saksbehandlerident: "$SAKSBEHANDLER_IDENT") {
+                leggTilKommentar(notatId: 1, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
                     id
                 }
             }
         """
         )
-        val body = runQuery(query)
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
     }

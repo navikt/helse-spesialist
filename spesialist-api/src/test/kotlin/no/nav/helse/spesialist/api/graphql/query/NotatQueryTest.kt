@@ -17,11 +17,11 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
     @Test
     fun `henter notater`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettNotat("Et notat")
         opprettNotat("Et annet notat")
 
-        val query = queryize(
+        val notater = runQuery(
             """
             {
                 notater(forPerioder: ["${PERIODE.id}"]) {
@@ -49,9 +49,7 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
                 }
             }
         """
-        )
-
-        val notater = runQuery(query)["data"]["notater"].first()
+        )["data"]["notater"].first()
 
         assertEquals(PERIODE.id.toString(), notater["id"].asText())
         assertEquals(2, notater["notater"].size())
@@ -61,16 +59,18 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter kun notater for gitte perioder`() {
+        val personId = opprettPerson()
+        val arbeidsgiverId = opprettArbeidsgiver()
         val førstePeriode = UUID.randomUUID()
         val andrePeriode = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(periode = Periode(førstePeriode, PERIODE.fom, PERIODE.tom))
-        opprettVedtaksperiode(periode = Periode(andrePeriode, PERIODE.fom, PERIODE.tom))
+        opprettVedtaksperiode(personId, arbeidsgiverId, Periode(førstePeriode, PERIODE.fom, PERIODE.tom))
+        opprettVedtaksperiode(personId, arbeidsgiverId, Periode(andrePeriode, PERIODE.fom, PERIODE.tom))
         opprettNotat(tekst = "Et notat", vedtaksperiodeId = førstePeriode)
         opprettNotat(tekst = "Et annet notat" , vedtaksperiodeId = førstePeriode)
         opprettNotat(tekst = "Et tredje notat", vedtaksperiodeId = andrePeriode)
 
-        val query = queryize(
+        val notater = runQuery(
             """
             {
                 notater(forPerioder: ["$førstePeriode"]) {
@@ -98,9 +98,7 @@ internal class NotatQueryTest : AbstractGraphQLApiTest() {
                 }
             }
         """
-        )
-
-        val notater = runQuery(query)["data"]["notater"]
+        )["data"]["notater"]
 
         assertEquals(1, notater.size())
         assertEquals(førstePeriode.toString(), notater.first()["id"].asText())

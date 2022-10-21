@@ -191,7 +191,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         }
     }
 
-    protected fun runQuery(query: String, group: UUID? = null): JsonNode {
+    protected fun runQuery(@Language("GraphQL") query: String, group: UUID? = null): JsonNode {
         val response = runBlocking {
             val response = client.preparePost("/graphql") {
                 contentType(ContentType.Application.Json)
@@ -204,7 +204,5 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
         return objectMapper.readTree(response)
     }
-
-    protected fun queryize(@Language("GraphQL") queryString: String) = queryString.trimIndent()
 
 }
