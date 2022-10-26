@@ -1,36 +1,36 @@
 fragment oppdrag on GraphQLOppdrag {
-    fagsystemId,
-    tidsstempel,
+    fagsystemId
+    tidsstempel
     utbetalingslinjer {
-        tom,
-        fom,
-        grad,
+        tom
+        fom
+        grad
         dagsats
-    },
+    }
     simulering {
-        totalbelop,
+        totalbelop
         perioder {
-            fom,
-            tom,
+            fom
+            tom
             utbetalinger {
                 detaljer {
-                    belop,
-                    antallSats,
-                    faktiskFom,
-                    faktiskTom,
-                    klassekode,
-                    klassekodeBeskrivelse,
-                    konto,
-                    refunderesOrgNr,
-                    sats,
-                    tilbakeforing,
-                    typeSats,
-                    uforegrad,
+                    belop
+                    antallSats
+                    faktiskFom
+                    faktiskTom
+                    klassekode
+                    klassekodeBeskrivelse
+                    konto
+                    refunderesOrgNr
+                    sats
+                    tilbakeforing
+                    typeSats
+                    uforegrad
                     utbetalingstype
-                },
-                feilkonto,
-                forfall,
-                utbetalesTilId,
+                }
+                feilkonto
+                forfall
+                utbetalesTilId
                 utbetalesTilNavn
             }
         }
@@ -38,212 +38,236 @@ fragment oppdrag on GraphQLOppdrag {
 }
 
 fragment grunnlag on GraphQLVilkarsgrunnlag {
+    id
     inntekter {
-        arbeidsgiver,
+        arbeidsgiver
         omregnetArsinntekt {
-            belop,
+            belop
             inntekterFraAOrdningen {
-                maned,
+                maned
                 sum
-            },
-            kilde,
+            }
+            kilde
             manedsbelop
-        },
+        }
         sammenligningsgrunnlag {
-            belop,
+            belop
             inntekterFraAOrdningen {
-                maned,
+                maned
                 sum
             }
         }
         deaktivert
-    },
-    omregnetArsinntekt,
-    sammenligningsgrunnlag,
-    skjaeringstidspunkt,
+    }
+    omregnetArsinntekt
+    sammenligningsgrunnlag
+    skjaeringstidspunkt
     sykepengegrunnlag
 }
 
 query HentSnapshot($fnr: String!) {
     person(fnr: $fnr) {
-        aktorId,
+        aktorId
         arbeidsgivere {
-            organisasjonsnummer,
+            organisasjonsnummer
             ghostPerioder {
-                id,
-                fom,
-                tom,
-                skjaeringstidspunkt,
-                vilkarsgrunnlaghistorikkId,
+                id
+                fom
+                tom
+                skjaeringstidspunkt
+                vilkarsgrunnlaghistorikkId
                 deaktivert
-            },
+            }
             generasjoner {
-                id,
+                id
                 perioder {
-                    __typename,
-                    erForkastet,
-                    fom,
-                    tom,
-                    inntektstype,
-                    opprettet,
-                    periodetype,
-                    periodetilstand,
-                    skjaeringstidspunkt,
+                    __typename
+                    erForkastet
+                    fom
+                    tom
+                    inntektstype
+                    opprettet
+                    periodetype
+                    periodetilstand
+                    skjaeringstidspunkt
                     tidslinje {
-                        begrunnelser,
-                        dato,
-                        grad,
+                        begrunnelser
+                        dato
+                        grad
                         kilde {
-                            id,
+                            id
                             type
-                        },
-                        sykdomsdagtype,
-                        utbetalingsdagtype,
+                        }
+                        sykdomsdagtype
+                        utbetalingsdagtype
                         utbetalingsinfo {
-                            arbeidsgiverbelop,
-                            inntekt,
-                            personbelop,
-                            refusjonsbelop,
-                            totalGrad,
+                            arbeidsgiverbelop
+                            inntekt
+                            personbelop
+                            refusjonsbelop
+                            totalGrad
                             utbetaling
                         }
-                    },
-                    vedtaksperiodeId,
+                    }
+                    vedtaksperiodeId
                     ... on GraphQLUberegnetPeriode {
-                        __typename,
-                        id,
+                        __typename
+                        id
                     }
                     ... on GraphQLBeregnetPeriode {
-                        __typename,
-                        id,
+                        __typename
+                        id
                         aktivitetslogg {
-                            alvorlighetsgrad,
-                            melding,
-                            tidsstempel,
+                            alvorlighetsgrad
+                            melding
+                            tidsstempel
                             vedtaksperiodeId
-                        },
-                        beregningId,
-                        forbrukteSykedager,
-                        gjenstaendeSykedager,
+                        }
+                        beregningId
+                        forbrukteSykedager
+                        gjenstaendeSykedager
                         hendelser {
                             ... on GraphQLInntektsmelding {
-                                __typename,
-                                beregnetInntekt,
-                                id,
-                                mottattDato,
-                                type
-                            },
-                            ... on GraphQLSoknadArbeidsgiver {
-                                __typename,
-                                fom,
-                                id,
-                                rapportertDato,
-                                sendtArbeidsgiver,
-                                tom,
-                                type
-                            },
-                            ... on GraphQLSoknadNav {
-                                __typename,
-                                fom,
-                                id,
-                                rapportertDato,
-                                sendtNav,
-                                tom,
-                                type
-                            },
-                            ... on GraphQLSykmelding {
-                                __typename,
-                                fom,
-                                id,
-                                rapportertDato,
-                                tom,
+                                __typename
+                                beregnetInntekt
+                                id
+                                mottattDato
                                 type
                             }
-                        },
-                        maksdato,
+                            ... on GraphQLSoknadArbeidsgiver {
+                                __typename
+                                fom
+                                id
+                                rapportertDato
+                                sendtArbeidsgiver
+                                tom
+                                type
+                            }
+                            ... on GraphQLSoknadNav {
+                                __typename
+                                fom
+                                id
+                                rapportertDato
+                                sendtNav
+                                tom
+                                type
+                            }
+                            ... on GraphQLSykmelding {
+                                __typename
+                                fom
+                                id
+                                rapportertDato
+                                tom
+                                type
+                            }
+                        }
+                        maksdato
                         periodevilkar {
                             alder {
-                                alderSisteSykedag,
+                                alderSisteSykedag
                                 oppfylt
-                            },
+                            }
                             soknadsfrist {
-                                oppfylt,
-                                sendtNav,
-                                soknadFom,
+                                oppfylt
+                                sendtNav
+                                soknadFom
                                 soknadTom
-                            },
+                            }
                             sykepengedager {
-                                forbrukteSykedager,
-                                gjenstaendeSykedager,
-                                maksdato,
-                                oppfylt,
+                                forbrukteSykedager
+                                gjenstaendeSykedager
+                                maksdato
+                                oppfylt
                                 skjaeringstidspunkt
                             }
                         }
                         utbetaling {
-                            id,
-                            arbeidsgiverFagsystemId,
-                            arbeidsgiverNettoBelop,
-                            personFagsystemId,
-                            personNettoBelop,
-                            statusEnum,
-                            typeEnum,
+                            id
+                            arbeidsgiverFagsystemId
+                            arbeidsgiverNettoBelop
+                            personFagsystemId
+                            personNettoBelop
+                            statusEnum
+                            typeEnum
                             vurdering {
-                                automatisk,
-                                godkjent,
-                                ident,
+                                automatisk
+                                godkjent
+                                ident
                                 tidsstempel
-                            },
+                            }
                             personoppdrag {
                                 ...oppdrag
-                            },
+                            }
                             arbeidsgiveroppdrag {
                                 ...oppdrag
                             }
-                        },
+                        }
                         refusjon {
-                            belop,
+                            belop
                             arbeidsgiverperioder {
-                                tom,
+                                tom
                                 fom
-                            },
+                            }
                             endringer {
-                                belop,
+                                belop
                                 dato
-                            },
-                            forsteFravaersdag,
+                            }
+                            forsteFravaersdag
                             sisteRefusjonsdag
                         }
                         vilkarsgrunnlaghistorikkId
+                        vilkarsgrunnlagId
                     }
                 }
             }
-        },
-        dodsdato,
-        fodselsnummer,
-        versjon,
+        }
+        dodsdato
+        fodselsnummer
+        versjon
+        vilkarsgrunnlag {
+            vilkarsgrunnlagtype
+            ...grunnlag
+            ... on GraphQLInfotrygdVilkarsgrunnlag {
+                __typename
+            }
+            ... on GraphQLSpleisVilkarsgrunnlag {
+                __typename
+                antallOpptjeningsdagerErMinst
+                avviksprosent
+                grunnbelop
+                sykepengegrunnlagsgrense {
+                    grunnbelop
+                    grense
+                    virkningstidspunkt
+                }
+                oppfyllerKravOmMedlemskap
+                oppfyllerKravOmMinstelonn
+                oppfyllerKravOmOpptjening
+                opptjeningFra
+            }
+        }
         vilkarsgrunnlaghistorikk {
-            id,
+            id
             grunnlag {
-                vilkarsgrunnlagtype,
-                ...grunnlag,
+                vilkarsgrunnlagtype
+                ...grunnlag
                 ... on GraphQLInfotrygdVilkarsgrunnlag {
-                    __typename,
-                },
+                    __typename
+                }
                 ... on GraphQLSpleisVilkarsgrunnlag {
-                    __typename,
-                    antallOpptjeningsdagerErMinst,
-                    avviksprosent,
-                    grunnbelop,
+                    __typename
+                    antallOpptjeningsdagerErMinst
+                    avviksprosent
+                    grunnbelop
                     sykepengegrunnlagsgrense {
-                        grunnbelop,
-                        grense,
+                        grunnbelop
+                        grense
                         virkningstidspunkt
                     }
-                    oppfyllerKravOmMedlemskap,
-                    oppfyllerKravOmMinstelonn,
-                    oppfyllerKravOmOpptjening,
-                    opptjeningFra,
+                    oppfyllerKravOmMedlemskap
+                    oppfyllerKravOmMinstelonn
+                    oppfyllerKravOmOpptjening
+                    opptjeningFra
                 }
             }
         }

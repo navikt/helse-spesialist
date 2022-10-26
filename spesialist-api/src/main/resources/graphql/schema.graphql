@@ -46,6 +46,7 @@ interface GraphQLTidslinjeperiode {
 }
 
 interface GraphQLVilkarsgrunnlag {
+  id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!
   sammenligningsgrunnlag: Float
@@ -108,6 +109,7 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   tom: LocalDate!
   utbetaling: GraphQLUtbetaling!
   vedtaksperiodeId: UUID!
+  vilkarsgrunnlagId: UUID
   vilkarsgrunnlaghistorikkId: UUID!
 }
 
@@ -140,6 +142,7 @@ type GraphQLGhostPeriode {
 }
 
 type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
+  id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!
   sammenligningsgrunnlag: Float
@@ -187,7 +190,7 @@ type GraphQLPerson {
   dodsdato: LocalDate
   fodselsnummer: String!
   versjon: Int!
-  vilkarsgrunnlag(id: String!): [GraphQLVilkarsgrunnlag!]
+  vilkarsgrunnlag: [GraphQLVilkarsgrunnlag!]!
   vilkarsgrunnlaghistorikk: [GraphQLVilkarsgrunnlaghistorikk!]!
 }
 
@@ -271,6 +274,7 @@ type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   antallOpptjeningsdagerErMinst: Int!
   avviksprosent: Float
   grunnbelop: Int!
+  id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!
   oppfyllerKravOmMedlemskap: Boolean

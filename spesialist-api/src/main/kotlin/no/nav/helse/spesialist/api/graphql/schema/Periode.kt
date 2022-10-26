@@ -439,6 +439,8 @@ data class BeregnetPeriode(
         )
     }
 
+    fun vilkarsgrunnlagId(): UUIDString? = periode.vilkarsgrunnlagId
+
     fun vilkarsgrunnlaghistorikkId(): UUIDString = periode.vilkarsgrunnlaghistorikkId
 
     fun risikovurdering(): Risikovurdering? =

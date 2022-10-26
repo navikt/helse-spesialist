@@ -28,6 +28,7 @@ internal class OppdaterSnapshotCommandTest {
             dodsdato = null,
             fodselsnummer = FNR,
             versjon = 1,
+            vilkarsgrunnlag = emptyList(),
             vilkarsgrunnlaghistorikk = emptyList()
         )
     }

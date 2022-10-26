@@ -247,19 +247,20 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
         )
     ),
     refusjon = null,
+    vilkarsgrunnlagId = null,
     vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
-    periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
+    periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
 )
 
 private fun enGenerasjon() = GraphQLGenerasjon(
     id = UUID.randomUUID().toString(),
-    perioder = listOf(enPeriode())
+    perioder = listOf(enPeriode()),
 )
 
 private fun enArbeidsgiver(organisasjonsnummer: String = "987654321") = GraphQLArbeidsgiver(
     organisasjonsnummer = organisasjonsnummer,
     ghostPerioder = emptyList(),
-    generasjoner = listOf(enGenerasjon())
+    generasjoner = listOf(enGenerasjon()),
 )
 
 private fun enPerson() = GraphQLPerson(
@@ -268,5 +269,6 @@ private fun enPerson() = GraphQLPerson(
     dodsdato = null,
     fodselsnummer = "01017012345",
     versjon = 1,
-    vilkarsgrunnlaghistorikk = emptyList()
+    vilkarsgrunnlag = emptyList(),
+    vilkarsgrunnlaghistorikk = emptyList(),
 )

@@ -15,6 +15,7 @@ data class Vilkarsgrunnlaghistorikk(
 )
 
 interface Vilkarsgrunnlag {
+    val id: UUIDString
     val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
     val inntekter: List<Arbeidsgiverinntekt>
     val omregnetArsinntekt: Double
@@ -24,6 +25,7 @@ interface Vilkarsgrunnlag {
 }
 
 data class VilkarsgrunnlagInfotrygd(
+    override val id: UUIDString,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val omregnetArsinntekt: Double,
@@ -33,6 +35,7 @@ data class VilkarsgrunnlagInfotrygd(
 ) : Vilkarsgrunnlag
 
 data class VilkarsgrunnlagSpleis(
+    override val id: UUIDString,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val omregnetArsinntekt: Double,
@@ -57,9 +60,10 @@ private fun GraphQLVilkarsgrunnlagtype.tilVilkarsgrunnlagtype(): Vilkarsgrunnlag
         else -> throw Exception("Ukjent vilkårsgrunnlagtype ${this.name}")
     }
 
-private fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
+internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
     when (this) {
         is GraphQLSpleisVilkarsgrunnlag -> VilkarsgrunnlagSpleis(
+            id = id,
             vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
             inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
             omregnetArsinntekt = omregnetArsinntekt,
@@ -77,6 +81,7 @@ private fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
         )
 
         is GraphQLInfotrygdVilkarsgrunnlag -> VilkarsgrunnlagInfotrygd(
+            id = id,
             vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
             inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
             omregnetArsinntekt = omregnetArsinntekt,

@@ -362,11 +362,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             dodsdato = null,
             fodselsnummer = fødselsnummer,
             versjon = 1,
+            vilkarsgrunnlag = emptyList(),
             vilkarsgrunnlaghistorikk = listOf(
                 GraphQLVilkarsgrunnlaghistorikk(
                     id = "en-id",
                     grunnlag = listOf(
                         GraphQLSpleisVilkarsgrunnlag(
+                            id = UUID.randomUUID().toString(),
                             vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
                             inntekter = emptyList(),
                             omregnetArsinntekt = 1_000_000.0,
