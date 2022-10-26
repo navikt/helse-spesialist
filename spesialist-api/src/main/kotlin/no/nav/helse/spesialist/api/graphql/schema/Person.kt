@@ -128,6 +128,7 @@ data class Person(
                 fom = it.fom,
                 tom = it.tom,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
+                vilkarsgrunnlagId = it.vilkarsgrunnlaghistorikkId,
                 vilkarsgrunnlaghistorikkId = it.vilkarsgrunnlaghistorikkId,
                 deaktivert = it.deaktivert,
                 organisasjonsnummer = organisasjonsnummer

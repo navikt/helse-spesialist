@@ -81,6 +81,8 @@ data class GhostPeriode(
     val fom: DateString,
     val tom: DateString,
     val skjaeringstidspunkt: DateString,
+    val vilkarsgrunnlagId: UUIDString?,
+    @Deprecated("Bruk heller \"vilkarsgrunnlagId\"")
     val vilkarsgrunnlaghistorikkId: UUIDString?,
     val deaktivert: Boolean,
     val organisasjonsnummer: String
