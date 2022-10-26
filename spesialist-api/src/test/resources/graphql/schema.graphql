@@ -361,7 +361,6 @@ type OverstyrtInntekt {
 type Paginering {
     antallSider: Int!
     elementerPerSide: Int!
-    peker: String
     side: Int!
 }
 
@@ -419,7 +418,7 @@ type Query {
     behandlingsstatistikk: Behandlingsstatistikk!
     notater(forPerioder: [String!]!): [Notater!]!
     oppdrag(fnr: String!): [Oppdrag!]!
-    oppgaver(after: String, first: Int!): Oppgaver!
+    oppgaver(antall: Int!, side: Int!, sortering: SorteringInput): Oppgaver!
     person(aktorId: String, fnr: String): Person
 }
 
@@ -761,6 +760,11 @@ enum Periodetype {
     OVERGANG_FRA_IT
 }
 
+enum Retning {
+    asc
+    desc
+}
+
 enum Sykdomsdagtype {
     ARBEIDSDAG
     ARBEIDSGIVERDAG
@@ -813,4 +817,10 @@ enum Vilkarsgrunnlagtype {
     INFOTRYGD
     SPLEIS
     UKJENT
+}
+
+input SorteringInput {
+    bosted: Retning!
+    opprettet: Retning!
+    status: Retning!
 }

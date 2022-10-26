@@ -93,15 +93,8 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         }
     }
 
-    fun finnOppgaver(saksbehandlerTilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisning> =
+    fun finnOppgaver(tilganger: SaksbehandlerTilganger): List<OppgaveForOversiktsvisning> =
         sessionOf(dataSource).use { session ->
-            val eventuellEkskluderingAvRiskQA =
-                if (saksbehandlerTilganger.harTilgangTilRiskOppgaver()) "" else "AND o.type != 'RISK_QA'"
-            val gyldigeAdressebeskyttelser =
-                if (saksbehandlerTilganger.harTilgangTilKode7()) "AND pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig')"
-                else "AND pi.adressebeskyttelse = 'Ugradert'"
-            val eventuellEkskluderingAvBeslutterOppgaver =
-                if (saksbehandlerTilganger.harTilgangTilBeslutterOppgaver()) "" else "AND o.er_beslutteroppgave = false"
             // bruk av const direkte i @Language-annotert sql fører til snodige fantom-compile-feil i IntelliJ
             val beslutterOppgaveHackyWorkaround = BESLUTTEROPPGAVE_PREFIX
 
@@ -119,18 +112,29 @@ class OppgaveApiDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                 LEFT JOIN saksbehandler s on t.saksbehandler_ref = s.oid
             WHERE status = 'AvventerSaksbehandler'::oppgavestatus
-                $eventuellEkskluderingAvRiskQA
-                $gyldigeAdressebeskyttelser
-                $eventuellEkskluderingAvBeslutterOppgaver
+                AND CASE WHEN :harTilgangTilRisk 
+                    THEN true
+                    ELSE o.type != 'RISK_QA' END
+                AND CASE WHEN :harTilgangTilKode7 
+                    THEN pi.adressebeskyttelse IN ('Ugradert', 'Fortrolig') 
+                    ELSE pi.adressebeskyttelse = 'Ugradert' END
+                AND CASE WHEN :harTilgangTilBeslutter
+                    THEN true
+                    ELSE o.er_beslutteroppgave = false END
             ORDER BY
                 CASE WHEN t.saksbehandler_ref IS NOT NULL THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'STIKKPRØVE' THEN 0 ELSE 1 END,
                 CASE WHEN o.type = 'RISK_QA' THEN 0 ELSE 1 END,
-                opprettet ASC
+                opprettet
                 ;
             """
+            val parameters = mapOf(
+                "harTilgangTilRisk" to tilganger.harTilgangTilRiskOppgaver(),
+                "harTilgangTilKode7" to tilganger.harTilgangTilKode7(),
+                "harTilgangTilBeslutter" to tilganger.harTilgangTilBeslutterOppgaver(),
+            )
             session.run(
-                queryOf(query)
+                queryOf(query, parameters)
                     .map(::tilOppgaveForOversiktsvisning)
                     .asList
             )

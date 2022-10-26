@@ -4,6 +4,7 @@ import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -73,6 +74,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personId: Long,
         arbeidsgiverId: Long,
         periode: Periode = PERIODE,
+        oppgavetype: Oppgavetype = Oppgavetype.SØKNAD
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
@@ -88,7 +90,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 )
             ).also {
                 opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
-                opprettOppgave(Oppgavestatus.AvventerSaksbehandler, Oppgavetype.SØKNAD, it)
+                opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, it)
             }
         }
 
@@ -159,7 +161,8 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettPerson(
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØRID,
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+        bostedId: Int = ENHET.id,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val personinfoid = opprettPersoninfo(adressebeskyttelse)
@@ -175,7 +178,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         fødselsnummer.toLong(),
                         aktørId.toLong(),
                         infotrygdutbetalingerid,
-                        ENHET.id,
+                        bostedId,
                         personinfoid
                     ).asUpdateAndReturnGeneratedKey
                 )
@@ -311,16 +314,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         vedtakRef: Long,
-        erBeslutter: Boolean = false
+        erBeslutter: Boolean = false,
+        opprettet: LocalDateTime = LocalDateTime.now(),
     ) =
         requireNotNull(
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 @Language("PostgreSQL")
                 val statement =
-                    "INSERT INTO oppgave(oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
+                    "INSERT INTO oppgave(opprettet, oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
                 session.run(
                     queryOf(
                         statement,
+                        opprettet,
                         status.name,
                         vedtakRef,
                         oppgavetype.name,
@@ -350,40 +355,41 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
-    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0) = GraphQLPerson(
-        aktorId = AKTØRID,
-        arbeidsgivere = emptyList(),
-        dodsdato = null,
-        fodselsnummer = fødselsnummer,
-        versjon = 1,
-        vilkarsgrunnlaghistorikk = listOf(
-            GraphQLVilkarsgrunnlaghistorikk(
-                id = "en-id",
-                grunnlag = listOf(
-                    GraphQLSpleisVilkarsgrunnlag(
-                        vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
-                        inntekter = emptyList(),
-                        omregnetArsinntekt = 1_000_000.0,
-                        sammenligningsgrunnlag = 1_000_000.0,
-                        skjaeringstidspunkt = "2020-01-01",
-                        sykepengegrunnlag = 1_000_000.0,
-                        antallOpptjeningsdagerErMinst = 123,
-                        avviksprosent = avviksprosent,
-                        grunnbelop = 100_000,
-                        sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(
+    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0): GraphQLPerson =
+        GraphQLPerson(
+            aktorId = AKTØRID,
+            arbeidsgivere = emptyList(),
+            dodsdato = null,
+            fodselsnummer = fødselsnummer,
+            versjon = 1,
+            vilkarsgrunnlaghistorikk = listOf(
+                GraphQLVilkarsgrunnlaghistorikk(
+                    id = "en-id",
+                    grunnlag = listOf(
+                        GraphQLSpleisVilkarsgrunnlag(
+                            vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
+                            inntekter = emptyList(),
+                            omregnetArsinntekt = 1_000_000.0,
+                            sammenligningsgrunnlag = 1_000_000.0,
+                            skjaeringstidspunkt = "2020-01-01",
+                            sykepengegrunnlag = 1_000_000.0,
+                            antallOpptjeningsdagerErMinst = 123,
+                            avviksprosent = avviksprosent,
                             grunnbelop = 100_000,
-                            grense = 600_000,
-                            virkningstidspunkt = "2020-01-01",
-                        ),
-                        oppfyllerKravOmMedlemskap = true,
-                        oppfyllerKravOmMinstelonn = true,
-                        oppfyllerKravOmOpptjening = true,
-                        opptjeningFra = "2000-01-01",
+                            sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(
+                                grunnbelop = 100_000,
+                                grense = 600_000,
+                                virkningstidspunkt = "2020-01-01",
+                            ),
+                            oppfyllerKravOmMedlemskap = true,
+                            oppfyllerKravOmMinstelonn = true,
+                            oppfyllerKravOmOpptjening = true,
+                            opptjeningFra = "2000-01-01",
+                        )
                     )
                 )
             )
         )
-    )
 
     protected data class Navn(
         val fornavn: String,
