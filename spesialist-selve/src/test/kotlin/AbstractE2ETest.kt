@@ -44,7 +44,6 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -103,7 +102,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val automatiseringDao = AutomatiseringDao(dataSource)
     protected val egenAnsattDao = EgenAnsattDao(dataSource)
     private val egenAnsattApiDao = EgenAnsattApiDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
 
     private val varselDao = VarselDao(dataSource)
     private val personApiDao = PersonApiDao(dataSource)
@@ -155,9 +153,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personDao = personDao,
             vedtakDao = vedtakDao,
             vergemålDao = vergemålDao,
-            snapshotDao = snapshotDao,
+            snapshotMediator = snapshotMediator,
             overstyringDao = overstyringDao,
         ) { false },
+        snapshotMediator = snapshotMediator
     )
     internal val hendelseMediator = HendelseMediator(
         dataSource = dataSource,

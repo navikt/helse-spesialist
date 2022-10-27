@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.HentEnhetløsning.Companion.erEnhetUtland
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.delvisRefusjon
@@ -16,6 +15,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.LoggerFactory
 
 internal class Automatisering(
@@ -27,8 +27,8 @@ internal class Automatisering(
     private val vergemålDao: VergemålDao,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
-    private val snapshotDao: SnapshotDao,
     private val overstyringDao: OverstyringDao,
+    private val snapshotMediator: SnapshotMediator,
     private val plukkTilManuell: PlukkTilManuell,
 ) {
     private companion object {
@@ -96,7 +96,7 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.harÅpneOppgaver(fødselsnummer)
         val inntektskilde = vedtakDao.finnInntektskilde(vedtaksperiodeId)
-        val vedtaksperiodensUtbetaling = snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId)
+        val vedtaksperiodensUtbetaling = snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId)
         val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
 
         return valider(

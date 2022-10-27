@@ -1,7 +1,6 @@
 package no.nav.helse.modell.kommando
 
 import java.util.UUID
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.delvisRefusjon
 import no.nav.helse.modell.oppgave.Oppgave
@@ -11,6 +10,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.LoggerFactory
 
 internal class OpprettSaksbehandleroppgaveCommand(
@@ -23,7 +23,7 @@ internal class OpprettSaksbehandleroppgaveCommand(
     private val risikovurderingDao: RisikovurderingDao,
     private val utbetalingId: UUID,
     private val utbetalingtype: Utbetalingtype,
-    private val snapshotDao: SnapshotDao,
+    private val snapshotMediator: SnapshotMediator,
 ) : Command {
 
     private companion object {
@@ -39,12 +39,18 @@ internal class OpprettSaksbehandleroppgaveCommand(
                 vedtaksperiodeId,
                 utbetalingId
             )
+
             risikovurderingDao.kreverSupersaksbehandler(vedtaksperiodeId) -> Oppgave.riskQA(
                 vedtaksperiodeId,
                 utbetalingId
             )
+
             vedtaksperiodensUtbetaling.delvisRefusjon() -> Oppgave.delvisRefusjon(vedtaksperiodeId, utbetalingId)
-            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() -> Oppgave.utbetalingTilSykmeldt(vedtaksperiodeId, utbetalingId)
+            vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() -> Oppgave.utbetalingTilSykmeldt(
+                vedtaksperiodeId,
+                utbetalingId
+            )
+
             else -> Oppgave.søknad(vedtaksperiodeId, utbetalingId)
         }
         logg.info("Oppretter saksbehandleroppgave $oppgave")
@@ -53,8 +59,9 @@ internal class OpprettSaksbehandleroppgaveCommand(
         return true
     }
 
-    private val harFortroligAdressebeskyttelse get() =
-        personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
+    private val harFortroligAdressebeskyttelse
+        get() =
+            personDao.findAdressebeskyttelse(fødselsnummer) == Adressebeskyttelse.Fortrolig
 
-    private val vedtaksperiodensUtbetaling by lazy { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) }
+    private val vedtaksperiodensUtbetaling by lazy { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
 }

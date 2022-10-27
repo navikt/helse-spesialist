@@ -1,14 +1,11 @@
 package no.nav.helse.modell
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import org.intellij.lang.annotations.Language
@@ -23,26 +20,6 @@ class SnapshotDao(private val dataSource: DataSource) {
                     tx.oppdaterGlobalVersjon(versjon)
                 tx.lagre(personRef, objectMapper.writeValueAsString(snapshot), versjon)
             }
-        }
-
-    internal fun finnUtbetaling(fødselsnummer: String, utbetalingId: UUID): GraphQLUtbetaling? =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-            SELECT * FROM person AS p
-            INNER JOIN snapshot AS ss ON ss.person_ref = p.id
-            WHERE p.fodselsnummer = ?;
-        """
-            session.run(
-                queryOf(query, fødselsnummer.toLong()).map { row ->
-                    objectMapper.readValue<GraphQLPerson>(row.string("data")).arbeidsgivere.firstNotNullOfOrNull { arbeidsgiver ->
-                        arbeidsgiver.generasjoner.firstOrNull()?.perioder?.filterIsInstance<GraphQLBeregnetPeriode>()
-                            ?.find { periode ->
-                                UUID.fromString(periode.utbetaling.id) == utbetalingId
-                            }?.utbetaling
-                    }
-                }.asSingle
-            )
         }
 
     private fun TransactionalSession.lagre(personRef: Int, snapshot: String, versjon: Int): Int {

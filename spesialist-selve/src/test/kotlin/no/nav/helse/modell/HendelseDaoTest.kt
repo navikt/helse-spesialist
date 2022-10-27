@@ -34,6 +34,7 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             godkjenningMediator = mockk(relaxed = true),
             overstyringMediator = mockk(),
             automatisering = mockk(relaxed = true),
+            snapshotMediator = mockk(relaxed = true),
         )
     }
 

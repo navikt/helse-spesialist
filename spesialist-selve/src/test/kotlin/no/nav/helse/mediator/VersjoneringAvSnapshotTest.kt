@@ -37,7 +37,7 @@ internal class VersjoneringAvSnapshotTest : AbstractE2ETest() {
         vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
 
-        verify(exactly = 1) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
+        verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
 }

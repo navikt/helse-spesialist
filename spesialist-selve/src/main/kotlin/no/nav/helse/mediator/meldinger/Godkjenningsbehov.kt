@@ -56,6 +56,7 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -93,9 +94,10 @@ internal class Godkjenningsbehov(
     utbetalingDao: UtbetalingDao,
     periodehistorikkDao: PeriodehistorikkDao,
     overstyringDao: OverstyringDao,
+    snapshotMediator: SnapshotMediator,
 ) : Hendelse, MacroCommand() {
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
-        val utbetaling = snapshotDao.finnUtbetaling(
+        val utbetaling = snapshotMediator.finnUtbetaling(
             fødselsnummer = fødselsnummer,
             utbetalingId = utbetalingId
         )
@@ -215,7 +217,7 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             utbetalingId = utbetalingId,
             utbetalingtype = utbetalingtype,
-            snapshotDao = snapshotDao,
+            snapshotMediator = snapshotMediator,
         ),
         TrengerTotrinnsvurderingCommand(
             vedtaksperiodeId = vedtaksperiodeId,

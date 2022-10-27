@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.OppgaveMediator
@@ -13,13 +12,14 @@ import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
 internal class OpprettSaksbehandleroppgaveCommandTest {
     private companion object {
@@ -33,7 +33,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val personDao = mockk<PersonDao>(relaxed = true)
-    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
+    private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val risikovurderingDao = mockk<RisikovurderingDao>(relaxed = true)
     private lateinit var context: CommandContext
     private val command = OpprettSaksbehandleroppgaveCommand(
@@ -46,7 +46,7 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         risikovurderingDao = risikovurderingDao,
         utbetalingId = UTBETALING_ID,
         utbetalingtype = Utbetalingtype.UTBETALING,
-        snapshotDao = snapshotDao,
+        snapshotMediator = snapshotMediator,
     )
 
     @BeforeEach
@@ -75,23 +75,33 @@ internal class OpprettSaksbehandleroppgaveCommandTest {
         every { reservasjonDao.hentReservertTil(FNR) } returns null
         every { personDao.findAdressebeskyttelse(FNR) } returns Adressebeskyttelse.Fortrolig
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.fortroligAdressebeskyttelse(VEDTAKSPERIODE_ID, UTBETALING_ID))}
+        verify(exactly = 1) {
+            oppgaveMediator.opprett(
+                Oppgave.fortroligAdressebeskyttelse(
+                    VEDTAKSPERIODE_ID,
+                    UTBETALING_ID
+                )
+            )
+        }
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
         every { reservasjonDao.hentReservertTil(FNR) } returns null
-        every { snapshotDao.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID))}
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.utbetalingTilSykmeldt(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() {
         every { reservasjonDao.hentReservertTil(FNR) } returns null
-        every { snapshotDao.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 500)
+        every { snapshotMediator.finnUtbetaling(FNR, UTBETALING_ID) } returns enUtbetaling(
+            personbeløp = 500,
+            arbeidsgiverbeløp = 500
+        )
         assertTrue(command.execute(context))
-        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID))}
+        verify(exactly = 1) { oppgaveMediator.opprett(Oppgave.delvisRefusjon(VEDTAKSPERIODE_ID, UTBETALING_ID)) }
     }
 
     private fun enUtbetaling(personbeløp: Int = 0, arbeidsgiverbeløp: Int = 0): GraphQLUtbetaling =

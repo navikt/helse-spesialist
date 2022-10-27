@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -23,6 +22,7 @@ import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLUtbetalingstatus
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -34,7 +34,7 @@ internal class AutomatiseringTest {
     private val risikovurderingDaoMock = mockk<RisikovurderingDao> {
         every { hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
     }
-    private val snapshotDao = mockk<SnapshotDao>(relaxed = true)
+    private val snapshotMediator = mockk<SnapshotMediator>(relaxed = true)
     private val digitalKontaktinformasjonDaoMock = mockk<DigitalKontaktinformasjonDao>(relaxed = true)
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
@@ -55,7 +55,7 @@ internal class AutomatiseringTest {
             vedtakDao = vedtakDaoMock,
             plukkTilManuell = plukkTilManuellMock,
             vergemålDao = vergemålDaoMock,
-            snapshotDao = snapshotDao,
+            snapshotMediator = snapshotMediator,
             overstyringDao = overstyringDaoMock,
         )
 
@@ -149,7 +149,7 @@ internal class AutomatiseringTest {
     fun `periode til revurdering skal ikke automatisk godkjennes`() {
         val hendelseId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        every { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) { fail("Denne skal ikke kalles") }
         verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
@@ -163,13 +163,13 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med utbetaling til sykmeldt skal ikke automatisk godkjennes`() {
-        every { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(personbeløp = 500)
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, UUID.randomUUID(), utbetalingId) { fail("Denne skal ikke kalles") }
     }
 
     @Test
     fun `periode med delvis refusjon skal ikke automatisk godkjennes`() {
-        every { snapshotDao.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(
             personbeløp = 500,
             arbeidsgiverbeløp = 500
         )

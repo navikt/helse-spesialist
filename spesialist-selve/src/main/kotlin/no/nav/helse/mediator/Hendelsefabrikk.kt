@@ -57,6 +57,7 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -89,6 +90,7 @@ internal class Hendelsefabrikk(
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val overstyringMediator: OverstyringMediator,
+    private val snapshotMediator: SnapshotMediator,
 ) {
     private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
@@ -159,6 +161,7 @@ internal class Hendelsefabrikk(
             utbetalingDao = utbetalingDao,
             periodehistorikkDao = periodehistorikkDao,
             overstyringDao = overstyringDao,
+            snapshotMediator = snapshotMediator,
         )
     }
 

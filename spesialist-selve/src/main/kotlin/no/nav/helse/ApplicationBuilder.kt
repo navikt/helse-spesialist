@@ -46,7 +46,6 @@ import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.mediator.api.personApi
 import no.nav.helse.mediator.api.tildelingApi
 import no.nav.helse.mediator.api.totrinnsvurderingApi
-import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.automatisering.Automatisering
@@ -185,7 +184,6 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val abonnementDao = no.nav.helse.spesialist.api.abonnement.AbonnementDao(dataSource)
     private val behandlingsstatistikkDao = BehandlingsstatistikkDao(dataSource)
     private val notatDao = NotatDao(dataSource)
-    private val snapshotDao = SnapshotDao(dataSource)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
@@ -307,8 +305,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         vedtakDao = vedtakDao,
         plukkTilManuell = plukkTilManuell,
         vergemålDao = vergemålDao,
-        snapshotDao = snapshotDao,
         overstyringDao = overstyringDao,
+        snapshotMediator = snapshotMediator,
     )
 
     val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao)
@@ -320,6 +318,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         godkjenningMediator = godkjenningMediator,
         automatisering = automatisering,
         overstyringMediator = overstyringMediator,
+        snapshotMediator = snapshotMediator,
     )
 
     init {
