@@ -10,14 +10,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.mediator.FeilendeMeldingerDao
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
-import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
@@ -49,6 +41,14 @@ import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkDao
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spesialist.api.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUberegnetPeriode
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
@@ -252,6 +252,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             enhetId = enhetId,
             infotrygdutbetalingerId = infotrygdutbetalingerId
         )
+    }
+
+    protected fun opprettMinimalPerson(
+        fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
+    ): Long {
+        return personDao.insertPerson(fødselsnummer, aktørId)
     }
 
     protected fun opprettSaksbehandler(

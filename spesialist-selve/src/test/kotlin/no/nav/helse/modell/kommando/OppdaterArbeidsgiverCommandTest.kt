@@ -35,7 +35,7 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, ghostOrgnr), dao)
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
     }
 
     @Test
@@ -74,7 +74,7 @@ internal class OppdaterArbeidsgiverCommandTest {
                 }
             }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
 
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class OppdaterArbeidsgiverCommandTest {
                 }
             }) { "Ønsket orgnr $orgnrMedUtdatertNavn mangler i behovet: ${context.behov()}" }
 
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
     }
 
     private fun løsning(vararg orgnumre: String) = Arbeidsgiverinformasjonløsning(orgnumre.map { arbeidsgiverinfo(it) })

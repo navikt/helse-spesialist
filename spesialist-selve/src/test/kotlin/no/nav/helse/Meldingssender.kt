@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.VARSEL_KODE_1
 import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
@@ -24,6 +25,12 @@ import org.intellij.lang.annotations.Language
 
 internal object Meldingssender {
     lateinit var testRapid: TestRapid
+
+    fun sendSøknadSendt(): UUID = uuid.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSøknadSendt(id, organisasjonsnummer = ORGNR)
+        )
+    }
 
     fun sendVedtaksperiodeEndret(
         orgnr: String = "orgnr",

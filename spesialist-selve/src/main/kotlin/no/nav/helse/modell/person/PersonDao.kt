@@ -2,7 +2,9 @@ package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.sql.DataSource
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.objectMapper
@@ -24,12 +26,20 @@ internal class PersonDao(private val dataSource: DataSource) {
     internal fun findPersoninfoSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT personinfo_oppdatert FROM person WHERE fodselsnummer=?;"
-        requireNotNull(
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row -> row.sqlDate("personinfo_oppdatert").toLocalDate() }
-                    .asSingle
-            )
+        session.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row -> row.localDateOrNull("personinfo_oppdatert") }
+                .asSingle
+        )
+    }
+
+    internal fun findPersoninfoRef(fødselsnummer: String) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT info_ref FROM person WHERE fodselsnummer=?;"
+        session.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row -> row.longOrNull("info_ref") }
+                .asSingle
         )
     }
 
@@ -63,7 +73,7 @@ internal class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    internal fun updatePersoninfo(
+    fun updateOrInsertPersoninfo(
         fødselsnummer: String,
         fornavn: String,
         mellomnavn: String?,
@@ -71,35 +81,123 @@ internal class PersonDao(private val dataSource: DataSource) {
         fødselsdato: LocalDate,
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse
-    ) = sessionOf(dataSource).use { session ->
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        session.transaction { transaction ->
+            transaction.finnPersonInfoRef(fødselsnummer)
+                ?.also {
+                    transaction.updatePersonInfo(
+                        it,
+                        fornavn,
+                        mellomnavn,
+                        etternavn,
+                        fødselsdato,
+                        kjønn,
+                        adressebeskyttelse,
+                        fødselsnummer
+                    )
+                }
+                ?: transaction.insertPersoninfo(
+                    fornavn,
+                    mellomnavn,
+                    etternavn,
+                    fødselsdato,
+                    kjønn,
+                    adressebeskyttelse,
+                    fødselsnummer
+                )
+        }
+    }
+
+    private fun TransactionalSession.finnPersonInfoRef(fødselsnummer: String): Long? {
         @Language("PostgreSQL")
-        val personinfoQuery = """
-            UPDATE person_info SET fornavn=:fornavn, mellomnavn=:mellomnavn, etternavn=:etternavn, fodselsdato=:fodselsdato, kjonn=CAST(:kjonn as person_kjonn), adressebeskyttelse=:adressebeskyttelse
-            WHERE id=(SELECT info_ref FROM person WHERE fodselsnummer=:fodselsnummer);
-        """
-        session.run(
+        val query = "SELECT info_ref FROM person WHERE fodselsnummer=?"
+
+        return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("info_ref") }.asSingle)
+    }
+
+    private fun TransactionalSession.updatePersonInfo(
+        id: Long,
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+        fødselsnummer: String
+    ) {
+        @Language("PostgreSQL")
+        val query = """
+            UPDATE person_info 
+            SET fornavn=:fornavn, 
+                mellomnavn=:mellomnavn, 
+                etternavn=:etternavn, 
+                fodselsdato=:fodselsdato, 
+                kjonn=CAST(:kjonn as person_kjonn), 
+                adressebeskyttelse=:adressebeskyttelse 
+            WHERE id=:id""".trimIndent()
+
+        run(
             queryOf(
-                personinfoQuery,
+                query,
                 mapOf(
                     "fornavn" to fornavn,
                     "mellomnavn" to mellomnavn,
                     "etternavn" to etternavn,
                     "fodselsdato" to fødselsdato,
                     "kjonn" to kjønn.name,
-                    "fodselsnummer" to fødselsnummer.toLong(),
-                    "adressebeskyttelse" to adressebeskyttelse.name
+                    "adressebeskyttelse" to adressebeskyttelse.name,
+                    "id" to id
                 )
             ).asUpdate
         )
+        updatePersoninfoOppdatert(fødselsnummer)
+    }
 
+    private fun TransactionalSession.insertPersoninfo(
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+        fødselsnummer: String
+    ) {
         @Language("PostgreSQL")
-        val personQuery = "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?;"
-        session.run(
-            queryOf(
-                personQuery,
-                fødselsnummer.toLong()
-            ).asUpdate
+        val query = """
+            INSERT INTO person_info(fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+            VALUES(:fornavn, :mellomnavn, :etternavn, :fodselsdato, CAST(:kjonn as person_kjonn), :adressebeskyttelse);
+        """
+
+        val personinfoId = requireNotNull(
+            run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "fornavn" to fornavn,
+                        "mellomnavn" to mellomnavn,
+                        "etternavn" to etternavn,
+                        "fodselsdato" to fødselsdato,
+                        "kjonn" to kjønn.name,
+                        "adressebeskyttelse" to adressebeskyttelse.name
+                    )
+                ).asUpdateAndReturnGeneratedKey
+            )
         )
+        updatePersoninfoRef(personinfoId, fødselsnummer)
+    }
+
+    private fun TransactionalSession.updatePersoninfoRef(id: Long, fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "UPDATE person SET info_ref=:id, personinfo_oppdatert=now() WHERE fodselsnummer=:fodselsnummer"
+
+        run(queryOf(query, mapOf("id" to id, "fodselsnummer" to fødselsnummer.toLong())).asUpdate)
+    }
+
+    private fun TransactionalSession.updatePersoninfoOppdatert(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "UPDATE person SET personinfo_oppdatert=now() WHERE fodselsnummer=?"
+
+        run(queryOf(query, fødselsnummer.toLong()).asUpdate)
     }
 
     internal fun findAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? =
@@ -120,12 +218,10 @@ internal class PersonDao(private val dataSource: DataSource) {
     internal fun findEnhetSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT enhet_ref_oppdatert FROM person WHERE fodselsnummer=?;"
-        requireNotNull(
-            session.run(
-                queryOf(query, fødselsnummer.toLong()).map { row ->
-                    row.sqlDate("enhet_ref_oppdatert").toLocalDate()
-                }.asSingle
-            )
+        session.run(
+            queryOf(query, fødselsnummer.toLong()).map { row ->
+                row.localDateOrNull("enhet_ref_oppdatert")
+            }.asSingle
         )
     }
 
@@ -160,12 +256,10 @@ internal class PersonDao(private val dataSource: DataSource) {
     internal fun findITUtbetalingsperioderSistOppdatert(fødselsnummer: String) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT infotrygdutbetalinger_oppdatert FROM person WHERE fodselsnummer=?;"
-        requireNotNull(
-            session.run(
-                queryOf(query, fødselsnummer.toLong())
-                    .map { row -> row.sqlDate("infotrygdutbetalinger_oppdatert").toLocalDate() }
-                    .asSingle
-            )
+        session.run(
+            queryOf(query, fødselsnummer.toLong())
+                .map { row -> row.localDateOrNull("infotrygdutbetalinger_oppdatert") }
+                .asSingle
         )
     }
 
@@ -180,45 +274,92 @@ internal class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    internal fun updateInfotrygdutbetalinger(fødselsnummer: String, data: JsonNode) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val infotrygdQuery = """
-                UPDATE infotrygdutbetalinger SET data=CAST(:data as json)
-                WHERE id=(SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=:fodselsnummer);
-            """
-            session.run(
-                queryOf(
-                    infotrygdQuery,
-                    mapOf(
-                        "data" to objectMapper.writeValueAsString(data),
-                        "fodselsnummer" to fødselsnummer.toLong()
-                    )
-                ).asUpdate
-            )
-
-            @Language("PostgreSQL")
-            val personQuery = "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?;"
-            session.run(queryOf(personQuery, fødselsnummer.toLong()).asUpdate)
+    fun updateOrInsertInfotrygdutbetalinger(
+        fødselsnummer: String,
+        utbetalinger: JsonNode
+    ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        session.transaction { transaction ->
+            transaction.finnInfotrygdutbetalingerRef(fødselsnummer)
+                ?.also {
+                    transaction.updateInfotrygdutbetalinger(it, fødselsnummer, utbetalinger)
+                }
+                ?: transaction.insertInfotrygdubetalinger(utbetalinger, fødselsnummer)
         }
+    }
 
-    internal fun updateInfotrygdutbetalingerRef(fødselsnummer: String, ref: Long) =
-        sessionOf(dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = """
-                UPDATE person SET infotrygdutbetalinger_ref=:ref, infotrygdutbetalinger_oppdatert=now()
-                WHERE fodselsnummer=:fodselsnummer;
+    private fun TransactionalSession.finnInfotrygdutbetalingerRef(fødselsnummer: String): Long? {
+        @Language("PostgreSQL")
+        val query = "SELECT infotrygdutbetalinger_ref FROM person WHERE fodselsnummer=?"
+
+        return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("infotrygdutbetalinger_ref") }.asSingle)
+    }
+
+    private fun TransactionalSession.updateInfotrygdutbetalinger(
+        infotrygdutbetalingerId: Long,
+        fødselsnummer: String,
+        utbetalinger: JsonNode
+    ) {
+        @Language("PostgreSQL")
+        val query = """
+                UPDATE infotrygdutbetalinger SET data=CAST(:utbetalinger as json)
+                WHERE id=:infotrygdutbetalingerId;
             """
-            session.run(
+
+        run(
+            queryOf(
+                query,
+                mapOf(
+                    "utbetalinger" to objectMapper.writeValueAsString(utbetalinger),
+                    "infotrygdutbetalingerId" to infotrygdutbetalingerId
+                )
+            ).asUpdate
+        )
+        updateInfotrygdutbetalingerOppdatert(fødselsnummer)
+    }
+
+    private fun TransactionalSession.updateInfotrygdutbetalingerOppdatert(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "UPDATE person SET infotrygdutbetalinger_oppdatert=now() WHERE fodselsnummer=?"
+
+        run(queryOf(query, fødselsnummer.toLong()).asUpdate)
+    }
+
+    private fun TransactionalSession.insertInfotrygdubetalinger(utbetalinger: JsonNode, fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "INSERT INTO infotrygdutbetalinger (data) VALUES (CAST(? as json))"
+
+        val infotrygdutbetalingerId = requireNotNull(
+            run(
                 queryOf(
                     query,
-                    mapOf(
-                        "ref" to ref,
-                        "fodselsnummer" to fødselsnummer.toLong()
-                    )
-                ).asUpdate
+                    objectMapper.writeValueAsString(utbetalinger)
+                ).asUpdateAndReturnGeneratedKey
             )
-        }
+        )
+        updateInfotrygdutbetalingerRef(infotrygdutbetalingerId, fødselsnummer)
+    }
+
+    private fun TransactionalSession.updateInfotrygdutbetalingerRef(
+        infotrygdutbetalingerId: Long,
+        fødselsnummer: String
+    ) {
+        @Language("PostgreSQL")
+        val query = """
+                UPDATE person SET infotrygdutbetalinger_ref=:infotrygdutbetalingerId, infotrygdutbetalinger_oppdatert=now()
+                WHERE fodselsnummer=:fodselsnummer;
+            """
+
+        run(
+            queryOf(
+                query,
+                mapOf(
+                    "infotrygdutbetalingerId" to infotrygdutbetalingerId,
+                    "fodselsnummer" to fødselsnummer.toLong()
+
+                )
+            ).asUpdate
+        )
+    }
 
     internal fun insertPerson(
         fødselsnummer: String,
@@ -229,8 +370,8 @@ internal class PersonDao(private val dataSource: DataSource) {
     ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref)
-            VALUES(:fodselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId);
+            INSERT INTO person(fodselsnummer, aktor_id, info_ref, enhet_ref, infotrygdutbetalinger_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_oppdatert)
+            VALUES(:fodselsnummer, :aktorId, :personinfoId, :enhetId, :infotrygdutbetalingerId, :timestamp, :timestamp, :timestamp);
         """
         session.run(
             queryOf(
@@ -240,7 +381,28 @@ internal class PersonDao(private val dataSource: DataSource) {
                     "aktorId" to aktørId.toLong(),
                     "personinfoId" to personinfoId,
                     "enhetId" to enhetId,
-                    "infotrygdutbetalingerId" to infotrygdutbetalingerId
+                    "infotrygdutbetalingerId" to infotrygdutbetalingerId,
+                    "timestamp" to LocalDateTime.now()
+                )
+            ).asUpdateAndReturnGeneratedKey
+        )
+    })
+
+    internal fun insertPerson(
+        fødselsnummer: String,
+        aktørId: String,
+    ) = requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO person(fodselsnummer, aktor_id)
+            VALUES(:fodselsnummer, :aktorId);
+        """
+        session.run(
+            queryOf(
+                query,
+                mapOf(
+                    "fodselsnummer" to fødselsnummer.toLong(),
+                    "aktorId" to aktørId.toLong()
                 )
             ).asUpdateAndReturnGeneratedKey
         )

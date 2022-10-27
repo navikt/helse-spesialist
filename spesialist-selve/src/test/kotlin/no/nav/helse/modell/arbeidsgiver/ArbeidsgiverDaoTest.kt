@@ -1,9 +1,11 @@
 package no.nav.helse.modell.arbeidsgiver
 
 import DatabaseIntegrationTest
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
 
@@ -20,7 +22,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     fun `oppdatere arbeidsgivernavn`() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyttNavn = "Nærbutikken ASA"
-        arbeidsgiverDao.updateNavn(ORGNUMMER, nyttNavn)
+        arbeidsgiverDao.updateOrInsertNavn(ORGNUMMER, nyttNavn)
         assertEquals(nyttNavn, arbeidsgiverApiDao.finnNavn(ORGNUMMER))
     }
 
@@ -28,7 +30,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     fun `oppdatere bransjer`() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyBransje = listOf("Ny bransje")
-        arbeidsgiverDao.updateBransjer(ORGNUMMER, nyBransje)
+        arbeidsgiverDao.updateOrInsertBransjer(ORGNUMMER, nyBransje)
         assertEquals(nyBransje, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
     }
 

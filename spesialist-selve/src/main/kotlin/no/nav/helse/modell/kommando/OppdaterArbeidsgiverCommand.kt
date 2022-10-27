@@ -22,7 +22,8 @@ internal class OppdaterArbeidsgiverCommand(
     }
 
     private fun ikkeOppdaterteNavn() = orgnummere.filterNot { orgnummer ->
-        arbeidsgiverDao.findNavnSistOppdatert(orgnummer) > LocalDate.now().minusDays(14)
+        val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer) ?: return@filterNot false
+        sistOppdatert > LocalDate.now().minusDays(14)
     }
 
     private fun ikkeOppdaterteBransjer() = orgnummere.filterNot { orgnummer ->

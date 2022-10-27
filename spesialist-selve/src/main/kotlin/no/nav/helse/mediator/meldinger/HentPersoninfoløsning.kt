@@ -6,8 +6,6 @@ import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.person.Kjønn
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -15,6 +13,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.slf4j.LoggerFactory
 
 internal class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {
@@ -40,7 +40,7 @@ internal class HentPersoninfoløsning(
     }
 
     internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
-        personDao.updatePersoninfo(
+        personDao.updateOrInsertPersoninfo(
             fødselsnummer = fødselsnummer,
             fornavn = fornavn,
             mellomnavn = mellomnavn,

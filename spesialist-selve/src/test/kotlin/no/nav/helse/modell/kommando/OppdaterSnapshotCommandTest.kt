@@ -64,6 +64,7 @@ internal class OppdaterSnapshotCommandTest {
     @Test
     fun `lagrer snapshot`() {
         every { personDao.findPersonByFødselsnummer(any()) } returns 1L
+        every { personDao.findPersoninfoRef(any()) } returns 1L
         every { snapshotClient.hentSnapshot(FNR) } returns object : GraphQLClientResponse<HentSnapshot.Result> {
             override val data = HentSnapshot.Result(person = PERSON)
         }
@@ -84,6 +85,7 @@ internal class OppdaterSnapshotCommandTest {
             json = """{"aktørId":"1000041572215"}"""
         )
         every { personDao.findPersonByFødselsnummer(any()) } returns 1L
+        every { personDao.findPersoninfoRef(any()) } returns 1L
         assertTrue(enkeltpersonCommand.execute(context))
         verify(exactly = 0) { snapshotClient.hentSnapshot(FNR) }
         verify(exactly = 0) { snapshotDao.lagre(FNR, PERSON) }
