@@ -249,6 +249,7 @@ query HentSnapshot($fnr: String!) {
         vilkarsgrunnlaghistorikk {
             id
             grunnlag {
+                id
                 vilkarsgrunnlagtype
                 ...grunnlag
                 ... on GraphQLInfotrygdVilkarsgrunnlag {
