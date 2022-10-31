@@ -11,6 +11,8 @@ import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
+import no.nav.helse.mediator.meldinger.NyeVarsler
+import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Companion.varsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -43,6 +45,7 @@ import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -89,6 +92,7 @@ internal class Hendelsefabrikk(
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
+    private val varselDao: VarselDao = VarselDao(dataSource),
     private val overstyringMediator: OverstyringMediator,
     private val snapshotMediator: SnapshotMediator,
 ) {
@@ -186,7 +190,8 @@ internal class Hendelsefabrikk(
             førstegangsbehandling = førstegangsbehandling,
             utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
             inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
-            orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning").path("orgnummereMedRelevanteArbeidsforhold")
+            orgnummereMedRelevanteArbeidsforhold = jsonNode.path("Godkjenning")
+                .path("orgnummereMedRelevanteArbeidsforhold")
                 .takeUnless(JsonNode::isMissingOrNull)?.map { it.asText() } ?: emptyList(),
             json = json
         )
@@ -334,7 +339,7 @@ internal class Hendelsefabrikk(
         navn: String,
         ident: String,
         epost: String,
-        overstyrteArbeidsforhold : List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String
@@ -617,12 +622,14 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json:String): RevurderingAvvist {
+    fun revurderingAvvist(fødselsnummer: String, errors: List<String>, json: String): RevurderingAvvist {
         return RevurderingAvvist(UUID.randomUUID(), fødselsnummer, errors, json, opptegnelseDao)
     }
+
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
         return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, generasjonDao)
     }
+
     fun vedtakFattet(json: String): VedtakFattet {
         val jsonNode = mapper.readTree(json)
         return VedtakFattet(
@@ -631,6 +638,21 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             json,
             generasjonDao
+        )
+    }
+
+    fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<NyeVarsler.Varsel>, json: String): NyeVarsler {
+        return NyeVarsler(id, fødselsnummer, varsler, json, varselDao)
+    }
+
+    fun nyeVarsler(json: String): NyeVarsler {
+        val jsonNode = mapper.readTree(json)
+        return NyeVarsler(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            varsler = jsonNode.path("aktiviteter").varsler(),
+            json,
+            varselDao
         )
     }
 }

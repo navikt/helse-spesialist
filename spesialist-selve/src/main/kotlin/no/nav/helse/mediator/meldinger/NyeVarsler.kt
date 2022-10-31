@@ -1,11 +1,14 @@
 package no.nav.helse.mediator.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.meldinger.NyeVarsler.Kontekst.Companion.vedtaksperiodeId
-import no.nav.helse.objectMapper
+import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Companion.lagre
+import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Companion.varsler
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -14,31 +17,59 @@ import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class NyeVarsler {
+internal class NyeVarsler(
+    override val id: UUID,
+    private val fødselsnummer: String,
+    private val varsler: List<Varsel>,
+    private val json: String,
+    private val varselDao: VarselDao
+) : Hendelse {
 
-    data class Varsel(
-        val id: UUID,
-        val kode: String,
-        val tittel: String,
-        val forklaring: String,
-        val handling: String,
-        val avviklet: Boolean,
-        val tidsstempel: LocalDateTime,
-        val kontekster: List<Kontekst>
-    ) {
-        init {
-            require(kontekster.vedtaksperiodeId() != null) { "varsel: ($kode, $id) er ikke i kontekst av en vedtaksperiode" }
-        }
+    private companion object {
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    data class Kontekst(
-        val konteksttype: String,
-        val kontekstmap: Map<String, String>
+    override fun fødselsnummer(): String = fødselsnummer
+    override fun toJson(): String = json
+    override fun execute(context: CommandContext): Boolean {
+        varsler.lagre(varselDao)
+        sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
+        return true
+    }
+
+    internal class Varsel(
+        private val id: UUID,
+        private val kode: String,
+        private val tidsstempel: LocalDateTime,
+        private val vedtaksperiodeId: UUID,
     ) {
 
-        companion object {
-            internal fun List<Kontekst>.vedtaksperiodeId() =
-                find { it.konteksttype == "Vedtaksperiode" }?.kontekstmap?.get("vedtaksperiodeId")
+        internal companion object {
+            internal fun List<Varsel>.lagre(varselDao: VarselDao) {
+                varselDao.transaction { tx ->
+                    forEach { varselDao.lagre(it.id, it.kode, it.tidsstempel, it.vedtaksperiodeId, tx) }
+                }
+            }
+
+            internal fun JsonNode.varsler(): List<Varsel> {
+                return this
+                    .filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
+                    .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
+                    .map { jsonNode ->
+                        val vedtaksperiodeId =
+                            UUID.fromString(
+                                jsonNode["kontekster"]
+                                    .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]
+                                    .get("vedtaksperiodeId").asText()
+                            )
+                        Varsel(
+                            UUID.fromString(jsonNode["id"].asText()),
+                            jsonNode["varselkode"].asText(),
+                            jsonNode["tidsstempel"].asLocalDateTime(),
+                            vedtaksperiodeId
+                        )
+                    }
+            }
         }
     }
 
@@ -47,38 +78,39 @@ internal class NyeVarsler {
         private val mediator: HendelseMediator
     ) : River.PacketListener {
 
-        private val logg = LoggerFactory.getLogger(this::class.java)
-        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.requireKey("@id")
-                    it.demandValue("@event_name", "aktivitetslogg_nye_varsler")
-                    it.demandKey("varsler")
+                    it.demandValue("@event_name", "aktivitetslogg_ny_aktivitet")
+                    it.requireKey("@id", "fødselsnummer")
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
-                    it.demandKey("fødselsnummer")
+                    it.requireArray("aktiviteter") {
+                        requireKey("melding", "nivå", "id")
+                        interestedIn("varselkode")
+                        require("tidsstempel", JsonNode::asLocalDateTime)
+                        requireArray("kontekster") {
+                            requireKey("konteksttype", "kontekstmap")
+                        }
+                    }
                 }
             }.register(this)
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
-            logg.info(
-                "Mottok aktivitetslogg_nye_varsler med {}",
-                StructuredArguments.keyValue("hendelseId", hendelseId)
-            )
-            sikkerLogg.info(
-                "Mottok aktivitetslogg_nye_varsler med {}, {}",
-                StructuredArguments.keyValue("hendelseId", hendelseId),
-                StructuredArguments.keyValue("hendelse", packet.toJson()),
+            val fødselsnummer = packet["fødselsnummer"].asText()
+            val varsler = packet["aktiviteter"].varsler()
+
+            if (varsler.isEmpty()) return
+
+            sikkerlogg.info(
+                "Mottok varsler for {} med {}, {}",
+                keyValue("fødselsnummer", fødselsnummer),
+                keyValue("hendelseId", hendelseId),
+                keyValue("hendelse", packet.toJson())
             )
 
-            val varsler = packet["varsler"].map { varsel ->
-                objectMapper.treeToValue(varsel, Varsel::class.java)
-            }
-            mediator.nyeVarsler(varsler)
+            mediator.nyeVarsler(hendelseId, fødselsnummer, varsler, packet.toJson(), context)
         }
-
     }
 }

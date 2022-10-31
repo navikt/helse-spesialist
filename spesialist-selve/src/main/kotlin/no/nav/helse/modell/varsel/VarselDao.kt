@@ -1,11 +1,11 @@
 package no.nav.helse.modell.varsel
 
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.NyeVarsler
-import no.nav.helse.mediator.meldinger.NyeVarsler.Kontekst.Companion.vedtaksperiodeId
 import org.intellij.lang.annotations.Language
 
 internal class VarselDao(private val dataSource: DataSource) {
@@ -26,23 +26,20 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun lagre(varsler: List<NyeVarsler.Varsel>) {
+    internal fun transaction(transactionBlock: (transactionalSession: TransactionalSession) -> Unit) {
+        sessionOf(dataSource).use { session -> session.transaction(transactionBlock) }
+    }
+
+    internal fun lagre(
+        id: UUID,
+        kode: String,
+        tidsstempel: LocalDateTime,
+        vedtaksperiodeId: UUID,
+        transactionalSession: TransactionalSession
+    ) {
         @Language("PostgreSQL")
-        val nyttVarsel = """
-                    insert into selve_varsel (unik_id, kode, vedtaksperiode_id)
-                    values (?,?,?);
-                    """
-        sessionOf(dataSource).use { session ->
-            varsler.forEach {
-                session.run(
-                    queryOf(
-                        nyttVarsel,
-                        it.id,
-                        it.kode,
-                        UUID.fromString(it.kontekster.vedtaksperiodeId())
-                    ).asUpdate
-                )
-            }
-        }
+        val query = "insert into selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet) values (?, ?, ?, ?);"
+
+        transactionalSession.run(queryOf(query, id, kode, vedtaksperiodeId, tidsstempel).asUpdate)
     }
 }

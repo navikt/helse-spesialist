@@ -31,8 +31,8 @@ internal class NyeVarslerRiverTest {
     }
 
     @Test
-    fun `leser aktivitetslogg_nye_varsler`() {
-        testRapid.sendTestMessage(testmeldingfabrikk.lagNyeVarsler(HENDELSE, VEDTAKSPERIODE, ORGNR, FNR))
-        //verify(exactly = 1) { mediator.nyeVarsler(any()) }
+    fun `leser aktivitetslogg_ny_aktivitet`() {
+        testRapid.sendTestMessage(testmeldingfabrikk.lagNyeVarsler(HENDELSE, VEDTAKSPERIODE, ORGNR))
+        verify(exactly = 1) { mediator.nyeVarsler(any(), any(), any(), any(), any()) }
     }
 }

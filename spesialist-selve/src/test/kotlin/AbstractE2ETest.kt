@@ -127,6 +127,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val vergemålDao = VergemålDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
     protected val generasjonDao = GenerasjonDao(dataSource)
+    protected val nyVarselDao = no.nav.helse.modell.varsel.VarselDao(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotApiDao = SnapshotApiDao(dataSource)

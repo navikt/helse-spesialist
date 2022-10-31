@@ -56,7 +56,6 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyringsteller
@@ -90,8 +89,7 @@ internal class HendelseMediator(
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val varselDao: VarselDao = VarselDao(dataSource)
+    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource)
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -253,7 +251,14 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         val hendelse =
-            hendelsefabrikk.vedtaksperiodeEndret(id, vedtaksperiodeId, fødselsnummer, forårsaketAvId, forrigeTilstand, message.toJson())
+            hendelsefabrikk.vedtaksperiodeEndret(
+                id,
+                vedtaksperiodeId,
+                fødselsnummer,
+                forårsaketAvId,
+                forrigeTilstand,
+                message.toJson()
+            )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
             sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
@@ -510,8 +515,14 @@ internal class HendelseMediator(
         utfør(hendelsefabrikk.vedtakFattet(id, fødselsnummer, vedtaksperiodeId, json), context)
     }
 
-    fun nyeVarsler(varsler: List<NyeVarsler.Varsel>) {
-        varselDao.lagre(varsler)
+    fun nyeVarsler(
+        id: UUID,
+        fødselsnummer: String,
+        varsler: List<NyeVarsler.Varsel>,
+        json: String,
+        context: MessageContext
+    ) {
+        utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {

@@ -656,23 +656,21 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
-    fun lagNyeVarsler(id: UUID, vedtaksperiodeId: UUID, orgnummer: String, fnr: String): String {
-        return nyHendelse(id, "aktivitetslogg_nye_varsler",
+    fun lagNyeVarsler(id: UUID, vedtaksperiodeId: UUID, orgnummer: String): String {
+        return nyHendelse(id, "aktivitetslogg_ny_aktivitet",
         mapOf(
-            "fødselsnummer" to fnr,
-            "varsler" to listOf(
-                lagVarsel(orgnummer = orgnummer, fnr = fnr, vedaksperiodeId = vedtaksperiodeId)
+            "fødselsnummer" to fødselsnummer,
+            "aktiviteter" to listOf(
+                lagAktivitet(orgnummer = orgnummer, fnr = fødselsnummer, vedaksperiodeId = vedtaksperiodeId)
             )
         ))
     }
 
-    private fun lagVarsel(id: UUID = UUID.randomUUID(), kode: String = "RV_VV", vedaksperiodeId: UUID = UUID.randomUUID(), orgnummer: String, fnr: String): Map<String, Any> = mapOf(
+    private fun lagAktivitet(id: UUID = UUID.randomUUID(), kode: String = "RV_VV", vedaksperiodeId: UUID = UUID.randomUUID(), orgnummer: String, fnr: String): Map<String, Any> = mapOf(
         "id" to id,
-        "kode" to kode,
-        "tittel" to "Eksempelvarsel",
-        "forklaring" to "Eksempelforklaring som forklarer",
-        "handling" to "Handling som burde tas",
-        "avviklet" to false,
+        "melding" to "en melding",
+        "nivå" to "VARSEL",
+        "varselkode" to kode,
         "tidsstempel" to LocalDateTime.now(),
         "kontekster" to listOf(
             mapOf(

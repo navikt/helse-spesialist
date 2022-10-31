@@ -46,6 +46,11 @@ internal object Meldingssender {
             testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
         }
 
+    fun sendAktivitetsloggNyAktivitet(orgnr: String = "orgnr", vedtaksperiodeId: UUID): UUID =
+        uuid.also { id ->
+            testRapid.sendTestMessage(meldingsfabrikk.lagNyeVarsler(id, vedtaksperiodeId, orgnr))
+        }
+
     fun sendGodkjenningsbehov(
         orgnr: String,
         vedtaksperiodeId: UUID,
