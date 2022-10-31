@@ -61,9 +61,20 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
             }
 
-            if(!harTilgangTilBeslutteroppgaver() && "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME")) {
+            if (!harTilgangTilBeslutteroppgaver() && "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME")) {
                 call.respondText(
                     "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
+                    status = HttpStatusCode.Unauthorized
+                )
+                return@post
+            }
+
+            if (oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) !== oid && "dev-gcp" != System.getenv(
+                    "NAIS_CLUSTER_NAME"
+                )
+            ) {
+                call.respondText(
+                    "Kan ikke beslutte egne oppgaver.",
                     status = HttpStatusCode.Unauthorized
                 )
                 return@post
