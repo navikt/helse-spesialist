@@ -61,7 +61,7 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
             }
 
-            if (!harTilgangTilBeslutteroppgaver() && "dev-gcp" != System.getenv("NAIS_CLUSTER_NAME")) {
+            if (!harTilgangTilBeslutteroppgaver() && erProd()) {
                 call.respondText(
                     "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
                     status = HttpStatusCode.Unauthorized
@@ -69,9 +69,7 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
                 return@post
             }
 
-            if (oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) !== oid && "dev-gcp" != System.getenv(
-                    "NAIS_CLUSTER_NAME"
-                )
+            if (oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid && erProd()
             ) {
                 call.respondText(
                     "Kan ikke beslutte egne oppgaver.",
@@ -91,6 +89,8 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
         call.respond(HttpStatusCode.OK)
     }
 }
+
+internal fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppdaterPersonsnapshotDto(
