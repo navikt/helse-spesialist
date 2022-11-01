@@ -46,9 +46,21 @@ internal object Meldingssender {
             testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))
         }
 
-    fun sendAktivitetsloggNyAktivitet(orgnr: String = "orgnr", vedtaksperiodeId: UUID): UUID =
+    fun sendAktivitetsloggNyAktivitet(
+        orgnr: String = "orgnr",
+        vedtaksperiodeId: UUID,
+        aktiviteterBlock: (fnr: String) -> List<Map<String, Any>> = { fnr ->
+            listOf(
+                meldingsfabrikk.lagAktivitet(
+                    orgnummer = orgnr,
+                    fnr = fnr,
+                    vedaksperiodeId = vedtaksperiodeId
+                )
+            )
+        }
+    ): UUID =
         uuid.also { id ->
-            testRapid.sendTestMessage(meldingsfabrikk.lagNyeVarsler(id, vedtaksperiodeId, orgnr))
+            testRapid.sendTestMessage(meldingsfabrikk.lagNyeVarsler(id, vedtaksperiodeId, orgnr, aktiviteterBlock))
         }
 
     fun sendGodkjenningsbehov(

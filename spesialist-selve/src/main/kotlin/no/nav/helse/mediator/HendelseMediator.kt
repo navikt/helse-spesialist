@@ -127,6 +127,7 @@ internal class HendelseMediator(
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
+            NyeVarsler.River(it, this)
         }
     }
 

@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -73,10 +74,10 @@ internal class NyeVarsler(
         }
     }
 
-    internal class NyeVarslerRiver(
+    internal class River(
         rapidsConnection: RapidsConnection,
         private val mediator: HendelseMediator
-    ) : River.PacketListener {
+    ) : PacketListener {
 
         init {
             River(rapidsConnection).apply {

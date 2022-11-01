@@ -104,11 +104,16 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>) =
-            ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer).toBody()
+        ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer).toBody()
 
-    fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>, ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) = (
+    fun arbeidsgiverinformasjon(
+        orgnummer: String,
+        navn: String,
+        bransjer: List<String>,
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>
+    ) = (
             listOf(ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer)) + ekstraArbeidsgivere
-        ).map(ArbeidsgiverinformasjonJson::toBody)
+            ).map(ArbeidsgiverinformasjonJson::toBody)
 
     fun lagArbeidsgiverinformasjonløsning(
         id: UUID = UUID.randomUUID(),
@@ -157,13 +162,13 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagHentPersoninfoV2(ident: String, adressebeskyttelse: String = "Ugradert") = mapOf(
-            "ident" to ident,
-            "fornavn" to "Kari",
-            "mellomnavn" to "",
-            "etternavn" to "Nordmann",
-            "fødselsdato" to "1970-01-01",
-            "kjønn" to "Kvinne",
-            "adressebeskyttelse" to adressebeskyttelse
+        "ident" to ident,
+        "fornavn" to "Kari",
+        "mellomnavn" to "",
+        "etternavn" to "Nordmann",
+        "fødselsdato" to "1970-01-01",
+        "kjønn" to "Kvinne",
+        "adressebeskyttelse" to adressebeskyttelse
     )
 
     fun lagFullstendigBehov(
@@ -196,27 +201,34 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         organisasjonsnummer: String = "orgnr",
         enhet: String = "0301",
         adressebeskyttelse: String = "Ugradert"
-    ) = lagFullstendigBehov(id, hendelseId, contextId, vedtaksperiodeId, organisasjonsnummer, listOf("HentEnhet", "HentPersoninfoV2", "HentInfotrygdutbetalinger"), mapOf(
-                "HentInfotrygdutbetalinger" to mapOf(
-                    "historikkFom" to "2017-01-01",
-                    "historikkTom" to "2020-12-31"
+    ) = lagFullstendigBehov(
+        id,
+        hendelseId,
+        contextId,
+        vedtaksperiodeId,
+        organisasjonsnummer,
+        listOf("HentEnhet", "HentPersoninfoV2", "HentInfotrygdutbetalinger"),
+        mapOf(
+            "HentInfotrygdutbetalinger" to mapOf(
+                "historikkFom" to "2017-01-01",
+                "historikkTom" to "2020-12-31"
+            ),
+            "@løsning" to mapOf(
+                "HentInfotrygdutbetalinger" to listOf(
+                    mapOf(
+                        "fom" to "2018-01-01",
+                        "tom" to "2018-01-31",
+                        "dagsats" to "1000.0",
+                        "grad" to "100",
+                        "typetekst" to "ArbRef",
+                        "organisasjonsnummer" to organisasjonsnummer
+                    )
                 ),
-                "@løsning" to mapOf(
-                    "HentInfotrygdutbetalinger" to listOf(
-                        mapOf(
-                            "fom" to "2018-01-01",
-                            "tom" to "2018-01-31",
-                            "dagsats" to "1000.0",
-                            "grad" to "100",
-                            "typetekst" to "ArbRef",
-                            "organisasjonsnummer" to organisasjonsnummer
-                        )
-                    ),
-                    "HentEnhet" to enhet,
-                    "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse)
-                )
+                "HentEnhet" to enhet,
+                "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse)
             )
         )
+    )
 
     fun lagHentInfotrygdutbetalingerløsning(
         id: UUID = UUID.randomUUID(),
@@ -656,17 +668,36 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
-    fun lagNyeVarsler(id: UUID, vedtaksperiodeId: UUID, orgnummer: String): String {
-        return nyHendelse(id, "aktivitetslogg_ny_aktivitet",
-        mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "aktiviteter" to listOf(
-                lagAktivitet(orgnummer = orgnummer, fnr = fødselsnummer, vedaksperiodeId = vedtaksperiodeId)
+    fun lagNyeVarsler(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        orgnummer: String,
+        aktiviteterBlock: (fnr: String) -> List<Map<String, Any>> = { fnr ->
+            listOf(
+                lagAktivitet(
+                    orgnummer = orgnummer,
+                    fnr = fnr,
+                    vedaksperiodeId = vedtaksperiodeId
+                )
             )
-        ))
+        }
+    ): String {
+        return nyHendelse(
+            id, "aktivitetslogg_ny_aktivitet",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "aktiviteter" to aktiviteterBlock(fødselsnummer)
+            )
+        )
     }
 
-    private fun lagAktivitet(id: UUID = UUID.randomUUID(), kode: String = "RV_VV", vedaksperiodeId: UUID = UUID.randomUUID(), orgnummer: String, fnr: String): Map<String, Any> = mapOf(
+    fun lagAktivitet(
+        id: UUID = UUID.randomUUID(),
+        kode: String = "RV_VV",
+        vedaksperiodeId: UUID = UUID.randomUUID(),
+        orgnummer: String,
+        fnr: String
+    ): Map<String, Any> = mapOf(
         "id" to id,
         "melding" to "en melding",
         "nivå" to "VARSEL",
@@ -744,7 +775,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             val gyldigTilOgMed: LocalDate
         )
 
+        @Suppress("unused")
         enum class Område { Alle, Syk, Sym, Annet }
+        @Suppress("unused")
         enum class VergemålType {
             ensligMindreaarigAsylsoeker,
             ensligMindreaarigFlyktning,
