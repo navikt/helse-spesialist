@@ -30,7 +30,7 @@ internal class VarselDao(private val dataSource: DataSource) {
         sessionOf(dataSource).use { session -> session.transaction(transactionBlock) }
     }
 
-    internal fun lagre(
+    internal fun lagreVarsel(
         id: UUID,
         kode: String,
         tidsstempel: LocalDateTime,
@@ -41,5 +41,18 @@ internal class VarselDao(private val dataSource: DataSource) {
         val query = "insert into selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet) values (?, ?, ?, ?);"
 
         transactionalSession.run(queryOf(query, id, kode, vedtaksperiodeId, tidsstempel).asUpdate)
+    }
+
+    internal fun lagreDefinisjon(
+        id: UUID,
+        kode: String,
+        tittel: String,
+        forklaring: String?,
+        handling: String?,
+        avviklet: Boolean,
+        opprettet: LocalDateTime,
+        transactionalSession: TransactionalSession
+    ) {
+        TODO("fix etterpå")
     }
 }

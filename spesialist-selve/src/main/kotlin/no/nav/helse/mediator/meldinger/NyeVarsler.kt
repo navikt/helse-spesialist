@@ -48,7 +48,7 @@ internal class NyeVarsler(
         internal companion object {
             internal fun List<Varsel>.lagre(varselDao: VarselDao) {
                 varselDao.transaction { tx ->
-                    forEach { varselDao.lagre(it.id, it.kode, it.tidsstempel, it.vedtaksperiodeId, tx) }
+                    forEach { varselDao.lagreVarsel(it.id, it.kode, it.tidsstempel, it.vedtaksperiodeId, tx) }
                 }
             }
 

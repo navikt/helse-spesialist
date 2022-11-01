@@ -37,6 +37,8 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.Varseldefinisjon
+import no.nav.helse.mediator.meldinger.Varseldefinisjon.Companion.lagre
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
@@ -56,6 +58,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyringsteller
@@ -89,7 +92,8 @@ internal class HendelseMediator(
     private val oppgaveMediator: OppgaveMediator,
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
-    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource)
+    private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
+    private val varselDao: VarselDao = VarselDao(dataSource)
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -524,6 +528,10 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
+    }
+
+    fun nyeVarseldefinisjoner(definisjoner: List<Varseldefinisjon>) {
+        definisjoner.lagre(varselDao)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {
