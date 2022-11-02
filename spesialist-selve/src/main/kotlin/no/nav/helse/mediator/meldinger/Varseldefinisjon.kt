@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.varsel.VarselDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,13 +16,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal class Varseldefinisjon(
-    private val id: UUID,
-    private val kode: String,
-    private val tittel: String,
-    private val forklaring: String?,
-    private val handling: String?,
-    private val avviklet: Boolean,
-    private val opprettet: LocalDateTime,
+    val id: UUID,
+    val kode: String,
+    val tittel: String,
+    val forklaring: String?,
+    val handling: String?,
+    val avviklet: Boolean,
+    val opprettet: LocalDateTime,
 ) {
 
     internal companion object {
@@ -64,7 +63,7 @@ internal class Varseldefinisjon(
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val mediator: HendelseMediator
+        private val varselDao: VarselDao
     ) : PacketListener {
 
         init {
@@ -73,7 +72,7 @@ internal class Varseldefinisjon(
                     it.demandValue("@event_name", "varseldefinisjoner_endret")
                     it.requireKey("@id")
                     it.requireArray("definisjoner") {
-                        this.requireKey("kode", "tittel", "forklaring", "handling", "avviklet")
+                        this.requireKey("id", "kode", "tittel", "forklaring", "handling", "avviklet")
                         this.require("opprettet", JsonNode::asLocalDateTime)
                     }
                 }
@@ -89,7 +88,7 @@ internal class Varseldefinisjon(
 
             val definisjoner = packet["definisjoner"].definisjoner()
 
-            mediator.nyeVarseldefinisjoner(definisjoner)
+            definisjoner.lagre(varselDao)
         }
     }
 }

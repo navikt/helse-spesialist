@@ -6,28 +6,76 @@ import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import org.intellij.lang.annotations.Language
 
 internal class VarselDao(private val dataSource: DataSource) {
 
+    internal fun transaction(transactionBlock: (transactionalSession: TransactionalSession) -> Unit) {
+        sessionOf(dataSource).use { session -> session.transaction(transactionBlock) }
+    }
+
     internal fun alleVarslerForVedtaksperiode(vedtaksperiodeId: UUID): List<Pair<String, String>> {
         @Language("PostgreSQL")
-        val alleVarslerForVedtaksperiode = """
-            select unik_id, kode from selve_varsel where vedtaksperiode_id = ?
-            """
+        val query = "SELECT unik_id,kode FROM selve_varsel WHERE vedtaksperiode_id = ?;"
 
         sessionOf(dataSource).use { session ->
             return session.run(
                 queryOf(
-                    alleVarslerForVedtaksperiode,
+                    query,
                     vedtaksperiodeId
                 ).map { varsel -> Pair(varsel.string("unik_id"), varsel.string("kode")) }.asList
             )
         }
     }
 
-    internal fun transaction(transactionBlock: (transactionalSession: TransactionalSession) -> Unit) {
-        sessionOf(dataSource).use { session -> session.transaction(transactionBlock) }
+    internal fun alleDefinisjoner(): List<Varseldefinisjon> {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT * FROM api_varseldefinisjon;"
+
+        sessionOf(dataSource).use { session ->
+            return session.run(
+                queryOf(
+                    query
+                ).map {
+                    Varseldefinisjon(
+                        id = it.uuid("unik_id"),
+                        kode = it.string("kode"),
+                        tittel = it.string("tittel"),
+                        forklaring = it.string("forklaring"),
+                        handling = it.string("handling"),
+                        avviklet = it.boolean("avviklet"),
+                        opprettet = it.localDateTime("opprettet")
+                    )
+                }.asList
+            )
+        }
+    }
+
+    internal fun definisjonForId(id: UUID): Varseldefinisjon? {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT * FROM api_varseldefinisjon WHERE unik_id = ?;"
+
+        sessionOf(dataSource).use { session ->
+            return session.run(
+                queryOf(
+                    query,
+                    id
+                ).map {
+                    Varseldefinisjon(
+                        id = it.uuid("unik_id"),
+                        kode = it.string("kode"),
+                        tittel = it.string("tittel"),
+                        forklaring = it.string("forklaring"),
+                        handling = it.string("handling"),
+                        avviklet = it.boolean("avviklet"),
+                        opprettet = it.localDateTime("opprettet")
+                    )
+                }.asSingle
+            )
+        }
     }
 
     internal fun lagreVarsel(
@@ -38,7 +86,7 @@ internal class VarselDao(private val dataSource: DataSource) {
         transactionalSession: TransactionalSession
     ) {
         @Language("PostgreSQL")
-        val query = "insert into selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet) values (?, ?, ?, ?);"
+        val query = "INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet) VALUES (?, ?, ?, ?);"
 
         transactionalSession.run(queryOf(query, id, kode, vedtaksperiodeId, tidsstempel).asUpdate)
     }
@@ -53,6 +101,10 @@ internal class VarselDao(private val dataSource: DataSource) {
         opprettet: LocalDateTime,
         transactionalSession: TransactionalSession
     ) {
-        TODO("fix etterpå")
+        @Language("PostgreSQL")
+        val query =
+            "INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING;"
+
+        transactionalSession.run(queryOf(query, id, kode, tittel, forklaring, handling, avviklet, opprettet).asUpdate)
     }
 }

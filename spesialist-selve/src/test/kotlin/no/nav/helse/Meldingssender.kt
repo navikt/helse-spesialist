@@ -5,11 +5,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.VARSEL_KODE_1
+import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.SubsumsjonJson
+import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -49,18 +52,27 @@ internal object Meldingssender {
     fun sendAktivitetsloggNyAktivitet(
         orgnr: String = "orgnr",
         vedtaksperiodeId: UUID,
-        aktiviteterBlock: (fnr: String) -> List<Map<String, Any>> = { fnr ->
-            listOf(
-                meldingsfabrikk.lagAktivitet(
-                    orgnummer = orgnr,
-                    fnr = fnr,
-                    vedaksperiodeId = vedtaksperiodeId
-                )
-            )
-        }
+        koder: List<String> = listOf("RV_VV")
     ): UUID =
         uuid.also { id ->
-            testRapid.sendTestMessage(meldingsfabrikk.lagNyeVarsler(id, vedtaksperiodeId, orgnr, aktiviteterBlock))
+            testRapid.sendTestMessage(meldingsfabrikk.lagNyeVarsler(id, vedtaksperiodeId, orgnr, koder.map {
+                meldingsfabrikk.lagAktivitet(
+                    kode = it,
+                    orgnummer = orgnr,
+                    vedtaksperiodeId = vedtaksperiodeId
+                )
+            }))
+        }
+
+    fun sendVarseldefinisjonerEndret(
+        definisjoner: List<Map<String, Any>> =
+            listOf(
+                meldingsfabrikkUtenFnr.lagVarseldefinisjon(kode = VARSEL_KODE_1),
+                meldingsfabrikkUtenFnr.lagVarseldefinisjon(kode = VARSEL_KODE_2)
+            )
+    ): UUID =
+        uuid.also { id ->
+            testRapid.sendTestMessage(meldingsfabrikkUtenFnr.lagVarseldefinisjonerEndret(id, definisjoner))
         }
 
     fun sendGodkjenningsbehov(
@@ -538,6 +550,7 @@ internal object Meldingssender {
     }
 
     private val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, Testdata.AKTØR)
+    private val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
     private val uuid get() = UUID.randomUUID()
 

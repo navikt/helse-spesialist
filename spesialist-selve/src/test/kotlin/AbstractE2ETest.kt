@@ -44,6 +44,7 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
+import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -136,6 +137,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testRapid = TestRapid()
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
+    protected val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
     protected val oppgaveMediator =
         OppgaveMediator(oppgaveDao, tildelingDao, reservasjonDao, opptegnelseDao)

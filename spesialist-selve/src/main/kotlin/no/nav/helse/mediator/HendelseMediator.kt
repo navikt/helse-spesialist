@@ -38,7 +38,6 @@ import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
-import no.nav.helse.mediator.meldinger.Varseldefinisjon.Companion.lagre
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
@@ -132,6 +131,7 @@ internal class HendelseMediator(
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
             NyeVarsler.River(it, this)
+            Varseldefinisjon.River(it, varselDao)
         }
     }
 
@@ -528,10 +528,6 @@ internal class HendelseMediator(
         context: MessageContext
     ) {
         utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
-    }
-
-    fun nyeVarseldefinisjoner(definisjoner: List<Varseldefinisjon>) {
-        definisjoner.lagre(varselDao)
     }
 
     fun håndter(overstyringMessage: OverstyrTidslinjeKafkaDto) {

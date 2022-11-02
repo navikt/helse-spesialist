@@ -672,21 +672,20 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         id: UUID,
         vedtaksperiodeId: UUID,
         orgnummer: String,
-        aktiviteterBlock: (fnr: String) -> List<Map<String, Any>> = { fnr ->
+        aktiviteter: List<Map<String, Any>> =
             listOf(
                 lagAktivitet(
                     orgnummer = orgnummer,
-                    fnr = fnr,
-                    vedaksperiodeId = vedtaksperiodeId
+                    vedtaksperiodeId = vedtaksperiodeId
                 )
             )
-        }
+
     ): String {
         return nyHendelse(
             id, "aktivitetslogg_ny_aktivitet",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "aktiviteter" to aktiviteterBlock(fødselsnummer)
+                "aktiviteter" to aktiviteter
             )
         )
     }
@@ -694,9 +693,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun lagAktivitet(
         id: UUID = UUID.randomUUID(),
         kode: String = "RV_VV",
-        vedaksperiodeId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String,
-        fnr: String
     ): Map<String, Any> = mapOf(
         "id" to id,
         "melding" to "en melding",
@@ -707,7 +705,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             mapOf(
                 "konteksttype" to "Person",
                 "kontekstmap" to mapOf(
-                    "fødselsnummer" to fnr,
+                    "fødselsnummer" to fødselsnummer,
                     "aktørId" to "2093088099680"
                 )
             ),
@@ -720,7 +718,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             mapOf(
                 "konteksttype" to "Vedtaksperiode",
                 "kontekstmap" to mapOf(
-                    "vedtaksperiodeId" to vedaksperiodeId
+                    "vedtaksperiodeId" to vedtaksperiodeId
                 )
             )
         )
@@ -777,6 +775,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
 
         @Suppress("unused")
         enum class Område { Alle, Syk, Sym, Annet }
+
         @Suppress("unused")
         enum class VergemålType {
             ensligMindreaarigAsylsoeker,

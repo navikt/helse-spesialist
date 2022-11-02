@@ -43,6 +43,9 @@ object Testdata {
     internal val UTBETALING_ID = UUID.randomUUID()
     internal val UTBETALING_ID2 = UUID.randomUUID()
 
+    const val VARSEL_KODE_1 = "VARSEL_KODE_1"
+    const val VARSEL_KODE_2 = "VARSEL_KODE_2"
+
     val VEDTAKSPERIODE_ID: UUID = UUID.randomUUID()
     val SNAPSHOT_MED_WARNINGS = snapshotMedWarnings(
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
