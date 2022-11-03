@@ -2,18 +2,25 @@ package no.nav.helse.modell.kommando
 
 import java.time.LocalDate
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsninger
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import org.slf4j.LoggerFactory
 
 internal class OppdaterArbeidsgiverCommand(
     orgnummere: List<String>,
     private val arbeidsgiverDao: ArbeidsgiverDao
 ) : Command {
+    private companion object {
+        private val log = LoggerFactory.getLogger(OppdaterArbeidsgiverCommand::class.java)
+    }
+
     // ignorerer fnr/aktørId/dnr ettersom bransje/navn er ganske så statisk for dem
     private val orgnummere = orgnummere.filter { it.length == 9 }
+    private val personidenter = orgnummere.filter { it.length > 9 }
 
     override fun execute(context: CommandContext) =
         when {
-            (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).isEmpty() -> true
+            (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn() + ikkeOppdaterteNavnForPersonidenter()).isEmpty() -> true
             else -> behandle(context)
         }
 
@@ -31,18 +38,43 @@ internal class OppdaterArbeidsgiverCommand(
         sistOppdatert > LocalDate.now().minusDays(14)
     }
 
+    private fun ikkeOppdaterteNavnForPersonidenter() = personidenter.filterNot { personlignr ->
+        val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(personlignr) ?: return@filterNot false
+        sistOppdatert > LocalDate.now().minusDays(14)
+    }
+
     private fun behandle(context: CommandContext): Boolean {
-        val løsning = context.get<Arbeidsgiverinformasjonløsning>() ?: return trengerMerInformasjon(context)
-        if (!løsning.harSvarForAlle(ikkeOppdaterteBransjer() + ikkeOppdaterteNavn())) return trengerMerInformasjon(context)
+        val løsning = context.get<Arbeidsgiverinformasjonløsning>()
+        context.get<HentPersoninfoløsninger>()?.also { personinfo ->
+            log.info("oppretter arbeidsgiver fra personer")
+            personinfo.opprett(arbeidsgiverDao)
+        }
+
+        if (
+            løsning == null ||
+            !løsning.harSvarForAlle(ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()) ||
+            ikkeOppdaterteNavnForPersonidenter().isNotEmpty()
+        ) return trengerMerInformasjon(context)
+
         løsning.oppdater(arbeidsgiverDao)
+
         return true
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
-        context.behov(
-            "Arbeidsgiverinformasjon",
-            mapOf("organisasjonsnummer" to (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).distinct())
-        )
+        val ikkeOppdaterteArbeidsgivere = (ikkeOppdaterteBransjer() + ikkeOppdaterteNavn()).distinct()
+        val ikkeOppdatertePersonArbeidsgivere = ikkeOppdaterteNavnForPersonidenter().distinct()
+
+        if (ikkeOppdaterteArbeidsgivere.isNotEmpty()) {
+            context.behov(
+                "Arbeidsgiverinformasjon",
+                mapOf("organisasjonsnummer" to ikkeOppdaterteArbeidsgivere)
+            )
+        }
+        if (ikkeOppdatertePersonArbeidsgivere.isNotEmpty()) {
+            context.behov("HentPersoninfoV2", mapOf("ident" to ikkeOppdatertePersonArbeidsgivere))
+        }
+
         return false
     }
 }

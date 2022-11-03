@@ -288,8 +288,9 @@ internal class HendelseMediator(
     ) {
         val hendelse = hendelsefabrikk.vedtaksperiodeOpprettet(id, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, message.toJson())
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
-            log.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
-            sikkerLogg.info("ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
+            // @TODO: Endre dette til å throwe når minimal-løsning er testet og er vanntett
+            log.info("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
+            sikkerLogg.info("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
             return
         }
         return utfør(hendelse, context)
