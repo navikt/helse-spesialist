@@ -115,12 +115,12 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         val query = "INSERT INTO arbeidsgiver_navn (navn, navn_oppdatert) VALUES (?, now())"
 
         val arbeidsgivernavnId = requireNotNull(run(queryOf(query, navn).asUpdateAndReturnGeneratedKey))
-        oppdaterNavnRef(arbeidsgivernavnId, orgnummer)
+        upsertNavnRef(arbeidsgivernavnId, orgnummer)
     }
 
-    private fun TransactionalSession.oppdaterNavnRef(arbeidsgivernavnRef: Long, orgnummer: String) {
+    private fun TransactionalSession.upsertNavnRef(arbeidsgivernavnRef: Long, orgnummer: String) {
         @Language("PostgreSQL")
-        val query = "UPDATE arbeidsgiver SET navn_ref=:arbeidsgivernavnRef WHERE orgnummer=:orgnummer"
+        val query = "INSERT INTO arbeidsgiver (orgnummer, navn_ref) VALUES(:orgnummer, :arbeidsgivernavnRef) ON CONFLICT(orgnummer) DO UPDATE SET navn_ref=:arbeidsgivernavnRef"
 
         run(queryOf(query, mapOf("arbeidsgivernavnRef" to arbeidsgivernavnRef, "orgnummer" to orgnummer.toLong())).asUpdate)
     }
@@ -152,12 +152,12 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         val query = "INSERT INTO arbeidsgiver_bransjer (bransjer, oppdatert) VALUES (?, now())"
 
         val bransjerId = requireNotNull(run(queryOf(query, objectMapper.writeValueAsString(bransjer)).asUpdateAndReturnGeneratedKey))
-        oppdaterBransjerRef(bransjerId, orgnummer)
+        upsertBransjerRef(bransjerId, orgnummer)
     }
 
-    private fun TransactionalSession.oppdaterBransjerRef(bransjerRef: Long, orgnummer: String) {
+    private fun TransactionalSession.upsertBransjerRef(bransjerRef: Long, orgnummer: String) {
         @Language("PostgreSQL")
-        val query = "UPDATE arbeidsgiver SET bransjer_ref=:bransjerRef WHERE orgnummer=:orgnummer"
+        val query = "INSERT INTO arbeidsgiver (orgnummer, bransjer_ref) VALUES(:orgnummer, :bransjerRef) ON CONFLICT(orgnummer) DO UPDATE SET bransjer_ref=:bransjerRef"
 
         run(queryOf(query, mapOf("bransjerRef" to bransjerRef, "orgnummer" to orgnummer.toLong())).asUpdate)
     }
