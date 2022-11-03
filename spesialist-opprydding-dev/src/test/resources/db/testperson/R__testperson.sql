@@ -1,9 +1,14 @@
-INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES ('${saksbehandler_oid}', 'SAKSBEHANDLER SAKSBEHANDLERSEN', 'saksbehandler@nav.no', 'I123456');
+INSERT INTO saksbehandler(oid, navn, epost, ident)
+VALUES ('${saksbehandler_oid}', 'SAKSBEHANDLER SAKSBEHANDLERSEN', 'saksbehandler@nav.no', 'I123456');
 
-INSERT INTO hendelse(id, data, type, fodselsnummer) VALUES ('${hendelse_id}', '{}'::json, 'TESTHENDELSE', ${fødselsnummer});
-INSERT INTO vedtaksperiode_hendelse(hendelse_ref, vedtaksperiode_id) VALUES ('${hendelse_id}', '${vedtaksperiode_id}');
-INSERT INTO command_context(context_id, hendelse_id, tilstand, data) VALUES ('${command_context_id}', '${hendelse_id}', 'TESTTILSTAND', '{}'::json);
-INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse) VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
+INSERT INTO hendelse(id, data, type, fodselsnummer)
+VALUES ('${hendelse_id}', '{}'::json, 'TESTHENDELSE', ${fødselsnummer});
+INSERT INTO vedtaksperiode_hendelse(hendelse_ref, vedtaksperiode_id)
+VALUES ('${hendelse_id}', '${vedtaksperiode_id}');
+INSERT INTO command_context(context_id, hendelse_id, tilstand, data)
+VALUES ('${command_context_id}', '${hendelse_id}', 'TESTTILSTAND', '{}'::json);
+INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
 INSERT INTO infotrygdutbetalinger(id, data)
 VALUES (${sequence_number}, '{}'::json);
 INSERT INTO person(id, fodselsnummer, aktor_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert,
@@ -26,7 +31,8 @@ VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
 INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number},
         ${sequence_number});
-INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet) VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now());
+INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet)
+VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now());
 INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, opprettet_av_hendelse)
 VALUES ('${vedtaksperiode_id}', '${hendelse_id}');
 INSERT INTO warning(id, melding, vedtak_ref, kilde, opprettet)
@@ -55,34 +61,65 @@ INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av
 VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${command_context_id}',
         'SØKNAD', '${utbetaling_id}');
 
-INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent) VALUES ('${saksbehandler_oid}', ${sequence_number}, false);
-INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til) VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
+INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref, på_vent)
+VALUES ('${saksbehandler_oid}', ${sequence_number}, false);
+INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til)
+VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
 
-INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type) VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
-INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id, siste_sekvensnummer) VALUES ('${saksbehandler_oid}', ${sequence_number}, 1);
+INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type)
+VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
+INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id, siste_sekvensnummer)
+VALUES ('${saksbehandler_oid}', ${sequence_number}, 1);
 
-INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt) VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
-INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident) VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}');
+INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt)
+VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now());
+INSERT INTO kommentarer(tekst, notat_ref, feilregistrert_tidspunkt, saksbehandlerident)
+VALUES ('EN_KOMMENTAR', ${sequence_number}, null, '${saksbehandler_oid}');
 
-INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref, hendelse_ref, saksbehandler_ref) VALUES (${sequence_number}, 'BEGRUNNELSE', now(), ${sequence_number}, ${sequence_number}, '${hendelse_id}', '${saksbehandler_oid}');
-INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad) VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
-INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring) VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING');
-INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt) VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01');
-INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number});
+INSERT INTO overstyring(id, begrunnelse, tidspunkt, person_ref, arbeidsgiver_ref, hendelse_ref, saksbehandler_ref)
+VALUES (${sequence_number}, 'BEGRUNNELSE', now(), ${sequence_number}, ${sequence_number}, '${hendelse_id}',
+        '${saksbehandler_oid}');
+INSERT INTO overstyring_dag(id, overstyring_ref, dato, dagtype, grad)
+VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100);
+INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring)
+VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING');
+INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt)
+VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01');
+INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
+VALUES ('${vedtaksperiode_id}', ${sequence_number});
 
-INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref) VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
-INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag) VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP', 'NY', '2018-01-01');
-INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag) VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER', 'SPREF', 'NY', '2018-01-01');
-INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffagsystemid, endringskode, klassekode, statuskode, datostatusfom, fom, tom, dagsats, lønn, grad, totalbeløp) VALUES (${sequence_number}, ${sequence_number}, 1, null, null, 'NY', 'SPREFAG-IOP', null, null, '2018-01-01', '2018-01-31', 1000, 1000, 100, 1000);
-INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffagsystemid, endringskode, klassekode, statuskode, datostatusfom, fom, tom, dagsats, lønn, grad, totalbeløp) VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, 1, null, null, 'NY', 'SPREFAG-IOP', null, null, '2018-01-01', '2018-01-31', 1000, 1000, 100, 1000);
-INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, type, opprettet) VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000, ${sequence_number}, 'UTBETALING', now());
+INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
+VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
+INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag)
+VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER', 'SP', 'NY', '2018-01-01');
+INSERT INTO oppdrag(id, fagsystem_id, mottaker, fagområde, endringskode, sistearbeidsgiverdag)
+VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER', 'SPREF', 'NY', '2018-01-01');
+INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffagsystemid, endringskode, klassekode,
+                             statuskode, datostatusfom, fom, tom, dagsats, lønn, grad, totalbeløp)
+VALUES (${sequence_number}, ${sequence_number}, 1, null, null, 'NY', 'SPREFAG-IOP', null, null, '2018-01-01',
+        '2018-01-31', 1000, 1000, 100, 1000);
+INSERT INTO utbetalingslinje(id, oppdrag_id, delytelseid, refdelytelseid, reffagsystemid, endringskode, klassekode,
+                             statuskode, datostatusfom, fom, tom, dagsats, lønn, grad, totalbeløp)
+VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, 1, null, null, 'NY', 'SPREFAG-IOP', null, null,
+        '2018-01-01', '2018-01-31', 1000, 1000, 100, 1000);
+INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_fagsystem_id_ref,
+                          person_fagsystem_id_ref, type, opprettet)
+VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000,
+        ${sequence_number}, 'UTBETALING', now());
 
-INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref) VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
+INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref)
+VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
 
-INSERT INTO periodehistorikk(id, type, timestamp, utbetaling_id, saksbehandler_oid, notat_id) VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${utbetaling_id}', '${saksbehandler_oid}', ${sequence_number});
+INSERT INTO periodehistorikk(id, type, timestamp, utbetaling_id, saksbehandler_oid, notat_id)
+VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${utbetaling_id}', '${saksbehandler_oid}',
+        ${sequence_number});
 
-INSERT INTO risikovurdering(id, vedtaksperiode_id, samlet_score, ufullstendig, opprettet) VALUES (${sequence_number}, '${vedtaksperiode_id}', 1000, false, now());
-INSERT INTO risikovurdering_arbeidsuforhetvurdering(id, risikovurdering_ref, tekst) VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
-INSERT INTO risikovurdering_faresignal(id, risikovurdering_ref, tekst) VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
+INSERT INTO risikovurdering(id, vedtaksperiode_id, samlet_score, ufullstendig, opprettet)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', 1000, false, now());
+INSERT INTO risikovurdering_arbeidsuforhetvurdering(id, risikovurdering_ref, tekst)
+VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
+INSERT INTO risikovurdering_faresignal(id, risikovurdering_ref, tekst)
+VALUES (${sequence_number}, ${sequence_number}, 'TESTTEKST');
 
-INSERT INTO feilende_meldinger(id, event_name, opprettet, blob) VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
+INSERT INTO feilende_meldinger(id, event_name, opprettet, blob)
+VALUES (gen_random_uuid(), 'FEILENDE_TESTHENDELSE', now(), '{}'::json);
