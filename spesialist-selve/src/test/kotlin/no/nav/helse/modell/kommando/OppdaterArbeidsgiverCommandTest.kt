@@ -39,7 +39,7 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -55,7 +55,7 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, ghostOrgnr), dao)
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
-        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -78,7 +78,7 @@ internal class OppdaterArbeidsgiverCommandTest {
                 }
             }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
 
-        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -102,7 +102,7 @@ internal class OppdaterArbeidsgiverCommandTest {
                 }
             }) { "Ønsket orgnr $orgnrMedUtdatertNavn mangler i behovet: ${context.behov()}" }
 
-        verify(exactly = 0) { dao.updateOrInsertNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -128,8 +128,8 @@ internal class OppdaterArbeidsgiverCommandTest {
         every { dao.findNavnSistOppdatert(fnr) } returns LocalDate.now()
         every { dao.findBransjerSistOppdatert(fnr) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 1) { dao.updateOrInsertNavn(fnr, "LITEN TRANFLASKE") }
-        verify(exactly = 1) { dao.updateOrInsertBransjer(fnr, listOf("Privatperson")) }
+        verify(exactly = 1) { dao.upsertNavn(fnr, "LITEN TRANFLASKE") }
+        verify(exactly = 1) { dao.upsertBransjer(fnr, listOf("Privatperson")) }
     }
 
     private fun løsning(vararg orgnumre: String) = Arbeidsgiverinformasjonløsning(orgnumre.map { arbeidsgiverinfo(it) })

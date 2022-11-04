@@ -29,7 +29,7 @@ internal class HentInfotrygdutbetalingerløsningTest {
         val json = objectMapper.createObjectNode()
         val utbetalinger = HentInfotrygdutbetalingerløsning(json)
         utbetalinger.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.updateOrInsertInfotrygdutbetalinger(FNR, json) }
+        verify(exactly = 1) { dao.upsertInfotrygdutbetalinger(FNR, json) }
     }
 
     @Test
@@ -37,6 +37,6 @@ internal class HentInfotrygdutbetalingerløsningTest {
         val json = objectMapper.createObjectNode()
         val utbetalinger = HentInfotrygdutbetalingerløsning(json)
         utbetalinger.oppdater(dao, FNR)
-        verify(exactly = 1) { dao.updateOrInsertInfotrygdutbetalinger(FNR, json) }
+        verify(exactly = 1) { dao.upsertInfotrygdutbetalinger(FNR, json) }
     }
 }

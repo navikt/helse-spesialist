@@ -36,13 +36,12 @@ internal class HentPersoninfoløsning(
         personDao.insertPersoninfo(fornavn, mellomnavn, etternavn, fødselsdato, kjønn, adressebeskyttelse)
 
     internal fun lagre(dao: ArbeidsgiverDao) {
-//        dao.insertArbeidsgiver(ident, "$fornavn $etternavn", listOf(BRANSJE_PRIVATPERSON))
-        dao.updateOrInsertNavn(ident, "$fornavn $etternavn")
-        dao.updateOrInsertBransjer(ident, listOf(BRANSJE_PRIVATPERSON))
+        dao.upsertNavn(ident, "$fornavn $etternavn")
+        dao.upsertBransjer(ident, listOf(BRANSJE_PRIVATPERSON))
     }
 
     internal fun oppdater(personDao: PersonDao, fødselsnummer: String) =
-        personDao.updateOrInsertPersoninfo(
+        personDao.upsertPersoninfo(
             fødselsnummer = fødselsnummer,
             fornavn = fornavn,
             mellomnavn = mellomnavn,

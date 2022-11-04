@@ -17,7 +17,7 @@ internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonN
         personDao.insertInfotrygdutbetalinger(utbetalinger)
 
     fun oppdater(personDao: PersonDao, fødselsnummer: String) {
-        personDao.updateOrInsertInfotrygdutbetalinger(fødselsnummer, utbetalinger)
+        personDao.upsertInfotrygdutbetalinger(fødselsnummer, utbetalinger)
     }
 
     internal class InfotrygdutbetalingerRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {

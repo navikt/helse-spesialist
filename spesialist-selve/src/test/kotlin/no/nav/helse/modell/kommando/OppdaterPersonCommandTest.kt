@@ -40,8 +40,8 @@ internal class OppdaterPersonCommandTest {
         every { dao.findITUtbetalingsperioderSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
         verify(exactly = 0) { dao.updateEnhet(any(), any()) }
-        verify(exactly = 0) { dao.updateOrInsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
-        verify(exactly = 0) { dao.updateOrInsertInfotrygdutbetalinger(any(), any()) }
+        verify(exactly = 0) { dao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { dao.upsertInfotrygdutbetalinger(any(), any()) }
     }
 
     @Test

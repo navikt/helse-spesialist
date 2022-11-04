@@ -64,7 +64,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         val nyFødselsdato = LocalDate.of(1990, 12, 31)
         val nyttKjønn = Kjønn.Mann
         val nyAdressebeskyttelse = Adressebeskyttelse.Fortrolig
-        personDao.updateOrInsertPersoninfo(FNR, nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
+        personDao.upsertPersoninfo(FNR, nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
         assertPersoninfo(nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
     }
 
@@ -87,7 +87,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         assertEquals("{}", infotrygdUtbetalinger().first())
         val utbetalinger = objectMapper.createObjectNode().set<JsonNode>("test", objectMapper.createArrayNode())
-        personDao.updateOrInsertInfotrygdutbetalinger(FNR, utbetalinger)
+        personDao.upsertInfotrygdutbetalinger(FNR, utbetalinger)
         assertEquals( "{\"test\":[]}", infotrygdUtbetalinger().first())
     }
 

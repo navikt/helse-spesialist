@@ -22,7 +22,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     fun `oppdatere arbeidsgivernavn`() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyttNavn = "Nærbutikken ASA"
-        arbeidsgiverDao.updateOrInsertNavn(ORGNUMMER, nyttNavn)
+        arbeidsgiverDao.upsertNavn(ORGNUMMER, nyttNavn)
         assertEquals(nyttNavn, arbeidsgiverApiDao.finnNavn(ORGNUMMER))
     }
 
@@ -30,7 +30,7 @@ internal class ArbeidsgiverDaoTest : DatabaseIntegrationTest() {
     fun `oppdatere bransjer`() {
         arbeidsgiverDao.insertArbeidsgiver(ORGNUMMER, ORGNAVN, BRANSJER)
         val nyBransje = listOf("Ny bransje")
-        arbeidsgiverDao.updateOrInsertBransjer(ORGNUMMER, nyBransje)
+        arbeidsgiverDao.upsertBransjer(ORGNUMMER, nyBransje)
         assertEquals(nyBransje, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
     }
 

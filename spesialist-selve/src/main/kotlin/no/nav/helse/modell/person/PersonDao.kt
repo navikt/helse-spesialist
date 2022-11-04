@@ -73,7 +73,7 @@ internal class PersonDao(private val dataSource: DataSource) {
         )
     }
 
-    fun updateOrInsertPersoninfo(
+    fun upsertPersoninfo(
         fødselsnummer: String,
         fornavn: String,
         mellomnavn: String?,
@@ -274,7 +274,7 @@ internal class PersonDao(private val dataSource: DataSource) {
             )
         }
 
-    fun updateOrInsertInfotrygdutbetalinger(
+    fun upsertInfotrygdutbetalinger(
         fødselsnummer: String,
         utbetalinger: JsonNode
     ) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->

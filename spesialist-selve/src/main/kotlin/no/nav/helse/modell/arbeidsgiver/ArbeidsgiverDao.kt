@@ -88,7 +88,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         )
     }
 
-    fun updateOrInsertNavn(orgnummer: String, navn: String) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    fun upsertNavn(orgnummer: String, navn: String) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.transaction { transaction ->
             transaction.finnArbeidsgiverNavnRef(orgnummer)
                 ?.also { transaction.oppdaterArbeidsgivernavn(it, navn) }
@@ -118,6 +118,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         upsertNavnRef(arbeidsgivernavnId, orgnummer)
     }
 
+    // Denne kan endres til update da det ikke ligger søknader som allerede har kommet inn på SendtSøknad-river, men ikke lest inn, igjen
     private fun TransactionalSession.upsertNavnRef(arbeidsgivernavnRef: Long, orgnummer: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO arbeidsgiver (orgnummer, navn_ref) VALUES(:orgnummer, :arbeidsgivernavnRef) ON CONFLICT(orgnummer) DO UPDATE SET navn_ref=:arbeidsgivernavnRef"
@@ -125,7 +126,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         run(queryOf(query, mapOf("arbeidsgivernavnRef" to arbeidsgivernavnRef, "orgnummer" to orgnummer.toLong())).asUpdate)
     }
 
-    fun updateOrInsertBransjer(orgnummer: String, bransjer: List<String>) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    fun upsertBransjer(orgnummer: String, bransjer: List<String>) = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         session.transaction { transaction ->
             transaction.finnArbeidsgiverbransjerRef(orgnummer)
                 ?.also { transaction.oppdaterArbeidsgiverbransjer(it, bransjer) }
@@ -155,6 +156,7 @@ class ArbeidsgiverDao(private val dataSource: DataSource) {
         upsertBransjerRef(bransjerId, orgnummer)
     }
 
+    // Denne kan endres til update da det ikke ligger søknader som allerede har kommet inn på SendtSøknad-river, men ikke lest inn, igjen
     private fun TransactionalSession.upsertBransjerRef(bransjerRef: Long, orgnummer: String) {
         @Language("PostgreSQL")
         val query = "INSERT INTO arbeidsgiver (orgnummer, bransjer_ref) VALUES(:orgnummer, :bransjerRef) ON CONFLICT(orgnummer) DO UPDATE SET bransjer_ref=:bransjerRef"

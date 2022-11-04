@@ -14,7 +14,6 @@ internal class OppdaterArbeidsgiverCommand(
         private val log = LoggerFactory.getLogger(OppdaterArbeidsgiverCommand::class.java)
     }
 
-    // ignorerer fnr/aktørId/dnr ettersom bransje/navn er ganske så statisk for dem
     private val orgnummere = orgnummere.filter { it.length == 9 }
     private val personidenter = orgnummere.filter { it.length > 9 }
 
@@ -30,17 +29,17 @@ internal class OppdaterArbeidsgiverCommand(
 
     private fun ikkeOppdaterteNavn() = orgnummere.filterNot { orgnummer ->
         val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(orgnummer) ?: return@filterNot false
-        sistOppdatert > LocalDate.now().minusDays(14)
+        sistOppdatert.innenforSisteFjortenDager()
     }
 
     private fun ikkeOppdaterteBransjer() = orgnummere.filterNot { orgnummer ->
         val sistOppdatert = arbeidsgiverDao.findBransjerSistOppdatert(orgnummer) ?: return@filterNot false
-        sistOppdatert > LocalDate.now().minusDays(14)
+        sistOppdatert.innenforSisteFjortenDager()
     }
 
     private fun ikkeOppdaterteNavnForPersonidenter() = personidenter.filterNot { personlignr ->
         val sistOppdatert = arbeidsgiverDao.findNavnSistOppdatert(personlignr) ?: return@filterNot false
-        sistOppdatert > LocalDate.now().minusDays(14)
+        sistOppdatert.innenforSisteFjortenDager()
     }
 
     private fun behandle(context: CommandContext): Boolean {
@@ -77,4 +76,6 @@ internal class OppdaterArbeidsgiverCommand(
 
         return false
     }
+
+    private fun LocalDate.innenforSisteFjortenDager() = this > LocalDate.now().minusDays(14)
 }
