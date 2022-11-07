@@ -61,7 +61,7 @@ internal class VedtaksperiodeOpprettet(
             val organisasjonsnummer = packet["organisasjonsnummer"].asText()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
             val fom = packet["fom"].asLocalDate()
-            val tom = packet["fom"].asLocalDate()
+            val tom = packet["tom"].asLocalDate()
 
             if (!erProd()) {
                 log.info("Oppretter person, arbeidsgiver og vedtak på vedtaksperiodeId: ${packet["vedtaksperiodeId"].asText()}")
