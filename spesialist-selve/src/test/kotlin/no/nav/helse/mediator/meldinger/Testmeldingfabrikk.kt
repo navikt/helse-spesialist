@@ -36,7 +36,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         nyHendelse(
             id, "sendt_søknad_nav", mapOf(
                 "fnr" to fødselsnummer,
-                "aktørId" to aktørId,
+                "aktorId" to aktørId,
                 "arbeidsgiver" to mapOf(
                     "orgnummer" to organisasjonsnummer
                 )
