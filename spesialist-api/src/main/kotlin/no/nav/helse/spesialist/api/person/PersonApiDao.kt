@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.person
 
+import javax.sql.DataSource
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
-import javax.sql.DataSource
 
 class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
     fun finnEnhet(fødselsnummer: String) = requireNotNull(
@@ -35,4 +35,11 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
                 "fodselsnummer"
             ).padStart(11, '0')
         }
+
+    fun spesialistHarPersonKlarForVisningISpeil(fødselsnummer: String) =
+        """SELECT info_ref FROM person WHERE fodselsnummer= :fodselsnummer"""
+            .single(
+                mapOf("fodselsnummer" to fødselsnummer.toLong())
+            ) { true }
+            ?: false
 }

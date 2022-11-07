@@ -49,7 +49,10 @@ class PersonQuery(
 
         val fødselsnummer = fnr.takeIf { it != null && personApiDao.finnesPersonMedFødselsnummer(it) }
             ?: aktorId?.let { personApiDao.finnFødselsnummer(it.toLong()) }
-            ?: return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
+
+        if (fødselsnummer == null || !personApiDao.spesialistHarPersonKlarForVisningISpeil(fødselsnummer)) {
+            return DataFetcherResult.newResult<Person?>().error(getNotFoundError(fnr)).build()
+        }
 
         if (isForbidden(fødselsnummer, env)) {
             return DataFetcherResult.newResult<Person?>().error(getForbiddenError(fødselsnummer)).build()
