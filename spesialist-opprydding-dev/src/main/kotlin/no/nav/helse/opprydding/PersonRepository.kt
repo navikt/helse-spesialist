@@ -63,6 +63,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.slettInfo(personinfoRef: List<Int>) {
+        if (personinfoRef.isEmpty()) return
         @Language("PostgreSQL")
         val query = "DELETE FROM person_info WHERE id IN (${personinfoRef.joinToString { "?" }})"
         run(queryOf(query, *personinfoRef.toTypedArray()).asExecute)
