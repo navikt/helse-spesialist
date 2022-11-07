@@ -177,9 +177,9 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         statement,
                         fødselsnummer.toLong(),
                         aktørId.toLong(),
-                        infotrygdutbetalingerid,
+                        personinfoid,
                         bostedId,
-                        personinfoid
+                        infotrygdutbetalingerid
                     ).asUpdateAndReturnGeneratedKey
                 )
             )

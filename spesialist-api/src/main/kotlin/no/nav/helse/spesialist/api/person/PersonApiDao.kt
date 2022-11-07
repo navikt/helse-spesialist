@@ -40,6 +40,5 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
         """SELECT info_ref FROM person WHERE fodselsnummer= :fodselsnummer"""
             .single(
                 mapOf("fodselsnummer" to fødselsnummer.toLong())
-            ) { true }
-            ?: false
+            ) { it.longOrNull("info_ref") != null }!!
 }
