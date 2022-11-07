@@ -47,7 +47,7 @@ internal class SøknadSendt(
                 validate {
                     it.demandAny("@event_name", listOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav"))
                     it.requireKey(
-                        "@id", "fnr", "aktørId", "arbeidsgiver.orgnummer"
+                        "@id", "fnr", "aktorId", "arbeidsgiver.orgnummer"
                     )
                 }
             }.register(this)
@@ -74,7 +74,7 @@ internal class SøknadSendt(
                     message = packet,
                     id = hendelseId,
                     fødselsnummer = packet["fnr"].asText(),
-                    aktørId = packet["aktørId"].asText(),
+                    aktørId = packet["aktorId"].asText(),
                     organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
                     context = context
                 )

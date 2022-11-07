@@ -178,7 +178,7 @@ internal class Hendelsefabrikk(
         return SøknadSendt(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-            aktørId = jsonNode.path("aktørId").asText(),
+            aktørId = jsonNode.path("aktorId").asText(),
             organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
             json = json,
             personDao = personDao,
