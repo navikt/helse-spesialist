@@ -74,7 +74,8 @@ internal class OpprettArbeidsgiverCommandTest {
         )))
         val command = OpprettArbeidsgiverCommand(listOf(fnr), dao)
         assertTrue(command.execute(context))
-        verify(exactly = 1) { dao.insertArbeidsgiver(fnr, "LITEN TRANFLASKE", listOf("Privatperson")) }
+        verify(exactly = 1) { dao.upsertNavn(fnr, "LITEN TRANFLASKE") }
+        verify(exactly = 1) { dao.upsertBransjer(fnr, listOf("Privatperson")) }
     }
 
     @Test

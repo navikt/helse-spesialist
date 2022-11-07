@@ -7,7 +7,11 @@ import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.HentPersoninfoløsninger
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -35,7 +39,7 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR), dao)
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -51,7 +55,7 @@ internal class OppdaterArbeidsgiverCommandTest {
         val command = OppdaterArbeidsgiverCommand(listOf(ORGNR, ghostOrgnr), dao)
         assertFalse(command.execute(context))
         assertTrue(context.harBehov())
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -74,7 +78,7 @@ internal class OppdaterArbeidsgiverCommandTest {
                 }
             }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
 
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
     }
 
     @Test
@@ -98,10 +102,40 @@ internal class OppdaterArbeidsgiverCommandTest {
                 }
             }) { "Ønsket orgnr $orgnrMedUtdatertNavn mangler i behovet: ${context.behov()}" }
 
-        verify(exactly = 0) { dao.updateNavn(any(), any()) }
+        verify(exactly = 0) { dao.upsertNavn(any(), any()) }
+    }
+
+    @Test
+    fun `opprett person-arbeidsgiver dersom den ikke finnes`() {
+        val fnr = "12345678911"
+        val context = CommandContext(UUID.randomUUID())
+
+        every { dao.findNavnSistOppdatert(fnr) } returns null
+
+        val command = OppdaterArbeidsgiverCommand(listOf(fnr), dao)
+        assertFalse(command.execute(context))
+        assertTrue(context.harBehov())
+
+        assertTrue(
+            context.behov().any {
+                it.value.values.any { behovdetalj ->
+                    (behovdetalj as List<*>).containsAll(listOf(fnr))
+                }
+            }) { "Ønsket orgnr mangler i behovet: ${context.behov()}" }
+
+        løsningPersoninfo(fnr).also(context::add)
+        assertFalse(command.execute(context))
+        every { dao.findNavnSistOppdatert(fnr) } returns LocalDate.now()
+        every { dao.findBransjerSistOppdatert(fnr) } returns LocalDate.now()
+        assertTrue(command.execute(context))
+        verify(exactly = 1) { dao.upsertNavn(fnr, "LITEN TRANFLASKE") }
+        verify(exactly = 1) { dao.upsertBransjer(fnr, listOf("Privatperson")) }
     }
 
     private fun løsning(vararg orgnumre: String) = Arbeidsgiverinformasjonløsning(orgnumre.map { arbeidsgiverinfo(it) })
 
     private fun arbeidsgiverinfo(orgnr: String) = Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(orgnr, "et irrelevant navn", emptyList())
+
+    private fun løsningPersoninfo(fnr: String) = HentPersoninfoløsninger(listOf(personinfo(fnr)))
+    private fun personinfo(fnr: String) = HentPersoninfoløsning(fnr, "LITEN", null, "TRANFLASKE", LocalDate.of(1970, 1, 1), Kjønn.Kvinne, Adressebeskyttelse.Ugradert)
 }

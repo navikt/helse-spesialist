@@ -11,10 +11,12 @@ internal class OpprettArbeidsgiverCommand(
 ) : Command {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettArbeidsgiverCommand::class.java)
+        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
         if (arbeidsgivereSomIkkeFinnes().isEmpty()) return ignorer()
+        sikkerLog.info("Arbeidsgiver(e) med orgnr: $orgnummere finnes ikke fra før")
         return behandle(context)
     }
 

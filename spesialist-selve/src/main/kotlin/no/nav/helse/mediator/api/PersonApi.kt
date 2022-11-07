@@ -90,7 +90,7 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
     }
 }
 
-internal fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
+fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppdaterPersonsnapshotDto(

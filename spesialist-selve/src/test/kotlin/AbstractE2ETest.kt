@@ -308,6 +308,44 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
+    protected fun assertPersonEksisterer(fnr: String) {
+        assertEquals(1, person(fnr))
+    }
+
+    protected fun assertPersonEksistererIkke(fnr: String) {
+        assertEquals(0, person(fnr))
+    }
+
+    protected fun assertArbeidsgiver(orgnr: String) {
+        assertEquals(1, arbeidsgiver(orgnr))
+    }
+
+    protected fun person(fnr: String): Int {
+        return sessionOf(dataSource).use { session ->
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        "SELECT COUNT(*) FROM person WHERE fodselsnummer = ?",
+                        fnr.toLong()
+                    ).map { row -> row.int(1) }.asSingle
+                )
+            )
+        }
+    }
+
+    protected fun arbeidsgiver(orgnr: String): Int {
+        return sessionOf(dataSource).use { session ->
+            requireNotNull(
+                session.run(
+                    queryOf(
+                        "SELECT COUNT(*) FROM arbeidsgiver WHERE orgnummer = ?",
+                        orgnr.toLong()
+                    ).map { row -> row.int(1) }.asSingle
+                )
+            )
+        }
+    }
+
     protected fun vedtak(vedtaksperiodeId: UUID): Int {
         return sessionOf(dataSource).use { session ->
             requireNotNull(

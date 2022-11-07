@@ -29,6 +29,20 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
     )
 
+    fun lagSøknadSendt(
+        id: UUID = UUID.randomUUID(),
+        organisasjonsnummer: String,
+    ) =
+        nyHendelse(
+            id, "sendt_søknad_nav", mapOf(
+                "fnr" to fødselsnummer,
+                "aktørId" to aktørId,
+                "arbeidsgiver" to mapOf(
+                    "orgnummer" to organisasjonsnummer
+                )
+            )
+        )
+
     fun lagVedtaksperiodeEndret(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -36,6 +50,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         forrigeTilstand: String = "FORRIGE_TILSTAND",
         gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
         forårsaketAvId: UUID = UUID.randomUUID(),
+        fom: LocalDate = LocalDate.of(2018, 1, 1),
+        tom: LocalDate = LocalDate.of(2018, 1, 31)
     ) =
         nyHendelse(
             id, "vedtaksperiode_endret", mapOf(
@@ -47,7 +63,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "forrigeTilstand" to forrigeTilstand,
                 "@forårsaket_av" to mapOf(
                     "id" to forårsaketAvId
-                )
+                ),
+                "fom" to fom,
+                "tom" to tom
             )
         )
 

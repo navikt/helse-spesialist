@@ -19,8 +19,8 @@ internal class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<A
 
     internal fun oppdater(arbeidsgiverDao: ArbeidsgiverDao) {
         arbeidsgivere.forEach {
-            arbeidsgiverDao.updateNavn(it.orgnummer, it.navn)
-            arbeidsgiverDao.updateBransjer(it.orgnummer, it.bransjer)
+            arbeidsgiverDao.upsertNavn(it.orgnummer, it.navn)
+            arbeidsgiverDao.upsertBransjer(it.orgnummer, it.bransjer)
         }
     }
 

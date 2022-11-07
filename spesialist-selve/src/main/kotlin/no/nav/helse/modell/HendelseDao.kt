@@ -1,13 +1,50 @@
 package no.nav.helse.modell
 
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.Hendelsefabrikk
-import no.nav.helse.mediator.meldinger.*
-import no.nav.helse.modell.HendelseDao.Hendelsetype.*
+import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
+import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
+import no.nav.helse.mediator.meldinger.Godkjenningsbehov
+import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
+import no.nav.helse.mediator.meldinger.Hendelse
+import no.nav.helse.mediator.meldinger.NyeVarsler
+import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
+import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.RevurderingAvvist
+import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.SøknadSendt
+import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
+import no.nav.helse.mediator.meldinger.UtbetalingEndret
+import no.nav.helse.mediator.meldinger.VedtakFattet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
+import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
+import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
+import no.nav.helse.modell.HendelseDao.Hendelsetype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.NYE_VARSLER
+import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
+import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING
+import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
+import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT
+import no.nav.helse.modell.HendelseDao.Hendelsetype.REVURDERING_AVVIST
+import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
+import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
+import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
+import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ENDRET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_ENDRET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
 import no.nav.helse.modell.person.toFødselsnummer
 import org.intellij.lang.annotations.Language
 
@@ -114,6 +151,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
             ENDRET_SKJERMETINFO -> hendelsefabrikk.endretSkjermetinfo(json)
             VEDTAK_FATTET -> hendelsefabrikk.vedtakFattet(json)
             NYE_VARSLER -> hendelsefabrikk.nyeVarsler(json)
+            VEDTAKSPERIODE_OPPRETTET -> hendelsefabrikk.vedtaksperiodeOpprettet(json)
+            SØKNAD_SENDT -> hendelsefabrikk.søknadSendt(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -134,6 +173,8 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is EndretSkjermetinfo -> ENDRET_SKJERMETINFO
         is VedtakFattet -> VEDTAK_FATTET
         is NyeVarsler -> NYE_VARSLER
+        is VedtaksperiodeOpprettet -> VEDTAKSPERIODE_OPPRETTET
+        is SøknadSendt -> SØKNAD_SENDT
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -141,6 +182,6 @@ internal class HendelseDao(private val dataSource: DataSource) {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
-        GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET, NYE_VARSLER
+        GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET, NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT
     }
 }

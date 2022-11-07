@@ -19,11 +19,13 @@ import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
@@ -166,6 +168,39 @@ internal class Hendelsefabrikk(
             periodehistorikkDao = periodehistorikkDao,
             overstyringDao = overstyringDao,
             snapshotMediator = snapshotMediator,
+        )
+    }
+
+    fun søknadSendt(
+        json: String
+    ): SøknadSendt {
+        val jsonNode = mapper.readTree(json)
+        return SøknadSendt(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            aktørId = jsonNode.path("aktørId").asText(),
+            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
+            json = json,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao
+        )
+    }
+
+    fun søknadSendt(
+        id: UUID,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
+        json: String
+    ): SøknadSendt {
+        return SøknadSendt(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            json = json,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao
         )
     }
 
@@ -582,6 +617,37 @@ internal class Hendelsefabrikk(
             periodehistorikkDao = periodehistorikkDao,
             oppgaveDao = oppgaveDao,
             utbetalingDao = utbetalingDao,
+        )
+    }
+
+    fun vedtaksperiodeOpprettet(id: UUID, fødselsnummer: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, json: String): VedtaksperiodeOpprettet {
+        return VedtaksperiodeOpprettet(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            json = json,
+        )
+    }
+
+    fun vedtaksperiodeOpprettet(json: String): VedtaksperiodeOpprettet {
+        val jsonNode = mapper.readTree(json)
+        return VedtaksperiodeOpprettet(
+            id = UUID.fromString(jsonNode["@id"].asText()),
+            fødselsnummer = jsonNode["fødselsnummer"].asText(),
+            organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
+            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+            fom = LocalDate.parse(jsonNode.path("vedtaksperiodeId").asText()),
+            tom = LocalDate.parse(jsonNode.path("vedtaksperiodeId").asText()),
+            personDao = personDao,
+            arbeidsgiverDao = arbeidsgiverDao,
+            vedtakDao = vedtakDao,
+            json = json,
         )
     }
 

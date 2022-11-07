@@ -48,7 +48,7 @@ internal class OppdaterPersoninfoCommandTest {
         context.add(løsning)
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
-        verify(exactly = 1) { dao.updatePersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
+        verify(exactly = 1) { dao.upsertPersoninfo(FNR, FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, ADRESSEBESKYTTELSE) }
 
     }
 
@@ -58,7 +58,7 @@ internal class OppdaterPersoninfoCommandTest {
         val command = OppdaterPersoninfoCommand(FNR, dao, force = false)
         every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
-        verify(exactly = 0) { dao.updatePersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { dao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class OppdaterPersoninfoCommandTest {
         every { dao.findPersoninfoSistOppdatert(FNR) } returns LocalDate.now()
         assertTrue(command.execute(context))
         verify(exactly = 1) { løsning.oppdater(dao, FNR) }
-        verify(exactly = 1) { dao.updatePersoninfo(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { dao.upsertPersoninfo(any(), any(), any(), any(), any(), any(), any()) }
     }
 
 

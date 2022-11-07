@@ -35,12 +35,14 @@ import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Saksbehandlerløsning
+import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.mediator.meldinger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
@@ -104,6 +106,7 @@ internal class HendelseMediator(
     init {
         DelegatedRapid(rapidsConnection, ::forbered, ::fortsett, ::errorHandler).also {
             Godkjenningsbehov.GodkjenningsbehovRiver(it, this)
+            SøknadSendt.SøknadSendtRiver(it, this)
             HentPersoninfoløsning.PersoninfoRiver(it, this)
             HentPersoninfoløsning.FlerePersoninfoRiver(it, this)
             HentEnhetløsning.HentEnhetRiver(it, this)
@@ -126,6 +129,7 @@ internal class HendelseMediator(
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)
             VedtaksperiodeReberegnet.River(it, this)
+            VedtaksperiodeOpprettet.River(it, this)
             RevurderingAvvist.River(it, this)
             GosysOppgaveEndret.River(it, this, oppgaveDao, tildelingDao)
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
@@ -272,6 +276,25 @@ internal class HendelseMediator(
         return utfør(hendelse, context)
     }
 
+    fun vedtaksperiodeOpprettet(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        context: MessageContext
+    ) {
+        val hendelse = hendelsefabrikk.vedtaksperiodeOpprettet(id, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, message.toJson())
+        if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
+            log.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
+            sikkerLogg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
+            return
+        }
+        return utfør(hendelse, context)
+    }
+
     fun vedtaksperiodeForkastet(
         message: JsonMessage,
         id: UUID,
@@ -327,6 +350,25 @@ internal class HendelseMediator(
                 utbetalingtype,
                 inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold,
+                message.toJson()
+            ), context
+        )
+    }
+
+    fun søknadSendt(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        aktørId: String,
+        organisasjonsnummer: String,
+        context: MessageContext
+    ) {
+        utfør(
+            hendelsefabrikk.søknadSendt(
+                id,
+                fødselsnummer,
+                aktørId,
+                organisasjonsnummer,
                 message.toJson()
             ), context
         )

@@ -1,10 +1,10 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class OppdaterPersonCommand(
     fødselsnummer: String,
@@ -57,7 +57,7 @@ internal class OppdaterPersonCommand(
     ) : OppdaterCommand(fødselsnummer, personDao, "HentEnhet") {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
             val sistOppdatert = personDao.findEnhetSistOppdatert(fødselsnummer)
-            return sistOppdatert > LocalDate.now().minusDays(5)
+            return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(5)
         }
 
         override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {
@@ -80,7 +80,7 @@ internal class OppdaterPersonCommand(
         ) {
         override fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
             val sistOppdatert = personDao.findITUtbetalingsperioderSistOppdatert(fødselsnummer)
-            return sistOppdatert > LocalDate.now().minusDays(1)
+            return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(1)
         }
 
         override fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {

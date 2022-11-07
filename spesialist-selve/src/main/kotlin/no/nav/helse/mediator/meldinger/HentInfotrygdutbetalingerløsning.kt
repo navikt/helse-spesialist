@@ -1,11 +1,15 @@
 package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.person.PersonDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonNode) {
 
@@ -13,12 +17,7 @@ internal class HentInfotrygdutbetalingerløsning(private val utbetalinger: JsonN
         personDao.insertInfotrygdutbetalinger(utbetalinger)
 
     fun oppdater(personDao: PersonDao, fødselsnummer: String) {
-        if (personDao.findInfotrygdutbetalinger(fødselsnummer) != null) {
-            personDao.updateInfotrygdutbetalinger(fødselsnummer, utbetalinger)
-        } else {
-            val utbetalingRef = personDao.insertInfotrygdutbetalinger(utbetalinger)
-            personDao.updateInfotrygdutbetalingerRef(fødselsnummer, utbetalingRef)
-        }
+        personDao.upsertInfotrygdutbetalinger(fødselsnummer, utbetalinger)
     }
 
     internal class InfotrygdutbetalingerRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {

@@ -52,7 +52,7 @@ internal class ArbeidsgiverinformasjonløsningTest {
             Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
         ))
         arbeidsgiver.oppdater(dao)
-        verify(exactly = 1) { dao.updateNavn(ORGNR, NAVN) }
+        verify(exactly = 1) { dao.upsertNavn(ORGNR, NAVN) }
     }
 
     @Test
@@ -61,6 +61,6 @@ internal class ArbeidsgiverinformasjonløsningTest {
             Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
         ))
         arbeidsgiver.oppdater(dao)
-        verify(exactly = 1) { dao.updateBransjer(ORGNR, BRANSJER) }
+        verify(exactly = 1) { dao.upsertBransjer(ORGNR, BRANSJER) }
     }
 }

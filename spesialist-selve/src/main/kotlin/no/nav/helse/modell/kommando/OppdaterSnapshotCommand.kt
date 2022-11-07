@@ -25,7 +25,13 @@ internal class OppdaterSnapshotCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        return if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) oppdaterSnapshot() else ignorer()
+        // findPersoninfoRef for å se om vi kun har minimal person
+        return if (
+            personDao.findPersonByFødselsnummer(fødselsnummer) != null &&
+            personDao.findPersoninfoRef(fødselsnummer) != null
+        ) {
+            oppdaterSnapshot()
+        } else ignorer()
     }
 
     private fun oppdaterSnapshot(): Boolean {

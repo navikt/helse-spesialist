@@ -1,9 +1,9 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
     private val fødselsnummer: String,
@@ -31,7 +31,7 @@ internal class OppdaterPersoninfoCommand(
 
     private fun erOppdatert(personDao: PersonDao, fødselsnummer: String): Boolean {
         val sistOppdatert = personDao.findPersoninfoSistOppdatert(fødselsnummer)
-        return sistOppdatert > LocalDate.now().minusDays(14)
+        return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(14)
     }
 
     private fun behandle(context: CommandContext, personDao: PersonDao, fødselsnummer: String): Boolean {

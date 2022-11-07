@@ -1,11 +1,11 @@
 package no.nav.helse.modell.kommando
 
+import java.time.LocalDate
 import no.nav.helse.mediator.meldinger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.HentPersoninfoløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class OpprettPersonCommand(
     private val fødselsnummer: String,
@@ -15,10 +15,12 @@ internal class OpprettPersonCommand(
 
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettPersonCommand::class.java)
+        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun execute(context: CommandContext): Boolean {
         if (personDao.findPersonByFødselsnummer(fødselsnummer) != null) return ignorer("Person finnes fra før")
+        sikkerLog.info("Personen finnes ikke fra før for fødselsnummer: $fødselsnummer")
         return behandle(context)
     }
 

@@ -1,14 +1,16 @@
 package no.nav.helse.modell.person
 
 import DatabaseIntegrationTest
+import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class PersonDaoTest : DatabaseIntegrationTest() {
 
@@ -43,6 +45,17 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `oppretter minimal person`() {
+        opprettMinimalPerson()
+        assertNotNull(personDao.findPersonByFødselsnummer(FNR))
+        assertNull(personDao.findEnhetSistOppdatert(FNR))
+        assertNull(personDao.findITUtbetalingsperioderSistOppdatert(FNR))
+        assertNull(personDao.findPersoninfoSistOppdatert(FNR))
+        assertEquals(1, person().size)
+        person().first().assertEquals(FNR, AKTØR, null, null, null)
+    }
+
+    @Test
     fun `oppdaterer personinfo`() {
         opprettPerson()
         val nyttFornavn = "OLE"
@@ -51,7 +64,7 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         val nyFødselsdato = LocalDate.of(1990, 12, 31)
         val nyttKjønn = Kjønn.Mann
         val nyAdressebeskyttelse = Adressebeskyttelse.Fortrolig
-        personDao.updatePersoninfo(FNR, nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
+        personDao.upsertPersoninfo(FNR, nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
         assertPersoninfo(nyttFornavn, nyttMellomnavn, nyttEtternavn, nyFødselsdato, nyttKjønn, nyAdressebeskyttelse)
     }
 
@@ -70,11 +83,12 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `oppdaterer infotrygdutbetalingerRef`() {
+    fun `oppdaterer infotrygdutbetalinger`() {
         opprettPerson()
-        val id = personDao.insertInfotrygdutbetalinger(objectMapper.createObjectNode())
-        personDao.updateInfotrygdutbetalingerRef(FNR, id)
-        person().first().assertInfotrygdUtbetalingerRef(id)
+        assertEquals("{}", infotrygdUtbetalinger().first())
+        val utbetalinger = objectMapper.createObjectNode().set<JsonNode>("test", objectMapper.createArrayNode())
+        personDao.upsertInfotrygdutbetalinger(FNR, utbetalinger)
+        assertEquals( "{\"test\":[]}", infotrygdUtbetalinger().first())
     }
 
     @Test
@@ -113,9 +127,9 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
                     Person(
                         row.long("fodselsnummer").toFødselsnummer(),
                         row.long("aktor_id").toString(),
-                        row.long("info_ref"),
-                        row.int("enhet_ref"),
-                        row.long("infotrygdutbetalinger_ref")
+                        row.longOrNull("info_ref"),
+                        row.intOrNull("enhet_ref"),
+                        row.longOrNull("infotrygdutbetalinger_ref")
                     )
                 }
                 .asList
@@ -143,16 +157,16 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
     private class Person(
         private val fødselsnummer: String,
         private val aktørId: String,
-        private val infoRef: Long,
-        private val enhetRef: Int,
-        private val infotrygdutbetalingerRef: Long
+        private val infoRef: Long?,
+        private val enhetRef: Int?,
+        private val infotrygdutbetalingerRef: Long?
     ) {
         fun assertEquals(
             forventetFødselsnummer: String,
             forventetAktørId: String,
-            forventetInfoRef: Long,
-            forventetEnhetRef: Int,
-            forventetInfotrygdutbetalingerRef: Long
+            forventetInfoRef: Long?,
+            forventetEnhetRef: Int?,
+            forventetInfotrygdutbetalingerRef: Long?
         ) {
             assertEquals(forventetFødselsnummer, fødselsnummer)
             assertEquals(forventetAktørId, aktørId)
@@ -163,10 +177,6 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
 
         fun assertEnhet(forventetEnhet: Int) {
             assertEquals(forventetEnhet, enhetRef)
-        }
-
-        fun assertInfotrygdUtbetalingerRef(forventetInfotrygdutbetalingerRef: Long) {
-            assertEquals(forventetInfotrygdutbetalingerRef, infotrygdutbetalingerRef)
         }
     }
 
