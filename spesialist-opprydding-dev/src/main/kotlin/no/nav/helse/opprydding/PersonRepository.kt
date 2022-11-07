@@ -76,6 +76,7 @@ internal class PersonRepository(private val dataSource: DataSource) {
     }
 
     private fun TransactionalSession.slettInfotrygdutbetalinger(infotrygdutbetalingerRef: List<Int>) {
+        if (infotrygdutbetalingerRef.isEmpty()) return
         @Language("PostgreSQL")
         val query = "DELETE FROM infotrygdutbetalinger WHERE id IN (${infotrygdutbetalingerRef.joinToString { "?" }})"
         run(queryOf(query, *infotrygdutbetalingerRef.toTypedArray()).asExecute)
