@@ -59,7 +59,8 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.varsel.VarselDao
+import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.overstyringsteller
@@ -94,7 +95,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val varselDao: VarselDao = VarselDao(dataSource)
+    private val varselRepository: VarselRepository = ActualVarselRepository(dataSource)
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -135,7 +136,7 @@ internal class HendelseMediator(
             EndretSkjermetinfo.River(it, personDao, egenAnsattDao)
             VedtakFattet.River(it, this)
             NyeVarsler.River(it, this)
-            Varseldefinisjon.River(it, varselDao)
+            Varseldefinisjon.River(it, varselRepository)
         }
     }
 

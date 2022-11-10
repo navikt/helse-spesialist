@@ -47,7 +47,8 @@ import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.varsel.VarselDao
+import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -94,7 +95,7 @@ internal class Hendelsefabrikk(
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
-    private val varselDao: VarselDao = VarselDao(dataSource),
+    private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
     private val overstyringMediator: OverstyringMediator,
     private val snapshotMediator: SnapshotMediator,
 ) {
@@ -708,7 +709,7 @@ internal class Hendelsefabrikk(
     }
 
     fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<NyeVarsler.Varsel>, json: String): NyeVarsler {
-        return NyeVarsler(id, fødselsnummer, varsler, json, varselDao)
+        return NyeVarsler(id, fødselsnummer, varsler, json, varselRepository)
     }
 
     fun nyeVarsler(json: String): NyeVarsler {
@@ -718,7 +719,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             varsler = jsonNode.path("aktiviteter").varsler(),
             json,
-            varselDao
+            varselRepository
         )
     }
 }

@@ -13,7 +13,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     @Test
     fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {
         sendAktivitetsloggNyAktivitet(orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
-        val varsler = nyVarselDao.alleVarslerForVedtaksperiode(VEDTAKSPERIODE_ID)
+        val varsler = nyVarselDao.alleVarslerFor(VEDTAKSPERIODE_ID)
 
         assertEquals(1, varsler.size)
     }
@@ -22,7 +22,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     fun `lagrer varsler når vi mottar flere ny aktivitet i aktivitetsloggen`() {
         sendAktivitetsloggNyAktivitet(orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
         sendAktivitetsloggNyAktivitet(orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)
-        val varsler = nyVarselDao.alleVarslerForVedtaksperiode(VEDTAKSPERIODE_ID)
+        val varsler = nyVarselDao.alleVarslerFor(VEDTAKSPERIODE_ID)
 
         assertEquals(2, varsler.size)
     }
@@ -30,7 +30,7 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
     @Test
     fun `lagrer flere varsler når vi mottar flere nye aktiviteter i samme aktivitetslogg`() {
         sendAktivitetsloggNyAktivitet(ORGNR, VEDTAKSPERIODE_ID, listOf("Kode 1", "Kode 2"))
-        val varsler = nyVarselDao.alleVarslerForVedtaksperiode(VEDTAKSPERIODE_ID)
+        val varsler = nyVarselDao.alleVarslerFor(VEDTAKSPERIODE_ID)
 
         assertEquals(2, varsler.size)
     }
@@ -41,8 +41,8 @@ internal class NyeVarslerE2ETest : AbstractE2ETest() {
         val v2 = UUID.randomUUID()
         sendAktivitetsloggNyAktivitet(orgnr = ORGNR, vedtaksperiodeId = v1)
         sendAktivitetsloggNyAktivitet(orgnr = ORGNR, vedtaksperiodeId = v2)
-        val v1varsler = nyVarselDao.alleVarslerForVedtaksperiode(v1)
-        val v2varsler = nyVarselDao.alleVarslerForVedtaksperiode(v2)
+        val v1varsler = nyVarselDao.alleVarslerFor(v1)
+        val v2varsler = nyVarselDao.alleVarslerFor(v2)
 
         assertEquals(1, v1varsler.size)
         assertEquals(1, v2varsler.size)

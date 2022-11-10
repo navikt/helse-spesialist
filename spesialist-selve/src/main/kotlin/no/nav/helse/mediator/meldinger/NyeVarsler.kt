@@ -8,7 +8,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Companion.lagre
 import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Companion.varsler
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.varsel.VarselDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,7 +23,7 @@ internal class NyeVarsler(
     private val fødselsnummer: String,
     private val varsler: List<Varsel>,
     private val json: String,
-    private val varselDao: VarselDao
+    private val varselRepository: VarselRepository
 ) : Hendelse {
 
     private companion object {
@@ -33,23 +33,25 @@ internal class NyeVarsler(
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
     override fun execute(context: CommandContext): Boolean {
-        varsler.lagre(varselDao)
+        varsler.lagre(varselRepository)
         sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         return true
     }
 
     internal class Varsel(
         private val id: UUID,
-        private val kode: String,
+        private val varselkode: String,
         private val tidsstempel: LocalDateTime,
         private val vedtaksperiodeId: UUID,
     ) {
 
+        internal fun lagre(varselRepository: VarselRepository) {
+            varselRepository.lagreVarsel(id, varselkode, tidsstempel, vedtaksperiodeId)
+        }
+
         internal companion object {
-            internal fun List<Varsel>.lagre(varselDao: VarselDao) {
-                varselDao.transaction { tx ->
-                    forEach { varselDao.lagreVarsel(it.id, it.kode, it.tidsstempel, it.vedtaksperiodeId, tx) }
-                }
+            internal fun List<Varsel>.lagre(varselRepository: VarselRepository) {
+                forEach { it.lagre(varselRepository) }
             }
 
             internal fun JsonNode.varsler(): List<Varsel> {

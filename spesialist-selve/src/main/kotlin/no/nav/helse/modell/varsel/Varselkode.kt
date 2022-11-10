@@ -1,5 +1,6 @@
 package no.nav.helse.modell.varsel
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
@@ -33,7 +34,7 @@ enum class Varselkode(
 
     internal fun nyttVarsel(vedtaksperiodeId: UUID, varselRepository: VarselRepository) {
         if (erAktivFor(vedtaksperiodeId, varselRepository)) return
-        varselRepository.nyttVarsel(vedtaksperiodeId, this.name)
+        varselRepository.lagreVarsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
         tellVarsel(this.name)
     }
 

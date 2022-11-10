@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.varsel.VarselDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -25,24 +25,15 @@ internal class Varseldefinisjon(
     val opprettet: LocalDateTime,
 ) {
 
+    internal fun lagre(varselRepository: VarselRepository) {
+        varselRepository.lagreDefinisjon(id, kode, tittel, forklaring, handling, avviklet, opprettet)
+    }
+
     internal companion object {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun List<Varseldefinisjon>.lagre(varselDao: VarselDao) {
-            varselDao.transaction { tx ->
-                forEach {
-                    varselDao.lagreDefinisjon(
-                        it.id,
-                        it.kode,
-                        it.tittel,
-                        it.forklaring,
-                        it.handling,
-                        it.avviklet,
-                        it.opprettet,
-                        tx
-                    )
-                }
-            }
+        internal fun List<Varseldefinisjon>.lagre(varselRepository: VarselRepository) {
+            forEach { it.lagre(varselRepository) }
         }
 
         internal fun JsonNode.definisjoner(): List<Varseldefinisjon> {
@@ -63,7 +54,7 @@ internal class Varseldefinisjon(
 
     internal class River(
         rapidsConnection: RapidsConnection,
-        private val varselDao: VarselDao
+        private val varselRepository: VarselRepository
     ) : PacketListener {
 
         init {
@@ -88,7 +79,7 @@ internal class Varseldefinisjon(
 
             val definisjoner = packet["definisjoner"].definisjoner()
 
-            definisjoner.lagre(varselDao)
+            definisjoner.lagre(varselRepository)
         }
     }
 }
