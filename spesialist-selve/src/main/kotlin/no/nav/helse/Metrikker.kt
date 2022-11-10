@@ -17,15 +17,19 @@ internal val automatiskAvvistÅrsakerTeller =
         .labelNames("aarsak")
         .register()
 
-private val warningteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
+private val varselteller = Counter.build("aktivitet_totals", "Teller antall warnings opprettet i Spesialist")
     .labelNames("alvorlighetsgrad", "melding")
     .register()
 
-private val inaktiveWarningteller = Counter.build("inaktive_warning_totals", "Teller antall warnings satt inaktive i Spesialist")
+private val inaktiveVarslerteller = Counter.build("inaktive_warning_totals", "Teller antall warnings satt inaktive i Spesialist")
     .labelNames("alvorlighetsgrad", "melding")
     .register()
 
-internal fun tellWarning(warning: String) = warningteller.labels("WARN", warning).inc()
+internal fun tellWarning(warning: String) = varselteller.labels("WARN", warning).inc()
 
-internal fun tellWarningInaktiv(warning: String) = inaktiveWarningteller.labels("WARN", warning).inc()
+internal fun tellVarsel(varselkode: String) = varselteller.labels("WARN", varselkode).inc()
+
+internal fun tellWarningInaktiv(warning: String) = inaktiveVarslerteller.labels("WARN", warning).inc()
+
+internal fun tellInaktivtVarsel(varselkode: String) = inaktiveVarslerteller.labels("WARN", varselkode).inc()
 

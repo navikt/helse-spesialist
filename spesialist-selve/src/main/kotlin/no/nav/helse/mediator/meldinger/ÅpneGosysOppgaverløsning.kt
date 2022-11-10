@@ -1,23 +1,30 @@
 package no.nav.helse.mediator.meldinger
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.tellWarning
-import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 import no.nav.helse.tellWarningInaktiv
+import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverløsning(
     private val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     private val antall: Int?,
-    private val oppslagFeilet: Boolean
+    private val oppslagFeilet: Boolean,
 ) {
     internal fun lagre(åpneGosysOppgaverDao: ÅpneGosysOppgaverDao) {
         åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(
@@ -73,9 +80,17 @@ internal class ÅpneGosysOppgaverløsning(
         }
     }
 
+    private fun leggTilVarsel(varselRepository: VarselRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
+        varselkode.nyttVarsel(vedtaksperiodeId, varselRepository)
+    }
+
+    private fun deaktiverVarsel(varselRepository: VarselRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
+        varselkode.deaktiverFor(vedtaksperiodeId, varselRepository)
+    }
+
     internal class ÅpneGosysOppgaverRiver(
         rapidsConnection: RapidsConnection,
-        private val hendelseMediator: HendelseMediator
+        private val hendelseMediator: HendelseMediator,
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 

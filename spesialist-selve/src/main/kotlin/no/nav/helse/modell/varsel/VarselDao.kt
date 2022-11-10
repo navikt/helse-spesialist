@@ -9,7 +9,19 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import org.intellij.lang.annotations.Language
 
-internal class VarselDao(private val dataSource: DataSource) {
+internal class VarselDao(private val dataSource: DataSource): VarselRepository {
+
+    override fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun nyttVarsel(vedtaksperiodeId: UUID, varselkode: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String) {
+        TODO("Not yet implemented")
+    }
 
     internal fun transaction(transactionBlock: (transactionalSession: TransactionalSession) -> Unit) {
         sessionOf(dataSource).use { session -> session.transaction(transactionBlock) }
