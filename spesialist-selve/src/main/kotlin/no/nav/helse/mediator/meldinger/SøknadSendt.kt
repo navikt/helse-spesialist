@@ -60,29 +60,20 @@ internal class SøknadSendt(
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
 
-            if (!erProd()) {
-                logg.info(
-                    "Mottok SøknadSendt med {}",
-                    keyValue("hendelseId", hendelseId)
-                )
-                sikkerLogg.info(
-                    "Mottok SøknadSendt med {}, {}",
-                    keyValue("hendelseId", hendelseId),
-                    keyValue("hendelse", packet.toJson()),
-                )
-                mediator.søknadSendt(
-                    message = packet,
-                    id = hendelseId,
-                    fødselsnummer = packet["fnr"].asText(),
-                    aktørId = packet["aktorId"].asText(),
-                    organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
-                    context = context
-                )
-            } else {
-                logg.info("SøknadSendt melding er mottatt, på ${packet["@event_name"].asText()}, men videre håndtering er togglet av")
-            }
+            logg.info("Mottok SøknadSendt med {}", keyValue("hendelseId", hendelseId))
+            sikkerLogg.info(
+                "Mottok SøknadSendt med {}, {}",
+                keyValue("hendelseId", hendelseId),
+                keyValue("hendelse", packet.toJson()),
+            )
+            mediator.søknadSendt(
+                message = packet,
+                id = hendelseId,
+                fødselsnummer = packet["fnr"].asText(),
+                aktørId = packet["aktorId"].asText(),
+                organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
+                context = context
+            )
         }
-    private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
-
     }
 }

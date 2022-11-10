@@ -63,22 +63,17 @@ internal class VedtaksperiodeOpprettet(
             val fom = packet["fom"].asLocalDate()
             val tom = packet["tom"].asLocalDate()
 
-            if (!erProd()) {
-                log.info("Oppretter person, arbeidsgiver og vedtak på vedtaksperiodeId: ${packet["vedtaksperiodeId"].asText()}")
-                mediator.vedtaksperiodeOpprettet(
-                    packet,
-                    id,
-                    fødselsnummer,
-                    organisasjonsnummer,
-                    vedtaksperiodeId,
-                    fom,
-                    tom,
-                    context
-                )
-            } else {
-                log.info("VedtaksperiodeOpprettet melding er mottatt men videre håndtering er togglet av")
-            }
+            log.info("Oppretter person, arbeidsgiver og vedtak på vedtaksperiodeId: ${packet["vedtaksperiodeId"].asText()}")
+            mediator.vedtaksperiodeOpprettet(
+                packet,
+                id,
+                fødselsnummer,
+                organisasjonsnummer,
+                vedtaksperiodeId,
+                fom,
+                tom,
+                context
+            )
         }
-        private fun erProd() = "prod-gcp" == System.getenv("NAIS_CLUSTER_NAME")
     }
 }
