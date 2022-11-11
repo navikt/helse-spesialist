@@ -8,6 +8,8 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -37,29 +39,33 @@ internal class ÅpneGosysOppgaverløsning(
         )
     }
 
-    internal fun evaluer(warningDao: WarningDao, vedtaksperiodeId: UUID) {
-        warningsForOppslagFeilet(warningDao, vedtaksperiodeId)
-        warningsForÅpneGosysOppgaver(warningDao, vedtaksperiodeId)
+    internal fun evaluer(warningDao: WarningDao, varselRepository: VarselRepository, vedtaksperiodeId: UUID) {
+        warningsForOppslagFeilet(warningDao, varselRepository, vedtaksperiodeId)
+        warningsForÅpneGosysOppgaver(warningDao, varselRepository, vedtaksperiodeId)
     }
 
-    private fun warningsForOppslagFeilet(warningDao: WarningDao, vedtaksperiodeId: UUID) {
+    private fun warningsForOppslagFeilet(warningDao: WarningDao, varselRepository: VarselRepository, vedtaksperiodeId: UUID) {
         val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
 
         if (oppslagFeilet) {
             leggTilWarning(warningDao, vedtaksperiodeId, melding)
+            leggTilVarsel(varselRepository, vedtaksperiodeId, SB_EX_4)
         } else {
             setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
+            deaktiverVarsel(varselRepository, vedtaksperiodeId, SB_EX_4)
         }
     }
 
-    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, vedtaksperiodeId: UUID) {
+    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, vedtaksperiodeId: UUID) {
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
         antall?.also {
             if (it > 0) {
                 leggTilWarning(warningDao, vedtaksperiodeId, melding)
+                leggTilVarsel(varselRepository, vedtaksperiodeId, SB_EX_1)
             } else if (it == 0) {
                 setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
+                deaktiverVarsel(varselRepository, vedtaksperiodeId, SB_EX_1)
             }
         }
     }

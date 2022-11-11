@@ -54,6 +54,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -79,6 +80,7 @@ internal class Godkjenningsbehov(
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
+    varselRepository: VarselRepository,
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
@@ -178,6 +180,7 @@ internal class Godkjenningsbehov(
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
+            varselRepository = varselRepository,
             vedtaksperiodeId = vedtaksperiodeId
         ),
         RisikoCommand(

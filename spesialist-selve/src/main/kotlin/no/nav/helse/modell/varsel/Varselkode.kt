@@ -20,7 +20,7 @@ enum class Varselkode(
 ) {
 
     SB_BO_1(""),
-    SB_EX_1(""),
+    SB_EX_1("Det finnes åpne oppgaver på sykepenger i Gosys"),
     SB_EX_2(""),
     SB_EX_3(""),
     SB_EX_4("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"),

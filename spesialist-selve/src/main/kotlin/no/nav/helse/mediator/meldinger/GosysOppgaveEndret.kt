@@ -20,6 +20,7 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -31,6 +32,7 @@ internal class GosysOppgaveEndret(
     gosysOppgaveEndretCommandData: GosysOppgaveEndretCommandData,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     warningDao: WarningDao,
+    varselRepository: VarselRepository,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     oppgaveMediator: OppgaveMediator,
@@ -45,6 +47,7 @@ internal class GosysOppgaveEndret(
             aktørId = aktørId,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
+            varselRepository = varselRepository,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId
         ),
         SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),

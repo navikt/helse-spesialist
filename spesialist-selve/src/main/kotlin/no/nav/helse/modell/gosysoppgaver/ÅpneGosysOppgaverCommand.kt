@@ -6,11 +6,13 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.modell.varsel.VarselRepository
 
 internal class ÅpneGosysOppgaverCommand(
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val warningDao: WarningDao,
+    private val varselRepository: VarselRepository,
     private val vedtaksperiodeId: UUID
 ) : Command {
 
@@ -30,7 +32,7 @@ internal class ÅpneGosysOppgaverCommand(
             return false
         }
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(warningDao, vedtaksperiodeId)
+        løsning.evaluer(warningDao, varselRepository, vedtaksperiodeId)
         return true
     }
 }

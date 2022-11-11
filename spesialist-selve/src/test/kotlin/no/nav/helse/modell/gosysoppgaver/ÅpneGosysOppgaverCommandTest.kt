@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.modell.varsel.VarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,7 +28,8 @@ internal class ÅpneGosysOppgaverCommandTest {
 
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, VEDTAKPERIODE_ID)
+    private val varselRepository = mockk<VarselRepository>(relaxed = true)
+    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, varselRepository, VEDTAKPERIODE_ID)
     private lateinit var context: CommandContext
 
     @BeforeEach
