@@ -13,7 +13,7 @@ internal class VarselkodeTest {
         val vedtaksperiodevarsler: MutableMap<UUID, MutableList<String>> = mutableMapOf()
         val deaktiverteVarsler: MutableMap<UUID, MutableList<String>> = mutableMapOf()
 
-        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Pair<String, String>> {
+        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
             TODO("Not yet implemented")
         }
 
@@ -23,6 +23,10 @@ internal class VarselkodeTest {
 
         override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String) {
             deaktiverteVarsler.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(varselkode)
+        }
+
+        override fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
+            TODO("Not yet implemented")
         }
 
         override fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {

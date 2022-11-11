@@ -60,6 +60,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -95,7 +96,7 @@ internal class HendelseMediator(
     private val hendelsefabrikk: Hendelsefabrikk,
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
-    private val varselRepository: VarselRepository = ActualVarselRepository(dataSource)
+    private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
 ) {
     private companion object {
         private val log = LoggerFactory.getLogger(HendelseMediator::class.java)
@@ -148,7 +149,7 @@ internal class HendelseMediator(
         contextId: UUID,
         behovId: UUID,
         løsning: Any,
-        context: MessageContext
+        context: MessageContext,
     ) {
         withMDC(
             mapOf(
@@ -219,7 +220,7 @@ internal class HendelseMediator(
 
     internal fun erTidligereSaksbehandler(
         oppgaveId: Long,
-        saksbehandlerreferanse: UUID
+        saksbehandlerreferanse: UUID,
     ): Boolean {
         val tidligereSaksbehandler = oppgaveMediator.finnTidligereSaksbehandler(oppgaveId)
         return tidligereSaksbehandler == saksbehandlerreferanse
@@ -246,7 +247,7 @@ internal class HendelseMediator(
         message: JsonMessage,
         id: UUID,
         fødselsnummer: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(fødselsnummer, hendelsefabrikk.adressebeskyttelseEndret(id, fødselsnummer, message.toJson()), context)
     }
@@ -258,7 +259,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         forårsaketAvId: UUID,
         forrigeTilstand: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         val hendelse =
             hendelsefabrikk.vedtaksperiodeEndret(
@@ -285,9 +286,17 @@ internal class HendelseMediator(
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
-        context: MessageContext
+        context: MessageContext,
     ) {
-        val hendelse = hendelsefabrikk.vedtaksperiodeOpprettet(id, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, message.toJson())
+        val hendelse = hendelsefabrikk.vedtaksperiodeOpprettet(
+            id,
+            fødselsnummer,
+            organisasjonsnummer,
+            vedtaksperiodeId,
+            fom,
+            tom,
+            message.toJson()
+        )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {
             log.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen")
             sikkerLogg.error("vedtaksperiodeOpprettet: ignorerer hendelseId=${hendelse.id} fordi vi kjenner ikke til personen med fnr=${fødselsnummer}")
@@ -301,7 +310,7 @@ internal class HendelseMediator(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         val hendelse = hendelsefabrikk.vedtaksperiodeForkastet(id, vedtaksperiodeId, fødselsnummer, message.toJson())
         if (!hendelseDao.harKoblingTil(vedtaksperiodeId)) {
@@ -328,7 +337,7 @@ internal class HendelseMediator(
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
-        context: MessageContext
+        context: MessageContext,
     ) {
         if (oppgaveDao.harGyldigOppgave(utbetalingId) || vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
             sikkerLogg.info("vedtaksperiodeId=$vedtaksperiodeId med utbetalingId=$utbetalingId har gyldig oppgave eller er automatisk godkjent. Ignorerer godkjenningsbehov med id=$id")
@@ -362,7 +371,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         aktørId: String,
         organisasjonsnummer: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(
             hendelsefabrikk.søknadSendt(
@@ -389,7 +398,7 @@ internal class HendelseMediator(
         begrunnelser: List<String>?,
         kommentar: String?,
         oppgaveId: Long,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(
             fødselsnummer, hendelsefabrikk.saksbehandlerløsning(
@@ -422,7 +431,7 @@ internal class HendelseMediator(
         overstyrteDager: List<OverstyringDagDto>,
         opprettet: LocalDateTime,
         json: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(
             fødselsnummer, hendelsefabrikk.overstyringTidslinje(
@@ -456,7 +465,7 @@ internal class HendelseMediator(
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(
             fødselsnummer, hendelsefabrikk.overstyringInntekt(
@@ -489,7 +498,7 @@ internal class HendelseMediator(
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(
             fødselsnummer, hendelsefabrikk.overstyringArbeidsforhold(
@@ -510,7 +519,7 @@ internal class HendelseMediator(
 
     fun utbetalingAnnullert(
         message: JsonMessage,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(hendelsefabrikk.utbetalingAnnullert(message.toJson()), context)
     }
@@ -519,7 +528,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         organisasjonsnummer: String,
         message: JsonMessage,
-        context: MessageContext
+        context: MessageContext,
     ) {
         if (arbeidsgiverDao.findArbeidsgiverByOrgnummer(organisasjonsnummer) == null) {
             log.warn(
@@ -566,9 +575,9 @@ internal class HendelseMediator(
     fun nyeVarsler(
         id: UUID,
         fødselsnummer: String,
-        varsler: List<NyeVarsler.Varsel>,
+        varsler: List<Varsel>,
         json: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         utfør(hendelsefabrikk.nyeVarsler(id, fødselsnummer, varsler, json), context)
     }
@@ -702,7 +711,7 @@ internal class HendelseMediator(
         hendelse: Hendelse,
         context: CommandContext,
         contextId: UUID,
-        messageContext: MessageContext
+        messageContext: MessageContext,
     ) {
         withMDC(
             mapOf(
@@ -740,7 +749,7 @@ internal class HendelseMediator(
         private val messageContex: MessageContext,
         private val hendelse: Hendelse,
         private val contextId: UUID,
-        private val commandContext: CommandContext
+        private val commandContext: CommandContext,
     ) {
         fun add(hendelseId: UUID, contextId: UUID, løsning: Any) {
             check(hendelseId == hendelse.id)

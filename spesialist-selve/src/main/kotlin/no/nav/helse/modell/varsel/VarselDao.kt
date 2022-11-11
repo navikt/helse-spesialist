@@ -5,22 +5,26 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Status
 import no.nav.helse.mediator.meldinger.Varseldefinisjon
+import no.nav.helse.modell.varsel.Varsel.Status
 import org.intellij.lang.annotations.Language
 
 internal class VarselDao(private val dataSource: DataSource) {
 
-    internal fun alleVarslerFor(vedtaksperiodeId: UUID): List<Pair<String, String>> {
+    internal fun alleVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
         @Language("PostgreSQL")
-        val query = "SELECT unik_id,kode FROM selve_varsel WHERE vedtaksperiode_id = ?;"
+        val query = "SELECT unik_id,kode,opprettet FROM selve_varsel WHERE vedtaksperiode_id = ?;"
 
         sessionOf(dataSource).use { session ->
             return session.run(
-                queryOf(
-                    query,
-                    vedtaksperiodeId
-                ).map { varsel -> Pair(varsel.string("unik_id"), varsel.string("kode")) }.asList
+                queryOf(query, vedtaksperiodeId).map {
+                    Varsel(
+                        it.uuid("unik_id"),
+                        it.string("kode"),
+                        it.localDateTime("opprettet"),
+                        vedtaksperiodeId
+                    )
+                }.asList
             )
         }
     }
@@ -77,12 +81,7 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean {
-        return finnVarselstatus(vedtaksperiodeId, varselkode) == Status.AKTIV
-    }
-
-    fun oppdaterStatus(vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String) {
-        if (finnVarselstatus(vedtaksperiodeId, varselkode) in listOf(Status.GODKJENT, Status.INAKTIV)) return
+    internal fun oppdaterStatus(vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String) {
         @Language("PostgreSQL")
         val query =
             "UPDATE selve_varsel SET status = ?,status_endret_tidspunkt = now(),status_endret_ident = ? WHERE vedtaksperiode_id = ? AND kode = ?;"
@@ -92,7 +91,7 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun finnVarselstatus(vedtaksperiodeId: UUID, varselkode: String): Status? {
+    internal fun finnVarselstatus(vedtaksperiodeId: UUID, varselkode: String): Status? {
         @Language("PostgreSQL")
         val query = "SELECT status FROM selve_varsel WHERE vedtaksperiode_id = ? and kode = ?;"
 

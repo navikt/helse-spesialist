@@ -12,7 +12,6 @@ import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.NyeVarsler
-import no.nav.helse.mediator.meldinger.NyeVarsler.Varsel.Companion.varsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
@@ -48,6 +47,8 @@ import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.ActualVarselRepository
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -132,7 +133,7 @@ internal class Hendelsefabrikk(
         utbetalingtype: Utbetalingtype,
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
-        json: String
+        json: String,
     ): Godkjenningsbehov {
         return Godkjenningsbehov(
             id = id,
@@ -173,7 +174,7 @@ internal class Hendelsefabrikk(
     }
 
     fun søknadSendt(
-        json: String
+        json: String,
     ): SøknadSendt {
         val jsonNode = mapper.readTree(json)
         return SøknadSendt(
@@ -192,7 +193,7 @@ internal class Hendelsefabrikk(
         fødselsnummer: String,
         aktørId: String,
         organisasjonsnummer: String,
-        json: String
+        json: String,
     ): SøknadSendt {
         return SøknadSendt(
             id = id,
@@ -246,7 +247,7 @@ internal class Hendelsefabrikk(
         begrunnelser: List<String>?,
         kommentar: String?,
         oppgaveId: Long,
-        json: String
+        json: String,
     ) = Saksbehandlerløsning(
         id = id,
         fødselsnummer = fødselsnummer,
@@ -296,7 +297,7 @@ internal class Hendelsefabrikk(
         begrunnelse: String,
         overstyrteDager: List<OverstyringDagDto>,
         opprettet: LocalDateTime,
-        json: String
+        json: String,
     ) = OverstyringTidslinje(
         id = id,
         fødselsnummer = fødselsnummer,
@@ -346,7 +347,7 @@ internal class Hendelsefabrikk(
         fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
-        json: String
+        json: String,
     ) = OverstyringInntekt(
         id = id,
         fødselsnummer = fødselsnummer,
@@ -378,7 +379,7 @@ internal class Hendelsefabrikk(
         overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
-        json: String
+        json: String,
     ) = OverstyringArbeidsforhold(
         id = id,
         fødselsnummer = fødselsnummer,
@@ -458,7 +459,7 @@ internal class Hendelsefabrikk(
         fødselsnummer: String,
         forårsaketAvId: UUID,
         forrigeTilstand: String,
-        json: String
+        json: String,
     ): VedtaksperiodeEndret {
         return VedtaksperiodeEndret(
             id = id,
@@ -492,7 +493,7 @@ internal class Hendelsefabrikk(
         id: UUID,
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-        json: String
+        json: String,
     ): VedtaksperiodeForkastet {
         return VedtaksperiodeForkastet(
             id = id,
@@ -621,7 +622,15 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun vedtaksperiodeOpprettet(id: UUID, fødselsnummer: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, json: String): VedtaksperiodeOpprettet {
+    fun vedtaksperiodeOpprettet(
+        id: UUID,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        fom: LocalDate,
+        tom: LocalDate,
+        json: String,
+    ): VedtaksperiodeOpprettet {
         return VedtaksperiodeOpprettet(
             id = id,
             fødselsnummer = fødselsnummer,
@@ -708,7 +717,7 @@ internal class Hendelsefabrikk(
         )
     }
 
-    fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<NyeVarsler.Varsel>, json: String): NyeVarsler {
+    fun nyeVarsler(id: UUID, fødselsnummer: String, varsler: List<Varsel>, json: String): NyeVarsler {
         return NyeVarsler(id, fødselsnummer, varsler, json, varselRepository)
     }
 
