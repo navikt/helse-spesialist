@@ -45,6 +45,12 @@ internal class NyeVarsler(
         private val vedtaksperiodeId: UUID,
     ) {
 
+        internal enum class Status {
+            AKTIV,
+            INAKTIV,
+            GODKJENT
+        }
+
         internal fun lagre(varselRepository: VarselRepository) {
             varselRepository.lagreVarsel(id, varselkode, tidsstempel, vedtaksperiodeId)
         }
