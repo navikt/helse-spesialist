@@ -27,7 +27,7 @@ internal class Varsel(
         && javaClass == other.javaClass
         && id == other.id
         && vedtaksperiodeId == other.vedtaksperiodeId
-        && opprettet == other.opprettet
+        && opprettet.withNano(0) == other.opprettet.withNano(0)
         && varselkode == other.varselkode)
 
     override fun hashCode(): Int {
