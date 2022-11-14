@@ -24,6 +24,7 @@ internal class Varsel(
 
     override fun equals(other: Any?): Boolean =
         this === other || other is Varsel
+        && javaClass == other.javaClass
         && id == other.id
         && vedtaksperiodeId == other.vedtaksperiodeId
         && opprettet == other.opprettet
