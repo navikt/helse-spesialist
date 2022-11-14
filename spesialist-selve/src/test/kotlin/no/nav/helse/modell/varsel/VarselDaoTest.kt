@@ -92,7 +92,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         dao.lagreVarsel(varselId, "EN_KODE", opprettet, v1)
-        assertEquals(Varsel(varselId, "EN_KODE", opprettet, v1), dao.alleVarslerFor(v1).first())
+        assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), dao.alleVarslerFor(v1))
     }
 
     private fun alleDefinisjoner(): List<Varseldefinisjon> {
