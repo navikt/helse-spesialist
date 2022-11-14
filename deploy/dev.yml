@@ -76,7 +76,7 @@ spec:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: tbd-spesialist-v1
     - name: RISK_SUPERSAKSBEHANDLER_GROUP
-      value: 1119ba1f-3b10-4598-a47b-16568c379114
+      value: d962856c-da36-42ca-af45-47a4dbdcdf9d
     - name: KODE7_SAKSBEHANDLER_GROUP
       value: c811e9f4-26a6-43f9-b930-8c83365683a9
     - name: BESLUTTER_SAKSBEHANDLER_GROUP
