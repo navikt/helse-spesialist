@@ -23,7 +23,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             periodeTom = 3.januar,
             personbeløp = 1500,
         )
-        assertVedtak(vedtaksperiodeId)
+        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
         assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'"))
         assertIkkeEtterspurtBehov("EgenAnsatt")
@@ -35,7 +35,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             fødselsnummer = FØDSELSNUMMER_SOM_GÅR_GJENNOM_FILTER,
             personbeløp = 1500,
         )
-        assertVedtak(vedtaksperiodeId)
+        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         sendSaksbehandlerløsningFraAPI(
             testRapid.inspektør.oppgaveId(),
             SAKSBEHANDLER_IDENT,
@@ -55,7 +55,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             personbeløp = 1500,
             arbeidsgiverbeløp = 500,
         )
-        assertVedtak(vedtaksperiodeId)
+        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
         assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon"))
         assertIkkeEtterspurtBehov("EgenAnsatt")
@@ -74,7 +74,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 )
             )
         )
-        assertVedtak(vedtaksperiodeId)
+        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(false, "Automatisk behandlet")
         assertVedtaksperiodeAvvist("FORLENGELSE", listOf("Brukerutbetalingsfilter: Vedtaksperioden har warnings"))
     }
@@ -85,7 +85,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
             fødselsnummer = FØDSELSNUMMER_SOM_IKKE_GÅR_GJENNOM_FILTER,
             arbeidsgiverbeløp = 500,
         )
-        assertVedtak(vedtaksperiodeId)
+        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
         assertGodkjenningsbehovløsning(true, "Automatisk behandlet")
     }
 

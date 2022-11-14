@@ -17,6 +17,7 @@ import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -59,6 +60,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         )
 
         sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "AVVENTER_GODKJENNING",
             gjeldendeTilstand = "AVVENTER_HISTORIKK"
@@ -84,6 +88,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
         sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "AVVENTER_GODKJENNING",
             gjeldendeTilstand = "AVVENTER_HISTORIKK"
@@ -115,6 +122,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         tildelOppgave(saksbehandlerOid)
 
         sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "AVVENTER_GODKJENNING",
             gjeldendeTilstand = "AVVENTER_HISTORIKK"
@@ -135,6 +145,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         tildelOppgave(saksbehandlerOid, påVent = true)
 
         sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "AVVENTER_GODKJENNING",
             gjeldendeTilstand = "AVVENTER_HISTORIKK"
@@ -175,6 +188,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         )
 
         sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "AVVENTER_GODKJENNING",
             gjeldendeTilstand = "AVVENTER_HISTORIKK"
@@ -216,6 +232,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryt ikke-eksisterende vedtaksperiode`() {
         assertDoesNotThrow {
             sendVedtaksperiodeEndret(
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 forrigeTilstand = "AVVENTER_GODKJENNING",
                 gjeldendeTilstand = "AVVENTER_HISTORIKK"
@@ -263,6 +282,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = vedtaksperiodeTilGodkjenning()
 
         sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = forrigeTilstand,
             gjeldendeTilstand = gjeldendeTilstand

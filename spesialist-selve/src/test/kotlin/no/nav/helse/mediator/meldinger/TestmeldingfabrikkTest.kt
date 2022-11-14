@@ -25,14 +25,14 @@ internal class TestmeldingfabrikkTest {
 
     @Test
     fun `meldinger inneholder standardfelt`() {
-        assertStandardfelt(fabrikk.lagVedtaksperiodeEndret())
+        assertStandardfelt(fabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FNR))
         assertStandardfelt(fabrikk.lagVedtaksperiodeForkastet())
         assertStandardfelt(fabrikk.lagGodkjenningsbehov())
     }
 
     @Test
     fun `vedtaksperiode endret`() {
-        val melding = fabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, VEDTAKSPERIODE_ID, "orgnr", "START", "SLUTT")
+        val melding = fabrikk.lagVedtaksperiodeEndret(HENDELSE_ID, AKTØR, FNR, "orgnr", VEDTAKSPERIODE_ID, "START", "SLUTT")
         assertFelt("fødselsnummer", FNR, melding)
         assertFelt("aktørId", AKTØR, melding)
         assertFelt("organisasjonsnummer", "orgnr", melding)

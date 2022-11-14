@@ -9,6 +9,8 @@ import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendOverstyrteDager
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -38,7 +40,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             UUID.fromString(it.path("@id").asText())
         }
         sendVedtaksperiodeEndret(
-            orgnr = ORGNR,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "FORRIGE_TILSTAND",
             gjeldendeTilstand = "GJELDENDE_TILSTAND",
@@ -80,7 +84,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             UUID.fromString(it.path("@id").asText())
         }
         sendVedtaksperiodeEndret(
-            orgnr = ORGNR,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "FORRIGE_TILSTAND",
             gjeldendeTilstand = "GJELDENDE_TILSTAND",
@@ -123,7 +129,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             UUID.fromString(it.path("@id").asText())
         }
         sendVedtaksperiodeEndret(
-            orgnr = ORGNR,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             forrigeTilstand = "FORRIGE_TILSTAND",
             gjeldendeTilstand = "GJELDENDE_TILSTAND",

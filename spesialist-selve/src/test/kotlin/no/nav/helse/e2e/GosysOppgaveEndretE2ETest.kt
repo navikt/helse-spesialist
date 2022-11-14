@@ -8,7 +8,7 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `foo`() {
         håndterSøknad()
-//        håndterVedtaksperiodeOpprettet()
+        håndterVedtaksperiodeOpprettet()
 //        håndterGodkjenningsbehov()
 //        håndterPersoninfoløsning()
 //        håndterEnhetløsning()

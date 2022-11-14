@@ -20,8 +20,14 @@ internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
         assertArbeidsgiverEksisterer(ORGNR)
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeEndret(orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
-        assertVedtak(VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            forrigeTilstand = "START"
+        )
+        assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
 
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)

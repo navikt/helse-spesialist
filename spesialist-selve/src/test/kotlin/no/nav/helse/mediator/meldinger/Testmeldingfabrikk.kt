@@ -47,8 +47,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
 
     fun lagVedtaksperiodeEndret(
         id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         organisasjonsnummer: String = "orgnr",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
         forrigeTilstand: String = "FORRIGE_TILSTAND",
         gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
         forårsaketAvId: UUID = UUID.randomUUID(),

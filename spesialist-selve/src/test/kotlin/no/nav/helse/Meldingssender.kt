@@ -37,7 +37,9 @@ internal object Meldingssender {
     }
 
     fun sendVedtaksperiodeEndret(
-        orgnr: String = "orgnr",
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         forrigeTilstand: String = "FORRIGE_TILSTAND",
         gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
@@ -46,8 +48,10 @@ internal object Meldingssender {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagVedtaksperiodeEndret(
                 id,
+                aktørId,
+                fødselsnummer,
+                organisasjonsnummer,
                 vedtaksperiodeId,
-                orgnr,
                 forrigeTilstand,
                 gjeldendeTilstand,
                 forårsaketAvId,

@@ -21,6 +21,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendSøknadSendt
+import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.behov
@@ -211,6 +212,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertArbeidsgiverEksisterer(organisasjonsnummer)
     }
 
+    protected fun håndterVedtaksperiodeOpprettet(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
+    ) {
+        sendVedtaksperiodeEndret(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, forrigeTilstand = "START")
+        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
+    }
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
@@ -312,11 +323,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         })
     }
 
-    protected fun assertVedtak(vedtaksperiodeId: UUID) {
+    protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
 
-    protected fun assertIkkeVedtak(vedtaksperiodeId: UUID) {
+    protected fun assertVedtaksperiodeEksistererIkke(vedtaksperiodeId: UUID) {
         assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
@@ -354,13 +365,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun vedtak(vedtaksperiodeId: UUID): Int {
         return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?"
             requireNotNull(
-                session.run(
-                    queryOf(
-                        "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = ?",
-                        vedtaksperiodeId
-                    ).map { row -> row.int(1) }.asSingle
-                )
+                session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
             )
         }
     }

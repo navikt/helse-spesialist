@@ -33,7 +33,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtaksperiode_endret oppretter ny generasjon når det ikke finnes eksisterende generasjoner og forrigeTilstand er 'START'`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "START")
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, "START")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
 
         assertNotNull(førsteGenerasjon)
@@ -42,7 +42,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtaksperiode_endret oppretter ikke ny generasjon når det ikke finnes eksisterende generasjoner og forrigeTilstand ikke er 'START'`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "ANNEN_TILSTAND")
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, "ANNEN_TILSTAND")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
 
         assertNull(førsteGenerasjon)
@@ -51,9 +51,9 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtaksperiode_endret oppretter ikke ny generasjon når det finnes eksisterende ulåst generasjon`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "START")
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, "START")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         val skalFortsattVæreførsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
 
         assertEquals(skalFortsattVæreførsteGenerasjon, førsteGenerasjon)
@@ -62,10 +62,10 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtak_fattet låser generasjon, ny vedtaksperiode_endret vil da opprette ny generasjon`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "START")
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, "START")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
         sendVedtakFattet(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         val andreGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
 
         assertNotNull(førsteGenerasjon)

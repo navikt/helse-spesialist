@@ -64,9 +64,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer endringer på ukjente vedtaksperioder`() {
-        val hendelseId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val hendelseId = sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         assertIkkeHendelse(hendelseId)
-        assertIkkeVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertHendelse(godkjenningsmeldingId)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT")
         assertBehov("HentPersoninfoV2", "HentEnhet", "HentInfotrygdutbetalinger")
-        assertIkkeVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -128,7 +128,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        assertVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -407,7 +407,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val endringsmeldingId = sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         verify(exactly = 2) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
@@ -476,7 +476,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        val endringsmeldingId = sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        val endringsmeldingId = sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         assertTilstand(endringsmeldingId, "NY", "FERDIG")
         assertSnapshot(SNAPSHOT_UTEN_WARNINGS, VEDTAKSPERIODE_ID)
         verify(exactly = 2) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
@@ -531,9 +531,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             listOf("begrunnelser"),
             "kommentar"
         )
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
-        sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
+        sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertTilstand(
             godkjenningsmeldingId,
@@ -555,7 +555,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `vedtaksperiode forkastet`() {
         val hendelseId = sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
         assertIkkeHendelse(hendelseId)
-        assertIkkeVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -563,7 +563,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
         assertHendelse(hendelseId)
-        assertIkkeVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
         assertTilstand(hendelseId, "NY", "SUSPENDERT", "AVBRUTT")
     }
 
@@ -635,7 +635,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        assertVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
         assertGodkjenningsbehovløsning(false, AUTOMATISK_BEHANDLET)
     }
@@ -684,7 +684,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "FERDIG"
         )
-        assertVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
         assertGodkjenningsbehovløsning(false, AUTOMATISK_BEHANDLET)
     }
@@ -1110,7 +1110,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         snapshot?.also {
             assertSnapshot(it, VEDTAKSPERIODE_ID)
         }
-        assertVedtak(VEDTAKSPERIODE_ID)
+        assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
         return godkjenningsmeldingId
     }
 
