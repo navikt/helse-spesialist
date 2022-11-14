@@ -3,6 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
@@ -13,18 +14,18 @@ internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
 
     @Test
     fun `Oppretter minimal person og arbeidsgiver ved mottatt søknad og minial vedtaksperiode ved vedtaksperiode endret`() {
-        assertPersonEksistererIkke(FØDSELSNUMMER)
+        assertPersonEksistererIkke(FØDSELSNUMMER, AKTØR)
 
-        sendSøknadSendt()
-        assertPersonEksisterer(FØDSELSNUMMER)
-        assertArbeidsgiver(ORGNR)
-        sendSøknadSendt()
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
+        assertArbeidsgiverEksisterer(ORGNR)
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID, forrigeTilstand = "START")
         assertVedtak(VEDTAKSPERIODE_ID)
         assertIngenOppgave()
 
-        sendSøknadSendt()
-        assertPersonEksisterer(FØDSELSNUMMER)
-        assertArbeidsgiver(ORGNR)
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
+        assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
+        assertArbeidsgiverEksisterer(ORGNR)
     }
 }

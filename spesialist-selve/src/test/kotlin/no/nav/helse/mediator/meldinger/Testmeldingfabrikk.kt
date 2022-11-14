@@ -32,6 +32,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun lagSøknadSendt(
         id: UUID = UUID.randomUUID(),
         organisasjonsnummer: String,
+        aktørId: String,
+        fødselsnummer: String,
     ) =
         nyHendelse(
             id, "sendt_søknad_nav", mapOf(

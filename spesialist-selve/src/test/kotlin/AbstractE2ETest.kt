@@ -20,6 +20,7 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.behov
@@ -84,6 +85,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -199,6 +201,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         Meldingssender.testRapid = testRapid
     }
 
+    protected fun håndterSøknad(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR
+    ) {
+        sendSøknadSendt(aktørId, fødselsnummer, organisasjonsnummer)
+        assertPersonEksisterer(fødselsnummer, aktørId)
+        assertArbeidsgiverEksisterer(organisasjonsnummer)
+    }
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
@@ -308,40 +320,34 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, vedtak(vedtaksperiodeId))
     }
 
-    protected fun assertPersonEksisterer(fnr: String) {
-        assertEquals(1, person(fnr))
+    protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
+        assertEquals(1, person(fødselsnummer, aktørId)) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
-    protected fun assertPersonEksistererIkke(fnr: String) {
-        assertEquals(0, person(fnr))
+    protected fun assertPersonEksistererIkke(fødselsnummer: String, aktørId: String) {
+        assertEquals(0, person(fødselsnummer, aktørId))
     }
 
-    protected fun assertArbeidsgiver(orgnr: String) {
-        assertEquals(1, arbeidsgiver(orgnr))
+    protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
+        assertEquals(1, arbeidsgiver(organisasjonsnummer)) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
-    protected fun person(fnr: String): Int {
+    protected fun person(fødselsnummer: String, aktørId: String): Int {
         return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT COUNT(*) FROM person WHERE fodselsnummer = ? AND aktor_id = ?"
             requireNotNull(
-                session.run(
-                    queryOf(
-                        "SELECT COUNT(*) FROM person WHERE fodselsnummer = ?",
-                        fnr.toLong()
-                    ).map { row -> row.int(1) }.asSingle
-                )
+                session.run(queryOf(query, fødselsnummer.toLong(), aktørId.toLong()).map { row -> row.int(1) }.asSingle)
             )
         }
     }
 
-    protected fun arbeidsgiver(orgnr: String): Int {
+    protected fun arbeidsgiver(organisasjonsnummer: String): Int {
         return sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT COUNT(*) FROM arbeidsgiver WHERE orgnummer = ?"
             requireNotNull(
-                session.run(
-                    queryOf(
-                        "SELECT COUNT(*) FROM arbeidsgiver WHERE orgnummer = ?",
-                        orgnr.toLong()
-                    ).map { row -> row.int(1) }.asSingle
-                )
+                session.run(queryOf(query, organisasjonsnummer.toLong()).map { row -> row.int(1) }.asSingle)
             )
         }
     }

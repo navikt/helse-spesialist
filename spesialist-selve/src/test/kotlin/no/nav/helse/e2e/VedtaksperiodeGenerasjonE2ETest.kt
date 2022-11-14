@@ -5,6 +5,7 @@ import ToggleHelpers.disable
 import ToggleHelpers.enable
 import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
@@ -31,7 +32,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vedtaksperiode_endret oppretter ny generasjon når det ikke finnes eksisterende generasjoner og forrigeTilstand er 'START'`() {
-        sendSøknadSendt()
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "START")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
 
@@ -40,7 +41,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vedtaksperiode_endret oppretter ikke ny generasjon når det ikke finnes eksisterende generasjoner og forrigeTilstand ikke er 'START'`() {
-        sendSøknadSendt()
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "ANNEN_TILSTAND")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
 
@@ -49,7 +50,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vedtaksperiode_endret oppretter ikke ny generasjon når det finnes eksisterende ulåst generasjon`() {
-        sendSøknadSendt()
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "START")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
         sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID)
@@ -60,7 +61,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vedtak_fattet låser generasjon, ny vedtaksperiode_endret vil da opprette ny generasjon`() {
-        sendSøknadSendt()
+        sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
         sendVedtaksperiodeEndret(ORGNR, VEDTAKSPERIODE_ID, "START")
         val førsteGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
         sendVedtakFattet(FØDSELSNUMMER, VEDTAKSPERIODE_ID)
