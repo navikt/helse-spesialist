@@ -23,12 +23,12 @@ internal class Varsel(
     }
 
     override fun equals(other: Any?): Boolean =
-        this === other || other is Varsel
+        this === other || (other is Varsel
         && javaClass == other.javaClass
         && id == other.id
         && vedtaksperiodeId == other.vedtaksperiodeId
         && opprettet == other.opprettet
-        && varselkode == other.varselkode
+        && varselkode == other.varselkode)
 
     override fun hashCode(): Int {
         var result = id.hashCode()
