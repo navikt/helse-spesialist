@@ -22,19 +22,12 @@ internal class Varsel(
         varselRepository.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Varsel
-
-        if (id != other.id) return false
-        if (varselkode != other.varselkode) return false
-        if (opprettet != other.opprettet) return false
-        if (vedtaksperiodeId != other.vedtaksperiodeId) return false
-
-        return true
-    }
+    override fun equals(other: Any?): Boolean =
+        this === other || other is Varsel
+        && id == other.id
+        && vedtaksperiodeId == other.vedtaksperiodeId
+        && opprettet == other.opprettet
+        && varselkode == other.varselkode
 
     override fun hashCode(): Int {
         var result = id.hashCode()
