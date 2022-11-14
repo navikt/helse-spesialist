@@ -9,7 +9,7 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     fun `foo`() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-//        håndterGodkjenningsbehov()
+        håndterGodkjenningsbehov()
 //        håndterPersoninfoløsning()
 //        håndterEnhetløsning()
 //        håndterInfotrygdutbetalingerløsning()

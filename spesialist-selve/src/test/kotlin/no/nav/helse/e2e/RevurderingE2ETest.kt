@@ -58,7 +58,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
     fun `revurdering ved saksbehandlet oppgave`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
 
-        val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
@@ -78,7 +78,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         assertGodkjenningsbehovløsning(true, SAKSBEHANDLERIDENT)
 
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID2,
             utbetalingtype = Utbetalingtype.REVURDERING
@@ -104,7 +104,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `revurdering av periode medfører oppgave selv om perioden ikke har warnings`() {
-        val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendUtbetalingEndret(
             "UTBETALING",
@@ -123,7 +123,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotMedRevurderingUtbetaling(utbetalingId = UTBETALING_ID2)
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID2,
             utbetalingtype = Utbetalingtype.REVURDERING
@@ -149,7 +149,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `fanger opp og informerer saksbehandler om avvist revurdering`() {
-        val godkjenningsmeldingId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
 
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
 

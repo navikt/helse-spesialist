@@ -37,7 +37,7 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         testRapid.reset()
         val vedtaksperiode2Id = randomUUID()
         val forlengelseBehovId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiode2Id,
             utbetalingId = randomUUID(),
             periodeFom = 1.februar,

@@ -51,7 +51,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         val overstyrtType = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodeFom = 1.januar,
@@ -96,7 +96,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         val overstyrtType = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodeFom = 1.januar,
@@ -141,7 +141,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         val overstyrtType = overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(VEDTAKSPERIODE_ID)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodeFom = 1.januar,

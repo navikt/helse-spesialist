@@ -9,6 +9,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -57,7 +58,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     private fun fetchPerson() = personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment)
 
     private fun sendMeldingerOppTilEgenAnsatt(): UUID {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,

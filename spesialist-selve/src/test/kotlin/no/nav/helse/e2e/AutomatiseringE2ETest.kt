@@ -42,7 +42,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter automatisk vedtak`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
@@ -110,7 +110,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter automatisk vedtak ved infotrygdforlengelse`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.INFOTRYGDFORLENGELSE
@@ -170,7 +170,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak ved warnings`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
@@ -246,7 +246,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         )
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
         )
@@ -333,7 +333,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
     fun `fatter ikke automatisk vedtak når bruker har åpne oppgaver i gosys`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE

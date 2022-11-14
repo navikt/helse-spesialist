@@ -121,7 +121,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
     ) {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             periodetype = periodetype

@@ -75,7 +75,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
     ) {
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = UTBETALING_ID
         )

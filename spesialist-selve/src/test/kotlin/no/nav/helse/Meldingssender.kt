@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.VARSEL_KODE_1
 import no.nav.helse.Testdata.VARSEL_KODE_2
@@ -16,6 +17,7 @@ import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.utbetaling.Utbetalingtype.*
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -91,7 +93,9 @@ internal object Meldingssender {
         }
 
     fun sendGodkjenningsbehov(
-        orgnr: String,
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
         periodeFom: LocalDate = LocalDate.now(),
@@ -99,18 +103,16 @@ internal object Meldingssender {
         skjæringstidspunkt: LocalDate = LocalDate.now(),
         periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         førstegangsbehandling: Boolean = true,
-        fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = Testdata.AKTØR,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
-        utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING
+        utbetalingtype: Utbetalingtype = UTBETALING
     ): UUID = uuid.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagGodkjenningsbehov(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
-                orgnummer = orgnr,
+                orgnummer = organisasjonsnummer,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -564,7 +566,7 @@ internal object Meldingssender {
         }
     }
 
-    private val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, Testdata.AKTØR)
+    private val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
     private val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
     private val uuid get() = UUID.randomUUID()

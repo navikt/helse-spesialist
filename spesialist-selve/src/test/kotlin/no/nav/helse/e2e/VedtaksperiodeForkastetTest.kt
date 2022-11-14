@@ -16,6 +16,7 @@ import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -64,6 +65,8 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
 
     private fun vedtaksperiodeTilGodkjenning(): UUID {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(
+            AKTØR,
+            FØDSELSNUMMER,
             ORGNR,
             VEDTAKSPERIODE_ID,
             UTBETALING_ID

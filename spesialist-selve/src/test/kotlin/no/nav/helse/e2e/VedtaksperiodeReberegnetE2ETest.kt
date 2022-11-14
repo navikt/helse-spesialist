@@ -36,6 +36,8 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
+            AKTØR,
+            FØDSELSNUMMER,
             ORGNR,
             VEDTAKSPERIODE_ID,
             UTBETALING_ID
@@ -164,9 +166,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     fun `avbryter kommandokjede ved reberegning og oppretter oppgave hos saksbehandler andre runde`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         var godkjenningsmeldingId = sendGodkjenningsbehov(
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
@@ -308,9 +310,9 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
 
     private fun vedtaksperiodeTilGodkjenning(): UUID {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsning(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(

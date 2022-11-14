@@ -222,14 +222,25 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 
+    protected fun håndterGodkjenningsbehov(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UTBETALING_ID
+    ) {
+        sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId)
+        assertEtterspurteBehov("HentPersoninfoV2")
+    }
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            1.januar,
-            31.januar,
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            periodeFom = 1.januar,
+            periodeTom = 31.januar,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
@@ -430,6 +441,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
     }
 
+    private fun assertEtterspurteBehov(vararg behov: String) {
+        val etterspurteBehov = testRapid.inspektør.behov()
+        assertEquals(etterspurteBehov, behov.toList()) {
+            val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
+            "Følgende behov ble ikke etterspurt: $ikkeEtterspurt\nEtterspurte behov: $etterspurteBehov\n"
+        }
+    }
+
     protected fun assertIkkeEtterspurtBehov(behov: String) {
         assertFalse(testRapid.inspektør.behov().any { it == behov })
     }
@@ -517,13 +536,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ): UUID {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = organisasjonsnummer,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            periodetype = Periodetype.FORLENGELSE,
-            fødselsnummer = fødselsnummer
+            periodetype = Periodetype.FORLENGELSE
         )
         val contextId = contextId(godkjenningsmeldingId)
         sendPersoninfoløsning(

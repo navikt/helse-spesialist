@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.UTBETALING_ID2
@@ -89,7 +90,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     @Test
     fun `oppretter ikke ny oppgave når det finnes en aktiv oppgave`() {
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
-        val behov2 = sendGodkjenningsbehov(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val behov2 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler)
         assertOppgaver(1)
         assertIkkeHendelse(behov2)
@@ -121,7 +122,7 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, true, utbetalingId = UTBETALING_ID)
         sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
-        val behov = sendGodkjenningsbehov(ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID2)
+        val behov = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID2)
         assertHendelse(behov)
     }
 

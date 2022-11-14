@@ -71,7 +71,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter ikke vedtak ved godkjenningsbehov uten nødvendig informasjon`() {
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertHendelse(godkjenningsmeldingId)
         assertTilstand(godkjenningsmeldingId, "NY", "SUSPENDERT")
         assertBehov("HentPersoninfoV2", "HentEnhet", "HentInfotrygdutbetalinger")
@@ -89,7 +89,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -134,7 +134,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -188,7 +188,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `behovene spores tilbake`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         val personinfomeldingId = sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val arbeidsgiverløsningId = sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -246,7 +250,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `slår sammen warnings fra spleis og spesialist i utgående event`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -292,7 +300,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `løser godkjenningsbehov når saksbehandler avslår`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS //Legger på warning for at saken ikke skal automatiseres
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -360,7 +372,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             SNAPSHOT_UTEN_WARNINGS
         )
 
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
@@ -420,7 +436,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             SNAPSHOT_UTEN_WARNINGS
         )
 
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
@@ -489,7 +509,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             SNAPSHOT_UTEN_WARNINGS
         )
 
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
@@ -560,7 +584,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `vedtaksperiode forkastet når det finnes en hendelse`() {
-        val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val hendelseId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
         assertHendelse(hendelseId)
         assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
@@ -570,7 +598,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `gjør ingen ting om man får tilbake løsning på en avbrutt command context`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val hendelseId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val hendelseId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,
@@ -594,7 +626,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter ikke oppgave om bruker er egen ansatt`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -643,7 +679,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter ikke oppgave om bruker tilhører utlandsenhet`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID, enhet = ENHET_UTLAND)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -692,7 +732,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `vanlig arbeidsforhold`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -745,7 +789,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter suspendert kommando når godkjenningsbehov kommer inn på nytt`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val hendelseId1 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val hendelseId1 = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         håndterVergeflyt(snapshot = null)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
     }
@@ -754,7 +802,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
         håndterVergeflyt()
         testRapid.reset()
-        sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         assertTrue(testRapid.inspektør.behov().isEmpty())
     }
 
@@ -766,7 +818,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertAutomatisertLøsning()
 
         testRapid.reset()
-        sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         assertTrue(testRapid.inspektør.behov().isEmpty())
     }
 
@@ -780,7 +836,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
 
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -825,7 +885,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR
         )
 
-        val godkjenningsmeldingId2 = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID2, UTBETALING_ID2)
+        val godkjenningsmeldingId2 = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID2,
+            utbetalingId = UTBETALING_ID2
+        )
         sendPersoninfoløsning(godkjenningsmeldingId2, ORGNR, VEDTAKSPERIODE_ID2)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId2,
@@ -858,7 +922,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val orgnummereMedRelevanteArbeidsforhold = listOf("123456789")
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
@@ -877,7 +941,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val orgnummereMedRelevanteArbeidsforhold = listOf(orgnr1, fnr1)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
@@ -900,7 +964,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val orgnummereMedRelevanteArbeidsforhold = listOf(orgnr1, fnr1)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
@@ -930,7 +994,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `legger til riktig felt for adressebeskyttelse i Personinfo`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
@@ -1000,7 +1064,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling og avvise godkjenning pga vergemål og egen ansatt`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
@@ -1062,7 +1130,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         snapshot?.also {
             every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns it
         }
-        val godkjenningsmeldingId = sendGodkjenningsbehov(ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
+        val godkjenningsmeldingId = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID
+        )
         sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,

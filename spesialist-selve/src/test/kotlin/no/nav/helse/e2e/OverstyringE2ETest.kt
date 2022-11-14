@@ -16,6 +16,7 @@ import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
@@ -67,6 +68,8 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertIngenOppgaver(originalOppgaveId)
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
+            AKTØR,
+            FØDSELSNUMMER,
             ORGNR,
             VEDTAKSPERIODE_ID,
             UTBETALING_ID,
@@ -109,7 +112,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodeFom = 1.januar,
@@ -147,7 +150,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
 
         val nyttGodkjenningsbehov = sendGodkjenningsbehov(
-            orgnr = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID,
             periodeFom = 1.januar,
@@ -165,11 +168,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     @Test
     fun `legger ved overstyringer i speil snapshot`() {
         val hendelseId = sendGodkjenningsbehov(
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            LocalDate.of(2018, 1, 1),
-            LocalDate.of(2018, 1, 31)
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
         )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         every { dataFetchingEnvironment.graphQlContext.get<String>("saksbehandlerNavn") } returns "saksbehandler"
@@ -228,11 +231,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         )
 
         val hendelseId2 = sendGodkjenningsbehov(
-            ORGNR,
-            VEDTAKSPERIODE_ID,
-            UTBETALING_ID,
-            LocalDate.of(2018, 1, 1),
-            LocalDate.of(2018, 1, 31)
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            periodeFom = LocalDate.of(2018, 1, 1),
+            periodeTom = LocalDate.of(2018, 1, 31)
         )
         sendEgenAnsattløsning(hendelseId2, false)
         sendVergemålløsning(
