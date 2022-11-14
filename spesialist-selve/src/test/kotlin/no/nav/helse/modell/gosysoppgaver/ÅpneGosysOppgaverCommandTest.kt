@@ -3,19 +3,21 @@ package no.nav.helse.modell.gosysoppgaver
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
-import no.nav.helse.modell.varsel.VarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 
 internal class ÅpneGosysOppgaverCommandTest {
@@ -63,6 +65,7 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 0) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, any()) }
+        verify(exactly = 0) { varselRepository.lagreVarsel(any(), SB_EX_1.name, any(), VEDTAKPERIODE_ID) }
     }
 
     @Test
@@ -76,6 +79,7 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
+        verify(exactly = 1) { varselRepository.lagreVarsel(any(), SB_EX_1.name, any(), VEDTAKPERIODE_ID) }
     }
 
     @Test
@@ -89,5 +93,6 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
+        verify(exactly = 1) { varselRepository.lagreVarsel(any(), SB_EX_4.name, any(), VEDTAKPERIODE_ID) }
     }
 }
