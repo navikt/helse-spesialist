@@ -13,7 +13,7 @@ import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendOverstyrteDager
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
-import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
@@ -192,7 +192,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsningOld(hendelseId, false)
-        sendVergemålløsning(
+        sendVergemålløsningOld(
             godkjenningsmeldingId = hendelseId
         )
         sendDigitalKontaktinformasjonløsning(
@@ -238,7 +238,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             periodeTom = LocalDate.of(2018, 1, 31)
         )
         sendEgenAnsattløsningOld(hendelseId2, false)
-        sendVergemålløsning(
+        sendVergemålløsningOld(
             godkjenningsmeldingId = hendelseId2
         )
         sendDigitalKontaktinformasjonløsning(

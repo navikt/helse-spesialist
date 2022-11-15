@@ -13,7 +13,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
-import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
@@ -86,7 +86,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId1,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(
+        sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1
         )
 

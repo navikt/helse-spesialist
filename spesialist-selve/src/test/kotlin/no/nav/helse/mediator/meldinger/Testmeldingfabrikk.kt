@@ -536,13 +536,16 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagVergemålløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        vergemål: VergemålJson,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-        vergemål: VergemålJson
+        contextId: UUID = UUID.randomUUID()
     ): String = nyHendelse(
         id,
         "behov", mutableMapOf(
+            "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "@final" to true,
             "@behov" to listOf("Vergemål"),

@@ -18,7 +18,7 @@ import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVedtaksperiodeForkastet
-import no.nav.helse.Meldingssender.sendVergemålløsning
+import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -102,7 +102,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -150,7 +150,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -208,7 +208,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        val vergemålløsningId = sendVergemålløsning(godkjenningsmeldingId)
+        val vergemålløsningId = sendVergemålløsningOld(godkjenningsmeldingId)
         val dkifløsningId = sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -270,7 +270,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -320,7 +320,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -396,7 +396,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -460,7 +460,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -533,7 +533,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -645,7 +645,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, true)
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -698,7 +698,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -749,7 +749,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -856,7 +856,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId)
+        sendVergemålløsningOld(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -900,7 +900,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId2,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(godkjenningsmeldingId2)
+        sendVergemålløsningOld(godkjenningsmeldingId2)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId2,
             erDigital = true
@@ -1081,7 +1081,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, true)
-        sendVergemålløsning(
+        sendVergemålløsningOld(
             godkjenningsmeldingId, vergemål = VergemålJson(
                 vergemål = listOf(
                     Vergemål(
@@ -1150,7 +1150,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
-        sendVergemålløsning(
+        sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vergemål = vergemål
         )

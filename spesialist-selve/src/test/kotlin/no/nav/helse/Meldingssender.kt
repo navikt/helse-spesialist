@@ -605,6 +605,30 @@ internal object Meldingssender {
         }
     }
 
+    fun sendVergemålløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        vergemål: Testmeldingfabrikk.VergemålJson = Testmeldingfabrikk.VergemålJson(),
+    ): UUID {
+        return uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("Vergemål", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagVergemålløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    vergemål = vergemål,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+    }
 
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
@@ -726,7 +750,7 @@ internal object Meldingssender {
         }
     }
 
-    fun sendVergemålløsning(
+    fun sendVergemålløsningOld(
         godkjenningsmeldingId: UUID,
         vergemål: Testmeldingfabrikk.VergemålJson = Testmeldingfabrikk.VergemålJson(),
         contextId: UUID = testRapid.inspektør.contextId()
@@ -734,10 +758,12 @@ internal object Meldingssender {
         return uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagVergemålløsning(
+                    AKTØR,
+                    FØDSELSNUMMER,
+                    vergemål,
                     id,
                     godkjenningsmeldingId,
-                    contextId,
-                    vergemål
+                    contextId
                 )
             )
         }

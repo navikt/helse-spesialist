@@ -16,5 +16,6 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
         håndterArbeidsgiverinformasjonløsning()
         håndterArbeidsforholdløsning()
         håndterEgenansattløsning()
+        håndterVergemålløsning()
     }
 }
