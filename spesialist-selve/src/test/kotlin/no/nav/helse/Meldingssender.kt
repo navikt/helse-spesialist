@@ -440,12 +440,38 @@ internal object Meldingssender {
     ): UUID =
         uuid.also { id ->
             val personinfobehov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
             assertEquals("HentPersoninfoV2", personinfobehov["@behov"].map { it.asText() }.single())
             val contextId = UUID.fromString(personinfobehov["contextId"].asText())
             val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
 
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagPersoninfoløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+    fun sendEnhetløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID
+    ): UUID =
+        uuid.also { id ->
+            val personinfobehov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("HentEnhet", personinfobehov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(personinfobehov["contextId"].asText())
+            val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagEnhetløsning(
                     aktørId = aktørId,
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,

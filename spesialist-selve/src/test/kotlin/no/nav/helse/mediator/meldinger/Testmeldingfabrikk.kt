@@ -380,6 +380,31 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 )
             )
         )
+    fun lagEnhetløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String = "orgnr",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+        enhet: String = OSLO
+    ) =
+        nyHendelse(
+            id, "behov", mapOf(
+                "@final" to true,
+                "@behov" to listOf("HentEnhet"),
+                "hendelseId" to "$hendelseId",
+                "contextId" to contextId,
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "orgnummer" to organisasjonsnummer,
+                "@løsning" to mapOf(
+                    "HentEnhet" to enhet
+                )
+            )
+        )
 
     fun lagSaksbehandlerløsning(
         id: UUID = UUID.randomUUID(),
