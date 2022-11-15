@@ -40,7 +40,12 @@ class ContextFactory(
 
 private fun ApplicationRequest.getGrupper(): List<UUID> {
     val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
+    return accessToken?.payload?.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString)?.also {
+        if (accessToken.payload.getClaim("NAVident").asString() != "E156407") {
+            val name = accessToken.payload.getClaim("name").asString()
+            println("$name er med i følgende grupper: $it")
+        }
+    } ?: emptyList()
 }
 
 private fun ApplicationRequest.getSaksbehandlerName(): String {
