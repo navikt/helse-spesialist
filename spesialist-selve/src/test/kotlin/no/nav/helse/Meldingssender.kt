@@ -710,6 +710,18 @@ internal object Meldingssender {
         }
     }
 
+    fun sendGosysOppgaveEndret(aktørId: String, fødselsnummer: String): UUID {
+        return uuid.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagGosysOppgaveEndret(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    id = id,
+                )
+            )
+        }
+    }
+
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
         orgnr: String = Testdata.ORGNR,

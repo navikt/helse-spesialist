@@ -24,6 +24,7 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendEnhetløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendGosysOppgaveEndret
 import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -322,9 +323,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun håndterRiskovurderingløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        kanGodkjennesAutomatisk: Boolean = true,
     ) {
-        sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId)
+        sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId, kanGodkjennesAutomatisk)
+    }
+
+    protected fun håndterGosysOppgaveEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
+        sendGosysOppgaveEndret(aktørId, fødselsnummer)
+        assertEtterspurteBehov("ÅpneOppgaver")
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
@@ -608,7 +615,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertTrue(sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is null or inaktiv_fra > now())",
+                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is null)",
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId
+                    )
+                ).map { row -> row.string("melding") }.asList
+            )
+        }.contains(forventet))
+    }
+
+    protected fun assertInaktivWarning(forventet: String, vedtaksperiodeId: UUID) {
+        assertTrue(sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is not null)",
                     mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId
                     )

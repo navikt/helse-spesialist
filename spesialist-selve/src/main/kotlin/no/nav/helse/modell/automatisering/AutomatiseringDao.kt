@@ -126,7 +126,7 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                 JOIN hendelse h ON h.id = a.hendelse_ref
             WHERE vedtaksperiode_ref = ? 
             AND hendelse_ref = ?
-            AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
+            AND (inaktiv_fra IS NULL)
             """
         session.run(queryOf(query, vedtaksperiodeRef, hendelseId).map { row -> tilAutomatiseringDto(problemer, row) }.asSingle
         )

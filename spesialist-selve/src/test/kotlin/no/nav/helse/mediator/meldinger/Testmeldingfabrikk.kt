@@ -587,6 +587,19 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
+    fun lagGosysOppgaveEndret(
+        aktørId: String,
+        fødselsnummer: String,
+        id: UUID,
+    ): String =
+        nyHendelse(
+            id,
+            "gosys_oppgave_endret", mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+            )
+        )
+
     fun lagRisikovurderingløsning(
         aktørId: String,
         fødselsnummer: String,
