@@ -15,7 +15,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import java.util.UUID
-import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
@@ -86,9 +85,6 @@ fun Application.graphQLApi(
     )
 
     routing {
-        if (Toggle.GraphQLPlayground.enabled) {
-            routes(server)
-        }
         authenticate("oidc") {
             routes(server)
         }
