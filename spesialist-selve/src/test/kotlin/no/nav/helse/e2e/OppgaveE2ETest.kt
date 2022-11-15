@@ -33,7 +33,15 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     @Test
     fun `invaliderer oppgave når utbetalingen har blitt forkastet`() {
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = FORKASTET,
+            arbeidsgiverFagsystemId = FAGSYSTEM_ID
+        )
         assertOppgavestatuser(0, AvventerSaksbehandler, Invalidert)
     }
 
@@ -42,12 +50,14 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         sendSaksbehandlerløsningFraAPI(testRapid.inspektør.oppgaveId(), "ident", "ident@nav.no", UUID.randomUUID(), true)
         sendUtbetalingEndret(
-            "UTBETALING",
-            FORKASTET,
-            ORGANISASJONSNUMMER,
-            FAGSYSTEM_ID,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
             utbetalingId = UTBETALING_ID,
-            forrigeStatus = IKKE_UTBETALT
+            type = "UTBETALING",
+            status = FORKASTET,
+            forrigeStatus = IKKE_UTBETALT,
+            arbeidsgiverFagsystemId = FAGSYSTEM_ID
         )
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Invalidert)
     }
@@ -63,7 +73,15 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
             utbetalingId = UTBETALING_ID
         )
         sendSaksbehandlerløsningFraAPI(testRapid.inspektør.oppgaveId(godkjenningsbehov).toLong(), "ident", "epost", oid, true)
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = UTBETALT,
+            arbeidsgiverFagsystemId = FAGSYSTEM_ID
+        )
         val oppgave = oppgaveDao.finn(UTBETALING_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertOppgavedetaljer(
@@ -81,7 +99,15 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     @Test
     fun `oppretter ny oppgave når det finnes en invalidert oppgave for en vedtaksperiode`() {
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = FORKASTET,
+            arbeidsgiverFagsystemId = FAGSYSTEM_ID
+        )
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler, Invalidert)
         assertOppgavestatuser(1, AvventerSaksbehandler)
@@ -112,7 +138,15 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
             UUID.randomUUID(),
             true
         )
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = FORKASTET,
+            arbeidsgiverFagsystemId = FAGSYSTEM_ID
+        )
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, false, utbetalingId = UTBETALING_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Invalidert)
         assertOppgavestatuser(1, AvventerSaksbehandler)
@@ -121,7 +155,15 @@ internal class OppgaveE2ETest: AbstractE2ETest() {
     @Test
     fun `håndterer nytt godkjenningsbehov om vi har automatisk godkjent en periode men spleis har reberegnet i mellomtiden`() {
         vedtaksperiode(FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, true, utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("UTBETALING", FORKASTET, ORGANISASJONSNUMMER, FAGSYSTEM_ID, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGANISASJONSNUMMER,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = FORKASTET,
+            arbeidsgiverFagsystemId = FAGSYSTEM_ID
+        )
         val behov = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGANISASJONSNUMMER, VEDTAKSPERIODE_ID, UTBETALING_ID2)
         assertHendelse(behov)
     }

@@ -17,11 +17,14 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.SubsumsjonJson
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.*
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.overstyring.Dagtype.*
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -173,76 +176,79 @@ internal object Meldingssender {
         }
 
     fun sendUtbetalingEndret(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        utbetalingId: UUID,
         type: String,
-        status: Utbetalingsstatus,
-        orgnr: String,
-        arbeidsgiverFagsystemId: String,
-        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
-        forrigeStatus: Utbetalingsstatus = status,
-        fødselsnummer: String = FØDSELSNUMMER,
-        utbetalingId: UUID
+        status: Utbetalingsstatus = NY,
+        forrigeStatus: Utbetalingsstatus = IKKE_UTBETALT,
+        arbeidsgiverFagsystemId: String = "LWCBIQLHLJISGREBICOHAU",
+        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF"
     ) {
-        @Language("JSON")
-        val json = """
-{
-    "@event_name": "utbetaling_endret",
-    "@id": "${UUID.randomUUID()}",
-    "@opprettet": "${LocalDateTime.now()}",
-    "utbetalingId": "$utbetalingId",
-    "fødselsnummer": "$fødselsnummer",
-    "type": "$type",
-    "forrigeStatus": "$forrigeStatus",
-    "gjeldendeStatus": "$status",
-    "organisasjonsnummer": "$orgnr",
-    "arbeidsgiverOppdrag": {
-      "mottaker": "$orgnr",
-      "fagområde": "SPREF",
-      "endringskode": "NY",
-      "fagsystemId": "$arbeidsgiverFagsystemId",
-      "sisteArbeidsgiverdag": "${LocalDate.MIN}",
-      "linjer": [
-        {
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "totalbeløp": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": "asdfg",
-          "delytelseId": 2,
-          "refDelytelseId": 1,
-          "datoStatusFom": "${LocalDate.now()}",
-          "endringskode": "NY",
-          "klassekode": "SPREFAG-IOP",
-          "statuskode": "OPPH"
-        },
-        {
-          "fom": "${LocalDate.now()}",
-          "tom": "${LocalDate.now()}",
-          "dagsats": 2000,
-          "totalbeløp": 2000,
-          "lønn": 2000,
-          "grad": 100.00,
-          "refFagsystemId": null,
-          "delytelseId": 3,
-          "refDelytelseId": null,
-          "datoStatusFom": null,
-          "endringskode": "NY",
-          "klassekode": "SPREFAG-IOP",
-          "statuskode": null
-        }
-      ]
-    },
-    "personOppdrag": {
-      "mottaker": "$FØDSELSNUMMER",
-      "fagområde": "SP",
-      "endringskode": "NY",
-      "fagsystemId": "$personFagsystemId",
-      "linjer": []
-    }
-}"""
+        uuid.also { id ->
+            @Language("JSON")
+            val json = """{
+                "@event_name": "utbetaling_endret",
+                "@id": "$id",
+                "@opprettet": "${LocalDateTime.now()}",
+                "utbetalingId": "$utbetalingId",
+                "aktørId":"$aktørId",
+                "fødselsnummer": "$fødselsnummer",
+                "organisasjonsnummer": "$organisasjonsnummer",
+                "type": "$type",
+                "forrigeStatus": "$forrigeStatus",
+                "gjeldendeStatus": "$status",
+                "arbeidsgiverOppdrag": {
+                    "mottaker": "$organisasjonsnummer",
+                    "fagområde": "SPREF",
+                    "endringskode": "NY",
+                    "fagsystemId": "$arbeidsgiverFagsystemId",
+                    "sisteArbeidsgiverdag": "${LocalDate.MIN}",
+                    "linjer": [
+                        {
+                            "fom": "${LocalDate.now()}",
+                            "tom": "${LocalDate.now()}",
+                            "dagsats": 2000,
+                            "totalbeløp": 2000,
+                            "lønn": 2000,
+                            "grad": 100.00,
+                            "refFagsystemId": "asdfg",
+                            "delytelseId": 2,
+                            "refDelytelseId": 1,
+                            "datoStatusFom": "${LocalDate.now()}",
+                            "endringskode": "NY",
+                            "klassekode": "SPREFAG-IOP",
+                            "statuskode": "OPPH"
+                        },
+                        {
+                            "fom": "${LocalDate.now()}",
+                            "tom": "${LocalDate.now()}",
+                            "dagsats": 2000,
+                            "totalbeløp": 2000,
+                            "lønn": 2000,
+                            "grad": 100.00,
+                            "refFagsystemId": null,
+                            "delytelseId": 3,
+                            "refDelytelseId": null,
+                            "datoStatusFom": null,
+                            "endringskode": "NY",
+                            "klassekode": "SPREFAG-IOP",
+                            "statuskode": null
+                        }
+                    ]
+                },
+                "personOppdrag": {
+                    "mottaker": "$fødselsnummer",
+                    "fagområde": "SP",
+                    "endringskode": "NY",
+                    "fagsystemId": "$personFagsystemId",
+                    "linjer": []
+                }
+            }"""
 
-        testRapid.sendTestMessage(json)
+            testRapid.sendTestMessage(json)
+        }
     }
 
     fun sendPersonUtbetalingEndret(
@@ -722,22 +728,26 @@ internal object Meldingssender {
         }
     }
 
-    fun sendOverstyrteDager(
-        dager: List<OverstyringDagDto>,
-        orgnr: String = Testdata.ORGNR,
-        saksbehandlerEpost: String = Testdata.SAKSBEHANDLER_EPOST,
-        saksbehandlerOid: UUID = Testdata.SAKSBEHANDLER_OID,
-        saksbehandlerIdent: String = Testdata.SAKSBEHANDLER_IDENT
+    fun sendOverstyrTidslinje(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        dager: List<OverstyringDagDto> = listOf(OverstyringDagDto(1.januar(1970), Feriedag, Sykedag, null, 100)),
+        saksbehandlerident: String = Testdata.SAKSBEHANDLER_IDENT,
+        saksbehandlerepost: String = Testdata.SAKSBEHANDLER_EPOST,
+        saksbehandleroid: UUID = Testdata.SAKSBEHANDLER_OID
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyringTidslinje(
-                    id = id,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
                     dager = dager,
-                    organisasjonsnummer = orgnr,
-                    saksbehandlerEpost = saksbehandlerEpost,
-                    saksbehandlerOid = saksbehandlerOid,
-                    saksbehandlerident = saksbehandlerIdent,
+                    saksbehandleroid = saksbehandleroid,
+                    saksbehandlerepost = saksbehandlerepost,
+                    saksbehandlerident = saksbehandlerident,
+                    id = id,
                 )
             )
         }

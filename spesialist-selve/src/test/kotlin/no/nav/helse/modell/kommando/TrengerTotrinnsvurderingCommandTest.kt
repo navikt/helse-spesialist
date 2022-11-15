@@ -8,6 +8,7 @@ import java.util.UUID
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
@@ -26,13 +27,15 @@ internal class TrengerTotrinnsvurderingCommandTest {
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
+    private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private lateinit var context: CommandContext
 
     private val command = TrengerTotrinnsvurderingCommand(
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
-        overstyringDao = overstyringDao
+        overstyringDao = overstyringDao,
+        varselRepository = varselRepository
     )
 
     @BeforeEach

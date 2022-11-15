@@ -26,11 +26,13 @@ import no.nav.helse.Meldingssender.sendEnhetløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendGosysOppgaveEndret
 import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
+import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendSøknadSendt
+import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
@@ -73,6 +75,10 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -152,6 +158,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected val testRapid = TestRapid()
 
+    private lateinit var utbetalingId: UUID
+
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
     protected val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
 
@@ -209,6 +217,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         reservasjonClient = mockk(relaxed = true),
     )
 
+    private fun nyUtbetalingId(utbetalingId: UUID) {
+        this.utbetalingId = utbetalingId
+    }
+
     @BeforeEach
     internal fun resetTestSetup() {
         testRapid.reset()
@@ -235,15 +247,77 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 
+    private fun håndterVedtaksperiodeEndret(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        forårsaketAvId: UUID = UUID.randomUUID()
+    ) {
+        sendVedtaksperiodeEndret(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            forårsaketAvId = forårsaketAvId
+        )
+    }
+
     protected fun håndterGodkjenningsbehov(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UUID.randomUUID(),
+        harOppdatertMetainfo: Boolean = false
+    ) {
+        nyUtbetalingId(utbetalingId)
+        sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId)
+        håndterUtbetalingOpprettet()
+        if (!harOppdatertMetainfo) assertEtterspurteBehov("HentPersoninfoV2")
+        else assertEtterspurteBehov("EgenAnsatt")
+    }
+
+    private fun håndterUtbetalingOpprettet(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR
+    ) {
+        sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, "UTBETALING")
+    }
+
+    protected fun håndterUtbetalingForkastet(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+    ) {
+        sendUtbetalingEndret(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            type = "UTBETALING",
+            forrigeStatus = NY,
+            status = FORKASTET
+        )
+    }
+
+    protected fun håndterUtbetalingUtbetalt(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
         utbetalingId: UUID = UTBETALING_ID
     ) {
-        sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId)
-        assertEtterspurteBehov("HentPersoninfoV2")
+        sendUtbetalingEndret(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            type = "UTBETALING",
+            forrigeStatus = SENDT,
+            status = UTBETALT
+        )
     }
 
     protected fun håndterPersoninfoløsning(
@@ -320,13 +394,28 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
     }
-    protected fun håndterRiskovurderingløsning(
+    protected fun håndterRisikovurderingløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         kanGodkjennesAutomatisk: Boolean = true,
     ) {
         sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId, kanGodkjennesAutomatisk)
+    }
+    protected fun håndterOverstyrTidslinje(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR
+    ) {
+        testRapid.reset()
+        sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
+        val overstyrTidslinjehendelser = testRapid.inspektør.hendelser("overstyr_tidslinje")
+        assertEquals(1, overstyrTidslinjehendelser.size)
+        val overstyrTidslinje = overstyrTidslinjehendelser.single()
+        val hendelseId = UUID.fromString(overstyrTidslinje["@id"].asText())
+        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
+        håndterVedtaksperiodeEndret(forårsaketAvId = hendelseId)
+        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
     }
 
     protected fun håndterGosysOppgaveEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
@@ -544,7 +633,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun assertEtterspurteBehov(vararg behov: String) {
         val etterspurteBehov = testRapid.inspektør.behov()
-        assertEquals(etterspurteBehov, behov.toList()) {
+        assertEquals(behov.toList(), etterspurteBehov) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
             "Følgende behov ble ikke etterspurt: $ikkeEtterspurt\nEtterspurte behov: $etterspurteBehov\n"
         }

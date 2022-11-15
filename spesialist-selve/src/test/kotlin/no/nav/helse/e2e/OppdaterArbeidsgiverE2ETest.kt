@@ -10,6 +10,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.oppgaveId
+import no.nav.helse.Testdata
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.UTBETALING_ID
@@ -27,7 +28,15 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         settOppBruker()
 
         sendSaksbehandlerløsningFraAPI(testRapid.inspektør.oppgaveId(), "ident", "epost", randomUUID(), false)
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = Testdata.AKTØR,
+            fødselsnummer = Testdata.FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
+        )
 
         // Tiden går, arbeidsgivernavnet blir utdatert
         markerArbeidsgivernavnSomUkjent()

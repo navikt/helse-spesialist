@@ -5,6 +5,9 @@ import java.util.UUID
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
@@ -16,6 +19,7 @@ internal class TrengerTotrinnsvurderingCommand(
     private val warningDao: WarningDao,
     private val oppgaveMediator: OppgaveMediator,
     private val overstyringDao: OverstyringDao,
+    private val varselRepository: VarselRepository
 ) : Command {
 
     private companion object {
@@ -35,6 +39,15 @@ internal class TrengerTotrinnsvurderingCommand(
         return "$BESLUTTEROPPGAVE_PREFIX ${formaterTekst(årsaker)}"
     }
 
+    private fun varselkoder(overstyringer: List<OverstyringType>, medlemskap: Boolean): List<Varselkode> {
+        val varselkoder = mutableListOf<Varselkode>()
+//        if(medlemskap) varselkoder.add(SB_BO_1)
+        if(overstyringer.contains(OverstyringType.Dager)) varselkoder.add(SB_BO_2)
+//        if(overstyringer.contains(OverstyringType.Inntekt)) varselkoder.add(SB_BO_3)
+//        if(overstyringer.contains(OverstyringType.Arbeidsforhold)) varselkoder.add(SB_BO_4)
+        return varselkoder
+    }
+
     override fun execute(context: CommandContext): Boolean {
         val harMedlemskapsvarsel = harMedlemskapsVarsel()
         val overstyringer = finnOverstyringerMedType()
@@ -43,6 +56,9 @@ internal class TrengerTotrinnsvurderingCommand(
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
             oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
 
+            varselkoder(overstyringer, harMedlemskapsvarsel).forEach {
+                it.nyttVarsel(vedtaksperiodeId, varselRepository)
+            }
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(
                 melding = getWarningtekst(overstyringer, harMedlemskapsvarsel),
                 kilde = WarningKilde.Spesialist,

@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendPersonUtbetalingEndret
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
+import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
@@ -32,9 +33,33 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     @Test
     fun `utbetaling endret`() {
         settOppBruker()
-        sendUtbetalingEndret("UTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("ETTERUTBETALING", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("ANNULLERING", ANNULLERT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = GODKJENT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
+        )
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "ETTERUTBETALING",
+            status = OVERFØRT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
+        )
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "ANNULLERING",
+            status = ANNULLERT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
+        )
         assertEquals(3, utbetalinger().size)
     }
 
@@ -45,11 +70,13 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         assertDoesNotThrow {
             sendUtbetalingEndret(
-                "UTBETALING",
-                GODKJENT,
-                ET_ANNET_ORGNR,
-                arbeidsgiverFagsystemId,
-                utbetalingId = UTBETALING_ID
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ET_ANNET_ORGNR,
+                utbetalingId = UTBETALING_ID,
+                type = "UTBETALING",
+                status = GODKJENT,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
         assertEquals(0, utbetalinger().size)
@@ -61,11 +88,13 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         settOppBruker()
         assertDoesNotThrow {
             sendUtbetalingEndret(
-                "UTBETALING",
-                GODKJENT,
-                ORGNR,
-                arbeidsgiverFagsystemId,
-                utbetalingId = UTBETALING_ID
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                utbetalingId = UTBETALING_ID,
+                type = "UTBETALING",
+                status = GODKJENT,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
         assertEquals(1, utbetalinger().size)
@@ -77,16 +106,40 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         settOppBruker()
         assertDoesNotThrow {
             sendUtbetalingEndret(
-                "FERIEPENGER", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                utbetalingId = UUID.randomUUID(),
+                type = "FERIEPENGER",
+                status = GODKJENT,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
             sendUtbetalingEndret(
-                "ETTERUTBETALING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                utbetalingId = UUID.randomUUID(),
+                type = "ETTERUTBETALING",
+                status = GODKJENT,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
             sendUtbetalingEndret(
-                "ANNULLERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                utbetalingId = UUID.randomUUID(),
+                type = "ANNULLERING",
+                status = GODKJENT,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
             sendUtbetalingEndret(
-                "REVURDERING", GODKJENT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UUID.randomUUID()
+                aktørId = AKTØR,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                utbetalingId = UUID.randomUUID(),
+                type = "REVURDERING",
+                status = GODKJENT,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
             )
         }
         assertEquals(4, utbetalinger().size)
@@ -97,21 +150,25 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `utbetaling forkastet`() {
         vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
         sendUtbetalingEndret(
-            "UTBETALING",
-            FORKASTET,
-            ORGNR,
-            arbeidsgiverFagsystemId,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = FORKASTET,
             forrigeStatus = IKKE_GODKJENT,
-            utbetalingId = UTBETALING_ID
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         assertEquals(1, utbetalinger().size)
         sendUtbetalingEndret(
-            "UTBETALING",
-            FORKASTET,
-            ORGNR,
-            arbeidsgiverFagsystemId,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = FORKASTET,
             forrigeStatus = GODKJENT,
-            utbetalingId = UTBETALING_ID
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         assertEquals(2, utbetalinger().size)
     }
@@ -119,7 +176,15 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     @Test
     fun `feriepengeutbetalinger har riktig type på utbetaling`() {
         vedtaksperiode(utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "FERIEPENGER",
+            status = OVERFØRT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
+        )
 
         utbetalinger().first().let {
             assertNotNull(it)
@@ -132,8 +197,24 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
         val nyUtbetalingId = UUID.randomUUID()
         vedtaksperiode(utbetalingId = UTBETALING_ID)
         vedtaksperiode(utbetalingId = nyUtbetalingId)
-        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = UTBETALING_ID)
-        sendUtbetalingEndret("FERIEPENGER", OVERFØRT, ORGNR, arbeidsgiverFagsystemId, utbetalingId = nyUtbetalingId)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "FERIEPENGER",
+            status = OVERFØRT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
+        )
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = nyUtbetalingId,
+            type = "FERIEPENGER",
+            status = OVERFØRT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
+        )
 
         assertEquals(2, utbetalinger().size)
         assertTrue { utbetalinger().find { it.id == nyUtbetalingId } != null }

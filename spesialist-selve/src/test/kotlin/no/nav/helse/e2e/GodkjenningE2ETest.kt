@@ -164,7 +164,15 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         val løsningId =
             sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
+        )
         assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
@@ -344,7 +352,15 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 begrunnelser,
                 kommentar
             )
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
+        )
         assertSnapshot(SNAPSHOT_MED_WARNINGS, VEDTAKSPERIODE_ID)
         assertTilstand(
             godkjenningsmeldingId,
@@ -556,7 +572,15 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             "kommentar"
         )
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
-        sendUtbetalingEndret("UTBETALING", UTBETALT, ORGNR, "EN_FAGSYSTEMID", utbetalingId = UTBETALING_ID)
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
+        )
         sendVedtaksperiodeEndret(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID)
         assertOppgavestatuser(0, AvventerSaksbehandler, AvventerSystem, Ferdigstilt)
         assertTilstand(

@@ -9,7 +9,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendOverstyrteDager
+import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRevurderingAvvist
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
@@ -62,11 +62,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
-            "UTBETALING",
-            Utbetalingsstatus.UTBETALT,
-            ORGNR,
-            "EN_FAGSYSTEMID",
-            utbetalingId = UTBETALING_ID
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = Utbetalingsstatus.UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
         )
         assertOppgavestatuser(
             0,
@@ -86,11 +88,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         håndterGodkjenningsbehov(godkjenningsmeldingId2)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
-            "REVURDERING",
-            Utbetalingsstatus.UTBETALT,
-            ORGNR,
-            "EN_FAGSYSTEMID",
-            utbetalingId = UTBETALING_ID2
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID2,
+            type = "REVURDERING",
+            status = Utbetalingsstatus.UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
         )
         assertOppgavestatuser(
             1,
@@ -107,19 +111,23 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId1 = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
         sendUtbetalingEndret(
-            "UTBETALING",
-            Utbetalingsstatus.UTBETALT,
-            ORGNR,
-            "EN_FAGSYSTEMID",
-            utbetalingId = UTBETALING_ID
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = Utbetalingsstatus.UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
         )
 
         sendUtbetalingEndret(
-            "REVURDERING",
-            Utbetalingsstatus.IKKE_GODKJENT,
-            ORGNR,
-            "EN_FAGSYSTEMID",
-            utbetalingId = UTBETALING_ID2
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID2,
+            type = "REVURDERING",
+            status = Utbetalingsstatus.IKKE_GODKJENT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
         )
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotMedRevurderingUtbetaling(utbetalingId = UTBETALING_ID2)
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
@@ -131,11 +139,13 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         håndterGodkjenningsbehov(godkjenningsmeldingId2)
         sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
-            "REVURDERING",
-            Utbetalingsstatus.UTBETALT,
-            ORGNR,
-            "EN_FAGSYSTEMID",
-            utbetalingId = UTBETALING_ID2
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID2,
+            type = "REVURDERING",
+            status = Utbetalingsstatus.UTBETALT,
+            arbeidsgiverFagsystemId = "EN_FAGSYSTEMID"
         )
         assertOppgavestatuser(
             0,
@@ -153,7 +163,12 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
         håndterGodkjenningsbehov(godkjenningsmeldingId1)
 
-        sendOverstyrteDager(listOf(OverstyringDagDto(LocalDate.now(), Dagtype.Feriedag, Dagtype.Sykedag, null, 100)))
+        sendOverstyrTidslinje(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            dager = listOf(OverstyringDagDto(LocalDate.now(), Dagtype.Feriedag, Dagtype.Sykedag, null, 100))
+        )
 
         // Behind the scenes: Saksbehandler har også hooket opp en opptegnelse
         speilOppretterAbonnement()

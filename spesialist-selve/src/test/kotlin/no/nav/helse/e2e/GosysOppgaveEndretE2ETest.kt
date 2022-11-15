@@ -38,7 +38,7 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning(antall = 1)
-        håndterRiskovurderingløsning()
+        håndterRisikovurderingløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 0)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, INAKTIV)
@@ -50,7 +50,7 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning(antall = 0)
-        håndterRiskovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
@@ -62,7 +62,7 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     fun `legger til varsel om manglende gosys-info`() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
-        håndterRiskovurderingløsning()
+        håndterRisikovurderingløsning()
         assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
@@ -72,7 +72,7 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     fun `legger til varsel dersom oppslag feiler når vi har fått beskjed om at gosys har endret seg`() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning(oppslagFeilet = false)
-        håndterRiskovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
         assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)

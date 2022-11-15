@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
-import no.nav.helse.Meldingssender.sendOverstyrteDager
+import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata.AKTØR
@@ -114,8 +114,11 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av tidslinje`() {
         settOppBruker()
-        sendOverstyrteDager(
-            listOf(
+        sendOverstyrTidslinje(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            organisasjonsnummer = ORGNR,
+            dager = listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,

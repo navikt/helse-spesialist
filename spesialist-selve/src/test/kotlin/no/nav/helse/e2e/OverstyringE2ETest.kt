@@ -10,7 +10,7 @@ import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
-import no.nav.helse.Meldingssender.sendOverstyrteDager
+import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
@@ -51,8 +51,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         val originaltGodkjenningsbehov = settOppBruker()
 
-        sendOverstyrteDager(
-            listOf(
+        sendOverstyrTidslinje(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            dager = listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,
@@ -199,8 +202,11 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = hendelseId,
             erDigital = true
         )
-        sendOverstyrteDager(
-            listOf(
+        sendOverstyrTidslinje(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            dager = listOf(
                 OverstyringDagDto(
                     dato = LocalDate.of(2018, 1, 20),
                     type = Dagtype.Feriedag,

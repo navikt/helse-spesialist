@@ -19,7 +19,10 @@ enum class Varselkode(
     private val avviklet: Boolean = false,
 ) {
 
-    SB_BO_1(""),
+    SB_BO_1("Beslutteroppgave: Lovvalg og medlemskap"),
+    SB_BO_2("Beslutteroppgave: Overstyring av utbetalingsdager"),
+    SB_BO_3("Beslutteroppgave: Overstyring av inntekt"),
+    SB_BO_4("Beslutteroppgave: Overstyring av annet arbeidsforhold"),
     SB_EX_1("Det finnes åpne oppgaver på sykepenger i Gosys"),
     SB_EX_2(""),
     SB_EX_3(""),
@@ -49,8 +52,4 @@ enum class Varselkode(
     }
 
     override fun toString() = "${this.name}: $varseltekst"
-
-    internal companion object {
-        internal val aktiveVarselkoder = values().filterNot { it.avviklet }
-    }
 }
