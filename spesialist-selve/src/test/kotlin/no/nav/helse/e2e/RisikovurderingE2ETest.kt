@@ -10,7 +10,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
@@ -79,7 +79,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,

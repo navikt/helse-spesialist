@@ -13,7 +13,7 @@ import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendKomposittbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
@@ -82,7 +82,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `ignorerer behov uten tilhørende command`() {
         val hendelseId = UUID.randomUUID()
         val contextId = UUID.randomUUID()
-        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID, contextId)
+        sendPersoninfoløsningComposite(hendelseId, ORGNR, VEDTAKSPERIODE_ID, contextId)
         assertIkkeHendelse(hendelseId)
     }
 
@@ -90,7 +90,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `oppretter vedtak ved godkjenningsbehov`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -135,7 +135,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -193,7 +193,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        val personinfomeldingId = sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        val personinfomeldingId = sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         val arbeidsgiverløsningId = sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -255,7 +255,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -305,7 +305,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -377,7 +377,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
@@ -441,7 +441,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
@@ -514,7 +514,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
@@ -603,7 +603,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = hendelseId,
             orgnummer = ORGNR,
@@ -619,7 +619,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         sendVedtaksperiodeForkastet(ORGNR, VEDTAKSPERIODE_ID)
 
         assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
-        sendPersoninfoløsning(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(hendelseId, ORGNR, VEDTAKSPERIODE_ID)
         assertTilstand(hendelseId, "NY", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "AVBRUTT")
     }
 
@@ -631,7 +631,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -684,7 +684,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID, enhet = ENHET_UTLAND)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID, enhet = ENHET_UTLAND)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -737,7 +737,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -841,7 +841,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -890,7 +890,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID2,
             utbetalingId = UTBETALING_ID2
         )
-        sendPersoninfoløsning(godkjenningsmeldingId2, ORGNR, VEDTAKSPERIODE_ID2)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId2, ORGNR, VEDTAKSPERIODE_ID2)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId2,
             orgnummer = ORGNR,
@@ -927,7 +927,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
 
         val orgnummere =
             testRapid.inspektør.meldinger().last()["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map { it.asText() }
@@ -946,7 +946,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
 
         val sisteMelding = testRapid.inspektør.meldinger().last()
         assertTrue("Arbeidsgiverinformasjon" in sisteMelding.path("@behov").map { it.asText() })
@@ -969,7 +969,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendKomposittbehov(
             godkjenningsmeldingId,
             listOf("HentPersoninfoV2", "Arbeidsgiverinformasjon"),
@@ -998,7 +998,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID, adressebeskyttelse = ADRESSEBESKYTTELSE.name
@@ -1069,7 +1069,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,
@@ -1135,7 +1135,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsmeldingId,
             orgnummer = ORGNR,

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
+import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.VARSEL_KODE_1
@@ -23,6 +24,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal object Meldingssender {
     lateinit var testRapid: TestRapid
@@ -408,7 +410,7 @@ internal object Meldingssender {
             )
         }
 
-    fun sendPersoninfoløsning(
+    fun sendPersoninfoløsningComposite(
         hendelseId: UUID,
         orgnr: String,
         vedtaksperiodeId: UUID,
@@ -418,7 +420,7 @@ internal object Meldingssender {
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
-                meldingsfabrikk.lagPersoninfoløsning(
+                meldingsfabrikk.lagPersoninfoløsningComposite(
                     id,
                     hendelseId,
                     contextId,
@@ -426,6 +428,31 @@ internal object Meldingssender {
                     orgnr,
                     enhet,
                     adressebeskyttelse
+                )
+            )
+        }
+
+    fun sendPersoninfoløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID
+    ): UUID =
+        uuid.also { id ->
+            val personinfobehov = testRapid.inspektør.siste("behov")
+            assertEquals("HentPersoninfoV2", personinfobehov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(personinfobehov["contextId"].asText())
+            val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagPersoninfoløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
                 )
             )
         }

@@ -19,6 +19,7 @@ import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
@@ -233,6 +234,20 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEtterspurteBehov("HentPersoninfoV2")
     }
 
+    protected fun håndterPersoninfoløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+    ) {
+        sendPersoninfoløsning(
+            aktørId,
+            fødselsnummer,
+            organisasjonsnummer,
+            vedtaksperiodeId
+        )
+    }
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
@@ -243,7 +258,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             periodeTom = 31.januar,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
-        sendPersoninfoløsning(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
         sendArbeidsgiverinformasjonløsning(
             hendelseId = godkjenningsbehovId,
             orgnummer = ORGNR,
@@ -545,7 +560,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             periodetype = Periodetype.FORLENGELSE
         )
         val contextId = contextId(godkjenningsmeldingId)
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             hendelseId = godkjenningsmeldingId,

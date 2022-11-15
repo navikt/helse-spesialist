@@ -215,7 +215,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             ) + detaljer
         )
 
-    fun lagPersoninfoløsning(
+    fun lagPersoninfoløsningComposite(
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
@@ -248,6 +248,29 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 ),
                 "HentEnhet" to enhet,
                 "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse)
+            )
+        )
+    )
+    fun lagPersoninfoløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String = "orgnr",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID(),
+    ) = nyHendelse(
+        id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("HentPersoninfoV2"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to contextId,
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer)
             )
         )
     )

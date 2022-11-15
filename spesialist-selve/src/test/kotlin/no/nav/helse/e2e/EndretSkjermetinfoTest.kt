@@ -5,7 +5,7 @@ import io.mockk.every
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -35,7 +35,7 @@ internal class EndretSkjermetinfoTest : AbstractE2ETest() {
     @Test
     fun `Etterspør skjermetinfo for kjente personer hvor skjermetinfo mangler i basen`() {
         val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UUID.randomUUID())
-        sendPersoninfoløsning(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
+        sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
 
         sendEndretSkjermetinfo(false)
         assertFalse(egenAnsattDao.erEgenAnsatt(FØDSELSNUMMER)!!)

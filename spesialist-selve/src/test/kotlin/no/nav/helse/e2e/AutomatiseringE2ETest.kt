@@ -8,7 +8,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
@@ -47,7 +47,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
@@ -115,7 +115,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.INFOTRYGDFORLENGELSE
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
@@ -175,7 +175,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
@@ -250,7 +250,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
@@ -338,7 +338,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID,
             periodetype = Periodetype.FORLENGELSE
         )
-        sendPersoninfoløsning(
+        sendPersoninfoløsningComposite(
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId

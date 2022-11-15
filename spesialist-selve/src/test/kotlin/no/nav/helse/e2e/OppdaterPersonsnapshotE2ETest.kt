@@ -13,7 +13,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendPersoninfoløsning
+import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
@@ -128,7 +128,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
         )
 
         if (periodetype == Periodetype.FØRSTEGANGSBEHANDLING) {
-            sendPersoninfoløsning(
+            sendPersoninfoløsningComposite(
                 orgnr = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId,
                 hendelseId = godkjenningsmeldingId
