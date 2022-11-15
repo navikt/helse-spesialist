@@ -11,7 +11,7 @@ import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
-import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
@@ -145,7 +145,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
             )
         }
 
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )

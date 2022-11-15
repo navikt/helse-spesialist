@@ -20,6 +20,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendEnhetløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
@@ -285,6 +286,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
         verify { snapshotClient.hentSnapshot(fødselsnummer) }
     }
+    protected fun håndterEgenansattløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+    ) {
+        sendEgenAnsattløsning(aktørId, fødselsnummer, false)
+    }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
@@ -319,7 +326,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun klargjørForGodkjenning(oppgaveId: UUID) {
-        sendEgenAnsattløsning(oppgaveId, false)
+        sendEgenAnsattløsningOld(oppgaveId, false)
         sendVergemålløsning(
             godkjenningsmeldingId = oppgaveId
         )
@@ -616,7 +623,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             contextId = contextId
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false,
             contextId = contextId

@@ -514,14 +514,16 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagEgenAnsattløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        erEgenAnsatt: Boolean = false,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-        erEgenAnsatt: Boolean = false,
-        fødselsnummer: String = this.fødselsnummer,
     ): String = nyHendelse(
         id,
         "behov", mutableMapOf(
+            "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "@final" to true,
             "@behov" to listOf("EgenAnsatt"),

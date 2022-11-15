@@ -579,6 +579,33 @@ internal object Meldingssender {
             )
         }
 
+    fun sendEgenAnsattløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        erEgenAnsatt: Boolean,
+    ): UUID {
+
+        return uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("EgenAnsatt", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagEgenAnsattløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    erEgenAnsatt = erEgenAnsatt,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId,
+                )
+            )
+        }
+    }
+
+
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
         orgnr: String = Testdata.ORGNR,
@@ -679,7 +706,7 @@ internal object Meldingssender {
         )
     }
 
-    fun sendEgenAnsattløsning(
+    fun sendEgenAnsattløsningOld(
         godkjenningsmeldingId: UUID,
         erEgenAnsatt: Boolean,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -688,11 +715,12 @@ internal object Meldingssender {
         return uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagEgenAnsattløsning(
+                    AKTØR,
+                    fødselsnummer,
+                    erEgenAnsatt,
                     id,
                     godkjenningsmeldingId,
                     contextId,
-                    erEgenAnsatt,
-                    fødselsnummer,
                 )
             )
         }

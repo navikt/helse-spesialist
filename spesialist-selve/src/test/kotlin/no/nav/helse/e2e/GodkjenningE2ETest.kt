@@ -10,7 +10,7 @@ import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
-import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendKomposittbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -101,7 +101,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsning(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -146,7 +146,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -204,7 +204,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        val egenansattMeldingId = sendEgenAnsattløsning(
+        val egenansattMeldingId = sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -266,7 +266,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -316,7 +316,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -392,7 +392,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -456,7 +456,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -529,7 +529,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -644,7 +644,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(godkjenningsmeldingId, true)
+        sendEgenAnsattløsningOld(godkjenningsmeldingId, true)
         sendVergemålløsning(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -697,7 +697,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsning(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -748,7 +748,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(godkjenningsmeldingId, false)
+        sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsning(godkjenningsmeldingId)
         sendDigitalKontaktinformasjonløsning(
             godkjenningsmeldingId = godkjenningsmeldingId,
@@ -852,7 +852,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )
@@ -896,7 +896,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID2
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId2,
             erEgenAnsatt = false
         )
@@ -1080,7 +1080,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(godkjenningsmeldingId, true)
+        sendEgenAnsattløsningOld(godkjenningsmeldingId, true)
         sendVergemålløsning(
             godkjenningsmeldingId, vergemål = VergemålJson(
                 vergemål = listOf(
@@ -1146,7 +1146,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(
+        sendEgenAnsattløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erEgenAnsatt = false
         )

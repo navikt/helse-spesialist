@@ -6,7 +6,7 @@ import io.mockk.mockk
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Testdata.AKTØR
@@ -40,7 +40,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             assertNull(response.data)
         }
 
-        sendEgenAnsattløsning(godkjenningsmeldingId = godkjenningsmeldingId, erEgenAnsatt = true)
+        sendEgenAnsattløsningOld(godkjenningsmeldingId = godkjenningsmeldingId, erEgenAnsatt = true)
         fetchPerson().let { response ->
             assertTrue(response.errors.any { it.message.contains("Har ikke tilgang til person med fødselsnummer") })
             assertNull(response.data)

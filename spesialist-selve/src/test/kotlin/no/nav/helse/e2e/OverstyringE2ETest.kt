@@ -6,7 +6,7 @@ import java.time.LocalDate
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
-import no.nav.helse.Meldingssender.sendEgenAnsattløsning
+import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
@@ -191,7 +191,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendEgenAnsattløsning(hendelseId, false)
+        sendEgenAnsattløsningOld(hendelseId, false)
         sendVergemålløsning(
             godkjenningsmeldingId = hendelseId
         )
@@ -237,7 +237,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             periodeFom = LocalDate.of(2018, 1, 1),
             periodeTom = LocalDate.of(2018, 1, 31)
         )
-        sendEgenAnsattløsning(hendelseId2, false)
+        sendEgenAnsattløsningOld(hendelseId2, false)
         sendVergemålløsning(
             godkjenningsmeldingId = hendelseId2
         )
