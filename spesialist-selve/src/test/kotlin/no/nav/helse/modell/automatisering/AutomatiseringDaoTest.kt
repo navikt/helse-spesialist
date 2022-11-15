@@ -1,7 +1,6 @@
 package no.nav.helse.modell.automatisering
 
 import DatabaseIntegrationTest
-import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -134,8 +133,8 @@ internal class AutomatiseringDaoTest : DatabaseIntegrationTest() {
         val automatiseringFørInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
         val problemerFørInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRef, HENDELSE_ID)
 
-        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(5))
-        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID, LocalDateTime.now().minusSeconds(5))
+        automatiseringDao.settAutomatiseringInaktiv(VEDTAKSPERIODE, HENDELSE_ID)
+        automatiseringDao.settAutomatiseringProblemInaktiv(VEDTAKSPERIODE, HENDELSE_ID)
 
         val automatiseringEtterInaktivering = automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID)
         val problemerEtterInaktivering = automatiseringDao.finnAktiveProblemer(vedtaksperiodeRef, HENDELSE_ID)

@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Row
@@ -20,13 +19,12 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
 
     internal fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        inaktiv_fra: LocalDateTime = LocalDateTime.now()
+        hendelseId: UUID
     ) = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query =
             """ UPDATE automatisering
-                SET inaktiv_fra = :inaktiv_fra
+                SET inaktiv_fra = now()
                 WHERE vedtaksperiode_ref = (SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiode_id LIMIT 1)
                 AND hendelse_ref = :hendelse_ref
             """
@@ -34,7 +32,6 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
             queryOf(
                 query,
                 mapOf(
-                    "inaktiv_fra" to inaktiv_fra,
                     "vedtaksperiode_id" to vedtaksperiodeId,
                     "hendelse_ref" to hendelseId
                 )
@@ -44,13 +41,12 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
 
     internal fun settAutomatiseringProblemInaktiv(
         vedtaksperiodeId: UUID,
-        hendelseId: UUID,
-        inaktiv_fra: LocalDateTime = LocalDateTime.now()
+        hendelseId: UUID
     ) = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
                 """ UPDATE automatisering_problem
-                    SET inaktiv_fra = :inaktiv_fra
+                    SET inaktiv_fra = now()
                     WHERE vedtaksperiode_ref = (SELECT id FROM vedtak WHERE vedtak.vedtaksperiode_id = :vedtaksperiode_id LIMIT 1)
                     AND hendelse_ref = :hendelse_ref
                 """
@@ -58,7 +54,6 @@ internal class AutomatiseringDao(val dataSource: DataSource) {
                 queryOf(
                     query,
                     mapOf(
-                        "inaktiv_fra" to inaktiv_fra,
                         "vedtaksperiode_id" to vedtaksperiodeId,
                         "hendelse_ref" to hendelseId
                     )
