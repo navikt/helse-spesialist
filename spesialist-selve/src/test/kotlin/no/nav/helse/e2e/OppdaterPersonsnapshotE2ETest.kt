@@ -16,7 +16,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.TestRapidHelpers.hendelseId
 import no.nav.helse.Testdata.AKTØR
@@ -154,7 +154,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(

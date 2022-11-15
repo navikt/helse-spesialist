@@ -14,7 +14,7 @@ import no.nav.helse.Meldingssender.sendOverstyrteDager
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -245,7 +245,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = hendelseId2,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = hendelseId2
         )
         sendRisikovurderingløsning(

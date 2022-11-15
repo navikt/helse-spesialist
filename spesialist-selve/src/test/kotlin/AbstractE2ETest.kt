@@ -33,6 +33,7 @@ import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.løsning
@@ -308,6 +309,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendDigitalKontaktinformasjonløsning(aktørId, fødselsnummer)
     }
 
+    protected fun håndterÅpneOppgaverløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        antall: Int = 0,
+        oppslagFeilet: Boolean = false,
+    ) {
+        sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
+    }
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
@@ -349,7 +359,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsmeldingId = oppgaveId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = oppgaveId
         )
         sendRisikovurderingløsning(
@@ -651,7 +661,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             erDigital = true,
             contextId = contextId
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             contextId = contextId
         )

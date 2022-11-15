@@ -655,6 +655,32 @@ internal object Meldingssender {
         }
     }
 
+    fun sendÅpneGosysOppgaverløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        antall: Int,
+        oppslagFeilet: Boolean,
+    ): UUID {
+        return uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("ÅpneOppgaver", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagÅpneGosysOppgaverløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    antall = antall,
+                    oppslagFeilet = oppslagFeilet,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+    }
 
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
@@ -706,7 +732,7 @@ internal object Meldingssender {
         }
     }
 
-    fun sendÅpneGosysOppgaverløsning(
+    fun sendÅpneGosysOppgaverløsningOld(
         godkjenningsmeldingId: UUID,
         antall: Int = 0,
         oppslagFeilet: Boolean = false,
@@ -715,11 +741,13 @@ internal object Meldingssender {
         return uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagÅpneGosysOppgaverløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    antall,
-                    oppslagFeilet
+                    aktørId = AKTØR,
+                    fødselsnummer = FØDSELSNUMMER,
+                    antall = antall,
+                    oppslagFeilet = oppslagFeilet,
+                    id = id,
+                    hendelseId = godkjenningsmeldingId,
+                    contextId = contextId
                 )
             )
         }

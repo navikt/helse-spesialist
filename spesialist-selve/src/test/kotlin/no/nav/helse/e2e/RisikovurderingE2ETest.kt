@@ -13,7 +13,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
@@ -102,7 +102,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(

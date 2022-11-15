@@ -12,7 +12,7 @@ import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -75,7 +75,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
@@ -143,7 +143,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
@@ -203,7 +203,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
@@ -278,7 +278,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
         sendRisikovurderingløsning(
@@ -366,7 +366,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             antall = 1,
             oppslagFeilet = false

@@ -14,7 +14,7 @@ import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
+import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -95,7 +95,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             erDigital = true
         )
 
-        sendÅpneGosysOppgaverløsning(
+        sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1, 1 // Dette trigger manuell saksbehandling
         )
 

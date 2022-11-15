@@ -561,15 +561,18 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagÅpneGosysOppgaverløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        antall: Int = 0,
+        oppslagFeilet: Boolean = false,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-        antall: Int = 0,
-        oppslagFeilet: Boolean = false
+        contextId: UUID = UUID.randomUUID()
     ): String =
         nyHendelse(
             id,
             "behov", mutableMapOf(
+                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "@final" to true,
                 "@behov" to listOf("ÅpneOppgaver"),
