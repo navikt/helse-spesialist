@@ -9,6 +9,8 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import java.util.UUID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext
 
@@ -38,14 +40,19 @@ class ContextFactory(
 
 }
 
+val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+
 private fun ApplicationRequest.getGrupper(): List<UUID> {
     val accessToken = call.principal<JWTPrincipal>()
-    return accessToken?.payload?.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString)?.also {
-        if (accessToken.payload.getClaim("NAVident").asString() == "E156407") {
-            val name = accessToken.payload.getClaim("name").asString()
-            println("$name er med i følgende grupper: $it")
-        }
-    } ?: emptyList()
+    if (accessToken == null) {
+        sikkerlogg.warn("Ingen access_token for graphql-kall")
+        return emptyList()
+    }
+    val grupper = accessToken.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
+    val navIdent = accessToken.payload.getClaim("NAVident").asString()
+    sikkerlogg.info("$navIdent er med i følgende grupper: $grupper")
+
+    return grupper
 }
 
 private fun ApplicationRequest.getSaksbehandlerName(): String {
