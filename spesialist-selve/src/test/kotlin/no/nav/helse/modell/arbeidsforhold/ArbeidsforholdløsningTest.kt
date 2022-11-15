@@ -2,12 +2,13 @@ package no.nav.helse.modell.arbeidsforhold
 
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class ArbeidsforholdløsningTest {
     private companion object {
@@ -38,6 +39,9 @@ internal class ArbeidsforholdløsningTest {
     fun `mottar arbeidsgiverløsning`() {
         rapid.sendTestMessage(
             meldingsfabrikk.lagArbeidsforholdløsning(
+                aktørId = AKTØRID,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
                 løsning = listOf(
                     Arbeidsforholdløsning.Løsning(
                         stillingstittel = STILLINGSTITTEL,
@@ -45,7 +49,8 @@ internal class ArbeidsforholdløsningTest {
                         startdato = STARTDATO,
                         sluttdato = SLUTTDATO
                     )
-                )
+                ),
+                vedtaksperiodeId = VEDTAKSPERIODE_ID
             )
         )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }
@@ -53,7 +58,14 @@ internal class ArbeidsforholdløsningTest {
 
     @Test
     fun `mottar tom arbeidsgiverløsning`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagArbeidsforholdløsning(løsning = listOf()))
+        rapid.sendTestMessage(
+            meldingsfabrikk.lagArbeidsforholdløsning(
+                aktørId = AKTØRID,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                løsning = listOf(),
+                vedtaksperiodeId = VEDTAKSPERIODE_ID
+            ))
 
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsforholdløsning>(), any()) }
     }

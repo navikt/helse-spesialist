@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
@@ -14,6 +15,7 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
@@ -273,7 +275,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendArbeidsgiverinformasjonløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
-
+    protected fun håndterArbeidsforholdløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+    ) {
+        every { snapshotClient.hentSnapshot(fødselsnummer) } returns SNAPSHOT_MED_WARNINGS
+        sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+        verify { snapshotClient.hentSnapshot(fødselsnummer) }
+    }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
@@ -298,7 +309,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 )
             }
         )
-        sendArbeidsforholdløsning(
+        sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsbehovId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
@@ -599,7 +610,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             contextId = contextId
         )
-        sendArbeidsforholdløsning(
+        sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId,
             orgnr = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,

@@ -5,7 +5,7 @@ import io.mockk.every
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
@@ -77,7 +77,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
-        sendArbeidsforholdløsning(
+        sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId1,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID

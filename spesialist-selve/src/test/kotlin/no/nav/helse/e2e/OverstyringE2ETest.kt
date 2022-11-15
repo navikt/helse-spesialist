@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import java.time.LocalDate
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
@@ -186,7 +186,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("Bransje1", "Bransje2")
         )
-        sendArbeidsforholdløsning(
+        sendArbeidsforholdløsningOld(
             hendelseId = hendelseId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID

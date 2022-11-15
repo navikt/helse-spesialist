@@ -5,7 +5,7 @@ import io.mockk.every
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
@@ -86,7 +86,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = vedtaksperiodeId,
             ekstraArbeidsgivere = ekstraArbeidsgivere
         )
-        sendArbeidsforholdløsning(
+        sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,

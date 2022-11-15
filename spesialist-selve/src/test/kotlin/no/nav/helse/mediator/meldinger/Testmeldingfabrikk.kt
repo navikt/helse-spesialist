@@ -165,12 +165,14 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagArbeidsforholdløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        løsning: List<Arbeidsforholdløsning.Løsning>,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        organisasjonsnummer: String = "orgnr",
-        løsning: List<Arbeidsforholdløsning.Løsning>
+        contextId: UUID = UUID.randomUUID()
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,

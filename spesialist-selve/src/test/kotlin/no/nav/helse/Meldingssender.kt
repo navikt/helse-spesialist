@@ -322,7 +322,7 @@ internal object Meldingssender {
         testRapid.sendTestMessage(json)
     }
 
-    fun sendArbeidsforholdløsning(
+    fun sendArbeidsforholdløsningOld(
         hendelseId: UUID,
         orgnr: String,
         vedtaksperiodeId: UUID,
@@ -339,12 +339,14 @@ internal object Meldingssender {
         uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagArbeidsforholdløsning(
+                    aktørId = AKTØR,
+                    fødselsnummer = FØDSELSNUMMER,
+                    organisasjonsnummer = orgnr,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    løsning = løsning,
                     id = id,
                     hendelseId = hendelseId,
-                    contextId = contextId,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    organisasjonsnummer = orgnr,
-                    løsning
+                    contextId = contextId
                 )
             )
         }
@@ -535,6 +537,41 @@ internal object Meldingssender {
                     navn = navn,
                     bransjer = bransjer,
                     ekstraArbeidsgivere = ekstraArbeidsgivere,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+
+    fun sendArbeidsforholdløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        løsning: List<Arbeidsforholdløsning.Løsning> = listOf(
+            Arbeidsforholdløsning.Løsning(
+                stillingstittel = "en-stillingstittel",
+                stillingsprosent = 100,
+                startdato = LocalDate.now(),
+                sluttdato = null
+            )
+        )
+    ): UUID =
+        uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("Arbeidsforhold", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagArbeidsforholdløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    løsning = løsning,
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId

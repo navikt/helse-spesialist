@@ -4,7 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
@@ -67,7 +67,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
         )
-        sendArbeidsforholdløsning(
+        sendArbeidsforholdløsningOld(
             hendelseId = godkjenningsmeldingId,
             orgnr = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID

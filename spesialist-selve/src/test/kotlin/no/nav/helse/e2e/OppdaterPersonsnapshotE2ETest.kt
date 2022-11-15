@@ -8,7 +8,7 @@ import java.util.*
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
+import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
@@ -138,7 +138,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId
             )
-            sendArbeidsforholdløsning(
+            sendArbeidsforholdløsningOld(
                 hendelseId = godkjenningsmeldingId,
                 orgnr = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId
