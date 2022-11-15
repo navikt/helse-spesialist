@@ -18,7 +18,6 @@ internal class OpprettMinimaltVedtakCommandTest {
     private companion object {
         private const val FNR = "12345678911"
         private const val ORGNR = "123456789"
-        private const val VEDTAK_REF = 1L
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
         private val FOM = LocalDate.of(2020, 1, 1)
         private val TOM = LocalDate.of(2020, 1, 31)
@@ -31,7 +30,7 @@ internal class OpprettMinimaltVedtakCommandTest {
     private val vedtakDao = mockk<VedtakDao>(relaxed = true)
     private val command = OpprettMinimaltVedtakCommand(
         fødselsnummer = FNR,
-        orgnummer = ORGNR,
+        organisasjonsnummer = ORGNR,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         periodeFom = FOM,
         periodeTom = TOM,
@@ -47,7 +46,7 @@ internal class OpprettMinimaltVedtakCommandTest {
     }
 
     @Test
-    fun `opprette vedtak`() {
+    fun `oppretter vedtaksperiode`() {
         val (personRef, arbeidsgiverRef) = personFinnes()
         every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns null
         assertTrue(command.execute(context))
@@ -60,6 +59,15 @@ internal class OpprettMinimaltVedtakCommandTest {
                 arbeidsgiverRef = arbeidsgiverRef,
                 snapshotRef = null
             )
+        }
+    }
+
+    @Test
+    fun `oppretter ikke vedtaksperiode dersom denne finnes fra før`() {
+        every { vedtakDao.finnVedtakId(VEDTAKSPERIODE_ID) } returns 1L
+        assertTrue(command.execute(context))
+        verify(exactly = 0) {
+            vedtakDao.opprett(any(), any(), any(), any(), any(), any())
         }
     }
 

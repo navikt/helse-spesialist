@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.time.LocalDate
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
@@ -63,7 +64,11 @@ internal class VedtaksperiodeOpprettet(
             val fom = packet["fom"].asLocalDate()
             val tom = packet["tom"].asLocalDate()
 
-            log.info("Oppretter person, arbeidsgiver og vedtak på vedtaksperiodeId: ${packet["vedtaksperiodeId"].asText()}")
+            log.info(
+                "Mottok vedtaksperiode opprettet {}, {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("hendelseId", id),
+            )
             mediator.vedtaksperiodeOpprettet(
                 packet,
                 id,

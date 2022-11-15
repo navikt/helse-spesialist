@@ -81,6 +81,7 @@ internal class VedtaksperiodeEndret(
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "vedtaksperiode_endret")
+                    it.rejectValue("forrigeTilstand", "START")
                     it.requireKey("vedtaksperiodeId")
                     it.requireKey("fødselsnummer")
                     it.requireKey("@id")

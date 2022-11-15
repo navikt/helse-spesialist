@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
@@ -30,6 +31,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         Toggle.VedtaksperiodeGenerasjoner.disable()
     }
 
+    @Disabled("Må flytte oppretting av generasjoner ved START til VedtaksperiodeOpprettet")
     @Test
     fun `vedtaksperiode_endret oppretter ny generasjon når det ikke finnes eksisterende generasjoner og forrigeTilstand er 'START'`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
@@ -59,6 +61,7 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETest() {
         assertEquals(skalFortsattVæreførsteGenerasjon, førsteGenerasjon)
     }
 
+    @Disabled("Må flytte oppretting av generasjoner ved START til VedtaksperiodeOpprettet")
     @Test
     fun `vedtak_fattet låser generasjon, ny vedtaksperiode_endret vil da opprette ny generasjon`() {
         sendSøknadSendt(AKTØR, FØDSELSNUMMER, ORGNR)
