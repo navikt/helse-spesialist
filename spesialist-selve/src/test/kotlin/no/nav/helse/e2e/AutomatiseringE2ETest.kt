@@ -5,7 +5,7 @@ import io.mockk.every
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -71,7 +71,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -139,7 +139,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -199,7 +199,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -274,7 +274,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -362,7 +362,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )

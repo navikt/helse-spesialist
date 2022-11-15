@@ -481,14 +481,17 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         )
 
     fun lagDigitalKontaktinformasjonløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        erDigital: Boolean = true,
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-        erDigital: Boolean = true
+        contextId: UUID = UUID.randomUUID()
     ): String =
         nyHendelse(
             id,
             "behov", mutableMapOf(
+                "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "@final" to true,
                 "@behov" to listOf("DigitalKontaktinformasjon"),

@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrteDager
@@ -185,7 +185,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )

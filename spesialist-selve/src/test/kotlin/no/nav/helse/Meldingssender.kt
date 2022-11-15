@@ -630,6 +630,32 @@ internal object Meldingssender {
         }
     }
 
+    fun sendDigitalKontaktinformasjonløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        erDigital: Boolean = true,
+    ): UUID {
+        return uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("DigitalKontaktinformasjon", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    erDigital = erDigital,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+    }
+
+
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
         orgnr: String = Testdata.ORGNR,
@@ -661,7 +687,7 @@ internal object Meldingssender {
             )
         }
 
-    fun sendDigitalKontaktinformasjonløsning(
+    fun sendDigitalKontaktinformasjonløsningOld(
         godkjenningsmeldingId: UUID,
         erDigital: Boolean = true,
         contextId: UUID = testRapid.inspektør.contextId()
@@ -669,10 +695,12 @@ internal object Meldingssender {
         return uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagDigitalKontaktinformasjonløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    erDigital
+                    aktørId = AKTØR,
+                    fødselsnummer = FØDSELSNUMMER,
+                    erDigital = erDigital,
+                    id = id,
+                    hendelseId = godkjenningsmeldingId,
+                    contextId = contextId
                 )
             )
         }

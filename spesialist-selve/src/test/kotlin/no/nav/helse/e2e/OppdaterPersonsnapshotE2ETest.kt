@@ -10,7 +10,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -150,7 +150,7 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId = godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )

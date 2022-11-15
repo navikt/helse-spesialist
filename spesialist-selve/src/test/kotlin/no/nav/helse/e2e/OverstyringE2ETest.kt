@@ -5,7 +5,7 @@ import io.mockk.every
 import java.time.LocalDate
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
@@ -195,7 +195,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = hendelseId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = hendelseId,
             erDigital = true
         )
@@ -241,7 +241,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = hendelseId2
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = hendelseId2,
             erDigital = true
         )

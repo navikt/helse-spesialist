@@ -19,6 +19,7 @@ import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendEnhetløsning
@@ -300,6 +301,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendVergemålløsning(aktørId, fødselsnummer)
     }
 
+    protected fun håndterDigitalKontaktinformasjonløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+    ) {
+        sendDigitalKontaktinformasjonløsning(aktørId, fødselsnummer)
+    }
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
@@ -337,7 +345,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = oppgaveId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = oppgaveId,
             erDigital = true
         )
@@ -638,7 +646,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true,
             contextId = contextId

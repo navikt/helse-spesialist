@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
+import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendKomposittbehov
@@ -103,7 +103,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -151,7 +151,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -209,7 +209,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         val vergemålløsningId = sendVergemålløsningOld(godkjenningsmeldingId)
-        val dkifløsningId = sendDigitalKontaktinformasjonløsning(
+        val dkifløsningId = sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -271,7 +271,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -321,7 +321,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -397,7 +397,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -461,7 +461,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -534,7 +534,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -646,7 +646,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, true)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -699,7 +699,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -750,7 +750,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         )
         sendEgenAnsattløsningOld(godkjenningsmeldingId, false)
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -857,7 +857,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -901,7 +901,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             erEgenAnsatt = false
         )
         sendVergemålløsningOld(godkjenningsmeldingId2)
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId2,
             erDigital = true
         )
@@ -1090,7 +1090,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 )
             )
         )
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
@@ -1155,7 +1155,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vergemål = vergemål
         )
 
-        sendDigitalKontaktinformasjonløsning(
+        sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
         )
