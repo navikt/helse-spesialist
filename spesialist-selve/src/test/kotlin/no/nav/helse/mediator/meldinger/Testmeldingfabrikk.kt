@@ -311,6 +311,44 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
+    fun lagInfotrygdutbetalingerløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String = "orgnr",
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID()
+    ) =
+        nyHendelse(
+            id, "behov", mapOf(
+                "@final" to true,
+                "@behov" to listOf("HentInfotrygdutbetalinger"),
+                "hendelseId" to "$hendelseId",
+                "contextId" to "$contextId",
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "orgnummer" to organisasjonsnummer,
+                "HentInfotrygdutbetalinger" to mapOf(
+                    "historikkFom" to "2017-01-01",
+                    "historikkTom" to "2020-12-31"
+                ),
+                "@løsning" to mapOf(
+                    "HentInfotrygdutbetalinger" to listOf(
+                        mapOf(
+                            "fom" to "2018-01-01",
+                            "tom" to "2018-01-31",
+                            "dagsats" to "1000.0",
+                            "grad" to "100",
+                            "typetekst" to "ArbRef",
+                            "organisasjonsnummer" to organisasjonsnummer
+                        )
+                    )
+                )
+            )
+        )
+
     fun lagUtbetalingAnnullertEvent(
         id: UUID = UUID.randomUUID(),
         fødselsnummer: String = "123456789",

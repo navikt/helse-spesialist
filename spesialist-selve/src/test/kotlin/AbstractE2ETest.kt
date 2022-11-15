@@ -19,6 +19,7 @@ import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendEnhetløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
@@ -241,12 +242,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        sendPersoninfoløsning(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId
-        )
+        sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
     protected fun håndterEnhetløsning(
@@ -255,12 +251,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        sendEnhetløsning(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId
-        )
+        sendEnhetløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+    }
+
+    protected fun håndterInfotrygdutbetalingerløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+    ) {
+        sendInfotrygdutbetalingerløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {

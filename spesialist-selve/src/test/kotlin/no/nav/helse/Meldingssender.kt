@@ -482,6 +482,31 @@ internal object Meldingssender {
                 )
             )
         }
+    fun sendInfotrygdutbetalingerløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID
+    ): UUID =
+        uuid.also { id ->
+            val personinfobehov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("HentInfotrygdutbetalinger", personinfobehov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(personinfobehov["contextId"].asText())
+            val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagInfotrygdutbetalingerløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
 
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
