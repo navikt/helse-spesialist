@@ -12,6 +12,8 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+
 data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext
 
 class ContextFactory(
@@ -40,19 +42,13 @@ class ContextFactory(
 
 }
 
-val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
 private fun ApplicationRequest.getGrupper(): List<UUID> {
     val accessToken = call.principal<JWTPrincipal>()
     if (accessToken == null) {
-        sikkerlogg.warn("Ingen access_token for graphql-kall")
+        sikkerlogg.error("Ingen access_token for graphql-kall")
         return emptyList()
     }
-    val grupper = accessToken.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
-    val navIdent = accessToken.payload.getClaim("NAVident").asString()
-    sikkerlogg.info("$navIdent er med i følgende grupper: $grupper")
-
-    return grupper
+    return accessToken.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()
 }
 
 private fun ApplicationRequest.getSaksbehandlerName(): String {
