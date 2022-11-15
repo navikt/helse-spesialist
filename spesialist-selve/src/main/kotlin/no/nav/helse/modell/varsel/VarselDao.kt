@@ -84,10 +84,10 @@ internal class VarselDao(private val dataSource: DataSource) {
     internal fun oppdaterStatus(vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String) {
         @Language("PostgreSQL")
         val query =
-            "UPDATE selve_varsel SET status = ?,status_endret_tidspunkt = now(),status_endret_ident = ? WHERE vedtaksperiode_id = ? AND kode = ?;"
+            "UPDATE selve_varsel SET status = ?,status_endret_tidspunkt = ?,status_endret_ident = ? WHERE vedtaksperiode_id = ? AND kode = ?;"
 
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, status.name, ident, vedtaksperiodeId, varselkode).asUpdate)
+            session.run(queryOf(query, status.name, LocalDateTime.now(), ident, vedtaksperiodeId, varselkode).asUpdate)
         }
     }
 
