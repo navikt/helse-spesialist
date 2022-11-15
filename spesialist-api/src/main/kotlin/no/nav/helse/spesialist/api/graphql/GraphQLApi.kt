@@ -88,10 +88,9 @@ fun Application.graphQLApi(
     routing {
         if (Toggle.GraphQLPlayground.enabled) {
             routes(server)
-        } else {
-            authenticate("oidc") {
-                routes(server)
-            }
+        }
+        authenticate("oidc") {
+            routes(server)
         }
     }
 }
