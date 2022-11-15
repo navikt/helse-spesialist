@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -45,9 +45,9 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
             orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST)
         )
 
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = forlengelseBehovId,
-            orgnummer = ORGNR_GHOST,
+            organisasjonsnummer = ORGNR_GHOST,
             navn = "spøkelse fabrikk 👻",
             vedtaksperiodeId = vedtaksperiode2Id,
         )
@@ -61,9 +61,9 @@ internal class OppdaterArbeidsgiverE2ETest : AbstractE2ETest() {
         arbeidgiverinformasjonBehov[1].behovInneholderOrgnr(ORGNR)
 
         val nyttAGNavn = "Oppdatert arbeidsgivernavn"
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = forlengelseBehovId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             navn = nyttAGNavn,
             vedtaksperiodeId = vedtaksperiode2Id,
         )

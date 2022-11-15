@@ -15,6 +15,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendEnhetløsning
@@ -263,6 +264,17 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendInfotrygdutbetalingerløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
 
+    protected fun håndterArbeidsgiverinformasjonløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+    ) {
+        sendArbeidsgiverinformasjonløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
+    }
+
+
+
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
         val godkjenningsbehovId = sendGodkjenningsbehov(
@@ -274,9 +286,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
         )
         sendPersoninfoløsningComposite(godkjenningsbehovId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsbehovId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             ekstraArbeidsgivere = orgnummereMedRelevanteArbeidsforhold.map {
                 ArbeidsgiverinformasjonJson(
@@ -581,9 +593,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             hendelseId = godkjenningsmeldingId,
             contextId = contextId
         )
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = organisasjonsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             contextId = contextId
         )

@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -33,33 +34,48 @@ internal class ArbeidsgiverinformasjonløsningTest {
 
     @Test
     fun `mottar arbeidsgiverløsning`() {
-        rapid.sendTestMessage(meldingsfabrikk.lagArbeidsgiverinformasjonløsning(navn = NAVN, bransjer = BRANSJER))
+        rapid.sendTestMessage(
+            meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
+                aktørId = AKTØRID,
+                fødselsnummer = FØDSELSNUMMER,
+                organisasjonsnummer = ORGNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                navn = NAVN,
+                bransjer = BRANSJER
+            )
+        )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), any<Arbeidsgiverinformasjonløsning>(), any()) }
     }
 
     @Test
     fun `oppretter løsning`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(listOf(
-            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-        ))
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(
+            listOf(
+                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+            )
+        )
         arbeidsgiver.opprett(dao)
         verify(exactly = 1) { dao.insertArbeidsgiver(ORGNR, NAVN, BRANSJER) }
     }
 
     @Test
     fun `oppdatere navn`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(listOf(
-            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-        ))
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(
+            listOf(
+                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+            )
+        )
         arbeidsgiver.oppdater(dao)
         verify(exactly = 1) { dao.upsertNavn(ORGNR, NAVN) }
     }
 
     @Test
     fun `oppdatere bransje`() {
-        val arbeidsgiver = Arbeidsgiverinformasjonløsning(listOf(
-            Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
-        ))
+        val arbeidsgiver = Arbeidsgiverinformasjonløsning(
+            listOf(
+                Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(ORGNR, NAVN, BRANSJER)
+            )
+        )
         arbeidsgiver.oppdater(dao)
         verify(exactly = 1) { dao.upsertBransjer(ORGNR, BRANSJER) }
     }

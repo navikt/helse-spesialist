@@ -5,7 +5,7 @@ import io.mockk.every
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
@@ -168,9 +168,9 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
 
     private fun håndterGodkjenningsbehov(godkjenningsmeldingId: UUID) {
         sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendArbeidsforholdløsning(

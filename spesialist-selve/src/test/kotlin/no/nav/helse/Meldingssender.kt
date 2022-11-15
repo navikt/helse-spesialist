@@ -386,9 +386,9 @@ internal object Meldingssender {
         )
     }
 
-    fun sendArbeidsgiverinformasjonløsning(
+    fun sendArbeidsgiverinformasjonløsningOld(
         hendelseId: UUID,
-        orgnummer: String,
+        organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         contextId: UUID = testRapid.inspektør.contextId(),
         navn: String = "En arbeidsgiver",
@@ -398,14 +398,16 @@ internal object Meldingssender {
         uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
-                    id = id,
-                    hendelseId = hendelseId,
-                    contextId = contextId,
+                    aktørId = AKTØR,
+                    fødselsnummer = FØDSELSNUMMER,
+                    organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    orgnummer = orgnummer,
                     navn = navn,
                     bransjer = bransjer,
-                    ekstraArbeidsgivere = ekstraArbeidsgivere
+                    ekstraArbeidsgivere = ekstraArbeidsgivere,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
                 )
             )
         }
@@ -439,11 +441,11 @@ internal object Meldingssender {
         vedtaksperiodeId: UUID
     ): UUID =
         uuid.also { id ->
-            val personinfobehov = testRapid.inspektør.siste("behov")
+            val behov = testRapid.inspektør.siste("behov")
             testRapid.reset()
-            assertEquals("HentPersoninfoV2", personinfobehov["@behov"].map { it.asText() }.single())
-            val contextId = UUID.fromString(personinfobehov["contextId"].asText())
-            val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
+            assertEquals("HentPersoninfoV2", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagPersoninfoløsning(
@@ -464,11 +466,11 @@ internal object Meldingssender {
         vedtaksperiodeId: UUID
     ): UUID =
         uuid.also { id ->
-            val personinfobehov = testRapid.inspektør.siste("behov")
+            val behov = testRapid.inspektør.siste("behov")
             testRapid.reset()
-            assertEquals("HentEnhet", personinfobehov["@behov"].map { it.asText() }.single())
-            val contextId = UUID.fromString(personinfobehov["contextId"].asText())
-            val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
+            assertEquals("HentEnhet", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagEnhetløsning(
@@ -489,11 +491,11 @@ internal object Meldingssender {
         vedtaksperiodeId: UUID
     ): UUID =
         uuid.also { id ->
-            val personinfobehov = testRapid.inspektør.siste("behov")
+            val behov = testRapid.inspektør.siste("behov")
             testRapid.reset()
-            assertEquals("HentInfotrygdutbetalinger", personinfobehov["@behov"].map { it.asText() }.single())
-            val contextId = UUID.fromString(personinfobehov["contextId"].asText())
-            val hendelseId = UUID.fromString(personinfobehov["hendelseId"].asText())
+            assertEquals("HentInfotrygdutbetalinger", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
 
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagInfotrygdutbetalingerløsning(
@@ -501,6 +503,38 @@ internal object Meldingssender {
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+
+    fun sendArbeidsgiverinformasjonløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        navn: String = "En arbeidsgiver",
+        bransjer: List<String> = listOf("En bransje", "En annen bransje"),
+        ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList(),
+    ): UUID =
+        uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("Arbeidsgiverinformasjon", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    navn = navn,
+                    bransjer = bransjer,
+                    ekstraArbeidsgivere = ekstraArbeidsgivere,
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId

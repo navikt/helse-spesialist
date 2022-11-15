@@ -6,7 +6,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
@@ -72,9 +72,9 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             UTBETALING_ID
         )
         sendPersoninfoløsningComposite(godkjenningsmeldingId1, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId1,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         sendArbeidsforholdløsning(

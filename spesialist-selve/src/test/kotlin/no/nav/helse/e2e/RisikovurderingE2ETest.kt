@@ -6,7 +6,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
@@ -16,9 +16,9 @@ import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions
@@ -80,9 +80,9 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
             utbetalingId = UTBETALING_ID
         )
         sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, vedtaksperiodeId)
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = vedtaksperiodeId,
             ekstraArbeidsgivere = ekstraArbeidsgivere
         )

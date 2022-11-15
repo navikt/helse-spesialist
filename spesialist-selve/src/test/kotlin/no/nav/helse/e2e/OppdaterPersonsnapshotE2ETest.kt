@@ -9,7 +9,7 @@ import java.util.UUID.randomUUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
@@ -23,9 +23,9 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -133,9 +133,9 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
                 vedtaksperiodeId = vedtaksperiodeId,
                 hendelseId = godkjenningsmeldingId
             )
-            sendArbeidsgiverinformasjonløsning(
+            sendArbeidsgiverinformasjonløsningOld(
                 hendelseId = godkjenningsmeldingId,
-                orgnummer = ORGNR,
+                organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId
             )
             sendArbeidsforholdløsning(

@@ -13,6 +13,6 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
-//        håndterArbeidsgiverinformasjonløsning()
+        håndterArbeidsgiverinformasjonløsning()
     }
 }

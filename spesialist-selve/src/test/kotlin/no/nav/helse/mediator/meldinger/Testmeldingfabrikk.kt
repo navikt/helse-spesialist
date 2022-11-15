@@ -138,14 +138,16 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             ).map(ArbeidsgiverinformasjonJson::toBody)
 
     fun lagArbeidsgiverinformasjonløsning(
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        orgnummer: String = "orgnr",
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
         navn: String,
         bransjer: List<String>,
-        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID()
     ) = nyHendelse(
         id, "behov", mapOf(
             "@final" to true,
@@ -155,9 +157,9 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
-            "orgnummer" to orgnummer,
+            "orgnummer" to organisasjonsnummer,
             "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(orgnummer, navn, bransjer, ekstraArbeidsgivere)
+                "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(organisasjonsnummer, navn, bransjer, ekstraArbeidsgivere)
             )
         )
     )

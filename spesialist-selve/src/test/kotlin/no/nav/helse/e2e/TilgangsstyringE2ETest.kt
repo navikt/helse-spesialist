@@ -5,16 +5,16 @@ import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -60,9 +60,9 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
     private fun sendMeldingerOppTilEgenAnsatt(): UUID {
         val godkjenningsmeldingId = sendGodkjenningsbehov(AKTØR, FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, UTBETALING_ID)
         sendPersoninfoløsningComposite(godkjenningsmeldingId, ORGNR, VEDTAKSPERIODE_ID)
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")

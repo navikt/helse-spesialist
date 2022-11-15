@@ -4,7 +4,7 @@ import AbstractE2ETest
 import io.mockk.every
 import java.util.UUID
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
+import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
@@ -17,10 +17,10 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
+import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
-import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -52,9 +52,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -120,9 +120,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -180,9 +180,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -255,9 +255,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
@@ -343,9 +343,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             hendelseId = godkjenningsmeldingId
         )
-        sendArbeidsgiverinformasjonløsning(
+        sendArbeidsgiverinformasjonløsningOld(
             hendelseId = godkjenningsmeldingId,
-            orgnummer = ORGNR,
+            organisasjonsnummer = ORGNR,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             navn = "En Arbeidsgiver",
             bransjer = listOf("En eller flere bransjer")
