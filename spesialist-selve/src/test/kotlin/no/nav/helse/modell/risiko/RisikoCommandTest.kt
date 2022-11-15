@@ -6,6 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Testdata.AKTØR
+import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -29,6 +31,8 @@ internal class RisikoCommandTest {
 
         private val meldingsfabrikk = Testmeldingfabrikk("foo", "bar")
         private fun risikovurderingLøsning(funn: List<Risikofunn>) = objectMapper.readTree(meldingsfabrikk.lagRisikovurderingløsning(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             funn = funn
         )).path("@løsning").path("Risikovurdering")

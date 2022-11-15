@@ -11,7 +11,7 @@ import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
@@ -99,7 +99,7 @@ internal class VedtaksperiodeForkastetTest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId1, 1 // Dette trigger manuell saksbehandling
         )
 
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )

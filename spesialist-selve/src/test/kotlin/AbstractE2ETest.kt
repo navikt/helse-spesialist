@@ -28,6 +28,7 @@ import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendSøknadSendt
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsning
@@ -44,6 +45,7 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
+import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
@@ -285,7 +287,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
     ) {
-        every { snapshotClient.hentSnapshot(fødselsnummer) } returns SNAPSHOT_MED_WARNINGS
+        every { snapshotClient.hentSnapshot(fødselsnummer) } returns SNAPSHOT_UTEN_WARNINGS
         sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
         verify { snapshotClient.hentSnapshot(fødselsnummer) }
     }
@@ -316,6 +318,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppslagFeilet: Boolean = false,
     ) {
         sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
+    }
+    protected fun håndterRiskovurderingløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
+    ) {
+        sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId)
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
@@ -362,7 +371,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = oppgaveId
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = oppgaveId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
@@ -665,7 +674,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             contextId = contextId
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = vedtaksperiodeId,
             kanGodkjennesAutomatisk = kanAutomatiseres,

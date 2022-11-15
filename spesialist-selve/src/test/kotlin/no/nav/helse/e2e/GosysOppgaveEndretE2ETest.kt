@@ -19,5 +19,6 @@ internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
         håndterVergemålløsning()
         håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
+        håndterRiskovurderingløsning()
     }
 }

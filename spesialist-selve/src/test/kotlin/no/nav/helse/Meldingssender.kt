@@ -681,6 +681,34 @@ internal object Meldingssender {
             )
         }
     }
+    fun sendRisikovurderingløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        kanGodkjennesAutomatisk: Boolean = true,
+        funn: List<Risikofunn> = emptyList()
+    ): UUID {
+        return uuid.also { id ->
+            val behov = testRapid.inspektør.siste("behov")
+            testRapid.reset()
+            assertEquals("Risikovurdering", behov["@behov"].map { it.asText() }.single())
+            val contextId = UUID.fromString(behov["contextId"].asText())
+            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagRisikovurderingløsning(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                    funn = funn,
+                    id = id,
+                    hendelseId = hendelseId,
+                    contextId = contextId
+                )
+            )
+        }
+    }
 
     fun sendOverstyrteDager(
         dager: List<OverstyringDagDto>,
@@ -753,7 +781,7 @@ internal object Meldingssender {
         }
     }
 
-    fun sendRisikovurderingløsning(
+    fun sendRisikovurderingløsningOld(
         godkjenningsmeldingId: UUID,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
@@ -763,12 +791,14 @@ internal object Meldingssender {
         return uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagRisikovurderingløsning(
-                    id,
-                    godkjenningsmeldingId,
-                    contextId,
-                    vedtaksperiodeId,
-                    kanGodkjennesAutomatisk,
-                    funn
+                    aktørId = AKTØR,
+                    fødselsnummer = FØDSELSNUMMER,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
+                    funn = funn,
+                    id = id,
+                    hendelseId = godkjenningsmeldingId,
+                    contextId = contextId
                 )
             )
         }

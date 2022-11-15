@@ -12,7 +12,7 @@ import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendOverstyrteDager
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.oppgaveId
@@ -248,7 +248,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = hendelseId2
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = hendelseId2,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )

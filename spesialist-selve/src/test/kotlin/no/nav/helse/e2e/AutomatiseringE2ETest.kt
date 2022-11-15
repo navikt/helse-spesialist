@@ -9,7 +9,7 @@ import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
@@ -78,7 +78,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
@@ -146,7 +146,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
@@ -206,7 +206,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
@@ -281,7 +281,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             godkjenningsmeldingId = godkjenningsmeldingId,
             kanGodkjennesAutomatisk = false,
@@ -371,7 +371,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             antall = 1,
             oppslagFeilet = false
         )
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )

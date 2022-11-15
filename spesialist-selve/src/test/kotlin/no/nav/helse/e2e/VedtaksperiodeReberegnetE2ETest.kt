@@ -12,7 +12,7 @@ import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsning
+import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
@@ -343,7 +343,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId1, 1
         )
 
-        sendRisikovurderingløsning(
+        sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
