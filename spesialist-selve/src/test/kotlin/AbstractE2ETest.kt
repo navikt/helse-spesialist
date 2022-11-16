@@ -62,6 +62,7 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -375,8 +376,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun håndterVergemålløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
+        fullmakter: List<Fullmakt> = emptyList(),
     ) {
-        sendVergemålløsning(aktørId, fødselsnummer)
+        val vergemål = Testmeldingfabrikk.VergemålJson(emptyList(), emptyList(), fullmakter)
+        sendVergemålløsning(aktørId, fødselsnummer, vergemål)
     }
 
     protected fun håndterDigitalKontaktinformasjonløsning(

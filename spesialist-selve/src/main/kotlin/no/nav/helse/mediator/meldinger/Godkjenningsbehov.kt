@@ -33,6 +33,7 @@ import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
 import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.TrengerTotrinnsvurderingCommand
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikoCommand
@@ -43,6 +44,7 @@ import no.nav.helse.modell.utbetaling.UtbetalingsfilterCommand
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.utbetalingTilSykmeldt
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
@@ -53,8 +55,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
@@ -171,6 +171,7 @@ internal class Godkjenningsbehov(
         VergemålCommand(
             vergemålDao = vergemålDao,
             warningDao = warningDao,
+            varselRepository = varselRepository,
             vedtaksperiodeId = vedtaksperiodeId
         ),
         DigitalKontaktinformasjonCommand(

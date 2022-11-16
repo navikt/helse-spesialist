@@ -1,16 +1,23 @@
 package no.nav.helse.modell.vergemal
 
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.Vergemålløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class VergemålCommandTest {
 
@@ -20,6 +27,7 @@ class VergemålCommandTest {
     }
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
+    private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private val warningMock = WarningMock()
     private val forventetFullmaktWarnings = listOf(
         Warning(
@@ -32,6 +40,7 @@ class VergemålCommandTest {
     private val command = VergemålCommand(
         vergemålDao = vergemålDao,
         warningDao = warningMock.warningDao,
+        varselRepository = varselRepository,
         vedtaksperiodeId = VEDTAKSPERIODE_ID
     )
     private lateinit var context: CommandContext
