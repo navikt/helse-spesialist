@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.Testdata
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -12,6 +13,12 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_4
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_VM_1
 import org.intellij.lang.annotations.Language
@@ -23,8 +30,57 @@ internal class VarselE2ETest : AbstractE2ETest() {
     @Test
     fun `ingen varsel`() {
         fremTilSaksbehandleroppgave()
+        assertIngenVarsel(SB_BO_1, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_BO_2, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_BO_3, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_BO_4, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_VM_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
+        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
+
+        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `varsel om beslutteroppgave ved overstyring av dager`() {
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrTidslinje()
+        håndterEgenansattløsning()
+        håndterVergemålløsning()
+        håndterDigitalKontaktinformasjonløsning()
+        håndterÅpneOppgaverløsning()
+
+        assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `varsel om beslutteroppgave ved overstyring av inntekt`() {
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrInntekt()
+        håndterEgenansattløsning()
+        håndterVergemålløsning()
+        håndterDigitalKontaktinformasjonløsning()
+        håndterÅpneOppgaverløsning()
+
+        assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
+        fremTilSaksbehandleroppgave(andreArbeidsgivere = listOf(Testdata.ORGNR_GHOST))
+        håndterOverstyrArbeidsforhold(organisasjonsnummer = Testdata.ORGNR_GHOST)
+        håndterEgenansattløsning()
+        håndterVergemålløsning()
+        håndterDigitalKontaktinformasjonløsning()
+        håndterÅpneOppgaverløsning()
+
+        assertVarsel(SB_BO_4, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
@@ -37,6 +93,69 @@ internal class VarselE2ETest : AbstractE2ETest() {
     fun `varsel om faresignaler ved risikovurdering`() {
         fremTilSaksbehandleroppgave(risikofunn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE", false)))
         assertVarsel(SB_RV_1, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `ingen varsler dersom ingen åpne oppgaver eller oppslagsfeil`() {
+        fremTilÅpneOppgaverBehov()
+        håndterÅpneOppgaverløsning()
+        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `lager varsel ved åpne gosys-oppgaver`() {
+        fremTilÅpneOppgaverBehov()
+        håndterÅpneOppgaverløsning(antall = 1)
+        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
+        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
+        fremTilÅpneOppgaverBehov()
+        håndterÅpneOppgaverløsning(antall = 1)
+        håndterRisikovurderingløsning()
+        håndterGosysOppgaveEndret()
+        håndterÅpneOppgaverløsning(antall = 0)
+        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
+        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertInaktivWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
+        fremTilÅpneOppgaverBehov()
+        håndterÅpneOppgaverløsning(antall = 0)
+        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterGosysOppgaveEndret()
+        håndterÅpneOppgaverløsning(antall = 1)
+        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
+        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `legger til varsel om manglende gosys-info`() {
+        fremTilÅpneOppgaverBehov()
+        håndterÅpneOppgaverløsning(oppslagFeilet = true)
+        håndterRisikovurderingløsning()
+        assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)
+        assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
+        assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `legger til varsel dersom oppslag feiler når vi har fått beskjed om at gosys har endret seg`() {
+        fremTilÅpneOppgaverBehov()
+        håndterÅpneOppgaverløsning(oppslagFeilet = false)
+        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterGosysOppgaveEndret()
+        håndterÅpneOppgaverløsning(oppslagFeilet = true)
+        assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)
+        assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
+        assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Varsel.Status) {
@@ -72,6 +191,20 @@ internal class VarselE2ETest : AbstractE2ETest() {
             )
         }
         Assertions.assertEquals(0, antallVarsler)
+    }
+
+    private fun fremTilÅpneOppgaverBehov() {
+        håndterSøknad()
+        håndterVedtaksperiodeOpprettet()
+        håndterGodkjenningsbehov()
+        håndterPersoninfoløsning()
+        håndterEnhetløsning()
+        håndterInfotrygdutbetalingerløsning()
+        håndterArbeidsgiverinformasjonløsning()
+        håndterArbeidsforholdløsning()
+        håndterEgenansattløsning()
+        håndterVergemålløsning()
+        håndterDigitalKontaktinformasjonløsning()
     }
 
     private fun fremTilSaksbehandleroppgave(
