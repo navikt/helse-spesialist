@@ -19,6 +19,12 @@ import org.junit.jupiter.api.Test
 internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
+    fun `ingen varsel`() {
+        fremTilSaksbehandleroppgave()
+        assertIngenVarsel(SB_VM_1, VEDTAKSPERIODE_ID)
+    }
+
+    @Test
     fun `varsel om vergemål`() {
         fremTilSaksbehandleroppgave(fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)))
         assertVarsel(SB_VM_1, VEDTAKSPERIODE_ID, AKTIV)
