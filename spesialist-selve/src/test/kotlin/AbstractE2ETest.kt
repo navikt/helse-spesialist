@@ -402,8 +402,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         kanGodkjennesAutomatisk: Boolean = true,
+        risikofunn: List<Risikofunn> = emptyList(),
     ) {
-        sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId, kanGodkjennesAutomatisk)
+        sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId, kanGodkjennesAutomatisk, risikofunn)
     }
     protected fun håndterOverstyrTidslinje(
         aktørId: String = AKTØR,

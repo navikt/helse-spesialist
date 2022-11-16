@@ -13,6 +13,7 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -28,6 +29,7 @@ internal class RisikoCommandTest {
 
         private val RISIKOVURDERING_DAO = mockk<RisikovurderingDao>()
         private val WARNING_DAO = mockk<WarningDao>()
+        private val VARSEL_REPOSITORY = mockk<VarselRepository>()
 
         private val meldingsfabrikk = Testmeldingfabrikk("foo", "bar")
         private fun risikovurderingLøsning(funn: List<Risikofunn>) = objectMapper.readTree(meldingsfabrikk.lagRisikovurderingløsning(
@@ -72,7 +74,7 @@ internal class RisikoCommandTest {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = true,
-            løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivele = "test", kreverSupersaksbehandler = false)))
+            løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false)))
         ))
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
@@ -87,7 +89,7 @@ internal class RisikoCommandTest {
             vedtaksperiodeId = enAnnenVedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = true,
-            løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivele = "test", kreverSupersaksbehandler = false)))
+            løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false)))
         ))
         val risikoCommand = risikoCommand()
         risikoCommand.assertFalse()
@@ -110,12 +112,14 @@ internal class RisikoCommandTest {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
         warningDao: WarningDao = WARNING_DAO,
+        varselRepository: VarselRepository = VARSEL_REPOSITORY,
         organisasjonsnummer: String = ORGNUMMER,
         førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao,
+        varselRepository = varselRepository,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling
     )

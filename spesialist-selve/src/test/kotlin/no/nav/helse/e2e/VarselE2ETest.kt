@@ -6,11 +6,13 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Område.Syk
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_VM_1
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -22,12 +24,19 @@ internal class VarselE2ETest : AbstractE2ETest() {
     fun `ingen varsel`() {
         fremTilSaksbehandleroppgave()
         assertIngenVarsel(SB_VM_1, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
     }
 
     @Test
     fun `varsel om vergemål`() {
         fremTilSaksbehandleroppgave(fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)))
         assertVarsel(SB_VM_1, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `varsel om faresignaler ved risikovurdering`() {
+        fremTilSaksbehandleroppgave(risikofunn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE", false)))
+        assertVarsel(SB_RV_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Varsel.Status) {
@@ -69,6 +78,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         andreArbeidsgivere: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
+        risikofunn: List<Risikofunn> = emptyList(),
     ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
@@ -83,6 +93,6 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterVergemålløsning(fullmakter = fullmakter)
         håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false, risikofunn = risikofunn)
     }
 }

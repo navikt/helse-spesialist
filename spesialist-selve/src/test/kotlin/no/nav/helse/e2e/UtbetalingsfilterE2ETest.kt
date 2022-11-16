@@ -70,7 +70,7 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 Risikofunn(
                     kreverSupersaksbehandler = false,
                     kategori = listOf("Noe"),
-                    beskrivele = "Noe"
+                    beskrivelse = "Noe"
                 )
             )
         )

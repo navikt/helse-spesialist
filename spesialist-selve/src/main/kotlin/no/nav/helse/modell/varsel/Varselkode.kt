@@ -28,9 +28,9 @@ enum class Varselkode(
     SB_EX_3(""),
     SB_EX_4("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"),
     SB_IK_1(""),
-    SB_RV_1(""),
+    SB_RV_1("Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger"),
     SB_RV_2(""),
-    SB_VM_1("Registert fullmakt på personen.");
+    SB_VM_1("Registert fullmakt på personen");
 
     init {
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }

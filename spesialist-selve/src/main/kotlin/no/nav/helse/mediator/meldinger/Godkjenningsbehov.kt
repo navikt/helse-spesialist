@@ -188,6 +188,7 @@ internal class Godkjenningsbehov(
             vedtaksperiodeId = vedtaksperiodeId,
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
+            varselRepository = varselRepository,
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = førstegangsbehandling
         ),

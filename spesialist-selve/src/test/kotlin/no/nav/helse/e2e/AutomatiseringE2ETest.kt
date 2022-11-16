@@ -250,8 +250,8 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
 
         val funn = listOf(
-            Risikofunn(kategori = listOf("8-4"), beskrivele = "8-4 ikke ok", kreverSupersaksbehandler = false),
-            Risikofunn(kategori = emptyList(), beskrivele = "faresignaler ikke ok", kreverSupersaksbehandler = false)
+            Risikofunn(kategori = listOf("8-4"), beskrivelse = "8-4 ikke ok", kreverSupersaksbehandler = false),
+            Risikofunn(kategori = emptyList(), beskrivelse = "faresignaler ikke ok", kreverSupersaksbehandler = false)
         )
 
         val godkjenningsmeldingId = sendGodkjenningsbehov(

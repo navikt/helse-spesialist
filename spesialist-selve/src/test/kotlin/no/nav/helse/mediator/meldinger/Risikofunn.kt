@@ -5,14 +5,14 @@ import org.intellij.lang.annotations.Language
 
 internal class Risikofunn(
     private val kategori: List<String>,
-    private val beskrivele: String,
+    private val beskrivelse: String,
     private val kreverSupersaksbehandler: Boolean) {
 
     @Language("JSON")
     private fun tilJson() = """
     {
         "kategori": ${kategori.map { "\"$it\"" }},
-        "beskrivelse": "$beskrivele",
+        "beskrivelse": "$beskrivelse",
         "kreverSupersaksbehandler": $kreverSupersaksbehandler
     }
     """.trimIndent()

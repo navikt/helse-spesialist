@@ -28,13 +28,13 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
 
     private val funn1 = listOf(Risikofunn(
         kategori = listOf("8-4"),
-        beskrivele = "ny sjekk ikke ok",
+        beskrivelse = "ny sjekk ikke ok",
         kreverSupersaksbehandler = true
     ))
 
     private val funn2 = listOf(Risikofunn(
         kategori = listOf("8-4"),
-        beskrivele = "8-4 ikke ok",
+        beskrivelse = "8-4 ikke ok",
         kreverSupersaksbehandler = false
     ))
 

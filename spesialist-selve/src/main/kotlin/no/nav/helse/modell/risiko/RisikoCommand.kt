@@ -6,6 +6,8 @@ import no.nav.helse.mediator.meldinger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.tellWarning
@@ -15,6 +17,7 @@ internal class RisikoCommand(
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
+    private val varselRepository: VarselRepository,
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean
 ) : Command {
@@ -65,6 +68,7 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
+            SB_RV_1.nyttVarsel(vedtaksperiodeId, varselRepository = varselRepository)
             tellWarning(melding)
         }
     }
