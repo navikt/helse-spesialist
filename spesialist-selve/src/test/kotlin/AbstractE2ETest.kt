@@ -49,7 +49,6 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
-import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
@@ -362,8 +361,9 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        regelverksvarsler: List<String> = emptyList(),
     ) {
-        every { snapshotClient.hentSnapshot(fødselsnummer) } returns SNAPSHOT_UTEN_WARNINGS
+        every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot(fødselsnummer = fødselsnummer, vedtaksperiodeId = vedtaksperiodeId, regelverksvarsler = regelverksvarsler)
         sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
         verify { snapshotClient.hentSnapshot(fødselsnummer) }
     }

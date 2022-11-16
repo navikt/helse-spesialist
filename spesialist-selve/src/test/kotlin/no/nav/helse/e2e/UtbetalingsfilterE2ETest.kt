@@ -108,8 +108,8 @@ internal class UtbetalingsfilterE2ETest : AbstractE2ETest() {
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
-                personbeløp = personbeløp,
                 arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
             ),
             kanAutomatiseres = risikofunn.isEmpty(),
             risikofunn = risikofunn

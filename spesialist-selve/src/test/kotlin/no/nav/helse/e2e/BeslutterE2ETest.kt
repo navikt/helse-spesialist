@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
 import org.intellij.lang.annotations.Language
@@ -47,6 +48,14 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, Status.AKTIV)
     }
 
+    @Test
+    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
+        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
+
+
+        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, Status.AKTIV)
+    }
+
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Status) {
         val antallVarsler = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -82,7 +91,9 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         Assertions.assertEquals(0, antallVarsler)
     }
 
-    private fun fremTilSaksbehandleroppgave() {
+    private fun fremTilSaksbehandleroppgave(
+        regelverksvarsler: List<String> = emptyList()
+    ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
@@ -90,7 +101,7 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
         håndterArbeidsgiverinformasjonløsning()
-        håndterArbeidsforholdløsning()
+        håndterArbeidsforholdløsning(regelverksvarsler = regelverksvarsler)
         håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterDigitalKontaktinformasjonløsning()

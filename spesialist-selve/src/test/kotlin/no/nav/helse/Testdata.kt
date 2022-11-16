@@ -75,9 +75,17 @@ object Testdata {
             personoppdrag = null,
             arbeidsgiveroppdrag = null
         ),
-        aktivitetslogg: List<GraphQLAktivitet> = emptyList()
+        regelverksvarsler: List<String> = emptyList(),
     ): GraphQLClientResponse<HentSnapshot.Result> =
         object : GraphQLClientResponse<HentSnapshot.Result> {
+            val aktivitetslogg = regelverksvarsler.map {
+                GraphQLAktivitet(
+                    "W",
+                    it,
+                    "2020-06-12 13:21:24.072",
+                    vedtaksperiodeId.toString()
+                )
+            }
             override val data = HentSnapshot.Result(
                 GraphQLPerson(
                     aktorId = AKTØR,
@@ -102,7 +110,7 @@ object Testdata {
                                             opprettet = "2020-01-31",
                                             periodetype = GraphQLPeriodetype.FORSTEGANGSBEHANDLING,
                                             tidslinje = emptyList(),
-                                            aktivitetslogg = aktivitetslogg,
+                                            aktivitetslogg = this.aktivitetslogg,
                                             beregningId = UUID.randomUUID().toString(),
                                             forbrukteSykedager = null,
                                             gjenstaendeSykedager = null,
@@ -152,10 +160,12 @@ object Testdata {
         utbetalingId: UUID,
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
-        aktivitetslogg: List<GraphQLAktivitet> = emptyList()
+        aktivitetslogg: List<GraphQLAktivitet> = emptyList(),
     ): GraphQLClientResponse<HentSnapshot.Result> =
         snapshot(
             versjon, fødselsnummer, vedtaksperiodeId, utbetalingId,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
             utbetaling = GraphQLUtbetaling(
                 id = utbetalingId.toString(),
                 arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
@@ -164,9 +174,6 @@ object Testdata {
                 personNettoBelop = personbeløp,
                 statusEnum = GraphQLUtbetalingstatus.UBETALT,
                 typeEnum = Utbetalingtype.REVURDERING,
-            ),
-            arbeidsgiverbeløp = arbeidsgiverbeløp,
-            personbeløp = personbeløp,
-            aktivitetslogg = aktivitetslogg
+            )
         )
 }

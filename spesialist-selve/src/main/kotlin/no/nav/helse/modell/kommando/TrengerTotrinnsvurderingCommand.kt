@@ -7,6 +7,7 @@ import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
 import no.nav.helse.modell.vedtak.Warning
@@ -42,7 +43,7 @@ internal class TrengerTotrinnsvurderingCommand(
 
     private fun varselkoder(overstyringer: List<OverstyringType>, medlemskap: Boolean): List<Varselkode> {
         val varselkoder = mutableListOf<Varselkode>()
-//        if(medlemskap) varselkoder.add(SB_BO_1)
+        if(medlemskap) varselkoder.add(SB_BO_1)
         if(overstyringer.contains(OverstyringType.Dager)) varselkoder.add(SB_BO_2)
         if(overstyringer.contains(OverstyringType.Inntekt)) varselkoder.add(SB_BO_3)
 //        if(overstyringer.contains(OverstyringType.Arbeidsforhold)) varselkoder.add(SB_BO_4)
