@@ -75,6 +75,7 @@ query HentSnapshot($fnr: String!) {
                 fom
                 tom
                 skjaeringstidspunkt
+                vilkarsgrunnlagId
                 vilkarsgrunnlaghistorikkId
                 deaktivert
             }
