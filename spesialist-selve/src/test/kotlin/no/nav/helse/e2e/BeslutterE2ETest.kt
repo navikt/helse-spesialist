@@ -4,12 +4,15 @@ import AbstractE2ETest
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.Testdata.ORGNR_GHOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.modell.varsel.Varsel.Status
+import no.nav.helse.modell.varsel.Varsel.Status.*
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_4
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -20,8 +23,17 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
     fun `ingen varsel om beslutteroppgave`() {
         fremTilSaksbehandleroppgave()
 
+        assertIngenVarsel(SB_BO_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_BO_2, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_BO_3, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_BO_4, VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
+        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
+
+        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
@@ -33,7 +45,7 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
 
-        assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, Status.AKTIV)
+        assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
@@ -45,15 +57,19 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
 
-        assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, Status.AKTIV)
+        assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
-    fun `varsel om beslutteroppgave ved varsel om lovvalg og medlemsskap`() {
-        fremTilSaksbehandleroppgave(regelverksvarsler = listOf("Vurder lovvalg og medlemskap"))
+    fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
+        fremTilSaksbehandleroppgave(andreArbeidsgivere = listOf(ORGNR_GHOST))
+        håndterOverstyrArbeidsforhold(organisasjonsnummer = ORGNR_GHOST)
+        håndterEgenansattløsning()
+        håndterVergemålløsning()
+        håndterDigitalKontaktinformasjonløsning()
+        håndterÅpneOppgaverløsning()
 
-
-        assertVarsel(SB_BO_1, VEDTAKSPERIODE_ID, Status.AKTIV)
+        assertVarsel(SB_BO_4, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Status) {
@@ -92,14 +108,16 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
     }
 
     private fun fremTilSaksbehandleroppgave(
+        andreArbeidsgivere: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList()
     ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov()
+        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsgivere)
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
+        if (andreArbeidsgivere.isNotEmpty()) håndterArbeidsgiverinformasjonløsning()
         håndterArbeidsgiverinformasjonløsning()
         håndterArbeidsforholdløsning(regelverksvarsler = regelverksvarsler)
         håndterEgenansattløsning()

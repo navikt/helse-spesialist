@@ -128,7 +128,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun arbeidsgiverinformasjon(orgnummer: String, navn: String, bransjer: List<String>) =
         ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer).toBody()
 
-    fun arbeidsgiverinformasjon(
+    private fun arbeidsgiverinformasjon(
         orgnummer: String,
         navn: String,
         bransjer: List<String>,
@@ -137,7 +137,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             listOf(ArbeidsgiverinformasjonJson(orgnummer, navn, bransjer)) + ekstraArbeidsgivere
             ).map(ArbeidsgiverinformasjonJson::toBody)
 
-    fun lagArbeidsgiverinformasjonløsning(
+    fun lagArbeidsgiverinformasjonløsningOld(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
@@ -160,6 +160,30 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "orgnummer" to organisasjonsnummer,
             "@løsning" to mapOf(
                 "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(organisasjonsnummer, navn, bransjer, ekstraArbeidsgivere)
+            )
+        )
+    )
+    fun lagArbeidsgiverinformasjonløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID()
+    ) = nyHendelse(
+        id, "behov", mapOf(
+            "@final" to true,
+            "@behov" to listOf("Arbeidsgiverinformasjon"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to mapOf(
+                "Arbeidsgiverinformasjon" to ekstraArbeidsgivere.map(ArbeidsgiverinformasjonJson::toBody)
             )
         )
     )
@@ -705,23 +729,25 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagOverstyringArbeidsforhold(
-        id: UUID = UUID.randomUUID(),
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        aktørId: String,
+        fødselsnummer: String,
         organisasjonsnummer: String = "orgnr",
-        saksbehandlerOid: UUID = UUID.randomUUID(),
-        saksbehandlerNavn: String = "saksbehandler",
-        saksbehandlerEpost: String = "sara.saksbehandler@nav.no",
+        skjæringstidspunkt: LocalDate,
+        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        saksbehandleroid: UUID = UUID.randomUUID(),
+        saksbehandlernavn: String = "saksbehandler",
+        saksbehandlerepost: String = "sara.saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        skjæringstidspunkt: LocalDate
+        id: UUID = UUID.randomUUID()
     ) = nyHendelse(
         id, "saksbehandler_overstyrer_arbeidsforhold", mapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
-            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerOid" to saksbehandleroid,
             "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlerNavn,
-            "saksbehandlerEpost" to saksbehandlerEpost,
+            "saksbehandlerNavn" to saksbehandlernavn,
+            "saksbehandlerEpost" to saksbehandlerepost,
             "skjæringstidspunkt" to skjæringstidspunkt,
             "overstyrteArbeidsforhold" to overstyrteArbeidsforhold
         )

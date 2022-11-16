@@ -13,9 +13,10 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.VARSEL_KODE_1
 import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
-import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.SubsumsjonJson
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
@@ -142,13 +143,20 @@ internal object Meldingssender {
 
 
     fun sendOverstyrtArbeidsforhold(
-        skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt>,
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        skjæringstidspunkt: LocalDate = 1.januar(1970),
+        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt> = listOf(
+            ArbeidsforholdOverstyrt(organisasjonsnummer, true, "begrunnelse", "forklaring")
+        ),
     ): UUID =
         uuid.also {
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyringArbeidsforhold(
-                    organisasjonsnummer = Testdata.ORGNR,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
                     skjæringstidspunkt = skjæringstidspunkt,
                     overstyrteArbeidsforhold = overstyrteArbeidsforhold
                 )
@@ -408,18 +416,18 @@ internal object Meldingssender {
         contextId: UUID = testRapid.inspektør.contextId(),
         navn: String = "En arbeidsgiver",
         bransjer: List<String> = listOf("En bransje", "En annen bransje"),
-        ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList()
+        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList()
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
-                meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
+                meldingsfabrikk.lagArbeidsgiverinformasjonløsningOld(
                     aktørId = AKTØR,
                     fødselsnummer = FØDSELSNUMMER,
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
+                    ekstraArbeidsgivere = ekstraArbeidsgivere,
                     navn = navn,
                     bransjer = bransjer,
-                    ekstraArbeidsgivere = ekstraArbeidsgivere,
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId
@@ -530,9 +538,6 @@ internal object Meldingssender {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        navn: String = "En arbeidsgiver",
-        bransjer: List<String> = listOf("En bransje", "En annen bransje"),
-        ekstraArbeidsgivere: List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson> = emptyList(),
     ): UUID =
         uuid.also { id ->
             val behov = testRapid.inspektør.siste("behov")
@@ -540,6 +545,11 @@ internal object Meldingssender {
             assertEquals("Arbeidsgiverinformasjon", behov["@behov"].map { it.asText() }.single())
             val contextId = UUID.fromString(behov["contextId"].asText())
             val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+            val arbeidsgivere = behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
+                val arbeidsgivernavn = listOf("En arbeidsgiver", "En annen arbeidsgiver", "En tredje arbeidsgiver", "En fjerde arbeidsgiver")
+                val arbeidsgiverbransjer = listOf("En bransje", "En annen bransje", "En tredje bransje", "En fjerde bransje")
+                ArbeidsgiverinformasjonJson(it.asText(), arbeidsgivernavn.random(), listOf(arbeidsgiverbransjer.random()))
+            }
 
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagArbeidsgiverinformasjonløsning(
@@ -547,9 +557,7 @@ internal object Meldingssender {
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    navn = navn,
-                    bransjer = bransjer,
-                    ekstraArbeidsgivere = ekstraArbeidsgivere,
+                    ekstraArbeidsgivere = arbeidsgivere,
                     id = id,
                     hendelseId = hendelseId,
                     contextId = contextId

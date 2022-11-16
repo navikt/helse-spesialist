@@ -73,6 +73,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av arbeidsforhold`() {
         settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
         sendOverstyrtArbeidsforhold(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(

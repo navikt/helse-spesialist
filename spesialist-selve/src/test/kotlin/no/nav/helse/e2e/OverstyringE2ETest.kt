@@ -137,6 +137,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer arbeidsforhold`() {
         val godkjenningsbehovId = settOppBruker(orgnummereMedRelevanteArbeidsforhold = listOf(ORGNR_GHOST))
         sendOverstyrtArbeidsforhold(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             skjæringstidspunkt = 1.januar,
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
@@ -230,6 +233,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             subsumsjon = null
         )
         sendOverstyrtArbeidsforhold(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             skjæringstidspunkt = LocalDate.of(2018, 1, 1),
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(

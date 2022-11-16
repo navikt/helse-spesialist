@@ -27,6 +27,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendGosysOppgaveEndret
 import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
 import no.nav.helse.Meldingssender.sendOverstyrTidslinje
+import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
@@ -270,10 +271,11 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UUID.randomUUID(),
-        harOppdatertMetainfo: Boolean = false
+        harOppdatertMetainfo: Boolean = false,
+        andreArbeidsforhold: List<String> = emptyList()
     ) {
         nyUtbetalingId(utbetalingId)
-        sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId)
+        sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId, orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold)
         håndterUtbetalingOpprettet()
         if (!harOppdatertMetainfo) assertEtterspurteBehov("HentPersoninfoV2")
         else assertEtterspurteBehov("EgenAnsatt")
@@ -351,7 +353,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
     ) {
         sendArbeidsgiverinformasjonløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
@@ -361,16 +363,13 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        regelverksvarsler: List<String> = emptyList(),
+        regelverksvarsler: List<String> = emptyList()
     ) {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot(fødselsnummer = fødselsnummer, vedtaksperiodeId = vedtaksperiodeId, regelverksvarsler = regelverksvarsler)
         sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
         verify { snapshotClient.hentSnapshot(fødselsnummer) }
     }
-    protected fun håndterEgenansattløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-    ) {
+    protected fun håndterEgenansattløsning(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
         sendEgenAnsattløsning(aktørId, fødselsnummer, false)
     }
     protected fun håndterVergemålløsning(
@@ -420,6 +419,16 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_inntekt") {
             sendOverstyrtInntekt(aktørId, fødselsnummer, organisasjonsnummer)
+        }
+    }
+
+    protected fun håndterOverstyrArbeidsforhold(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR
+    ) {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
+            sendOverstyrtArbeidsforhold(aktørId, fødselsnummer, organisasjonsnummer)
         }
     }
 
