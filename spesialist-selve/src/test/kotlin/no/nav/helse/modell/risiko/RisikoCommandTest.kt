@@ -9,7 +9,7 @@ import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.Risikovurderingløsning
+import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -70,12 +70,14 @@ internal class RisikoCommandTest {
     @Test
     fun `Om vi har fått løsning på en rett vedtaksperiode lagres den`() {
         every { RISIKOVURDERING_DAO.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) } returns
-        context.add(Risikovurderingløsning(
+        context.add(
+            Risikovurderingløsning(
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = true,
             løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false)))
-        ))
+        )
+        )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
         assertFalse(context.harBehov())
@@ -85,12 +87,14 @@ internal class RisikoCommandTest {
     @Test
     fun `Om vi har fått løsning på en annen vedtaksperiode etterspør vi nytt behov`() {
         val enAnnenVedtaksperiodeId = UUID.randomUUID()
-        context.add(Risikovurderingløsning(
+        context.add(
+            Risikovurderingløsning(
             vedtaksperiodeId = enAnnenVedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = true,
             løsning = risikovurderingLøsning(funn = listOf(Risikofunn(kategori = listOf("test"), beskrivelse = "test", kreverSupersaksbehandler = false)))
-        ))
+        )
+        )
         val risikoCommand = risikoCommand()
         risikoCommand.assertFalse()
         assertTrue(context.harBehov())

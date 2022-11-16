@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.meldinger
+package no.nav.helse.mediator.meldinger.løsninger
 
 import java.time.LocalDateTime
 import java.util.UUID

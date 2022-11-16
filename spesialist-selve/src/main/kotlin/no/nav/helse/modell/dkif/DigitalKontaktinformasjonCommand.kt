@@ -1,6 +1,6 @@
 package no.nav.helse.modell.dkif
 
-import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.DigitalKontaktinformasjonløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory

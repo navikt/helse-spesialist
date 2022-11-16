@@ -2,7 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.meldinger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.kommando.Command
@@ -33,7 +33,7 @@ internal class AutomatiskAvvisningCommand(
         val utbetalingsfilter = utbetalingsfilter()
 
         if (!erEgenAnsatt && !tilhørerEnhetUtland && !underVergemål && utbetalingsfilter.kanUtbetales) {
-            if (utbetalingsfilter.plukketUtForUtbetalingTilSykmeldt) sikkerLogg.info("Plukket ut for utbetaling til sykmeldt", keyValue("fødselsnummer", fødselsnummer))
+            if (utbetalingsfilter.plukketUtForUtbetalingTilSykmeldt) sikkerLogg.info("Plukket ut for utbetaling til sykmeldt, {}", keyValue("fødselsnummer", fødselsnummer))
             return true
         }
 

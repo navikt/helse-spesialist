@@ -1,6 +1,6 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import no.nav.helse.mediator.meldinger.ÅpneGosysOppgaverløsning
+import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext

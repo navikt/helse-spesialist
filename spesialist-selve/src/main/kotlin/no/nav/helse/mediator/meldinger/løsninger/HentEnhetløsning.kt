@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.meldinger
+package no.nav.helse.mediator.meldinger.løsninger
 
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.person.PersonDao

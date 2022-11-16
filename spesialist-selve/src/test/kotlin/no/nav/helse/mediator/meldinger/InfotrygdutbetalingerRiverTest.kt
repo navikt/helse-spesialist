@@ -7,6 +7,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
 
 internal class InfotrygdutbetalingerRiverTest {
     private companion object {

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext

@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 
 internal class HentEnhetRiverTest {
     private companion object {

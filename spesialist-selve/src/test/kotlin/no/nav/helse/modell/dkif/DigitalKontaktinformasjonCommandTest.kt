@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.mediator.meldinger.DigitalKontaktinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.DigitalKontaktinformasjonløsning
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

@@ -1,8 +1,8 @@
 package no.nav.helse.modell.kommando
 
 import java.time.LocalDate
-import no.nav.helse.mediator.meldinger.Arbeidsgiverinformasjonløsning
-import no.nav.helse.mediator.meldinger.HentPersoninfoløsninger
+import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsninger
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import org.slf4j.LoggerFactory
 

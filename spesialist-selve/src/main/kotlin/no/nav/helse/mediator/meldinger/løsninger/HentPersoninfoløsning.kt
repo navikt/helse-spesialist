@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.meldinger
+package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate

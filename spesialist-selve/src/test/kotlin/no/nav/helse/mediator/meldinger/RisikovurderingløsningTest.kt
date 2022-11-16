@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 
 internal class RisikovurderingløsningTest {
 
