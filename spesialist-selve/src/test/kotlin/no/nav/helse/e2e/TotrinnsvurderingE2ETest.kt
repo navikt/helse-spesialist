@@ -30,6 +30,9 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt`() {
         settOppBruker()
         sendOverstyrtInntekt(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             månedligInntekt = 25000.0,
             fraMånedligInntekt = 25001.0,
             skjæringstidspunkt = 1.januar,

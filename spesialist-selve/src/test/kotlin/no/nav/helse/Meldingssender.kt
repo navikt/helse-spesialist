@@ -7,6 +7,9 @@ import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
+import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.VARSEL_KODE_1
 import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
@@ -153,24 +156,28 @@ internal object Meldingssender {
         }
 
     fun sendOverstyrtInntekt(
-        orgnr: String = Testdata.ORGNR,
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
         månedligInntekt: Double = 25000.0,
         fraMånedligInntekt: Double = 25001.0,
-        skjæringstidspunkt: LocalDate,
+        skjæringstidspunkt: LocalDate = 1.januar(1970),
         forklaring: String = "testbortforklaring",
-        subsumsjon: SubsumsjonJson?
+        subsumsjon: SubsumsjonJson? = SubsumsjonJson("8-28", "LEDD_1", "BOKSTAV_A")
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(
                 meldingsfabrikk.lagOverstyringInntekt(
-                    id = id,
-                    organisasjonsnummer = orgnr,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
                     månedligInntekt = månedligInntekt,
                     fraMånedligInntekt = fraMånedligInntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
-                    saksbehandlerEpost = Testdata.SAKSBEHANDLER_EPOST,
                     forklaring = forklaring,
-                    subsumsjon = subsumsjon
+                    subsumsjon = subsumsjon,
+                    saksbehandlerepost = SAKSBEHANDLER_EPOST,
+                    id = id
                 )
             )
         }
@@ -181,8 +188,8 @@ internal object Meldingssender {
         organisasjonsnummer: String,
         utbetalingId: UUID,
         type: String,
-        status: Utbetalingsstatus = NY,
-        forrigeStatus: Utbetalingsstatus = IKKE_UTBETALT,
+        status: Utbetalingsstatus = IKKE_UTBETALT,
+        forrigeStatus: Utbetalingsstatus = NY,
         arbeidsgiverFagsystemId: String = "LWCBIQLHLJISGREBICOHAU",
         personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF"
     ) {
@@ -733,9 +740,9 @@ internal object Meldingssender {
         fødselsnummer: String,
         organisasjonsnummer: String,
         dager: List<OverstyringDagDto> = listOf(OverstyringDagDto(1.januar(1970), Feriedag, Sykedag, null, 100)),
-        saksbehandlerident: String = Testdata.SAKSBEHANDLER_IDENT,
-        saksbehandlerepost: String = Testdata.SAKSBEHANDLER_EPOST,
-        saksbehandleroid: UUID = Testdata.SAKSBEHANDLER_OID
+        saksbehandlerident: String = SAKSBEHANDLER_IDENT,
+        saksbehandlerepost: String = SAKSBEHANDLER_EPOST,
+        saksbehandleroid: UUID = SAKSBEHANDLER_OID
     ): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(

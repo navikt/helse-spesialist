@@ -91,6 +91,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
     fun `saksbehandler overstyrer inntekt`() {
         val godkjenningsbehovId = settOppBruker()
         val hendelseId = sendOverstyrtInntekt(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             månedligInntekt = 25000.0,
             fraMånedligInntekt = 25001.0,
             skjæringstidspunkt = 1.januar,
@@ -217,7 +220,9 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
             )
         )
         sendOverstyrtInntekt(
-            orgnr = ORGNR,
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
             månedligInntekt = 15000.0,
             fraMånedligInntekt = 15001.0,
             skjæringstidspunkt = LocalDate.now(),

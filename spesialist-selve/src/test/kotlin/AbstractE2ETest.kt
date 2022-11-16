@@ -27,6 +27,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendGosysOppgaveEndret
 import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
 import no.nav.helse.Meldingssender.sendOverstyrTidslinje
+import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsning
@@ -287,7 +288,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, "UTBETALING")
     }
 
-    protected fun håndterUtbetalingForkastet(
+    private fun håndterUtbetalingForkastet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -407,12 +408,28 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR
     ) {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
+            sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
+        }
+    }
+
+    protected fun håndterOverstyrInntekt(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR
+    ) {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_inntekt") {
+            sendOverstyrtInntekt(aktørId, fødselsnummer, organisasjonsnummer)
+        }
+    }
+
+    private fun håndterOverstyring(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, overstyringHendelse: String, overstyringBlock: () -> Unit) {
         testRapid.reset()
-        sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
-        val overstyrTidslinjehendelser = testRapid.inspektør.hendelser("overstyr_tidslinje")
-        assertEquals(1, overstyrTidslinjehendelser.size)
-        val overstyrTidslinje = overstyrTidslinjehendelser.single()
-        val hendelseId = UUID.fromString(overstyrTidslinje["@id"].asText())
+        overstyringBlock()
+        val hendelser = testRapid.inspektør.hendelser(overstyringHendelse)
+        assertEquals(1, hendelser.size)
+        val overstyring = hendelser.single()
+        val hendelseId = UUID.fromString(overstyring["@id"].asText())
         håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
         håndterVedtaksperiodeEndret(forårsaketAvId = hendelseId)
         håndterGodkjenningsbehov(harOppdatertMetainfo = true)

@@ -660,18 +660,20 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     )
 
     fun lagOverstyringInntekt(
-        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
         organisasjonsnummer: String = "orgnr",
         begrunnelse: String = "begrunnelse",
-        forklaring: String = "forklaring",
-        saksbehandlerOid: UUID = UUID.randomUUID(),
-        saksbehandlerNavn: String = "saksbehandler",
-        saksbehandlerEpost: String = "saksbehandler@nav.no",
-        saksbehandlerident: String = "saksbehandlerIdent",
         månedligInntekt: Double = 25000.0,
         fraMånedligInntekt: Double = 25001.0,
         skjæringstidspunkt: LocalDate,
-        subsumsjon: SubsumsjonJson?
+        forklaring: String = "forklaring",
+        subsumsjon: SubsumsjonJson?,
+        saksbehandleroid: UUID = UUID.randomUUID(),
+        saksbehandlernavn: String = "saksbehandler",
+        saksbehandlerepost: String = "saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent",
+        id: UUID = UUID.randomUUID()
     ) = nyHendelse(
         id, "saksbehandler_overstyrer_inntekt", mutableMapOf<String, Any>(
             "aktørId" to aktørId,
@@ -679,10 +681,10 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "organisasjonsnummer" to organisasjonsnummer,
             "begrunnelse" to begrunnelse,
             "forklaring" to forklaring,
-            "saksbehandlerOid" to saksbehandlerOid,
+            "saksbehandlerOid" to saksbehandleroid,
             "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlerNavn,
-            "saksbehandlerEpost" to saksbehandlerEpost,
+            "saksbehandlerNavn" to saksbehandlernavn,
+            "saksbehandlerEpost" to saksbehandlerepost,
             "månedligInntekt" to månedligInntekt,
             "fraMånedligInntekt" to fraMånedligInntekt,
             "skjæringstidspunkt" to skjæringstidspunkt,

@@ -8,6 +8,7 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
+import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -16,14 +17,15 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
 
     @Test
     fun `ingen varsel om beslutteroppgave`() {
-        fremTilOppgave()
+        fremTilSaksbehandleroppgave()
 
         assertIngenVarsel(SB_BO_2, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_BO_3, VEDTAKSPERIODE_ID)
     }
 
     @Test
     fun `varsel om beslutteroppgave ved overstyring av dager`() {
-        fremTilOppgave()
+        fremTilSaksbehandleroppgave()
         håndterOverstyrTidslinje()
         håndterEgenansattløsning()
         håndterVergemålløsning()
@@ -31,6 +33,18 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         håndterÅpneOppgaverløsning()
 
         assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, Status.AKTIV)
+    }
+
+    @Test
+    fun `varsel om beslutteroppgave ved overstyring av inntekt`() {
+        fremTilSaksbehandleroppgave()
+        håndterOverstyrInntekt()
+        håndterEgenansattløsning()
+        håndterVergemålløsning()
+        håndterDigitalKontaktinformasjonløsning()
+        håndterÅpneOppgaverløsning()
+
+        assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, Status.AKTIV)
     }
 
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Status) {
@@ -68,7 +82,7 @@ internal class BeslutterE2ETest: AbstractE2ETest() {
         Assertions.assertEquals(0, antallVarsler)
     }
 
-    private fun fremTilOppgave() {
+    private fun fremTilSaksbehandleroppgave() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
         håndterGodkjenningsbehov()
