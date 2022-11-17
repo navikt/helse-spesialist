@@ -31,6 +31,14 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `lagrer ikke varsler dobbelt`() {
+        val unikId = UUID.randomUUID()
+        dao.lagreVarsel(unikId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE)
+        dao.lagreVarsel(unikId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE)
+        assertEquals(1, dao.alleVarslerFor(VEDTAKSPERIODE).size)
+    }
+
+    @Test
     fun `lagre varseldefinisjon`() {
         val definisjonId = UUID.randomUUID()
         dao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
