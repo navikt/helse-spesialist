@@ -13,7 +13,9 @@ import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.HentSnapshot
 import no.nav.helse.spesialist.api.graphql.enums.GraphQLVilkarsgrunnlagtype
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLRefusjonselement
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
@@ -355,43 +357,57 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         }
     }
 
-    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0): GraphQLPerson =
-        GraphQLPerson(
+    private fun snapshot(fødselsnummer: String = FØDSELSNUMMER, avviksprosent: Double = 0.0): GraphQLPerson {
+        val vilkårsgrunnlag = GraphQLSpleisVilkarsgrunnlag(
+            id = UUID.randomUUID().toString(),
+            vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
+            inntekter = emptyList(),
+            omregnetArsinntekt = 1_000_000.0,
+            sammenligningsgrunnlag = 1_000_000.0,
+            skjaeringstidspunkt = "2020-01-01",
+            sykepengegrunnlag = 1_000_000.0,
+            antallOpptjeningsdagerErMinst = 123,
+            avviksprosent = avviksprosent,
+            grunnbelop = 100_000,
+            sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(
+                grunnbelop = 100_000,
+                grense = 600_000,
+                virkningstidspunkt = "2020-01-01",
+            ),
+            oppfyllerKravOmMedlemskap = true,
+            oppfyllerKravOmMinstelonn = true,
+            oppfyllerKravOmOpptjening = true,
+            opptjeningFra = "2000-01-01",
+            arbeidsgiverrefusjoner = listOf(
+                GraphQLArbeidsgiverrefusjon(
+                    arbeidsgiver = ORGANISASJONSNUMMER,
+                    refusjonsopplysninger = listOf(
+                        GraphQLRefusjonselement(
+                            fom = "2020-01-01",
+                            tom = null,
+                            belop = 30000.0,
+                            meldingsreferanseId = UUID.randomUUID().toString()
+                        )
+                    )
+                )
+            ),
+        )
+
+        return GraphQLPerson(
             aktorId = AKTØRID,
             arbeidsgivere = emptyList(),
             dodsdato = null,
             fodselsnummer = fødselsnummer,
             versjon = 1,
-            vilkarsgrunnlag = emptyList(),
+            vilkarsgrunnlag = listOf(vilkårsgrunnlag),
             vilkarsgrunnlaghistorikk = listOf(
                 GraphQLVilkarsgrunnlaghistorikk(
                     id = "en-id",
-                    grunnlag = listOf(
-                        GraphQLSpleisVilkarsgrunnlag(
-                            id = UUID.randomUUID().toString(),
-                            vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.SPLEIS,
-                            inntekter = emptyList(),
-                            omregnetArsinntekt = 1_000_000.0,
-                            sammenligningsgrunnlag = 1_000_000.0,
-                            skjaeringstidspunkt = "2020-01-01",
-                            sykepengegrunnlag = 1_000_000.0,
-                            antallOpptjeningsdagerErMinst = 123,
-                            avviksprosent = avviksprosent,
-                            grunnbelop = 100_000,
-                            sykepengegrunnlagsgrense = GraphQLSykepengegrunnlagsgrense(
-                                grunnbelop = 100_000,
-                                grense = 600_000,
-                                virkningstidspunkt = "2020-01-01",
-                            ),
-                            oppfyllerKravOmMedlemskap = true,
-                            oppfyllerKravOmMinstelonn = true,
-                            oppfyllerKravOmOpptjening = true,
-                            opptjeningFra = "2000-01-01",
-                        )
-                    )
+                    grunnlag = listOf(vilkårsgrunnlag)
                 )
             )
         )
+    }
 
     protected data class Navn(
         val fornavn: String,

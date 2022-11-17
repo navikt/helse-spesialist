@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -13,7 +14,41 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
+    fun `henter refusjonsopplysninger`() {
+        mockSnapshot()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+
+        val body = runQuery(
+            """
+            {
+                person(fnr:"$FØDSELSNUMMER") {
+                    vilkarsgrunnlag {
+                        ... on VilkarsgrunnlagSpleis {
+                          arbeidsgiverrefusjoner {
+                            arbeidsgiver
+                            refusjonsopplysninger {
+                                fom,
+                                tom,
+                                belop,
+                                meldingsreferanseId
+                            }
+                        }
+                    }
+                }
+                }
+            }
+        """
+        )
+        val refusjonsopplysning =
+            body["data"]["person"]["vilkarsgrunnlag"].first()["arbeidsgiverrefusjoner"].first().get("refusjonsopplysninger").first()
+        assertEquals("2020-01-01", refusjonsopplysning["fom"].asText())
+        assertTrue(refusjonsopplysning["tom"].isNull)
+        assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
+
+    }
+    @Test
     fun `henter sykepengegrunnlagsgrense`() {
+        mockSnapshot()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(

@@ -84,6 +84,11 @@ type GraphQLArbeidsgiverinntekt {
   sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag
 }
 
+type GraphQLArbeidsgiverrefusjon {
+  arbeidsgiver: String!
+  refusjonsopplysninger: [GraphQLRefusjonselement!]!
+}
+
 type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   aktivitetslogg: [GraphQLAktivitet!]!
   beregningId: UUID!
@@ -203,6 +208,13 @@ type GraphQLRefusjon {
   sisteRefusjonsdag: LocalDate
 }
 
+type GraphQLRefusjonselement {
+  belop: Float!
+  fom: LocalDate!
+  meldingsreferanseId: UUID!
+  tom: LocalDate
+}
+
 type GraphQLRefusjonsendring {
   belop: Float!
   dato: LocalDate!
@@ -273,6 +285,7 @@ type GraphQLSoknadNav implements GraphQLHendelse {
 
 type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   antallOpptjeningsdagerErMinst: Int!
+  arbeidsgiverrefusjoner: [GraphQLArbeidsgiverrefusjon!]!
   avviksprosent: Float
   grunnbelop: Int!
   id: UUID!

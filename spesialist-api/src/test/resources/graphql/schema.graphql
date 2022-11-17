@@ -101,6 +101,18 @@ type Arbeidsgiverinntekt {
     sammenligningsgrunnlag: Sammenligningsgrunnlag
 }
 
+type Arbeidsgiverrefusjon {
+    arbeidsgiver: String!
+    refusjonsopplysninger: [Refusjonselement!]!
+}
+
+type Refusjonselement {
+    fom: String!
+    tom: String
+    meldingsreferanseId: String
+    belop: Float!
+}
+
 type Arbeidsgiveroppdrag implements Spennoppdrag {
     fagsystemId: String!
     linjer: [Utbetalingslinje!]!
@@ -388,6 +400,7 @@ type Person {
     tildeling: Tildeling
     versjon: Int!
     vilkarsgrunnlaghistorikk: [Vilkarsgrunnlaghistorikk!]!
+    vilkarsgrunnlag: [Vilkarsgrunnlag!]!
 }
 
 type Personinfo {
@@ -610,6 +623,7 @@ type VilkarsgrunnlagSpleis implements Vilkarsgrunnlag {
     avviksprosent: Float
     grunnbelop: Int!
     inntekter: [Arbeidsgiverinntekt!]!
+    arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]
     omregnetArsinntekt: Float!
     oppfyllerKravOmMedlemskap: Boolean
     oppfyllerKravOmMinstelonn: Boolean!
