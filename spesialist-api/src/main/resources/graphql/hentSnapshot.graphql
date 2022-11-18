@@ -59,6 +59,15 @@ fragment grunnlag on GraphQLVilkarsgrunnlag {
         }
         deaktivert
     }
+    arbeidsgiverrefusjoner {
+        arbeidsgiver
+        refusjonsopplysninger {
+            fom
+            tom
+            belop
+            meldingsreferanseId
+        }
+    }
     omregnetArsinntekt
     sammenligningsgrunnlag
     skjaeringstidspunkt
@@ -243,15 +252,6 @@ query HentSnapshot($fnr: String!) {
                 oppfyllerKravOmMinstelonn
                 oppfyllerKravOmOpptjening
                 opptjeningFra
-                arbeidsgiverrefusjoner {
-                    arbeidsgiver
-                    refusjonsopplysninger {
-                        fom
-                        tom
-                        belop
-                        meldingsreferanseId
-                    }
-                }
             }
         }
     }

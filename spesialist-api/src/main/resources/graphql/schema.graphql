@@ -46,6 +46,7 @@ interface GraphQLTidslinjeperiode {
 }
 
 interface GraphQLVilkarsgrunnlag {
+  arbeidsgiverrefusjoner: [GraphQLArbeidsgiverrefusjon!]!
   id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!
@@ -148,6 +149,7 @@ type GraphQLGhostPeriode {
 }
 
 type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
+  arbeidsgiverrefusjoner: [GraphQLArbeidsgiverrefusjon!]!
   id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
   omregnetArsinntekt: Float!

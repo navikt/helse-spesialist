@@ -37,6 +37,7 @@ interface Spennoppdrag {
 
 interface Vilkarsgrunnlag {
     inntekter: [Arbeidsgiverinntekt!]!
+    arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]
     omregnetArsinntekt: Float!
     sammenligningsgrunnlag: Float
     skjaeringstidspunkt: String!
@@ -611,6 +612,7 @@ type Utbetalingslinje {
 
 type VilkarsgrunnlagInfotrygd implements Vilkarsgrunnlag {
     inntekter: [Arbeidsgiverinntekt!]!
+    arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]
     omregnetArsinntekt: Float!
     sammenligningsgrunnlag: Float
     skjaeringstidspunkt: String!

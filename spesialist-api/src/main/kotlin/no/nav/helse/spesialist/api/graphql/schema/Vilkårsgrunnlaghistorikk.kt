@@ -12,6 +12,7 @@ interface Vilkarsgrunnlag {
     val id: UUIDString
     val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
     val inntekter: List<Arbeidsgiverinntekt>
+    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
     val omregnetArsinntekt: Double
     val sammenligningsgrunnlag: Double?
     val skjaeringstidspunkt: DateString
@@ -22,6 +23,7 @@ data class VilkarsgrunnlagInfotrygd(
     override val id: UUIDString,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
     override val inntekter: List<Arbeidsgiverinntekt>,
+    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     override val omregnetArsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val skjaeringstidspunkt: DateString,
@@ -36,7 +38,7 @@ data class VilkarsgrunnlagSpleis(
     override val sammenligningsgrunnlag: Double?,
     override val skjaeringstidspunkt: DateString,
     override val sykepengegrunnlag: Double,
-    val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
+    override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     val avviksprosent: Double?,
     val antallOpptjeningsdagerErMinst: Int,
     val grunnbelop: Int,
@@ -80,6 +82,7 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
             id = id,
             vilkarsgrunnlagtype = vilkarsgrunnlagtype.tilVilkarsgrunnlagtype(),
             inntekter = inntekter.map { it.tilArbeidsgiverinntekt() },
+            arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilArbeidsgiverrefusjon() },
             omregnetArsinntekt = omregnetArsinntekt,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             skjaeringstidspunkt = skjaeringstidspunkt,
