@@ -3,16 +3,17 @@ package no.nav.helse.modell.kommando
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.objectMapper
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
-import org.junit.jupiter.api.Assertions.assertNotNull
 
 internal class UtbetalingsgodkjenningCommandTest {
     private companion object {
@@ -28,6 +29,7 @@ internal class UtbetalingsgodkjenningCommandTest {
 
     private val behov = UtbetalingsgodkjenningMessage("""{ "@event_name": "behov" }""")
     private val dao = mockk<HendelseDao>()
+    private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
@@ -35,7 +37,21 @@ internal class UtbetalingsgodkjenningCommandTest {
     fun setup() {
         clearMocks(dao)
         commandContext = CommandContext(UUID.randomUUID())
-        command = UtbetalingsgodkjenningCommand(GODKJENT, IDENT, OID, EPOST, TIDSPUNKT, null, null, null, GODKJENNINGSBEHOV_ID, dao, GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)), vedtaksperiodeId, fødselsnummer)
+        command = UtbetalingsgodkjenningCommand(
+            godkjent = GODKJENT,
+            saksbehandlerIdent = IDENT,
+            oid = OID,
+            epostadresse = EPOST,
+            godkjenttidspunkt = TIDSPUNKT,
+            årsak = null,
+            begrunnelser = null,
+            kommentar = null,
+            godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
+            hendelseDao = dao,
+            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), varselRepository),
+            vedtaksperiodeId = vedtaksperiodeId,
+            fødselsnummer = fødselsnummer
+        )
     }
 
     @Test

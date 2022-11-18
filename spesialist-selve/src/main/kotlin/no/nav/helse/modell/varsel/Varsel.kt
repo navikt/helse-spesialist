@@ -15,7 +15,8 @@ internal class Varsel(
     internal enum class Status {
         AKTIV,
         INAKTIV,
-        GODKJENT
+        GODKJENT,
+        AVVIST
     }
 
     internal fun lagre(varselRepository: VarselRepository) {
@@ -36,6 +37,14 @@ internal class Varsel(
         result = 31 * result + opprettet.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
         return result
+    }
+
+    internal fun godkjennHvisAktiv(vedtaksperiodeId: UUID, ident: String, varselRepository: VarselRepository) {
+        varselRepository.godkjennFor(vedtaksperiodeId, varselkode, ident)
+    }
+
+    internal fun avvisHvisAktiv(vedtaksperiodeId: UUID, ident: String, varselRepository: VarselRepository) {
+        varselRepository.avvisFor(vedtaksperiodeId, varselkode, ident)
     }
 
     internal companion object {

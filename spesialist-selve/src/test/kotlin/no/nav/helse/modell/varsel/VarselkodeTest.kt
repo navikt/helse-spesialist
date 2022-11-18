@@ -25,6 +25,18 @@ internal class VarselkodeTest {
             TODO("Not yet implemented")
         }
 
+        override fun avvisFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
+            TODO("Not yet implemented")
+        }
+
+        override fun godkjennAlleFor(vedtaksperiodeId: UUID, ident: String) {
+            TODO("Not yet implemented")
+        }
+
+        override fun avvisAlleFor(vedtaksperiodeId: UUID, ident: String) {
+            TODO("Not yet implemented")
+        }
+
         override fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
             vedtaksperiodevarsler.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(varselkode)
         }

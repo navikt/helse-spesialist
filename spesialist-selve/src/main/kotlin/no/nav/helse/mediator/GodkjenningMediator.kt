@@ -13,11 +13,13 @@ import no.nav.helse.modell.kommando.CommandContext
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.varsel.VarselRepository
 
 internal class GodkjenningMediator(
     private val warningDao: WarningDao,
     private val vedtakDao: VedtakDao,
-    private val opptegnelseDao: OpptegnelseDao
+    private val opptegnelseDao: OpptegnelseDao,
+    private val varselRepository: VarselRepository
 ) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
@@ -29,6 +31,7 @@ internal class GodkjenningMediator(
         godkjenttidspunkt: LocalDateTime
     ) {
         behov.godkjennManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt)
+        varselRepository.godkjennAlleFor(vedtaksperiodeId, saksbehandlerIdent)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }
@@ -46,6 +49,7 @@ internal class GodkjenningMediator(
         kommentar: String?
     ) {
         behov.avvisManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
+        varselRepository.avvisAlleFor(vedtaksperiodeId, saksbehandlerIdent)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }

@@ -49,7 +49,7 @@ internal class SaksbehandlerløsningTest {
         json = HENDELSE_JSON,
         oppgaveDao = mockk(relaxed = true),
         hendelseDao = hendelseDao,
-        godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk()),
+        godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(), mockk(relaxed = true)),
     )
 
     private val context = CommandContext(randomUUID())

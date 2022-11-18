@@ -30,7 +30,12 @@ internal class AutomatiseringCommandTest {
             hendelseId,
             automatisering,
             """{ "@event_name": "behov" }""",
-            GodkjenningMediator(warningDao = mockk(relaxed = true), vedtakDao = mockk(relaxed = true), opptegnelseDao = mockk(relaxed = true)),
+            GodkjenningMediator(
+                warningDao = mockk(relaxed = true),
+                vedtakDao = mockk(relaxed = true),
+                opptegnelseDao = mockk(relaxed = true),
+                varselRepository = mockk(relaxed = true),
+            ),
         )
 
     private lateinit var context: CommandContext

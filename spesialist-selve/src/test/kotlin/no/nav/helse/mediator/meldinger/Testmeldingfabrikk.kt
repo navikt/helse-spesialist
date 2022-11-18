@@ -163,30 +163,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
     )
-    fun lagArbeidsgiverinformasjonløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson> = emptyList(),
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
-    ) = nyHendelse(
-        id, "behov", mapOf(
-            "@final" to true,
-            "@behov" to listOf("Arbeidsgiverinformasjon"),
-            "hendelseId" to "$hendelseId",
-            "contextId" to "$contextId",
-            "vedtaksperiodeId" to "$vedtaksperiodeId",
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "orgnummer" to organisasjonsnummer,
-            "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to ekstraArbeidsgivere.map(ArbeidsgiverinformasjonJson::toBody)
-            )
-        )
-    )
 
     fun lagArbeidsforholdløsning(
         aktørId: String,
@@ -279,29 +255,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
     )
-    fun lagPersoninfoløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String = "orgnr",
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-    ) = nyHendelse(
-        id, "behov", mapOf(
-            "@final" to true,
-            "@behov" to listOf("HentPersoninfoV2"),
-            "hendelseId" to "$hendelseId",
-            "contextId" to contextId,
-            "vedtaksperiodeId" to "$vedtaksperiodeId",
-            "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId,
-            "orgnummer" to organisasjonsnummer,
-            "@løsning" to mapOf(
-                "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer)
-            )
-        )
-    )
 
     fun lagHentInfotrygdutbetalingerløsning(
         id: UUID = UUID.randomUUID(),
@@ -309,44 +262,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr"
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@final" to true,
-                "@behov" to listOf("HentInfotrygdutbetalinger"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId",
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
-                "HentInfotrygdutbetalinger" to mapOf(
-                    "historikkFom" to "2017-01-01",
-                    "historikkTom" to "2020-12-31"
-                ),
-                "@løsning" to mapOf(
-                    "HentInfotrygdutbetalinger" to listOf(
-                        mapOf(
-                            "fom" to "2018-01-01",
-                            "tom" to "2018-01-31",
-                            "dagsats" to "1000.0",
-                            "grad" to "100",
-                            "typetekst" to "ArbRef",
-                            "organisasjonsnummer" to organisasjonsnummer
-                        )
-                    )
-                )
-            )
-        )
-
-    fun lagInfotrygdutbetalingerløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String = "orgnr",
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID()
     ) =
         nyHendelse(
             id, "behov", mapOf(
@@ -429,31 +344,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
-        enhet: String = OSLO
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@final" to true,
-                "@behov" to listOf("HentEnhet"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to contextId,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
-                "@løsning" to mapOf(
-                    "HentEnhet" to enhet
-                )
-            )
-        )
-    fun lagEnhetløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String = "orgnr",
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        id: UUID = UUID.randomUUID(),
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
         enhet: String = OSLO
     ) =
         nyHendelse(
@@ -611,19 +501,6 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
-    fun lagGosysOppgaveEndret(
-        aktørId: String,
-        fødselsnummer: String,
-        id: UUID,
-    ): String =
-        nyHendelse(
-            id,
-            "gosys_oppgave_endret", mutableMapOf(
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-            )
-        )
-
     fun lagRisikovurderingløsning(
         aktørId: String,
         fødselsnummer: String,
@@ -657,6 +534,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 )
             )
         )
+
 
     fun lagOverstyringTidslinje(
         aktørId: String,

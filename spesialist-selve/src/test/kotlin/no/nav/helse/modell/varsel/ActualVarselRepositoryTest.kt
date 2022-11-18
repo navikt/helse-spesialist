@@ -5,6 +5,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -41,6 +42,37 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         repository.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
         repository.godkjennFor(vedtaksperiodeId, "EN_KODE", "EN_IDENT")
         assertEquals(GODKJENT, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+    }
+
+    @Test
+    fun `kan godkjenne alle varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        generasjonDao.opprettFor(vedtaksperiodeId, UUID.randomUUID())
+        repository.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        repository.lagreVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        repository.godkjennAlleFor(vedtaksperiodeId, "EN_IDENT")
+        assertEquals(GODKJENT, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+        assertEquals(GODKJENT, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_ANNEN_KODE"))
+    }
+
+    @Test
+    fun `kan avvise varsel`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        generasjonDao.opprettFor(vedtaksperiodeId, UUID.randomUUID())
+        repository.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        repository.avvisFor(vedtaksperiodeId, "EN_KODE", "EN_IDENT")
+        assertEquals(AVVIST, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+    }
+
+    @Test
+    fun `kan avvise alle varsler`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        generasjonDao.opprettFor(vedtaksperiodeId, UUID.randomUUID())
+        repository.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        repository.lagreVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        repository.avvisAlleFor(vedtaksperiodeId, "EN_IDENT")
+        assertEquals(AVVIST, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_KODE"))
+        assertEquals(AVVIST, varselDao.finnVarselstatus(vedtaksperiodeId, "EN_ANNEN_KODE"))
     }
 
     @Test

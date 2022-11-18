@@ -7,38 +7,20 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.Meldingssender
-import no.nav.helse.Meldingssender.sendArbeidsforholdløsning
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
-import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsning
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsning
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
-import no.nav.helse.Meldingssender.sendEgenAnsattløsning
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
-import no.nav.helse.Meldingssender.sendEnhetløsning
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
-import no.nav.helse.Meldingssender.sendGosysOppgaveEndret
-import no.nav.helse.Meldingssender.sendInfotrygdutbetalingerløsning
-import no.nav.helse.Meldingssender.sendOverstyrTidslinje
-import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
-import no.nav.helse.Meldingssender.sendOverstyrtInntekt
-import no.nav.helse.Meldingssender.sendPersoninfoløsning
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
-import no.nav.helse.Meldingssender.sendRisikovurderingløsning
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
-import no.nav.helse.Meldingssender.sendSøknadSendt
-import no.nav.helse.Meldingssender.sendUtbetalingEndret
-import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
-import no.nav.helse.Meldingssender.sendVergemålløsning
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
-import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsning
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -62,7 +44,6 @@ import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.TestmeldingfabrikkUtenFnr
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -77,11 +58,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetaling.UtbetalingDao
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -151,16 +128,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val notatDao = NotatDao(dataSource)
     private val vergemålDao = VergemålDao(dataSource)
     protected val overstyringDao = OverstyringDao(dataSource)
-    protected val generasjonDao = GenerasjonDao(dataSource)
     protected val nyVarselDao = no.nav.helse.modell.varsel.VarselDao(dataSource)
+    private val varselRepository = ActualVarselRepository(dataSource)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val snapshotApiDao = SnapshotApiDao(dataSource)
     protected val snapshotMediator = SnapshotMediator(snapshotApiDao, snapshotClient)
 
     protected val testRapid = TestRapid()
-
-    private lateinit var utbetalingId: UUID
 
     protected val meldingsfabrikk get() = Testmeldingfabrikk(FØDSELSNUMMER, AKTØR)
     protected val meldingsfabrikkUtenFnr get() = TestmeldingfabrikkUtenFnr()
@@ -171,7 +146,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao),
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, varselRepository),
         overstyringMediator = OverstyringMediator(testRapid),
         automatisering = Automatisering(
             warningDao = warningDao,
@@ -219,238 +194,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         reservasjonClient = mockk(relaxed = true),
     )
 
-    private fun nyUtbetalingId(utbetalingId: UUID) {
-        this.utbetalingId = utbetalingId
-    }
-
     @BeforeEach
     internal fun resetTestSetup() {
         testRapid.reset()
         Meldingssender.testRapid = testRapid
-    }
-
-    protected fun håndterSøknad(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR
-    ) {
-        sendSøknadSendt(aktørId, fødselsnummer, organisasjonsnummer)
-        assertPersonEksisterer(fødselsnummer, aktørId)
-        assertArbeidsgiverEksisterer(organisasjonsnummer)
-    }
-
-    protected fun håndterVedtaksperiodeOpprettet(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
-    ) {
-        sendVedtaksperiodeEndret(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, forrigeTilstand = "START")
-        assertVedtaksperiodeEksisterer(vedtaksperiodeId)
-    }
-
-    private fun håndterVedtaksperiodeEndret(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        forårsaketAvId: UUID = UUID.randomUUID()
-    ) {
-        sendVedtaksperiodeEndret(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            forårsaketAvId = forårsaketAvId
-        )
-    }
-
-    protected fun håndterGodkjenningsbehov(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
-        harOppdatertMetainfo: Boolean = false,
-        andreArbeidsforhold: List<String> = emptyList()
-    ) {
-        nyUtbetalingId(utbetalingId)
-        sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId, orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold)
-        håndterUtbetalingOpprettet()
-        if (!harOppdatertMetainfo) assertEtterspurteBehov("HentPersoninfoV2")
-        else assertEtterspurteBehov("EgenAnsatt")
-    }
-
-    private fun håndterUtbetalingOpprettet(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR
-    ) {
-        sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, "UTBETALING")
-    }
-
-    private fun håndterUtbetalingForkastet(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-    ) {
-        sendUtbetalingEndret(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utbetalingId = utbetalingId,
-            type = "UTBETALING",
-            forrigeStatus = NY,
-            status = FORKASTET
-        )
-    }
-
-    protected fun håndterUtbetalingUtbetalt(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        utbetalingId: UUID = UTBETALING_ID
-    ) {
-        sendUtbetalingEndret(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            utbetalingId = utbetalingId,
-            type = "UTBETALING",
-            forrigeStatus = SENDT,
-            status = UTBETALT
-        )
-    }
-
-    protected fun håndterPersoninfoløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-    ) {
-        sendPersoninfoløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
-    }
-
-    protected fun håndterEnhetløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-    ) {
-        sendEnhetløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
-    }
-
-    protected fun håndterInfotrygdutbetalingerløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-    ) {
-        sendInfotrygdutbetalingerløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
-    }
-
-    protected fun håndterArbeidsgiverinformasjonløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID
-    ) {
-        sendArbeidsgiverinformasjonløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
-    }
-
-    protected fun håndterArbeidsforholdløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        regelverksvarsler: List<String> = emptyList()
-    ) {
-        every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot(fødselsnummer = fødselsnummer, vedtaksperiodeId = vedtaksperiodeId, regelverksvarsler = regelverksvarsler)
-        sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
-        verify { snapshotClient.hentSnapshot(fødselsnummer) }
-    }
-    protected fun håndterEgenansattløsning(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
-        sendEgenAnsattløsning(aktørId, fødselsnummer, false)
-    }
-    protected fun håndterVergemålløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        fullmakter: List<Fullmakt> = emptyList(),
-    ) {
-        val vergemål = Testmeldingfabrikk.VergemålJson(emptyList(), emptyList(), fullmakter)
-        sendVergemålløsning(aktørId, fødselsnummer, vergemål)
-    }
-
-    protected fun håndterDigitalKontaktinformasjonløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-    ) {
-        sendDigitalKontaktinformasjonløsning(aktørId, fødselsnummer)
-    }
-
-    protected fun håndterÅpneOppgaverløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        antall: Int = 0,
-        oppslagFeilet: Boolean = false,
-    ) {
-        sendÅpneGosysOppgaverløsning(aktørId, fødselsnummer, antall, oppslagFeilet)
-    }
-    protected fun håndterRisikovurderingløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        kanGodkjennesAutomatisk: Boolean = true,
-        risikofunn: List<Risikofunn> = emptyList(),
-    ) {
-        sendRisikovurderingløsning(aktørId, fødselsnummer, vedtaksperiodeId, kanGodkjennesAutomatisk, risikofunn)
-    }
-    protected fun håndterOverstyrTidslinje(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
-            sendOverstyrTidslinje(aktørId, fødselsnummer, organisasjonsnummer)
-        }
-    }
-
-    protected fun håndterOverstyrInntekt(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_inntekt") {
-            sendOverstyrtInntekt(aktørId, fødselsnummer, organisasjonsnummer)
-        }
-    }
-
-    protected fun håndterOverstyrArbeidsforhold(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
-            sendOverstyrtArbeidsforhold(aktørId, fødselsnummer, organisasjonsnummer)
-        }
-    }
-
-    private fun håndterOverstyring(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, overstyringHendelse: String, overstyringBlock: () -> Unit) {
-        testRapid.reset()
-        overstyringBlock()
-        val hendelser = testRapid.inspektør.hendelser(overstyringHendelse)
-        assertEquals(1, hendelser.size)
-        val overstyring = hendelser.single()
-        val hendelseId = UUID.fromString(overstyring["@id"].asText())
-        håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
-        håndterVedtaksperiodeEndret(forårsaketAvId = hendelseId)
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
-    }
-
-    protected fun håndterGosysOppgaveEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
-        sendGosysOppgaveEndret(aktørId, fødselsnummer)
-        assertEtterspurteBehov("ÅpneOppgaver")
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
@@ -505,7 +252,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun sendVedtakFattet(
         fødselsnummer: String,
-        vedtaksperiodeId: UUID
+        vedtaksperiodeId: UUID,
     ) {
         Meldingssender.sendVedtakFattet(fødselsnummer, vedtaksperiodeId)
     }
@@ -522,7 +269,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         saksbehandlerOid: UUID,
         godkjent: Boolean,
         begrunnelser: List<String>? = null,
-        kommentar: String? = null
+        kommentar: String? = null,
     ): UUID {
         hendelseMediator.håndter(
             godkjenningDTO = GodkjenningDTO(
@@ -563,7 +310,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertPersonEksisterer(fødselsnummer: String, aktørId: String) {
-        assertEquals(1, person(fødselsnummer, aktørId)) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
+        assertEquals(
+            1,
+            person(fødselsnummer, aktørId)
+        ) { "Person med fødselsnummer=$fødselsnummer og aktørId=$aktørId finnes ikke i databasen" }
     }
 
     protected fun assertPersonEksistererIkke(fødselsnummer: String, aktørId: String) {
@@ -571,7 +321,10 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
-        assertEquals(1, arbeidsgiver(organisasjonsnummer)) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
+        assertEquals(
+            1,
+            arbeidsgiver(organisasjonsnummer)
+        ) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
     protected fun person(fødselsnummer: String, aktørId: String): Int {
@@ -620,7 +373,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertGodkjenningsbehovløsning(
         godkjent: Boolean,
         saksbehandlerIdent: String,
-        block: (JsonNode) -> Unit = {}
+        block: (JsonNode) -> Unit = {},
     ) {
         testRapid.inspektør.løsning("Godkjenning").apply {
             assertTrue(path("godkjent").isBoolean)
@@ -634,7 +387,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertVedtaksperiodeAvvist(
         periodetype: String,
         begrunnelser: List<String>? = null,
-        kommentar: String? = null
+        kommentar: String? = null,
     ) {
         testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
             assertEquals(periodetype, it.path("periodetype").asText())
@@ -659,14 +412,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun assertBehov(vararg behov: String) {
         assertTrue(testRapid.inspektør.behov().containsAll(behov.toList()))
-    }
-
-    private fun assertEtterspurteBehov(vararg behov: String) {
-        val etterspurteBehov = testRapid.inspektør.behov()
-        assertEquals(behov.toList(), etterspurteBehov) {
-            val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
-            "Følgende behov ble ikke etterspurt: $ikkeEtterspurt\nEtterspurte behov: $etterspurteBehov\n"
-        }
     }
 
     protected fun assertIkkeEtterspurtBehov(behov: String) {
@@ -743,19 +488,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }.contains(forventet))
     }
 
-    protected fun assertInaktivWarning(forventet: String, vedtaksperiodeId: UUID) {
-        assertTrue(sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is not null)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
-                ).map { row -> row.string("melding") }.asList
-            )
-        }.contains(forventet))
-    }
-
     protected fun vedtaksperiode(
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
@@ -765,7 +497,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         utbetalingId: UUID,
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
-        risikofunn: List<Risikofunn> = emptyList()
+        risikofunn: List<Risikofunn> = emptyList(),
     ): UUID {
         every { snapshotClient.hentSnapshot(fødselsnummer) } returns snapshot
         val godkjenningsmeldingId = sendGodkjenningsbehov(

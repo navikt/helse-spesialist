@@ -11,14 +11,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.modell.varsel.VarselRepository
 
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val varselRepository = mockk<VarselRepository>(relaxed = true)
     private val mediator = GodkjenningMediator(
         warningDao = mockk(relaxed = true),
         vedtakDao = mockk(relaxed = true),
-        opptegnelseDao = opptegnelseDao
+        opptegnelseDao = opptegnelseDao,
+        varselRepository = varselRepository,
     )
 
     @BeforeEach

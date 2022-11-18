@@ -10,6 +10,7 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -38,19 +39,37 @@ internal class Saksbehandlerløsning(
     godkjenningsbehovhendelseId: UUID,
     hendelseDao: HendelseDao,
     private val oppgaveDao: OppgaveDao,
-    godkjenningMediator: GodkjenningMediator
+    godkjenningMediator: GodkjenningMediator,
 ) : Hendelse, MacroCommand() {
 
     override val commands = listOf(
-        UtbetalingsgodkjenningCommand(godkjent, saksbehandlerIdent, oid, epostadresse, godkjenttidspunkt, årsak, begrunnelser, kommentar, godkjenningsbehovhendelseId, hendelseDao, godkjenningMediator, vedtaksperiodeId(), fødselsnummer),
+        UtbetalingsgodkjenningCommand(
+            godkjent,
+            saksbehandlerIdent,
+            oid,
+            epostadresse,
+            godkjenttidspunkt,
+            årsak,
+            begrunnelser,
+            kommentar,
+            godkjenningsbehovhendelseId,
+            hendelseDao,
+            godkjenningMediator,
+            vedtaksperiodeId(),
+            fødselsnummer
+        ),
     )
 
     override fun fødselsnummer() = fødselsnummer
     override fun vedtaksperiodeId() = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
     override fun toJson() = json
 
-    internal class SaksbehandlerløsningRiver(rapidsConnection: RapidsConnection, private val mediator: HendelseMediator) : River.PacketListener {
+    internal class SaksbehandlerløsningRiver(
+        rapidsConnection: RapidsConnection,
+        private val mediator: HendelseMediator,
+    ) : River.PacketListener {
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
+
         init {
             River(rapidsConnection)
                 .apply {

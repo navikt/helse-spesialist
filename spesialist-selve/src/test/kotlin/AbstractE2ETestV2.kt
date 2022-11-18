@@ -429,7 +429,8 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             godkjenningsbehovId = godkjenningsbehovId,
             godkjent = godkjent
         )
-        assertUtgåendeMelding("vedtaksperiode_godkjent")
+        if (godkjent) assertUtgåendeMelding("vedtaksperiode_godkjent")
+        else assertUtgåendeMelding("vedtaksperiode_avvist")
         assertUtgåendeBehovløsning("Godkjenning")
     }
 

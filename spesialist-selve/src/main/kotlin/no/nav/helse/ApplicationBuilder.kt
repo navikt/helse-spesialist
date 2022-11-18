@@ -60,6 +60,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.tildeling.TildelingService
+import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -188,6 +189,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val vergemålDao = VergemålDao(dataSource)
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
+    private val varselRepository = ActualVarselRepository(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
@@ -309,15 +311,13 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         snapshotMediator = snapshotMediator,
     )
 
-    val godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao)
-    val overstyringMediator = OverstyringMediator(rapidsConnection)
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
-        godkjenningMediator = godkjenningMediator,
+        godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, varselRepository),
         automatisering = automatisering,
-        overstyringMediator = overstyringMediator,
+        overstyringMediator = OverstyringMediator(rapidsConnection),
         snapshotMediator = snapshotMediator,
     )
 

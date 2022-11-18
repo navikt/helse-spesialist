@@ -5,6 +5,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
@@ -15,6 +16,9 @@ internal interface VarselRepository {
     fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel>
     fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String)
     fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String)
+    fun avvisFor(vedtaksperiodeId: UUID, varselkode: String, ident: String)
+    fun godkjennAlleFor(vedtaksperiodeId: UUID, ident: String)
+    fun avvisAlleFor(vedtaksperiodeId: UUID, ident: String)
     fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID)
     fun lagreDefinisjon(
         id: UUID,
@@ -49,6 +53,21 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     override fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
         if (!erAktivFor(vedtaksperiodeId, varselkode)) return
         varselDao.oppdaterStatus(vedtaksperiodeId, varselkode, GODKJENT, ident)
+    }
+
+    override fun avvisFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
+        if (!erAktivFor(vedtaksperiodeId, varselkode)) return
+        varselDao.oppdaterStatus(vedtaksperiodeId, varselkode, AVVIST, ident)
+    }
+
+    override fun godkjennAlleFor(vedtaksperiodeId: UUID, ident: String) {
+        val varsler = varselDao.alleVarslerFor(vedtaksperiodeId)
+        varsler.forEach { it.godkjennHvisAktiv(vedtaksperiodeId, ident, this) }
+    }
+
+    override fun avvisAlleFor(vedtaksperiodeId: UUID, ident: String) {
+        val varsler = varselDao.alleVarslerFor(vedtaksperiodeId)
+        varsler.forEach { it.avvisHvisAktiv(vedtaksperiodeId, ident, this) }
     }
 
     override fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
