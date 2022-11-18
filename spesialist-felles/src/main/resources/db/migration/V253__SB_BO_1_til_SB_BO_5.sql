@@ -1,0 +1,1 @@
+UPDATE api_varseldefinisjon SET kode = 'SB_BO_5' WHERE kode = 'SB_BO_1';

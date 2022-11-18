@@ -23,6 +23,7 @@ enum class Varselkode(
     SB_BO_2("Beslutteroppgave: Overstyring av utbetalingsdager"),
     SB_BO_3("Beslutteroppgave: Overstyring av inntekt"),
     SB_BO_4("Beslutteroppgave: Overstyring av annet arbeidsforhold"),
+    SB_BO_5("Beslutteroppgave: Lovvalg og medlemskap og/eller overstyring av utbetalingsdager og/eller overstyring av inntekt og/eller overstyring av annet arbeidsforhold", avviklet = true),
     SB_EX_1("Det finnes åpne oppgaver på sykepenger i Gosys"),
     SB_EX_2("Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform", avviklet = true),
     SB_EX_3("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"),
