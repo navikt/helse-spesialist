@@ -57,6 +57,7 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
+            varselkode().nyttVarsel(vedtaksperiodeId, varselRepository)
             tellWarning(melding)
         }
         if (harFaresignalerFunn()) {
@@ -68,7 +69,7 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
-            SB_RV_1.nyttVarsel(vedtaksperiodeId, varselRepository = varselRepository)
+            SB_RV_1.nyttVarsel(vedtaksperiodeId, varselRepository)
             tellWarning(melding)
         }
     }

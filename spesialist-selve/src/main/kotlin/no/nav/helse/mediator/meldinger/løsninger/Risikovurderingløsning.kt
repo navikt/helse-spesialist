@@ -1,12 +1,19 @@
 package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.risiko.RisikovurderingDao
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
+import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.*
 
 internal class Risikovurderingløsning(
     private val vedtaksperiodeId: UUID,
@@ -36,18 +43,28 @@ internal class Risikovurderingløsning(
 
     internal fun arbeidsuførhetsmelding(): String =
         "Arbeidsuførhet, aktivitetsplikt og/eller medvirkning må vurderes." +
-            løsning["funn"]
-                .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
-                .map { it["beskrivelse"].asText() }
-                .takeIf { it.isNotEmpty() }
-                ?.let { "\n" + it.joinToString(" ") }
+                løsning["funn"]
+                    .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
+                    .map { it["beskrivelse"].asText() }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { "\n" + it.joinToString(" ") }
+
+    internal fun varselkode(): Varselkode {
+        val riskbeskrivelser = løsning["funn"]
+            .filter { funn -> funn["kategori"].toList().map(JsonNode::asText).contains("8-4") }
+            .map { it["beskrivelse"].asText() }
+        val feilmelding =
+            "Klarte ikke gjøre automatisk 8-4-vurdering p.g.a. teknisk feil. Kan godkjennes hvis alt ser greit ut."
+        if (riskbeskrivelser.contains(feilmelding)) return SB_RV_3
+        return SB_RV_2
+    }
 
     internal fun harFaresignalerFunn() =
         !kanGodkjennesAutomatisk && løsning["funn"].any { !it["kategori"].toList().map { it.asText() }.contains("8-4") }
 
     internal class V2River(
         rapidsConnection: RapidsConnection,
-        private val hendelseMediator: HendelseMediator
+        private val hendelseMediator: HendelseMediator,
     ) : River.PacketListener {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 

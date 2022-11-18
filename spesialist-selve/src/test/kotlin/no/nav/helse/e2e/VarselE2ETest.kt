@@ -20,6 +20,8 @@ import no.nav.helse.modell.varsel.Varselkode.SB_BO_4
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
+import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
+import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import no.nav.helse.modell.varsel.Varselkode.SB_VM_1
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -36,6 +38,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         assertIngenVarsel(SB_BO_4, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_VM_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
     }
@@ -156,6 +159,31 @@ internal class VarselE2ETest : AbstractE2ETest() {
         assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `varsel dersom teknisk feil ved sjekk av 8-4-knappetrykk`() {
+        fremTilSaksbehandleroppgave(
+            risikofunn = listOf(
+                Risikofunn(
+                    listOf("8-4", "EN_ANNEN_KATEGORI"),
+                    "Klarte ikke gjøre automatisk 8-4-vurdering p.g.a. teknisk feil. Kan godkjennes hvis alt ser greit ut.",
+                    false
+                )
+            )
+        )
+        assertVarsel(SB_RV_3, VEDTAKSPERIODE_ID, AKTIV)
+    }
+
+    @Test
+    fun `varsel ved manuell stans av automatisk behandling - 8-4`() {
+        fremTilSaksbehandleroppgave(
+            risikofunn = listOf(
+                Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false)
+            )
+        )
+        assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
+        assertVarsel(SB_RV_2, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     private fun assertVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID, status: Varsel.Status) {
