@@ -22,6 +22,7 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.mockk.mockk
 import java.net.ServerSocket
@@ -31,7 +32,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMe
 import no.nav.helse.spesialist.api.graphql.ContextFactory
 import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SchemaBuilder
-import no.nav.helse.spesialist.api.graphql.routes
+import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.oppgave.experimental.OppgavePagineringDao
 import no.nav.helse.spesialist.api.oppgave.experimental.OppgaveService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
@@ -92,7 +93,9 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         )
 
         setupHttpServer {
-            routes(graphQLServer)
+            route("graphql") {
+                queryHandler(graphQLServer)
+            }
         }
     }
 

@@ -11,8 +11,6 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.TestApplication
-import no.nav.helse.spesialist.api.Toggle
-import no.nav.helse.spesialist.api.ToggleHelpers.enable
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
@@ -58,8 +56,6 @@ import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 fun main() = runBlocking {
-    Toggle.GraphQLApi.enable()
-    Toggle.GraphQLPlayground.enable()
     TestApplication(4321).start { dataSource ->
         val snapshotApiDao = mockk<SnapshotApiDao>(relaxed = true)
         val personApiDao = mockk<PersonApiDao>(relaxed = true)

@@ -97,6 +97,7 @@ jobs:
                   IMAGE: ${{ needs.image_name.outputs.image }}
 
     deployProd:
+        if: ${{ false }}
         name: Deploy to prod
         needs: [image_name, build, deployDev]
         runs-on: ubuntu-latest

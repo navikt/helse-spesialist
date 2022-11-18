@@ -13,6 +13,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.util.UUID
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -85,14 +86,23 @@ fun Application.graphQLApi(
     )
 
     routing {
-        authenticate("oidc") {
-            routes(server)
+        route("graphql") {
+            authenticate("oidc") {
+                queryHandler(server)
+                playground()
+            }
+
+            if (erDev()) {
+                route("introspection") {
+                    queryHandler(server)
+                }
+            }
         }
     }
 }
 
-internal fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
-    post("graphql") {
+internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
+    post {
         val result = server.execute(call.request)
 
         if (result != null) {
@@ -100,7 +110,9 @@ internal fun Route.routes(server: GraphQLServer<ApplicationRequest>) {
             call.respond(json)
         }
     }
+}
 
+internal fun Route.playground() {
     get("playground") {
         call.respondText(buildPlaygroundHtml("graphql", "subscriptions"), ContentType.Text.Html)
     }
@@ -110,3 +122,5 @@ private fun buildPlaygroundHtml(graphQLEndpoint: String, subscriptionsEndpoint: 
     Application::class.java.classLoader.getResource("graphql-playground.html")?.readText()
         ?.replace("\${graphQLEndpoint}", graphQLEndpoint)?.replace("\${subscriptionsEndpoint}", subscriptionsEndpoint)
         ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
+
+private fun erDev() = "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME")

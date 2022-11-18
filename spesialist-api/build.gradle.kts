@@ -1,4 +1,4 @@
-import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateSDLTask
+import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 val testcontainersVersion = "1.17.3"
 val graphQLKotlinVersion = "6.2.5"
@@ -15,6 +15,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("io.ktor:ktor-server-netty:$ktorVersion")
 }
+
 val graphqlIntrospectSchema by tasks.getting(com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask::class) {
     endpoint.set("https://spleis-api.dev.intern.nav.no/graphql")
     outputFile.set(File("${project.projectDir}/src/main/resources/graphql/schema.graphql"))
@@ -24,7 +25,7 @@ val graphqlIntrospectSchema by tasks.getting(com.expediagroup.graphql.plugin.gra
 // Kan kjøres manuelt for å hente nytt schema.
 graphqlIntrospectSchema.enabled = System.getenv("CI") != "true"
 
-val graphqlGenerateClient by tasks.getting(com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask::class) {
+val graphqlGenerateClient by tasks.getting(GraphQLGenerateClientTask::class) {
     val baseDir = "${project.projectDir}/src/main/resources/graphql"
 
     serializer.set(com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.JACKSON)
@@ -40,13 +41,3 @@ val graphqlGenerateClient by tasks.getting(com.expediagroup.graphql.plugin.gradl
         dependsOn("graphqlIntrospectSchema")
     }
 }
-
-val graphqlGenerateSDL by tasks.getting(GraphQLGenerateSDLTask::class) {
-    packages.set(listOf(
-        "no.nav.helse.spesialist.api.graphql.schema",
-        "no.nav.helse.spesialist.api.graphql.mutation",
-        "no.nav.helse.spesialist.api.graphql.query",
-    ))
-}
-
-graphqlGenerateSDL.enabled = false

@@ -85,10 +85,6 @@ spec:
       value: 611669fa-de5c-4dc2-a0e8-6041a019992a
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
-    - name: GRAPHQL_ENABLED
-      value: "true"
-    - name: GRAPHQL_PLAYGROUND_ENABLED
-      value: "true"
     - name: BEHOLD_FORELENGELSER_TIL_UTS
       value: "true"
     - name: SPLEIS_API_URL
