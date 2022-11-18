@@ -18,11 +18,11 @@ import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_4
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
+import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
-import no.nav.helse.modell.varsel.Varselkode.SB_VM_1
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -36,11 +36,11 @@ internal class VarselE2ETest : AbstractE2ETest() {
         assertIngenVarsel(SB_BO_2, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_BO_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_BO_4, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_VM_1, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_IK_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_RV_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
     @Test
     fun `varsel om vergemål`() {
         fremTilSaksbehandleroppgave(fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)))
-        assertVarsel(SB_VM_1, VEDTAKSPERIODE_ID, AKTIV)
+        assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, AKTIV)
     }
 
     @Test
@@ -102,7 +102,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
     fun `ingen varsler dersom ingen åpne oppgaver eller oppslagsfeil`() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning()
-        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
     }
 
@@ -111,7 +111,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
-        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
         assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
@@ -123,7 +123,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 0)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
-        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
         assertInaktivWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
@@ -135,7 +135,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
-        assertIngenVarsel(SB_EX_4, VEDTAKSPERIODE_ID)
+        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
         assertWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
 
@@ -144,7 +144,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         fremTilÅpneOppgaverBehov()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
         håndterRisikovurderingløsning()
-        assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)
+        assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }
@@ -156,7 +156,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
-        assertVarsel(SB_EX_4, VEDTAKSPERIODE_ID, AKTIV)
+        assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
         assertWarning("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }

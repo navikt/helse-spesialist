@@ -2,7 +2,7 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -49,7 +49,7 @@ internal class VarselkodeTest {
     @Test
     fun `opprett nytt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        SB_EX_4.nyttVarsel(vedtaksperiodeId, varselRepository)
+        SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
 
         assertEquals(1, varselRepository.vedtaksperiodevarsler[vedtaksperiodeId]?.size)
     }
@@ -57,8 +57,8 @@ internal class VarselkodeTest {
     @Test
     fun `sjekker om varsel er aktivt`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        SB_EX_4.nyttVarsel(vedtaksperiodeId, varselRepository)
-        SB_EX_4.nyttVarsel(vedtaksperiodeId, varselRepository)
+        SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
+        SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
 
         assertEquals(1, varselRepository.vedtaksperiodevarsler[vedtaksperiodeId]?.size)
     }
@@ -66,8 +66,8 @@ internal class VarselkodeTest {
     @Test
     fun `deaktiverer varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        SB_EX_4.nyttVarsel(vedtaksperiodeId, varselRepository)
-        SB_EX_4.deaktiverFor(vedtaksperiodeId, varselRepository)
+        SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
+        SB_EX_3.deaktiverFor(vedtaksperiodeId, varselRepository)
 
         assertEquals(1, varselRepository.deaktiverteVarsler[vedtaksperiodeId]?.size)
     }

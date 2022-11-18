@@ -7,7 +7,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.varsel.Varselkode.SB_VM_1
+import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.tellWarning
@@ -41,7 +41,7 @@ internal class VergemålCommand(
         }
         if (løsning.harFullmakt()) {
             "Registert fullmakt på personen.".leggTilSomWarning()
-            SB_VM_1.nyttVarsel(vedtaksperiodeId, varselRepository = varselRepository)
+            SB_IK_1.nyttVarsel(vedtaksperiodeId, varselRepository = varselRepository)
         }
 
         return true

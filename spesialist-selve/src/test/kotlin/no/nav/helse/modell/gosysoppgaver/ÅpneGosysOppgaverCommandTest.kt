@@ -10,7 +10,7 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -93,6 +93,6 @@ internal class ÅpneGosysOppgaverCommandTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { dao.persisterÅpneGosysOppgaver(any()) }
         verify(exactly = 1) { warningDao.leggTilWarning(VEDTAKPERIODE_ID, forventetWarning) }
-        verify(exactly = 1) { varselRepository.lagreVarsel(any(), SB_EX_4.name, any(), VEDTAKPERIODE_ID) }
+        verify(exactly = 1) { varselRepository.lagreVarsel(any(), SB_EX_3.name, any(), VEDTAKPERIODE_ID) }
     }
 }

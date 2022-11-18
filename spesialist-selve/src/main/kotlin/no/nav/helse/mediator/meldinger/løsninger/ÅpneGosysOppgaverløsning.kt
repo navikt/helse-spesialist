@@ -9,7 +9,7 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
-import no.nav.helse.modell.varsel.Varselkode.SB_EX_4
+import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -49,10 +49,10 @@ internal class ÅpneGosysOppgaverløsning(
 
         if (oppslagFeilet) {
             leggTilWarning(warningDao, vedtaksperiodeId, melding)
-            leggTilVarsel(varselRepository, vedtaksperiodeId, SB_EX_4)
+            leggTilVarsel(varselRepository, vedtaksperiodeId, SB_EX_3)
         } else {
             setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
-            deaktiverVarsel(varselRepository, vedtaksperiodeId, SB_EX_4)
+            deaktiverVarsel(varselRepository, vedtaksperiodeId, SB_EX_3)
         }
     }
 
