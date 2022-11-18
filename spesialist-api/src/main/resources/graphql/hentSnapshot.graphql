@@ -76,7 +76,6 @@ query HentSnapshot($fnr: String!) {
                 tom
                 skjaeringstidspunkt
                 vilkarsgrunnlagId
-                vilkarsgrunnlaghistorikkId
                 deaktivert
             }
             generasjoner {
@@ -216,7 +215,6 @@ query HentSnapshot($fnr: String!) {
                             forsteFravaersdag
                             sisteRefusjonsdag
                         }
-                        vilkarsgrunnlaghistorikkId
                         vilkarsgrunnlagId
                     }
                 }
@@ -252,41 +250,6 @@ query HentSnapshot($fnr: String!) {
                         tom
                         belop
                         meldingsreferanseId
-                    }
-                }
-            }
-        }
-        vilkarsgrunnlaghistorikk {
-            id
-            grunnlag {
-                id
-                vilkarsgrunnlagtype
-                ...grunnlag
-                ... on GraphQLInfotrygdVilkarsgrunnlag {
-                    __typename
-                }
-                ... on GraphQLSpleisVilkarsgrunnlag {
-                    __typename
-                    antallOpptjeningsdagerErMinst
-                    avviksprosent
-                    grunnbelop
-                    sykepengegrunnlagsgrense {
-                        grunnbelop
-                        grense
-                        virkningstidspunkt
-                    }
-                    oppfyllerKravOmMedlemskap
-                    oppfyllerKravOmMinstelonn
-                    oppfyllerKravOmOpptjening
-                    opptjeningFra
-                    arbeidsgiverrefusjoner {
-                        arbeidsgiver
-                        refusjonsopplysninger {
-                            fom
-                            tom
-                            belop
-                            meldingsreferanseId
-                        }
                     }
                 }
             }

@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLRefusjonselement
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatDao
 import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
@@ -76,7 +75,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         personId: Long,
         arbeidsgiverId: Long,
         periode: Periode = PERIODE,
-        oppgavetype: Oppgavetype = Oppgavetype.SØKNAD
+        oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
@@ -117,7 +116,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettNotat(
         tekst: String = "Et notat",
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
-        vedtaksperiodeId: UUID = PERIODE.id
+        vedtaksperiodeId: UUID = PERIODE.id,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -210,7 +209,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGANISASJONSNUMMER,
-        bransjer: List<String> = emptyList()
+        bransjer: List<String> = emptyList(),
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val bransjeid = opprettBransjer(bransjer)
@@ -400,12 +399,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             fodselsnummer = fødselsnummer,
             versjon = 1,
             vilkarsgrunnlag = listOf(vilkårsgrunnlag),
-            vilkarsgrunnlaghistorikk = listOf(
-                GraphQLVilkarsgrunnlaghistorikk(
-                    id = "en-id",
-                    grunnlag = listOf(vilkårsgrunnlag)
-                )
-            )
         )
     }
 

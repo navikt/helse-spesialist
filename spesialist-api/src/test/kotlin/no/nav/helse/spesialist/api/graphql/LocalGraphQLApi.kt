@@ -244,7 +244,6 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
     ),
     refusjon = null,
     vilkarsgrunnlagId = null,
-    vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
     periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
 )
 
@@ -266,5 +265,4 @@ private fun enPerson() = GraphQLPerson(
     fodselsnummer = "01017012345",
     versjon = 1,
     vilkarsgrunnlag = emptyList(),
-    vilkarsgrunnlaghistorikk = emptyList(),
 )

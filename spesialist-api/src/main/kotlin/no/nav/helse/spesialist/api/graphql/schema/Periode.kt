@@ -441,8 +441,6 @@ data class BeregnetPeriode(
 
     fun vilkarsgrunnlagId(): UUIDString? = periode.vilkarsgrunnlagId
 
-    fun vilkarsgrunnlaghistorikkId(): UUIDString = periode.vilkarsgrunnlaghistorikkId
-
     fun risikovurdering(): Risikovurdering? =
         risikovurderingApiDao.finnRisikovurdering(UUID.fromString(vedtaksperiodeId()))?.let { vurdering ->
             Risikovurdering(

@@ -107,7 +107,6 @@ fun snapshot(
                                         skjaeringstidspunkt = "2020-01-01",
                                         refusjon = null,
                                         vilkarsgrunnlagId = null,
-                                        vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
                                         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
                                     )
                                 )
@@ -117,7 +116,6 @@ fun snapshot(
                 ),
                 dodsdato = null,
                 vilkarsgrunnlag = emptyList(),
-                vilkarsgrunnlaghistorikk = emptyList(),
             )
         )
     }

@@ -4,7 +4,6 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -55,25 +54,22 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
-                    vilkarsgrunnlaghistorikk {
-                        id,
-                        grunnlag {
-                            skjaeringstidspunkt
-                             ... on VilkarsgrunnlagSpleis {
-                                sykepengegrunnlagsgrense {
-                                    grunnbelop,
-                                    grense,
-                                    virkningstidspunkt
-                                }
-                             }
-                        }
+                    vilkarsgrunnlag {
+                        skjaeringstidspunkt
+                         ... on VilkarsgrunnlagSpleis {
+                            sykepengegrunnlagsgrense {
+                                grunnbelop,
+                                grense,
+                                virkningstidspunkt
+                            }
+                         }
                     }
                 }
             }
         """
         )
         val sykepengegrunnlagsgrense =
-            body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"].first()["sykepengegrunnlagsgrense"]
+            body["data"]["person"]["vilkarsgrunnlag"].first()["sykepengegrunnlagsgrense"]
 
         assertEquals(100_000, sykepengegrunnlagsgrense["grunnbelop"].asInt())
         assertEquals(600_000, sykepengegrunnlagsgrense["grense"].asInt())
@@ -94,32 +90,29 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
-                    vilkarsgrunnlaghistorikk {
-                        id,
-                        grunnlag {
-                            skjaeringstidspunkt
-                             ... on VilkarsgrunnlagSpleis {
-                                avviksprosent
-                             }
+                    vilkarsgrunnlag {
+                        skjaeringstidspunkt
+                        ... on VilkarsgrunnlagSpleis {
+                            avviksprosent
                         }
                     }
                 }
             }
         """
         )
-        val grunnlag = body["data"]["person"]["vilkarsgrunnlaghistorikk"].first()["grunnlag"]
+        val grunnlag = body["data"]["person"]["vilkarsgrunnlag"].first()
         val forventetError = objectMapper.readTree(
             """
             {
-                "message": "Can't serialize value (/person/vilkarsgrunnlaghistorikk[0]/grunnlag[0]/avviksprosent) : Expected type 'Float' but was 'Double'.",
-                "path": ["person", "vilkarsgrunnlaghistorikk", 0, "grunnlag", 0, "avviksprosent"]
+                "message": "Can't serialize value (/person/vilkarsgrunnlag[0]/avviksprosent) : Expected type 'Float' but was 'Double'.",
+                "path": ["person", "vilkarsgrunnlag", 0, "avviksprosent"]
             }
         """
         )
 
         assertEquals(forventetError, body["errors"].first())
         assertNotNull(grunnlag)
-        assertNull(grunnlag["avviksprosent"])
+        assertTrue(grunnlag["avviksprosent"].isNull)
     }
 
 }

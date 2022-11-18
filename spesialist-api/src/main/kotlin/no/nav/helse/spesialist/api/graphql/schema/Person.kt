@@ -118,9 +118,6 @@ data class Person(
 
     fun vilkarsgrunnlag(): List<Vilkarsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag() }
 
-    fun vilkarsgrunnlaghistorikk(): List<Vilkarsgrunnlaghistorikk> =
-        snapshot.vilkarsgrunnlaghistorikk.map { it.tilVilkarsgrunnlaghistorikk() }
-
     private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<GhostPeriode> =
         map {
             GhostPeriode(
@@ -129,7 +126,6 @@ data class Person(
                 tom = it.tom,
                 skjaeringstidspunkt = it.skjaeringstidspunkt,
                 vilkarsgrunnlagId = it.vilkarsgrunnlagId,
-                vilkarsgrunnlaghistorikkId = it.vilkarsgrunnlaghistorikkId,
                 deaktivert = it.deaktivert,
                 organisasjonsnummer = organisasjonsnummer
             )

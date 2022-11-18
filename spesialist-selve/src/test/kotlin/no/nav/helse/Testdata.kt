@@ -138,7 +138,6 @@ object Testdata {
                                             skjaeringstidspunkt = "2020-01-01",
                                             refusjon = null,
                                             vilkarsgrunnlagId = null,
-                                            vilkarsgrunnlaghistorikkId = UUID.randomUUID().toString(),
                                             periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
                                         )
                                     )
@@ -148,7 +147,6 @@ object Testdata {
                     ),
                     dodsdato = null,
                     vilkarsgrunnlag = emptyList(),
-                    vilkarsgrunnlaghistorikk = emptyList(),
                 )
             )
         }
@@ -160,7 +158,6 @@ object Testdata {
         utbetalingId: UUID,
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
-        aktivitetslogg: List<GraphQLAktivitet> = emptyList(),
     ): GraphQLClientResponse<HentSnapshot.Result> =
         snapshot(
             versjon, fødselsnummer, vedtaksperiodeId, utbetalingId,

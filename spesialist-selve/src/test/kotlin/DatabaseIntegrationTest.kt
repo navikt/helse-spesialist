@@ -420,7 +420,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ),
                     dodsdato = null,
                     vilkarsgrunnlag = emptyList(),
-                    vilkarsgrunnlaghistorikk = emptyList()
                 )
             )
         }

@@ -5,14 +5,8 @@ import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLInfotrygdVilkarsg
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
-import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLVilkarsgrunnlaghistorikk
 
 enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
-
-data class Vilkarsgrunnlaghistorikk(
-    val id: UUIDString,
-    val grunnlag: List<Vilkarsgrunnlag>
-)
 
 interface Vilkarsgrunnlag {
     val id: UUIDString
@@ -31,7 +25,7 @@ data class VilkarsgrunnlagInfotrygd(
     override val omregnetArsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val skjaeringstidspunkt: DateString,
-    override val sykepengegrunnlag: Double
+    override val sykepengegrunnlag: Double,
 ) : Vilkarsgrunnlag
 
 data class VilkarsgrunnlagSpleis(
@@ -50,7 +44,7 @@ data class VilkarsgrunnlagSpleis(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
-    val opptjeningFra: DateString
+    val opptjeningFra: DateString,
 ) : Vilkarsgrunnlag
 
 private fun GraphQLVilkarsgrunnlagtype.tilVilkarsgrunnlagtype(): Vilkarsgrunnlagtype =
@@ -95,17 +89,11 @@ internal fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(): Vilkarsgrunnlag =
         else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
     }
 
-internal fun GraphQLVilkarsgrunnlaghistorikk.tilVilkarsgrunnlaghistorikk(): Vilkarsgrunnlaghistorikk =
-    Vilkarsgrunnlaghistorikk(
-        id = id,
-        grunnlag = grunnlag.map { it.tilVilkarsgrunnlag() }
-    )
-
 internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
     Sykepengegrunnlagsgrense(grunnbelop, grense, virkningstidspunkt)
 
 data class Sykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
-    val virkningstidspunkt: DateString
+    val virkningstidspunkt: DateString,
 )
