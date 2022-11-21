@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -61,6 +62,63 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId
         )
         assertEquals(3, utbetalinger().size)
+    }
+
+    @Test
+    fun `utbetaling endret lagres ikke dobbelt`() {
+        val opprettet = LocalDateTime.now()
+        settOppBruker()
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = GODKJENT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+            opprettet = opprettet
+        )
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = GODKJENT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+            opprettet = opprettet
+        )
+
+        assertEquals(1, utbetalinger().size)
+    }
+
+    @Test
+    fun `tillater samme status ved et senere tidspunkt`() {
+        val opprettet = LocalDateTime.now()
+        val senereTidspunkt = opprettet.plusSeconds(10)
+        settOppBruker()
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = GODKJENT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+            opprettet = opprettet
+        )
+        sendUtbetalingEndret(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            organisasjonsnummer = ORGNR,
+            utbetalingId = UTBETALING_ID,
+            type = "UTBETALING",
+            status = GODKJENT,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+            opprettet = senereTidspunkt
+        )
+
+        assertEquals(2, utbetalinger().size)
     }
 
     @Test

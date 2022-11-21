@@ -199,14 +199,15 @@ internal object Meldingssender {
         status: Utbetalingsstatus = IKKE_UTBETALT,
         forrigeStatus: Utbetalingsstatus = NY,
         arbeidsgiverFagsystemId: String = "LWCBIQLHLJISGREBICOHAU",
-        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF"
+        personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
+        opprettet: LocalDateTime = LocalDateTime.now(),
     ) {
         uuid.also { id ->
             @Language("JSON")
             val json = """{
                 "@event_name": "utbetaling_endret",
                 "@id": "$id",
-                "@opprettet": "${LocalDateTime.now()}",
+                "@opprettet": "$opprettet",
                 "utbetalingId": "$utbetalingId",
                 "aktørId":"$aktørId",
                 "fødselsnummer": "$fødselsnummer",

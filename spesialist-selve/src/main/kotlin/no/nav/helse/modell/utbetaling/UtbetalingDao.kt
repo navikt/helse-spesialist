@@ -1,12 +1,12 @@
 package no.nav.helse.modell.utbetaling
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import org.intellij.lang.annotations.Language
 
 class UtbetalingDao(private val dataSource: DataSource) {
 
@@ -43,7 +43,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO utbetaling ( utbetaling_id_ref, status, opprettet, data )
-            VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json))
+            VALUES (:utbetalingIdRef, CAST(:status as utbetaling_status), :opprettet, CAST(:json as json)) ON CONFLICT (status, opprettet, utbetaling_id_ref) DO NOTHING;
         """
         sessionOf(dataSource).use {
             it.run(
