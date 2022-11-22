@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
+import AbstractE2ETestV2
 import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
@@ -24,10 +24,11 @@ import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class VarselE2ETest : AbstractE2ETest() {
+internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `ingen varsel`() {
@@ -76,7 +77,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
 
     @Test
     fun `varsel om beslutteroppgave ved overstyring av arbeidsforhold`() {
-        fremTilSaksbehandleroppgave(andreArbeidsgivere = listOf(Testdata.ORGNR_GHOST))
+        fremTilSaksbehandleroppgave(andreArbeidsforhold = listOf(Testdata.ORGNR_GHOST))
         håndterOverstyrArbeidsforhold(organisasjonsnummer = Testdata.ORGNR_GHOST)
         håndterEgenansattløsning()
         håndterVergemålløsning()
@@ -221,6 +222,32 @@ internal class VarselE2ETest : AbstractE2ETest() {
         assertEquals(0, antallVarsler)
     }
 
+    private fun assertWarning(forventet: String, vedtaksperiodeId: UUID) {
+        Assertions.assertTrue(sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is null)",
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId
+                    )
+                ).map { row -> row.string("melding") }.asList
+            )
+        }.contains(forventet))
+    }
+
+    private fun assertInaktivWarning(forventet: String, vedtaksperiodeId: UUID) {
+        Assertions.assertTrue(sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    "SELECT melding FROM warning WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId) and (inaktiv_fra is not null)",
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId
+                    )
+                ).map { row -> row.string("melding") }.asList
+            )
+        }.contains(forventet))
+    }
+
     private fun fremTilÅpneOppgaverBehov() {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
@@ -233,27 +260,5 @@ internal class VarselE2ETest : AbstractE2ETest() {
         håndterEgenansattløsning()
         håndterVergemålløsning()
         håndterDigitalKontaktinformasjonløsning()
-    }
-
-    private fun fremTilSaksbehandleroppgave(
-        andreArbeidsgivere: List<String> = emptyList(),
-        regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
-    ) {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsgivere)
-        håndterPersoninfoløsning()
-        håndterEnhetløsning()
-        håndterInfotrygdutbetalingerløsning()
-        if (andreArbeidsgivere.isNotEmpty()) håndterArbeidsgiverinformasjonløsning()
-        håndterArbeidsgiverinformasjonløsning()
-        håndterArbeidsforholdløsning(regelverksvarsler = regelverksvarsler)
-        håndterEgenansattløsning()
-        håndterVergemålløsning(fullmakter = fullmakter)
-        håndterDigitalKontaktinformasjonløsning()
-        håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false, risikofunn = risikofunn)
     }
 }

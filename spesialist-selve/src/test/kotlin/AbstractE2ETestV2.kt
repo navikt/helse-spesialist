@@ -45,21 +45,26 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
         this.utbetalingId = utbetalingId
     }
 
-    protected fun fremTilSaksbehandleroppgave(andreArbeidsforhold: List<String> = emptyList()) {
+    protected fun fremTilSaksbehandleroppgave(
+        andreArbeidsforhold: List<String> = emptyList(),
+        regelverksvarsler: List<String> = emptyList(),
+        fullmakter: List<Fullmakt> = emptyList(),
+        risikofunn: List<Risikofunn> = emptyList(),
+    ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov()
+        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsforhold)
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
         if (andreArbeidsforhold.isNotEmpty()) håndterArbeidsgiverinformasjonløsning()
         håndterArbeidsgiverinformasjonløsning()
-        håndterArbeidsforholdløsning()
+        håndterArbeidsforholdløsning(regelverksvarsler = regelverksvarsler)
         håndterEgenansattløsning()
-        håndterVergemålløsning()
+        håndterVergemålløsning(fullmakter = fullmakter)
         håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
-        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
+        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false, risikofunn = risikofunn)
     }
 
     protected fun håndterSøknad(
