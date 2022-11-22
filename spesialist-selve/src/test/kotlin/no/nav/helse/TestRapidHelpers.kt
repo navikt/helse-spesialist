@@ -2,8 +2,8 @@ package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 
 object TestRapidHelpers {
     fun TestRapid.RapidInspector.meldinger() =
@@ -28,6 +28,12 @@ object TestRapidHelpers {
         løsninger()
             .last { it.path("@behov").map(JsonNode::asText).contains(behov) }
             .path("@løsning").path(behov)
+
+    fun TestRapid.RapidInspector.løsningOrNull(behov: String): JsonNode? =
+        løsninger()
+            .lastOrNull { it.path("@behov").map(JsonNode::asText).contains(behov) }
+            ?.path("@løsning")
+            ?.path(behov)
 
     fun TestRapid.RapidInspector.contextId(): UUID =
         (hendelser("behov")

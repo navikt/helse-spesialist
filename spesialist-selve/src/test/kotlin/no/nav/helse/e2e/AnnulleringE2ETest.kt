@@ -1,36 +1,24 @@
 package no.nav.helse.e2e
 
-import AbstractE2ETest
-import no.nav.helse.Testdata.FØDSELSNUMMER
-import io.mockk.every
-import java.util.UUID
-import no.nav.helse.Meldingssender.sendUtbetalingAnnullert
-import no.nav.helse.Testdata.snapshot
+import AbstractE2ETestV2
+import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
+import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
+import no.nav.helse.Testdata.SAKSBEHANDLER_OID
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import org.junit.jupiter.api.Test
 
-internal class AnnulleringE2ETest : AbstractE2ETest() {
-    private val vedtaksperiodeId1: UUID = UUID.randomUUID()
-    private val vedtaksperiodeId2: UUID = UUID.randomUUID()
-    private val snapshotV1 = snapshot(1)
-    private val snapshotV2 = snapshot(2)
-    private val snapshotFinal = snapshot(3)
+internal class AnnulleringE2ETest : AbstractE2ETestV2() {
+    private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
     @Test
-    fun `utbetaling annullert oppdaterer alle snapshots på personen`() {
-        val oid = UUID.randomUUID()
-        val navn = "en saksbehandler"
-        val epost = "saksbehandler_epost"
-        val ident = "Z999999"
-        saksbehandlerDao.opprettSaksbehandler(oid, navn, epost, ident)
-        vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId1, snapshot = snapshotV1, utbetalingId = UUID.randomUUID())
-        vedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2, snapshot = snapshotV2, utbetalingId = UUID.randomUUID())
-
-        assertVedtaksperiodeEksisterer(vedtaksperiodeId2)
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
-        sendUtbetalingAnnullert(saksbehandlerEpost = epost)
-
-        assertSnapshot(snapshotFinal, vedtaksperiodeId1)
-        assertSnapshot(snapshotFinal, vedtaksperiodeId2)
+    fun `annullert utbetaling medfører at snapshot blir oppdatert`() {
+        fremTilSaksbehandleroppgave()
+        håndterSaksbehandlerløsning()
+        håndterVedtakFattet()
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_IDENT)
+        assertNyttSnapshot {
+            håndterUtbetalingAnnullert()
+        }
     }
-
 }
