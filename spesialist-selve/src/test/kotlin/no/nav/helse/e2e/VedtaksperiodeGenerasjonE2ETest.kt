@@ -61,7 +61,8 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         fremTilSaksbehandleroppgave()
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true)
+
+        håndterGodkjenningsbehov(harOppdatertMetainfo = true) //revurdering
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertLåsteGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }

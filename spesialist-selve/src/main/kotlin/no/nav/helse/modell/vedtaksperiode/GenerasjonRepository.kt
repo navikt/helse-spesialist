@@ -39,9 +39,8 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
             return
         }
-        dao.opprettFor(vedtaksperiodeId, hendelseId).also {
-            it.loggOpprettet(vedtaksperiodeId)
-        }
+        dao.opprettFor(vedtaksperiodeId, hendelseId)
+            .loggOpprettet(vedtaksperiodeId)
     }
 
     override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID) {

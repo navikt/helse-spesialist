@@ -61,6 +61,7 @@ internal class VedtaksperiodeOpprettet(
                 validate {
                     it.demandValue("@event_name", "vedtaksperiode_endret")
                     it.demandValue("forrigeTilstand", "START")
+                    it.rejectValue("gjeldendeTilstand", "TIL_INFOTRYGD")
                     it.requireKey(
                         "@id", "fødselsnummer", "organisasjonsnummer", "vedtaksperiodeId", "fom", "tom"
                     )
