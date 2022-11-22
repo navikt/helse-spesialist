@@ -1,10 +1,9 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -19,7 +18,7 @@ internal class VedtakFattet(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val json: String,
-    private val generasjonDao: GenerasjonDao
+    private val generasjonRepository: GenerasjonRepository
 ) : Hendelse {
 
     private companion object {
@@ -59,13 +58,7 @@ internal class VedtakFattet(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        generasjonDao.låsFor(vedtaksperiodeId, id)?.also {
-            sikkerLogg.info(
-                "Låser generasjon {} for {}",
-                keyValue("generasjonId", it),
-                keyValue("vedtaksperiodeId", vedtaksperiodeId)
-            )
-        }
+        generasjonRepository.låsFor(vedtaksperiodeId, id)
         return true
     }
 }

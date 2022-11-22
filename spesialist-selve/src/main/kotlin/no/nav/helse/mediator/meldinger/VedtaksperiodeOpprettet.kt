@@ -4,12 +4,15 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OpprettFørsteVedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.kommando.OpprettMinimaltVedtakCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -28,6 +31,7 @@ internal class VedtaksperiodeOpprettet(
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
     vedtakDao: VedtakDao,
+    generasjonRepository: GenerasjonRepository,
     private val json: String,
 ) : Hendelse, MacroCommand() {
 
@@ -35,8 +39,16 @@ internal class VedtaksperiodeOpprettet(
     override fun toJson(): String = json
 
     override val commands: List<Command> = listOf(
-        OpprettMinimaltVedtakCommand(fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, personDao, arbeidsgiverDao, vedtakDao)
-    )
+        OpprettMinimaltVedtakCommand(fødselsnummer, organisasjonsnummer, vedtaksperiodeId, fom, tom, personDao, arbeidsgiverDao, vedtakDao),
+    ).let {
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
+            it + OpprettFørsteVedtaksperiodeGenerasjonCommand(
+                vedtaksperiodeId = vedtaksperiodeId,
+                hendelseId = id,
+                generasjonRepository = generasjonRepository,
+            )
+        } else it
+    }
 
     internal class River(
         rapidsConnection: RapidsConnection,

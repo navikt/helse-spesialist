@@ -51,7 +51,6 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
-import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -95,7 +94,6 @@ internal class Hendelsefabrikk(
     private val arbeidsforholdDao: ArbeidsforholdDao = ArbeidsforholdDao(dataSource),
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
-    private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
     private val generasjonRepository: GenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
@@ -645,6 +643,7 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            generasjonRepository = generasjonRepository,
             json = json,
         )
     }
@@ -661,6 +660,7 @@ internal class Hendelsefabrikk(
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,
             vedtakDao = vedtakDao,
+            generasjonRepository = generasjonRepository,
             json = json,
         )
     }
@@ -708,7 +708,7 @@ internal class Hendelsefabrikk(
     }
 
     fun vedtakFattet(id: UUID, fødselsnummer: String, vedtaksperiodeId: UUID, json: String): VedtakFattet {
-        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, generasjonDao)
+        return VedtakFattet(id, fødselsnummer, vedtaksperiodeId, json, generasjonRepository)
     }
 
     fun vedtakFattet(json: String): VedtakFattet {
@@ -718,7 +718,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             json,
-            generasjonDao
+            generasjonRepository
         )
     }
 

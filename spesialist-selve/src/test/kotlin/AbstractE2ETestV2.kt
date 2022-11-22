@@ -87,19 +87,21 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 
-    private fun håndterVedtaksperiodeEndret(
+    protected fun håndterVedtaksperiodeEndret(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        forårsaketAvId: UUID = UUID.randomUUID()
+        forårsaketAvId: UUID = UUID.randomUUID(),
+        erRevurdering: Boolean = false
     ) {
         meldingssenderV2.sendVedtaksperiodeEndret(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
+            forrigeTilstand = if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
             forårsaketAvId = forårsaketAvId
         )
     }
@@ -112,9 +114,10 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
     private fun håndterUtbetalingOpprettet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR
+        organisasjonsnummer: String = ORGNR,
+        utbetalingtype: String = "UTBETALING"
     ) {
-        meldingssenderV2.sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, "UTBETALING")
+        meldingssenderV2.sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, utbetalingtype)
     }
 
     private fun håndterUtbetalingForkastet(
@@ -185,9 +188,24 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
         harOppdatertMetainfo: Boolean = false,
         andreArbeidsforhold: List<String> = emptyList()
     ) {
+        val erRevurdering = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT true FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND låst = true ORDER BY id DESC"
+            session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
+        }
+
         nyUtbetalingId(utbetalingId)
-        meldingssenderV2.sendGodkjenningsbehov(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, utbetalingId, orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold)
-        håndterUtbetalingOpprettet()
+        håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
+        håndterVedtaksperiodeEndret(erRevurdering = erRevurdering)
+        meldingssenderV2.sendGodkjenningsbehov(
+            aktørId,
+            fødselsnummer,
+            organisasjonsnummer,
+            vedtaksperiodeId,
+            utbetalingId,
+            orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold
+        )
         if (!harOppdatertMetainfo) assertEtterspurteBehov("HentPersoninfoV2")
         else assertEtterspurteBehov("EgenAnsatt")
     }

@@ -17,18 +17,20 @@ class Generasjon(
 
     internal fun forsøkOpprettNeste(
         hendelseId: UUID,
-        opprettBlock: (vedtaksperiodeId: UUID, hendelseId: UUID) -> Unit,
-    ) {
+        opprettBlock: (vedtaksperiodeId: UUID, hendelseId: UUID) -> Generasjon,
+    ): Generasjon? {
         if (!låst) {
             sikkerlogg.info(
                 "Oppretter ikke ny generasjon for {} da nåværende generasjon med {} er ulåst",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("id", id)
             )
-            return
+            return null
         }
-        opprettBlock(vedtaksperiodeId, hendelseId)
+        return opprettBlock(vedtaksperiodeId, hendelseId)
     }
+
+    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, låst=$låst"
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Generasjon

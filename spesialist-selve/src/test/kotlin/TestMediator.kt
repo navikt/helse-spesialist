@@ -54,12 +54,12 @@ internal class TestMediator(
 
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = dataSource,
-        automatisering = automatisering,
-        godkjenningMediator = godkjenningMediator,
+        snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
+        godkjenningMediator = godkjenningMediator,
+        automatisering = automatisering,
         overstyringMediator = overstyringMediator,
-        snapshotMediator = snapshotMediator,
-        snapshotClient = snapshotClient
+        snapshotMediator = snapshotMediator
     )
 
     init {
