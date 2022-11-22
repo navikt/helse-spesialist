@@ -6,7 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class VedtaksperiodeGenerasjonCommand(
+internal class OpprettFørsteVedtaksperiodeGenerasjonCommand(
     val vedtaksperiodeId: UUID,
     val vedtaksperiodeEndretHendelseId: UUID,
     val generasjonRepository: GenerasjonRepository,
@@ -18,7 +18,7 @@ internal class VedtaksperiodeGenerasjonCommand(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        generasjonRepository.forsøkOpprett(vedtaksperiodeId, vedtaksperiodeEndretHendelseId).also {
+        generasjonRepository.opprettFørste(vedtaksperiodeId, vedtaksperiodeEndretHendelseId).also {
             sikkerLogg.info(
                 "Opprettet ny generasjon = {} for vedtaksperiode = {} på grunn av vedtaksperiode_endret = {}",
                 keyValue("generasjonId", it),

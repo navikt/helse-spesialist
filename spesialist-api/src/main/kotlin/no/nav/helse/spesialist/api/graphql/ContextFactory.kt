@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
+private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
 data class AuthorizedContext(val kanSeKode7: Boolean) : GraphQLContext
 

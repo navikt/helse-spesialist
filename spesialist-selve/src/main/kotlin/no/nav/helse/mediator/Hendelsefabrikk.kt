@@ -17,7 +17,6 @@ import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
-import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
@@ -26,6 +25,7 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
@@ -50,7 +50,9 @@ import no.nav.helse.modell.varsel.ActualVarselRepository
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
@@ -94,6 +96,7 @@ internal class Hendelsefabrikk(
     private val utbetalingDao: UtbetalingDao = UtbetalingDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao = OpptegnelseDao(dataSource),
     private val generasjonDao: GenerasjonDao = GenerasjonDao(dataSource),
+    private val generasjonRepository: GenerasjonRepository = ActualGenerasjonRepository(dataSource),
     private val vergemålDao: VergemålDao = VergemålDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val varselRepository: VarselRepository = ActualVarselRepository(dataSource),
@@ -474,7 +477,7 @@ internal class Hendelsefabrikk(
             snapshotClient = snapshotClient,
             personDao = personDao,
             overstyringDao = overstyringDao,
-            generasjonDao = generasjonDao
+            generasjonRepository = generasjonRepository
         )
     }
 

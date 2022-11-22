@@ -2,60 +2,57 @@ package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
 import java.util.UUID
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
-    private companion object {
-        private val VEDTAKSPERIODE_ENDRET_HENDELSE_ID = UUID.randomUUID()
-        private val VEDTAK_FATTET_HENDELSE_ID = UUID.randomUUID()
-    }
-
     @Test
     fun `oppretter generasjon for vedtaksperiode`() {
-        val generasjon = generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
+        val generasjon = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
-        assertEquals(1L, generasjon)
+        assertEquals(generasjon, siste)
     }
 
     @Test
-    fun `oppretter ikke generasjon, så lenge det finnes en ulåst generasjon`() {
-        val førsteGenerasjon = generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
-        val andreGenerasjonBurdeIkkeOpprettes =
-            generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
+    fun `kan låse generasjon`() {
+        val vedtaksperiodeEndretId = UUID.randomUUID()
+        val vedtakFattetId = UUID.randomUUID()
+        val generasjon = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, vedtaksperiodeEndretId)
+        val låstGenerasjon = generasjonDao.låsFor(VEDTAKSPERIODE_ID, vedtakFattetId)
 
-        assertEquals(1L, førsteGenerasjon)
-        assertEquals(null, andreGenerasjonBurdeIkkeOpprettes)
-    }
-
-    @Test
-    fun `oppretter ny generasjon når forrige er låst`() {
-        val førsteGenerasjon = generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
-        generasjonDao.låsGenerasjon(VEDTAKSPERIODE_ID, VEDTAK_FATTET_HENDELSE_ID)
-        val andreGenerasjon = generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
-
-        assertEquals(1L, førsteGenerasjon)
-        assertEquals(2L, andreGenerasjon)
-    }
-
-    @Test
-    fun `sjekker at låsGenerasjon returnerer id'en til raden`() {
-        val førsteGenerasjon = generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
-        val låstGenerasjon = generasjonDao.låsGenerasjon(VEDTAKSPERIODE_ID, VEDTAK_FATTET_HENDELSE_ID)
-
-        assertEquals(1L, førsteGenerasjon)
-        assertEquals(førsteGenerasjon, låstGenerasjon)
+        assertNotEquals(generasjon, låstGenerasjon)
+        assertLåst(VEDTAKSPERIODE_ID, vedtaksperiodeEndretId, vedtakFattetId)
     }
 
     @Test
     fun `sjekker at siste generasjon blir returnert`() {
-        generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
-        generasjonDao.låsGenerasjon(VEDTAKSPERIODE_ID, VEDTAK_FATTET_HENDELSE_ID)
-        val andreGenerasjon = generasjonDao.prøvOpprett(VEDTAKSPERIODE_ID, VEDTAKSPERIODE_ENDRET_HENDELSE_ID)
-        val gjeldendeGenerasjon = generasjonDao.generasjon(VEDTAKSPERIODE_ID)
+        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val generasjon = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
-        assertEquals(gjeldendeGenerasjon, andreGenerasjon)
+        assertEquals(generasjon, siste)
+    }
+
+    private fun assertLåst(vedtaksperiodeId: UUID, opprettetAvId: UUID, låstAvId: UUID) {
+        val låst = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ? AND låst_av_hendelse = ?;"
+
+            session.run(queryOf(query, vedtaksperiodeId, opprettetAvId, låstAvId).map {
+                it.boolean("låst")
+            }.asSingle)
+        } ?: false
+
+        assertTrue(låst) {"Generasjonen er ikke låst"}
     }
 }

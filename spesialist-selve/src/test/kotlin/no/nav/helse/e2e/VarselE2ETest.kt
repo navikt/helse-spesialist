@@ -24,7 +24,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_2
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_3
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VarselE2ETest : AbstractE2ETest() {
@@ -201,7 +201,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
                 )
             )
         }
-        Assertions.assertEquals(1, antallVarsler)
+        assertEquals(1, antallVarsler)
     }
 
     private fun assertIngenVarsel(varselkode: Varselkode, vedtaksperiodeId: UUID) {
@@ -218,7 +218,7 @@ internal class VarselE2ETest : AbstractE2ETest() {
                 )
             )
         }
-        Assertions.assertEquals(0, antallVarsler)
+        assertEquals(0, antallVarsler)
     }
 
     private fun fremTilÅpneOppgaverBehov() {

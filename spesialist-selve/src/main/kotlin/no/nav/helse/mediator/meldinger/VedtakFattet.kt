@@ -59,7 +59,7 @@ internal class VedtakFattet(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        generasjonDao.låsGenerasjon(vedtaksperiodeId, id)?.also {
+        generasjonDao.låsFor(vedtaksperiodeId, id)?.also {
             sikkerLogg.info(
                 "Låser generasjon {} for {}",
                 keyValue("generasjonId", it),
