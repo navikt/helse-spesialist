@@ -17,24 +17,17 @@ import no.nav.helse.mediator.api.OverstyrInntektKafkaDto
 import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
-import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
-import no.nav.helse.mediator.meldinger.løsninger.DigitalKontaktinformasjonløsning
-import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
 import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.Hendelse
-import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
-import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.meldinger.Personavstemming
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
-import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
-import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
@@ -44,6 +37,14 @@ import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.DigitalKontaktinformasjonløsning
+import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
+import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
+import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
+import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
+import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.CommandContextDao
@@ -138,6 +139,7 @@ internal class HendelseMediator(
             VedtakFattet.River(it, this)
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
+            if (Toggle.VedtaksperiodeGenerasjoner.enabled) Personavstemming.River(it, dataSource)
         }
     }
 
