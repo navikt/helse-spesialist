@@ -105,7 +105,6 @@ fun snapshot(
                                             )
                                         ),
                                         skjaeringstidspunkt = "2020-01-01",
-                                        refusjon = null,
                                         vilkarsgrunnlagId = null,
                                         periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
                                     )

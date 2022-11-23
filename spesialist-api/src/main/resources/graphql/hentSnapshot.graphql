@@ -211,19 +211,6 @@ query HentSnapshot($fnr: String!) {
                                 ...oppdrag
                             }
                         }
-                        refusjon {
-                            belop
-                            arbeidsgiverperioder {
-                                tom
-                                fom
-                            }
-                            endringer {
-                                belop
-                                dato
-                            }
-                            forsteFravaersdag
-                            sisteRefusjonsdag
-                        }
                         vilkarsgrunnlagId
                     }
                 }

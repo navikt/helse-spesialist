@@ -242,7 +242,6 @@ private fun enPeriode() = GraphQLBeregnetPeriode(
             )
         )
     ),
-    refusjon = null,
     vilkarsgrunnlagId = null,
     periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
 )

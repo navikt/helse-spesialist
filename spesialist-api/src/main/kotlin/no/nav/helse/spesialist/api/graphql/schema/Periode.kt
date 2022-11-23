@@ -451,20 +451,6 @@ data class BeregnetPeriode(
 
     fun varsler(): List<String> = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
 
-    fun refusjon(): Refusjon? = periode.refusjon?.let { refusjon ->
-        Refusjon(
-            belop = refusjon.belop,
-            arbeidsgiverperioder = refusjon.arbeidsgiverperioder.map {
-                Refusjon.Refusjonsperiode(it.fom, it.tom)
-            },
-            endringer = refusjon.endringer.map {
-                Refusjon.Endring(it.belop, it.dato)
-            },
-            forsteFravaersdag = refusjon.forsteFravaersdag,
-            sisteRefusjonsdag = refusjon.sisteRefusjonsdag
-        )
-    }
-
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =
         oppgaveApiDao.finnOppgaveId(UUID.fromString(vedtaksperiodeId()))?.toString()
