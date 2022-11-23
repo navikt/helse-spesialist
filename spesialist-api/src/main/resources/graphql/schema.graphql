@@ -106,7 +106,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   periodevilkar: GraphQLPeriodevilkar!
-  refusjon: GraphQLRefusjon
   skjaeringstidspunkt: LocalDate!
   soknaderArbeidsgiver: [GraphQLSoknadArbeidsgiver!]!
   soknaderNav: [GraphQLSoknadNav!]!
@@ -116,7 +115,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   utbetaling: GraphQLUtbetaling!
   vedtaksperiodeId: UUID!
   vilkarsgrunnlagId: UUID
-  vilkarsgrunnlaghistorikkId: UUID!
 }
 
 type GraphQLDag {
@@ -199,15 +197,6 @@ type GraphQLPerson {
   fodselsnummer: String!
   versjon: Int!
   vilkarsgrunnlag: [GraphQLVilkarsgrunnlag!]!
-  vilkarsgrunnlaghistorikk: [GraphQLVilkarsgrunnlaghistorikk!]!
-}
-
-type GraphQLRefusjon {
-  arbeidsgiverperioder: [GraphQLRefusjonsperiode!]!
-  belop: Float
-  endringer: [GraphQLRefusjonsendring!]!
-  forsteFravaersdag: LocalDate
-  sisteRefusjonsdag: LocalDate
 }
 
 type GraphQLRefusjonselement {
@@ -215,16 +204,6 @@ type GraphQLRefusjonselement {
   fom: LocalDate!
   meldingsreferanseId: UUID!
   tom: LocalDate
-}
-
-type GraphQLRefusjonsendring {
-  belop: Float!
-  dato: LocalDate!
-}
-
-type GraphQLRefusjonsperiode {
-  fom: LocalDate!
-  tom: LocalDate!
 }
 
 type GraphQLSammenligningsgrunnlag {
