@@ -2,6 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -58,7 +59,8 @@ internal class VedtakFattet(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        generasjonRepository.låsFor(vedtaksperiodeId, id)
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled)
+            generasjonRepository.låsFor(vedtaksperiodeId, id)
         return true
     }
 }
