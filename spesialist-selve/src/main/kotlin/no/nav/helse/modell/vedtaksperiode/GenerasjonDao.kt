@@ -8,16 +8,6 @@ import org.intellij.lang.annotations.Language
 
 class GenerasjonDao(private val dataSource: DataSource) {
 
-    internal fun generasjon(vedtaksperiodeId: UUID): Long? {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT id FROM selve_vedtaksperiode_generasjon where vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1;"
-
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { it.long("id") }.asSingle)
-        }
-    }
-
     internal fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon? {
         @Language("PostgreSQL")
         val query = """
@@ -35,6 +25,15 @@ class GenerasjonDao(private val dataSource: DataSource) {
                     it.boolean("låst"),
                 )
             }.asSingle)
+        }
+    }
+
+    internal fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID) {
+        @Language("PostgreSQL")
+        val query = "UPDATE selve_vedtaksperiode_generasjon SET utbetaling_id = ? WHERE vedtaksperiode_id = ? AND låst = false;"
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, utbetalingId, vedtaksperiodeId).asUpdate)
         }
     }
 

@@ -60,6 +60,21 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertEquals(siste, funnet)
     }
 
+    @Test
+    fun `kan sette utbetaling_id for siste generasjon hvis den er åpen`() {
+        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.utbetalingFor(VEDTAKSPERIODE_ID, UTBETALING_ID)
+        assertUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID)
+    }
+
+    @Test
+    fun `kan ikke sette utbetaling_id for generasjon hvis den er låst`() {
+        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.utbetalingFor(VEDTAKSPERIODE_ID, UTBETALING_ID)
+        assertUtbetaling(VEDTAKSPERIODE_ID, null)
+    }
+
     private fun assertLåst(vedtaksperiodeId: UUID, opprettetAvId: UUID, låstAvId: UUID) {
         val låst = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
@@ -86,5 +101,19 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         } ?: false
 
         assertFalse(låst) {"Generasjonen er låst"}
+    }
+
+    private fun assertUtbetaling(vedtaksperiodeId: UUID, forventetUtbetalingId: UUID?) {
+        val utbetalingId = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query =
+                "SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1;"
+
+            session.run(queryOf(query, vedtaksperiodeId).map {
+                it.uuidOrNull("utbetaling_id")
+            }.asSingle)
+        }
+
+        assertEquals(forventetUtbetalingId, utbetalingId)
     }
 }
