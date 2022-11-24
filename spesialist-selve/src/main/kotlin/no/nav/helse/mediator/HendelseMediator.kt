@@ -35,6 +35,7 @@ import no.nav.helse.mediator.meldinger.Varseldefinisjon
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.mediator.meldinger.løsninger.Arbeidsgiverinformasjonløsning
@@ -140,6 +141,7 @@ internal class HendelseMediator(
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
             if (Toggle.VedtaksperiodeGenerasjoner.enabled) Personavstemming.River(it, dataSource)
+            if (Toggle.VedtaksperiodeGenerasjoner.enabled) VedtaksperiodeNyUtbetaling.River(it, this)
         }
     }
 

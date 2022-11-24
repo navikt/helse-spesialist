@@ -571,7 +571,8 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId,
             utbetalingId,
             json,
-            generasjonRepository
+            utbetalingDao,
+            generasjonRepository,
         )
     }
 

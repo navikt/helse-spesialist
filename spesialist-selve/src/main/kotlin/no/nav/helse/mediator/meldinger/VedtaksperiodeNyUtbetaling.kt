@@ -4,7 +4,10 @@ import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
+import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.OpprettKoblingTilGenerasjonCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -17,17 +20,28 @@ internal class VedtaksperiodeNyUtbetaling(
     override val id: UUID,
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID,
+    utbetalingId: UUID,
     private val json: String,
-    private val generasjonRepository: GenerasjonRepository
+    utbetalingDao: UtbetalingDao,
+    generasjonRepository: GenerasjonRepository,
 ) : Hendelse, MacroCommand() {
 
     private companion object {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override val commands: List<Command>
-        get() = TODO("Not yet implemented")
+    override val commands: List<Command> = listOf(
+        OpprettKoblingTilUtbetalingCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            utbetalingDao = utbetalingDao,
+        ),
+        OpprettKoblingTilGenerasjonCommand(
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            generasjonRepository = generasjonRepository,
+        )
+    )
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId

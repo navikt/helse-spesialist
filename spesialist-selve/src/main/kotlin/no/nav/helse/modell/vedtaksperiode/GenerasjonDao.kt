@@ -28,12 +28,23 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID) {
+    internal fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID): Generasjon? {
         @Language("PostgreSQL")
-        val query = "UPDATE selve_vedtaksperiode_generasjon SET utbetaling_id = ? WHERE vedtaksperiode_id = ? AND låst = false;"
+        val query = """
+            UPDATE selve_vedtaksperiode_generasjon 
+            SET utbetaling_id = ? 
+            WHERE vedtaksperiode_id = ? AND låst = false
+            RETURNING unik_id, vedtaksperiode_id, låst;
+            """
 
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, utbetalingId, vedtaksperiodeId).asUpdate)
+            session.run(queryOf(query, utbetalingId, vedtaksperiodeId).map {
+                Generasjon(
+                    it.uuid("unik_id"),
+                    it.uuid("vedtaksperiode_id"),
+                    it.boolean("låst"),
+                )
+            }.asSingle)
         }
     }
 

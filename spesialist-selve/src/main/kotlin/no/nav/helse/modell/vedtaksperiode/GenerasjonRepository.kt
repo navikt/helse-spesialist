@@ -10,6 +10,7 @@ internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID)
     fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID)
     fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID)
+    fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID)
 }
 
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
@@ -26,6 +27,14 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
         private fun Generasjon.loggLåst() {
             sikkerlogg.info("Låser generasjon {}", keyValue("generasjon", this))
+        }
+
+        private fun Generasjon.loggKnyttetUtbetaling(utbetalingId: UUID) {
+            sikkerlogg.info(
+                "Knyttet {} til utbetaling {}",
+                keyValue("generasjon", this),
+                keyValue("utbetalingId", utbetalingId)
+            )
         }
     }
 
@@ -63,6 +72,16 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 "Finner ikke ulåst generasjon for {}. Forsøkt låst av {}",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
                 keyValue("hendelseId", hendelseId)
+            )
+    }
+
+    override fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID) {
+        dao.utbetalingFor(vedtaksperiodeId, utbetalingId)
+            ?.loggKnyttetUtbetaling(utbetalingId)
+            ?: sikkerlogg.info(
+                "Finner ikke ulåst generasjon for {}. Forsøkt knyttet til utbetaling {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("utbetalingId", utbetalingId)
             )
     }
 
