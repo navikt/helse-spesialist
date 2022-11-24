@@ -6,6 +6,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.meldinger.Personavstemming.Vedtaksperiode.Generasjon.Companion.lagre
 import no.nav.helse.mediator.meldinger.Personavstemming.Vedtaksperiode.Utbetaling
 import no.nav.helse.mediator.meldinger.Personavstemming.Vedtaksperiode.Utbetaling.Companion.sortert
@@ -16,6 +17,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.intellij.lang.annotations.Language
+import org.slf4j.LoggerFactory
 
 internal class Personavstemming {
 
@@ -102,10 +104,10 @@ internal class Personavstemming {
             utbetalinger
                 .sortert()
                 .forEach {
-                val generasjon = it.lagGenerasjon(id, sistOpprettet)
-                sistOpprettet = null
-                generasjoner.add(generasjon)
-            }
+                    val generasjon = it.lagGenerasjon(id, sistOpprettet)
+                    sistOpprettet = null
+                    generasjoner.add(generasjon)
+                }
 
             return generasjoner
         }
@@ -141,17 +143,18 @@ internal class Personavstemming {
             val låst: Boolean,
         ) {
             internal companion object {
+                private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
                 fun List<Generasjon>.lagre(dataSource: DataSource, hendelseId: UUID) {
                     forEach { it.lagre(dataSource, hendelseId) }
                 }
             }
 
             internal fun lagre(dataSource: DataSource, hendelseId: UUID) {
-                sessionOf(dataSource).use { session ->
+                val insertOk = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                     @Language("PostgreSQL")
                     val query = """
                         INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, utbetaling_id, opprettet_tidspunkt, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse, låst)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (vedtaksperiode_id, utbetaling_id) DO NOTHING; 
                         """
                     session.run(
                         queryOf(
@@ -164,9 +167,15 @@ internal class Personavstemming {
                             låstTidspunkt,
                             if (låst) hendelseId else null,
                             låst
-                        ).asUpdate
+                        ).asUpdateAndReturnGeneratedKey
                     )
                 }
+
+                if (insertOk == null) sikkerlogg.warn(
+                    "Kunne ikke inserte generasjon for {}, {}, den eksisterer fra før av.",
+                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                    keyValue("utbetalingId", utbetalingId)
+                )
             }
         }
 
