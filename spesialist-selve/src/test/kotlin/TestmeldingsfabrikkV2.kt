@@ -614,6 +614,24 @@ internal object TestmeldingsfabrikkV2 {
         )
     )
 
+    fun lagVedtaksperiodeNyUtbetaling(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ) =
+        nyHendelse(
+            id, "vedtaksperiode_ny_utbetaling", mapOf(
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "utbetalingId" to "$utbetalingId",
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+            )
+        )
+
     fun lagUtbetalingAnnullert(
         aktørId: String,
         fødselsnummer: String,

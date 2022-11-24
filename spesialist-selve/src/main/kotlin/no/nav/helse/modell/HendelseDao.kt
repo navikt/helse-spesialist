@@ -17,15 +17,16 @@ import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
-import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
 import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
+import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.ENDRET_SKJERMETINFO
 import no.nav.helse.modell.HendelseDao.Hendelsetype.GODKJENNING
@@ -42,6 +43,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ANNULLERT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.UTBETALING_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_ENDRET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_OPPRETTET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.modell.HendelseDao.Hendelsetype.VEDTAK_FATTET
@@ -153,6 +155,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             NYE_VARSLER -> hendelsefabrikk.nyeVarsler(json)
             VEDTAKSPERIODE_OPPRETTET -> hendelsefabrikk.vedtaksperiodeOpprettet(json)
             SØKNAD_SENDT -> hendelsefabrikk.søknadSendt(json)
+            VEDTAKSPERIODE_NY_UTBETALING -> hendelsefabrikk.vedtaksperiodeNyUtbetaling(json)
         }
 
     private fun tilHendelsetype(hendelse: Hendelse) = when (hendelse) {
@@ -175,6 +178,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is NyeVarsler -> NYE_VARSLER
         is VedtaksperiodeOpprettet -> VEDTAKSPERIODE_OPPRETTET
         is SøknadSendt -> SØKNAD_SENDT
+        is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
         else -> throw IllegalArgumentException("ukjent hendelsetype: ${hendelse::class.simpleName}")
     }
 
@@ -182,6 +186,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
-        GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET, NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT
+        GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET, NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT,
+        VEDTAKSPERIODE_NY_UTBETALING
     }
 }

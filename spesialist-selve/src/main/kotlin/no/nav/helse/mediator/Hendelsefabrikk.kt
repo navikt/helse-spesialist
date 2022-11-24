@@ -23,6 +23,7 @@ import no.nav.helse.mediator.meldinger.UtbetalingEndret
 import no.nav.helse.mediator.meldinger.VedtakFattet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeEndret
 import no.nav.helse.mediator.meldinger.VedtaksperiodeForkastet
+import no.nav.helse.mediator.meldinger.VedtaksperiodeNyUtbetaling
 import no.nav.helse.mediator.meldinger.VedtaksperiodeOpprettet
 import no.nav.helse.mediator.meldinger.VedtaksperiodeReberegnet
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
@@ -554,6 +555,34 @@ internal class Hendelsefabrikk(
             opptegnelseDao = opptegnelseDao,
             oppgaveDao = oppgaveDao,
             oppgaveMediator = oppgaveMediator
+        )
+    }
+
+    fun vedtaksperiodeNyUtbetaling(
+        hendelseId: UUID,
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        json: String,
+    ): VedtaksperiodeNyUtbetaling {
+        return VedtaksperiodeNyUtbetaling(
+            hendelseId,
+            fødselsnummer,
+            vedtaksperiodeId,
+            utbetalingId,
+            json,
+            generasjonRepository
+        )
+    }
+
+    fun vedtaksperiodeNyUtbetaling(json: String): VedtaksperiodeNyUtbetaling {
+        val jsonNode = mapper.readTree(json)
+        return vedtaksperiodeNyUtbetaling(
+            hendelseId = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
+            utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
+            json = json,
         )
     }
 
