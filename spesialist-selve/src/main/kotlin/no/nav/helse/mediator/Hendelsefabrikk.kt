@@ -444,7 +444,7 @@ internal class Hendelsefabrikk(
     }
 
     fun adressebeskyttelseEndret(id: UUID, fødselsnummer: String, json: String) =
-        AdressebeskyttelseEndret(id, fødselsnummer, json, personDao)
+        AdressebeskyttelseEndret(id, fødselsnummer, json, personDao, oppgaveDao, hendelseDao, godkjenningMediator)
 
     fun adressebeskyttelseEndret(json: String): AdressebeskyttelseEndret {
         val jsonNode = mapper.readTree(json)
@@ -452,7 +452,10 @@ internal class Hendelsefabrikk(
             id = UUID.fromString(jsonNode.path("@id").asText()),
             fødselsnummer = jsonNode.path("fødselsnummer").asText(),
             json = json,
-            personDao = personDao
+            personDao = personDao,
+            oppgaveDao = oppgaveDao,
+            hendelseDao = hendelseDao,
+            godkjenningMediator = godkjenningMediator,
         )
     }
 

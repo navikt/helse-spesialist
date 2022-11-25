@@ -12,14 +12,30 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import java.util.*
+import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.modell.HendelseDao
+import no.nav.helse.modell.kommando.AvvisVedStrengtFortroligAdressebeskyttelseCommand
+import no.nav.helse.modell.oppgave.OppgaveDao
 
 internal class AdressebeskyttelseEndret(
     override val id: UUID,
     private val fødselsnummer: String,
     private val json: String,
-    personDao: PersonDao
+    personDao: PersonDao,
+    oppgaveDao: OppgaveDao,
+    hendelseDao: HendelseDao,
+    godkjenningMediator: GodkjenningMediator
 ) : Hendelse, MacroCommand() {
-    override val commands: List<Command> = listOf(OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true))
+    override val commands: List<Command> = listOf(
+        OppdaterPersoninfoCommand(fødselsnummer, personDao, force = true),
+        AvvisVedStrengtFortroligAdressebeskyttelseCommand(
+            fødselsnummer,
+            personDao,
+            oppgaveDao,
+            hendelseDao,
+            godkjenningMediator
+        )
+    )
 
     override fun fødselsnummer(): String = fødselsnummer
 

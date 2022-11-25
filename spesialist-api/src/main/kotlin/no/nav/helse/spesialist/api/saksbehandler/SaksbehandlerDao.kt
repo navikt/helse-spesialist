@@ -43,7 +43,6 @@ class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource)
                 FROM vedtak v
                          JOIN oppgave o ON o.vedtak_ref = v.id
                          JOIN person p ON v.person_ref = p.id
-                         JOIN arbeidsgiver a ON v.arbeidsgiver_ref = a.id
                 WHERE p.fodselsnummer = :fodselsnummer
                   AND o.status = 'AvventerSaksbehandler'::oppgavestatus;
             """

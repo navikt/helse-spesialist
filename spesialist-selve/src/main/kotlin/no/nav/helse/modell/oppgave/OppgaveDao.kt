@@ -55,6 +55,35 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             LIMIT 1;
         """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("oppgaveId") }!!
 
+    fun harÅpenOppgave(fødselsnummer: String) =
+        """ SELECT 1 as exists
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            AND status = 'AvventerSaksbehandler'::oppgavestatus;
+        """.list(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.long("exists") }.isNotEmpty()
+
+    fun finnGodkjenningsbehov(fødselsnummer: String) =
+        """ SELECT c.hendelse_id as hendelse_id
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+                     JOIN command_context c ON o.command_context_id = c.context_id
+            WHERE p.fodselsnummer = :fodselsnummer
+            AND status = 'AvventerSaksbehandler'::oppgavestatus
+            GROUP BY c.hendelse_id;
+        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.uuid("hendelse_id") }!!
+
+    fun finnVedtaksperiodeId(fødselsnummer: String) =
+        """ SELECT v.vedtaksperiode_id as vedtaksperiode_id
+            FROM oppgave o
+                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            AND status = 'AvventerSaksbehandler'::oppgavestatus;
+        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.uuid("vedtaksperiode_id") }!!
+
     fun finnOppgaveId(fødselsnummer: String) =
         """ SELECT o.id as oppgaveId
             FROM oppgave o
@@ -150,7 +179,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun setBeslutteroppgave(
         oppgaveId: Long,
-        tidligereSaksbehandlerOID: UUID
+        tidligereSaksbehandlerOID: UUID,
     ) =
         """ UPDATE oppgave
             SET er_beslutteroppgave=true, 
@@ -167,7 +196,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun setReturoppgave(
         oppgaveId: Long,
-        beslutterSaksbehandlerOid: UUID
+        beslutterSaksbehandlerOid: UUID,
     ) =
         """ UPDATE oppgave
             SET er_beslutteroppgave=false, 
@@ -196,7 +225,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
         oppgaveId: Long,
         oppgavestatus: Oppgavestatus,
         ferdigstiltAv: String? = null,
-        oid: UUID? = null
+        oid: UUID? = null,
     ) =
         """UPDATE oppgave SET ferdigstilt_av=:ferdigstiltAv, ferdigstilt_av_oid=:oid, status=:oppgavestatus::oppgavestatus WHERE id=:oppgaveId"""
             .update(
@@ -292,6 +321,17 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 ).asUpdateAndReturnGeneratedKey
             )
         }
+
+    fun invaliderOppgaveFor(fødselsnummer: String) = """
+        UPDATE oppgave
+        SET status = 'Invalidert'
+        FROM oppgave o2
+        JOIN vedtak v on v.id = o2.vedtak_ref
+        JOIN person p on v.person_ref = p.id
+        WHERE p.fodselsnummer = :fodselsnummer
+        AND o2.status = 'AvventerSaksbehandler'::oppgavestatus; 
+    """.trimMargin().update(mapOf("fodselsnummer" to fødselsnummer.toLong()))
+
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 }
