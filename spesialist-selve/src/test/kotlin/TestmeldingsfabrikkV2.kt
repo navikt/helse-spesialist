@@ -403,7 +403,7 @@ internal object TestmeldingsfabrikkV2 {
         kommentar: String? = null,
         id: UUID,
         hendelseId: UUID,
-        oppgaveId: Long
+        oppgaveId: Long,
     ): String =
         nyHendelse(
             id, "saksbehandler_løsning", mutableMapOf<String, Any>(
@@ -427,7 +427,7 @@ internal object TestmeldingsfabrikkV2 {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        id: UUID
+        id: UUID,
     ): String = nyHendelse(
         id, "vedtak_fattet", mapOf(
             "aktørId" to aktørId,
@@ -460,7 +460,7 @@ internal object TestmeldingsfabrikkV2 {
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID
+        id: UUID,
     ) = nyHendelse(
         id, "saksbehandler_overstyrer_tidslinje", mapOf(
             "aktørId" to aktørId,
@@ -489,7 +489,7 @@ internal object TestmeldingsfabrikkV2 {
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID
+        id: UUID,
     ) = nyHendelse(
         id, "saksbehandler_overstyrer_inntekt", mutableMapOf<String, Any>(
             "aktørId" to aktørId,
@@ -530,7 +530,7 @@ internal object TestmeldingsfabrikkV2 {
         saksbehandlernavn: String = "saksbehandler",
         saksbehandlerepost: String = "sara.saksbehandler@nav.no",
         saksbehandlerident: String = "saksbehandlerIdent",
-        id: UUID
+        id: UUID,
     ) = nyHendelse(
         id, "saksbehandler_overstyrer_arbeidsforhold", mapOf(
             "aktørId" to aktørId,
@@ -631,6 +631,66 @@ internal object TestmeldingsfabrikkV2 {
                 "organisasjonsnummer" to organisasjonsnummer,
             )
         )
+
+    fun lagAktivitetsloggNyAktivitet(
+        id: UUID,
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        varselkoder: List<String>,
+    ): String {
+        return nyHendelse(
+            id, "aktivitetslogg_ny_aktivitet",
+            mapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "aktiviteter" to varselkoder.map {
+                    lagAktivitet(
+                        fødselsnummer = fødselsnummer,
+                        varselkode = it,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        organisasjonsnummer = organisasjonsnummer
+                    )
+                }
+            )
+        )
+    }
+
+    private fun lagAktivitet(
+        id: UUID = UUID.randomUUID(),
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        varselkode: String,
+    ): Map<String, Any> = mapOf(
+        "id" to id,
+        "melding" to "en melding",
+        "nivå" to "VARSEL",
+        "varselkode" to varselkode,
+        "tidsstempel" to LocalDateTime.now(),
+        "kontekster" to listOf(
+            mapOf(
+                "konteksttype" to "Person",
+                "kontekstmap" to mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "aktørId" to "2093088099680"
+                )
+            ),
+            mapOf(
+                "konteksttype" to "Arbeidsgiver",
+                "kontekstmap" to mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer
+                )
+            ),
+            mapOf(
+                "konteksttype" to "Vedtaksperiode",
+                "kontekstmap" to mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeId
+                )
+            )
+        )
+    )
 
     fun lagUtbetalingAnnullert(
         aktørId: String,

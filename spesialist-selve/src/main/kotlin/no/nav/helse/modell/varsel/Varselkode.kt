@@ -2,8 +2,6 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.tellInaktivtVarsel
-import no.nav.helse.tellVarsel
 
 // Alle Varselkoder må følge formatet
 internal const val varselkodeformat = "SB_\\D{2}_\\d{1,3}"
@@ -37,19 +35,11 @@ enum class Varselkode(
     }
 
     internal fun nyttVarsel(vedtaksperiodeId: UUID, varselRepository: VarselRepository) {
-        if (erAktivFor(vedtaksperiodeId, varselRepository)) return
         varselRepository.lagreVarsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
-        tellVarsel(this.name)
     }
 
     internal fun deaktiverFor(vedtaksperiodeId: UUID, varselRepository: VarselRepository) {
-        if (!erAktivFor(vedtaksperiodeId, varselRepository)) return
         varselRepository.deaktiverFor(vedtaksperiodeId, this.name)
-        tellInaktivtVarsel(this.name)
-    }
-
-    private fun erAktivFor(vedtaksperiodeId: UUID, varselRepository: VarselRepository): Boolean {
-        return varselRepository.erAktivFor(vedtaksperiodeId, this.name)
     }
 
     override fun toString() = "${this.name}: $varseltekst"

@@ -87,6 +87,25 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         )
     }
 
+    fun sendAktivitetsloggNyAktivitet(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        varselkoder: List<String> = emptyList(),
+    ): UUID =
+        newUUID.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagAktivitetsloggNyAktivitet(
+                    id,
+                    aktørId,
+                    fødselsnummer,
+                    organisasjonsnummer,
+                    vedtaksperiodeId,
+                    varselkoder
+                )
+            )
+        }
 
     fun sendVedtaksperiodeForkastet(
         aktørId: String,

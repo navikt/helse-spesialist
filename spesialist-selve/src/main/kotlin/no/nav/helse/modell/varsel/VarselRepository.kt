@@ -3,14 +3,18 @@ package no.nav.helse.modell.varsel
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
+import no.nav.helse.tellInaktivtVarsel
+import no.nav.helse.tellVarsel
+import org.slf4j.LoggerFactory
 
 internal interface VarselRepository {
     fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel>
-    fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean
     fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String)
     fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String)
     fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID)
@@ -27,18 +31,20 @@ internal interface VarselRepository {
 
 internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository {
 
-    private val dao = VarselDao(dataSource)
-
-    override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
-        return dao.alleVarslerFor(vedtaksperiodeId)
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean {
-        return dao.finnVarselstatus(vedtaksperiodeId, varselkode) == AKTIV
+    private val varselDao = VarselDao(dataSource)
+    private val generasjonDao = GenerasjonDao(dataSource)
+
+    override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
+        return varselDao.alleVarslerFor(vedtaksperiodeId)
     }
 
     override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String) {
         endreStatusHvisAktiv(vedtaksperiodeId, varselkode, INAKTIV, "Spesialist")
+        tellInaktivtVarsel(varselkode)
     }
 
     override fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
@@ -46,15 +52,37 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     }
 
     override fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
-        dao.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId)
+        generasjonDao.finnSisteFor(vedtaksperiodeId)
+            ?.run {
+                if (erAktivFor(vedtaksperiodeId, varselkode)) return
+                varselDao.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId)
+                tellVarsel(varselkode)
+            }
+            ?: sikkerlogg.info(
+                "Lagrer ikke {} for {} fordi det ikke finnes noen generasjon for perioden.",
+                keyValue("varselkode", varselkode),
+                keyValue("vedtaksperiodeId", vedtaksperiodeId)
+            )
     }
 
-    override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime) {
-        dao.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
+    override fun lagreDefinisjon(
+        id: UUID,
+        varselkode: String,
+        tittel: String,
+        forklaring: String?,
+        handling: String?,
+        avviklet: Boolean,
+        opprettet: LocalDateTime,
+    ) {
+        varselDao.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
+    }
+
+    private fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean {
+        return varselDao.finnVarselstatus(vedtaksperiodeId, varselkode) == AKTIV
     }
 
     private fun endreStatusHvisAktiv(vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String) {
-        if (dao.finnVarselstatus(vedtaksperiodeId, varselkode) != AKTIV) return
-        dao.oppdaterStatus(vedtaksperiodeId, varselkode, status, ident)
+        if (!erAktivFor(vedtaksperiodeId, varselkode)) return
+        varselDao.oppdaterStatus(vedtaksperiodeId, varselkode, status, ident)
     }
 }

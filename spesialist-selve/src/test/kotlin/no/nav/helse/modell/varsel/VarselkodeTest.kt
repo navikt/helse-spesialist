@@ -17,10 +17,6 @@ internal class VarselkodeTest {
             TODO("Not yet implemented")
         }
 
-        override fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean {
-            return vedtaksperiodevarsler[vedtaksperiodeId]?.contains(varselkode) == true
-        }
-
         override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String) {
             deaktiverteVarsler.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(varselkode)
         }
@@ -49,15 +45,6 @@ internal class VarselkodeTest {
     @Test
     fun `opprett nytt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
-
-        assertEquals(1, varselRepository.vedtaksperiodevarsler[vedtaksperiodeId]?.size)
-    }
-
-    @Test
-    fun `sjekker om varsel er aktivt`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
         SB_EX_3.nyttVarsel(vedtaksperiodeId, varselRepository)
 
         assertEquals(1, varselRepository.vedtaksperiodevarsler[vedtaksperiodeId]?.size)
