@@ -101,7 +101,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `ingen varsler dersom ingen åpne oppgaver eller oppslagsfeil`() {
-        fremTilÅpneOppgaverBehov()
+        fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning()
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
         assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
@@ -109,7 +109,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `lager varsel ved åpne gosys-oppgaver`() {
-        fremTilÅpneOppgaverBehov()
+        fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
@@ -118,7 +118,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
-        fremTilÅpneOppgaverBehov()
+        fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 1)
         håndterRisikovurderingløsning()
         håndterGosysOppgaveEndret()
@@ -130,7 +130,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
-        fremTilÅpneOppgaverBehov()
+        fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(antall = 0)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
         håndterGosysOppgaveEndret()
@@ -142,7 +142,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `legger til varsel om manglende gosys-info`() {
-        fremTilÅpneOppgaverBehov()
+        fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(oppslagFeilet = true)
         håndterRisikovurderingløsning()
         assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
@@ -152,7 +152,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
 
     @Test
     fun `legger til varsel dersom oppslag feiler når vi har fått beskjed om at gosys har endret seg`() {
-        fremTilÅpneOppgaverBehov()
+        fremTilÅpneOppgaver()
         håndterÅpneOppgaverløsning(oppslagFeilet = false)
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
         håndterGosysOppgaveEndret()
@@ -246,19 +246,5 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
                 ).map { row -> row.string("melding") }.asList
             )
         }.contains(forventet))
-    }
-
-    private fun fremTilÅpneOppgaverBehov() {
-        håndterSøknad()
-        håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov()
-        håndterPersoninfoløsning()
-        håndterEnhetløsning()
-        håndterInfotrygdutbetalingerløsning()
-        håndterArbeidsgiverinformasjonløsning()
-        håndterArbeidsforholdløsning()
-        håndterEgenansattløsning()
-        håndterVergemålløsning()
-        håndterDigitalKontaktinformasjonløsning()
     }
 }

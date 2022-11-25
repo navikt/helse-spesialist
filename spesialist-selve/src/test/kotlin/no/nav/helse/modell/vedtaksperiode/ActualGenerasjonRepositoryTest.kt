@@ -77,7 +77,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `kan ikke knytte utbetalingId til låst generasjon`() {
+    fun `kan ikke knytte utbetalingId til låst generasjon som ikke har utbetalingId`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
 
@@ -86,6 +86,21 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         repository.utbetalingFor(vedtaksperiodeId, utbetalingId)
 
         assertUtbetaling(vedtaksperiodeId, null)
+    }
+
+    @Test
+    fun `kan ikke knytte utbetalingId til låst generasjon som har utbetalingId fra før`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val gammel = UUID.randomUUID()
+        val ny = UUID.randomUUID()
+
+        repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID())
+        repository.utbetalingFor(vedtaksperiodeId, gammel)
+        repository.låsFor(vedtaksperiodeId, UUID.randomUUID())
+        repository.utbetalingFor(vedtaksperiodeId, ny)
+
+        assertUtbetaling(vedtaksperiodeId, gammel)
+        assertUtbetaling(vedtaksperiodeId, gammel)
     }
 
     private fun assertGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {

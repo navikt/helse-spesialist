@@ -2,6 +2,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.time.LocalDate
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -16,6 +17,7 @@ import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
+import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
@@ -44,16 +46,18 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
     private fun nyUtbetalingId(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
     }
-
-    protected fun fremTilSaksbehandleroppgave(
+    protected fun fremTilÅpneOppgaver(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
         andreArbeidsforhold: List<String> = emptyList(),
         regelverksvarsler: List<String> = emptyList(),
         fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
     ) {
         håndterSøknad()
         håndterVedtaksperiodeOpprettet()
-        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsforhold)
+        håndterVedtaksperiodeNyUtbetaling()
+        håndterGodkjenningsbehov(andreArbeidsforhold = andreArbeidsforhold, fom = fom, tom = tom, skjæringstidspunkt = skjæringstidspunkt)
         håndterPersoninfoløsning()
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
@@ -63,8 +67,34 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
         håndterEgenansattløsning()
         håndterVergemålløsning(fullmakter = fullmakter)
         håndterDigitalKontaktinformasjonløsning()
+    }
+
+    protected fun fremTilSaksbehandleroppgave(
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
+        andreArbeidsforhold: List<String> = emptyList(),
+        regelverksvarsler: List<String> = emptyList(),
+        fullmakter: List<Fullmakt> = emptyList(),
+        risikofunn: List<Risikofunn> = emptyList(),
+    ) {
+        fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false, risikofunn = risikofunn)
+    }
+
+    protected fun nyttVedtak(
+        fom: LocalDate,
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate = fom,
+        andreArbeidsforhold: List<String> = emptyList(),
+        regelverksvarsler: List<String> = emptyList(),
+        fullmakter: List<Fullmakt> = emptyList(),
+        risikofunn: List<Risikofunn> = emptyList(),
+    ) {
+        fremTilSaksbehandleroppgave(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter, risikofunn)
+        håndterSaksbehandlerløsning()
+        håndterVedtakFattet()
     }
 
     protected fun håndterSøknad(
@@ -103,6 +133,23 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
             forrigeTilstand = if (erRevurdering) "AVVENTER_SIMULERING_REVURDERING" else "AVVENTER_SIMULERING",
             gjeldendeTilstand = if (erRevurdering) "AVVENTER_GODKJENNING_REVURDERING" else "AVVENTER_GODKJENNING",
             forårsaketAvId = forårsaketAvId
+        )
+    }
+
+    protected fun håndterVedtaksperiodeNyUtbetaling(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        utbetalingId: UUID = UUID.randomUUID()
+    ) {
+        nyUtbetalingId(utbetalingId)
+        meldingssenderV2.sendVedtaksperiodeNyUtbetaling(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId
         )
     }
 
@@ -157,6 +204,7 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR
     ) {
+        @Suppress("SqlResolve")
         fun fagsystemidFor(utbetalingId: UUID, tilArbeidsgiver: Boolean): String {
             val fagsystemidtype = if (tilArbeidsgiver) "arbeidsgiver" else "person"
             return sessionOf(dataSource).use { session ->
@@ -174,8 +222,8 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
             organisasjonsnummer = organisasjonsnummer,
             utbetalingId = utbetalingId,
             epost = SAKSBEHANDLER_EPOST,
-            arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, true),
-            personFagsystemId = fagsystemidFor(utbetalingId, false),
+            arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = true),
+            personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
         )
     }
 
@@ -185,6 +233,9 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
         utbetalingId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+        skjæringstidspunkt: LocalDate = fom,
         harOppdatertMetainfo: Boolean = false,
         andreArbeidsforhold: List<String> = emptyList()
     ) {
@@ -195,7 +246,6 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
             session.run(queryOf(query, vedtaksperiodeId).map { it.boolean(1) }.asSingle) ?: false
         }
 
-        nyUtbetalingId(utbetalingId)
         håndterUtbetalingOpprettet(utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING")
         håndterVedtaksperiodeEndret(erRevurdering = erRevurdering)
         meldingssenderV2.sendGodkjenningsbehov(
@@ -204,6 +254,9 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
             organisasjonsnummer,
             vedtaksperiodeId,
             utbetalingId,
+            periodeFom = fom,
+            periodeTom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
             orgnummereMedRelevanteArbeidsforhold = andreArbeidsforhold
         )
         if (!harOppdatertMetainfo) assertEtterspurteBehov("HentPersoninfoV2")
@@ -304,14 +357,14 @@ internal abstract class AbstractE2ETestV2: AbstractDatabaseTest() {
             requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.long(1) }.asSingle))
         }
 
-        fun godkejnningsbehovIdFor(vedtaksperiodeId: UUID): UUID = sessionOf(dataSource).use { session ->
+        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = ? AND h.type = 'GODKJENNING';"
             requireNotNull(session.run(queryOf(query, vedtaksperiodeId).map { it.uuid("id") }.asSingle))
         }
 
         val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
-        val godkjenningsbehovId = godkejnningsbehovIdFor(vedtaksperiodeId)
+        val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
         meldingssenderV2.sendSaksbehandlerløsning(fødselsnummer, oppgaveId = oppgaveId, godkjenningsbehovId = godkjenningsbehovId, godkjent = godkjent)
         assertUtgåendeMelding("vedtaksperiode_godkjent")
         assertUtgåendeBehovløsning("Godkjenning")
