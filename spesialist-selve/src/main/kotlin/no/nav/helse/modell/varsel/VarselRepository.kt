@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.modell.varsel.Varsel.Status
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
@@ -43,12 +42,14 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     }
 
     override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String) {
-        endreStatusHvisAktiv(vedtaksperiodeId, varselkode, INAKTIV, "Spesialist")
-        tellInaktivtVarsel(varselkode)
+        if (!erAktivFor(vedtaksperiodeId, varselkode)) return
+        varselDao.oppdaterStatus(vedtaksperiodeId, varselkode, INAKTIV, "Spesialist")
+        if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
     override fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
-        endreStatusHvisAktiv(vedtaksperiodeId, varselkode, GODKJENT, ident)
+        if (!erAktivFor(vedtaksperiodeId, varselkode)) return
+        varselDao.oppdaterStatus(vedtaksperiodeId, varselkode, GODKJENT, ident)
     }
 
     override fun lagreVarsel(id: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
@@ -56,7 +57,7 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
             ?.run {
                 if (erAktivFor(vedtaksperiodeId, varselkode)) return
                 varselDao.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId)
-                tellVarsel(varselkode)
+                if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
             }
             ?: sikkerlogg.info(
                 "Lagrer ikke {} for {} fordi det ikke finnes noen generasjon for perioden.",
@@ -79,10 +80,5 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
 
     private fun erAktivFor(vedtaksperiodeId: UUID, varselkode: String): Boolean {
         return varselDao.finnVarselstatus(vedtaksperiodeId, varselkode) == AKTIV
-    }
-
-    private fun endreStatusHvisAktiv(vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String) {
-        if (!erAktivFor(vedtaksperiodeId, varselkode)) return
-        varselDao.oppdaterStatus(vedtaksperiodeId, varselkode, status, ident)
     }
 }
