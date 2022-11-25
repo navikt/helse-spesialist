@@ -9,7 +9,6 @@ import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.vedtaksperiode.GenerasjonDao
 import no.nav.helse.tellInaktivtVarsel
-import no.nav.helse.tellVarsel
 import org.slf4j.LoggerFactory
 
 internal interface VarselRepository {
@@ -56,8 +55,7 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         generasjonDao.finnSisteFor(vedtaksperiodeId)
             ?.run {
                 if (erAktivFor(vedtaksperiodeId, varselkode)) return
-                varselDao.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId)
-                if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
+                this.lagreVarsel(id, varselkode, opprettet, varselDao::lagreVarsel)
             }
             ?: sikkerlogg.info(
                 "Lagrer ikke {} for {} fordi det ikke finnes noen generasjon for perioden.",

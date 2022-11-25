@@ -31,10 +31,10 @@ VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
 INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref)
 VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number},
         ${sequence_number});
-INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet)
-VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now());
-INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, opprettet_av_hendelse)
-VALUES ('${vedtaksperiode_id}', '${hendelse_id}');
+INSERT INTO selve_vedtaksperiode_generasjon(id, vedtaksperiode_id, opprettet_av_hendelse)
+VALUES (${sequence_number}, '${vedtaksperiode_id}', '${hendelse_id}');
+INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
+VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now(), ${sequence_number});
 INSERT INTO warning(id, melding, vedtak_ref, kilde, opprettet)
 VALUES (${sequence_number}, 'WARNING', ${sequence_number}, 'Spesialist', now());
 INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde)

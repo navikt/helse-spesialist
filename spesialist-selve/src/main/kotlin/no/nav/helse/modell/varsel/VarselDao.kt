@@ -54,12 +54,19 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun lagreVarsel(id: UUID, kode: String, tidsstempel: LocalDateTime, vedtaksperiodeId: UUID) {
+    internal fun lagreVarsel(
+        varselId: UUID,
+        varselkode: String,
+        opprettet: LocalDateTime,
+        vedtaksperiodeId: UUID,
+        generasjonId: UUID,
+    ) {
         @Language("PostgreSQL")
-        val query = "INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet) VALUES (?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING;"
+        val query =
+            "INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref) VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?)) ON CONFLICT (unik_id) DO NOTHING;"
 
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, id, kode, vedtaksperiodeId, tidsstempel).asUpdate)
+            session.run(queryOf(query, varselId, varselkode, vedtaksperiodeId, opprettet, generasjonId).asUpdate)
         }
     }
 

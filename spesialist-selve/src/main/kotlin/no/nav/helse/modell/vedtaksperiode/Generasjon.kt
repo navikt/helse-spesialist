@@ -1,7 +1,10 @@
 package no.nav.helse.modell.vedtaksperiode
 
+import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.modell.varsel.varselkodeformat
+import no.nav.helse.tellVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -30,14 +33,29 @@ class Generasjon(
         return opprettBlock(vedtaksperiodeId, hendelseId)
     }
 
+    internal fun lagreVarsel(
+        varselId: UUID,
+        varselkode: String,
+        opprettet: LocalDateTime,
+        opprettBlock: (varselId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID, generasjonId: UUID) -> Unit,
+    ) {
+        if (låst) return sikkerlogg.info(
+            "Kan ikke lagre varsel {} på låst generasjon {}",
+            keyValue("varselId", varselId),
+            keyValue("generasjon", this)
+        )
+        opprettBlock(varselId, varselkode, opprettet, vedtaksperiodeId, id)
+        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
+    }
+
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, låst=$låst"
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Generasjon
-        && javaClass == other.javaClass
-        && id == other.id
-        && vedtaksperiodeId == other.vedtaksperiodeId
-        && låst == other.låst)
+                && javaClass == other.javaClass
+                && id == other.id
+                && vedtaksperiodeId == other.vedtaksperiodeId
+                && låst == other.låst)
 
     override fun hashCode(): Int {
         var result = id.hashCode()
