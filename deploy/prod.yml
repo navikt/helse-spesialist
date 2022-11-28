@@ -100,4 +100,4 @@ spec:
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: VEDTAKSPERIODE_GENERASJONER
-      value: "true"
+      value: "false"
