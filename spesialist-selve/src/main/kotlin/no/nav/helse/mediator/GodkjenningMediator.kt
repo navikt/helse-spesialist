@@ -1,19 +1,19 @@
 package no.nav.helse.mediator
 
+import java.time.LocalDateTime
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
-import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.automatiseringsteller
 import no.nav.helse.automatiskAvvistÅrsakerTeller
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
-import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import org.slf4j.LoggerFactory
 
 internal class GodkjenningMediator(
     private val warningDao: WarningDao,
@@ -31,7 +31,7 @@ internal class GodkjenningMediator(
         godkjenttidspunkt: LocalDateTime
     ) {
         behov.godkjennManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt)
-        varselRepository.godkjennAlleFor(vedtaksperiodeId, saksbehandlerIdent)
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled) varselRepository.godkjennAlleFor(vedtaksperiodeId, saksbehandlerIdent)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }
@@ -49,7 +49,7 @@ internal class GodkjenningMediator(
         kommentar: String?
     ) {
         behov.avvisManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
-        varselRepository.avvisAlleFor(vedtaksperiodeId, saksbehandlerIdent)
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled) varselRepository.avvisAlleFor(vedtaksperiodeId, saksbehandlerIdent)
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }
