@@ -25,7 +25,7 @@ enum class Varselkode(
     SB_EX_1("Det finnes åpne oppgaver på sykepenger i Gosys"),
     SB_EX_2("Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform", avviklet = true),
     SB_EX_3("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"),
-    SB_IK_1("Registert fullmakt på personen"),
+    SB_IK_1("Registrert fullmakt på personen"),
     SB_RV_1("Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger"),
     SB_RV_2("Veileder har stanset automatisk behandling. Se Gosys for mer informasjon"),
     SB_RV_3("Kunne ikke sjekke om veileder har stanset automatisk behandling på grunn av teknisk feil");
