@@ -3,6 +3,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -24,6 +25,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
@@ -41,6 +43,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     @BeforeEach
     internal fun resetTestSetup() {
         testRapid.reset()
+        lagVarseldefinisjoner()
     }
 
     private fun nyUtbetalingId(utbetalingId: UUID) {
@@ -572,6 +575,27 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             requireNotNull(
                 session.run(queryOf(query, vedtaksperiodeId).map { row -> row.int(1) }.asSingle)
             )
+        }
+    }
+
+    private fun lagVarseldefinisjoner() {
+        sessionOf(dataSource).use { session ->
+            val varselkoder = Varselkode.values()
+            varselkoder.forEach { varselkode ->
+                @Language("PostgreSQL")
+                val query = "INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, avviklet, opprettet) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (unik_id) DO NOTHING"
+                session.run(
+                    queryOf(
+                        query,
+                        UUID.nameUUIDFromBytes(varselkode.name.toByteArray()),
+                        varselkode.name,
+                        "En tittel for varselkode=${varselkode.name}",
+                        "En forklaring for varselkode=${varselkode.name}",
+                        "En handling for varselkode=${varselkode.name}",
+                        false,
+                        LocalDateTime.now()
+                    ).asUpdate)
+            }
         }
     }
 }

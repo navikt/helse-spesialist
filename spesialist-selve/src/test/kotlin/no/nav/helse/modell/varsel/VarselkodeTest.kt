@@ -17,15 +17,15 @@ internal class VarselkodeTest {
             TODO("Not yet implemented")
         }
 
-        override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String) {
+        override fun deaktiverFor(vedtaksperiodeId: UUID, varselkode: String, definisjonId: UUID?) {
             deaktiverteVarsler.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(varselkode)
         }
 
-        override fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
+        override fun godkjennFor(vedtaksperiodeId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
             TODO("Not yet implemented")
         }
 
-        override fun avvisFor(vedtaksperiodeId: UUID, varselkode: String, ident: String) {
+        override fun avvisFor(vedtaksperiodeId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
             TODO("Not yet implemented")
         }
 

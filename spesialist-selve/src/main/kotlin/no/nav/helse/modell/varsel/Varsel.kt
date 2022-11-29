@@ -40,11 +40,11 @@ internal class Varsel(
     }
 
     internal fun godkjennHvisAktiv(vedtaksperiodeId: UUID, ident: String, varselRepository: VarselRepository) {
-        varselRepository.godkjennFor(vedtaksperiodeId, varselkode, ident)
+        varselRepository.godkjennFor(vedtaksperiodeId, varselkode, ident, null)
     }
 
     internal fun avvisHvisAktiv(vedtaksperiodeId: UUID, ident: String, varselRepository: VarselRepository) {
-        varselRepository.avvisFor(vedtaksperiodeId, varselkode, ident)
+        varselRepository.avvisFor(vedtaksperiodeId, varselkode, ident, null)
     }
 
     internal companion object {

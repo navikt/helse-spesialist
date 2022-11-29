@@ -17,6 +17,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
+import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import no.nav.helse.modell.varsel.Varselkode
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_1
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_2
@@ -140,7 +141,7 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterRisikovurderingløsning()
         håndterGosysOppgaveEndret()
         håndterÅpneOppgaverløsning(antall = 0)
-        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, Varsel.Status.INAKTIV)
+        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, INAKTIV)
         assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
         assertInaktivWarning("Det finnes åpne oppgaver på sykepenger i Gosys", VEDTAKSPERIODE_ID)
     }

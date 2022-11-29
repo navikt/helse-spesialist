@@ -39,7 +39,7 @@ enum class Varselkode(
     }
 
     internal fun deaktiverFor(vedtaksperiodeId: UUID, varselRepository: VarselRepository) {
-        varselRepository.deaktiverFor(vedtaksperiodeId, this.name)
+        varselRepository.deaktiverFor(vedtaksperiodeId, this.name, null)
     }
 
     override fun toString() = "${this.name}: $varseltekst"

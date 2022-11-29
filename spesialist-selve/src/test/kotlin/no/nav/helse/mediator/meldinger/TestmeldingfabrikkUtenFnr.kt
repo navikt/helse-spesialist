@@ -30,10 +30,10 @@ internal class TestmeldingfabrikkUtenFnr() {
 
     internal fun lagVarseldefinisjon(
         id: UUID = UUID.randomUUID(),
-        kode: String = "${UUID.randomUUID()}",
-        tittel: String = "En tittel",
-        forklaring: String = "En forklaring",
-        handling: String = "En handling"
+        kode: String = "EN_KODE",
+        tittel: String = "EN_TITTEL",
+        forklaring: String = "EN_FORKLARING",
+        handling: String = "EN_HANDLING"
     ): Map<String, Any> = mapOf(
         "id" to id,
         "kode" to kode,
