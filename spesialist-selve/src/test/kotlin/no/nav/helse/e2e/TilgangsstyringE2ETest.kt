@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import graphql.GraphQLError
 import io.mockk.every
 import io.mockk.mockk
 import java.util.UUID
@@ -16,6 +17,7 @@ import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,13 +38,13 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
         val godkjenningsmeldingId = sendMeldingerOppTilEgenAnsatt()
 
         fetchPerson().let { response ->
-            assertTrue(response.errors.any { it.message.contains("Har ikke tilgang til person med fødselsnummer") })
+            assertFeilmelding("Har ikke tilgang til person med fødselsnummer ", response.errors)
             assertNull(response.data)
         }
 
         sendEgenAnsattløsningOld(godkjenningsmeldingId = godkjenningsmeldingId, erEgenAnsatt = true)
         fetchPerson().let { response ->
-            assertTrue(response.errors.any { it.message.contains("Har ikke tilgang til person med fødselsnummer") })
+            assertFeilmelding("Har ikke tilgang til person med fødselsnummer ", response.errors)
             assertNull(response.data)
         }
 
@@ -50,7 +52,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             every { harTilgangTilSkjermedePersoner() } returns true
         }
         fetchPerson().let { response ->
-            assertTrue(response.errors.isEmpty())
+            assertEquals(emptyList<GraphQLError>(), response.errors)
             assertNotNull(response.data)
         }
     }
@@ -73,5 +75,13 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
         return godkjenningsmeldingId
+    }
+
+    companion object {
+        private fun assertFeilmelding(feilmelding: String, errors: List<GraphQLError>) {
+            assertTrue(errors.any { it.message.contains(feilmelding) }) {
+                "Forventet at $errors skulle inneholde \"$feilmelding\""
+            }
+        }
     }
 }
