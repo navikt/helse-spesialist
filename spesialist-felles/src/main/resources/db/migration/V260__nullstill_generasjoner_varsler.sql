@@ -1,2 +1,1 @@
-TRUNCATE TABLE selve_varsel;
-TRUNCATE TABLE selve_vedtaksperiode_generasjon;
+TRUNCATE TABLE selve_vedtaksperiode_generasjon RESTART IDENTITY CASCADE;
