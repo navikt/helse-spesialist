@@ -1,0 +1,2 @@
+TRUNCATE TABLE selve_varsel;
+TRUNCATE TABLE selve_vedtaksperiode_generasjon;
