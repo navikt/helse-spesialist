@@ -15,12 +15,17 @@ import io.ktor.server.routing.post
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.harTilgangTilBeslutteroppgaver
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.tilganger
 import org.slf4j.LoggerFactory
 
-internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator: OppgaveMediator) {
+internal fun Route.personApi(
+    hendelseMediator: HendelseMediator,
+    oppgaveMediator: OppgaveMediator,
+    tilgangsgrupper: Tilgangsgrupper,
+) {
     val log = LoggerFactory.getLogger("PersonApi")
 
     get("/api/person/aktorId/{aktørId}/sist_oppdatert") {
@@ -39,7 +44,7 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
 
     post("/api/vedtak") {
         val godkjenning = call.receive<GodkjenningDTO>()
-        log.info("Behandler godkjenning av ${godkjenning.oppgavereferanse}")
+        log.info("Behandler godkjenning av oppgaveId=${godkjenning.oppgavereferanse}")
         val (oid, epostadresse) = requireNotNull(call.principal<JWTPrincipal>()).payload.let {
             UUID.fromString(it.getClaim("oid").asString()) to it.getClaim("preferred_username").asString()
         }
@@ -54,6 +59,18 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
             return@post
         }
 
+        val tilgangskontroll = tilganger(tilgangsgrupper)
+        val erRiskOppgave = withContext(Dispatchers.IO) { oppgaveMediator.erRiskoppgave(godkjenning.oppgavereferanse) }
+        if (erRiskOppgave && !tilgangskontroll.harTilgangTilRisksaker) {
+            call.respond(
+                status = HttpStatusCode.Forbidden,
+                mapOf(
+                    "melding" to "Saksbehandler har ikke tilgang til RISK_QA-saker",
+                    "feilkode" to "IkkeTilgangTilRiskQa"
+                )
+            )
+            return@post
+        }
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
         if (erBeslutteroppgave) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
@@ -61,7 +78,7 @@ internal fun Route.personApi(hendelseMediator: HendelseMediator, oppgaveMediator
                 log.info("Oppgave ${godkjenning.oppgavereferanse} er merket vha Speil.")
             }
 
-            if (!harTilgangTilBeslutteroppgaver() && !erDev()) {
+            if (!tilgangskontroll.harTilgangTilBeslutterOppgaver && !erDev()) {
                 call.respondText(
                     "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
                     status = HttpStatusCode.Unauthorized

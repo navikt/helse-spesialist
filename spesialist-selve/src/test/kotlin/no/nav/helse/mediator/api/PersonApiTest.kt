@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.api
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -24,6 +25,7 @@ import java.net.ServerSocket
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
+import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
@@ -45,6 +47,7 @@ internal class PersonApiTest {
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
+    private val riskQaGruppe = UUID.randomUUID()
 
     @Test
     fun `godkjenning av vedtaksperiode OK`() {
@@ -52,7 +55,7 @@ internal class PersonApiTest {
         val response = runBlocking {
             client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
-                setBody<GodkjenningDTO>(objectMapper.valueToTree(godkjenning))
+                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }
@@ -65,11 +68,36 @@ internal class PersonApiTest {
         val response = runBlocking {
             client.preparePost("/api/vedtak") {
                 contentType(ContentType.Application.Json)
-                setBody<GodkjenningDTO>(objectMapper.valueToTree(godkjenning))
+                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
                 authentication(SAKSBEHANDLER_OID)
             }.execute()
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
+    }
+
+    @Test
+    fun `må ha tilgang for å kunne godkjenne vedtaksperiode med oppgavetype RISK_QA`() {
+        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveMediator.erRiskoppgave(1L) } returns true
+        val responseForManglendeTilgang = runBlocking {
+            client.preparePost("/api/vedtak") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+                authentication(SAKSBEHANDLER_OID, emptyList())
+
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Forbidden, responseForManglendeTilgang.status)
+
+        val responseForTilgangOk = runBlocking {
+            client.preparePost("/api/vedtak") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+                authentication(SAKSBEHANDLER_OID, listOf(riskQaGruppe.toString()))
+
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Created, responseForTilgangOk.status)
     }
 //
 //    @Test
@@ -227,7 +255,16 @@ internal class PersonApiTest {
             azureAdAppAuthentication(azureConfig)
             routing {
                 authenticate("oidc") {
-                    personApi(hendelseMediator, oppgaveMediator)
+                    personApi(
+                        hendelseMediator,
+                        oppgaveMediator,
+                        Tilgangsgrupper(
+                            mapOf(
+                                Tilgangsgrupper.riskQaKey to riskQaGruppe.toString(),
+                                Tilgangsgrupper.beslutterKey to UUID.randomUUID().toString()
+                            )
+                        )
+                    )
                 }
             }
         }.also {

@@ -154,6 +154,8 @@ class OppgaveMediator(
 
     fun erAktivOppgave(oppgaveId: Long) = oppgaveDao.venterPåSaksbehandler(oppgaveId)
 
+    fun erRiskoppgave(oppgaveId: Long) = oppgaveDao.erRiskoppgave(oppgaveId)
+
     fun erBeslutteroppgave(oppgaveId: Long) = oppgaveDao.erBeslutteroppgave(oppgaveId)
 
     fun trengerTotrinnsvurdering(oppgaveId: Long) = oppgaveDao.trengerTotrinnsvurdering(oppgaveId)

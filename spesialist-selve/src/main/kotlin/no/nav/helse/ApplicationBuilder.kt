@@ -213,6 +213,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         } ?: false
     })
 
+    private val tilgangsgrupper = Tilgangsgrupper(System.getenv())
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
             install(CORS) {
@@ -264,10 +266,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 periodehistorikkDao = periodehistorikkDao,
                 notatDao = notatDao,
                 reservasjonClient = reservasjonClient,
-                skjermedePersonerGruppeId = env.skjermedePersonerGruppeId(),
-                kode7Saksbehandlergruppe = env.kode7GruppeId(),
-                beslutterGruppeId = env.beslutterGruppeId(),
-                riskGruppeId = env.riskGruppeId(),
+                skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
+                kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+                beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
+                riskGruppeId = tilgangsgrupper.riskQaGruppeId,
                 snapshotMediator = snapshotMediator,
                 oppgaveService = OppgaveService(oppgavePagineringDao),
                 behandlingsstatistikkMediator = behandlingsstatistikkMediator,
@@ -276,7 +278,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 authenticate("oidc") {
                     personApi(
                         hendelseMediator = hendelseMediator,
-                        oppgaveMediator = oppgaveMediator
+                        oppgaveMediator = oppgaveMediator,
+                        tilgangsgrupper = tilgangsgrupper,
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(tildelingService)
@@ -334,10 +337,10 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             saksbehandlerDao,
             tildelingDao,
             hendelseMediator,
-            riskSaksbehandlergruppe = env.riskGruppeId(),
-            kode7Saksbehandlergruppe = env.kode7GruppeId(),
-            beslutterSaksbehandlergruppe = env.beslutterGruppeId(),
-            skjermedePersonerSaksbehandlergruppe = env.skjermedePersonerGruppeId(),
+            riskSaksbehandlergruppe = tilgangsgrupper.riskQaGruppeId,
+            kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+            beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
+            skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
         )
     }
 
@@ -375,14 +378,26 @@ internal fun PipelineContext<Unit, ApplicationCall>.gruppemedlemskap(): List<UUI
     return accessToken.payload.getClaim("groups").asList(String::class.java).map(UUID::fromString)
 }
 
-private fun Map<String, String>.kode7GruppeId() = UUID.fromString(this.getValue("KODE7_SAKSBEHANDLER_GROUP"))
-private fun Map<String, String>.riskGruppeId() = UUID.fromString(this.getValue("RISK_SUPERSAKSBEHANDLER_GROUP"))
-private fun Map<String, String>.beslutterGruppeId() = UUID.fromString(this.getValue("BESLUTTER_SAKSBEHANDLER_GROUP"))
-private fun Map<String, String>.skjermedePersonerGruppeId() = UUID.fromString(this.getValue("SKJERMEDE_PERSONER_GROUP"))
-
-object Tilgangsgrupper {
-    val beslutter: UUID by lazy { System.getenv().beslutterGruppeId() }
+class Tilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper, private val gruppemedlemskap: List<UUID>) {
+    val harTilgangTilRisksaker by lazy { gruppemedlemskap.contains(tilgangsgrupper.riskQaGruppeId) }
+    val harTilgangTilBeslutterOppgaver by lazy { gruppemedlemskap.contains(tilgangsgrupper.beslutterGruppeId) }
 }
 
-internal fun PipelineContext<Unit, ApplicationCall>.harTilgangTilBeslutteroppgaver(): Boolean =
-    gruppemedlemskap().contains(Tilgangsgrupper.beslutter)
+class Tilgangsgrupper(private val env: Map<String, String>) {
+    private fun fromEnv(key: String) = UUID.fromString(env.getValue(key))
+
+    val kode7GruppeId: UUID by lazy { fromEnv(kode7Key) }
+    val riskQaGruppeId: UUID by lazy { fromEnv(riskQaKey) }
+    val beslutterGruppeId: UUID by lazy { fromEnv(beslutterKey) }
+    val skjermedePersonerGruppeId: UUID by lazy { fromEnv(skjermedeKey) }
+
+    companion object {
+        const val kode7Key = "KODE7_SAKSBEHANDLER_GROUP"
+        const val riskQaKey = "RISK_SUPERSAKSBEHANDLER_GROUP"
+        const val beslutterKey = "BESLUTTER_SAKSBEHANDLER_GROUP"
+        const val skjermedeKey = "SKJERMEDE_PERSONER_GROUP"
+    }
+}
+
+internal fun PipelineContext<Unit, ApplicationCall>.tilganger(tilgangsgrupper: Tilgangsgrupper) =
+    Tilgangskontroll(tilgangsgrupper, gruppemedlemskap())

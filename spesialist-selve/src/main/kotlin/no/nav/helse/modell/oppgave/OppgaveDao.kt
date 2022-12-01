@@ -39,6 +39,12 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             AND status = 'AvventerSaksbehandler'::oppgavestatus
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_beslutteroppgave") } ?: false
 
+    fun erRiskoppgave(oppgaveId: Long): Boolean =
+        """ SELECT 1 FROM oppgave
+            WHERE id=:oppgaveId
+            AND type = 'RISK_QA'::type
+        """.single(mapOf("oppgaveId" to oppgaveId)) { true } ?: false
+
     fun erReturoppgave(oppgaveId: Long): Boolean =
         """ SELECT er_returoppgave FROM oppgave
             WHERE id=:oppgaveId
