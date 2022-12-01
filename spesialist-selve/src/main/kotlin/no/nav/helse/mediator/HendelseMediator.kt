@@ -130,7 +130,7 @@ internal class HendelseMediator(
             Vergemålløsning.VergemålRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
-            Inntektløsning.InntektRiver(it, this)
+            if (Toggle.Inntekter.enabled) Inntektløsning.InntektRiver(it, this)
             UtbetalingAnnullert.UtbetalingAnnullertRiver(it, this)
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)

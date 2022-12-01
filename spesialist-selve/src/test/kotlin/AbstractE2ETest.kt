@@ -1,3 +1,4 @@
+import ToggleHelpers.enable
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -40,6 +41,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
@@ -198,6 +200,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     internal fun resetTestSetup() {
         testRapid.reset()
         Meldingssender.testRapid = testRapid
+        Toggle.Inntekter.enable()
     }
 
     protected fun settOppBruker(orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList()): UUID {
