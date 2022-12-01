@@ -1,12 +1,14 @@
 package no.nav.helse.modell.person
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.sql.DataSource
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -113,6 +115,13 @@ internal class PersonDao(private val dataSource: DataSource) {
         val query = "SELECT info_ref FROM person WHERE fodselsnummer=?"
 
         return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("info_ref") }.asSingle)
+    }
+
+    private fun TransactionalSession.finnPersonRef(fødselsnummer: String): Long? {
+        @Language("PostgreSQL")
+        val query = "SELECT id FROM person WHERE fodselsnummer=?"
+
+        return run(queryOf(query, fødselsnummer.toLong()).map { it.longOrNull("id") }.asSingle)
     }
 
     private fun TransactionalSession.updatePersonInfo(
@@ -272,6 +281,48 @@ internal class PersonDao(private val dataSource: DataSource) {
                     queryOf(query, objectMapper.writeValueAsString(data)).asUpdateAndReturnGeneratedKey
                 )
             )
+        }
+
+    internal fun findInntekter(fødselsnummer: String, skjæringstidspunkt: LocalDate) =
+        sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = """
+                SELECT * FROM inntekt 
+                WHERE person_ref=(SELECT id FROM person WHERE fodselsnummer=:fodselsnummer)
+                AND skjaeringstidspunkt=:skjaeringstidspunkt;
+            """
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "skjaeringstidspunkt" to skjæringstidspunkt
+                    )
+                ).map { row -> objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))}.asSingle
+            )
+        }
+
+    internal fun insertInntekter(fødselsnummer: String, skjæringstidspunkt: LocalDate, inntekter: List<Inntekter>) =
+        sessionOf(dataSource).use { session ->
+            session.transaction { transaction ->
+                transaction.finnPersonRef(fødselsnummer)?.also {
+                    @Language("PostgreSQL")
+                    val query = """
+                        INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
+                        VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
+                    """
+                    session.run(
+                        queryOf(
+                            query,
+                            mapOf(
+                                "person_ref" to it,
+                                "skjaeringstidspunkt" to skjæringstidspunkt,
+                                "inntekter" to objectMapper.writeValueAsString(inntekter)
+                            )
+                        ).asExecute
+                    )
+                }
+            }
         }
 
     fun upsertInfotrygdutbetalinger(

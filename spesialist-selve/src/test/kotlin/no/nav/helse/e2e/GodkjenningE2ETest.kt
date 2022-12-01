@@ -12,6 +12,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendInntektløsningOld
 import no.nav.helse.Meldingssender.sendKomposittbehov
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
@@ -162,6 +163,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         val løsningId =
             sendSaksbehandlerløsningFraAPI(OPPGAVEID, SAKSBEHANDLERIDENT, SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, true)
         sendUtbetalingEndret(
@@ -177,6 +181,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -224,6 +229,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val åpnegosysoppgaverløsningId = sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId
         )
+        val inntektløsningId = sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         val risikoløsningId = sendRisikovurderingløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
@@ -243,11 +251,11 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                 åpnegosysoppgaverløsningId.toString(),
                 inspektør.field(7, "@forårsaket_av").path("id").asText()
             )
-            assertEquals(risikoløsningId.toString(), inspektør.field(8, "@forårsaket_av").path("id").asText())
-            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(9, "@forårsaket_av").path("id").asText())
-            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(10, "@forårsaket_av").path("id").asText())
-            assertEquals(løsningId.toString(), inspektør.field(11, "@forårsaket_av").path("id").asText())
-            assertNotEquals(godkjenningsmeldingId.toString(), inspektør.field(11, "@id").asText())
+            assertEquals(inntektløsningId.toString(), inspektør.field(8, "@forårsaket_av").path("id").asText())
+            assertEquals(risikoløsningId.toString(), inspektør.field(9, "@forårsaket_av").path("id").asText())
+            assertEquals(godkjenningsmeldingId.toString(), inspektør.field(11, "@forårsaket_av").path("id").asText())
+            assertEquals(løsningId.toString(), inspektør.field(13, "@forårsaket_av").path("id").asText())
+            assertNotEquals(godkjenningsmeldingId.toString(), inspektør.field(13, "@id").asText())
 
             0.until(inspektør.size).forEach {
                 println(inspektør.message(it))
@@ -340,6 +348,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         val begrunnelser = listOf("Fortjener ikke penger", "Skulker sannsynligvis")
         val kommentar = "Jeg har tatt meg litt frihet i vurderingen"
         val løsningId =
@@ -365,6 +376,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -425,10 +437,14 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         assertOppgavestatuser(0, AvventerSaksbehandler)
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -489,6 +505,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         sendSaksbehandlerløsningFraAPI(
             OPPGAVEID,
             SAKSBEHANDLERIDENT,
@@ -502,6 +521,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -562,6 +582,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         sendSaksbehandlerløsningFraAPI(
             OPPGAVEID,
             SAKSBEHANDLERIDENT,
@@ -586,6 +609,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -818,13 +842,13 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             utbetalingId = UTBETALING_ID
         )
-        håndterVergeflyt(snapshot = null)
+        håndterVergeflyt(snapshot = null, automatisertEllerAvvist = true)
         assertTilstand(hendelseId1, "NY", "SUSPENDERT", "AVBRUTT")
     }
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom det eksisterer en aktiv oppgave`() {
-        håndterVergeflyt()
+        håndterVergeflyt(automatisertEllerAvvist = true)
         testRapid.reset()
         sendGodkjenningsbehov(
             organisasjonsnummer = ORGNR,
@@ -836,7 +860,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `ignorerer påminnet godkjenningsbehov dersom vedtaket er automatisk godkjent`() {
-        val hendelseId = håndterVergeflyt()
+        val hendelseId = håndterVergeflyt(automatisertEllerAvvist = true)
         sendRisikovurderingløsningOld(hendelseId, VEDTAKSPERIODE_ID)
         assertOppgaver(0)
         assertAutomatisertLøsning()
@@ -1033,7 +1057,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter saksbehandling og avviser godkjenning på person med verge`() {
-        håndterVergeflyt(VergemålJson(vergemål = listOf(Vergemål(voksen))))
+        håndterVergeflyt(vergemål = VergemålJson(vergemål = listOf(Vergemål(voksen))), automatisertEllerAvvist = true)
         assertGodkjenningsbehovløsning(godkjent = false, saksbehandlerIdent = AUTOMATISK_BEHANDLET) {
             assertEquals("Vergemål", it["begrunnelser"].first().asText())
         }
@@ -1043,7 +1067,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `avbryter ikke saksbehandling for person uten verge`() {
-        håndterVergeflyt(VergemålJson())
+        håndterVergeflyt(vergemål = VergemålJson(), automatisertEllerAvvist = true)
         assertGodkjenningsbehovløsning(godkjent = true, saksbehandlerIdent = AUTOMATISK_BEHANDLET)
         assertTrue(testRapid.inspektør.behov().contains("Vergemål"))
         assertNotNull(testRapid.inspektør.hendelser("behov").firstOrNull { it.hasNonNull("Vergemål") })
@@ -1149,7 +1173,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
     private fun håndterVergeflyt(
         vergemål: VergemålJson = VergemålJson(),
-        snapshot: GraphQLClientResponse<HentSnapshot.Result>? = SNAPSHOT_UTEN_WARNINGS
+        snapshot: GraphQLClientResponse<HentSnapshot.Result>? = SNAPSHOT_UTEN_WARNINGS,
+        automatisertEllerAvvist: Boolean = false
+
     ): UUID {
         snapshot?.also {
             every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns it
@@ -1178,7 +1204,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vergemål = vergemål
         )
-
         sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId,
             erDigital = true
@@ -1190,18 +1215,17 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+
+        if (!automatisertEllerAvvist) sendInntektløsningOld(godkjenningsmeldingId)
+
+        val tilstander = mutableListOf("NY")
+        tilstander.addAll(listOf("SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT", "SUSPENDERT"))
+        if (!automatisertEllerAvvist) tilstander.add("SUSPENDERT")
+        tilstander.add("FERDIG")
+
         assertTilstand(
             godkjenningsmeldingId,
-            "NY",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "SUSPENDERT",
-            "FERDIG"
+            *tilstander.toTypedArray()
         )
         snapshot?.also {
             assertSnapshot(it, VEDTAKSPERIODE_ID)

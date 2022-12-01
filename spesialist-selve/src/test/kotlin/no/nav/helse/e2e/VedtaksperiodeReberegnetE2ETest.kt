@@ -11,6 +11,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendInntektløsningOld
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
@@ -101,6 +102,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -224,6 +226,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
 
@@ -303,6 +306,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
+            "SUSPENDERT",
             "FERDIG"
         )
         assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler)
@@ -332,13 +336,10 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         sendVergemålløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1
         )
-
-
         sendDigitalKontaktinformasjonløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1,
             erDigital = true
         )
-
         sendÅpneGosysOppgaverløsningOld(
             godkjenningsmeldingId = godkjenningsmeldingId1, 1
         )
@@ -347,6 +348,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId1,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(godkjenningsmeldingId = godkjenningsmeldingId1)
         return godkjenningsmeldingId1
     }
 

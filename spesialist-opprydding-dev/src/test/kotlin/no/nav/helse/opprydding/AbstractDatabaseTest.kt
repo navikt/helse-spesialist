@@ -113,7 +113,8 @@ internal abstract class AbstractDatabaseTest {
                 "arbeidsgiver",
                 "arbeidsgiver_bransjer",
                 "arbeidsgiver_navn",
-                "api_varseldefinisjon"
+                "api_varseldefinisjon",
+                "inntekt",
             )
         )
         tabeller.forEach {

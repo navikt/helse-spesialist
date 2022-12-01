@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
 import no.nav.helse.Testdata.SAKSBEHANDLER_IDENT
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
@@ -466,6 +467,25 @@ internal object Meldingssender {
                     aktørId = AKTØR,
                     fødselsnummer = FØDSELSNUMMER,
                     erDigital = erDigital,
+                    id = id,
+                    hendelseId = godkjenningsmeldingId,
+                    contextId = contextId
+                )
+            )
+        }
+    }
+
+    fun sendInntektløsningOld(
+        godkjenningsmeldingId: UUID,
+        contextId: UUID = testRapid.inspektør.contextId()
+    ): UUID {
+        return uuid.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagInntektløsning(
+                    aktørId = AKTØR,
+                    fødselsnummer = FØDSELSNUMMER,
+                    orgnummer = ORGNR,
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID,
                     id = id,
                     hendelseId = godkjenningsmeldingId,
                     contextId = contextId

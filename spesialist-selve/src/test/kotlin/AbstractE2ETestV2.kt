@@ -90,6 +90,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fremTilÅpneOppgaver(fom, tom, skjæringstidspunkt, andreArbeidsforhold, regelverksvarsler, fullmakter)
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false, risikofunn = risikofunn)
+        håndterInntektløsning()
     }
 
     protected fun nyttVedtak(
@@ -377,6 +378,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
     ) {
         meldingssenderV2.sendDigitalKontaktinformasjonløsning(aktørId, fødselsnummer)
+    }
+
+    protected fun håndterInntektløsning(
+        aktørId: String = AKTØR,
+        fødselsnummer: String = FØDSELSNUMMER,
+    ) {
+        meldingssenderV2.sendInntektløsning(aktørId, fødselsnummer)
     }
 
     protected fun håndterÅpneOppgaverløsning(

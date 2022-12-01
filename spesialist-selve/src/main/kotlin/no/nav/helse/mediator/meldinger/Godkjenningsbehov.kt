@@ -31,6 +31,7 @@ import no.nav.helse.modell.kommando.KlargjørVedtaksperiodeCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgaveCommand
+import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.kommando.PersisterPeriodehistorikkCommand
 import no.nav.helse.modell.kommando.TrengerTotrinnsvurderingCommand
 import no.nav.helse.modell.oppgave.OppgaveMediator
@@ -75,6 +76,7 @@ internal class Godkjenningsbehov(
     utbetalingtype: Utbetalingtype,
     inntektskilde: Inntektskilde,
     orgnummereMedRelevanteArbeidsforhold: List<String>,
+    skjæringstidspunkt: LocalDate,
     private val json: String,
     personDao: PersonDao,
     arbeidsgiverDao: ArbeidsgiverDao,
@@ -236,7 +238,12 @@ internal class Godkjenningsbehov(
             utbetalingId = utbetalingId,
             periodehistorikkDao = periodehistorikkDao,
             utbetalingDao = utbetalingDao,
-        )
+        ),
+        PersisterInntektCommand(
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            personDao = personDao
+        ),
     )
 
     override fun fødselsnummer() = fødselsnummer

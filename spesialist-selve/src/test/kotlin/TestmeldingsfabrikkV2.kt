@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn
@@ -325,6 +326,38 @@ internal object TestmeldingsfabrikkV2 {
                 "@løsning" to mapOf(
                     "DigitalKontaktinformasjon" to mapOf(
                         "erDigital" to erDigital
+                    )
+                )
+            )
+        )
+
+    fun lagInntektløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        id: UUID,
+        hendelseId: UUID,
+        contextId: UUID,
+    ): String =
+        nyHendelse(
+            id, "behov", mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("InntekterForSykepengegrunnlag"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "@løsning" to mapOf(
+                    "InntekterForSykepengegrunnlag" to listOf(
+                        mapOf(
+                            "årMåned" to YearMonth.now(),
+                            "inntektsliste" to listOf(
+                                mapOf(
+                                    "beløp" to 20000,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to "123456789"
+                                )
+                            )
+                        )
                     )
                 )
             )

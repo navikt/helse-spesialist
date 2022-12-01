@@ -442,6 +442,27 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         )
     }
 
+    fun sendInntektløsning(
+        aktørId: String,
+        fødselsnummer: String,
+    ): UUID = newUUID.also { id ->
+        val behov = testRapid.inspektør.siste("behov")
+        testRapid.reset()
+        assertEquals("InntekterForSykepengegrunnlag", behov["@behov"].map { it.asText() }.single())
+        val contextId = UUID.fromString(behov["contextId"].asText())
+        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
+
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagInntektløsning(
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                id = id,
+                hendelseId = hendelseId,
+                contextId = contextId
+            )
+        )
+    }
+
     fun sendÅpneGosysOppgaverløsning(
         aktørId: String,
         fødselsnummer: String,

@@ -151,6 +151,7 @@ internal class Hendelsefabrikk(
             utbetalingtype = utbetalingtype,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+            skjæringstidspunkt = skjæringstidspunkt,
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao,

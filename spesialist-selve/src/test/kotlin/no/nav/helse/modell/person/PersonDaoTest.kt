@@ -2,9 +2,12 @@ package no.nav.helse.modell.person
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
+import java.time.YearMonth
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.person.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -97,6 +100,58 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
         assertEquals(Adressebeskyttelse.Fortrolig, personDao.findAdressebeskyttelse(FNR))
     }
 
+    @Test
+    fun `Lagrer inntekt`() {
+        opprettPerson()
+        val sekvensnummer = personDao.insertInntekter(
+            fødselsnummer = FNR,
+            skjæringstidspunkt = LocalDate.parse("2022-11-11"),
+            inntekter = listOf(
+                Inntekter(
+                    YearMonth.parse("2022-11"),
+                    listOf(Inntekter.Inntekt(20000, ORGNUMMER))
+                ),
+                Inntekter(
+                    YearMonth.parse("2022-10"),
+                    listOf(Inntekter.Inntekt(20000, ORGNUMMER))
+                ),
+                Inntekter(
+                    YearMonth.parse("2022-09"),
+                    listOf(Inntekter.Inntekt(20000, ORGNUMMER))
+                )
+            )
+        )
+        assertEquals(1, sekvensnummer)
+
+        val inntekter = inntekter()
+        assertEquals(3, inntekter.size)
+        assertEquals(YearMonth.parse("2022-11"), inntekter.first().årMåned)
+    }
+
+    @Test
+    fun `Finner riktig inntekt`() {
+        opprettPerson()
+        personDao.insertInntekter(
+            fødselsnummer = FNR,
+            skjæringstidspunkt = LocalDate.parse("2022-11-11"),
+            inntekter = listOf(Inntekter(YearMonth.parse("2022-11"), listOf(Inntekter.Inntekt(20000, ORGNUMMER))))
+        )
+        personDao.insertInntekter(
+            fødselsnummer = FNR,
+            skjæringstidspunkt = LocalDate.parse("2022-03-03"),
+            inntekter = listOf(Inntekter(YearMonth.parse("2022-03"), listOf(Inntekter.Inntekt(20000, ORGNUMMER))))
+        )
+        personDao.insertInntekter(
+            fødselsnummer = FNR,
+            skjæringstidspunkt = LocalDate.parse("2020-01-01"),
+            inntekter = listOf(Inntekter(YearMonth.parse("2021-01"), listOf(Inntekter.Inntekt(20000, ORGNUMMER))))
+        )
+
+        assertEquals(YearMonth.parse("2022-11"), personDao.findInntekter(FNR, LocalDate.parse("2022-11-11"))!!.first().årMåned)
+        assertEquals(YearMonth.parse("2022-03"), personDao.findInntekter(FNR, LocalDate.parse("2022-03-03"))!!.first().årMåned)
+        assertEquals(YearMonth.parse("2021-01"), personDao.findInntekter(FNR, LocalDate.parse("2020-01-01"))!!.first().årMåned)
+    }
+
     private fun assertPersoninfo(
         forventetNavn: String,
         forventetMellomnavn: String?,
@@ -134,6 +189,16 @@ internal class PersonDaoTest : DatabaseIntegrationTest() {
                 }
                 .asList
         )
+    }
+
+    private fun inntekter(): List<Inntekter> = sessionOf(dataSource).use { session ->
+        session.run(
+            queryOf("SELECT inntekter from inntekt")
+                .map { row ->
+                    objectMapper.readValue<List<Inntekter>>(row.string("inntekter"))
+                }
+                .asSingle
+        ) ?: emptyList()
     }
 
     private fun personinfo() =

@@ -44,6 +44,7 @@ import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentInfotrygdutbetalingerløsning
 import no.nav.helse.mediator.meldinger.løsninger.HentPersoninfoløsning
+import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.løsninger.Saksbehandlerløsning
 import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
@@ -129,6 +130,7 @@ internal class HendelseMediator(
             Vergemålløsning.VergemålRiver(it, this)
             ÅpneGosysOppgaverløsning.ÅpneGosysOppgaverRiver(it, this)
             Risikovurderingløsning.V2River(it, this)
+            Inntektløsning.InntektRiver(it, this)
             UtbetalingAnnullert.UtbetalingAnnullertRiver(it, this)
             OppdaterPersonsnapshot.River(it, this)
             UtbetalingEndret.River(it, this)

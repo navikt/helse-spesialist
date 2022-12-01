@@ -8,6 +8,7 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendInntektløsningOld
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendUtbetalingEndret
@@ -211,6 +212,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
@@ -230,6 +234,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -296,6 +301,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             kanGodkjennesAutomatisk = false,
             funn = funn
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
@@ -315,6 +323,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
@@ -392,6 +401,9 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
             godkjenningsmeldingId = godkjenningsmeldingId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID
         )
+        sendInntektløsningOld(
+            godkjenningsmeldingId = godkjenningsmeldingId,
+        )
         val løsningId = sendSaksbehandlerløsningFraAPI(
             oppgaveId = OPPGAVEID,
             saksbehandlerIdent = SAKSBEHANDLERIDENT,
@@ -411,6 +423,7 @@ internal class AutomatiseringE2ETest : AbstractE2ETest() {
         assertTilstand(
             godkjenningsmeldingId,
             "NY",
+            "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",
             "SUSPENDERT",

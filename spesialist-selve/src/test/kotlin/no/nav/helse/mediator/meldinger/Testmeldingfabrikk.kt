@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
@@ -414,6 +415,44 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 "@løsning" to mapOf(
                     "DigitalKontaktinformasjon" to mapOf(
                         "erDigital" to erDigital
+                    )
+                )
+            )
+        )
+
+
+    fun lagInntektløsning(
+        aktørId: String,
+        fødselsnummer: String,
+        orgnummer: String,
+        vedtaksperiodeId: UUID,
+        id: UUID = UUID.randomUUID(),
+        hendelseId: UUID = UUID.randomUUID(),
+        contextId: UUID = UUID.randomUUID()
+    ): String =
+        nyHendelse(
+            id,
+            "behov", mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("InntekterForSykepengegrunnlag"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "orgnummer" to orgnummer,
+                "@løsning" to mapOf(
+                    "InntekterForSykepengegrunnlag" to listOf(
+                        mapOf(
+                            "årMåned" to "${YearMonth.now().minusMonths(1)}",
+                            "inntektsliste" to listOf(
+                                mapOf(
+                                    "beløp" to 20000,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to orgnummer
+                                )
+                            )
+                        )
                     )
                 )
             )
