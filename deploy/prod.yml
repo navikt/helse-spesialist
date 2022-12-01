@@ -100,6 +100,6 @@ spec:
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: VEDTAKSPERIODE_GENERASJONER
-      value: "false"
+      value: "true"
     - name: PERSONAVSTEMMING_FOR_HISTORISKE_GENERASJONER
       value: "false"
