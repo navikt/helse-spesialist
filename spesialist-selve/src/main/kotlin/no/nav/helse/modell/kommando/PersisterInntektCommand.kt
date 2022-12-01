@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import java.time.LocalDate
+import java.time.YearMonth
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.person.PersonDao
@@ -41,11 +42,13 @@ internal class PersisterInntektCommand (
         context.behov(
             "InntekterForSykepengegrunnlag",
             mapOf(
-                "beregningStart" to skjæringstidspunkt.minusMonths(3).toString(),
-                "beregningSlutt" to skjæringstidspunkt.minusMonths(1).toString()
+                "beregningStart" to skjæringstidspunkt.minusMonths(3).toYearMonth().toString(),
+                "beregningSlutt" to skjæringstidspunkt.minusMonths(1).toYearMonth().toString(),
             )
         )
 
         return false
     }
+
+    private fun LocalDate.toYearMonth() = YearMonth.of(this.year, this.month)
 }
