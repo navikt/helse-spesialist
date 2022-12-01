@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.person
 
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,4 +44,20 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         assertEquals(FØDSELSNUMMER, personApiDao.finnFødselsnummer(AKTØRID.toLong()))
     }
+
+    @Test
+    fun `kan svare på om en person er klar for visning, hvilket vil si om spesialist har preppet ferdig minst en gang`() {
+        val personId = opprettPerson()
+        assertPersonenErIkkeKlar()
+
+        val vedtakId = opprettVedtak(personId, opprettArbeidsgiver())
+        assertPersonenErIkkeKlar()
+
+        klargjørVedtak(vedtakId, PERIODE, Oppgavetype.SØKNAD)
+        assertPersonenErKlar()
+    }
+
+    private fun personenErKlar() = personApiDao.spesialistHarPersonKlarForVisningISpeil(FØDSELSNUMMER)
+    private fun assertPersonenErIkkeKlar() = assertFalse(personenErKlar())
+    private fun assertPersonenErKlar() = assertTrue(personenErKlar())
 }

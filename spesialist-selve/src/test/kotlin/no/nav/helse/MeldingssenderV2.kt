@@ -2,6 +2,7 @@ package no.nav.helse
 
 import TestmeldingsfabrikkV2
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
@@ -24,6 +25,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Feriedag
 import no.nav.helse.spesialist.api.overstyring.Dagtype.Sykedag
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class MeldingssenderV2(private val testRapid: TestRapid) {
@@ -136,6 +138,18 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 id = id,
             )
         )
+    }
+
+    fun sendEndretSkjermetinfo(skjermet: Boolean, fødselsnummer: String = Testdata.FØDSELSNUMMER) {
+        @Language("JSON")
+        val json = """{
+          "@event_name": "endret_skjermetinfo",
+          "@id": "${UUID.randomUUID()}",
+          "fødselsnummer": "$fødselsnummer",
+          "skjermet": "$skjermet",
+          "@opprettet": "${LocalDateTime.now()}"
+        }"""
+        testRapid.sendTestMessage(json)
     }
 
     fun sendUtbetalingEndret(

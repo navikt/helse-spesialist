@@ -76,6 +76,12 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         arbeidsgiverId: Long,
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
+    ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, periode, oppgavetype) }
+
+    protected fun opprettVedtak(
+        personId: Long,
+        arbeidsgiverId: Long,
+        periode: Periode = PERIODE,
     ) =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             val snapshotid = opprettSnapshot()
@@ -89,11 +95,20 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         statement, periode.id, periode.fom, periode.tom, arbeidsgiverId, personId, snapshotid
                     ).asUpdateAndReturnGeneratedKey
                 )
-            ).also {
-                opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, it)
-                opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, it)
-            }
+            )
         }
+
+    protected fun klargjørVedtak(
+        vedtakId: Long,
+        periode: Periode,
+        oppgavetype: Oppgavetype,
+    ) {
+        opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, vedtakId)
+        val hendelseId = UUID.randomUUID()
+        opprettHendelse(hendelseId)
+        opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
+        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId)
+    }
 
     private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
         sessionOf(dataSource).use { session ->
@@ -334,6 +349,49 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     ).asUpdateAndReturnGeneratedKey
                 )
             })
+
+    private fun opprettHendelse(
+        hendelseId: UUID,
+        foedselsnummer: String = FØDSELSNUMMER,
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = """
+            INSERT INTO hendelse(id, fodselsnummer, data, type)
+            VALUES (:hendelseId, :foedselsnummer, '{}', 'type')
+        """
+        session.run(
+            queryOf(
+                statement,
+                mapOf("hendelseId" to hendelseId, "foedselsnummer" to foedselsnummer.toLong())
+            ).asUpdate
+        )
+    }
+
+    private fun opprettAutomatisering(
+        automatisert: Boolean,
+        stikkprøve: Boolean = false,
+        vedtaksperiodeId: UUID,
+        hendelseId: UUID,
+        utbetalingId: UUID = UUID.randomUUID(),
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val statement = """
+                INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
+                VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :automatisert, :stikkproeve, :utbetalingId);
+            """
+        session.run(
+            queryOf(
+                statement,
+                mapOf(
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "hendelseId" to hendelseId,
+                    "automatisert" to automatisert,
+                    "stikkproeve" to stikkprøve,
+                    "utbetalingId" to utbetalingId
+                )
+            ).asUpdate
+        )
+    }
 
     protected fun tildelOppgave(oppgaveRef: Long, saksbehandlerOid: UUID) =
         sessionOf(dataSource).use { session ->

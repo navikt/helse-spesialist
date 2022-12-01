@@ -36,9 +36,12 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
             ).padStart(11, '0')
         }
 
+    // Alle peridoer som enten har ført til manuell oppgave eller blitt automatisk godkjent, vil ha et innslag i
+    // automatisering-tabellen.
     fun spesialistHarPersonKlarForVisningISpeil(fødselsnummer: String) =
-        """SELECT info_ref FROM person WHERE fodselsnummer= :fodselsnummer"""
-            .single(
-                mapOf("fodselsnummer" to fødselsnummer.toLong())
-            ) { it.longOrNull("info_ref") != null }!!
+        """SELECT 1 FROM person p
+           INNER JOIN vedtak v ON v.person_ref = p.id
+           INNER JOIN automatisering a on a.vedtaksperiode_ref = v.id
+           WHERE p.fodselsnummer = :fodselsnummer
+       """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { true } ?: false
 }
