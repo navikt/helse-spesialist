@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import java.time.LocalDate
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.person.PersonDao
 import org.slf4j.LoggerFactory
@@ -15,6 +16,8 @@ internal class PersisterInntektCommand (
     }
 
     override fun resume(context: CommandContext): Boolean {
+        if (!Toggle.Inntekter.enabled) return true
+
         val løsning = context.get<Inntektløsning>() ?: return trengerInntekt(context)
 
         løsning.lagre(personDao, fødselsnummer, skjæringstidspunkt).also {
@@ -25,6 +28,8 @@ internal class PersisterInntektCommand (
     }
 
     override fun execute(context: CommandContext): Boolean {
+        if (!Toggle.Inntekter.enabled) return true
+
         personDao.findInntekter(fødselsnummer, skjæringstidspunkt) ?: return trengerInntekt(context).also {
             sikkerLog.info("Inntekter er ikke tidligere lagret for person med fødselsnummer: $fødselsnummer, sender behov")
         }
