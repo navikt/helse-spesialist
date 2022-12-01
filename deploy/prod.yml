@@ -101,3 +101,5 @@ spec:
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: VEDTAKSPERIODE_GENERASJONER
       value: "false"
+    - name: PERSONAVSTEMMING_FOR_HISTORISKE_GENERASJONER
+      value: "false"

@@ -141,7 +141,7 @@ internal class HendelseMediator(
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
             VedtaksperiodeNyUtbetaling.River(it, this)
-            if (Toggle.VedtaksperiodeGenerasjoner.enabled) Personavstemming.River(it, dataSource)
+            if (Toggle.PersonavstemmingForHistoriskeGenerasjoner.enabled) Personavstemming.River(it, dataSource)
         }
     }
 
