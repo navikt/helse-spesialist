@@ -43,5 +43,6 @@ class PersonApiDao(dataSource: DataSource) : HelseDao(dataSource) {
            INNER JOIN vedtak v ON v.person_ref = p.id
            INNER JOIN automatisering a on a.vedtaksperiode_ref = v.id
            WHERE p.fodselsnummer = :fodselsnummer
+           LIMIT 1
        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { true } ?: false
 }
