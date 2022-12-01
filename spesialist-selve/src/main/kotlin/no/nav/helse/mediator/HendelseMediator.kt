@@ -265,6 +265,7 @@ internal class HendelseMediator(
         fødselsnummer: String,
         forårsaketAvId: UUID,
         forrigeTilstand: String,
+        gjeldendeTilstand: String,
         context: MessageContext,
     ) {
         val hendelse =
@@ -274,6 +275,7 @@ internal class HendelseMediator(
                 fødselsnummer,
                 forårsaketAvId,
                 forrigeTilstand,
+                gjeldendeTilstand,
                 message.toJson()
             )
         if (personDao.findPersonByFødselsnummer(fødselsnummer) == null) {

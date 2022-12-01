@@ -29,12 +29,12 @@ internal class VedtaksperiodeEndretRiverTest {
     @Test
     fun `leser vedtaksperiode_endret`() {
         rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER))
-        verify(exactly = 1) { mediator.vedtaksperiodeEndret(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { mediator.vedtaksperiodeEndret(any(), any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
     fun `leser ikke vedtaksperiode_endret der forrigeTilstand=START`() {
         rapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, forrigeTilstand = "START"))
-        verify(exactly = 0) { mediator.vedtaksperiodeEndret(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { mediator.vedtaksperiodeEndret(any(), any(), any(), any(), any(), any(), any(), any()) }
     }
 }
