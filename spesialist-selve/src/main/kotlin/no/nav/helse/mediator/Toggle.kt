@@ -9,5 +9,5 @@ abstract class Toggle(private var _enabled: Boolean) {
     object VedtaksperiodeGenerasjoner: Toggle("VEDTAKSPERIODE_GENERASJONER")
     object PersonavstemmingForHistoriskeGenerasjoner: Toggle("PERSONAVSTEMMING_FOR_HISTORISKE_GENERASJONER")
 
-    object Inntekter: Toggle("INNTEKTER", true)
+    object Inntekter: Toggle("INNTEKTER")
 }
