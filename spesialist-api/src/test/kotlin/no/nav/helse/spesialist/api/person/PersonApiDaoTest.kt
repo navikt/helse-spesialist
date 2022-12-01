@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.api.person
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,6 +56,23 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
         assertPersonenErIkkeKlar()
 
         klargjørVedtak(vedtakId, PERIODE, Oppgavetype.SØKNAD)
+        assertPersonenErKlar()
+    }
+
+    @Test
+    fun `feiler ikke når det fins mer enn ett vedtak`() {
+        val personId = opprettPerson()
+        assertPersonenErIkkeKlar()
+
+        val arbeidsgiverId = opprettArbeidsgiver()
+        val vedtakId = opprettVedtak(personId, arbeidsgiverId)
+        assertPersonenErIkkeKlar()
+
+        klargjørVedtak(vedtakId, PERIODE, Oppgavetype.SØKNAD)
+        assertPersonenErKlar()
+        val periode2 = Periode(UUID.randomUUID(), LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 12))
+        val vedtakId2 = opprettVedtak(personId, arbeidsgiverId, periode2)
+        klargjørVedtak(vedtakId2, periode2, Oppgavetype.SØKNAD)
         assertPersonenErKlar()
     }
 
