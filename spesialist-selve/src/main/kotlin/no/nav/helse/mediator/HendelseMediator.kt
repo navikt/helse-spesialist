@@ -26,7 +26,6 @@ import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
-import no.nav.helse.mediator.meldinger.Personavstemming
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.SøknadSendt
 import no.nav.helse.mediator.meldinger.UtbetalingAnnullert
@@ -143,7 +142,6 @@ internal class HendelseMediator(
             NyeVarsler.River(it, this)
             Varseldefinisjon.River(it, varselRepository)
             VedtaksperiodeNyUtbetaling.River(it, this)
-            if (Toggle.PersonavstemmingForHistoriskeGenerasjoner.enabled) Personavstemming.River(it, dataSource)
         }
     }
 
