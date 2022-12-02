@@ -42,7 +42,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
     fun erRiskoppgave(oppgaveId: Long): Boolean =
         """ SELECT 1 FROM oppgave
             WHERE id=:oppgaveId
-            AND type = 'RISK_QA'::type
+            AND type = 'RISK_QA'
         """.single(mapOf("oppgaveId" to oppgaveId)) { true } ?: false
 
     fun erReturoppgave(oppgaveId: Long): Boolean =

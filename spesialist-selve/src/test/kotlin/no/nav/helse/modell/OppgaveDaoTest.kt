@@ -310,6 +310,16 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertTrue(trengerTotrinnsvurdering())
     }
 
+    @Test
+    fun `sjekker risk-oppgaver`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave(contextId = CONTEXT_ID, oppgavetype = Oppgavetype.RISK_QA)
+
+        assertTrue(oppgaveDao.erRiskoppgave(oppgaveId))
+    }
+
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
         it.run(
             queryOf(
