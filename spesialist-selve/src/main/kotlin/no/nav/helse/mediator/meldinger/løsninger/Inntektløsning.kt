@@ -33,7 +33,9 @@ internal class Inntektløsning(
                         it.demandValue("@event_name", "behov")
                         it.demandValue("@final", true)
                         it.demandAll("@behov", listOf(behov))
-                        it.requireKey("@id", "contextId", "hendelseId")
+                        it.demandKey("contextId")
+                        it.demandKey("hendelseId")
+                        it.requireKey("@id")
                         it.requireArray("@løsning.$behov") {
                             this.require("årMåned", JsonNode::asYearMonth)
                             this.requireArray("inntektsliste") {
