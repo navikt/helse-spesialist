@@ -55,7 +55,8 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID) {
         val generasjon = dao.finnSisteFor(vedtaksperiodeId)
         if (generasjon == null) {
-            sikkerlogg.info("""
+            sikkerlogg.info(
+                """
                 Kan ikke opprette ny generasjon for {} fra vedtaksperiode_endret så lenge det ikke eksisterer minimum én generasjon fra før av. 
                 Første generasjon kan kun opprettes når vedtaksperioden opprettes.
                 """.trimIndent(),
@@ -70,6 +71,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     }
 
     override fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID) {
+        dao.finnSisteFor(vedtaksperiodeId) ?: return
         dao.låsFor(vedtaksperiodeId, hendelseId)
             ?.loggLåst()
             ?: sikkerlogg.error(
