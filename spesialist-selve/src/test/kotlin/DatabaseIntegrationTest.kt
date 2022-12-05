@@ -10,6 +10,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.mediator.FeilendeMeldingerDao
+import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.SnapshotDao
@@ -354,6 +355,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             refDelytelseId = null,
             refFagsystemId = null
         )
+    }
+
+    protected fun opprettInntekt(fødselsnummer: String, skjæringstidspunkt: LocalDate, inntekter: List<Inntekter>) {
+        personDao.insertInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
     }
 
     protected fun hentUtbetalingMedUtbetalingId(utbetalingIdRef: Long): String? {

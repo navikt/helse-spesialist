@@ -109,6 +109,7 @@ data class Arbeidsgiver(
                     is GraphQLUberegnetPeriode -> UberegnetPeriode(id = it.id, periode = it)
                     is GraphQLBeregnetPeriode -> BeregnetPeriode(
                         id = it.id,
+                        orgnummer = organisasjonsnummer,
                         periode = it,
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,

@@ -302,6 +302,7 @@ data class UberegnetPeriode(
 @Suppress("unused")
 data class BeregnetPeriode(
     val id: UUIDString,
+    private val orgnummer: String,
     private val periode: GraphQLBeregnetPeriode,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
@@ -335,6 +336,9 @@ data class BeregnetPeriode(
 
     fun beslutterSaksbehandlerOid(): UUIDString? =
         oppgaveApiDao.hentBeslutterSaksbehandlerOid(UUID.fromString(vedtaksperiodeId()))?.toString()
+
+    fun inntektFraAordningen(): List<InntektFraAOrdningen> =
+        oppgaveApiDao.finnPeriodensInntekterFraAordningen(periode.vedtaksperiodeId, periode.skjaeringstidspunkt, orgnummer)
 
     fun notater(): List<Notat> = notatDao.finnNotater(UUID.fromString(vedtaksperiodeId())).map {
         Notat(

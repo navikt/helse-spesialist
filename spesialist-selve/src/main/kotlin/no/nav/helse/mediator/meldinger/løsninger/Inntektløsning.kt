@@ -74,6 +74,6 @@ internal class Inntektløsning(
     }
 }
 
-internal data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
+data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
     data class Inntekt(val beløp: Int, val orgnummer: String)
 }
