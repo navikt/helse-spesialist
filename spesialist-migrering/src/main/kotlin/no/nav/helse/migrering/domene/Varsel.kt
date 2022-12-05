@@ -1,7 +1,8 @@
-package no.nav.helse.migrering
+package no.nav.helse.migrering.domene
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.migrering.db.SpesialistDao
 
 internal class Varsel(
     private val vedtaksperiodeId: UUID,

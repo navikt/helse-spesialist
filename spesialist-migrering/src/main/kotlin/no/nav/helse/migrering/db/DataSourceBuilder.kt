@@ -1,4 +1,4 @@
-package no.nav.helse.migrering
+package no.nav.helse.migrering.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

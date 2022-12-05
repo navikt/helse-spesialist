@@ -1,9 +1,10 @@
-package no.nav.helse.migrering
+package no.nav.helse.migrering.db
 
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.migrering.domene.Varsel
 import org.intellij.lang.annotations.Language
 
 internal class SparsomDao(private val dataSource: DataSource) {

@@ -1,16 +1,13 @@
 package no.nav.helse.migrering
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.migrering.Personavstemming.Vedtaksperiode.Generasjon.Companion.lagre
-import no.nav.helse.migrering.Personavstemming.Vedtaksperiode.Utbetaling
-import no.nav.helse.migrering.Personavstemming.Vedtaksperiode.Utbetaling.Companion.sortert
-import no.nav.helse.migrering.Varsel.Companion.konsumer
-import no.nav.helse.migrering.Varsel.Companion.lagre
-import no.nav.helse.migrering.Varsel.Companion.sortert
-import no.nav.helse.migrering.Varsel.Companion.varslerFor
+import no.nav.helse.migrering.db.SparsomDao
+import no.nav.helse.migrering.db.SpesialistDao
+import no.nav.helse.migrering.domene.Generasjon.Companion.lagre
+import no.nav.helse.migrering.domene.Utbetaling
+import no.nav.helse.migrering.domene.Vedtaksperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -102,144 +99,9 @@ internal class Personavstemming {
                 )
             }
             vedtaksperioder
-                .map { it.generasjoner().sortedBy { it.opprettet } }
+                .map { periode -> periode.generasjoner().sortedBy { it.opprettet } }
                 .forEach { it.lagre(spesialistDao, hendelseId) }
         }
     }
 
-    internal class Vedtaksperiode(
-        private val id: UUID,
-        private val opprettet: LocalDateTime,
-        private val oppdatert: LocalDateTime,
-        private val utbetalinger: List<Utbetaling>,
-        private val tilstand: String,
-        personVarsler: List<Varsel>,
-    ) {
-
-        private val varsler = personVarsler.varslerFor(id).sortert().toMutableList()
-
-        internal fun generasjoner(): List<Generasjon> {
-            var sistOpprettet: LocalDateTime? = opprettet
-            if (utbetalinger.isEmpty()) {
-                if (tilstand == "AVSLUTTET_UTEN_UTBETALING") return listOf(auu(oppdatert, varsler))
-                return listOf(åpen(varsler))
-            }
-
-            val generasjoner = mutableListOf<Generasjon>()
-
-            utbetalinger
-                .sortert()
-                .also { sorterteUtbetalinger ->
-                    sorterteUtbetalinger.forEach {
-                        val generasjon = it.lagGenerasjon(id, sistOpprettet, varsler)
-                        sistOpprettet = null
-                        if (sorterteUtbetalinger.indexOf(it) == sorterteUtbetalinger.lastIndex) {
-                            varsler.forEach { varsel ->
-                                generasjon.nyttVarsel(varsel)
-                            }
-                        }
-                        generasjoner.add(generasjon)
-                    }
-                }
-
-            return generasjoner
-        }
-
-        private fun åpen(varsler: List<Varsel>): Generasjon {
-            return Generasjon(
-                id = UUID.randomUUID(),
-                vedtaksperiodeId = id,
-                utbetalingId = null,
-                opprettet = opprettet,
-                låstTidspunkt = null,
-                varsler = varsler,
-            )
-        }
-
-        private fun auu(låstTidspunkt: LocalDateTime, varsler: List<Varsel>): Generasjon {
-            return Generasjon(
-                id = UUID.randomUUID(),
-                vedtaksperiodeId = id,
-                utbetalingId = null,
-                opprettet = opprettet,
-                låstTidspunkt = låstTidspunkt,
-                varsler = varsler,
-            )
-        }
-
-        internal class Generasjon(
-            val id: UUID,
-            val vedtaksperiodeId: UUID,
-            val utbetalingId: UUID?,
-            val opprettet: LocalDateTime,
-            val låstTidspunkt: LocalDateTime?,
-            varsler: List<Varsel>,
-        ) {
-
-            private val varsler: MutableList<Varsel> = varsler.toMutableList()
-
-            internal companion object {
-                private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-                fun List<Generasjon>.lagre(spesialistDao: SpesialistDao, hendelseId: UUID) {
-                    forEach { it.lagre(spesialistDao, hendelseId) }
-                }
-            }
-
-            internal fun nyttVarsel(varsel: Varsel) {
-                varsler.add(varsel)
-            }
-
-            internal fun lagre(spesialistDao: SpesialistDao, hendelseId: UUID) {
-                val insertGenerasjonOk = spesialistDao.lagreGenerasjon(
-                    id,
-                    vedtaksperiodeId,
-                    utbetalingId,
-                    opprettet,
-                    hendelseId,
-                    låstTidspunkt
-                )
-
-                if (!insertGenerasjonOk) {
-                    sikkerlogg.warn(
-                        "Kunne ikke inserte generasjon for {}, {}, den eksisterer fra før av.",
-                        keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                        keyValue("utbetalingId", utbetalingId)
-                    )
-                    return
-                }
-
-                val insertVarselOk = varsler.lagre(id, spesialistDao)
-            }
-        }
-
-        internal class Utbetaling(
-            private val id: UUID,
-            private val opprettet: LocalDateTime,
-            private val oppdatert: LocalDateTime,
-            private val status: String,
-        ) {
-            internal companion object {
-                internal fun List<Utbetaling>.sortert(): List<Utbetaling> {
-                    return sortedBy { it.opprettet }
-                }
-            }
-
-            internal fun lagGenerasjon(
-                vedtaksperiodeId: UUID,
-                sistOpprettet: LocalDateTime?,
-                varsler: MutableList<Varsel>,
-            ): Generasjon {
-                val generasjonVarsler = varsler.konsumer(oppdatert)
-                val låst = status in listOf("UTBETALT", "GODKJENT_UTEN_UTBETALING")
-                return Generasjon(
-                    UUID.randomUUID(),
-                    vedtaksperiodeId,
-                    id,
-                    sistOpprettet ?: opprettet,
-                    if (låst) oppdatert else null,
-                    generasjonVarsler
-                )
-            }
-        }
-    }
 }
