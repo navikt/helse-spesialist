@@ -52,8 +52,12 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
     @Test
     fun `leser person_avstemt`() {
-        nyPeriode(1.januar) sistOppdatert 1.januar medUtbetalinger { listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 1.januar)) }
-        nyPeriode(2.januar) sistOppdatert 2.januar medTilstand "AVVENTER_SIMULERING" medUtbetalinger { listOf(nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar)) }
+        nyPeriode(1.januar) sistOppdatert 1.januar medUtbetalinger {
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 1.januar))
+        }
+        nyPeriode(2.januar) sistOppdatert 2.januar medTilstand "AVVENTER_SIMULERING" medUtbetalinger {
+            listOf(nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar))
+        }
         nyPeriode(3.januar) sistOppdatert 6.januar medTilstand "AVVENTER_SIMULERING" medUtbetalinger {
             listOf(
                 nyUtbetaling(utbetalt = true, revurdering = false, dato = 3.januar),
@@ -94,12 +98,11 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
             )
         }
 
-        val melding = testevent()
-        testRapid.sendTestMessage(melding)
+        testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 1, 2)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "RV_VV_1")
-        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1")
-        assertVarselPåGenerasjon(1.vedtaksperiode, 2, "RV_VV_1")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1" to 2.januar)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1" to 3.januar)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 2, "RV_VV_1" to 4.januar)
     }
 
     @Test
@@ -115,8 +118,8 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 1, 1)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1")
-        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1" to 2.januar)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1" to 3.januar)
     }
 
     @Test
@@ -132,7 +135,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 0, 1)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1" to 2.januar)
     }
 
     private class Vedtaksperiode(
@@ -242,22 +245,22 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         return this
     }
 
-    private fun assertVarselPåGenerasjon(vedtaksperiodeId: UUID, generasjonIndex: Int, vararg varselkode: String) {
+    private fun assertVarselPåGenerasjon(vedtaksperiodeId: UUID, generasjonIndex: Int, vararg varselkode: Pair<String, LocalDate>) {
         @Language("PostgreSQL")
         val query1 = "SELECT id, opprettet_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY opprettet_tidspunkt;"
 
-        val (generasjonId, opprettet) = sessionOf(dataSource).use { session ->
+        val generasjonId = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     query1,
                     vedtaksperiodeId
                 ).map {
-                    it.long("id") to it.localDateTime("opprettet_tidspunkt")
+                    it.long("id")
                 }.asList)[generasjonIndex]
         }
 
         @Language("PostgreSQL")
-        val query2 = "SELECT kode FROM selve_varsel WHERE generasjon_ref = ?;"
+        val query2 = "SELECT kode, opprettet FROM selve_varsel WHERE generasjon_ref = ?;"
 
         val varselkoder = sessionOf(dataSource).use { session ->
             session.run(
@@ -265,11 +268,11 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                     query2,
                     generasjonId
                 ).map {
-                    it.string("kode")
+                    it.string("kode") to it.localDateTime("opprettet")
                 }.asList)
         }
 
-        assertEquals(varselkode.toList(), varselkoder)
+        assertEquals(varselkode.map { (kode, dato) -> kode to dato.atTime(12, 0, 0) }, varselkoder)
     }
 
     private fun assertGenerasjoner(vedtaksperiodeId: UUID, forventetAntallUlåste: Int, forventetAntallLåste: Int) {

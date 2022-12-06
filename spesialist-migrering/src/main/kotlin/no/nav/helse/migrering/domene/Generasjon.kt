@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.migrering.db.SpesialistDao
+import no.nav.helse.migrering.domene.Varsel.Companion.dedup
 import no.nav.helse.migrering.domene.Varsel.Companion.lagre
 import org.slf4j.LoggerFactory
 
@@ -50,6 +51,6 @@ internal class Generasjon(
             return
         }
 
-        val insertVarselOk = varsler.lagre(id, spesialistDao)
+        val insertVarselOk = varsler.dedup().lagre(id, spesialistDao)
     }
 }

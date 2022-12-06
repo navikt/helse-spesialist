@@ -29,6 +29,20 @@ internal class Varsel(
             this.removeAll(konsumerteVarsler)
             return konsumerteVarsler
         }
+
+        internal fun List<Varsel>.dedup(): List<Varsel> {
+            return sortedBy { it.melding }.fold(mutableListOf()) { acc, varsel ->
+                if (acc.isEmpty() || acc.last().melding != varsel.melding) {
+                    acc.add(varsel)
+                    return@fold acc
+                }
+
+                if (acc.last().opprettet >= varsel.opprettet) return@fold acc
+                acc.removeLast()
+                acc.add(varsel)
+                acc
+            }
+        }
     }
 
     internal fun lagre(generasjonId: UUID, spesialistDao: SpesialistDao) {
