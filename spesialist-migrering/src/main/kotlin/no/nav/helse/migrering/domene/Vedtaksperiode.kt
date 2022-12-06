@@ -2,6 +2,7 @@ package no.nav.helse.migrering.domene
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.migrering.db.SpesialistDao
 import no.nav.helse.migrering.domene.Utbetaling.Companion.sortert
 import no.nav.helse.migrering.domene.Utbetaling.Vurdering
 import no.nav.helse.migrering.domene.Varsel.Companion.sortert
@@ -18,9 +19,14 @@ internal class Vedtaksperiode(
 
     private val varsler = personVarsler.varslerFor(id).sortert().toMutableList()
 
-    internal fun generasjoner(): List<Generasjon> {
+    internal fun generasjoner(spesialistDao: SpesialistDao): List<Generasjon> {
         var sistOpprettet: LocalDateTime? = opprettet
         if (utbetalinger.isEmpty()) {
+            val eksisterendeGenerasjon = spesialistDao.finnSisteGenerasjonFor(id)
+            if (eksisterendeGenerasjon != null) {
+                if (!eksisterendeGenerasjon.erLåst()) return emptyList()
+                if (tilstand == "AVSLUTTET_UTEN_UTBETALING") return emptyList()
+            }
             if (tilstand == "AVSLUTTET_UTEN_UTBETALING") return listOf(auu(oppdatert, varsler))
             return listOf(åpen(varsler))
         }

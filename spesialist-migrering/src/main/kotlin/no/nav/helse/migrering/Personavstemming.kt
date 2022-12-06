@@ -118,7 +118,7 @@ internal class Personavstemming {
                 )
             }
             vedtaksperioder
-                .map { periode -> periode.generasjoner().sortedBy { it.opprettet } }
+                .map { periode -> periode.generasjoner(spesialistDao).sortedBy { it.opprettet } }
                 .forEach { it.lagre(spesialistDao, hendelseId) }
 
             sikkerlogg.info("Fullført migrering av generasjoner og varsler for person med {}", keyValue("fødselsnummer", fødselsnummer))

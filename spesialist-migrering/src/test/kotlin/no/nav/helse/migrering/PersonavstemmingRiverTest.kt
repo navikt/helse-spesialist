@@ -36,6 +36,9 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
             .registerModule(JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        private const val LÅST: Boolean = true
+        private const val ÅPEN: Boolean = false
     }
 
     private val testRapid = TestRapid().apply {
@@ -188,6 +191,43 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "GODKJENT", 2.januar, "EN_IDENT")
     }
 
+    @Test
+    fun `oppretter ikke åpen generasjon dersom det finnes en åpen generasjon fra før av`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVVENTER_HISTORIKK" medEksisterendeGenerasjon ÅPEN
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 1, 0)
+    }
+
+    @Test
+    fun `oppretter ikke auu-generasjon dersom det finnes en låst generasjon fra før av`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET_UTEN_UTBETALING" medEksisterendeGenerasjon LÅST
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 0, 1)
+    }
+
+    private infix fun Vedtaksperiode.medEksisterendeGenerasjon(låst: Boolean): Vedtaksperiode {
+        @Language("PostgreSQL")
+        val query =
+            """
+                INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, utbetaling_id, opprettet_tidspunkt, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse, låst) 
+                VALUES (?, ?, ?, ?, ?, ?, ?) 
+            """
+        sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    query,
+                    id(),
+                    null,
+                    opprettet(),
+                    UUID.randomUUID(),
+                    if (låst) oppdatert() else null,
+                    if (låst) UUID.randomUUID() else null,
+                    låst
+                ).asUpdate)
+        }
+        return this
+    }
+
     private class Vedtaksperiode(
         private val id: UUID,
         private val opprettet: LocalDateTime,
@@ -199,6 +239,9 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         private val varsler: MutableList<Testvarsel> = mutableListOf()
 
         internal fun id() = id
+
+        internal fun opprettet() = opprettet
+        internal fun oppdatert() = oppdatert
 
         internal fun oppdatert(oppdatert: LocalDateTime) {
             this.oppdatert = oppdatert

@@ -5,10 +5,29 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.migrering.domene.Generasjon
 import no.nav.helse.migrering.domene.Varsel
 import org.intellij.lang.annotations.Language
 
 internal class SpesialistDao(private val dataSource: DataSource) {
+
+    internal fun finnSisteGenerasjonFor(vedtaksperiodeId: UUID): Generasjon? {
+        @Language("PostgreSQL")
+        val query = "SELECT unik_id, vedtaksperiode_id, utbetaling_id, opprettet_tidspunkt, låst_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map {
+                Generasjon(
+                    it.uuid("unik_id"),
+                    it.uuid("vedtaksperiode_id"),
+                    it.uuidOrNull("utbetaling_id"),
+                    it.localDateTime("opprettet_tidspunkt"),
+                    it.localDateTimeOrNull("låst_tidspunkt"),
+                    null,
+                    emptyList()
+                )
+            }.asSingle)
+        }
+    }
 
     internal fun lagreGenerasjon(
         id: UUID,
