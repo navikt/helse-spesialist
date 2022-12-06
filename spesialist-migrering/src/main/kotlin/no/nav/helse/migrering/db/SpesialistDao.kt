@@ -60,16 +60,19 @@ internal class SpesialistDao(private val dataSource: DataSource) {
         varselId: UUID,
         vedtaksperiodeId: UUID,
         opprettet: LocalDateTime,
+        statusEndretIdent: String?,
+        statusEndretTidspunkt: LocalDateTime?,
+        status: String,
     ) {
         @Language("PostgreSQL")
         val query = """
-                INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref, definisjon_ref) 
-                VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), ?) 
+                INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref, definisjon_ref, status_endret_ident, status_endret_tidspunkt, status) 
+                VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), ?, ?, ?, ?) 
                 ON CONFLICT (unik_id) DO NOTHING;
             """
 
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, varselId, varselkode, vedtaksperiodeId, opprettet, generasjonId, definisjonRef).asUpdate)
+            session.run(queryOf(query, varselId, varselkode, vedtaksperiodeId, opprettet, generasjonId, definisjonRef, statusEndretIdent, statusEndretTidspunkt, status).asUpdate)
         }
     }
 }

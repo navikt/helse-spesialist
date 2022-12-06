@@ -9,6 +9,7 @@ internal class Utbetaling(
     private val opprettet: LocalDateTime,
     private val oppdatert: LocalDateTime,
     private val status: String,
+    private val vurdering: Vurdering?,
 ) {
     internal companion object {
         internal fun List<Utbetaling>.sortert(): List<Utbetaling> {
@@ -29,7 +30,17 @@ internal class Utbetaling(
             id,
             sistOpprettet ?: opprettet,
             if (låst) oppdatert else null,
-            generasjonVarsler
+            vurdering,
+            generasjonVarsler,
         )
+    }
+
+    internal class Vurdering(
+        internal val ident: String,
+        internal val tidspunkt: LocalDateTime,
+        internal val automatiskBehandling: Boolean,
+        internal val godkjent: Boolean,
+    ) {
+
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.migrering.db.SpesialistDao
+import no.nav.helse.migrering.domene.Utbetaling.Vurdering
 import no.nav.helse.migrering.domene.Varsel.Companion.dedup
 import no.nav.helse.migrering.domene.Varsel.Companion.lagre
 import org.slf4j.LoggerFactory
@@ -14,6 +15,7 @@ internal class Generasjon(
     val utbetalingId: UUID?,
     val opprettet: LocalDateTime,
     val låstTidspunkt: LocalDateTime?,
+    val vurdering: Vurdering?,
     varsler: List<Varsel>,
 ) {
 
@@ -50,7 +52,11 @@ internal class Generasjon(
             )
             return
         }
-
-        val insertVarselOk = varsler.dedup().lagre(id, spesialistDao)
+        val varselStatus = when (vurdering?.godkjent) {
+            true -> "GODKJENT"
+            false -> "AVVIST"
+            null -> "AKTIV"
+        }
+        val insertVarselOk = varsler.dedup().lagre(id, vurdering?.ident, vurdering?.tidspunkt, varselStatus, spesialistDao)
     }
 }

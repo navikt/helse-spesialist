@@ -3,6 +3,7 @@ package no.nav.helse.migrering.domene
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.migrering.domene.Utbetaling.Companion.sortert
+import no.nav.helse.migrering.domene.Utbetaling.Vurdering
 import no.nav.helse.migrering.domene.Varsel.Companion.sortert
 import no.nav.helse.migrering.domene.Varsel.Companion.varslerFor
 
@@ -35,7 +36,7 @@ internal class Vedtaksperiode(
             }
 
         if (generasjoner.periodeISpillEtterSisteUtbetaling()) {
-            generasjoner.add(Generasjon(UUID.randomUUID(), id, null, oppdatert, null, emptyList()))
+            generasjoner.add(Generasjon(UUID.randomUUID(), id, null, oppdatert, null, null, emptyList()))
         }
 
         if (generasjoner.sisteErÅpen()) {
@@ -59,6 +60,7 @@ internal class Vedtaksperiode(
             utbetalingId = null,
             opprettet = opprettet,
             låstTidspunkt = null,
+            vurdering = null,
             varsler = varsler,
         )
     }
@@ -70,6 +72,12 @@ internal class Vedtaksperiode(
             utbetalingId = null,
             opprettet = opprettet,
             låstTidspunkt = låstTidspunkt,
+            vurdering = Vurdering(
+                ident = "Automatisk behandlet",
+                tidspunkt = oppdatert,
+                automatiskBehandling = true,
+                godkjent = true
+            ),
             varsler = varsler,
         )
     }

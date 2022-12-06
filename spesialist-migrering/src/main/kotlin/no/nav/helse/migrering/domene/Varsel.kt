@@ -16,8 +16,8 @@ internal class Varsel(
             return filter { it.vedtaksperiodeId == vedtaksperiodeId }
         }
 
-        internal fun List<Varsel>.lagre(generasjonId: UUID, spesialistDao: SpesialistDao) {
-            forEach { it.lagre(generasjonId, spesialistDao) }
+        internal fun List<Varsel>.lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
+            forEach { it.lagre(generasjonId, ident, statusEndretTidspunkt, status, spesialistDao) }
         }
 
         internal fun List<Varsel>.sortert(): List<Varsel> {
@@ -45,9 +45,9 @@ internal class Varsel(
         }
     }
 
-    internal fun lagre(generasjonId: UUID, spesialistDao: SpesialistDao) {
+    internal fun lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
         val (definisjonRef, varselkode) = spesialistDao.finnDefinisjonFor(melding)
-        spesialistDao.lagreVarsel(generasjonId, definisjonRef, varselkode, id, vedtaksperiodeId, opprettet)
+        spesialistDao.lagreVarsel(generasjonId, definisjonRef, varselkode, id, vedtaksperiodeId, opprettet, ident, statusEndretTidspunkt, status)
     }
 
     internal fun erFør(tidspunkt: LocalDateTime) = opprettet <= tidspunkt

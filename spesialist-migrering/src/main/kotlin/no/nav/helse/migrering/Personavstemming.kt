@@ -7,6 +7,7 @@ import no.nav.helse.migrering.db.SparsomDao
 import no.nav.helse.migrering.db.SpesialistDao
 import no.nav.helse.migrering.domene.Generasjon.Companion.lagre
 import no.nav.helse.migrering.domene.Utbetaling
+import no.nav.helse.migrering.domene.Utbetaling.Vurdering
 import no.nav.helse.migrering.domene.Vedtaksperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -51,6 +52,13 @@ internal class Personavstemming {
                             require("id") { jsonNode ->
                                 UUID.fromString(jsonNode.asText())
                             }
+                            interestedIn("vurdering")
+                            interestedIn(
+                                "vurdering.ident",
+                                "vurdering.tidspunkt",
+                                "vurdering.automatiskBehandling",
+                                "vurdering.godkjent"
+                            )
                         }
                     }
                 }
@@ -94,6 +102,14 @@ internal class Personavstemming {
                             utbetalingNode["opprettet"].asLocalDateTime(),
                             utbetalingNode["oppdatert"].asLocalDateTime(),
                             utbetalingNode["status"].asText(),
+                            utbetalingNode["vurdering"]?.let { vurderingNode ->
+                                Vurdering(
+                                    vurderingNode["ident"].asText(),
+                                    vurderingNode["tidspunkt"].asLocalDateTime(),
+                                    vurderingNode["automatiskBehandling"].asBoolean(),
+                                    vurderingNode["godkjent"].asBoolean(),
+                                )
+                            },
                         )
                     }
                 )

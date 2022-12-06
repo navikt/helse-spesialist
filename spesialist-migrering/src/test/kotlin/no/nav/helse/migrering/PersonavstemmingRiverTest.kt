@@ -100,9 +100,9 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 1, 2)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1" to 2.januar)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1" to 3.januar)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 2, "RV_VV_1" to 4.januar)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "GODKJENT", 2.januar, "EN_IDENT")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1","GODKJENT", 3.januar, "EN_IDENT")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 2, "RV_VV_1","AKTIV", 4.januar, null)
     }
 
     @Test
@@ -118,8 +118,8 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 1, 1)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1" to 2.januar)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1" to 3.januar)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "GODKJENT", 2.januar, "EN_IDENT")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1", "AKTIV", 3.januar, null)
     }
 
     @Test
@@ -135,11 +135,26 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 0, 1)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1" to 2.januar)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "GODKJENT", 2.januar, "EN_IDENT")
+    }
+
+    @Test
+    fun `varsel blir avvist hvis utbetaling er avvist`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = false))
+        } medVarsler {
+            listOf(
+                "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
+            )
+        }
+
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 0, 1)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "AVVIST", 2.januar, "EN_IDENT")
     }
 
     private class Vedtaksperiode(
-        private val opprettet: LocalDateTime
+        private val opprettet: LocalDateTime,
     ) {
         private val id: UUID = UUID.randomUUID()
         private lateinit var oppdatert: LocalDateTime
@@ -188,7 +203,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     private class Testvarsel(
         private val vedtaksperiodeId: UUID,
         private val tekst: String,
-        dato: LocalDate
+        dato: LocalDate,
     ) {
         private val tidspunkt = dato.atTime(12, 0, 0)
 
@@ -197,29 +212,38 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         }
     }
 
-    private class Utbetaling(utbetalt: Boolean, private val revurdering: Boolean, dato: LocalDate) {
+    private class Utbetaling(utbetalt: Boolean, private val revurdering: Boolean, dato: LocalDate, godkjent: Boolean) {
         private val id: UUID = UUID.randomUUID()
         private val opprettet: LocalDateTime = dato.atStartOfDay()
         private val oppdatert: LocalDateTime = dato.atTime(23, 59, 59)
         private val tilstand = if (utbetalt) "UTBETALT" else "IKKE_UTBETALT"
+        private val vurdering = if (utbetalt) mapOf(
+            "ident" to "EN_IDENT",
+            "tidspunkt" to oppdatert,
+            "automatiskBehandling" to false,
+            "godkjent" to godkjent,
+        ) else null
         internal fun id() = id
 
         internal fun toJson(): String {
-            return mapOf(
-                    "id" to id,
-                    "type" to if (revurdering) "REVURDERING" else "UTBETALING",
-                    "status" to tilstand,
-                    "opprettet" to opprettet,
-                    "oppdatert" to oppdatert
+            return mutableMapOf<String, Any>(
+                "id" to id,
+                "type" to if (revurdering) "REVURDERING" else "UTBETALING",
+                "status" to tilstand,
+                "opprettet" to opprettet,
+                "oppdatert" to oppdatert
             ).let {
+                it.compute("vurdering") { _, _ -> vurdering}
                 jacksonObjectMapper.writeValueAsString(it)
             }
         }
     }
 
-    private fun nyPeriode(opprettet: LocalDate): Vedtaksperiode = Vedtaksperiode(opprettet.atStartOfDay()).also { vedtaksperioder.add(it) }
-    private fun nyUtbetaling(utbetalt: Boolean, revurdering: Boolean, dato: LocalDate): Utbetaling {
-        return Utbetaling(utbetalt, revurdering, dato)
+    private fun nyPeriode(opprettet: LocalDate): Vedtaksperiode =
+        Vedtaksperiode(opprettet.atStartOfDay()).also { vedtaksperioder.add(it) }
+
+    private fun nyUtbetaling(utbetalt: Boolean, revurdering: Boolean, dato: LocalDate, godkjent: Boolean = true): Utbetaling {
+        return Utbetaling(utbetalt, revurdering, dato, godkjent)
     }
 
     private infix fun Vedtaksperiode.sistOppdatert(oppdatert: LocalDate): Vedtaksperiode {
@@ -245,9 +269,17 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         return this
     }
 
-    private fun assertVarselPåGenerasjon(vedtaksperiodeId: UUID, generasjonIndex: Int, vararg varselkode: Pair<String, LocalDate>) {
+    private fun assertVarselPåGenerasjon(
+        vedtaksperiodeId: UUID,
+        generasjonIndex: Int,
+        varselkode: String,
+        status: String,
+        opprettet: LocalDate,
+        ident: String?,
+    ) {
         @Language("PostgreSQL")
-        val query1 = "SELECT id, opprettet_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY opprettet_tidspunkt;"
+        val query1 =
+            "SELECT id, opprettet_tidspunkt FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY opprettet_tidspunkt;"
 
         val generasjonId = sessionOf(dataSource).use { session ->
             session.run(
@@ -256,11 +288,12 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                     vedtaksperiodeId
                 ).map {
                     it.long("id")
-                }.asList)[generasjonIndex]
+                }.asList
+            )[generasjonIndex]
         }
 
         @Language("PostgreSQL")
-        val query2 = "SELECT kode, opprettet FROM selve_varsel WHERE generasjon_ref = ?;"
+        val query2 = "SELECT kode, opprettet, status_endret_ident, status FROM selve_varsel WHERE generasjon_ref = ?;"
 
         val varselkoder = sessionOf(dataSource).use { session ->
             session.run(
@@ -268,11 +301,26 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                     query2,
                     generasjonId
                 ).map {
-                    it.string("kode") to it.localDateTime("opprettet")
-                }.asList)
+                    mapOf(
+                        "varselkode" to it.string("kode"),
+                        "opprettet" to it.localDateTime("opprettet"),
+                        "statusEndretIdent" to it.stringOrNull("status_endret_ident"),
+                        "status" to it.string("status"),
+                    )
+                }.asList
+            )
         }
 
-        assertEquals(varselkode.map { (kode, dato) -> kode to dato.atTime(12, 0, 0) }, varselkoder)
+        assertEquals(1, varselkoder.size)
+        assertEquals(
+            mapOf(
+                "varselkode" to varselkode,
+                "opprettet" to opprettet.atTime(12,0,0),
+                "statusEndretIdent" to ident,
+                "status" to status
+            ),
+            varselkoder.firstOrNull()
+        )
     }
 
     private fun assertGenerasjoner(vedtaksperiodeId: UUID, forventetAntallUlåste: Int, forventetAntallLåste: Int) {
@@ -288,8 +336,8 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                 "SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND låst = true"
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }
-        assertEquals(forventetAntallUlåste, antallUlåste) { "forventet $forventetAntallUlåste ulåste generasjoner. Fant $antallUlåste"}
-        assertEquals(forventetAntallLåste, antallLåste) { "forventet $forventetAntallLåste låste generasjoner. Fant $antallLåste"}
+        assertEquals(forventetAntallUlåste, antallUlåste) { "forventet $forventetAntallUlåste ulåste generasjoner. Fant $antallUlåste" }
+        assertEquals(forventetAntallLåste, antallLåste) { "forventet $forventetAntallLåste låste generasjoner. Fant $antallLåste" }
     }
 
     @Language("JSON")
