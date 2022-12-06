@@ -1,0 +1,5 @@
+FROM navikt/java:17
+
+ENV JAVA_OPTS='-XX:MaxRAMPercentage=90'
+
+COPY spesialist-migrering/build/libs/*.jar ./
