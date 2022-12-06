@@ -36,6 +36,7 @@ where a.id in (select id from aktiviteter) and kn.navn = 'vedtaksperiodeId';
                     it.string("tekst"),
                     it.localDateTime("tidsstempel"),
                     it.uuid("aktivitet_uuid"),
+                    null
                 )
             }.asList)
         }

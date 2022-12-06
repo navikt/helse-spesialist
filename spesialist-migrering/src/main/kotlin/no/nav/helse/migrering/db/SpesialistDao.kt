@@ -5,6 +5,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.migrering.domene.Varsel
 import org.intellij.lang.annotations.Language
 
 internal class SpesialistDao(private val dataSource: DataSource) {
@@ -73,6 +74,28 @@ internal class SpesialistDao(private val dataSource: DataSource) {
 
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, varselId, varselkode, vedtaksperiodeId, opprettet, generasjonId, definisjonRef, statusEndretIdent, statusEndretTidspunkt, status).asUpdate)
+        }
+    }
+
+    internal fun finnVarslerFor(fødselsnummer: String): List<Varsel> {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT melding, opprettet, vedtaksperiode_id, inaktiv_fra
+            FROM warning 
+            INNER JOIN vedtak v on warning.vedtak_ref = v.id 
+                WHERE v.person_ref = (SELECT id FROM person WHERE fodselsnummer = ? LIMIT 1)
+        """
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, fødselsnummer.toLong()).map {
+                Varsel(
+                    it.uuid("vedtaksperiode_id"),
+                    it.string("melding"),
+                    it.localDateTime("opprettet"),
+                    UUID.randomUUID(),
+                    it.localDateTimeOrNull("inaktiv_fra"),
+                )
+            }.asList)
         }
     }
 }

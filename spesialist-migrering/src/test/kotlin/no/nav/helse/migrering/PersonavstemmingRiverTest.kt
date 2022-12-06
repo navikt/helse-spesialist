@@ -89,7 +89,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                 nyUtbetaling(utbetalt = true, revurdering = true, dato = 3.januar),
                 nyUtbetaling(utbetalt = false, revurdering = true, dato = 4.januar),
             )
-        } medVarsler {
+        } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 1.januar,
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
@@ -109,7 +109,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `opprett generasjon for periode der siste utbetaling er utbetalt og perioden ikke er i en sluttilstand`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVVENTER_GJENNOMFØRT_REVURDERING" medUtbetalinger {
             listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar))
-        } medVarsler {
+        } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 3.januar
@@ -126,7 +126,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `opprett generasjon for periode der siste utbetaling er utbetalt og perioden er i en sluttilstand`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
             listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar))
-        } medVarsler {
+        } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 3.januar
@@ -142,7 +142,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `varsel blir avvist hvis utbetaling er avvist`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
             listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = false))
-        } medVarsler {
+        } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
             )
@@ -153,10 +153,45 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "AVVIST", 2.januar, "EN_IDENT")
     }
 
+    @Test
+    fun `inaktive varsler i warning blir satt til inaktive i selve_varsel`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = true))
+        } medSpesialistVarsler {
+            listOf(
+                Triple("Registert fullmakt på personen.", 2. januar, true)
+            )
+        }
+
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 0, 1)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "INAKTIV", 2.januar, "Spesialist")
+    }
+
+    @Test
+    fun `tar med varsler fra spesialist`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = true))
+        } medSpleisVarsler {
+            listOf(
+                "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
+            )
+        } medSpesialistVarsler {
+            listOf(
+                Triple("Registert fullmakt på personen.", 2. januar, false)
+            )
+        }
+
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 0, 1)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "GODKJENT", 2.januar, "EN_IDENT")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "GODKJENT", 2.januar, "EN_IDENT")
+    }
+
     private class Vedtaksperiode(
+        private val id: UUID,
         private val opprettet: LocalDateTime,
     ) {
-        private val id: UUID = UUID.randomUUID()
         private lateinit var oppdatert: LocalDateTime
         private val utbetalinger = mutableListOf<UUID>()
         private var tilstand: String = "AVSLUTTET"
@@ -208,7 +243,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         private val tidspunkt = dato.atTime(12, 0, 0)
 
         internal fun varsel(): Varsel {
-            return Varsel(vedtaksperiodeId, tekst, tidspunkt, UUID.randomUUID())
+            return Varsel(vedtaksperiodeId, tekst, tidspunkt, UUID.randomUUID(), null)
         }
     }
 
@@ -239,8 +274,63 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         }
     }
 
-    private fun nyPeriode(opprettet: LocalDate): Vedtaksperiode =
-        Vedtaksperiode(opprettet.atStartOfDay()).also { vedtaksperioder.add(it) }
+    private fun finnPerson(): Boolean {
+        @Language("PostgreSQL")
+        val query = """
+            SELECT true FROM person WHERE fodselsnummer = ?;
+        """
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, 12029240045).map {
+                it.boolean(1)
+            }.asSingle)
+        } ?: false
+
+    }
+
+    private fun opprettPerson() {
+        if (finnPerson()) return
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO person (fodselsnummer, aktor_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert, infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert) 
+            VALUES (12029240045, 42, null, null, null, null, null, null);
+        """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query).asUpdate)
+        }
+    }
+
+    private fun opprettArbeidsgiver() {
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO arbeidsgiver (orgnummer, navn_ref, bransjer_ref) 
+            VALUES (987654321, null, null) ON CONFLICT (orgnummer) DO NOTHING;
+        """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query).asUpdate)
+        }
+    }
+
+    private fun opprettVedtak(vedtaksperiodeId: UUID) {
+        val fom = 1. januar
+        val tom = 31. januar
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, snapshot_ref) 
+            VALUES (?, ?, ?, (SELECT id FROM arbeidsgiver WHERE orgnummer = 987654321), (SELECT id FROM person WHERE fodselsnummer = 12029240045), null);
+        """
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId, fom, tom).asUpdate)
+        }
+    }
+
+    private fun nyPeriode(opprettet: LocalDate): Vedtaksperiode {
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtak(vedtaksperiodeId)
+        return Vedtaksperiode(vedtaksperiodeId, opprettet.atStartOfDay()).also { vedtaksperioder.add(it) }
+    }
 
     private fun nyUtbetaling(utbetalt: Boolean, revurdering: Boolean, dato: LocalDate, godkjent: Boolean = true): Utbetaling {
         return Utbetaling(utbetalt, revurdering, dato, godkjent)
@@ -264,8 +354,30 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         return this
     }
 
-    private infix fun Vedtaksperiode.medVarsler(varsler: () -> List<Pair<String, LocalDate>>): Vedtaksperiode {
+    private infix fun Vedtaksperiode.medSpleisVarsler(varsler: () -> List<Pair<String, LocalDate>>): Vedtaksperiode {
         this.varsler(varsler())
+        return this
+    }
+
+    private infix fun Vedtaksperiode.medSpesialistVarsler(varsler: () -> List<Triple<String, LocalDate, Boolean>>): Vedtaksperiode {
+        val spesialistVarsler = varsler()
+        spesialistVarsler.forEach {(melding, opprettet, inaktiv) ->
+            @Language("PostgreSQL")
+            val query = """
+                INSERT INTO warning (melding, vedtak_ref, kilde, opprettet, inaktiv_fra) 
+                VALUES (?, (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), 'Spesialist', ?, ?)    
+            """
+
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf(
+                    query,
+                    melding,
+                    id(),
+                    opprettet.atTime(12, 0, 0),
+                    if (inaktiv) opprettet.atTime(12, 0, 0) else null
+                ).asUpdate)
+            }
+        }
         return this
     }
 
@@ -293,13 +405,14 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         }
 
         @Language("PostgreSQL")
-        val query2 = "SELECT kode, opprettet, status_endret_ident, status FROM selve_varsel WHERE generasjon_ref = ?;"
+        val query2 = "SELECT kode, opprettet, status_endret_ident, status FROM selve_varsel WHERE generasjon_ref = ? AND kode = ?;"
 
         val varselkoder = sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     query2,
-                    generasjonId
+                    generasjonId,
+                    varselkode,
                 ).map {
                     mapOf(
                         "varselkode" to it.string("kode"),

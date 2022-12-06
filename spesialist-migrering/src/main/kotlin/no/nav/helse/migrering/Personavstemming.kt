@@ -84,7 +84,7 @@ internal class Personavstemming {
                 )
                 return
             }
-            val varslerForPerson = sparsomDao.finnVarslerFor(fødselsnummer)
+            val varslerForPerson = sparsomDao.finnVarslerFor(fødselsnummer) + spesialistDao.finnVarslerFor(fødselsnummer)
             val utbetalingerJson = arbeidsgivereJson.flatMap { it["utbetalinger"] }
             val vedtaksperioder = vedtaksperioderJson.map { periodeNode ->
                 val vedtaksperiodeUtbetalinger = utbetalingerJson.filter { utbetalingNode ->

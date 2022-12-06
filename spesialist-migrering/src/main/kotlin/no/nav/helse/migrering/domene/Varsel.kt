@@ -9,6 +9,7 @@ internal class Varsel(
     private val melding: String,
     private val opprettet: LocalDateTime,
     private val id: UUID,
+    private val inaktivFra: LocalDateTime?,
 ) {
 
     internal companion object {
@@ -17,7 +18,15 @@ internal class Varsel(
         }
 
         internal fun List<Varsel>.lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
-            forEach { it.lagre(generasjonId, ident, statusEndretTidspunkt, status, spesialistDao) }
+            forEach {
+                it.lagre(
+                    generasjonId,
+                    it.inaktivFra?.let { "Spesialist" } ?: ident,
+                    it.inaktivFra ?: statusEndretTidspunkt,
+                    it.inaktivFra?.let { "INAKTIV" } ?: status,
+                    spesialistDao
+                )
+            }
         }
 
         internal fun List<Varsel>.sortert(): List<Varsel> {
