@@ -34,20 +34,23 @@ internal class Vedtaksperiode(
                 generasjoner.add(generasjon)
             }
 
-        if (generasjoner.isNotEmpty() && generasjoner.last().erLåst()) {
-            if (tilstand !in listOf("AVSLUTTET", "TIL_INFOTRYGD, TIL_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")) {
-                generasjoner.add(
-                    Generasjon(UUID.randomUUID(), id, null, oppdatert, null, emptyList())
-                )
-            }
+        if (generasjoner.periodeISpillEtterSisteUtbetaling()) {
+            generasjoner.add(Generasjon(UUID.randomUUID(), id, null, oppdatert, null, emptyList()))
         }
 
-        if (generasjoner.isNotEmpty() && !generasjoner.last().erLåst()) {
+        if (generasjoner.sisteErÅpen()) {
             generasjoner.last().nyeVarsler(varsler)
         }
 
         return generasjoner
     }
+
+    private fun List<Generasjon>.sisteErÅpen() = isNotEmpty() && !last().erLåst()
+
+    private fun List<Generasjon>.periodeISpillEtterSisteUtbetaling() =
+        isNotEmpty()
+                && last().erLåst()
+                && tilstand !in listOf("AVSLUTTET", "TIL_INFOTRYGD, TIL_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
 
     private fun åpen(varsler: List<Varsel>): Generasjon {
         return Generasjon(
