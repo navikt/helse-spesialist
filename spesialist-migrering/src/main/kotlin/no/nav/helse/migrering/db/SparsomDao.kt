@@ -32,7 +32,7 @@ where a.id in (select id from aktiviteter) and kn.navn = 'vedtaksperiodeId';
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, fødselsnummer).map {
                 Varsel(
-                    UUID.fromString(it.string("vedtaksperiodeId")),
+                    UUID.fromString(it.string("verdi")),
                     it.string("tekst"),
                     it.localDateTime("tidsstempel"),
                     it.uuid("aktivitet_uuid"),
