@@ -43,7 +43,7 @@ spec:
     enabled: true
   envFrom:
     - secret: google-sql-spesialist-spesialist-spesialist-migrering-3ec80e91
-    - secret: google-sql-sparsom-sparsom-spesialist-migrering-e7fbff0b
+    - secret: google-sql-sparsom-sparsom-spesialist-migrering-sparso-19bb4184
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
