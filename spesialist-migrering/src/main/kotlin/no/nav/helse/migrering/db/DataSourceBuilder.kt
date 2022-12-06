@@ -7,17 +7,21 @@ import java.time.Duration
 // Understands how to create a data source from environment variables
 internal class DataSourceBuilder(env: Map<String, String>, dbUser: DbUser) {
 
-    internal enum class DbUser {
-        SPARSOM,
-        SPESIALIST
+    internal enum class DbUser(private val user: String) {
+        SPARSOM("SPESIALIST_MIGRERING_SPARSOM"),
+        SPESIALIST("SPESIALIST_MIGRERING");
+
+        override fun toString(): String {
+            return user
+        }
     }
 
     private val gcpProjectId: String = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "GCP_TEAM_PROJECT_ID must be set" }
-    private val databaseRegion: String = requireNotNull(env["DATABASE_${dbUser}_MIGRERING_REGION"]) { "REGION must be set" }
-    private val databaseInstance: String = requireNotNull(env["DATABASE_${dbUser}_MIGRERING_INSTANCE"]) { "INSTANCE must be set" }
-    private val databaseUsername: String = requireNotNull(env["DATABASE_${dbUser}_MIGRERING_USERNAME"]) { "USERNAME must be set" }
-    private val databasePassword: String = requireNotNull(env["DATABASE_${dbUser}_MIGRERING_PASSWORD"]) { "PASSWORD must be set" }
-    private val databaseName: String = requireNotNull(env["DATABASE_${dbUser}_MIGRERING_DATABASE"]) { "DATABASE must be set" }
+    private val databaseRegion: String = requireNotNull(env["DATABASE_${dbUser}_REGION"]) { "REGION must be set" }
+    private val databaseInstance: String = requireNotNull(env["DATABASE_${dbUser}_INSTANCE"]) { "INSTANCE must be set" }
+    private val databaseUsername: String = requireNotNull(env["DATABASE_${dbUser}_USERNAME"]) { "USERNAME must be set" }
+    private val databasePassword: String = requireNotNull(env["DATABASE_${dbUser}_PASSWORD"]) { "PASSWORD must be set" }
+    private val databaseName: String = requireNotNull(env["DATABASE_${dbUser}_DATABASE"]) { "DATABASE must be set" }
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = String.format(

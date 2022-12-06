@@ -55,7 +55,7 @@ spec:
       value: "europe-north1"
     - name: DATABASE_SPESIALIST_MIGRERING_INSTANCE
       value: "spesialist"
-    - name: DATABASE_SPARSOM_MIGRERING_REGION
+    - name: DATABASE_SPESIALIST_MIGRERING_SPARSOM_REGION
       value: "europe-north1"
-    - name: DATABASE_SPARSOM_MIGRERING_INSTANCE
+    - name: DATABASE_SPESIALIST_MIGRERING_SPARSOM_INSTANCE
       value: "sparsom"
