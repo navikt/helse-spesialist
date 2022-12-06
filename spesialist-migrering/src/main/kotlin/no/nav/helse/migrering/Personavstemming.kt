@@ -84,6 +84,9 @@ internal class Personavstemming {
                 )
                 return
             }
+
+            sikkerlogg.info("Starter migrering av generasjoner og varsler for person med {}", keyValue("fødselsnummer", fødselsnummer))
+
             val varslerForPerson = sparsomDao.finnVarslerFor(fødselsnummer) + spesialistDao.finnVarslerFor(fødselsnummer)
             val utbetalingerJson = arbeidsgivereJson.flatMap { it["utbetalinger"] }
             val vedtaksperioder = vedtaksperioderJson.map { periodeNode ->
@@ -117,6 +120,8 @@ internal class Personavstemming {
             vedtaksperioder
                 .map { periode -> periode.generasjoner().sortedBy { it.opprettet } }
                 .forEach { it.lagre(spesialistDao, hendelseId) }
+
+            sikkerlogg.info("Fullført migrering av generasjoner og varsler for person med {}", keyValue("fødselsnummer", fødselsnummer))
         }
     }
 

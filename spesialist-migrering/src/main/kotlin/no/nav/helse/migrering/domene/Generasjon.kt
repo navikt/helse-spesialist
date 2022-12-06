@@ -57,6 +57,6 @@ internal class Generasjon(
             false -> "AVVIST"
             null -> "AKTIV"
         }
-        val insertVarselOk = varsler.dedup().lagre(id, vurdering?.ident, vurdering?.tidspunkt, varselStatus, spesialistDao)
+        varsler.dedup().lagre(id, vurdering?.ident, vurdering?.tidspunkt, varselStatus, spesialistDao)
     }
 }
