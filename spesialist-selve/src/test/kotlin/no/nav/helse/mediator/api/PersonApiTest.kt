@@ -25,6 +25,7 @@ import java.net.ServerSocket
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.AzureAdAppConfig
+import no.nav.helse.AzureConfig
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
@@ -245,14 +246,17 @@ internal class PersonApiTest {
     fun setup() {
         server = embeddedServer(CIO, port = httpPort) {
             install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-
-            val jwkProvider = jwtStub.getJwkProviderMock()
-            val azureConfig = AzureAdAppConfig(
+            val azureConfig = AzureConfig(
                 clientId = clientId,
                 issuer = issuer,
-                jwkProvider = jwkProvider
+                jwkProvider = jwtStub.getJwkProviderMock(),
+                tokenEndpoint = "",
             )
-            azureAdAppAuthentication(azureConfig)
+            val azureAdAppConfig = AzureAdAppConfig(
+                azureConfig = azureConfig,
+            )
+
+            azureAdAppAuthentication(azureAdAppConfig)
             routing {
                 authenticate("oidc") {
                     personApi(

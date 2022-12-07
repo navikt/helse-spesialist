@@ -27,8 +27,8 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
-import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
+import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrTidslinjeDTO
 import no.nav.helse.mediator.api.overstyringApi
@@ -261,7 +261,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                 JacksonConverter(objectMapper),
             )
         }
-        application.azureAdAppAuthentication(AbstractApiTest.azureAdConfig)
+        application.azureAdAppAuthentication(azureAdAppConfig)
         application.routing {
             authenticate("oidc") {
                 overstyringApi(hendelseMediator)

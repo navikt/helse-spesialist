@@ -1,6 +1,5 @@
 package no.nav.helse
 
-import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
@@ -33,13 +32,14 @@ import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import java.net.ProxySelector
 import java.net.URI
-import java.net.URL
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Hendelsefabrikk
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.annulleringApi
+import no.nav.helse.mediator.api.erDev
 import no.nav.helse.mediator.api.leggPåVentApi
 import no.nav.helse.mediator.api.notaterApi
 import no.nav.helse.mediator.api.overstyringApi
@@ -151,11 +151,24 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
         scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
     )
-    private val azureConfig = AzureAdAppConfig(
+    private val azureConfig = AzureConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
         issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
-        jwkProvider = JwkProviderBuilder(URL(env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"))).build()
+        jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
+        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
     )
+    private val azureAdAppConfig = AzureAdAppConfig(
+        azureConfig = azureConfig,
+    )
+    private val graphAccessTokenClient = GraphAccessTokenClient(
+        httpClient = httpClient,
+        azureConfig = azureConfig,
+        privateJwk = env.getValue("AZURE_APP_JWK")
+    ).also {
+        if (erDev()) {
+            runBlocking { it.fetchToken() }
+        }
+    }
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var tildelingService: TildelingService
@@ -252,7 +265,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             }
             install(ContentNegotiationServer) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             requestResponseTracing(httpTraceLog)
-            azureAdAppAuthentication(azureConfig)
+            azureAdAppAuthentication(azureAdAppConfig)
             graphQLApi(
                 personApiDao = personApiDao,
                 egenAnsattApiDao = egenAnsattApiDao,

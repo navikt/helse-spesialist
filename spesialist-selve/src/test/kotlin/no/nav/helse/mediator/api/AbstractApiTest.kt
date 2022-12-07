@@ -21,6 +21,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import java.net.ServerSocket
 import java.util.*
+import no.nav.helse.AzureConfig
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractApiTest {
@@ -40,16 +41,19 @@ abstract class AbstractApiTest {
 
     companion object {
         private val requiredGroup: UUID = UUID.randomUUID()
-        internal val clientId = "client_id"
-        private val epostadresse = "sara.saksbehandler@nav.no"
-        internal val issuer = "https://jwt-provider-domain"
-        internal val jwtStub = JwtStub()
-        internal val azureAdConfig =
-            AzureAdAppConfig(
-                clientId = clientId,
-                issuer = issuer,
-                jwkProvider = jwtStub.getJwkProviderMock()
-            )
+        private const val clientId = "client_id"
+        private const val epostadresse = "sara.saksbehandler@nav.no"
+        private const val issuer = "https://jwt-provider-domain"
+        private val jwtStub = JwtStub()
+        private val azureConfig = AzureConfig(
+            clientId = clientId,
+            issuer = issuer,
+            jwkProvider = jwtStub.getJwkProviderMock(),
+            tokenEndpoint = "",
+        )
+        internal val azureAdAppConfig = AzureAdAppConfig(
+            azureConfig = azureConfig,
+        )
 
         fun HttpRequestBuilder.authentication(oid: UUID, group: String? = null) {
             header(
@@ -114,14 +118,16 @@ abstract class AbstractApiTest {
                             JacksonConverter(objectMapper)
                         )
                     }
-                    val jwkProvider = jwtStub.getJwkProviderMock()
-                    val azureConfig =
-                        AzureAdAppConfig(
+                    val azureAdAppConfig = AzureAdAppConfig(
+                        azureConfig = AzureConfig(
                             clientId = clientId,
                             issuer = issuer,
-                            jwkProvider = jwkProvider
-                        )
-                    azureAdAppAuthentication(azureConfig)
+                            jwkProvider = jwtStub.getJwkProviderMock(),
+                            tokenEndpoint = "",
+                        ),
+                    )
+
+                    azureAdAppAuthentication(azureAdAppConfig)
                     routing {
                         authenticate("oidc", build = build)
                     }

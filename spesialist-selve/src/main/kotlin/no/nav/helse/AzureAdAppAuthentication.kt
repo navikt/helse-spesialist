@@ -1,6 +1,5 @@
 package no.nav.helse
 
-import com.auth0.jwk.JwkProvider
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
@@ -16,13 +15,11 @@ internal fun Application.azureAdAppAuthentication(config: AzureAdAppConfig) {
 }
 
 internal class AzureAdAppConfig(
-    private val clientId: String,
-    private val issuer: String,
-    private val jwkProvider: JwkProvider
+    private val azureConfig: AzureConfig,
 ) {
     fun configureAuthentication(configuration: JWTAuthenticationProvider.Config) {
-        configuration.verifier(jwkProvider, issuer) {
-            withAudience(clientId)
+        configuration.verifier(azureConfig.jwkProvider, azureConfig.issuer) {
+            withAudience(azureConfig.clientId)
         }
         configuration.validate { credentials -> JWTPrincipal(credentials.payload) }
     }

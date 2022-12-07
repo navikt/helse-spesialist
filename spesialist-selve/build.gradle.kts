@@ -1,6 +1,5 @@
 val graphQLKotlinVersion = "5.5.0"
 val testcontainersVersion = "1.17.3"
-val ktorVersion = "2.0.1"
 
 plugins {
     kotlin("plugin.serialization") version "1.6.21"
@@ -8,6 +7,7 @@ plugins {
 }
 
 dependencies {
+    api("com.nimbusds:nimbus-jose-jwt:9.25.6")
     implementation("com.expediagroup:graphql-kotlin-server:$graphQLKotlinVersion")
     implementation(project(":spesialist-felles"))
     implementation(project(":spesialist-api"))

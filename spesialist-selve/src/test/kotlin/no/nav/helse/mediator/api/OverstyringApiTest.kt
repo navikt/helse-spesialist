@@ -29,7 +29,7 @@ import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
-import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
+import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.rapids_rivers.asLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -206,7 +206,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                 JacksonConverter(objectMapper)
             )
         }
-        application.azureAdAppAuthentication(azureAdConfig)
+        application.azureAdAppAuthentication(azureAdAppConfig)
         application.routing {
             authenticate("oidc") {
                 overstyringApi(hendelseMediator)
