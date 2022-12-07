@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.person.PersonApiDao
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 data class Infotrygdutbetaling(
@@ -58,6 +59,7 @@ data class Person(
     private val overstyringApiDao: OverstyringApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
+    private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
@@ -106,6 +108,7 @@ data class Person(
             arbeidsgiverApiDao = arbeidsgiverApiDao,
             risikovurderingApiDao = risikovurderingApiDao,
             varselDao = varselDao,
+            varselRepository = varselRepository,
             oppgaveApiDao = oppgaveApiDao,
             periodehistorikkDao = periodehistorikkDao,
             notatDao = notatDao,

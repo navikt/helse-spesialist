@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 internal class SchemaBuilder(
@@ -34,6 +35,7 @@ internal class SchemaBuilder(
     val overstyringApiDao: OverstyringApiDao,
     val risikovurderingApiDao: RisikovurderingApiDao,
     val varselDao: VarselDao,
+    val varselRepository: ApiVarselRepository,
     val utbetalingApiDao: UtbetalingApiDao,
     val oppgaveApiDao: OppgaveApiDao,
     val periodehistorikkDao: PeriodehistorikkDao,
@@ -61,6 +63,7 @@ internal class SchemaBuilder(
                         overstyringApiDao = overstyringApiDao,
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
+                        varselRepository = varselRepository,
                         oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkDao = periodehistorikkDao,
                         snapshotMediator = snapshotMediator,

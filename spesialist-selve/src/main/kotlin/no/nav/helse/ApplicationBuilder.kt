@@ -91,6 +91,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
@@ -205,6 +206,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val notatMediator = NotatMediator(notatDao)
     private val overstyringDao = OverstyringDao(dataSource)
     private val varselRepository = ActualVarselRepository(dataSource)
+    private val apiVarselRepository = ApiVarselRepository(dataSource)
 
     private val behandlingsstatistikkMediator = BehandlingsstatistikkMediator(behandlingsstatistikkDao)
 
@@ -276,6 +278,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 overstyringApiDao = overstyringApiDao,
                 risikovurderingApiDao = risikovurderingApiDao,
                 varselDao = varselDao,
+                varselRepository = apiVarselRepository,
                 utbetalingApiDao = utbetalingApiDao,
                 oppgaveApiDao = oppgaveApiDao,
                 periodehistorikkDao = periodehistorikkDao,

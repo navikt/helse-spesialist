@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 fun Application.graphQLApi(
@@ -41,6 +42,7 @@ fun Application.graphQLApi(
     overstyringApiDao: OverstyringApiDao,
     risikovurderingApiDao: RisikovurderingApiDao,
     varselDao: VarselDao,
+    varselRepository: ApiVarselRepository,
     utbetalingApiDao: UtbetalingApiDao,
     oppgaveApiDao: OppgaveApiDao,
     periodehistorikkDao: PeriodehistorikkDao,
@@ -62,6 +64,7 @@ fun Application.graphQLApi(
         overstyringApiDao = overstyringApiDao,
         risikovurderingApiDao = risikovurderingApiDao,
         varselDao = varselDao,
+        varselRepository = varselRepository,
         utbetalingApiDao = utbetalingApiDao,
         oppgaveApiDao = oppgaveApiDao,
         periodehistorikkDao = periodehistorikkDao,

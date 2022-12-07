@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 
 data class Arbeidsforhold(
@@ -105,6 +106,7 @@ data class Arbeidsgiver(
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
+    private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
@@ -121,6 +123,7 @@ data class Arbeidsgiver(
                         periode = it,
                         risikovurderingApiDao = risikovurderingApiDao,
                         varselDao = varselDao,
+                        varselRepository = varselRepository,
                         oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkDao = periodehistorikkDao,
                         notatDao = notatDao

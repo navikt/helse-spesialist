@@ -20,6 +20,8 @@ import no.nav.helse.spesialist.api.oppgave.OppgaveApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
@@ -220,6 +222,20 @@ data class Refusjon(
     )
 }
 
+data class VarselDTO(
+    val id: UUIDString,
+    val tittel: String,
+    val forklaring: String?,
+    val handling: String?,
+    val vurdering: VarselvurderingDTO?,
+) {
+    data class VarselvurderingDTO(
+        val ident: String,
+        val tidsstempel: DateTimeString,
+        val status: Varselstatus,
+    )
+}
+
 interface Periode {
     fun erForkastet(): Boolean
     fun fom(): DateString
@@ -306,6 +322,7 @@ data class BeregnetPeriode(
     private val periode: GraphQLBeregnetPeriode,
     private val risikovurderingApiDao: RisikovurderingApiDao,
     private val varselDao: VarselDao,
+    private val varselRepository: ApiVarselRepository,
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val notatDao: NotatDao,
@@ -454,6 +471,11 @@ data class BeregnetPeriode(
         }
 
     fun varsler(): List<String> = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
+
+    fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerFor(
+        UUID.fromString(vedtaksperiodeId()),
+        UUID.fromString(periode.utbetaling.id)
+    )
 
     @Deprecated("Oppgavereferanse bør hentes fra periodens oppgave")
     fun oppgavereferanse(): String? =

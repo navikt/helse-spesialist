@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
@@ -54,6 +55,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected val varselDao = VarselDao(dataSource)
+    protected val apiVarselRepository = ApiVarselRepository(dataSource)
     protected val arbeidsgiverApiDao = ArbeidsgiverApiDao(dataSource)
     protected val risikovurderingApiDao = RisikovurderingApiDao(dataSource)
     protected val saksbehandlerDao = SaksbehandlerDao(dataSource)
@@ -97,6 +99,15 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 )
             )
         }
+
+    protected fun opprettVarseldefinisjon(tittel: String = "EN_TITTEL", kode: String = "EN_KODE"): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
+            VALUES (?, ?, ?, ?, ?, ?)    
+        """
+        requireNotNull(session.run(queryOf(query, UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
+    }
 
     protected fun klargjørVedtak(
         vedtakId: Long,
