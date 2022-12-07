@@ -33,7 +33,7 @@ internal class Personavstemming {
             River(rapidsConnection).apply {
                 validate {
                     it.demandValue("@event_name", "person_avstemt")
-                    it.requireKey("@id", "fødselsnummer")
+                    it.requireKey("@id", "fødselsnummer", "aktørId")
                     it.require("@opprettet") { message -> message.asLocalDateTime() }
                     it.requireArray("arbeidsgivere") {
                         requireArray("vedtaksperioder") {
@@ -68,6 +68,8 @@ internal class Personavstemming {
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             val hendelseId = UUID.fromString(packet["@id"].asText())
             val fødselsnummer = packet["fødselsnummer"].asText()
+            val aktørId = packet["aktørId"].asText()
+            sikkerlogg.info("Mottatt person_avstemt for {}, {}", keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId))
             val arbeidsgivereJson = packet["arbeidsgivere"]
             if (arbeidsgivereJson.isEmpty) {
                 sikkerlogg.info(
