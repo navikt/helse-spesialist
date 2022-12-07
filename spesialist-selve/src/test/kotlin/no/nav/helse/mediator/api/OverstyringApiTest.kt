@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api
 
 import AbstractE2ETest
+import ToggleHelpers.enable
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -26,6 +27,7 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_NAVN
 import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.januar
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdConfig
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -123,6 +125,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr inntekt`() {
+        Toggle.Refusjonsendringer.enable()
         with(TestApplicationEngine()) {
             setUpApplication()
 

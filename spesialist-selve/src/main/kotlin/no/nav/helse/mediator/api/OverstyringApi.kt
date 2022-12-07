@@ -15,6 +15,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -69,8 +70,8 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
             fraMånedligInntekt = overstyring.fraMånedligInntekt,
             skjæringstidspunkt = overstyring.skjæringstidspunkt,
             subsumsjon = overstyring.subsumsjon,
-            refusjonsopplysninger = if (erDev()) overstyring.refusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
-            fraRefusjonsopplysninger = if (erDev()) overstyring.fraRefusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
+            refusjonsopplysninger = if (Toggle.Refusjonsendringer.enabled) overstyring.refusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
+            fraRefusjonsopplysninger = if (Toggle.Refusjonsendringer.enabled) overstyring.fraRefusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
         )
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
