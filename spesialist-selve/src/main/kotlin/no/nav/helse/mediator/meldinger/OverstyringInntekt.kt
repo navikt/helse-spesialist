@@ -6,6 +6,8 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.OverstyringMediator
+import no.nav.helse.mediator.api.Refusjonselement
+import no.nav.helse.mediator.api.refusjonselementer
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
@@ -44,6 +46,8 @@ internal class OverstyringInntekt(
     månedligInntekt: Double,
     fraMånedligInntekt: Double,
     skjæringstidspunkt: LocalDate,
+    refusjonsopplysninger: List<Refusjonselement>?,
+    fraRefusjonsopplysninger: List<Refusjonselement>?,
     opprettet: LocalDateTime,
     private val json: String,
     reservasjonDao: ReservasjonDao,
@@ -70,6 +74,8 @@ internal class OverstyringInntekt(
             månedligInntekt = månedligInntekt,
             fraMånedligInntekt = fraMånedligInntekt,
             skjæringstidspunkt = skjæringstidspunkt,
+            refusjonsopplysninger = refusjonsopplysninger,
+            fraRefusjonsopplysninger = fraRefusjonsopplysninger,
             opprettet = opprettet,
             overstyringDao = overstyringDao
         ),
@@ -111,6 +117,8 @@ internal class OverstyringInntekt(
                     it.requireKey("saksbehandlerNavn")
                     it.requireKey("saksbehandlerEpost")
                     it.requireKey("@id")
+                    it.interestedIn("refusjonsopplysninger")
+                    it.interestedIn("fraRefusjonsopplysninger")
                 }
             }.register(this)
         }
@@ -141,6 +149,8 @@ internal class OverstyringInntekt(
                 fraMånedligInntekt = packet["fraMånedligInntekt"].asDouble(),
                 skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
                 opprettet = packet["@opprettet"].asLocalDateTime(),
+                refusjonsopplysninger = packet["refusjonsopplysninger"].refusjonselementer(),
+                fraRefusjonsopplysninger = packet["fraRefusjonsopplysninger"].refusjonselementer(),
                 json = packet.toJson(),
                 context = context
             )

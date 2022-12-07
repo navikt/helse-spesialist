@@ -7,6 +7,8 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.mediator.api.Refusjonselement
+import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.intellij.lang.annotations.Language
@@ -148,7 +150,9 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         månedligInntekt: Double,
         fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
-        tidspunkt: LocalDateTime
+        tidspunkt: LocalDateTime,
+        refusjonsopplysninger: List<Refusjonselement>?,
+        fraRefusjonsopplysninger: List<Refusjonselement>?,
     ) {
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             @Language("PostgreSQL")
@@ -163,8 +167,8 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
 
             @Language("PostgreSQL")
             val opprettOverstyringInntektQuery = """
-                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref)
-                VALUES (:forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref)
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger)
+                VALUES (:forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json)
             """.trimIndent()
 
             val overstyringRef = session.run(
@@ -177,8 +181,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                         "saksbehandler_ref" to saksbehandlerRef,
                         "tidspunkt" to tidspunkt,
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to organisasjonsnummer.toLong()
-                    )
+                        "orgnr" to organisasjonsnummer.toLong())
                 ).asUpdateAndReturnGeneratedKey
             )
 
@@ -190,7 +193,9 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                         "manedlig_inntekt" to månedligInntekt,
                         "fra_manedlig_inntekt" to fraMånedligInntekt,
                         "skjaeringstidspunkt" to skjæringstidspunkt,
-                        "overstyring_ref" to overstyringRef
+                        "overstyring_ref" to overstyringRef,
+                        "refusjonsopplysninger" to refusjonsopplysninger?.let { objectMapper.writeValueAsString(refusjonsopplysninger) },
+                        "fra_refusjonsopplysninger" to fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(fraRefusjonsopplysninger) }
                     )
                 ).asUpdate
             )

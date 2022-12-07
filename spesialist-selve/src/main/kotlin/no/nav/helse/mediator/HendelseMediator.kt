@@ -15,6 +15,7 @@ import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektKafkaDto
 import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
+import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
@@ -470,6 +471,8 @@ internal class HendelseMediator(
         fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
+        refusjonsopplysninger: List<Refusjonselement>?,
+        fraRefusjonsopplysninger: List<Refusjonselement>?,
         json: String,
         context: MessageContext,
     ) {
@@ -487,6 +490,8 @@ internal class HendelseMediator(
                 månedligInntekt = månedligInntekt,
                 fraMånedligInntekt = fraMånedligInntekt,
                 skjæringstidspunkt = skjæringstidspunkt,
+                refusjonsopplysninger = refusjonsopplysninger,
+                fraRefusjonsopplysninger = fraRefusjonsopplysninger,
                 opprettet = opprettet,
                 json = json
             ), context

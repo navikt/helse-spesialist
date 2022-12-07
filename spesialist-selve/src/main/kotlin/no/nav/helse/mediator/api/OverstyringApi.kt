@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
@@ -66,7 +68,9 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
             månedligInntekt = overstyring.månedligInntekt,
             fraMånedligInntekt = overstyring.fraMånedligInntekt,
             skjæringstidspunkt = overstyring.skjæringstidspunkt,
-            subsumsjon = overstyring.subsumsjon
+            subsumsjon = overstyring.subsumsjon,
+            refusjonsopplysninger = if (erDev()) overstyring.refusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
+            fraRefusjonsopplysninger = if (erDev()) overstyring.fraRefusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
         )
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
@@ -154,6 +158,8 @@ data class OverstyrInntektDTO(
     val fraMånedligInntekt: Double,
     val skjæringstidspunkt: LocalDate,
     val subsumsjon: SubsumsjonDto?,
+    val refusjonsopplysninger: List<Refusjonselement>?,
+    val fraRefusjonsopplysninger: List<Refusjonselement>?,
 )
 
 data class OverstyrInntektKafkaDto(
@@ -167,6 +173,8 @@ data class OverstyrInntektKafkaDto(
     val fraMånedligInntekt: Double,
     val skjæringstidspunkt: LocalDate,
     val subsumsjon: SubsumsjonDto?,
+    val refusjonsopplysninger: List<Refusjonselement>?,
+    val fraRefusjonsopplysninger: List<Refusjonselement>?,
 ) {
     fun somKafkaMessage() = JsonMessage.newMessage(
         "saksbehandler_overstyrer_inntekt",
@@ -184,9 +192,36 @@ data class OverstyrInntektKafkaDto(
             "fraMånedligInntekt" to fraMånedligInntekt,
             "skjæringstidspunkt" to skjæringstidspunkt,
             subsumsjon?.let { "subsumsjon" to subsumsjon.toMap() },
+            refusjonsopplysninger?.let { "refusjonsopplysninger" to refusjonsopplysninger.toMap() },
+            fraRefusjonsopplysninger?.let { "fraRefusjonsopplysninger" to fraRefusjonsopplysninger.toMap() }
         ).toMap()
     )
 }
+
+data class Refusjonselement(
+    val fom: LocalDate,
+    val tom: LocalDate? = null,
+    val beløp: Double
+) {
+    fun toMap(): Map<String, Any?> = listOfNotNull(
+        "fom" to fom,
+        "tom" to tom,
+        "beløp" to beløp,
+    ).toMap()
+}
+
+internal fun JsonNode.refusjonselementer(): List<Refusjonselement>? {
+    if (this.isNull) return null
+    return this.map { jsonNode ->
+        Refusjonselement(
+            fom = jsonNode["fom"].asLocalDate(),
+            tom = if (jsonNode["tom"].isNull) null else jsonNode["tom"].asLocalDate(),
+            beløp = jsonNode["beløp"].asDouble()
+        )
+    }
+}
+
+fun List<Refusjonselement>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
 
 @JsonIgnoreProperties
 data class OverstyrArbeidsforholdDto(

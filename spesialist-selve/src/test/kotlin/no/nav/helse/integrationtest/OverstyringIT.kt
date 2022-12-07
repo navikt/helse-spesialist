@@ -30,10 +30,10 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.OverstyrInntektDTO
 import no.nav.helse.mediator.api.OverstyrTidslinjeDTO
 import no.nav.helse.mediator.api.overstyringApi
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
@@ -86,17 +86,18 @@ internal class OverstyringIT : AbstractE2ETest() {
             setUpApplication()
             settOppBruker()
 
-            val overstyring = OverstyrInntektDTO(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                forklaring = "en forklaring",
-                månedligInntekt = 25000.0,
-                fraMånedligInntekt = 25001.0,
-                skjæringstidspunkt = 1.januar,
-                subsumsjon = null,
-            )
+            val json = """
+                {
+                    "organisasjonsnummer": $ORGNR,
+                    "fødselsnummer": $FØDSELSNUMMER,
+                    "aktørId": $AKTØR,
+                    "begrunnelse": "en begrunnelse",
+                    "forklaring": "en forklaring",
+                    "månedligInntekt": 25000.0,
+                    "fraMånedligInntekt": 25001.0,
+                    "skjæringstidspunkt": "2018-01-01"
+                }
+            """.trimIndent()
 
             val response = runBlocking {
                 client.post("/api/overstyr/inntekt") {
@@ -107,7 +108,7 @@ internal class OverstyringIT : AbstractE2ETest() {
                         navn = SAKSBEHANDLER_NAVN,
                         ident = SAKSBEHANDLER_IDENT,
                     )
-                    setBody(objectMapper.writeValueAsString(overstyring))
+                    setBody(json)
                 }
             }
 
@@ -116,6 +117,80 @@ internal class OverstyringIT : AbstractE2ETest() {
             testRapid.sendTestMessage(
                 testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").first().toString()
             )
+            assertEquals("Invalidert", oppgaveStatus())
+            assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
+        }
+    }
+
+    @Test
+    fun `overstyr inntekt med refusjon`() {
+        with(TestApplicationEngine()) {
+            setUpApplication()
+            settOppBruker()
+
+            val json = """
+                {
+                    "organisasjonsnummer": $ORGNR,
+                    "fødselsnummer": $FØDSELSNUMMER,
+                    "aktørId": $AKTØR,
+                    "begrunnelse": "en begrunnelse",
+                    "forklaring": "en forklaring",
+                    "månedligInntekt": 25000.0,
+                    "fraMånedligInntekt": 25001.0,
+                    "skjæringstidspunkt": "2018-01-01",
+                    "refusjonsopplysninger": [
+                        {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 25000.0
+                        },
+                        {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 25000.0
+                        }
+                    ],
+                    "fraRefusjonsopplysninger": [
+                        {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 25001.0
+                        },
+                        {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 25001.0
+                        }
+                    ]
+                }
+            """.trimIndent()
+
+            val response = runBlocking {
+                client.post("/api/overstyr/inntekt") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT,
+                    )
+                    setBody(json)
+                }
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").size)
+            testRapid.sendTestMessage(
+                testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt").first().toString()
+            )
+
+            //TODO: Bruk OverstyringApiDao når denne er oppdatert til å inkludere nye kolonner
+            val refusjonsopplysninger = overstyringInntektRefusjonsopplysninger("refusjonsopplysninger")
+            val fraRefusjonsopplysninger = overstyringInntektRefusjonsopplysninger("fra_refusjonsopplysninger")
+
+            assertTrue(refusjonsopplysninger?.isNotEmpty() == true)
+            assertTrue(fraRefusjonsopplysninger?.isNotEmpty() == true)
+
             assertEquals("Invalidert", oppgaveStatus())
             assertEquals(1, testRapid.inspektør.hendelser("overstyr_inntekt").size)
         }
@@ -164,6 +239,13 @@ internal class OverstyringIT : AbstractE2ETest() {
             assertEquals(1, testRapid.inspektør.hendelser("overstyr_arbeidsforhold").size)
         }
     }
+
+    private fun overstyringInntektRefusjonsopplysninger(column: String) =
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf("SELECT * FROM overstyring_inntekt").map {
+                it.stringOrNull(column)
+            }.asSingle)
+        }
 
     private fun oppgaveStatus() =
         sessionOf(dataSource).use { session ->

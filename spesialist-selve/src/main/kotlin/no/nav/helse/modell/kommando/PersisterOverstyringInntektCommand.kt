@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.modell.overstyring.OverstyringDao
 
 internal class PersisterOverstyringInntektCommand(
@@ -15,6 +16,8 @@ internal class PersisterOverstyringInntektCommand(
     private val månedligInntekt: Double,
     private val fraMånedligInntekt: Double,
     private val skjæringstidspunkt: LocalDate,
+    private val refusjonsopplysninger: List<Refusjonselement>?,
+    private val fraRefusjonsopplysninger: List<Refusjonselement>?,
     private val opprettet: LocalDateTime,
     private val overstyringDao: OverstyringDao
 ) : Command {
@@ -30,7 +33,9 @@ internal class PersisterOverstyringInntektCommand(
             månedligInntekt = månedligInntekt,
             fraMånedligInntekt = fraMånedligInntekt,
             skjæringstidspunkt = skjæringstidspunkt,
-            tidspunkt = opprettet
+            tidspunkt = opprettet,
+            refusjonsopplysninger = refusjonsopplysninger,
+            fraRefusjonsopplysninger = fraRefusjonsopplysninger,
         )
         return true
     }

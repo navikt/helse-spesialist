@@ -7,6 +7,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.Refusjonselement
+import no.nav.helse.mediator.api.refusjonselementer
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -350,6 +352,8 @@ internal class Hendelsefabrikk(
         månedligInntekt: Double,
         fraMånedligInntekt: Double,
         skjæringstidspunkt: LocalDate,
+        refusjonsopplysninger: List<Refusjonselement>?,
+        fraRefusjonsopplysninger: List<Refusjonselement>?,
         opprettet: LocalDateTime,
         json: String,
     ) = OverstyringInntekt(
@@ -368,6 +372,8 @@ internal class Hendelsefabrikk(
         reservasjonDao = reservasjonDao,
         saksbehandlerDao = saksbehandlerDao,
         overstyringDao = overstyringDao,
+        refusjonsopplysninger = refusjonsopplysninger,
+        fraRefusjonsopplysninger = fraRefusjonsopplysninger,
         opprettet = opprettet,
         json = json,
         overstyringMediator = overstyringMediator,
@@ -439,6 +445,8 @@ internal class Hendelsefabrikk(
             månedligInntekt = jsonNode.path("månedligInntekt").asDouble(),
             fraMånedligInntekt = jsonNode.path("fraMånedligInntekt").asDouble(),
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
+            refusjonsopplysninger = jsonNode.path("refusjonsopplysninger").refusjonselementer(),
+            fraRefusjonsopplysninger = jsonNode.path("fraRefusjonsopplysninger").refusjonselementer(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json
         )

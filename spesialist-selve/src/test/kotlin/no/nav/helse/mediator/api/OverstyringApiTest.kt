@@ -126,20 +126,35 @@ internal class OverstyringApiTest : AbstractE2ETest() {
         with(TestApplicationEngine()) {
             setUpApplication()
 
-            val overstyring = OverstyrInntektDTO(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                forklaring = "en forklaring",
-                månedligInntekt = 25000.0,
-                fraMånedligInntekt = 25001.0,
-                skjæringstidspunkt = 1.januar,
-                subsumsjon = SubsumsjonDto(
-                    paragraf = "8-28",
-                    ledd = "3",
-                )
-            )
+            val json = """
+                {
+                    "organisasjonsnummer": $ORGNR,
+                    "fødselsnummer": $FØDSELSNUMMER,
+                    "aktørId": $AKTØR,
+                    "begrunnelse": "en begrunnelse",
+                    "forklaring": "en forklaring",
+                    "månedligInntekt": 25000.0,
+                    "fraMånedligInntekt": 25001.0,
+                    "skjæringstidspunkt": "2018-01-01",
+                    "subsumsjon": {
+                        "paragraf": "8-28",
+                        "ledd": "3",
+                        "bokstav": null
+                    },
+                    "refusjonsopplysninger": [
+                        {
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-31",
+                        "beløp": 25000.0
+                        },
+                        {
+                        "fom": "2018-02-01",
+                        "tom": null,
+                        "beløp": 24000.0
+                        }
+                    ]
+                }
+            """.trimIndent()
 
             val response = runBlocking {
                 client.post("/api/overstyr/inntekt") {
@@ -150,7 +165,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
                         navn = SAKSBEHANDLER_NAVN,
                         ident = SAKSBEHANDLER_IDENT
                     )
-                    setBody(objectMapper.writeValueAsString(overstyring))
+                    setBody(json)
                 }
             }
 
@@ -173,6 +188,11 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             assertEquals("8-28", event["subsumsjon"]["paragraf"].asText())
             assertEquals("3", event["subsumsjon"]["ledd"].asText())
             assertNull(event["subsumsjon"]["bokstav"])
+            assertEquals(2, event["refusjonsopplysninger"].size())
+            assertEquals("2018-01-01", event["refusjonsopplysninger"].first()["fom"].asText())
+            assertEquals("2018-01-31", event["refusjonsopplysninger"].first()["tom"].asText())
+            assertEquals(25000.0, event["refusjonsopplysninger"].first()["beløp"].asDouble())
+            assertNull(event["fraRefusjonsopplysninger"])
         }
     }
 

@@ -178,7 +178,21 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
     fun `Finner opprettede inntektoverstyringer`() {
         opprettPerson()
         overstyrInntekt(ID)
-        overstyringDao.persisterOverstyringInntekt(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, FORKLARING, OID, INNTEKT, INNTEKT+1, SKJÆRINGSTIDSPUNKT, OPPRETTET)
+        overstyringDao.persisterOverstyringInntekt(
+            ID,
+            EKSTERN_HENDELSE_ID,
+            FØDSELSNUMMER,
+            ORGNUMMER,
+            BEGRUNNELSE,
+            FORKLARING,
+            OID,
+            INNTEKT,
+            INNTEKT + 1,
+            SKJÆRINGSTIDSPUNKT,
+            OPPRETTET,
+            null,
+            null
+        )
         val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNUMMER).first()
 
         assertEquals(ID, hentetOverstyring.hendelseId)
@@ -259,6 +273,8 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             månedligInntekt = INNTEKT,
             fraMånedligInntekt = INNTEKT + 1,
             skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+            refusjonsopplysninger = null,
+            fraRefusjonsopplysninger = null,
             opprettet = OPPRETTET,
             json = "{}",
             reservasjonDao = reservasjonDao,
