@@ -17,8 +17,6 @@ import java.util.Date
 import java.util.UUID
 import org.slf4j.LoggerFactory
 
-internal val logger = LoggerFactory.getLogger("MsGraphClient")
-
 internal class GraphAccessTokenClient(
     val httpClient: HttpClient,
     val azureConfig: AzureConfig,
@@ -52,7 +50,7 @@ internal class GraphAccessTokenClient(
             }))
         }.body()
 
-        logger.info("hentet token for MS graph: $token")
+        logger.info("hentet token for MS graph")
 
         return token
     }
@@ -61,4 +59,8 @@ internal class GraphAccessTokenClient(
     internal data class AadAccessToken(
         val access_token: String,
     )
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(GraphAccessTokenClient::class.java)
+    }
 }

@@ -164,9 +164,11 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
         httpClient = httpClient,
         azureConfig = azureConfig,
         privateJwk = env.getValue("AZURE_APP_JWK")
-    ).also {
+    )
+
+    private val msGraphClient = MsGraphClient(httpClient = httpClient, tokenClient = graphAccessTokenClient).also {
         if (erDev()) {
-            runBlocking { it.fetchToken() }
+            runBlocking { it.hentGrupper() }
         }
     }
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
