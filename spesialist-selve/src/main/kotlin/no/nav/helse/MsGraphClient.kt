@@ -19,7 +19,7 @@ internal class MsGraphClient(
 
         val tbdGroupId = "f787f900-6697-440d-a086-d5bb56e26a9c"
         val response = httpClient.get(
-        "$graphUrl/groups/$tbdGroupId/members?\$select=id,givenName,surname,onPremisesSamAccountName&\$top=$500") {
+        "$graphUrl/groups/$tbdGroupId/members?\$select=id,givenName,surname,onPremisesSamAccountName&\$top=500") {
             bearerAuth(token.access_token)
             accept(ContentType.parse("application/json"))
         }
