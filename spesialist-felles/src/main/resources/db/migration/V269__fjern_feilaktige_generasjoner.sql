@@ -1,9 +1,9 @@
 UPDATE selve_varsel SET generasjon_ref = 2129490 WHERE generasjon_ref = 20463;
 UPDATE selve_varsel SET generasjon_ref = 241498 WHERE generasjon_ref = 31337;
-UPDATE selve_varsel SET generasjon_ref = 2129490 WHERE generasjon_ref = 4476796;
+UPDATE selve_varsel SET generasjon_ref = 4476796 WHERE generasjon_ref = 50153;
 UPDATE selve_varsel SET generasjon_ref = 847922 WHERE generasjon_ref = 847920;
-UPDATE selve_varsel SET generasjon_ref = 2129490 WHERE generasjon_ref = 2489071;
-UPDATE selve_varsel SET generasjon_ref = 2129490 WHERE generasjon_ref = 3804686;
+UPDATE selve_varsel SET generasjon_ref = 2489071 WHERE generasjon_ref = 2489069;
+UPDATE selve_varsel SET generasjon_ref = 3804686 WHERE generasjon_ref = 3804684;
 
 DELETE FROM selve_vedtaksperiode_generasjon
 WHERE unik_id IN (
