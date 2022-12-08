@@ -37,7 +37,15 @@ data class OverstyringInntektDto(
     val månedligInntekt: Double,
     val fraMånedligInntekt: Double?,
     val skjæringstidspunkt: LocalDate,
-)
+    val refusjonsopplysninger: List<Refusjonselement>?,
+    val fraRefusjonsopplysninger: List<Refusjonselement>?,
+) {
+    data class Refusjonselement(
+        val fom: LocalDate,
+        val tom: LocalDate?,
+        val beløp: Double,
+    )
+}
 
 data class OverstyringArbeidsforholdDto(
     val hendelseId: UUID,

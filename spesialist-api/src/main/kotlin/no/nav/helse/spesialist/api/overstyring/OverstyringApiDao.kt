@@ -1,9 +1,11 @@
 package no.nav.helse.spesialist.api.overstyring
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 
 class OverstyringApiDao(private val dataSource: DataSource) {
@@ -53,7 +55,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()
 
     fun finnOverstyringerAvInntekt(fødselsnummer: String, organisasjonsnummer: String): List<OverstyringInntektDto> =
-        sessionOf(dataSource).use {
+        sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val finnOverstyringQuery = """
             SELECT o.*, oi.*, p.fodselsnummer, a.orgnummer, s.navn, s.ident FROM overstyring o
@@ -64,7 +66,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 INNER JOIN hendelse h ON h.id = o.hendelse_ref
             WHERE p.fodselsnummer = ? AND a.orgnummer = ?
         """
-            it.run(
+            session.run(
                 queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                     .map { overstyringRow ->
                         OverstyringInntektDto(
@@ -78,7 +80,11 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                             saksbehandlerIdent = overstyringRow.stringOrNull("ident"),
                             månedligInntekt = overstyringRow.double("manedlig_inntekt"),
                             fraMånedligInntekt = overstyringRow.doubleOrNull("fra_manedlig_inntekt"),
-                            skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt")
+                            skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
+                            refusjonsopplysninger = overstyringRow.stringOrNull("refusjonsopplysninger")
+                                ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
+                            fraRefusjonsopplysninger = overstyringRow.stringOrNull("fra_refusjonsopplysninger")
+                                ?.let { objectMapper.readValue<List<OverstyringInntektDto.Refusjonselement>>(it) },
                         )
                     }.asList
             )

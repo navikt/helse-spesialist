@@ -20,12 +20,12 @@ data class Arbeidsforhold(
     val stillingstittel: String,
     val stillingsprosent: Int,
     val startdato: DateString,
-    val sluttdato: DateString?
+    val sluttdato: DateString?,
 )
 
 data class Generasjon(
     val id: UUIDString,
-    val perioder: List<Periode>
+    val perioder: List<Periode>,
 )
 
 interface Overstyring {
@@ -47,7 +47,7 @@ data class Dagoverstyring(
         val type: Dagtype,
         val fraType: Dagtype?,
         val grad: Int?,
-        val fraGrad: Int?
+        val fraGrad: Int?,
     )
 }
 
@@ -62,7 +62,15 @@ data class Inntektoverstyring(
         val forklaring: String,
         val manedligInntekt: Double,
         val fraManedligInntekt: Double?,
-        val skjaeringstidspunkt: DateTimeString
+        val skjaeringstidspunkt: DateTimeString,
+        val refusjonsopplysninger: List<Refusjonsopplysning>,
+        val fraRefusjonsopplysninger: List<Refusjonsopplysning>,
+    )
+
+    data class Refusjonsopplysning(
+        val fom: DateString,
+        val tom: DateString?,
+        val belop: Double,
     )
 }
 
@@ -73,7 +81,7 @@ data class Arbeidsforholdoverstyring(
     override val saksbehandler: Saksbehandler,
     val deaktivert: Boolean,
     val skjaeringstidspunkt: DateString,
-    val forklaring: String
+    val forklaring: String,
 ) : Overstyring
 
 data class GhostPeriode(
@@ -83,7 +91,7 @@ data class GhostPeriode(
     val skjaeringstidspunkt: DateString,
     val vilkarsgrunnlagId: UUIDString?,
     val deaktivert: Boolean,
-    val organisasjonsnummer: String
+    val organisasjonsnummer: String,
 )
 
 data class Arbeidsgiver(
@@ -173,7 +181,21 @@ private fun OverstyringInntektDto.tilInntektoverstyring() = Inntektoverstyring(
         forklaring = forklaring,
         manedligInntekt = månedligInntekt,
         fraManedligInntekt = fraMånedligInntekt,
-        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE)
+        skjaeringstidspunkt = skjæringstidspunkt.format(DateTimeFormatter.ISO_DATE),
+        refusjonsopplysninger = refusjonsopplysninger?.map {
+            Inntektoverstyring.Refusjonsopplysning(
+                fom = it.fom.toString(),
+                tom = it.tom?.toString(),
+                belop = it.beløp
+            )
+        } ?: emptyList(),
+        fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map {
+            Inntektoverstyring.Refusjonsopplysning(
+                fom = it.fom.toString(),
+                tom = it.tom?.toString(),
+                belop = it.beløp
+            )
+        } ?: emptyList(),
     )
 )
 
