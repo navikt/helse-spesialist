@@ -17,9 +17,9 @@ internal class MsGraphClient(
     suspend fun hentGrupper() {
         val token = runBlocking { tokenClient.fetchToken() }
 
-        val tbdGroupId = "f787f900-6697-440d-a086-d5bb56e26a9c"
+        val groupId = "a7476a04-cec2-44dd-947f-efc745f199a7"
         val response = httpClient.get(
-        "$graphUrl/groups/$tbdGroupId/members?\$select=id,givenName,surname,onPremisesSamAccountName&\$top=500") {
+        "$graphUrl/groups/$groupId/members?\$select=id,givenName,surname,onPremisesSamAccountName&\$top=500") {
             bearerAuth(token.access_token)
             accept(ContentType.parse("application/json"))
         }
