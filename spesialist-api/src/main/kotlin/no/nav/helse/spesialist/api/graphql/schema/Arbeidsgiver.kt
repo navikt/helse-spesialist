@@ -63,8 +63,8 @@ data class Inntektoverstyring(
         val manedligInntekt: Double,
         val fraManedligInntekt: Double?,
         val skjaeringstidspunkt: DateTimeString,
-        val refusjonsopplysninger: List<Refusjonsopplysning>,
-        val fraRefusjonsopplysninger: List<Refusjonsopplysning>,
+        val refusjonsopplysninger: List<Refusjonsopplysning>?,
+        val fraRefusjonsopplysninger: List<Refusjonsopplysning>?,
     )
 
     data class Refusjonsopplysning(
