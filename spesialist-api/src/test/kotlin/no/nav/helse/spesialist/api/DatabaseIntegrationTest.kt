@@ -106,7 +106,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
             VALUES (?, ?, ?, ?, ?, ?)    
         """
-        requireNotNull(session.run(queryOf(query, UUID.randomUUID(), kode, tittel, "EN_FORKLARING", "EN_HANDLING", LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
+        requireNotNull(session.run(queryOf(query, UUID.randomUUID(), kode, tittel, null, null, LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
     }
 
     protected fun klargjørVedtak(

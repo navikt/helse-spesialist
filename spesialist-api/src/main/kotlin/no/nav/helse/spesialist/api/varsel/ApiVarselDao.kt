@@ -24,8 +24,8 @@ internal class ApiVarselDao(private val dataSource: DataSource) {
                 Varsel(
                     it.uuid("unik_id"),
                     it.string("tittel"),
-                    it.string("forklaring"),
-                    it.string("handling"),
+                    it.stringOrNull("forklaring"),
+                    it.stringOrNull("handling"),
                     if (it.localDateTimeOrNull("status_endret_tidspunkt") != null) Varselvurdering(
                         it.string("status_endret_ident"),
                         it.localDateTime("status_endret_tidspunkt"),

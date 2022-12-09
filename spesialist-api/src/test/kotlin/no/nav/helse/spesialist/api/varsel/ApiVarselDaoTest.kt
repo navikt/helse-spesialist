@@ -45,7 +45,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon("EN_NY_TITTEL")
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
-        val forventetVarsel = Varsel(varselId, "EN_NY_TITTEL", "EN_FORKLARING", "EN_HANDLING", null)
+        val forventetVarsel = Varsel(varselId, "EN_NY_TITTEL", null, null, null)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
     }
@@ -60,7 +60,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         opprettVarseldefinisjon("EN_NY_TITTEL")
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
-        val forventetVarsel = Varsel(varselId, "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", null)
+        val forventetVarsel = Varsel(varselId, "EN_TITTEL", null, null, null)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
     }
