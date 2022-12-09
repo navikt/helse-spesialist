@@ -1,6 +1,5 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -25,21 +24,19 @@ internal class Utbetalingsfilter(
 
     private fun evaluer(): Boolean{
         if (!harUtbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
+        if (utbetalingtype == REVURDERING) return true // revurderinger kan alltid utbetales
         if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
         if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
-        // Unngå ping-pong om en av de utvalgte utbetalingene til sykmeldt revurderes og får warning
-        if (warnings.isNotEmpty() && utbetalingtype != REVURDERING) {
+
+        if (warnings.isNotEmpty()) {
             if (årsaker.isEmpty()) sikkerLogg.info("Utbetalingsfilter warnings som eneste årsak til at det ikke kan utbetales:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
             else sikkerLogg.info("Utbetalingsfilter warnings som en av flere årsaker til at det ikke kan utbetales:\n${Warning.formater(warnings).joinToString(separator = "\n")}")
             nyÅrsak("Vedtaksperioden har warnings")
         }
         if (årsaker.isNotEmpty() && erUtbetaltFør) {
-            if (Toggle.BeholdForlengelseMedOvergangTilUTS.enabled) {
-                return true
-            }
-            sikkerLogg.info("Kandidat for å beholde hos oss. Avvisningsgrunner: ${årsaker.joinToString()}")
+            return true
         }
         return årsaker.isEmpty()
     }

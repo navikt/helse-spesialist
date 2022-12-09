@@ -86,8 +86,6 @@ spec:
       value: 611669fa-de5c-4dc2-a0e8-6041a019992a
     - name: SPLEIS_CLIENT_ID
       value: api://dev-gcp.tbd.spleis-api/.default
-    - name: BEHOLD_FORELENGELSER_TIL_UTS
-      value: "true"
     - name: SPLEIS_API_URL
       value: "http://spleis-api"
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_API_URL
