@@ -1,10 +1,13 @@
 package no.nav.helse.modell.automatisering
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
@@ -153,6 +156,20 @@ internal class AutomatiseringTest {
         automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId) { fail("Denne skal ikke kalles") }
         verify(exactly = 1) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+    }
+
+    @Test
+    fun `periode til revurdering skal automatisk godkjennes om toggle er på`() {
+        Toggle.AutomatiserRevuderinger.enable()
+        val hendelseId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val onSuccessCallback = mockk<() -> Unit>(relaxed = true)
+        every { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) } returns enUtbetaling(type = Utbetalingtype.REVURDERING)
+        automatisering.utfør(fødselsnummer, vedtaksperiodeId, hendelseId, utbetalingId, onSuccessCallback)
+        verify(exactly = 0) { automatiseringDaoMock.manuellSaksbehandling(any(), vedtaksperiodeId, hendelseId, utbetalingId) }
+        verify(exactly = 1) { automatiseringDaoMock.automatisert(any(), any(), any()) }
+        verify(exactly = 1) { onSuccessCallback() }
+        Toggle.AutomatiserRevuderinger.disable()
     }
 
     @Test
