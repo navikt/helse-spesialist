@@ -2,6 +2,7 @@ package no.nav.helse.modell.automatisering
 
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
@@ -15,6 +16,7 @@ import no.nav.helse.modell.risiko.RisikovurderingDao
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vergemal.VergemålDao
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spesialist.api.snapshot.SnapshotMediator
 import org.slf4j.LoggerFactory
 
@@ -111,7 +113,7 @@ internal class Automatisering(
             validering("Har flere arbeidsgivere") { inntektskilde == Inntektskilde.EN_ARBEIDSGIVER },
             validering("Delvis refusjon") { !vedtaksperiodensUtbetaling.delvisRefusjon() },
             validering("Utbetaling til sykmeldt") { !vedtaksperiodensUtbetaling.utbetalingTilSykmeldt() },
-            validering("Utbetalingen er revurdering") { !vedtaksperiodensUtbetaling.erRevurdering() },
+            AutomatiserRevurderinger(vedtaksperiodensUtbetaling),
             validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring }
         )
     }
@@ -126,6 +128,14 @@ internal class Automatisering(
             override fun erAautomatiserbar() = automatiserbar()
             override fun error() = error
         }
+
+    private class AutomatiserRevurderinger(private val utbetaling: GraphQLUtbetaling?): AutomatiseringValidering {
+        override fun erAautomatiserbar(): Boolean {
+            if (!utbetaling.erRevurdering()) return true
+            return Toggle.AutomatiserRevuderinger.enabled
+        }
+        override fun error() = "Utbetalingen er revurdering"
+    }
 
     fun erStikkprøve(vedtaksperiodeId: UUID, hendelseId: UUID) =
         automatiseringDao.plukketUtTilStikkprøve(vedtaksperiodeId, hendelseId)
