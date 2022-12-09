@@ -10,7 +10,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
-import no.nav.helse.modell.kommando.OppdaterSpeilSnapshotCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
@@ -40,7 +39,6 @@ internal class VedtaksperiodeEndret(
     generasjonRepository: GenerasjonRepository,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
-        OppdaterSpeilSnapshotCommand(),
         OppdaterSnapshotCommand(
             snapshotClient = snapshotClient,
             snapshotDao = snapshotDao,
