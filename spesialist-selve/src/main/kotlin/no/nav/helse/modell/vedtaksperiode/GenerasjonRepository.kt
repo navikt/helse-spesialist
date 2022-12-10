@@ -11,6 +11,7 @@ internal interface GenerasjonRepository {
     fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID)
     fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID)
     fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID)
+    fun sisteFor(vedtaksperiodeId: UUID): Generasjon
 }
 
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
@@ -67,8 +68,10 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
         generasjon
             .forsøkOpprettNeste(hendelseId, dao::opprettFor)
             ?.loggOpprettet(vedtaksperiodeId)
-
     }
+
+    override fun sisteFor(vedtaksperiodeId: UUID) =
+        dao.finnSisteFor(vedtaksperiodeId) ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
 
     override fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID) {
         dao.finnSisteFor(vedtaksperiodeId) ?: return

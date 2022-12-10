@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
@@ -103,8 +105,29 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertUtbetaling(vedtaksperiodeId, gammel)
     }
 
+    @Test
+    fun `finner siste generasjon for en periode`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+
+        repository.opprettFørste(vedtaksperiodeId, hendelseId)
+        assertGenerasjon(vedtaksperiodeId, hendelseId)
+        assertDoesNotThrow {
+            repository.sisteFor(vedtaksperiodeId)
+        }
+    }
+
+    @Test
+    fun `kaster exception dersom vi ikke finner generasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+
+        assertThrows<IllegalStateException> {
+            repository.sisteFor(vedtaksperiodeId)
+        }
+    }
+
     private fun assertGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {
-        val generasjon = sessionOf(dataSource).use {session ->
+        val generasjon = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ?;"
 
