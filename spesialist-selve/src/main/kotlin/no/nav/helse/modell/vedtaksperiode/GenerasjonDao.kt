@@ -4,9 +4,42 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.varsel.Varsel
 import org.intellij.lang.annotations.Language
 
 class GenerasjonDao(private val dataSource: DataSource) {
+
+    internal fun finnSisteFor(vedtaksperiodeId: UUID): Generasjon? {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT id, unik_id, vedtaksperiode_id, låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC;"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map {
+                Generasjon(
+                    it.uuid("unik_id"),
+                    it.uuid("vedtaksperiode_id"),
+                    it.boolean("låst"),
+                    finnVarslerFor(it.long("id")).toSet()
+                )
+            }.asSingle)
+        }
+    }
+
+    private fun finnVarslerFor(generasjonRef: Long): List<Varsel> {
+        @Language("PostgreSQL")
+        val query = "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonRef).map {
+                Varsel(
+                    it.uuid("unik_id"),
+                    it.string("kode"),
+                    it.localDateTime("opprettet"),
+                    it.uuid("vedtaksperiode_id"),
+                    enumValueOf(it.string("status"))
+                )
+            }.asList)
+        }
+    }
 
     internal fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon? {
         @Language("PostgreSQL")
@@ -39,21 +72,6 @@ class GenerasjonDao(private val dataSource: DataSource) {
 
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(query, utbetalingId, vedtaksperiodeId).map {
-                Generasjon(
-                    it.uuid("unik_id"),
-                    it.uuid("vedtaksperiode_id"),
-                    it.boolean("låst"),
-                )
-            }.asSingle)
-        }
-    }
-
-    internal fun finnSisteFor(vedtaksperiodeId: UUID): Generasjon? {
-        @Language("PostgreSQL")
-        val query =
-            "SELECT unik_id, vedtaksperiode_id, låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC;"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map {
                 Generasjon(
                     it.uuid("unik_id"),
                     it.uuid("vedtaksperiode_id"),

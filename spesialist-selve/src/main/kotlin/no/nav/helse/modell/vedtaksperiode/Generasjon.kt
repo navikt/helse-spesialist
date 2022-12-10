@@ -3,16 +3,19 @@ package no.nav.helse.modell.vedtaksperiode
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.varselkodeformat
 import no.nav.helse.tellVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class Generasjon(
+internal class Generasjon(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val låst: Boolean,
+    varsler: Set<Varsel> = emptySet()
 ) {
+    private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")

@@ -1,10 +1,13 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import DatabaseIntegrationTest
+import java.time.LocalDateTime
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.modell.varsel.Varsel
+import no.nav.helse.modell.varsel.VarselDao
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
+    private val varselDao = VarselDao(dataSource)
 
     @Test
     fun `oppretter generasjon for vedtaksperiode`() {
@@ -73,6 +77,37 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
         generasjonDao.utbetalingFor(VEDTAKSPERIODE_ID, UTBETALING_ID)
         assertUtbetaling(VEDTAKSPERIODE_ID, null)
+    }
+
+    @Test
+    fun `generasjon hentes opp sammen med varsler`() {
+        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
+        val varselId = UUID.randomUUID()
+        val varselOpprettet = LocalDateTime.now()
+        val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)
+        varselDao.lagreVarsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID, generasjonId)
+        val generasjon = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
+        assertEquals(
+            Generasjon(
+                generasjonId,
+                VEDTAKSPERIODE_ID,
+                false,
+                setOf(
+                    Varsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID)
+                )
+            ),
+            generasjon
+        )
+    }
+
+    private fun generasjonIdFor(vedtaksperiodeId: UUID): UUID {
+        @Language("PostgreSQL")
+        val query =
+            "SELECT unik_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id"
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { it.uuid("unik_id") }.asList).single()
+        }
     }
 
     private fun assertLåst(vedtaksperiodeId: UUID, opprettetAvId: UUID, låstAvId: UUID) {

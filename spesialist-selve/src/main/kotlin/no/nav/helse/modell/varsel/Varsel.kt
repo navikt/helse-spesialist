@@ -3,6 +3,7 @@ package no.nav.helse.modell.varsel
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.rapids_rivers.asLocalDateTime
 
 internal class Varsel(
@@ -10,6 +11,7 @@ internal class Varsel(
     private val varselkode: String,
     private val opprettet: LocalDateTime,
     private val vedtaksperiodeId: UUID,
+    private var status: Status = AKTIV
 ) {
 
     internal enum class Status {
