@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.lagre
@@ -35,6 +36,7 @@ internal class NyeVarsler(
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
     override fun execute(context: CommandContext): Boolean {
+        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
         varsler.lagre(varselRepository, generasjonRepository)
         sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         return true
