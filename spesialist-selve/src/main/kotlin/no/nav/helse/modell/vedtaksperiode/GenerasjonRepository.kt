@@ -7,8 +7,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
-    fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID)
-    fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID)
+    fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID())
+    fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID())
     fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID)
     fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
@@ -41,7 +41,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     private val dao = GenerasjonDao(dataSource)
 
-    override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(
                 "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
@@ -49,11 +49,11 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
             return
         }
-        dao.opprettFor(vedtaksperiodeId, hendelseId)
+        dao.opprettFor(vedtaksperiodeId, hendelseId, id)
             .loggOpprettet(vedtaksperiodeId)
     }
 
-    override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID) {
+    override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) {
         val generasjon = dao.finnSisteFor(vedtaksperiodeId)
         if (generasjon == null) {
             sikkerlogg.info(
@@ -66,7 +66,7 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             return
         }
         generasjon
-            .forsøkOpprettNeste(hendelseId, dao::opprettFor)
+            .forsøkOpprettNeste(hendelseId, id, dao::opprettFor)
             ?.loggOpprettet(vedtaksperiodeId)
     }
 

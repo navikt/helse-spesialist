@@ -28,7 +28,8 @@ internal class Generasjon(
 
     internal fun forsøkOpprettNeste(
         hendelseId: UUID,
-        opprettBlock: (vedtaksperiodeId: UUID, hendelseId: UUID) -> Generasjon,
+        id: UUID,
+        opprettBlock: (vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) -> Generasjon,
     ): Generasjon? {
         if (!låst) {
             sikkerlogg.info(
@@ -38,7 +39,7 @@ internal class Generasjon(
             )
             return null
         }
-        return opprettBlock(vedtaksperiodeId, hendelseId)
+        return opprettBlock(vedtaksperiodeId, hendelseId, id)
     }
 
     internal fun lagreVarsel(

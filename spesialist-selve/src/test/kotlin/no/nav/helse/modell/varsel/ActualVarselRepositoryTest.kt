@@ -33,14 +33,14 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         definisjonId = UUID.randomUUID()
         vedtaksperiodeId = UUID.randomUUID()
         varselRepository.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
-        generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID())
+        generasjonId = UUID.randomUUID()
+        generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
         generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-        generasjonId = generasjonId(vedtaksperiodeId)
     }
 
     @Test
     fun `kan lagre varsel dersom det finnes en generasjon for perioden`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId(vedtaksperiodeId), "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
         assertAktiv(generasjonId, "EN_KODE")
     }
 
@@ -70,7 +70,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     fun `avvisning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
         generasjon.håndterNyttVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
         generasjon.håndterAvvist("EN_KODE", varselRepository)
-        assertEquals(AVVIST, statusFor(generasjonId(vedtaksperiodeId), "EN_KODE"))
+        assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
         assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
     }
 
@@ -121,6 +121,18 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
         varselRepository.deaktiverFor(vedtaksperiodeId, generasjonId, "EN_KODE", null)
         assertInaktiv(generasjonId, "EN_KODE")
+    }
+
+    @Test
+    fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
+        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        val nesteGenerasjonId = UUID.randomUUID()
+        generasjonRepository.låsFor(vedtaksperiodeId, UUID.randomUUID())
+        generasjonRepository.forsøkOpprett(vedtaksperiodeId, UUID.randomUUID(), nesteGenerasjonId)
+        varselRepository.lagreVarsel(UUID.randomUUID(), nesteGenerasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
+        varselRepository.deaktiverFor(vedtaksperiodeId, nesteGenerasjonId, "EN_KODE", null)
+        assertAktiv(generasjonId, "EN_KODE")
+        assertInaktiv(nesteGenerasjonId, "EN_KODE")
     }
 
     @Test

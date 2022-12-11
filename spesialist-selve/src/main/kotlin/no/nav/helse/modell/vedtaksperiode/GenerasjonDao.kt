@@ -59,16 +59,16 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun opprettFor(vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
+    internal fun opprettFor(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon {
         @Language("PostgreSQL")
         val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse) 
-            VALUES (?, ?)
+            INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) 
+            VALUES (?, ?, ?)
             RETURNING id, unik_id, vedtaksperiode_id, låst
             """
 
         return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, hendelseId).map(::toGenerasjon).asSingle)
+            session.run(queryOf(query, id, vedtaksperiodeId, hendelseId).map(::toGenerasjon).asSingle)
         }) { "Kunne ikke opprette ny vedtaksperiode generasjon" }
     }
 

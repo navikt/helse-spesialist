@@ -44,13 +44,23 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterVarsel(vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String, definisjonId: UUID) {
+    internal fun oppdaterVarsel(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String, definisjonId: UUID) {
         @Language("PostgreSQL")
         val query =
-            "UPDATE selve_varsel SET status = ?,status_endret_tidspunkt = ?,status_endret_ident = ?, definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = ?) WHERE vedtaksperiode_id = ? AND kode = ?;"
+            """
+                UPDATE selve_varsel 
+                SET 
+                    status = ?,
+                    status_endret_tidspunkt = ?,
+                    status_endret_ident = ?, 
+                    definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = ?) 
+                WHERE vedtaksperiode_id = ? 
+                AND generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) 
+                AND kode = ?;
+            """
 
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, status.name, LocalDateTime.now(), ident, definisjonId, vedtaksperiodeId, varselkode).asUpdate)
+            session.run(queryOf(query, status.name, LocalDateTime.now(), ident, definisjonId, vedtaksperiodeId, generasjonId, varselkode).asUpdate)
         }
     }
 

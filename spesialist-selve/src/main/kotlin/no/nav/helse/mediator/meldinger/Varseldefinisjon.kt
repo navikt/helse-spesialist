@@ -58,11 +58,12 @@ internal class Varseldefinisjon(
 
     fun oppdaterVarsel(
         vedtaksperiodeId: UUID,
+        generasjonId: UUID,
         status: Status,
         ident: String,
-        oppdaterBlock: (vedtaksperiodeId: UUID, varselkode: String, status: Status, ident: String, definisjonId: UUID) -> Unit,
+        oppdaterBlock: (vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String, definisjonId: UUID) -> Unit,
     ) {
-        oppdaterBlock(vedtaksperiodeId, varselkode, status, ident, this.id)
+        oppdaterBlock(vedtaksperiodeId, generasjonId, varselkode, status, ident, this.id)
     }
 
 

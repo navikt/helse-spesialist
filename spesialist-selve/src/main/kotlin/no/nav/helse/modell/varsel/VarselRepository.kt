@@ -37,18 +37,18 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
 
     override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, INAKTIV, "Spesialist", varselDao::oppdaterVarsel)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, INAKTIV, "Spesialist", varselDao::oppdaterVarsel)
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
     override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, GODKJENT, ident, varselDao::oppdaterVarsel)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, GODKJENT, ident, varselDao::oppdaterVarsel)
     }
 
     override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, AVVIST, ident, varselDao::oppdaterVarsel)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, AVVIST, ident, varselDao::oppdaterVarsel)
     }
 
     override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
