@@ -13,6 +13,8 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -31,7 +33,8 @@ internal class ÅpneGosysOppgaverCommandTest {
     private val dao = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val warningDao = mockk<WarningDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
-    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, varselRepository, VEDTAKPERIODE_ID)
+    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
+    private val command = ÅpneGosysOppgaverCommand(AKTØR_ID, dao, warningDao, varselRepository, generasjonRepository, VEDTAKPERIODE_ID)
     private lateinit var context: CommandContext
 
     @BeforeEach

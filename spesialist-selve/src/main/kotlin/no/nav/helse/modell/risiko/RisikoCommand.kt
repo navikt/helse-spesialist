@@ -10,6 +10,7 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
@@ -18,6 +19,7 @@ internal class RisikoCommand(
     private val risikovurderingDao: RisikovurderingDao,
     private val warningDao: WarningDao,
     private val varselRepository: VarselRepository,
+    private val generasjonRepository: GenerasjonRepository,
     private val organisasjonsnummer: String,
     private val førstegangsbehandling: Boolean
 ) : Command {

@@ -13,6 +13,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_BO_3
 import no.nav.helse.modell.varsel.Varselkode.SB_BO_4
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.spesialist.api.oppgave.BESLUTTEROPPGAVE_PREFIX
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.slf4j.LoggerFactory
@@ -22,7 +23,8 @@ internal class TrengerTotrinnsvurderingCommand(
     private val warningDao: WarningDao,
     private val oppgaveMediator: OppgaveMediator,
     private val overstyringDao: OverstyringDao,
-    private val varselRepository: VarselRepository
+    private val varselRepository: VarselRepository,
+    private val generasjonRepository: GenerasjonRepository
 ) : Command {
 
     private companion object {

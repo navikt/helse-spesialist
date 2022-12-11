@@ -10,6 +10,7 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_IK_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
@@ -17,6 +18,7 @@ internal class VergemålCommand(
     private val vergemålDao: VergemålDao,
     private val warningDao: WarningDao,
     private val varselRepository: VarselRepository,
+    private val generasjonRepository: GenerasjonRepository,
     private val vedtaksperiodeId: UUID
 ) : Command {
 

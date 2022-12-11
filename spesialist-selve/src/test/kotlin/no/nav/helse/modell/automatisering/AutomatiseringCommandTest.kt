@@ -35,6 +35,7 @@ internal class AutomatiseringCommandTest {
                 vedtakDao = mockk(relaxed = true),
                 opptegnelseDao = mockk(relaxed = true),
                 varselRepository = mockk(relaxed = true),
+                generasjonRepository = mockk(relaxed = true)
             ),
         )
 

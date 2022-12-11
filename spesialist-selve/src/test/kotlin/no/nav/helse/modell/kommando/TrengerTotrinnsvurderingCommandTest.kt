@@ -11,6 +11,7 @@ import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.spesialist.api.overstyring.OverstyringType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,6 +29,7 @@ internal class TrengerTotrinnsvurderingCommandTest {
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
+    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
     private lateinit var context: CommandContext
 
     private val command = TrengerTotrinnsvurderingCommand(
@@ -35,7 +37,8 @@ internal class TrengerTotrinnsvurderingCommandTest {
         warningDao = warningDao,
         oppgaveMediator = oppgaveMediator,
         overstyringDao = overstyringDao,
-        varselRepository = varselRepository
+        varselRepository = varselRepository,
+        generasjonRepository = generasjonRepository
     )
 
     @BeforeEach

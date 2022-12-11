@@ -46,6 +46,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
 import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålCommand
@@ -83,6 +84,7 @@ internal class Godkjenningsbehov(
     vedtakDao: VedtakDao,
     warningDao: WarningDao,
     varselRepository: VarselRepository,
+    generasjonRepository: GenerasjonRepository,
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
@@ -174,6 +176,7 @@ internal class Godkjenningsbehov(
             vergemålDao = vergemålDao,
             warningDao = warningDao,
             varselRepository = varselRepository,
+            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = vedtaksperiodeId
         ),
         DigitalKontaktinformasjonCommand(
@@ -184,6 +187,7 @@ internal class Godkjenningsbehov(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
             varselRepository = varselRepository,
+            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = vedtaksperiodeId
         ),
         RisikoCommand(
@@ -191,6 +195,7 @@ internal class Godkjenningsbehov(
             risikovurderingDao = risikovurderingDao,
             warningDao = warningDao,
             varselRepository = varselRepository,
+            generasjonRepository = generasjonRepository,
             organisasjonsnummer = organisasjonsnummer,
             førstegangsbehandling = førstegangsbehandling
         ),
@@ -231,7 +236,8 @@ internal class Godkjenningsbehov(
             warningDao = warningDao,
             oppgaveMediator = oppgaveMediator,
             overstyringDao = overstyringDao,
-            varselRepository = varselRepository
+            varselRepository = varselRepository,
+            generasjonRepository = generasjonRepository
         ),
         PersisterPeriodehistorikkCommand(
             vedtaksperiodeId = vedtaksperiodeId,

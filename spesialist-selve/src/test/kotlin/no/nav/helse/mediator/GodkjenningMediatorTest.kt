@@ -3,25 +3,28 @@ package no.nav.helse.mediator
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
-import no.nav.helse.modell.varsel.VarselRepository
 
 internal class GodkjenningMediatorTest {
     private lateinit var context: CommandContext
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
+    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
     private val mediator = GodkjenningMediator(
         warningDao = mockk(relaxed = true),
         vedtakDao = mockk(relaxed = true),
         opptegnelseDao = opptegnelseDao,
         varselRepository = varselRepository,
+        generasjonRepository = generasjonRepository,
     )
 
     @BeforeEach

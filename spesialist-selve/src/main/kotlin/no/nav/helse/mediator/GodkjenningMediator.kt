@@ -10,6 +10,7 @@ import no.nav.helse.modell.VedtakDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload.Companion.lagre
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
@@ -19,7 +20,8 @@ internal class GodkjenningMediator(
     private val warningDao: WarningDao,
     private val vedtakDao: VedtakDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val varselRepository: VarselRepository
+    private val varselRepository: VarselRepository,
+    private val generasjonRepository: GenerasjonRepository
 ) {
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,

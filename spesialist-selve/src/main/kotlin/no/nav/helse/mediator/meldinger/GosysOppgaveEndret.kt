@@ -13,14 +13,15 @@ import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
+import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -33,6 +34,7 @@ internal class GosysOppgaveEndret(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     warningDao: WarningDao,
     varselRepository: VarselRepository,
+    generasjonRepository: GenerasjonRepository,
     automatisering: Automatisering,
     godkjenningMediator: GodkjenningMediator,
     oppgaveMediator: OppgaveMediator,
@@ -48,6 +50,7 @@ internal class GosysOppgaveEndret(
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             warningDao = warningDao,
             varselRepository = varselRepository,
+            generasjonRepository = generasjonRepository,
             vedtaksperiodeId = gosysOppgaveEndretCommandData.vedtaksperiodeId
         ),
         SjekkAtOppgaveFortsattErÅpenCommand(fødselsnummer = fødselsnummer, oppgaveDao = oppgaveDao),

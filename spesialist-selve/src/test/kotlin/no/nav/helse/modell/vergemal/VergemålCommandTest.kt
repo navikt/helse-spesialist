@@ -13,6 +13,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,6 +29,7 @@ class VergemålCommandTest {
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
+    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
     private val warningMock = WarningMock()
     private val forventetFullmaktWarnings = listOf(
         Warning(
@@ -41,6 +43,7 @@ class VergemålCommandTest {
         vergemålDao = vergemålDao,
         warningDao = warningMock.warningDao,
         varselRepository = varselRepository,
+        generasjonRepository = generasjonRepository,
         vedtaksperiodeId = VEDTAKSPERIODE_ID
     )
     private lateinit var context: CommandContext

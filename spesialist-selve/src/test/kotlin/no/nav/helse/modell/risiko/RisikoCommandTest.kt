@@ -9,11 +9,12 @@ import java.util.UUID
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
+import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -23,13 +24,14 @@ import org.junit.jupiter.api.Test
 
 internal class RisikoCommandTest {
 
+    private val risikovurderingDao = mockk<RisikovurderingDao>()
+    private val warningDao = mockk<WarningDao>()
+    private val varselRepository = mockk<VarselRepository>()
+    private val generasjonRepository = mockk<GenerasjonRepository>()
+
     private companion object {
         private const val ORGNUMMER = "123456789"
         private val VEDTAKSPERIODE_ID = UUID.randomUUID()
-
-        private val RISIKOVURDERING_DAO = mockk<RisikovurderingDao>()
-        private val WARNING_DAO = mockk<WarningDao>()
-        private val VARSEL_REPOSITORY = mockk<VarselRepository>()
 
         private val meldingsfabrikk = Testmeldingfabrikk("foo", "bar")
         private fun risikovurderingLøsning(funn: List<Risikofunn>) = objectMapper.readTree(meldingsfabrikk.lagRisikovurderingløsning(
@@ -46,7 +48,7 @@ internal class RisikoCommandTest {
     fun setup() {
         context = CommandContext(UUID.randomUUID())
         clearAllMocks()
-        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns null
+        every { risikovurderingDao.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns null
     }
 
     @Test
@@ -61,7 +63,7 @@ internal class RisikoCommandTest {
 
     @Test
     fun `Går videre hvis risikovurderingen for vedtaksperioden allerede er gjort`() {
-        every { RISIKOVURDERING_DAO.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns mockk()
+        every { risikovurderingDao.hentRisikovurdering(VEDTAKSPERIODE_ID) } returns mockk()
         val risikoCommand = risikoCommand()
         risikoCommand.assertTrue()
         assertFalse(context.harBehov())
@@ -69,7 +71,7 @@ internal class RisikoCommandTest {
 
     @Test
     fun `Om vi har fått løsning på en rett vedtaksperiode lagres den`() {
-        every { RISIKOVURDERING_DAO.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) } returns
+        every { risikovurderingDao.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) } returns
         context.add(
             Risikovurderingløsning(
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -81,7 +83,7 @@ internal class RisikoCommandTest {
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
         assertFalse(context.harBehov())
-        verify(exactly = 1) { RISIKOVURDERING_DAO.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) }
+        verify(exactly = 1) { risikovurderingDao.lagre(VEDTAKSPERIODE_ID, any(), any(), any(), any()) }
     }
 
     @Test
@@ -114,9 +116,9 @@ internal class RisikoCommandTest {
 
     private fun risikoCommand(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        risikovurderingDao: RisikovurderingDao = RISIKOVURDERING_DAO,
-        warningDao: WarningDao = WARNING_DAO,
-        varselRepository: VarselRepository = VARSEL_REPOSITORY,
+        risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
+        warningDao: WarningDao = this.warningDao,
+        varselRepository: VarselRepository = this.varselRepository,
         organisasjonsnummer: String = ORGNUMMER,
         førstegangsbehandling: Boolean = true
     ) = RisikoCommand(
@@ -124,6 +126,7 @@ internal class RisikoCommandTest {
         risikovurderingDao = risikovurderingDao,
         warningDao = warningDao,
         varselRepository = varselRepository,
+        generasjonRepository = generasjonRepository,
         organisasjonsnummer = organisasjonsnummer,
         førstegangsbehandling = førstegangsbehandling
     )

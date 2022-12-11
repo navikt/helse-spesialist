@@ -9,6 +9,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.UtbetalingsgodkjenningMessage
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -30,6 +31,7 @@ internal class UtbetalingsgodkjenningCommandTest {
     private val behov = UtbetalingsgodkjenningMessage("""{ "@event_name": "behov" }""")
     private val dao = mockk<HendelseDao>()
     private val varselRepository = mockk<VarselRepository>(relaxed = true)
+    private val generasjonRepository = mockk<GenerasjonRepository>(relaxed = true)
     private lateinit var commandContext: CommandContext
     private lateinit var command: UtbetalingsgodkjenningCommand
 
@@ -48,7 +50,7 @@ internal class UtbetalingsgodkjenningCommandTest {
             kommentar = null,
             godkjenningsbehovhendelseId = GODKJENNINGSBEHOV_ID,
             hendelseDao = dao,
-            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), varselRepository),
+            godkjenningMediator = GodkjenningMediator(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), varselRepository, generasjonRepository),
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer
         )

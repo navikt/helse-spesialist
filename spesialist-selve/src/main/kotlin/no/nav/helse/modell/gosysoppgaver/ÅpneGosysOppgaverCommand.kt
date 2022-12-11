@@ -1,18 +1,20 @@
 package no.nav.helse.modell.gosysoppgaver
 
+import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import org.slf4j.LoggerFactory
-import java.util.*
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import org.slf4j.LoggerFactory
 
 internal class ÅpneGosysOppgaverCommand(
     private val aktørId: String,
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     private val warningDao: WarningDao,
     private val varselRepository: VarselRepository,
+    private val generasjonRepository: GenerasjonRepository,
     private val vedtaksperiodeId: UUID
 ) : Command {
 
