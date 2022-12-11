@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
@@ -12,6 +13,7 @@ import no.nav.helse.modell.varsel.Varselkode.SB_EX_1
 import no.nav.helse.modell.varsel.Varselkode.SB_EX_3
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -39,33 +41,33 @@ internal class ÅpneGosysOppgaverløsning(
         )
     }
 
-    internal fun evaluer(warningDao: WarningDao, varselRepository: VarselRepository, vedtaksperiodeId: UUID) {
-        warningsForOppslagFeilet(warningDao, varselRepository, vedtaksperiodeId)
-        warningsForÅpneGosysOppgaver(warningDao, varselRepository, vedtaksperiodeId)
+    internal fun evaluer(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
+        warningsForOppslagFeilet(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId)
+        warningsForÅpneGosysOppgaver(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId)
     }
 
-    private fun warningsForOppslagFeilet(warningDao: WarningDao, varselRepository: VarselRepository, vedtaksperiodeId: UUID) {
+    private fun warningsForOppslagFeilet(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
         val melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"
 
         if (oppslagFeilet) {
             leggTilWarning(warningDao, vedtaksperiodeId, melding)
-            leggTilVarsel(varselRepository, vedtaksperiodeId, SB_EX_3)
+            leggTilVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_3)
         } else {
             setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
-            deaktiverVarsel(varselRepository, vedtaksperiodeId, SB_EX_3)
+            deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_3)
         }
     }
 
-    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, vedtaksperiodeId: UUID) {
+    private fun warningsForÅpneGosysOppgaver(warningDao: WarningDao, varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID) {
         val melding = "Det finnes åpne oppgaver på sykepenger i Gosys"
 
         antall?.also {
             if (it > 0) {
                 leggTilWarning(warningDao, vedtaksperiodeId, melding)
-                leggTilVarsel(varselRepository, vedtaksperiodeId, SB_EX_1)
+                leggTilVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
             } else if (it == 0) {
                 setEksisterendeWarningInaktive(warningDao, vedtaksperiodeId, melding)
-                deaktiverVarsel(varselRepository, vedtaksperiodeId, SB_EX_1)
+                deaktiverVarsel(varselRepository, generasjonRepository, vedtaksperiodeId, SB_EX_1)
             }
         }
     }
@@ -86,12 +88,16 @@ internal class ÅpneGosysOppgaverløsning(
         }
     }
 
-    private fun leggTilVarsel(varselRepository: VarselRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
-        varselkode.nyttVarsel(vedtaksperiodeId, varselRepository)
+    private fun leggTilVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
+        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return
+        val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+        varselkode.nyttVarsel(generasjon, varselRepository)
     }
 
-    private fun deaktiverVarsel(varselRepository: VarselRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
-        varselkode.deaktiverFor(vedtaksperiodeId, varselRepository)
+    private fun deaktiverVarsel(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository, vedtaksperiodeId: UUID, varselkode: Varselkode) {
+        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return
+        val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+        varselkode.deaktiverFor(generasjon, varselRepository)
     }
 
     internal class ÅpneGosysOppgaverRiver(

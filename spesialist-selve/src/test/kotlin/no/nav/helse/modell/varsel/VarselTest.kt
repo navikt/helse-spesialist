@@ -1,25 +1,134 @@
 package no.nav.helse.modell.varsel
 
-import io.mockk.mockk
-import io.mockk.verify
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VarselTest {
 
-    private val varselRepositoryMock = mockk<VarselRepository>(relaxed = true)
+    private val varsler = mutableListOf<String>()
+    private val godkjenteVarsler = mutableListOf<String>()
+    private val avvisteVarsler = mutableListOf<String>()
+    private val deaktiverteVarsler = mutableListOf<String>()
+    val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), false)
+
+    @BeforeEach
+    internal fun beforeEach() {
+        varsler.clear()
+        godkjenteVarsler.clear()
+        avvisteVarsler.clear()
+        deaktiverteVarsler.clear()
+    }
 
     @Test
     fun lagre() {
-        val varselId = UUID.randomUUID()
-        val opprettet = LocalDateTime.now()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val varsel = Varsel(varselId, "EN_KODE", opprettet, vedtaksperiodeId)
-        varsel.lagre(varselRepositoryMock)
-        verify(exactly = 1) { varselRepositoryMock.lagreVarsel(varselId, "EN_KODE", opprettet, vedtaksperiodeId) }
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        varsel.lagre(generasjon, varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals("EN_KODE", varsler.single())
+    }
+
+    @Test
+    fun `kan godkjenne aktivt varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        varsel.lagre(generasjon, varselRepository)
+        varsel.godkjennFor(UUID.randomUUID(), "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, godkjenteVarsler.size)
+    }
+
+    @Test
+    fun `kan avvise aktivt varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        varsel.lagre(generasjon, varselRepository)
+        varsel.avvisFor(UUID.randomUUID(), "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, avvisteVarsler.size)
+    }
+
+    @Test
+    fun `kan deaktivere aktivt varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        varsel.lagre(generasjon, varselRepository)
+        varsel.deaktiverFor(UUID.randomUUID(), varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, deaktiverteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke avvise godkjent varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, godkjenteVarsler.size)
+        assertEquals(0, avvisteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke deaktivere godkjent varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, godkjenteVarsler.size)
+        assertEquals(0, deaktiverteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke godkjenne avvist varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, avvisteVarsler.size)
+        assertEquals(0, godkjenteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke deaktivere avvist varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, avvisteVarsler.size)
+        assertEquals(0, deaktiverteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke godkjenne deaktivert varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        varsel.godkjennFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, deaktiverteVarsler.size)
+        assertEquals(0, godkjenteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke avvise deaktivert varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        varsel.avvisFor(enGenerasjonId, "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, deaktiverteVarsler.size)
+        assertEquals(0, avvisteVarsler.size)
     }
 
     @Test
@@ -39,5 +148,58 @@ internal class VarselTest {
         val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
         assertNotEquals(Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()), varsel)
         assertNotEquals(Varsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), UUID.randomUUID()).hashCode(), varsel.hashCode())
+    }
+
+    private val varselRepository = object : VarselRepository {
+        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
+            TODO("Not yet implemented")
+        }
+
+        override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
+            deaktiverteVarsler.add(varselkode)
+        }
+
+        override fun godkjennFor(
+            vedtaksperiodeId: UUID,
+            generasjonId: UUID,
+            varselkode: String,
+            ident: String,
+            definisjonId: UUID?,
+        ) {
+            godkjenteVarsler.add(varselkode)
+        }
+
+        override fun avvisFor(
+            vedtaksperiodeId: UUID,
+            generasjonId: UUID,
+            varselkode: String,
+            ident: String,
+            definisjonId: UUID?,
+        ) {
+            avvisteVarsler.add(varselkode)
+        }
+
+        override fun lagreVarsel(
+            id: UUID,
+            generasjonId: UUID,
+            varselkode: String,
+            opprettet: LocalDateTime,
+            vedtaksperiodeId: UUID,
+        ) {
+            varsler.add(varselkode)
+        }
+
+        override fun lagreDefinisjon(
+            id: UUID,
+            varselkode: String,
+            tittel: String,
+            forklaring: String?,
+            handling: String?,
+            avviklet: Boolean,
+            opprettet: LocalDateTime,
+        ) {
+            TODO("Not yet implemented")
+        }
+
     }
 }

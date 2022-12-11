@@ -2,6 +2,7 @@ package no.nav.helse.modell.risiko
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
@@ -59,8 +60,11 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
-            varselkode().nyttVarsel(vedtaksperiodeId, varselRepository)
             tellWarning(melding)
+            if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
+                val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+                varselkode().nyttVarsel(generasjon, varselRepository)
+            }
         }
         if (harFaresignalerFunn()) {
             val melding = "Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger."
@@ -71,7 +75,10 @@ internal class RisikoCommand(
                     opprettet = LocalDateTime.now(),
                 )
             )
-            SB_RV_1.nyttVarsel(vedtaksperiodeId, varselRepository)
+            if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
+                val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+                SB_RV_1.nyttVarsel(generasjon, varselRepository)
+            }
             tellWarning(melding)
         }
     }

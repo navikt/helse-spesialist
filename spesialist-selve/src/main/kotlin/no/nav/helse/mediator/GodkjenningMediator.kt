@@ -33,7 +33,10 @@ internal class GodkjenningMediator(
         godkjenttidspunkt: LocalDateTime
     ) {
         behov.godkjennManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt)
-        if (Toggle.VedtaksperiodeGenerasjoner.enabled) varselRepository.godkjennAlleFor(vedtaksperiodeId, saksbehandlerIdent)
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
+            val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+            sisteGenerasjon.håndterGodkjent(saksbehandlerIdent, varselRepository)
+        }
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }
@@ -51,7 +54,10 @@ internal class GodkjenningMediator(
         kommentar: String?
     ) {
         behov.avvisManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
-        if (Toggle.VedtaksperiodeGenerasjoner.enabled) varselRepository.avvisAlleFor(vedtaksperiodeId, saksbehandlerIdent)
+        if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
+            val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+            sisteGenerasjon.håndterAvvist(saksbehandlerIdent, varselRepository)
+        }
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
     }

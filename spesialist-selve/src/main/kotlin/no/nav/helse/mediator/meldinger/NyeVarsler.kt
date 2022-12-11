@@ -9,6 +9,7 @@ import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.lagre
 import no.nav.helse.modell.varsel.Varsel.Companion.varsler
 import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -24,6 +25,7 @@ internal class NyeVarsler(
     private val varsler: List<Varsel>,
     private val json: String,
     private val varselRepository: VarselRepository,
+    private val generasjonRepository: GenerasjonRepository,
 ) : Hendelse {
 
     private companion object {
@@ -33,7 +35,7 @@ internal class NyeVarsler(
     override fun fødselsnummer(): String = fødselsnummer
     override fun toJson(): String = json
     override fun execute(context: CommandContext): Boolean {
-        varsler.lagre(varselRepository)
+        varsler.lagre(varselRepository, generasjonRepository)
         sikkerlogg.info("Lagrer ${varsler.size} varsler for {}", keyValue("fødselsnummer", fødselsnummer))
         return true
     }

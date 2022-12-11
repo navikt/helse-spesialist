@@ -2,6 +2,7 @@ package no.nav.helse.modell.kommando
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.overstyring.OverstyringDao
@@ -61,14 +62,16 @@ internal class TrengerTotrinnsvurderingCommand(
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
             oppgaveMediator.alleUlagredeOppgaverTilTotrinnsvurdering()
 
-            varselkoder(overstyringer, harMedlemskapsvarsel).forEach {
-                it.nyttVarsel(vedtaksperiodeId, varselRepository)
-            }
             warningDao.leggTilWarning(vedtaksperiodeId, Warning(
                 melding = getWarningtekst(overstyringer, harMedlemskapsvarsel),
                 kilde = WarningKilde.Spesialist,
                 opprettet = LocalDateTime.now()
             ))
+            if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
+            val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+            varselkoder(overstyringer, harMedlemskapsvarsel).forEach {
+                it.nyttVarsel(generasjon, varselRepository)
+            }
         }
 
         return true

@@ -34,7 +34,7 @@ internal class ÅpneGosysOppgaverCommand(
             return false
         }
         løsning.lagre(åpneGosysOppgaverDao)
-        løsning.evaluer(warningDao, varselRepository, vedtaksperiodeId)
+        løsning.evaluer(warningDao, varselRepository, generasjonRepository, vedtaksperiodeId)
         return true
     }
 }

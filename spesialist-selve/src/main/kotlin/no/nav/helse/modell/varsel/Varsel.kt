@@ -3,8 +3,15 @@ package no.nav.helse.modell.varsel
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
+import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
+import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import org.slf4j.LoggerFactory
 
 internal class Varsel(
     private val id: UUID,
@@ -21,8 +28,41 @@ internal class Varsel(
         AVVIST
     }
 
-    internal fun lagre(varselRepository: VarselRepository) {
-        varselRepository.lagreVarsel(id, varselkode, opprettet, vedtaksperiodeId)
+    internal fun lagre(generasjon: Generasjon, varselRepository: VarselRepository) {
+        generasjon.håndterNyttVarsel(id, varselkode, opprettet, varselRepository)
+    }
+
+    internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+        if (status != AKTIV) return sikkerlogg.info(
+            "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV",
+            keyValue("varselkode", varselkode),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("generasjonId", generasjonId)
+        )
+        status = GODKJENT
+        varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
+    }
+
+    internal fun deaktiverFor(generasjonId: UUID, varselRepository: VarselRepository) {
+        if (status != AKTIV) return sikkerlogg.info(
+            "Deaktiverer ikke varsel med {}, {}, {} som ikke har status AKTIV",
+            keyValue("varselkode", varselkode),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("generasjonId", generasjonId)
+        )
+        status = INAKTIV
+        varselRepository.deaktiverFor(vedtaksperiodeId, generasjonId, varselkode, null)
+    }
+
+    internal fun avvisFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+        if (status != AKTIV) return sikkerlogg.info(
+            "Avviser ikke varsel med {}, {}, {} som ikke har status AKTIV",
+            keyValue("varselkode", varselkode),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("generasjonId", generasjonId)
+        )
+        status = AVVIST
+        varselRepository.avvisFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
     }
 
     override fun equals(other: Any?): Boolean =
@@ -41,17 +81,34 @@ internal class Varsel(
         return result
     }
 
-    internal fun godkjennHvisAktiv(vedtaksperiodeId: UUID, ident: String, varselRepository: VarselRepository) {
-        varselRepository.godkjennFor(vedtaksperiodeId, varselkode, ident, null)
-    }
-
-    internal fun avvisHvisAktiv(vedtaksperiodeId: UUID, ident: String, varselRepository: VarselRepository) {
-        varselRepository.avvisFor(vedtaksperiodeId, varselkode, ident, null)
-    }
-
     internal companion object {
-        internal fun List<Varsel>.lagre(varselRepository: VarselRepository) {
-            forEach { it.lagre(varselRepository) }
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun List<Varsel>.lagre(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository) {
+            groupBy { it.vedtaksperiodeId }.forEach { (vedtaksperiodeId, varsler) ->
+                val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+                varsler.lagre(generasjon, varselRepository)
+            }
+        }
+
+        private fun List<Varsel>.lagre(generasjon: Generasjon, varselRepository: VarselRepository) {
+            forEach { it.lagre(generasjon, varselRepository) }
+        }
+
+        internal fun List<Varsel>.godkjennFor(generasjonId: UUID, varselkode: String, ident: String, varselRepository: VarselRepository) {
+            find { it.varselkode == varselkode }?.godkjennFor(generasjonId, ident, varselRepository)
+        }
+
+        internal fun List<Varsel>.deaktiverFor(generasjonId: UUID, varselkode: String, varselRepository: VarselRepository) {
+            find { it.varselkode == varselkode }?.deaktiverFor(generasjonId, varselRepository)
+        }
+
+        internal fun List<Varsel>.godkjennAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+            forEach { it.godkjennFor(generasjonId, ident, varselRepository) }
+        }
+
+        internal fun List<Varsel>.avvisAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+            forEach { it.avvisFor(generasjonId, ident, varselRepository) }
         }
 
         internal fun JsonNode.varsler(): List<Varsel> {

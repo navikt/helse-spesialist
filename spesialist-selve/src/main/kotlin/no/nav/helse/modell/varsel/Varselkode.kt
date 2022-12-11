@@ -2,6 +2,7 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.vedtaksperiode.Generasjon
 
 // Alle Varselkoder må følge formatet
 internal const val varselkodeformat = "SB_\\D{2}_\\d{1,3}"
@@ -34,12 +35,12 @@ enum class Varselkode(
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    internal fun nyttVarsel(vedtaksperiodeId: UUID, varselRepository: VarselRepository) {
-        varselRepository.lagreVarsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
+    internal fun nyttVarsel(generasjon: Generasjon, varselRepository: VarselRepository) {
+        generasjon.håndterNyttVarsel(UUID.randomUUID(), this.name, LocalDateTime.now(), varselRepository)
     }
 
-    internal fun deaktiverFor(vedtaksperiodeId: UUID, varselRepository: VarselRepository) {
-        varselRepository.deaktiverFor(vedtaksperiodeId, this.name, null)
+    internal fun deaktiverFor(generasjon: Generasjon, varselRepository: VarselRepository) {
+        generasjon.håndterDeaktivertVarsel(this.name, varselRepository)
     }
 
     override fun toString() = "${this.name}: $varseltekst"
