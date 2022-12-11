@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.util.UUID
 import javax.sql.DataSource
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.varsel.Varsel
@@ -14,30 +15,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query =
             "SELECT id, unik_id, vedtaksperiode_id, låst FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC;"
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map {
-                Generasjon(
-                    it.uuid("unik_id"),
-                    it.uuid("vedtaksperiode_id"),
-                    it.boolean("låst"),
-                    finnVarslerFor(it.long("id")).toSet()
-                )
-            }.asSingle)
-        }
-    }
-
-    private fun finnVarslerFor(generasjonRef: Long): List<Varsel> {
-        @Language("PostgreSQL")
-        val query = "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, generasjonRef).map {
-                Varsel(
-                    it.uuid("unik_id"),
-                    it.string("kode"),
-                    it.localDateTime("opprettet"),
-                    it.uuid("vedtaksperiode_id"),
-                    enumValueOf(it.string("status"))
-                )
-            }.asList)
+            session.run(queryOf(query, vedtaksperiodeId).map(::toGenerasjon).asSingle)
         }
     }
 
@@ -86,17 +64,36 @@ class GenerasjonDao(private val dataSource: DataSource) {
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon (vedtaksperiode_id, opprettet_av_hendelse) 
             VALUES (?, ?)
-            RETURNING unik_id, vedtaksperiode_id, låst;
+            RETURNING id, unik_id, vedtaksperiode_id, låst
             """
 
         return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId, hendelseId).map {
-                Generasjon(
-                    it.uuid("unik_id"),
-                    it.uuid("vedtaksperiode_id"),
-                    it.boolean("låst"),
-                )
-            }.asSingle)
+            session.run(queryOf(query, vedtaksperiodeId, hendelseId).map(::toGenerasjon).asSingle)
         }) { "Kunne ikke opprette ny vedtaksperiode generasjon" }
+    }
+
+    private fun toGenerasjon(row: Row): Generasjon {
+        return Generasjon(
+            row.uuid("unik_id"),
+            row.uuid("vedtaksperiode_id"),
+            row.boolean("låst"),
+            varslerFor(row.long("id")).toSet()
+        )
+    }
+
+    private fun varslerFor(generasjonRef: Long): List<Varsel> {
+        @Language("PostgreSQL")
+        val query = "SELECT unik_id, vedtaksperiode_id, kode, opprettet, status FROM selve_varsel WHERE generasjon_ref = ?"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonRef).map {
+                Varsel(
+                    it.uuid("unik_id"),
+                    it.string("kode"),
+                    it.localDateTime("opprettet"),
+                    it.uuid("vedtaksperiode_id"),
+                    enumValueOf(it.string("status"))
+                )
+            }.asList)
+        }
     }
 }
