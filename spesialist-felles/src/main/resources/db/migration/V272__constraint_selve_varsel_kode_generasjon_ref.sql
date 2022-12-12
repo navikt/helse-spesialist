@@ -1,0 +1,1 @@
+ALTER TABLE selve_varsel ADD UNIQUE (generasjon_ref, kode);
