@@ -15,6 +15,15 @@ internal class Utbetaling(
         internal fun List<Utbetaling>.sortert(): List<Utbetaling> {
             return sortedBy { it.opprettet }
         }
+
+        internal fun List<Utbetaling>.fjernGammelMoro(): List<Utbetaling> {
+            val kopi = toMutableList()
+            // Fjerner alle gamle utbetalinger som ikke ble utbetalt og som skulle ha vært forkastet men ikke har blitt det
+            kopi.removeAll {
+                it.status == "IKKE_UTBETALT" && indexOf(it) != lastIndex
+            }
+            return kopi
+        }
     }
 
     internal fun lagGenerasjon(

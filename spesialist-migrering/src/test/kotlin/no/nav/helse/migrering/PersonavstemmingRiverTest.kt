@@ -105,7 +105,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         assertGenerasjoner(1.vedtaksperiode, 1, 2)
         assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "GODKJENT", 2.januar, "EN_IDENT")
         assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1","GODKJENT", 3.januar, "EN_IDENT")
-        assertVarselPåGenerasjon(1.vedtaksperiode, 2, "RV_VV_1","AKTIV", 4.januar, null)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 2, "RV_VV_1","AKTIV", 4.januar, null, false)
     }
 
     @Test
@@ -122,7 +122,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 1, 1)
         assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "GODKJENT", 2.januar, "EN_IDENT")
-        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1", "AKTIV", 3.januar, null)
+        assertVarselPåGenerasjon(1.vedtaksperiode, 1, "RV_VV_1", "AKTIV", 3.januar, null, false)
     }
 
     @Test
@@ -168,7 +168,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         testRapid.sendTestMessage(testevent())
         assertGenerasjoner(1.vedtaksperiode, 0, 1)
-        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "INAKTIV", 2.januar, "Spesialist")
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "INAKTIV", 2.januar, "Spesialist", false)
     }
 
     @Test
@@ -205,6 +205,71 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         assertGenerasjoner(1.vedtaksperiode, 0, 1)
     }
 
+    @Test
+    fun `lager ikke generasjoner av utbetalinger som ikke er siste utbetaling og har status IKKE_UTBETALT - Siste er ikke utbetalt`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, dato = 2.januar),
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 1, 0)
+    }
+
+    @Test
+    fun `lager ikke generasjoner av utbetalinger som ikke er siste utbetaling og har status IKKE_UTBETALT - Siste er utbetalt`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+                nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar),
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 0, 1)
+    }
+
+    @Test
+    fun `lager generasjoner av utbetalinger som kun har én utbetaling med status IKKE_UTBETALT`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertGenerasjoner(1.vedtaksperiode, 1, 0)
+    }
+
+    @Test
+    fun `Lagrer ikke varsel _med_ referanse til definisjon dersom varselet er aktivt`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+            )
+        } medSpleisVarsler {
+            listOf(
+                "Arbeidsgiver er ikke registrert i Aa-registeret." to 1.januar,
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_VV_1", "AKTIV", 1.januar, null, harDefinisjon = false)
+    }
+
+    @Test
+    fun `Lagrer ikke varsel _med_ referanse til definisjon dersom varselet er inaktivt`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+            )
+        } medSpesialistVarsler {
+            listOf(
+                Triple("Registert fullmakt på personen.", 1.januar, true),
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "INAKTIV", 1.januar, "Spesialist", harDefinisjon = false)
+    }
+
     private infix fun Vedtaksperiode.medEksisterendeGenerasjon(låst: Boolean): Vedtaksperiode {
         @Language("PostgreSQL")
         val query =
@@ -238,24 +303,24 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
 
         private val varsler: MutableList<Testvarsel> = mutableListOf()
 
-        internal fun id() = id
+        fun id() = id
 
-        internal fun opprettet() = opprettet
-        internal fun oppdatert() = oppdatert
+        fun opprettet() = opprettet
+        fun oppdatert() = oppdatert
 
-        internal fun oppdatert(oppdatert: LocalDateTime) {
+        fun oppdatert(oppdatert: LocalDateTime) {
             this.oppdatert = oppdatert
         }
 
-        internal fun tilstand(tilstand: String) {
+        fun tilstand(tilstand: String) {
             this.tilstand = tilstand
         }
 
-        internal fun utbetalinger(utbetalingIder: List<UUID>) {
+        fun utbetalinger(utbetalingIder: List<UUID>) {
             utbetalinger.addAll(utbetalingIder)
         }
 
-        internal fun varsler(varsler: List<Pair<String, LocalDate>>) {
+        fun varsler(varsler: List<Pair<String, LocalDate>>) {
             varsler.map { (tekst, dato) ->
                 Testvarsel(id, tekst, dato)
             }.also {
@@ -263,9 +328,9 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
             }
         }
 
-        internal fun varsler(): List<Varsel> = varsler.map { it.varsel() }
+        fun varsler(): List<Varsel> = varsler.map { it.varsel() }
 
-        internal fun toJson(): String {
+        fun toJson(): String {
             return mapOf(
                 "id" to id,
                 "tilstand" to tilstand,
@@ -285,7 +350,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     ) {
         private val tidspunkt = dato.atTime(12, 0, 0)
 
-        internal fun varsel(): Varsel {
+        fun varsel(): Varsel {
             return Varsel(vedtaksperiodeId, tekst, tidspunkt, UUID.randomUUID(), null)
         }
     }
@@ -301,9 +366,9 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
             "automatiskBehandling" to false,
             "godkjent" to godkjent,
         ) else null
-        internal fun id() = id
+        fun id() = id
 
-        internal fun toJson(): String {
+        fun toJson(): String {
             return mutableMapOf<String, Any>(
                 "id" to id,
                 "type" to if (revurdering) "REVURDERING" else "UTBETALING",
@@ -431,6 +496,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         status: String,
         opprettet: LocalDate,
         ident: String?,
+        harDefinisjon: Boolean = true
     ) {
         @Language("PostgreSQL")
         val query1 =
@@ -448,7 +514,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         }
 
         @Language("PostgreSQL")
-        val query2 = "SELECT kode, opprettet, status_endret_ident, status FROM selve_varsel WHERE generasjon_ref = ? AND kode = ?;"
+        val query2 = "SELECT kode, opprettet, status_endret_ident, status, definisjon_ref FROM selve_varsel WHERE generasjon_ref = ? AND kode = ?;"
 
         val varselkoder = sessionOf(dataSource).use { session ->
             session.run(
@@ -462,6 +528,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                         "opprettet" to it.localDateTime("opprettet"),
                         "statusEndretIdent" to it.stringOrNull("status_endret_ident"),
                         "status" to it.string("status"),
+                        "harDefinisjon" to (it.longOrNull("definisjon_ref") != null)
                     )
                 }.asList
             )
@@ -473,7 +540,8 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
                 "varselkode" to varselkode,
                 "opprettet" to opprettet.atTime(12,0,0),
                 "statusEndretIdent" to ident,
-                "status" to status
+                "status" to status,
+                "harDefinisjon" to harDefinisjon
             ),
             varselkoder.firstOrNull()
         )

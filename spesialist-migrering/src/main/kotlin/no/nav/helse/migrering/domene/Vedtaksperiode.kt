@@ -3,6 +3,7 @@ package no.nav.helse.migrering.domene
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.migrering.db.SpesialistDao
+import no.nav.helse.migrering.domene.Utbetaling.Companion.fjernGammelMoro
 import no.nav.helse.migrering.domene.Utbetaling.Companion.sortert
 import no.nav.helse.migrering.domene.Utbetaling.Vurdering
 import no.nav.helse.migrering.domene.Varsel.Companion.sortert
@@ -35,6 +36,7 @@ internal class Vedtaksperiode(
 
         utbetalinger
             .sortert()
+            .fjernGammelMoro()
             .onEach {
                 val generasjon = it.lagGenerasjon(id, sistOpprettet, varsler)
                 sistOpprettet = null

@@ -56,7 +56,17 @@ internal class Varsel(
 
     internal fun lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
         val (definisjonRef, varselkode) = spesialistDao.finnDefinisjonFor(melding)
-        spesialistDao.lagreVarsel(generasjonId, definisjonRef, varselkode, id, vedtaksperiodeId, opprettet, ident, statusEndretTidspunkt, status)
+        spesialistDao.lagreVarsel(
+            generasjonId = generasjonId,
+            definisjonRef = if (status in listOf("AKTIV", "INAKTIV")) null else definisjonRef,
+            varselkode = varselkode,
+            varselId = id,
+            vedtaksperiodeId = vedtaksperiodeId,
+            opprettet = opprettet,
+            statusEndretIdent = ident,
+            statusEndretTidspunkt = statusEndretTidspunkt,
+            status = status
+        )
     }
 
     internal fun erFør(tidspunkt: LocalDateTime) = opprettet <= tidspunkt
