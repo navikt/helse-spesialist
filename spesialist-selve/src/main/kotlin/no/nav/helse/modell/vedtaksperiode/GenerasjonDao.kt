@@ -19,17 +19,17 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon? {
+    internal fun låsFor(generasjonId: UUID, hendelseId: UUID): Generasjon? {
         @Language("PostgreSQL")
         val query = """
             UPDATE selve_vedtaksperiode_generasjon 
             SET låst = true, låst_tidspunkt = now(), låst_av_hendelse = ? 
-            WHERE vedtaksperiode_id = ? AND låst = false
+            WHERE unik_id = ?
             RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst;
             """
 
         return sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, hendelseId, vedtaksperiodeId).map(::toGenerasjon).asSingle)
+            session.run(queryOf(query, hendelseId, generasjonId).map(::toGenerasjon).asSingle)
         }
     }
 

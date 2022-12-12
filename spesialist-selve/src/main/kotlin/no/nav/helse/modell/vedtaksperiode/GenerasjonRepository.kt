@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
     fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon
-    fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID)
+    fun låsFor(generasjonId: UUID, hendelseId: UUID)
     fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
 }
@@ -70,13 +70,12 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
     override fun sisteFor(vedtaksperiodeId: UUID) =
         dao.finnSisteFor(vedtaksperiodeId) ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
 
-    override fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID) {
-        dao.finnSisteFor(vedtaksperiodeId) ?: return
-        dao.låsFor(vedtaksperiodeId, hendelseId)
+    override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
+        dao.låsFor(generasjonId, hendelseId)
             ?.loggLåst()
             ?: sikkerlogg.error(
-                "Finner ikke ulåst generasjon for {}. Forsøkt låst av {}",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                "Finner ikke generasjon med {}. Forsøkt låst av {}",
+                keyValue("generasjonId", generasjonId),
                 keyValue("hendelseId", hendelseId)
             )
     }

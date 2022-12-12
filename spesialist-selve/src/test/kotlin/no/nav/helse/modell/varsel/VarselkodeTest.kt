@@ -57,7 +57,7 @@ internal class VarselkodeTest {
     private val generasjonRepository = object : GenerasjonRepository {
         override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
         override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
+        override fun låsFor(generasjonId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
         override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
     }

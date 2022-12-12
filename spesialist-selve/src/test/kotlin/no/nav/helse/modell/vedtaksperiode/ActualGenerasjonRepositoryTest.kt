@@ -46,14 +46,15 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeOpprettet = UUID.randomUUID()
         val vedtaksperiodeEndret = UUID.randomUUID()
         val vedtakFattet = UUID.randomUUID()
+        val førsteGenerasjonId = UUID.randomUUID()
+        val andreGenerasjonId = UUID.randomUUID()
 
-        repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet)
-        repository.låsFor(vedtaksperiodeId, vedtakFattet)
-        val generasjon = repository.sisteFor(vedtaksperiodeId)
-        generasjon.håndterNyGenerasjon(vedtaksperiodeEndret)
+        val generasjon = repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet, førsteGenerasjonId)
+        generasjon?.håndterVedtakFattet(vedtakFattet)
+        generasjon?.håndterNyGenerasjon(vedtaksperiodeEndret, andreGenerasjonId)
 
-        assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet)
-        assertGenerasjon(vedtaksperiodeId, vedtaksperiodeEndret)
+        assertLåstGenerasjon(førsteGenerasjonId, vedtakFattet)
+        assertUlåstGenerasjon(andreGenerasjonId)
     }
 
     @Test
@@ -88,13 +89,12 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val utbetalingId = UUID.randomUUID()
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        repository.låsFor(vedtaksperiodeId, UUID.randomUUID())
+        generasjon?.håndterVedtakFattet(UUID.randomUUID())
         generasjon?.håndterNyUtbetaling(utbetalingId)
 
         assertUtbetaling(generasjonId, null)
     }
 
-    @Disabled("Generasjon må håndtere låsing")
     @Test
     fun `kan ikke knytte utbetalingId til låst generasjon som har utbetalingId fra før`() {
         val generasjonId = UUID.randomUUID()
@@ -104,7 +104,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
         generasjon?.håndterNyUtbetaling(gammel)
-        repository.låsFor(vedtaksperiodeId, UUID.randomUUID())
+        generasjon?.håndterVedtakFattet(UUID.randomUUID())
         generasjon?.håndterNyUtbetaling(ny)
 
         assertUtbetaling(generasjonId, gammel)
@@ -137,6 +137,30 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
             val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? AND opprettet_av_hendelse = ?;"
 
             session.run(queryOf(query, vedtaksperiodeId, hendelseId).map {
+                it.long(1)
+            }.asSingle)
+        }
+        assertNotNull(generasjon)
+    }
+
+    private fun assertLåstGenerasjon(generasjonId: UUID, hendelseId: UUID) {
+        val generasjon = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND låst_av_hendelse = ?;"
+
+            session.run(queryOf(query, generasjonId, hendelseId).map {
+                it.long(1)
+            }.asSingle)
+        }
+        assertNotNull(generasjon)
+    }
+
+    private fun assertUlåstGenerasjon(generasjonId: UUID) {
+        val generasjon = sessionOf(dataSource).use { session ->
+            @Language("PostgreSQL")
+            val query = "SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ? AND låst = false;"
+
+            session.run(queryOf(query, generasjonId).map {
                 it.long(1)
             }.asSingle)
         }

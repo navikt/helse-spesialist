@@ -17,7 +17,7 @@ internal class Generasjon private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     private var utbetalingId: UUID?,
-    private val låst: Boolean,
+    private var låst: Boolean,
     varsler: Set<Varsel>,
     private val generasjonRepository: GenerasjonRepository
 ) {
@@ -91,6 +91,16 @@ internal class Generasjon private constructor(
 
     internal fun håndterAvvistAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
         varsler.avvisAlleFor(id, ident, varselRepository)
+    }
+
+    internal fun håndterVedtakFattet(hendelseId: UUID) {
+        if (låst) return sikkerlogg.warn(
+            "Siste {} er allerede låst. Forsøkt låst av {}",
+            keyValue("generasjon", this),
+            keyValue("hendelseId", hendelseId)
+        )
+        låst = true
+        generasjonRepository.låsFor(id, hendelseId)
     }
 
     override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, låst=$låst"

@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.meldinger
 
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.CommandContext
@@ -23,7 +24,7 @@ internal class VedtakFattet(
 ) : Hendelse {
 
     private companion object {
-        private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
     override fun fødselsnummer(): String = fødselsnummer
@@ -45,11 +46,11 @@ internal class VedtakFattet(
         }
 
         override fun onError(problems: MessageProblems, context: MessageContext) {
-            sikkerLogg.error("Forstod ikke vedtak_fattet:\n${problems.toExtendedReport()}")
+            sikkerlogg.error("Forstod ikke vedtak_fattet:\n${problems.toExtendedReport()}")
         }
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
-            sikkerLogg.info("Mottok melding om vedtak fattet")
+            sikkerlogg.info("Mottok melding om vedtak fattet")
 
             val fødselsnummer = packet["fødselsnummer"].asText()
             val vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText())
@@ -59,8 +60,18 @@ internal class VedtakFattet(
     }
 
     override fun execute(context: CommandContext): Boolean {
-        if (Toggle.VedtaksperiodeGenerasjoner.enabled)
-            generasjonRepository.låsFor(vedtaksperiodeId, id)
+        if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
+        try {
+            val generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+            generasjon.håndterVedtakFattet(id)
+        } catch (e: IllegalStateException) {
+            sikkerlogg.info(
+                "Finner ikke noen generasjon for {}, forsøkt låst av {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("hendelseId", id),
+            )
+        }
+
         return true
     }
 }

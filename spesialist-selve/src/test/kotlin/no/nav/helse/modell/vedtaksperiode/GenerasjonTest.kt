@@ -16,6 +16,7 @@ internal class GenerasjonTest {
     private val avvisteVarsler = mutableListOf<String>()
     private val deaktiverteVarsler = mutableListOf<String>()
     private val generasjonerMedUtbetaling = mutableMapOf<UUID, UUID>()
+    private val låsteGenerasjoner = mutableMapOf<UUID, UUID>()
     private lateinit var generasjonId: UUID
 
     @BeforeEach
@@ -146,13 +147,12 @@ internal class GenerasjonTest {
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
 
-    @Disabled("Generasjon må håndtere låsing")
     @Test
     fun `forskjellig låst`() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
-        generasjonRepository.låsFor(vedtaksperiodeId, UUID.randomUUID())
+        generasjon1.håndterVedtakFattet(UUID.randomUUID())
         val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
@@ -187,7 +187,9 @@ internal class GenerasjonTest {
     private val generasjonRepository = object : GenerasjonRepository {
         override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
         override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon = TODO("Not yet implemented")
-        override fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
+        override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
+            låsteGenerasjoner[generasjonId] = hendelseId
+        }
         override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID) {
             generasjonerMedUtbetaling[generasjonId] = utbetalingId
         }

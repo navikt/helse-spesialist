@@ -31,8 +31,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     fun `kan låse generasjon`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val vedtakFattetId = UUID.randomUUID()
-        val generasjon = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, vedtaksperiodeEndretId)
-        val låstGenerasjon = generasjonDao.låsFor(VEDTAKSPERIODE_ID, vedtakFattetId)
+        val generasjonId = UUID.randomUUID()
+        val generasjon = generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, vedtaksperiodeEndretId)
+        val låstGenerasjon = generasjonDao.låsFor(generasjonId, vedtakFattetId)
 
         assertNotEquals(generasjon, låstGenerasjon)
         assertLåst(VEDTAKSPERIODE_ID, vedtaksperiodeEndretId, vedtakFattetId)
