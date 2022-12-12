@@ -111,6 +111,8 @@ internal class Varsel(
             forEach { it.avvisFor(generasjonId, ident, varselRepository) }
         }
 
+        internal fun List<Varsel>.harVarsel(varselkode: String) = find { it.varselkode == varselkode } != null
+
         internal fun JsonNode.varsler(): List<Varsel> {
             return this
                 .filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }

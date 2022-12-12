@@ -7,7 +7,6 @@ import no.nav.helse.modell.varsel.VarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonTest {
@@ -66,7 +65,6 @@ internal class GenerasjonTest {
         assertEquals("SB_EX_2", avvisteVarsler[1])
     }
 
-    @Disabled("Generasjon må håndtere duplikate varsler")
     @Test
     fun `Lagrer kun én utgave av et aktivt varsel`() {
         val generasjon = nyGenerasjon()
@@ -94,19 +92,25 @@ internal class GenerasjonTest {
         assertEquals(nyUtbetalingId, generasjonerMedUtbetaling[generasjonId])
     }
 
-//    @Test
-//    fun `kan ikke knytte utbetalingId til låst generasjon som har utbetalingId fra før`() {
-//        val generasjonId = UUID.randomUUID()
-//        val vedtaksperiodeId = UUID.randomUUID()
-//        val generasjon = generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-//        generasjon.håndterNyUtbetaling(UUID.randomUUID())
-//        generasjonRepository.låsFor()
-//        repository.utbetalingFor(generasjonId, gammel)
-//        repository.låsFor(vedtaksperiodeId, UUID.randomUUID())
-//        repository.utbetalingFor(generasjonId, ny)
-//
-//        assertUtbetaling(generasjonId, gammel)
-//    }
+    @Test
+    fun `kan ikke knytte utbetalingId til låst generasjon som har utbetalingId fra før`() {
+        val generasjon = nyGenerasjon()
+        val gammelUtbetalingId = UUID.randomUUID()
+        val nyUtbetalingId = UUID.randomUUID()
+        generasjon.håndterNyUtbetaling(gammelUtbetalingId)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(nyUtbetalingId)
+        assertEquals(gammelUtbetalingId, generasjonerMedUtbetaling[generasjonId])
+    }
+
+    @Test
+    fun `kan ikke knytte utbetalingId til låst generasjon som ikke har utbetalingId fra før`() {
+        val generasjon = nyGenerasjon()
+        val nyUtbetalingId = UUID.randomUUID()
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(nyUtbetalingId)
+        assertEquals(null, generasjonerMedUtbetaling[generasjonId])
+    }
 
     @Test
     fun `referential equals`() {

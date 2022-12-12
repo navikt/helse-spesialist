@@ -9,6 +9,7 @@ import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.deaktiverFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
+import no.nav.helse.modell.varsel.Varsel.Companion.harVarsel
 import no.nav.helse.modell.varsel.VarselRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -71,6 +72,11 @@ internal class Generasjon private constructor(
         if (låst) return sikkerlogg.info(
             "Kan ikke lagre varsel {} på låst generasjon {}",
             keyValue("varselId", varselId),
+            keyValue("generasjon", this)
+        )
+        if (varsler.harVarsel(varselkode)) return sikkerlogg.info(
+            "Lagrer ikke varsel {} da {} allerede har varselet",
+            keyValue("varselkode", varselkode),
             keyValue("generasjon", this)
         )
         varsler.add(Varsel(varselId, varselkode, opprettet, vedtaksperiodeId))
