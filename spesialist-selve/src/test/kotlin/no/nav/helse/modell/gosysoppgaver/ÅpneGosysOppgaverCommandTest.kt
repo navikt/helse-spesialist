@@ -78,7 +78,7 @@ internal class ÅpneGosysOppgaverCommandTest {
     @Test
     fun `Lagrer warning ved åpne oppgaver`() {
         Toggle.VedtaksperiodeGenerasjoner.enable()
-        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(UUID.randomUUID(), VEDTAKPERIODE_ID, false))
+        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(UUID.randomUUID(), VEDTAKPERIODE_ID, generasjonRepository))
         val forventetWarning = Warning(
             melding = "Det finnes åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist,
@@ -95,7 +95,7 @@ internal class ÅpneGosysOppgaverCommandTest {
     @Test
     fun `Lagrer warning ved oppslag feilet`() {
         Toggle.VedtaksperiodeGenerasjoner.enable()
-        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(UUID.randomUUID(), VEDTAKPERIODE_ID, false))
+        every { generasjonRepository.sisteFor(VEDTAKPERIODE_ID) } returns (Generasjon(UUID.randomUUID(), VEDTAKPERIODE_ID, generasjonRepository))
         val forventetWarning = Warning(
             melding = "Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys",
             kilde = WarningKilde.Spesialist,

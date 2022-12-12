@@ -66,17 +66,10 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `kan sette utbetaling_id for siste generasjon hvis den er åpen`() {
-        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), UUID.randomUUID())
-        generasjonDao.utbetalingFor(VEDTAKSPERIODE_ID, UTBETALING_ID)
-        assertUtbetaling(VEDTAKSPERIODE_ID, UTBETALING_ID)
-    }
-
-    @Test
-    fun `kan ikke sette utbetaling_id for generasjon hvis den er låst`() {
-        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), UUID.randomUUID())
-        generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
-        generasjonDao.utbetalingFor(VEDTAKSPERIODE_ID, UTBETALING_ID)
-        assertUtbetaling(VEDTAKSPERIODE_ID, null)
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), generasjonId)
+        generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
+        assertUtbetaling(generasjonId, UTBETALING_ID)
     }
 
     @Test
@@ -91,10 +84,12 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Generasjon(
                 generasjonId,
                 VEDTAKSPERIODE_ID,
+                UUID.randomUUID(),
                 false,
                 setOf(
                     Varsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID)
-                )
+                ),
+                dataSource
             ),
             generasjon
         )
@@ -138,13 +133,13 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertFalse(låst) {"Generasjonen er låst"}
     }
 
-    private fun assertUtbetaling(vedtaksperiodeId: UUID, forventetUtbetalingId: UUID?) {
+    private fun assertUtbetaling(generasjonId: UUID, forventetUtbetalingId: UUID?) {
         val utbetalingId = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val query =
-                "SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id DESC LIMIT 1;"
+                "SELECT utbetaling_id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?"
 
-            session.run(queryOf(query, vedtaksperiodeId).map {
+            session.run(queryOf(query, generasjonId).map {
                 it.uuidOrNull("utbetaling_id")
             }.asSingle)
         }

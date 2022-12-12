@@ -3,6 +3,7 @@ package no.nav.helse.modell.varsel
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.modell.vedtaksperiode.Generasjon
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
@@ -14,7 +15,7 @@ internal class VarselTest {
     private val godkjenteVarsler = mutableListOf<String>()
     private val avvisteVarsler = mutableListOf<String>()
     private val deaktiverteVarsler = mutableListOf<String>()
-    val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), false)
+    private val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
 
     @BeforeEach
     internal fun beforeEach() {
@@ -151,55 +152,30 @@ internal class VarselTest {
     }
 
     private val varselRepository = object : VarselRepository {
-        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
-            TODO("Not yet implemented")
-        }
-
         override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
             deaktiverteVarsler.add(varselkode)
         }
 
-        override fun godkjennFor(
-            vedtaksperiodeId: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            ident: String,
-            definisjonId: UUID?,
-        ) {
+        override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
             godkjenteVarsler.add(varselkode)
         }
 
-        override fun avvisFor(
-            vedtaksperiodeId: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            ident: String,
-            definisjonId: UUID?,
-        ) {
+        override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
             avvisteVarsler.add(varselkode)
         }
-
-        override fun lagreVarsel(
-            id: UUID,
-            generasjonId: UUID,
-            varselkode: String,
-            opprettet: LocalDateTime,
-            vedtaksperiodeId: UUID,
-        ) {
+        override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
             varsler.add(varselkode)
         }
 
-        override fun lagreDefinisjon(
-            id: UUID,
-            varselkode: String,
-            tittel: String,
-            forklaring: String?,
-            handling: String?,
-            avviklet: Boolean,
-            opprettet: LocalDateTime,
-        ) {
-            TODO("Not yet implemented")
-        }
+        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> = TODO("Not yet implemented")
+        override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
+    }
 
+    private val generasjonRepository get() = object : GenerasjonRepository {
+        override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon = TODO("Not yet implemented")
+        override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Unit = TODO("Not yet implemented")
+        override fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
+        override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Unit = TODO("Not yet implemented")
+        override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
     }
 }

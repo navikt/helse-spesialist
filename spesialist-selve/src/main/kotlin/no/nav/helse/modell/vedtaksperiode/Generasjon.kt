@@ -2,6 +2,7 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDateTime
 import java.util.UUID
+import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
@@ -14,12 +15,29 @@ import no.nav.helse.tellVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-internal class Generasjon(
+internal class Generasjon private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
+    private var utbetalingId: UUID?,
     private val låst: Boolean,
-    varsler: Set<Varsel> = emptySet()
+    varsler: Set<Varsel>,
+    private val generasjonRepository: GenerasjonRepository
 ) {
+    internal constructor(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        generasjonRepository: GenerasjonRepository
+    ): this(id, vedtaksperiodeId, null, false, emptySet(), generasjonRepository)
+
+    internal constructor(
+        id: UUID,
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID?,
+        låst: Boolean,
+        varsler: Set<Varsel>,
+        dataSource: DataSource
+    ): this(id, vedtaksperiodeId, utbetalingId, låst, varsler, ActualGenerasjonRepository(dataSource))
+
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
     private companion object {
@@ -40,6 +58,16 @@ internal class Generasjon(
             return null
         }
         return opprettBlock(vedtaksperiodeId, hendelseId, id)
+    }
+
+    internal fun håndterNyUtbetaling(utbetalingId: UUID) {
+        if (låst) return sikkerlogg.error(
+            "Kan ikke legge til ny utbetaling med {} for generasjon med {}, da generasjonen er låst",
+            keyValue("utbetalingId", utbetalingId),
+            keyValue("generasjonId", id)
+        )
+        this.utbetalingId = utbetalingId
+        generasjonRepository.utbetalingFor(id, utbetalingId)
     }
 
     internal fun lagreVarsel(

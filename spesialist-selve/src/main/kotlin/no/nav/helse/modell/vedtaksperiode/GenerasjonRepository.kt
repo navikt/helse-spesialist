@@ -7,10 +7,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
-    fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID())
+    fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
     fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID())
     fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID)
-    fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID)
+    fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
 }
 
@@ -41,16 +41,17 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     private val dao = GenerasjonDao(dataSource)
 
-    override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) {
+    override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
         if (dao.finnSisteFor(vedtaksperiodeId) != null) {
             sikkerlogg.info(
                 "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId)
             )
-            return
+            return null
         }
-        dao.opprettFor(vedtaksperiodeId, hendelseId, id)
-            .loggOpprettet(vedtaksperiodeId)
+        return dao.opprettFor(vedtaksperiodeId, hendelseId, id).also {
+            it.loggOpprettet(vedtaksperiodeId)
+        }
     }
 
     override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) {
@@ -84,12 +85,12 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
     }
 
-    override fun utbetalingFor(vedtaksperiodeId: UUID, utbetalingId: UUID) {
-        dao.utbetalingFor(vedtaksperiodeId, utbetalingId)
+    override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID) {
+        dao.utbetalingFor(generasjonId, utbetalingId)
             ?.loggKnyttetUtbetaling(utbetalingId)
             ?: sikkerlogg.info(
                 "Finner ikke ulåst generasjon for {}. Forsøkt knyttet til utbetaling {}",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("vedtaksperiodeId", generasjonId),
                 keyValue("utbetalingId", utbetalingId)
             )
     }
