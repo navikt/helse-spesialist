@@ -69,7 +69,7 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
     @Test
     fun `avvisning av varsel med definisjonId medfører at varselet lagres med referanse til denne definisjonen`() {
         generasjon.håndterNyttVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
-        generasjon.håndterAvvist("EN_KODE", varselRepository)
+        generasjon.håndterAvvistAvSaksbehandler("EN_KODE", varselRepository)
         assertEquals(AVVIST, statusFor(generasjonId, "EN_KODE"))
         assertDefinisjonFor(vedtaksperiodeId, "EN_KODE", definisjonId)
     }

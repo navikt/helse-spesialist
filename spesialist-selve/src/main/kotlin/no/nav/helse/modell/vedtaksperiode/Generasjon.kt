@@ -85,11 +85,11 @@ internal class Generasjon private constructor(
         varsler.deaktiverFor(id, varselkode, varselRepository)
     }
 
-    internal fun håndterGodkjent(ident: String, varselRepository: VarselRepository) {
+    internal fun håndterGodkjentAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
         varsler.godkjennAlleFor(id, ident, varselRepository)
     }
 
-    internal fun håndterAvvist(ident: String, varselRepository: VarselRepository) {
+    internal fun håndterAvvistAvSaksbehandler(ident: String, varselRepository: VarselRepository) {
         varsler.avvisAlleFor(id, ident, varselRepository)
     }
 

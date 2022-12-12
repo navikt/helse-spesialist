@@ -35,7 +35,7 @@ internal class GodkjenningMediator(
         behov.godkjennManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt)
         if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
             val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-            sisteGenerasjon.håndterGodkjent(saksbehandlerIdent, varselRepository)
+            sisteGenerasjon.håndterGodkjentAvSaksbehandler(saksbehandlerIdent, varselRepository)
         }
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeGodkjent(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
@@ -56,7 +56,7 @@ internal class GodkjenningMediator(
         behov.avvisManuelt(saksbehandlerIdent, saksbehandlerEpost, godkjenttidspunkt, årsak, begrunnelser, kommentar)
         if (Toggle.VedtaksperiodeGenerasjoner.enabled) {
             val sisteGenerasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
-            sisteGenerasjon.håndterAvvist(saksbehandlerIdent, varselRepository)
+            sisteGenerasjon.håndterAvvistAvSaksbehandler(saksbehandlerIdent, varselRepository)
         }
         context.publiser(behov.toJson())
         context.publiser(behov.lagVedtaksperiodeAvvist(vedtaksperiodeId, fødselsnummer, warningDao, vedtakDao).toJson())
