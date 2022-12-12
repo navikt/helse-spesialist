@@ -224,6 +224,7 @@ data class Refusjon(
 
 data class VarselDTO(
     val id: UUIDString,
+    val kode: String,
     val tittel: String,
     val forklaring: String?,
     val handling: String?,

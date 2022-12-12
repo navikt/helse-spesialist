@@ -23,6 +23,7 @@ internal class ApiVarselDao(private val dataSource: DataSource) {
             session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map {
                 Varsel(
                     it.uuid("unik_id"),
+                    it.string("kode"),
                     it.string("tittel"),
                     it.stringOrNull("forklaring"),
                     it.stringOrNull("handling"),
