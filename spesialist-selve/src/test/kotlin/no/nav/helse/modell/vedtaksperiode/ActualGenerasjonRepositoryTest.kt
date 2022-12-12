@@ -8,7 +8,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -81,7 +80,6 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertUtbetaling(generasjonId, utbetalingId)
     }
 
-    @Disabled("Generasjon må håndtere låsing")
     @Test
     fun `kan ikke knytte utbetalingId til låst generasjon som ikke har utbetalingId`() {
         val generasjonId = UUID.randomUUID()
