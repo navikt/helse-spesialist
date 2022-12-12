@@ -33,5 +33,6 @@ data class Varsel(
         VURDERT,
         GODKJENT,
         AVVIST,
+        INAKTIV
     }
 }
