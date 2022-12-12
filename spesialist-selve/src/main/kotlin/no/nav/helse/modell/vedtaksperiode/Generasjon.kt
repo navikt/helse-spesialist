@@ -10,8 +10,6 @@ import no.nav.helse.modell.varsel.Varsel.Companion.deaktiverFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.modell.varsel.varselkodeformat
-import no.nav.helse.tellVarsel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -67,21 +65,6 @@ internal class Generasjon private constructor(
         )
         this.utbetalingId = utbetalingId
         generasjonRepository.utbetalingFor(id, utbetalingId)
-    }
-
-    internal fun lagreVarsel(
-        varselId: UUID,
-        varselkode: String,
-        opprettet: LocalDateTime,
-        opprettBlock: (varselId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID, generasjonId: UUID) -> Unit,
-    ) {
-        if (låst) return sikkerlogg.info(
-            "Kan ikke lagre varsel {} på låst generasjon {}",
-            keyValue("varselId", varselId),
-            keyValue("generasjon", this)
-        )
-        opprettBlock(varselId, varselkode, opprettet, vedtaksperiodeId, id)
-        if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
     internal fun håndterNyttVarsel(varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
