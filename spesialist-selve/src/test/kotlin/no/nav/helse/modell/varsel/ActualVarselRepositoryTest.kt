@@ -34,8 +34,8 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
         vedtaksperiodeId = UUID.randomUUID()
         varselRepository.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         generasjonId = UUID.randomUUID()
-        generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+
+        generasjon = generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)!!
     }
 
     @Test
@@ -125,12 +125,13 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
 
     @Test
     fun `oppdatering av varsel for én generasjon endrer ikke varsel for en annen generasjon på samme periode`() {
-        varselRepository.lagreVarsel(UUID.randomUUID(), generasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
-        val nesteGenerasjonId = UUID.randomUUID()
+        generasjon.håndterNyttVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
         generasjonRepository.låsFor(vedtaksperiodeId, UUID.randomUUID())
-        generasjonRepository.forsøkOpprett(vedtaksperiodeId, UUID.randomUUID(), nesteGenerasjonId)
-        varselRepository.lagreVarsel(UUID.randomUUID(), nesteGenerasjonId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId)
-        varselRepository.deaktiverFor(vedtaksperiodeId, nesteGenerasjonId, "EN_KODE", null)
+        generasjon = generasjonRepository.sisteFor(vedtaksperiodeId)
+        val nesteGenerasjonId = UUID.randomUUID()
+        val nesteGenerasjon = generasjon.håndterNyGenerasjon(UUID.randomUUID(), nesteGenerasjonId)
+        nesteGenerasjon?.håndterNyttVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
+        nesteGenerasjon?.håndterDeaktivertVarsel("EN_KODE", varselRepository)
         assertAktiv(generasjonId, "EN_KODE")
         assertInaktiv(nesteGenerasjonId, "EN_KODE")
     }
@@ -151,14 +152,6 @@ internal class ActualVarselRepositoryTest : AbstractDatabaseTest() {
             ),
             definisjonDao.definisjonFor(definisjonId)
         )
-    }
-
-    private fun generasjonId(vedtaksperiodeId: UUID): UUID {
-        @Language("PostgreSQL")
-        val query = "SELECT unik_id FROM selve_vedtaksperiode_generasjon WHERE vedtaksperiode_id = ? ORDER BY id"
-        return requireNotNull(sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, vedtaksperiodeId).map { it.uuid("unik_id") }.asSingle)
-        })
     }
 
     private fun statusFor(generasjonId: UUID, varselkode: String): Varsel.Status? {

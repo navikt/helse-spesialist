@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 internal interface GenerasjonRepository {
     fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID()): Generasjon?
-    fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID = UUID.randomUUID())
+    fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon
     fun låsFor(vedtaksperiodeId: UUID, hendelseId: UUID)
     fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
@@ -18,9 +18,16 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
 
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        private fun Generasjon.loggOpprettet(vedtaksperiodeId: UUID) {
+        private fun Generasjon.loggFørsteOpprettet(vedtaksperiodeId: UUID) {
             sikkerlogg.info(
                 "Oppretter første generasjon {} for {}",
+                keyValue("generasjon", this),
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            )
+        }
+        private fun Generasjon.loggNesteOpprettet(vedtaksperiodeId: UUID) {
+            sikkerlogg.info(
+                "Oppretter neste generasjon {} for {}",
                 keyValue("generasjon", this),
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
             )
@@ -49,26 +56,15 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
             return null
         }
-        return dao.opprettFor(vedtaksperiodeId, hendelseId, id).also {
-            it.loggOpprettet(vedtaksperiodeId)
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
+            it.loggFørsteOpprettet(vedtaksperiodeId)
         }
     }
 
-    override fun forsøkOpprett(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) {
-        val generasjon = dao.finnSisteFor(vedtaksperiodeId)
-        if (generasjon == null) {
-            sikkerlogg.info(
-                """
-                Kan ikke opprette ny generasjon for {} fra vedtaksperiode_endret så lenge det ikke eksisterer minimum én generasjon fra før av. 
-                Første generasjon kan kun opprettes når vedtaksperioden opprettes.
-                """.trimIndent(),
-                keyValue("vedtaksperiodeId", vedtaksperiodeId)
-            )
-            return
+    override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
+            it.loggNesteOpprettet(vedtaksperiodeId)
         }
-        generasjon
-            .forsøkOpprettNeste(hendelseId, id, dao::opprettFor)
-            ?.loggOpprettet(vedtaksperiodeId)
     }
 
     override fun sisteFor(vedtaksperiodeId: UUID) =

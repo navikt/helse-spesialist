@@ -44,20 +44,19 @@ internal class Generasjon private constructor(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    internal fun forsøkOpprettNeste(
+    internal fun håndterNyGenerasjon(
         hendelseId: UUID,
-        id: UUID,
-        opprettBlock: (vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID) -> Generasjon,
+        id: UUID = UUID.randomUUID(),
     ): Generasjon? {
         if (!låst) {
             sikkerlogg.info(
                 "Oppretter ikke ny generasjon for {} da nåværende generasjon med {} er ulåst",
                 keyValue("vedtaksperiodeId", vedtaksperiodeId),
-                keyValue("id", id)
+                keyValue("generasjonId", this.id)
             )
             return null
         }
-        return opprettBlock(vedtaksperiodeId, hendelseId, id)
+        return generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId)
     }
 
     internal fun håndterNyUtbetaling(utbetalingId: UUID) {

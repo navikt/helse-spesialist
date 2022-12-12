@@ -21,7 +21,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppretter generasjon for vedtaksperiode`() {
-        val generasjon = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), UUID.randomUUID())
+        val generasjon = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
         val siste = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
         assertEquals(generasjon, siste)
@@ -31,7 +31,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     fun `kan låse generasjon`() {
         val vedtaksperiodeEndretId = UUID.randomUUID()
         val vedtakFattetId = UUID.randomUUID()
-        val generasjon = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, vedtaksperiodeEndretId, UUID.randomUUID())
+        val generasjon = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, vedtaksperiodeEndretId)
         val låstGenerasjon = generasjonDao.låsFor(VEDTAKSPERIODE_ID, vedtakFattetId)
 
         assertNotEquals(generasjon, låstGenerasjon)
@@ -55,9 +55,9 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `sjekker at siste generasjon blir returnert`() {
-        val første = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), UUID.randomUUID())
+        val første = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
         generasjonDao.låsFor(VEDTAKSPERIODE_ID, UUID.randomUUID())
-        val siste = generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), UUID.randomUUID())
+        val siste = generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
         val funnet = generasjonDao.finnSisteFor(VEDTAKSPERIODE_ID)
 
         assertNotEquals(første, funnet)
@@ -67,14 +67,14 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `kan sette utbetaling_id for siste generasjon hvis den er åpen`() {
         val generasjonId = UUID.randomUUID()
-        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), generasjonId)
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
         generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
         assertUtbetaling(generasjonId, UTBETALING_ID)
     }
 
     @Test
     fun `generasjon hentes opp sammen med varsler`() {
-        generasjonDao.opprettFor(VEDTAKSPERIODE_ID, UUID.randomUUID(), UUID.randomUUID())
+        generasjonDao.opprettFor(UUID.randomUUID(), VEDTAKSPERIODE_ID, UUID.randomUUID())
         val varselId = UUID.randomUUID()
         val varselOpprettet = LocalDateTime.now()
         val generasjonId = generasjonIdFor(VEDTAKSPERIODE_ID)

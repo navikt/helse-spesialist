@@ -47,7 +47,7 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun opprettFor(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon {
+    internal fun opprettFor(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
         @Language("PostgreSQL")
         val query = """
             INSERT INTO selve_vedtaksperiode_generasjon (unik_id, vedtaksperiode_id, opprettet_av_hendelse) 

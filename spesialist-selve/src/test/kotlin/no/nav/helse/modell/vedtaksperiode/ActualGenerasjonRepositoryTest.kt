@@ -49,7 +49,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
         repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet)
         repository.låsFor(vedtaksperiodeId, vedtakFattet)
-        repository.forsøkOpprett(vedtaksperiodeId, vedtaksperiodeEndret)
+        val generasjon = repository.sisteFor(vedtaksperiodeId)
+        generasjon.håndterNyGenerasjon(vedtaksperiodeEndret)
 
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet)
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeEndret)
@@ -60,9 +61,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         val vedtaksperiodeOpprettet = UUID.randomUUID()
         val vedtaksperiodeEndret = UUID.randomUUID()
-
-        repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet)
-        repository.forsøkOpprett(vedtaksperiodeId, vedtaksperiodeEndret)
+        val førsteGenerasjon = repository.opprettFørste(vedtaksperiodeId, vedtaksperiodeOpprettet)
+        førsteGenerasjon?.håndterNyGenerasjon(vedtaksperiodeEndret)
 
         assertGenerasjon(vedtaksperiodeId, vedtaksperiodeOpprettet)
         assertIngenGenerasjon(vedtaksperiodeId, vedtaksperiodeEndret)
