@@ -56,23 +56,23 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     @Test
     fun `leser person_avstemt`() {
         nyPeriode(1.januar) sistOppdatert 1.januar medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 1.januar))
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 1.januar,))
         }
         nyPeriode(2.januar) sistOppdatert 2.januar medTilstand "AVVENTER_SIMULERING" medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar))
+            listOf(nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar,))
         }
         nyPeriode(3.januar) sistOppdatert 6.januar medTilstand "AVVENTER_SIMULERING" medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = true, revurdering = false, dato = 3.januar),
-                nyUtbetaling(utbetalt = true, revurdering = true, dato = 4.januar),
-                nyUtbetaling(utbetalt = false, revurdering = true, dato = 5.januar),
+                nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 3.januar,),
+                nyUtbetaling(utbetalt = true, revurdering = true, opprettet = 4.januar,),
+                nyUtbetaling(utbetalt = false, revurdering = true, opprettet = 5.januar,),
             )
         }
         nyPeriode(7.januar) sistOppdatert 7.januar medTilstand "AVVENTER_HISTORIKK"
         nyPeriode(8.januar) sistOppdatert 8.januar medTilstand "AVSLUTTET_UTEN_UTBETALING"
         nyPeriode(9.januar) sistOppdatert 9.januar medTilstand "AVVENTER_GJENNOMFØRT_REVURDERING" medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = true, revurdering = false, dato = 9.januar)
+                nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 9.januar,)
             )
         }
         testRapid.sendTestMessage(testevent())
@@ -88,9 +88,9 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `lagrer varsler sammen med generasjoner`() {
         nyPeriode(1.januar) sistOppdatert 5.januar medTilstand "AVVENTER_SIMULERING" medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar),
-                nyUtbetaling(utbetalt = true, revurdering = true, dato = 3.januar),
-                nyUtbetaling(utbetalt = false, revurdering = true, dato = 4.januar),
+                nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar,),
+                nyUtbetaling(utbetalt = true, revurdering = true, opprettet = 3.januar,),
+                nyUtbetaling(utbetalt = false, revurdering = true, opprettet = 4.januar,),
             )
         } medSpleisVarsler {
             listOf(
@@ -111,7 +111,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     @Test
     fun `opprett generasjon for periode der siste utbetaling er utbetalt og perioden ikke er i en sluttilstand`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVVENTER_GJENNOMFØRT_REVURDERING" medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar))
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar,))
         } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
@@ -128,7 +128,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     @Test
     fun `opprett generasjon for periode der siste utbetaling er utbetalt og perioden er i en sluttilstand`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar))
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar,))
         } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
@@ -144,7 +144,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     @Test
     fun `varsel blir avvist hvis utbetaling er avvist`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = false))
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar, oppdatert = 3.januar, godkjent = false))
         } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
@@ -159,7 +159,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     @Test
     fun `inaktive varsler i warning blir satt til inaktive i selve_varsel`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = true))
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar, oppdatert = 3.januar, godkjent = true))
         } medSpesialistVarsler {
             listOf(
                 Triple("Registert fullmakt på personen.", 2. januar, true)
@@ -174,7 +174,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     @Test
     fun `tar med varsler fra spesialist`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medTilstand "AVSLUTTET" medUtbetalinger {
-            listOf(nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar, godkjent = true))
+            listOf(nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar, oppdatert = 3.januar, godkjent = true))
         } medSpleisVarsler {
             listOf(
                 "Arbeidsgiver er ikke registrert i Aa-registeret." to 2.januar,
@@ -209,8 +209,8 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `lager ikke generasjoner av utbetalinger som ikke er siste utbetaling og har status IKKE_UTBETALT - Siste er ikke utbetalt`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
-                nyUtbetaling(utbetalt = false, revurdering = false, dato = 2.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 2.januar),
             )
         }
         testRapid.sendTestMessage(testevent())
@@ -221,8 +221,8 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `lager ikke generasjoner av utbetalinger som ikke er siste utbetaling og har status IKKE_UTBETALT - Siste er utbetalt`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
-                nyUtbetaling(utbetalt = true, revurdering = false, dato = 2.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar),
+                nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 2.januar),
             )
         }
         testRapid.sendTestMessage(testevent())
@@ -233,7 +233,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `lager generasjoner av utbetalinger som kun har én utbetaling med status IKKE_UTBETALT`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar,),
             )
         }
         testRapid.sendTestMessage(testevent())
@@ -244,7 +244,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `Lagrer ikke varsel _med_ referanse til definisjon dersom varselet er aktivt`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar,),
             )
         } medSpleisVarsler {
             listOf(
@@ -259,7 +259,7 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
     fun `Lagrer ikke varsel _med_ referanse til definisjon dersom varselet er inaktivt`() {
         nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
             listOf(
-                nyUtbetaling(utbetalt = false, revurdering = false, dato = 1.januar),
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar,),
             )
         } medSpesialistVarsler {
             listOf(
@@ -268,6 +268,38 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         }
         testRapid.sendTestMessage(testevent())
         assertVarselPåGenerasjon(1.vedtaksperiode, 0, "SB_IK_1", "INAKTIV", 1.januar, "Spesialist", harDefinisjon = false)
+    }
+
+    @Test
+    fun `Forsøker å lagre kun ett av varselene som mapper til samme varselkode`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = true, revurdering = false, opprettet = 1.januar, oppdatert = 3.januar),
+            )
+        } medSpleisVarsler {
+            listOf(
+                "Bruker har mottatt AAP innenfor 6 måneder av første fraværsdag" to 1.januar,
+                "Bruker har mottatt AAP innenfor 6 måneder av første fraværsdag. Kontroller at brukeren har rett til sykepenger" to 2.januar,
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_AY_3", "GODKJENT", 2.januar, "EN_IDENT", harDefinisjon = true)
+    }
+
+    @Test
+    fun `Forsøker å lagre kun ett av varselene som mapper til samme varselkode - ikke utbetalt enda`() {
+        nyPeriode(1.januar) sistOppdatert 3.januar medUtbetalinger {
+            listOf(
+                nyUtbetaling(utbetalt = false, revurdering = false, opprettet = 1.januar),
+            )
+        } medSpleisVarsler {
+            listOf(
+                "Bruker har mottatt AAP innenfor 6 måneder av første fraværsdag" to 1.januar,
+                "Bruker har mottatt AAP innenfor 6 måneder av første fraværsdag. Kontroller at brukeren har rett til sykepenger" to 2.januar,
+            )
+        }
+        testRapid.sendTestMessage(testevent())
+        assertVarselPåGenerasjon(1.vedtaksperiode, 0, "RV_AY_3", "AKTIV", 2.januar, null, harDefinisjon = false)
     }
 
     private infix fun Vedtaksperiode.medEksisterendeGenerasjon(låst: Boolean): Vedtaksperiode {
@@ -355,14 +387,20 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         }
     }
 
-    private class Utbetaling(utbetalt: Boolean, private val revurdering: Boolean, dato: LocalDate, godkjent: Boolean) {
+    private class Utbetaling(
+        utbetalt: Boolean,
+        private val revurdering: Boolean,
+        opprettet: LocalDate,
+        oppdatert: LocalDate = opprettet,
+        godkjent: Boolean
+    ) {
         private val id: UUID = UUID.randomUUID()
-        private val opprettet: LocalDateTime = dato.atStartOfDay()
-        private val oppdatert: LocalDateTime = dato.atTime(23, 59, 59)
+        private val opprettet: LocalDateTime = opprettet.atStartOfDay()
+        private val oppdatert: LocalDateTime = oppdatert.atTime(23, 59, 59)
         private val tilstand = if (utbetalt) "UTBETALT" else "IKKE_UTBETALT"
         private val vurdering = if (utbetalt) mapOf(
             "ident" to "EN_IDENT",
-            "tidspunkt" to oppdatert,
+            "tidspunkt" to this.oppdatert,
             "automatiskBehandling" to false,
             "godkjent" to godkjent,
         ) else null
@@ -440,8 +478,14 @@ internal class PersonavstemmingRiverTest : AbstractDatabaseTest() {
         return Vedtaksperiode(vedtaksperiodeId, opprettet.atStartOfDay()).also { vedtaksperioder.add(it) }
     }
 
-    private fun nyUtbetaling(utbetalt: Boolean, revurdering: Boolean, dato: LocalDate, godkjent: Boolean = true): Utbetaling {
-        return Utbetaling(utbetalt, revurdering, dato, godkjent)
+    private fun nyUtbetaling(
+        utbetalt: Boolean,
+        revurdering: Boolean,
+        opprettet: LocalDate,
+        oppdatert: LocalDate = opprettet,
+        godkjent: Boolean = true
+    ): Utbetaling {
+        return Utbetaling(utbetalt, revurdering, opprettet, oppdatert, godkjent)
     }
 
     private infix fun Vedtaksperiode.sistOppdatert(oppdatert: LocalDate): Vedtaksperiode {

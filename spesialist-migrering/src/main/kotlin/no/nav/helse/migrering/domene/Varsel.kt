@@ -3,6 +3,7 @@ package no.nav.helse.migrering.domene
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.migrering.db.SpesialistDao
+import kotlin.properties.Delegates
 
 internal class Varsel(
     private val vedtaksperiodeId: UUID,
@@ -11,51 +12,16 @@ internal class Varsel(
     private val id: UUID,
     private val inaktivFra: LocalDateTime?,
 ) {
+    private var varselkode by Delegates.notNull<String>()
+    private var definisjonRef by Delegates.notNull<Long>()
 
-    internal companion object {
-        internal fun List<Varsel>.varslerFor(vedtaksperiodeId: UUID): List<Varsel> {
-            return filter { it.vedtaksperiodeId == vedtaksperiodeId }
-        }
-
-        internal fun List<Varsel>.lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
-            forEach {
-                it.lagre(
-                    generasjonId,
-                    it.inaktivFra?.let { "Spesialist" } ?: ident,
-                    it.inaktivFra ?: statusEndretTidspunkt,
-                    it.inaktivFra?.let { "INAKTIV" } ?: status,
-                    spesialistDao
-                )
-            }
-        }
-
-        internal fun List<Varsel>.sortert(): List<Varsel> {
-            return sortedBy { it.opprettet }
-        }
-
-        internal fun MutableList<Varsel>.konsumer(tidspunkt: LocalDateTime): List<Varsel> {
-            val konsumerteVarsler = this.takeWhile { it.erFør(tidspunkt) }
-            this.removeAll(konsumerteVarsler)
-            return konsumerteVarsler
-        }
-
-        internal fun List<Varsel>.dedup(): List<Varsel> {
-            return sortedBy { it.melding }.fold(mutableListOf()) { acc, varsel ->
-                if (acc.isEmpty() || acc.last().melding != varsel.melding) {
-                    acc.add(varsel)
-                    return@fold acc
-                }
-
-                if (acc.last().opprettet >= varsel.opprettet) return@fold acc
-                acc.removeLast()
-                acc.add(varsel)
-                acc
-            }
-        }
+    internal fun definisjon(spesialistDao: SpesialistDao) {
+        val (ref, kode) = spesialistDao.finnDefinisjonFor(melding)
+        varselkode = kode
+        definisjonRef = ref
     }
 
     internal fun lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
-        val (definisjonRef, varselkode) = spesialistDao.finnDefinisjonFor(melding)
         spesialistDao.lagreVarsel(
             generasjonId = generasjonId,
             definisjonRef = if (status in listOf("AKTIV", "INAKTIV")) null else definisjonRef,
@@ -91,4 +57,35 @@ internal class Varsel(
         return result
     }
 
+    internal companion object {
+        internal fun List<Varsel>.varslerFor(vedtaksperiodeId: UUID): List<Varsel> {
+            return filter { it.vedtaksperiodeId == vedtaksperiodeId }
+        }
+
+        internal fun List<Varsel>.lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
+            forEach {
+                it.lagre(
+                    generasjonId,
+                    it.inaktivFra?.let { "Spesialist" } ?: ident,
+                    it.inaktivFra ?: statusEndretTidspunkt,
+                    it.inaktivFra?.let { "INAKTIV" } ?: status,
+                    spesialistDao
+                )
+            }
+        }
+
+        internal fun List<Varsel>.sortert(): List<Varsel> {
+            return sortedBy { it.opprettet }
+        }
+
+        internal fun MutableList<Varsel>.konsumer(tidspunkt: LocalDateTime): List<Varsel> {
+            val konsumerteVarsler = this.takeWhile { it.erFør(tidspunkt) }
+            this.removeAll(konsumerteVarsler)
+            return konsumerteVarsler
+        }
+
+        internal fun List<Varsel>.dedup(): List<Varsel> {
+            return sortedByDescending { it.opprettet }.distinctBy { it.varselkode }
+        }
+    }
 }

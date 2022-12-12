@@ -16,9 +16,12 @@ internal class Vedtaksperiode(
     private val utbetalinger: List<Utbetaling>,
     private val tilstand: String,
     personVarsler: List<Varsel>,
+    spesialistDao: SpesialistDao
 ) {
 
-    private val varsler = personVarsler.varslerFor(id).sortert().toMutableList()
+    private val varsler = personVarsler.varslerFor(id).sortert().toMutableList().onEach {
+        it.definisjon(spesialistDao)
+    }
 
     internal fun generasjoner(spesialistDao: SpesialistDao): List<Generasjon> {
         var sistOpprettet: LocalDateTime? = opprettet

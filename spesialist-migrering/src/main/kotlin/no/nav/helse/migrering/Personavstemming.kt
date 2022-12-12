@@ -101,6 +101,7 @@ internal class Personavstemming {
                     oppdatert = periodeNode["oppdatert"].asLocalDateTime(),
                     tilstand = periodeNode["tilstand"].asText(),
                     personVarsler = varslerForPerson,
+                    spesialistDao = spesialistDao,
                     utbetalinger = vedtaksperiodeUtbetalinger.map { utbetalingNode ->
                         Utbetaling(
                             UUID.fromString(utbetalingNode["id"].asText()),
