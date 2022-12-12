@@ -11,6 +11,7 @@ import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.MeldingssenderV2
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.TestRapidHelpers.løsning
 import no.nav.helse.TestRapidHelpers.løsningOrNull
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
@@ -26,11 +27,12 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.varsel.Varselkode
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
@@ -501,6 +503,32 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
         håndterVedtaksperiodeEndret(forårsaketAvId = hendelseId)
         håndterGodkjenningsbehov(harOppdatertMetainfo = true)
+    }
+
+    protected fun assertAutomatiskGodkjent() {
+        val løsning = testRapid.inspektør.løsning("Godkjenning")
+        assertTrue(løsning.path("godkjent").isBoolean)
+        assertTrue(løsning.path("godkjent").booleanValue())
+        assertNotNull(løsning.path("godkjenttidspunkt").asLocalDateTime())
+        assertUtgåendeMelding("vedtaksperiode_godkjent")
+    }
+
+    protected fun assertIkkeAutomatiskGodkjent() {
+        val løsning = testRapid.inspektør.løsningOrNull("Godkjenning")
+        assertNull(løsning)
+    }
+
+    protected fun assertSaksbehandleroppgave(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        oppgavestatus: Oppgavestatus,
+    ) {
+        @Language("PostgreSQL")
+        val query = "SELECT status FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)"
+        val oppgavestatuser = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId).map { enumValueOf<Oppgavestatus>(it.string("status")) }.asList)
+        }
+        assertEquals(1, oppgavestatuser.size)
+        assertEquals(oppgavestatus, oppgavestatuser.single())
     }
 
     protected fun assertVarsler(vedtaksperiodeId: UUID, forventetAntall: Int) {
