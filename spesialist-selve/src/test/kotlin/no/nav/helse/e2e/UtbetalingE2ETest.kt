@@ -125,7 +125,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
     fun `utbetaling endret uten at vi kjenner arbeidsgiver`() {
         val ET_ORGNR = "1"
         val ET_ANNET_ORGNR = "2"
-        vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ET_ORGNR, VEDTAKSPERIODE_ID, false, UTBETALING_ID, SNAPSHOT_UTEN_WARNINGS)
         assertDoesNotThrow {
             sendUtbetalingEndret(
                 aktørId = AKTØR,
@@ -206,7 +206,7 @@ internal class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling forkastet`() {
-        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, SNAPSHOT_UTEN_WARNINGS, UTBETALING_ID)
+        vedtaksperiode(FØDSELSNUMMER, ORGNR, VEDTAKSPERIODE_ID, true, UTBETALING_ID, SNAPSHOT_UTEN_WARNINGS)
         sendUtbetalingEndret(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,

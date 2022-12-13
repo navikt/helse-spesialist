@@ -14,9 +14,9 @@ internal class VersjoneringAvSnapshotTest : AbstractE2ETest() {
     @Test
     fun `utdatert snapshot`() {
         val utbetalingId = UUID.randomUUID()
-        val gammelSnapshot = snapshot(-1)
-        val nyttSnapshot = snapshot()
-        vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
+        val gammelSnapshot = snapshot(-1, utbetalingId = utbetalingId)
+        val nyttSnapshot = snapshot(utbetalingId = utbetalingId)
+        vedtaksperiode(utbetalingId = utbetalingId, snapshot = gammelSnapshot)
 
         clearMocks(snapshotClient)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
@@ -27,17 +27,6 @@ internal class VersjoneringAvSnapshotTest : AbstractE2ETest() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
         snapshotMediator.hentSnapshot(FØDSELSNUMMER)
         verify(exactly = 0) { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
-    }
-
-    @Test
-    fun `utdatert snapshot fra aktørId`() {
-        val utbetalingId = UUID.randomUUID()
-        val gammelSnapshot = snapshot(-1)
-        val nyttSnapshot = snapshot(2)
-        vedtaksperiode(snapshot = gammelSnapshot, utbetalingId = utbetalingId)
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns nyttSnapshot
-
-        verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
     }
 
 }

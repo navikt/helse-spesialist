@@ -63,6 +63,9 @@ class SnapshotDao(private val dataSource: DataSource) {
     }
 }
 
+// Disse støtter null fordi (gammelt) oppsett av testdata ikke sørger for at utbetalingen kan hentes opp fra
+// UtbetalingsFilterCommand
+
 internal fun GraphQLUtbetaling?.utbetalingTilSykmeldt() = this != null && personNettoBelop != 0
 
 internal fun GraphQLUtbetaling?.utbetalingTilArbeidsgiver() = this != null && arbeidsgiverNettoBelop != 0

@@ -23,10 +23,11 @@ fun snapshotMedWarnings(
     vedtaksperiodeId: UUID,
     orgnr: String,
     fnr: String,
-    aktørId: String
+    aktørId: String,
+    utbetalingId: UUID = UUID.randomUUID(),
 ): GraphQLClientResponse<HentSnapshot.Result> =
     snapshot(
-        vedtaksperiodeId, orgnr, fnr, aktørId, listOf(
+        vedtaksperiodeId, orgnr, fnr, aktørId, utbetalingId, listOf(
             GraphQLAktivitet(
                 alvorlighetsgrad = "W",
                 melding = "Brukeren har flere inntekter de siste tre måneder",
@@ -41,6 +42,7 @@ fun snapshot(
     orgnr: String,
     fnr: String,
     aktørId: String,
+    utbetalingId: UUID = UUID.randomUUID(),
     aktivitetslogg: List<GraphQLAktivitet> = emptyList()
 ): GraphQLClientResponse<HentSnapshot.Result> =
     object : GraphQLClientResponse<HentSnapshot.Result> {
@@ -61,7 +63,7 @@ fun snapshot(
                                         id = UUID.randomUUID().toString(),
                                         vedtaksperiodeId = vedtaksperiodeId.toString(),
                                         utbetaling = GraphQLUtbetaling(
-                                            id = UUID.randomUUID().toString(),
+                                            id = utbetalingId.toString(),
                                             arbeidsgiverFagsystemId = "EN_FAGSYSTEMID",
                                             arbeidsgiverNettoBelop = 30000,
                                             personFagsystemId = "EN_FAGSYSTEMID",

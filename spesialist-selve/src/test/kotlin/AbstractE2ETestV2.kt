@@ -17,6 +17,7 @@ import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SAKSBEHANDLER_EPOST
+import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
@@ -168,7 +169,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UTBETALING_ID,
     ) {
         nyUtbetalingId(utbetalingId)
         meldingssenderV2.sendVedtaksperiodeNyUtbetaling(
@@ -283,7 +284,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UTBETALING_ID,
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,

@@ -63,7 +63,8 @@ internal class VedtaksperiodeGenerasjonE2ETest : AbstractE2ETestV2() {
         håndterSaksbehandlerløsning()
         håndterVedtakFattet()
 
-        håndterGodkjenningsbehov(harOppdatertMetainfo = true) //revurdering
+        val utbetalingId2 = UUID.randomUUID()
+        håndterGodkjenningsbehov(utbetalingId = utbetalingId2, harOppdatertMetainfo = true) //revurdering
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
         assertLåsteGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }

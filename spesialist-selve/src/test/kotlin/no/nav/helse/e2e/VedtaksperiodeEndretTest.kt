@@ -22,8 +22,9 @@ internal class VedtaksperiodeEndretTest : AbstractE2ETest() {
 
     @Test
     fun `vedtaksperiode_endret erstatter spleis-warnings og lagrer de med verdi fra feltet tidsstempel`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot()
-        vedtaksperiode(utbetalingId = UUID.randomUUID())
+        val utbetalingId = UUID.randomUUID()
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshot(utbetalingId = utbetalingId)
+        vedtaksperiode(utbetalingId = utbetalingId)
 
         val tidspunkter = finnWarningsOpprettet(VEDTAKSPERIODE_ID)
         sendVedtaksperiodeEndret(aktørId = AKTØR, fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, vedtaksperiodeId = VEDTAKSPERIODE_ID)

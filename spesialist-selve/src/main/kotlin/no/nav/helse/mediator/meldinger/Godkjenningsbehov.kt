@@ -102,11 +102,12 @@ internal class Godkjenningsbehov(
     overstyringDao: OverstyringDao,
     snapshotMediator: SnapshotMediator,
 ) : Hendelse, MacroCommand() {
+
+    // lambda fordi mange av testene ikke sørger for at utbetalingen fins i databasen før godkjenningsbehovet behandles
+    private val utbetalingsfinner = { snapshotMediator.finnUtbetaling(fødselsnummer, utbetalingId) }
+
     private val utbetalingsfilter: () -> Utbetalingsfilter = {
-        val utbetaling = snapshotMediator.finnUtbetaling(
-            fødselsnummer = fødselsnummer,
-            utbetalingId = utbetalingId
-        )
+        val utbetaling = utbetalingsfinner()
         Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
             harUtbetalingTilSykmeldt = utbetaling.utbetalingTilSykmeldt(),
@@ -197,7 +198,8 @@ internal class Godkjenningsbehov(
             varselRepository = varselRepository,
             generasjonRepository = generasjonRepository,
             organisasjonsnummer = organisasjonsnummer,
-            førstegangsbehandling = førstegangsbehandling
+            førstegangsbehandling = førstegangsbehandling,
+            utbetalingsfinner = utbetalingsfinner,
         ),
         AutomatiskAvvisningCommand(
             fødselsnummer = fødselsnummer,

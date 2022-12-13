@@ -11,6 +11,7 @@ import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.FØDSELSNUMMER
+import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -20,7 +21,7 @@ import org.junit.jupiter.api.Test
 internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
-        vedtaksperiode(utbetalingId = UUID.randomUUID())
+        vedtaksperiode(utbetalingId = UTBETALING_ID)
         val originaleBehov = testRapid.inspektør.behov().size
         val hendelseId = sendAdressebeskyttelseEndret()
 
@@ -55,7 +56,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
             aktørId = Testdata.AKTØR,
             fødselsnummer = FØDSELSNUMMER,
             organisasjonsnummer = Testdata.ORGNR,
-            utbetalingId = Testdata.UTBETALING_ID,
+            utbetalingId = UTBETALING_ID,
             type = "UTBETALING",
             status = Utbetalingsstatus.UTBETALT,
         )

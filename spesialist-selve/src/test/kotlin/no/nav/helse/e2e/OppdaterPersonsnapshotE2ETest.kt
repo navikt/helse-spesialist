@@ -31,19 +31,19 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
-    private val vedtaksperiodeId1: UUID = randomUUID()
-    private val vedtaksperiodeId2: UUID = randomUUID()
-    private val utbetalingId1: UUID = randomUUID()
-    private val utbetalingId2: UUID = randomUUID()
-    private val snapshotV1 = snapshot(1)
-    private val snapshotV2 = snapshot(2)
-    private val snapshotFinal = snapshot(3)
 
     @Test
     fun `Oppdater personsnapshot oppdaterer alle snapshots på personen`() {
-        vedtaksperiode(vedtaksperiodeId1, snapshotV1, utbetalingId1, Periodetype.FØRSTEGANGSBEHANDLING)
-        vedtaksperiode(vedtaksperiodeId2, snapshotV2, utbetalingId2, Periodetype.FORLENGELSE)
+        val vedtaksperiodeId1 = randomUUID()
+        val utbetalingId1 = randomUUID()
+        val snapshot1 = snapshot(1, utbetalingId = utbetalingId1)
+        vedtaksperiode(vedtaksperiodeId1, snapshot1, utbetalingId1, Periodetype.FØRSTEGANGSBEHANDLING)
+        val vedtaksperiodeId2 = randomUUID()
+        val utbetalingId2 = randomUUID()
+        val snapshot2 = snapshot(2, utbetalingId = utbetalingId2)
+        vedtaksperiode(vedtaksperiodeId2, snapshot2, utbetalingId2, Periodetype.FORLENGELSE)
 
+        val snapshotFinal = snapshot(3)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
         sendOppdaterPersonsnapshot()
 
@@ -53,8 +53,9 @@ internal class OppdaterPersonsnapshotE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer også Infotrygd-utbetalinger`() {
-        vedtaksperiode(vedtaksperiodeId1, snapshotV1, utbetalingId1, Periodetype.FØRSTEGANGSBEHANDLING)
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotFinal
+        val utbetalingId = randomUUID()
+        val snapshot = snapshot(1, utbetalingId = utbetalingId)
+        vedtaksperiode(randomUUID(), snapshot, utbetalingId, Periodetype.FØRSTEGANGSBEHANDLING)
         sendOppdaterPersonsnapshot()
 
         assertInfotrygdutbetalingerOppdatert(FØDSELSNUMMER)

@@ -51,7 +51,8 @@ object Testdata {
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         orgnr = ORGNR,
         fnr = FØDSELSNUMMER,
-        aktørId = AKTØR
+        aktørId = AKTØR,
+        utbetalingId = UTBETALING_ID,
     )
 
     val SNAPSHOT_UTEN_WARNINGS = snapshot()
@@ -60,7 +61,7 @@ object Testdata {
         versjon: Int = 1,
         fødselsnummer: String = FØDSELSNUMMER,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverbeløp: Int = 30000,
         personbeløp: Int = 0,
         utbetaling: GraphQLUtbetaling = GraphQLUtbetaling(

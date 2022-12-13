@@ -928,9 +928,10 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val UTBETALING_ID2 = UUID.randomUUID()
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns snapshotMedWarnings(
             vedtaksperiodeId = VEDTAKSPERIODE_ID2,
-            aktørId = AKTØR,
+            orgnr = ORGNR,
             fnr = FØDSELSNUMMER,
-            orgnr = ORGNR
+            aktørId = AKTØR,
+            utbetalingId = UTBETALING_ID2,
         )
 
         val godkjenningsmeldingId2 = sendGodkjenningsbehov(
@@ -1175,7 +1176,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vergemål: VergemålJson = VergemålJson(),
         snapshot: GraphQLClientResponse<HentSnapshot.Result>? = SNAPSHOT_UTEN_WARNINGS,
         automatisertEllerAvvist: Boolean = false
-
     ): UUID {
         snapshot?.also {
             every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns it

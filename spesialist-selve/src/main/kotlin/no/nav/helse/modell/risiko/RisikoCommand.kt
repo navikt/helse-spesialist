@@ -7,11 +7,13 @@ import no.nav.helse.mediator.meldinger.løsninger.Risikovurderingløsning
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.utbetalingTilSykmeldt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varselkode.SB_RV_1
 import no.nav.helse.modell.vedtak.Warning
 import no.nav.helse.modell.vedtak.WarningKilde
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.tellWarning
 import org.slf4j.LoggerFactory
 
@@ -22,8 +24,12 @@ internal class RisikoCommand(
     private val varselRepository: VarselRepository,
     private val generasjonRepository: GenerasjonRepository,
     private val organisasjonsnummer: String,
-    private val førstegangsbehandling: Boolean
+    private val førstegangsbehandling: Boolean,
+    private val utbetalingsfinner: () -> GraphQLUtbetaling?,
 ) : Command {
+
+    val utbetaling
+        get() = checkNotNull(utbetalingsfinner()) { "Forventer å kunne finne utbetaling før kjøring av RisikoCommand" }
 
     override fun execute(context: CommandContext) = behandle(context)
 
@@ -38,7 +44,8 @@ internal class RisikoCommand(
             context.behov("Risikovurdering", mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "organisasjonsnummer" to organisasjonsnummer,
-                "førstegangsbehandling" to førstegangsbehandling
+                "førstegangsbehandling" to førstegangsbehandling,
+                "kunRefusjon" to !utbetaling.utbetalingTilSykmeldt(),
             ))
             return false
         }

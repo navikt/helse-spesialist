@@ -1,6 +1,7 @@
 package no.nav.helse.e2e
 
 import AbstractE2ETest
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import java.util.UUID
 import kotliquery.queryOf
@@ -14,14 +15,17 @@ import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
+import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
 import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.Testdata.snapshot
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 private class RisikovurderingE2ETest : AbstractE2ETest() {
@@ -67,6 +71,19 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         )
 
         assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
+    }
+
+    @Test
+    fun `sender med kunRefusjon`() {
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns
+                snapshot(personbeløp = 0, arbeidsgiverbeløp = 42, utbetalingId = UTBETALING_ID)
+
+        godkjenningsoppgave(funn = emptyList())
+
+        val riskbehov = testRapid.inspektør.hendelser("behov").first {
+            it["@behov"].map(JsonNode::asText).contains("Risikovurdering")
+        }
+        assertTrue(riskbehov["Risikovurdering"]["kunRefusjon"].asBoolean())
     }
 
     fun godkjenningsoppgave(

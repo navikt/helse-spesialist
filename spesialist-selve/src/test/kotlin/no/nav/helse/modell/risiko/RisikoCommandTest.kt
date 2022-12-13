@@ -16,6 +16,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.graphql.hentsnapshot.GraphQLUtbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,6 +29,7 @@ internal class RisikoCommandTest {
     private val warningDao = mockk<WarningDao>()
     private val varselRepository = mockk<VarselRepository>()
     private val generasjonRepository = mockk<GenerasjonRepository>()
+    private val utbetalingMock = mockk<GraphQLUtbetaling>(relaxed = true)
 
     private companion object {
         private const val ORGNUMMER = "123456789"
@@ -59,6 +61,28 @@ internal class RisikoCommandTest {
         assertEquals(1, context.behov().size)
         assertEquals("Risikovurdering", context.behov().keys.first())
         assertTrue(context.behov().getValue("Risikovurdering").keys.contains("førstegangsbehandling"))
+    }
+
+    @Test
+    fun `Sender kunRefusjon=true når det ikke skal utbetales noe til den sykmeldte`() {
+        every { utbetalingMock.arbeidsgiverNettoBelop } returns 1
+        every { utbetalingMock.personNettoBelop } returns 0
+
+        risikoCommand().assertFalse()
+
+        val risikobehov = context.behov().getValue("Risikovurdering")
+        assertTrue(risikobehov["kunRefusjon"] as Boolean)
+    }
+
+    @Test
+    fun `Sender kunRefusjon=false når det er utbetaling til den sykmeldte`() {
+        every { utbetalingMock.arbeidsgiverNettoBelop } returns 1
+        every { utbetalingMock.personNettoBelop } returns 1
+
+        risikoCommand().assertFalse()
+
+        val risikobehov = context.behov().getValue("Risikovurdering")
+        assertFalse(risikobehov["kunRefusjon"] as Boolean)
     }
 
     @Test
@@ -128,6 +152,7 @@ internal class RisikoCommandTest {
         varselRepository = varselRepository,
         generasjonRepository = generasjonRepository,
         organisasjonsnummer = organisasjonsnummer,
-        førstegangsbehandling = førstegangsbehandling
+        førstegangsbehandling = førstegangsbehandling,
+        utbetalingsfinner = { utbetalingMock },
     )
 }
