@@ -37,7 +37,7 @@ internal class VarselDao(private val dataSource: DataSource) {
     ) {
         @Language("PostgreSQL")
         val query =
-            "INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref, definisjon_ref) VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), null) ON CONFLICT (unik_id) DO NOTHING;"
+            "INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref, definisjon_ref) VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), null);"
 
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, varselId, varselkode, vedtaksperiodeId, opprettet, generasjonId).asUpdate)

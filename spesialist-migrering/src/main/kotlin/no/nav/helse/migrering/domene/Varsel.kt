@@ -45,7 +45,7 @@ internal class Varsel(
                 keyValue("varselId", id),
                 keyValue("varselkode", varselkode),
             )
-            e.printStackTrace()
+            throw e
         }
 
     }
