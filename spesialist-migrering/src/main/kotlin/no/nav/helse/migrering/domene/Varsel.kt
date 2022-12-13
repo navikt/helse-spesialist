@@ -2,7 +2,10 @@ package no.nav.helse.migrering.domene
 
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.migrering.db.SpesialistDao
+import org.postgresql.util.PSQLException
+import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 internal class Varsel(
@@ -22,17 +25,29 @@ internal class Varsel(
     }
 
     internal fun lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
-        spesialistDao.lagreVarsel(
-            generasjonId = generasjonId,
-            definisjonRef = if (status in listOf("AKTIV", "INAKTIV")) null else definisjonRef,
-            varselkode = varselkode,
-            varselId = id,
-            vedtaksperiodeId = vedtaksperiodeId,
-            opprettet = opprettet,
-            statusEndretIdent = ident,
-            statusEndretTidspunkt = statusEndretTidspunkt,
-            status = status
-        )
+        try {
+            spesialistDao.lagreVarsel(
+                generasjonId = generasjonId,
+                definisjonRef = if (status in listOf("AKTIV", "INAKTIV")) null else definisjonRef,
+                varselkode = varselkode,
+                varselId = id,
+                vedtaksperiodeId = vedtaksperiodeId,
+                opprettet = opprettet,
+                statusEndretIdent = ident,
+                statusEndretTidspunkt = statusEndretTidspunkt,
+                status = status
+            )
+        } catch (e: PSQLException) {
+            sikkerlogg.info(
+                "Kunne ikke lagre varsel: {}, {}, {}, {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("generasjonId", generasjonId),
+                keyValue("varselId", id),
+                keyValue("varselkode", varselkode),
+            )
+            e.printStackTrace()
+        }
+
     }
 
     internal fun erFør(tidspunkt: LocalDateTime) = opprettet <= tidspunkt
@@ -58,6 +73,7 @@ internal class Varsel(
     }
 
     internal companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         internal fun List<Varsel>.varslerFor(vedtaksperiodeId: UUID): List<Varsel> {
             return filter { it.vedtaksperiodeId == vedtaksperiodeId }
         }
@@ -65,11 +81,11 @@ internal class Varsel(
         internal fun List<Varsel>.lagre(generasjonId: UUID, ident: String?, statusEndretTidspunkt: LocalDateTime?, status: String, spesialistDao: SpesialistDao) {
             forEach {
                 it.lagre(
-                    generasjonId,
-                    it.inaktivFra?.let { "Spesialist" } ?: ident,
-                    it.inaktivFra ?: statusEndretTidspunkt,
-                    it.inaktivFra?.let { "INAKTIV" } ?: status,
-                    spesialistDao
+                    generasjonId = generasjonId,
+                    ident = it.inaktivFra?.let { "Spesialist" } ?: ident,
+                    statusEndretTidspunkt = it.inaktivFra ?: statusEndretTidspunkt,
+                    status = it.inaktivFra?.let { "INAKTIV" } ?: status,
+                    spesialistDao = spesialistDao
                 )
             }
         }
@@ -85,7 +101,9 @@ internal class Varsel(
         }
 
         internal fun List<Varsel>.dedup(): List<Varsel> {
-            return sortedByDescending { it.opprettet }.distinctBy { it.varselkode }
+            return sortedByDescending { it.opprettet }
+                .distinctBy { it.varselkode }
+                .distinctBy { it.id }
         }
     }
 }

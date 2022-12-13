@@ -87,7 +87,7 @@ internal class SpesialistDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val query = """
                 INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref, definisjon_ref, status_endret_ident, status_endret_tidspunkt, status) 
-                VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?), ?, ?, ?, ?);
+                VALUES (?, ?, ?, ?, (SELECT id FROM selve_vedtaksperiode_generasjon svg WHERE svg.unik_id = ?), ?, ?, ?, ?);
             """
 
         sessionOf(dataSource).use { session ->
