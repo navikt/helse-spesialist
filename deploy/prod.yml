@@ -24,8 +24,8 @@ spec:
       cpu: 100m
       memory: 512Mi
   replicas:
-    min: 12
-    max: 12
+    min: 0
+    max: 0
     cpuThresholdPercentage: 70
   prometheus:
     enabled: true
@@ -102,4 +102,4 @@ spec:
     - name: KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: VEDTAKSPERIODE_GENERASJONER
-      value: "false"
+      value: "true"
