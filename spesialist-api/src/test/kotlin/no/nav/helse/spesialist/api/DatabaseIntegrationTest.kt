@@ -100,13 +100,13 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             )
         }
 
-    protected fun opprettVarseldefinisjon(tittel: String = "EN_TITTEL", kode: String = "EN_KODE"): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+    protected fun opprettVarseldefinisjon(tittel: String = "EN_TITTEL", kode: String = "EN_KODE", definisjonId: UUID = UUID.randomUUID()): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
         @Language("PostgreSQL")
         val query = """
             INSERT INTO api_varseldefinisjon(unik_id, kode, tittel, forklaring, handling, opprettet) 
             VALUES (?, ?, ?, ?, ?, ?)    
         """
-        requireNotNull(session.run(queryOf(query, UUID.randomUUID(), kode, tittel, null, null, LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
+        requireNotNull(session.run(queryOf(query, definisjonId, kode, tittel, null, null, LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
     }
 
     protected fun klargjørVedtak(

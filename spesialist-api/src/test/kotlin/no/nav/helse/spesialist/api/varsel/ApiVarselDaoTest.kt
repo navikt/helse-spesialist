@@ -39,13 +39,14 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     fun `Finner siste definisjon for varsler når definisjonsRef ikke finnes`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         opprettVarseldefinisjon()
-        opprettVarseldefinisjon("EN_NY_TITTEL")
+        opprettVarseldefinisjon(tittel = "EN_NY_TITTEL", definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
-        val forventetVarsel = Varsel(varselId, "EN_KODE", "EN_NY_TITTEL", null, null, null)
+        val forventetVarsel = Varsel(varselId, definisjonId,"EN_KODE", "EN_NY_TITTEL", null, null, null)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
     }
@@ -54,13 +55,14 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     fun `Finner riktig definisjon for varsler når varselet har definisjonRef`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val definisjonRef = opprettVarseldefinisjon("EN_TITTEL")
+        val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL", definisjonId = definisjonId)
         opprettVarseldefinisjon("EN_NY_TITTEL")
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
-        val forventetVarsel = Varsel(varselId, "EN_KODE", "EN_TITTEL", null, null, null)
+        val forventetVarsel = Varsel(varselId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
     }
