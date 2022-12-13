@@ -140,7 +140,10 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendEndretSkjermetinfo(skjermet: Boolean, fødselsnummer: String = Testdata.FØDSELSNUMMER) {
+    fun sendEndretSkjermetinfo(
+        fødselsnummer: String,
+        skjermet: Boolean,
+    ) {
         @Language("JSON")
         val json = """{
           "@event_name": "endret_skjermetinfo",

@@ -77,7 +77,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
         assertKanHentePerson()
 
-        meldingssenderV2.sendEndretSkjermetinfo(true)
+        meldingssenderV2.sendEndretSkjermetinfo(FØDSELSNUMMER, true)
 
         assertKanIkkeHentePerson("Har ikke tilgang til person med fødselsnummer ")
 

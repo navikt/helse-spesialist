@@ -22,6 +22,7 @@ import no.nav.helse.Testdata.snapshot
 import no.nav.helse.januar
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
+import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
@@ -193,6 +194,13 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             varselkoder = varselkoder
         )
+    }
+
+    protected fun håndterEndretSkjermetinfo(
+        fødselsnummer: String = FØDSELSNUMMER,
+        skjermet: Boolean
+    ) {
+        meldingssenderV2.sendEndretSkjermetinfo(fødselsnummer, skjermet)
     }
 
     protected fun håndterGosysOppgaveEndret(aktørId: String = AKTØR, fødselsnummer: String = FØDSELSNUMMER) {
@@ -538,6 +546,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
+    }
+
+    protected fun assertSkjermet(fødselsnummer: String = FØDSELSNUMMER, skjermet: Boolean?) {
+        assertEquals(skjermet, EgenAnsattDao(dataSource).erEgenAnsatt(fødselsnummer))
     }
 
     protected fun assertNyttSnapshot(block: () -> Unit) {
