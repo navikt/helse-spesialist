@@ -11,6 +11,7 @@ on:
       - 'build.gradle.kts'
       - '.github/workflows/spesialist-migrering.yml'
       - 'deploy/dev-migrering.yml'
+      - 'deploy/prod-migrering.yml'
       - '.dockerignore'
 
 jobs:
