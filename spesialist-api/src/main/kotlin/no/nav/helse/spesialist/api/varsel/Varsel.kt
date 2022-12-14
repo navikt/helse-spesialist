@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 
 data class Varsel(
-    private val id: UUID,
+    private val generasjonId: UUID,
     private val definisjonId: UUID,
     private val kode: String,
     private val tittel: String,
@@ -20,7 +20,7 @@ data class Varsel(
         }
     }
 
-    internal fun toDto() = VarselDTO(id.toString(), definisjonId.toString(), kode, tittel, forklaring, handling, vurdering?.toDto())
+    internal fun toDto() = VarselDTO(generasjonId.toString(), definisjonId.toString(), kode, tittel, forklaring, handling, vurdering?.toDto())
 
     data class Varselvurdering(
         private val ident: String,

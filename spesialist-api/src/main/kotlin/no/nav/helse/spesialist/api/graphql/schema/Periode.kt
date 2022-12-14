@@ -223,7 +223,7 @@ data class Refusjon(
 }
 
 data class VarselDTO(
-    val id: UUIDString,
+    val generasjonId: UUIDString,
     val definisjonId: UUIDString,
     val kode: String,
     val tittel: String,
