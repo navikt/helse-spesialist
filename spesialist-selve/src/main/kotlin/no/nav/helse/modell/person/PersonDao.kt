@@ -311,7 +311,7 @@ internal class PersonDao(private val dataSource: DataSource) {
                         INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
                         VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
                     """
-                    session.run(
+                    transaction.run(
                         queryOf(
                             query,
                             mapOf(
