@@ -24,19 +24,19 @@ import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 private class RisikovurderingE2ETest : AbstractE2ETest() {
 
-    private val funn1 = listOf(Risikofunn(
+    private val funnSomKreverRiskTilgang = listOf(Risikofunn(
         kategori = listOf("8-4"),
         beskrivelse = "ny sjekk ikke ok",
         kreverSupersaksbehandler = true
     ))
 
-    private val funn2 = listOf(Risikofunn(
+    private val funnSomAlleKanBehandle = listOf(Risikofunn(
         kategori = listOf("8-4"),
         beskrivelse = "8-4 ikke ok",
         kreverSupersaksbehandler = false
@@ -45,7 +45,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter oppgave av type RISK_QA`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        godkjenningsoppgave(funn1, VEDTAKSPERIODE_ID)
+        godkjenningsoppgave(funnSomKreverRiskTilgang, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("RISK_QA", VEDTAKSPERIODE_ID)
     }
@@ -53,22 +53,7 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `oppretter oppgave av type SØKNAD`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        godkjenningsoppgave(funn2, VEDTAKSPERIODE_ID)
-
-        assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `Venter på alle løsninger på utstedte risikobehov`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        godkjenningsoppgave(
-            funn = funn2,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            ekstraArbeidsgivere = listOf(
-                Testmeldingfabrikk.ArbeidsgiverinformasjonJson("456789123", "Shappa på hjørnet", listOf("Sjappe")),
-                Testmeldingfabrikk.ArbeidsgiverinformasjonJson("789456123", "Borti der", listOf("Skredsøker"))
-            )
-        )
+        godkjenningsoppgave(funnSomAlleKanBehandle, VEDTAKSPERIODE_ID)
 
         assertOppgaveType("SØKNAD", VEDTAKSPERIODE_ID)
     }
@@ -130,16 +115,13 @@ private class RisikovurderingE2ETest : AbstractE2ETest() {
         )
     }
 
-    private fun assertOppgaveType(forventet: String, vedtaksperiodeId: UUID) {
-        Assertions.assertEquals(forventet, sessionOf(dataSource).use  {
+    private fun assertOppgaveType(forventet: String, vedtaksperiodeId: UUID) =
+        assertEquals(forventet, sessionOf(dataSource).use {
             it.run(
                 queryOf(
-                    "SELECT type FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id=:vedtaksperiodeId)",
-                    mapOf(
-                        "vedtaksperiodeId" to vedtaksperiodeId
-                    )
+                    "SELECT type FROM oppgave JOIN vedtak on vedtak.id = vedtak_ref WHERE vedtaksperiode_id = :vedtaksperiodeId",
+                    mapOf("vedtaksperiodeId" to vedtaksperiodeId)
                 ).map { row -> row.string("type") }.asSingle
             )
         })
-    }
 }
