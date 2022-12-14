@@ -28,12 +28,24 @@ data class Varsel(
         private val status: Varselstatus,
     ) {
         internal fun toDto() = VarselvurderingDTO(ident, tidsstempel.toString(), status)
+        override fun equals(other: Any?): Boolean =
+            this === other || (other is Varselvurdering
+            && javaClass == other.javaClass
+            && ident == other.ident
+            && status == other.status)
+
+        override fun hashCode(): Int {
+            var result = ident.hashCode()
+            result = 31 * result + tidsstempel.hashCode()
+            result = 31 * result + status.hashCode()
+            return result
+        }
     }
 
     enum class Varselstatus {
+        AKTIV,
         VURDERT,
         GODKJENT,
         AVVIST,
-        INAKTIV
     }
 }

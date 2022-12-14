@@ -13,4 +13,21 @@ class ApiVarselRepository(dataSource: DataSource) {
         return varselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).toDto()
     }
 
+    fun settStatusVurdert(
+        generasjonId: UUID,
+        definisjonId: UUID,
+        varselkode: String,
+        ident: String,
+    ): Int {
+        return varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)
+    }
+
+    fun settStatusAktiv(
+        generasjonId: UUID,
+        varselkode: String,
+        ident: String
+    ): Int {
+        return varselDao.settStatusAktiv(generasjonId, varselkode, ident)
+    }
+
 }

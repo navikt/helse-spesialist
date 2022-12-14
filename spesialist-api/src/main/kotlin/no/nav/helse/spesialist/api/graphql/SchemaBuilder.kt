@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
 import no.nav.helse.spesialist.api.egenAnsatt.EgenAnsattApiDao
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
+import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.NotatQuery
 import no.nav.helse.spesialist.api.graphql.query.OppdragQuery
@@ -96,6 +97,9 @@ internal class SchemaBuilder(
             mutations = listOf(
                 TopLevelObject(
                     NotatMutation(notatDao = notatDao)
+                ),
+                TopLevelObject(
+                    VarselMutation(varselRepository = varselRepository)
                 )
             )
         )
