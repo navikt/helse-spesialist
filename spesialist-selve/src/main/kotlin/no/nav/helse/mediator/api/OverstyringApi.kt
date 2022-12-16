@@ -59,6 +59,8 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
+        val harOverstyringAvRefusjonTilgang = saksbehandler.toDto().ident == "N115007"
+
         val message = OverstyrInntektKafkaDto(
             organisasjonsnummer = overstyring.organisasjonsnummer,
             fødselsnummer = overstyring.fødselsnummer,
@@ -70,8 +72,8 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
             fraMånedligInntekt = overstyring.fraMånedligInntekt,
             skjæringstidspunkt = overstyring.skjæringstidspunkt,
             subsumsjon = overstyring.subsumsjon,
-            refusjonsopplysninger = if (Toggle.Refusjonsendringer.enabled) overstyring.refusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
-            fraRefusjonsopplysninger = if (Toggle.Refusjonsendringer.enabled) overstyring.fraRefusjonsopplysninger else null, //TODO Slå av toggle når speil er klar
+            refusjonsopplysninger = if (Toggle.Refusjonsendringer.enabled || harOverstyringAvRefusjonTilgang) overstyring.refusjonsopplysninger else null, //TODO Slå av toggle og tilgangsstyring når speil er klar
+            fraRefusjonsopplysninger = if (Toggle.Refusjonsendringer.enabled || harOverstyringAvRefusjonTilgang) overstyring.fraRefusjonsopplysninger else null, //TODO Slå av toggle og tilgangsstyring når speil er klar
         )
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
