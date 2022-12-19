@@ -82,11 +82,23 @@ internal class DefinisjonDaoTest: DatabaseIntegrationTest() {
     @Test
     fun `finner siste definisjon for kode`() {
         val definisjonsId = UUID.randomUUID()
-        definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now().minusHours(1))
         definisjonDao.lagreDefinisjon(definisjonsId, "EN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, LocalDateTime.now())
         val definisjon = definisjonDao.sisteDefinisjonFor("EN_KODE")
 
         assertEquals(Varseldefinisjon(definisjonsId, "EN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, LocalDateTime.now()), definisjon)
+    }
+
+    @Test
+    fun `finner siste definisjon i tid for kode`() {
+        val definisjonsId = UUID.randomUUID()
+        val nå = LocalDateTime.now()
+        val ettÅrSiden = LocalDateTime.now().minusYears(1)
+        definisjonDao.lagreDefinisjon(definisjonsId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, nå)
+        definisjonDao.lagreDefinisjon(UUID.randomUUID(), "EN_KODE", "EN_ANNEN_TITTEL", "EN_ANNEN_FORKLARING", "EN_ANNEN_HANDLING", false, ettÅrSiden)
+        val definisjon = definisjonDao.sisteDefinisjonFor("EN_KODE")
+
+        assertEquals(Varseldefinisjon(definisjonsId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now()), definisjon)
     }
 
     private fun alleDefinisjoner(): List<Varseldefinisjon> {

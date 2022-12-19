@@ -27,7 +27,7 @@ class DefinisjonDao(private val dataSource: DataSource) {
 
     internal fun sisteDefinisjonFor(varselkode: String): Varseldefinisjon {
         @Language("PostgreSQL")
-        val query = "SELECT * FROM api_varseldefinisjon WHERE kode = ? ORDER BY id DESC;"
+        val query = "SELECT * FROM api_varseldefinisjon WHERE kode = ? ORDER BY opprettet DESC;"
 
         return requireNotNull(sessionOf(dataSource).use { session ->
             session.run(
