@@ -9,6 +9,7 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object BeholdForlengelseMedOvergangTilUTS: Toggle("BEHOLD_FORELENGELSER_TIL_UTS")
     object VedtaksperiodeGenerasjoner: Toggle("VEDTAKSPERIODE_GENERASJONER")
+    object VurderingAvVarsler: Toggle("VURDERING_AV_VARSLER")
     object Inntekter: Toggle("INNTEKTER", true)
 
     object Refusjonsendringer : Toggle("REFUSJONSENDRINGER", erDev())

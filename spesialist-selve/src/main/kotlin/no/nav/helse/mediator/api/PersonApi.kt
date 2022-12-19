@@ -17,11 +17,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
 import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(
+    varselRepository: ApiVarselRepository,
     hendelseMediator: HendelseMediator,
     oppgaveMediator: OppgaveMediator,
     tilgangsgrupper: Tilgangsgrupper,
@@ -71,6 +74,21 @@ internal fun Route.personApi(
             )
             return@post
         }
+
+        val antallIkkeVurderteVarsler =
+            if (Toggle.VurderingAvVarsler.enabled) varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
+            else 0
+        if (antallIkkeVurderteVarsler > 0 ) {
+            call.respond(
+                status = HttpStatusCode.BadRequest,
+                mapOf(
+                    "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
+                    "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
+                )
+            )
+            return@post
+        }
+
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
         if (erBeslutteroppgave) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil

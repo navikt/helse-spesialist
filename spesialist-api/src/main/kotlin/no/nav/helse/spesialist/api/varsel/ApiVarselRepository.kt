@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.varsel
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
+import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 
 class ApiVarselRepository(dataSource: DataSource) {
@@ -11,6 +12,11 @@ class ApiVarselRepository(dataSource: DataSource) {
 
     internal fun finnVarslerFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<VarselDTO> {
         return varselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).toDto()
+    }
+
+    fun ikkeVurderteVarslerFor(oppgaveId: Long): Int {
+        val alleVarsler = varselDao.finnVarslerFor(oppgaveId) ?: throw IllegalArgumentException("Ugyldig oppgaveId")
+        return alleVarsler.antallIkkeVurderte()
     }
 
     fun settStatusVurdert(

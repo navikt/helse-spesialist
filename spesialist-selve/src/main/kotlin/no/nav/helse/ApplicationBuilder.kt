@@ -297,6 +297,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             routing {
                 authenticate("oidc") {
                     personApi(
+                        varselRepository = apiVarselRepository,
                         hendelseMediator = hendelseMediator,
                         oppgaveMediator = oppgaveMediator,
                         tilgangsgrupper = tilgangsgrupper,

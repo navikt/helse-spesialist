@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 
 data class Varsel(
     private val generasjonId: UUID,
@@ -18,21 +19,34 @@ data class Varsel(
         internal fun List<Varsel>.toDto(): List<VarselDTO> {
             return map { it.toDto() }
         }
+
+        internal fun List<Varsel>.antallIkkeVurderte(): Int {
+            return filter { it.vurdering?.erIkkeVurdert() ?: false }.size
+        }
     }
 
-    internal fun toDto() = VarselDTO(generasjonId.toString(), definisjonId.toString(), kode, tittel, forklaring, handling, vurdering?.toDto())
+    internal fun toDto() = VarselDTO(
+        generasjonId.toString(),
+        definisjonId.toString(),
+        kode,
+        tittel,
+        forklaring,
+        handling,
+        vurdering?.toDto()
+    )
 
     data class Varselvurdering(
         private val ident: String,
         private val tidsstempel: LocalDateTime,
         private val status: Varselstatus,
     ) {
+        internal fun erIkkeVurdert() = status == AKTIV
         internal fun toDto() = VarselvurderingDTO(ident, tidsstempel.toString(), status)
         override fun equals(other: Any?): Boolean =
             this === other || (other is Varselvurdering
-            && javaClass == other.javaClass
-            && ident == other.ident
-            && status == other.status)
+                    && javaClass == other.javaClass
+                    && ident == other.ident
+                    && status == other.status)
 
         override fun hashCode(): Int {
             var result = ident.hashCode()

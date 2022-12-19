@@ -31,6 +31,7 @@ import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,6 +44,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
 
+    private val apiVarselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
     private val saksbehandlerIdent = "1234"
@@ -260,6 +262,7 @@ internal class PersonApiTest {
             routing {
                 authenticate("oidc") {
                     personApi(
+                        apiVarselRepository,
                         hendelseMediator,
                         oppgaveMediator,
                         Tilgangsgrupper(

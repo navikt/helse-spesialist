@@ -19,6 +19,19 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "utbetaling_id" to utbetalingId)) { mapVarsel(it) }
 
+    internal fun finnVarslerFor(oppgaveId: Long): List<Varsel>? {
+        val data = queryize(
+            """
+            SELECT vedtaksperiode_id, utbetaling_id FROM oppgave 
+                JOIN vedtak v ON oppgave.vedtak_ref = v.id
+                WHERE oppgave.id = :oppgave_id;
+        """
+        ).single(mapOf("oppgave_id" to oppgaveId)) { it.uuid("vedtaksperiode_id") to it.uuid("utbetaling_id") }
+            ?: return null
+        val (vedtaksperiodeId, utbetalingId) = data
+        return finnVarslerFor(vedtaksperiodeId, utbetalingId)
+    }
+
     internal fun settStatusVurdert(
         generasjonId: UUID,
         definisjonId: UUID,
