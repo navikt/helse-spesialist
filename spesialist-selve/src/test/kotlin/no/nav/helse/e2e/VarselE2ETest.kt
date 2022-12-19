@@ -211,10 +211,10 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     @Test
     fun `godkjenner varsler når periode blir godkjent`() {
         fremTilSaksbehandleroppgave(
+            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)),
             risikofunn = listOf(
                 Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false)
-            ),
-            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX))
+            )
         )
         håndterSaksbehandlerløsning()
         assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, GODKJENT)
@@ -224,10 +224,10 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
     @Test
     fun `avviser varsler når periode blir avvist`() {
         fremTilSaksbehandleroppgave(
+            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX)),
             risikofunn = listOf(
                 Risikofunn(listOf("8-4", "EN_ANNEN_KATEGORI"), "EN_BESKRIVELSE", false)
-            ),
-            fullmakter = listOf(Fullmakt(områder = listOf(Syk), LocalDate.MIN, LocalDate.MAX))
+            )
         )
         håndterSaksbehandlerløsning(godkjent = false)
         assertVarsel(SB_IK_1, VEDTAKSPERIODE_ID, AVVIST)

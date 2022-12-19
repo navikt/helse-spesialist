@@ -19,6 +19,14 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun alleFor(utbetalingId: UUID): List<Generasjon> {
+        @Language("PostgreSQL")
+        val query = "SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, låst FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = ?"
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, utbetalingId).map(::toGenerasjon).asList)
+        }
+    }
+
     internal fun låsFor(generasjonId: UUID, hendelseId: UUID): Generasjon? {
         @Language("PostgreSQL")
         val query = """

@@ -11,11 +11,12 @@ import org.junit.jupiter.api.Test
 
 internal class GenerasjonTest {
     private val varsler = mutableListOf<String>()
-    private val godkjenteVarsler = mutableListOf<String>()
+    private val godkjenteVarsler = mutableMapOf<UUID, MutableList<String>>()
     private val avvisteVarsler = mutableListOf<String>()
     private val deaktiverteVarsler = mutableListOf<String>()
     private val generasjonerMedUtbetaling = mutableMapOf<UUID, UUID>()
     private val låsteGenerasjoner = mutableMapOf<UUID, UUID>()
+    private val generasjoner = mutableMapOf<UUID, Generasjon>()
     private lateinit var generasjonId: UUID
 
     @BeforeEach
@@ -32,7 +33,7 @@ internal class GenerasjonTest {
         generasjon.håndterNyttVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjon.håndterGodkjentVarsel("SB_EX_1", "EN_IDENT", varselRepository)
         assertEquals(1, godkjenteVarsler.size)
-        assertEquals("SB_EX_1", godkjenteVarsler[0])
+        assertEquals("SB_EX_1", godkjenteVarsler[generasjonId]?.get(0))
     }
 
     @Test
@@ -46,12 +47,13 @@ internal class GenerasjonTest {
     @Test
     fun `godkjenner alle varsler når generasjonen blir godkjent`() {
         val generasjon = nyGenerasjon()
+        generasjon.håndterNyUtbetaling(UUID.randomUUID())
         generasjon.håndterNyttVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjon.håndterNyttVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), varselRepository)
         generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
-        assertEquals(2, godkjenteVarsler.size)
-        assertEquals("SB_EX_1", godkjenteVarsler[0])
-        assertEquals("SB_EX_2", godkjenteVarsler[1])
+        assertEquals(2, godkjenteVarsler[generasjonId]?.size)
+        assertEquals("SB_EX_1", godkjenteVarsler[generasjonId]?.get(0))
+        assertEquals("SB_EX_2", godkjenteVarsler[generasjonId]?.get(1))
     }
 
     @Test
@@ -113,6 +115,26 @@ internal class GenerasjonTest {
     }
 
     @Test
+    fun `godkjenner varsler for alle generasjoner som hører til samme utbetaling`() {
+        val generasjonIdV1 = UUID.randomUUID()
+        val generasjonIdV2 = UUID.randomUUID()
+        val generasjonV1 = nyGenerasjon(generasjonIdV1)
+        val generasjonV2 = nyGenerasjon(generasjonIdV2)
+        val utbetalingId = UUID.randomUUID()
+        generasjonV1.håndterNyUtbetaling(utbetalingId)
+        generasjonV2.håndterNyUtbetaling(utbetalingId)
+        generasjonV1.håndterNyttVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), varselRepository)
+        generasjonV2.håndterNyttVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), varselRepository)
+
+        generasjonV2.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
+        assertEquals(utbetalingId, generasjonerMedUtbetaling[generasjonIdV1])
+        assertEquals(utbetalingId, generasjonerMedUtbetaling[generasjonIdV2])
+
+        assertEquals("EN_KODE", godkjenteVarsler[generasjonIdV1]?.get(0))
+        assertEquals("EN_ANNEN_KODE", godkjenteVarsler[generasjonIdV2]?.get(0))
+    }
+
+    @Test
     fun `referential equals`() {
         val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
         assertEquals(generasjon, generasjon)
@@ -162,9 +184,11 @@ internal class GenerasjonTest {
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
 
-    private fun nyGenerasjon(): Generasjon {
-        generasjonId = UUID.randomUUID()
-        return Generasjon(generasjonId, UUID.randomUUID(), generasjonRepository)
+    private fun nyGenerasjon(id: UUID = UUID.randomUUID()): Generasjon {
+        generasjonId = id
+        return Generasjon(generasjonId, UUID.randomUUID(), generasjonRepository).also {
+            generasjoner[id] = it
+        }
     }
 
     private val varselRepository = object : VarselRepository {
@@ -173,7 +197,7 @@ internal class GenerasjonTest {
         }
 
         override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
-            godkjenteVarsler.add(varselkode)
+            godkjenteVarsler.getOrPut(generasjonId) { mutableListOf() }.add(varselkode)
         }
 
         override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
@@ -198,5 +222,10 @@ internal class GenerasjonTest {
             generasjonerMedUtbetaling[generasjonId] = utbetalingId
         }
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
+        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
+            return generasjonerMedUtbetaling
+                .filterValues { it == utbetalingId }
+                .mapNotNull { (key, _) -> generasjoner[key] }
+        }
     }
 }

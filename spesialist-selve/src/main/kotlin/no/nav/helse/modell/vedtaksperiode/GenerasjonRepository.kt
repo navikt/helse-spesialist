@@ -12,9 +12,58 @@ internal interface GenerasjonRepository {
     fun låsFor(generasjonId: UUID, hendelseId: UUID)
     fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
+    fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
 }
 
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
+
+    private val dao = GenerasjonDao(dataSource)
+
+    override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
+        if (dao.finnSisteFor(vedtaksperiodeId) != null) {
+            sikkerlogg.info(
+                "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId)
+            )
+            return null
+        }
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
+            it.loggFørsteOpprettet(vedtaksperiodeId)
+        }
+    }
+
+    override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
+        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
+            it.loggNesteOpprettet(vedtaksperiodeId)
+        }
+    }
+
+    override fun sisteFor(vedtaksperiodeId: UUID) =
+        dao.finnSisteFor(vedtaksperiodeId) ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
+
+    override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> {
+        return dao.alleFor(utbetalingId)
+    }
+
+    override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
+        dao.låsFor(generasjonId, hendelseId)
+            ?.loggLåst()
+            ?: sikkerlogg.error(
+                "Finner ikke generasjon med {}. Forsøkt låst av {}",
+                keyValue("generasjonId", generasjonId),
+                keyValue("hendelseId", hendelseId)
+            )
+    }
+
+    override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID) {
+        dao.utbetalingFor(generasjonId, utbetalingId)
+            ?.loggKnyttetUtbetaling(utbetalingId)
+            ?: sikkerlogg.info(
+                "Finner ikke ulåst generasjon for {}. Forsøkt knyttet til utbetaling {}",
+                keyValue("vedtaksperiodeId", generasjonId),
+                keyValue("utbetalingId", utbetalingId)
+            )
+    }
 
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -45,49 +94,4 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
         }
     }
-
-    private val dao = GenerasjonDao(dataSource)
-
-    override fun opprettFørste(vedtaksperiodeId: UUID, hendelseId: UUID, id: UUID): Generasjon? {
-        if (dao.finnSisteFor(vedtaksperiodeId) != null) {
-            sikkerlogg.info(
-                "Kan ikke opprette første generasjon for {} når det eksisterer generasjoner fra før av",
-                keyValue("vedtaksperiodeId", vedtaksperiodeId)
-            )
-            return null
-        }
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
-            it.loggFørsteOpprettet(vedtaksperiodeId)
-        }
-    }
-
-    override fun opprettNeste(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
-        return dao.opprettFor(id, vedtaksperiodeId, hendelseId).also {
-            it.loggNesteOpprettet(vedtaksperiodeId)
-        }
-    }
-
-    override fun sisteFor(vedtaksperiodeId: UUID) =
-        dao.finnSisteFor(vedtaksperiodeId) ?: throw IllegalStateException("Forventer å finne en generasjon for perioden")
-
-    override fun låsFor(generasjonId: UUID, hendelseId: UUID) {
-        dao.låsFor(generasjonId, hendelseId)
-            ?.loggLåst()
-            ?: sikkerlogg.error(
-                "Finner ikke generasjon med {}. Forsøkt låst av {}",
-                keyValue("generasjonId", generasjonId),
-                keyValue("hendelseId", hendelseId)
-            )
-    }
-
-    override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID) {
-        dao.utbetalingFor(generasjonId, utbetalingId)
-            ?.loggKnyttetUtbetaling(utbetalingId)
-            ?: sikkerlogg.info(
-                "Finner ikke ulåst generasjon for {}. Forsøkt knyttet til utbetaling {}",
-                keyValue("vedtaksperiodeId", generasjonId),
-                keyValue("utbetalingId", utbetalingId)
-            )
-    }
-
 }

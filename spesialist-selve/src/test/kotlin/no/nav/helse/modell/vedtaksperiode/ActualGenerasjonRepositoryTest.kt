@@ -129,6 +129,20 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         }
     }
 
+    @Test
+    fun `finner alle generasjoner knyttet til en utbetalingId`() {
+        val generasjonIdV1 = UUID.randomUUID()
+        val generasjonIdV2 = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+
+        val generasjonV1 = repository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonIdV1)
+        val generasjonV2 = repository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonIdV2)
+        generasjonV1?.håndterNyUtbetaling(utbetalingId)
+        generasjonV2?.håndterNyUtbetaling(utbetalingId)
+
+        assertEquals(2, repository.tilhørendeFor(utbetalingId).size)
+    }
+
     private fun assertGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {
         val generasjon = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")

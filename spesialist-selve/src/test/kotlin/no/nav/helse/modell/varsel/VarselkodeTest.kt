@@ -60,5 +60,6 @@ internal class VarselkodeTest {
         override fun låsFor(generasjonId: UUID, hendelseId: UUID): Unit = TODO("Not yet implemented")
         override fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID): Unit = TODO("Not yet implemented")
         override fun sisteFor(vedtaksperiodeId: UUID): Generasjon = TODO("Not yet implemented")
+        override fun tilhørendeFor(utbetalingId: UUID): List<Generasjon> = TODO("Not yet implemented")
     }
 }

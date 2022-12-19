@@ -96,6 +96,19 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         )
     }
 
+    @Test
+    fun `finner alle generasjoner knyttet til en utbetalingId`() {
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId1, UUID.randomUUID(), UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonId2, UUID.randomUUID(), UUID.randomUUID())
+        generasjonDao.utbetalingFor(generasjonId1, utbetalingId)
+        generasjonDao.utbetalingFor(generasjonId2, utbetalingId)
+
+        assertEquals(2, generasjonDao.alleFor(utbetalingId).size)
+    }
+
     private fun generasjonIdFor(vedtaksperiodeId: UUID): UUID {
         @Language("PostgreSQL")
         val query =
