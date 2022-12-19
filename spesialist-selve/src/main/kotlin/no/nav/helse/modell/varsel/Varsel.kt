@@ -33,8 +33,8 @@ internal class Varsel(
     }
 
     internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
-        if (status !in listOf(AKTIV, INAKTIV)) return sikkerlogg.info(
-            "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV eller INAKTIV",
+        if (status != AKTIV) return sikkerlogg.info(
+            "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV. Varselet har status=$status",
             keyValue("varselkode", varselkode),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("generasjonId", generasjonId)
@@ -55,8 +55,8 @@ internal class Varsel(
     }
 
     internal fun avvisFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
-        if (status !in listOf(AKTIV, INAKTIV)) return sikkerlogg.info(
-            "Avviser ikke varsel med {}, {}, {} som ikke har status AKTIV eller INAKTIV",
+        if (status != AKTIV) return sikkerlogg.info(
+            "Avviser ikke varsel med {}, {}, {} som ikke har status AKTIV. Varselet har status=$status",
             keyValue("varselkode", varselkode),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("generasjonId", generasjonId)
