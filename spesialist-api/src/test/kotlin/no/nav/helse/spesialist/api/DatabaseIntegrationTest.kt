@@ -76,9 +76,10 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected fun opprettVedtaksperiode(
         personId: Long,
         arbeidsgiverId: Long,
+        utbetlingId: UUID? = null,
         periode: Periode = PERIODE,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
-    ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, periode, oppgavetype) }
+    ) = opprettVedtak(personId, arbeidsgiverId, periode).also { klargjørVedtak(it, utbetlingId, periode, oppgavetype) }
 
     protected fun opprettVedtak(
         personId: Long,
@@ -111,6 +112,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun klargjørVedtak(
         vedtakId: Long,
+        utbetlingId: UUID? = null,
         periode: Periode,
         oppgavetype: Oppgavetype,
     ) {
@@ -118,7 +120,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val hendelseId = UUID.randomUUID()
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId)
+        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, oppgavetype, vedtakId, utbetlingId)
     }
 
     private fun opprettSaksbehandleroppgavetype(type: Periodetype, inntektskilde: Inntektskilde, vedtakRef: Long) =
@@ -341,6 +343,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
         oppgavetype: Oppgavetype = Oppgavetype.SØKNAD,
         vedtakRef: Long,
+        utbetlingId: UUID? = null,
         erBeslutter: Boolean = false,
         opprettet: LocalDateTime = LocalDateTime.now(),
     ) =
@@ -348,10 +351,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             sessionOf(dataSource, returnGeneratedKey = true).use { session ->
                 @Language("PostgreSQL")
                 val statement =
-                    "INSERT INTO oppgave(opprettet, oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
+                    "INSERT INTO oppgave(utbetaling_id, opprettet, oppdatert, status, vedtak_ref, type, er_beslutteroppgave) VALUES(?, ?, now(), CAST(? as oppgavestatus), ?, CAST(? as oppgavetype), ?)"
                 session.run(
                     queryOf(
                         statement,
+                        utbetlingId,
                         opprettet,
                         status.name,
                         vedtakRef,

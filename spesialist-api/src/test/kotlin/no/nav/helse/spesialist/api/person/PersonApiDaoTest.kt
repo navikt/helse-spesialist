@@ -55,7 +55,7 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
         val vedtakId = opprettVedtak(personId, opprettArbeidsgiver())
         assertPersonenErIkkeKlar()
 
-        klargjørVedtak(vedtakId, PERIODE, Oppgavetype.SØKNAD)
+        klargjørVedtak(vedtakId = vedtakId, periode = PERIODE, oppgavetype = Oppgavetype.SØKNAD)
         assertPersonenErKlar()
     }
 
@@ -68,11 +68,11 @@ internal class PersonApiDaoTest : DatabaseIntegrationTest() {
         val vedtakId = opprettVedtak(personId, arbeidsgiverId)
         assertPersonenErIkkeKlar()
 
-        klargjørVedtak(vedtakId, PERIODE, Oppgavetype.SØKNAD)
+        klargjørVedtak(vedtakId = vedtakId, periode = PERIODE, oppgavetype = Oppgavetype.SØKNAD)
         assertPersonenErKlar()
         val periode2 = Periode(UUID.randomUUID(), LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 12))
         val vedtakId2 = opprettVedtak(personId, arbeidsgiverId, periode2)
-        klargjørVedtak(vedtakId2, periode2, Oppgavetype.SØKNAD)
+        klargjørVedtak(vedtakId = vedtakId2, periode = periode2, oppgavetype = Oppgavetype.SØKNAD)
         assertPersonenErKlar()
     }
 

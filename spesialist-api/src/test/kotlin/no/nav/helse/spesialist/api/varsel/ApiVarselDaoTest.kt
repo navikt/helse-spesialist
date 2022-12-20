@@ -23,7 +23,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `Finner varsler`() {
+    fun `Finner varsler med vedtaksperiodeId og utbetalingId`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
@@ -36,6 +36,23 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
 
         assertTrue(varsler.isNotEmpty())
         assertEquals(2, varsler.size)
+    }
+
+    @Test
+    fun `Finner varsler med oppgaveId`() {
+        val definisjonId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId)
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
+        val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
+
+        checkNotNull(varsler)
+        assertEquals(forventetVarsel, varsler.single())
     }
 
     @Test
@@ -123,5 +140,11 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
         session.run(queryOf(query, id, kode, vedtaksperiodeId, generasjonRef, definisjonRef, LocalDateTime.now(), null, null).asExecute)
+    }
+
+    private fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;"
+        return requireNotNull(session.run(queryOf(query, mapOf("vedtaksperiode_id" to vedtaksperiodeId)).map { it.long("id") }.asSingle))
     }
 }

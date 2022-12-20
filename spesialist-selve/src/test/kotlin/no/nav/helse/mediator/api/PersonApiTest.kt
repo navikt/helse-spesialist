@@ -1,5 +1,7 @@
 package no.nav.helse.mediator.api
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -29,6 +31,7 @@ import no.nav.helse.AzureConfig
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
@@ -76,6 +79,40 @@ internal class PersonApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
+    }
+
+    @Test
+    fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
+        Toggle.VurderingAvVarsler.enable()
+        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 0
+        val response = runBlocking {
+            client.preparePost("/api/vedtak") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Created, response.status)
+        Toggle.VurderingAvVarsler.disable()
+    }
+
+    @Test
+    fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
+        Toggle.VurderingAvVarsler.enable()
+        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 1
+        val response = runBlocking {
+            client.preparePost("/api/vedtak") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(godkjenning))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test

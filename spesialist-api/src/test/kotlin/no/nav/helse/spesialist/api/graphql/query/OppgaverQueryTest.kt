@@ -147,7 +147,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val personId = opprettPerson()
         val arbeidsgiverId = opprettArbeidsgiver()
         val vedtakRef = opprettVedtaksperiode(personId, arbeidsgiverId, oppgavetype = Oppgavetype.SØKNAD)
-        opprettOppgave(vedtakRef = vedtakRef, oppgavetype = Oppgavetype.REVURDERING)
+        opprettOppgave(oppgavetype = Oppgavetype.REVURDERING, vedtakRef = vedtakRef)
 
         val body = runQuery(
             """
@@ -181,7 +181,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val personId = opprettPerson()
         val arbeidsgiverId = opprettArbeidsgiver()
         val vedtakRef = opprettVedtaksperiode(personId, arbeidsgiverId, oppgavetype = Oppgavetype.SØKNAD)
-        opprettOppgave(vedtakRef = vedtakRef, oppgavetype = Oppgavetype.REVURDERING)
+        opprettOppgave(oppgavetype = Oppgavetype.REVURDERING, vedtakRef = vedtakRef)
 
         val body = runQuery(
             """
@@ -290,23 +290,23 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         val vedtakRef = opprettVedtaksperiode(personId, arbeidsgiverId, oppgavetype = Oppgavetype.STIKKPRØVE)
 
         opprettOppgave(
-            vedtakRef = vedtakRef,
             oppgavetype = Oppgavetype.REVURDERING,
+            vedtakRef = vedtakRef,
             opprettet = LocalDateTime.now().minusDays(1)
         )
         opprettOppgave(
-            vedtakRef = vedtakRef,
             oppgavetype = Oppgavetype.SØKNAD,
+            vedtakRef = vedtakRef,
             opprettet = LocalDateTime.now().minusDays(10)
         )
         opprettOppgave(
-            vedtakRef = vedtakRef,
             oppgavetype = Oppgavetype.UTBETALING_TIL_SYKMELDT,
+            vedtakRef = vedtakRef,
             opprettet = LocalDateTime.now().minusDays(4)
         )
         opprettOppgave(
-            vedtakRef = vedtakRef,
             oppgavetype = Oppgavetype.DELVIS_REFUSJON,
+            vedtakRef = vedtakRef,
             opprettet = LocalDateTime.now().minusDays(7)
         )
 
