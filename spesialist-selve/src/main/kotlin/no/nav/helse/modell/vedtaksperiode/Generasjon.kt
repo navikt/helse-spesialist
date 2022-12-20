@@ -68,6 +68,21 @@ internal class Generasjon private constructor(
         generasjonRepository.utbetalingFor(id, utbetalingId)
     }
 
+    internal fun invaliderUtbetaling(utbetalingId: UUID) {
+        if (utbetalingId != this.utbetalingId) return sikkerlogg.error(
+                "{} sin utbetalingId samsvarer ikke med den forkastede utbetalingIden {}. Dette skal ikke kunne skje",
+                keyValue("Generasjon", this),
+                keyValue("utbetalingId", utbetalingId)
+            )
+        if (låst) return sikkerlogg.error(
+            "{} er låst. Utbetaling med {} forsøkt forkastet",
+            keyValue("Generasjon", this),
+            keyValue("utbetalingId", utbetalingId)
+        )
+        this.utbetalingId = null
+        generasjonRepository.fjernUtbetalingFor(id)
+    }
+
     internal fun håndterNyttVarsel(varselId: UUID, varselkode: String, opprettet: LocalDateTime, varselRepository: VarselRepository) {
         if (låst) return sikkerlogg.info(
             "Kan ikke lagre varsel {} på låst generasjon {}",

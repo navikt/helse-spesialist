@@ -109,6 +109,16 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
         assertEquals(2, generasjonDao.alleFor(utbetalingId).size)
     }
 
+    @Test
+    fun `Kan fjerne utbetaling fra generasjon`() {
+        val generasjonId = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE_ID, UUID.randomUUID())
+        generasjonDao.utbetalingFor(generasjonId, UTBETALING_ID)
+        assertUtbetaling(generasjonId, UTBETALING_ID)
+        generasjonDao.fjernUtbetalingFor(generasjonId)
+        assertUtbetaling(generasjonId, null)
+    }
+
     private fun generasjonIdFor(vedtaksperiodeId: UUID): UUID {
         @Language("PostgreSQL")
         val query =

@@ -115,6 +115,27 @@ internal class GenerasjonTest {
     }
 
     @Test
+    fun `kan fjerne utbetalingId fra ulåst generasjon`() {
+        val generasjon = nyGenerasjon()
+        val utbetalingId = UUID.randomUUID()
+        generasjon.håndterNyUtbetaling(utbetalingId)
+        assertEquals(utbetalingId, generasjonerMedUtbetaling[generasjonId])
+        generasjon.invaliderUtbetaling(utbetalingId)
+        assertEquals(null, generasjonerMedUtbetaling[generasjonId])
+    }
+
+    @Test
+    fun `kan ikke fjerne utbetalingId fra låst generasjon`() {
+        val generasjon = nyGenerasjon()
+        val utbetalingId = UUID.randomUUID()
+        generasjon.håndterNyUtbetaling(utbetalingId)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        assertEquals(utbetalingId, generasjonerMedUtbetaling[generasjonId])
+        generasjon.invaliderUtbetaling(utbetalingId)
+        assertEquals(utbetalingId, generasjonerMedUtbetaling[generasjonId])
+    }
+
+    @Test
     fun `godkjenner varsler for alle generasjoner som hører til samme utbetaling`() {
         val generasjonIdV1 = UUID.randomUUID()
         val generasjonIdV2 = UUID.randomUUID()
@@ -226,6 +247,10 @@ internal class GenerasjonTest {
             return generasjonerMedUtbetaling
                 .filterValues { it == utbetalingId }
                 .mapNotNull { (key, _) -> generasjoner[key] }
+        }
+
+        override fun fjernUtbetalingFor(generasjonId: UUID) {
+            generasjonerMedUtbetaling.remove(generasjonId)
         }
     }
 }

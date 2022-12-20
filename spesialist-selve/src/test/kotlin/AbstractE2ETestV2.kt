@@ -321,7 +321,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         meldingssenderV2.sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, utbetalingtype)
     }
 
-    private fun håndterUtbetalingForkastet(
+    protected fun håndterUtbetalingForkastet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,

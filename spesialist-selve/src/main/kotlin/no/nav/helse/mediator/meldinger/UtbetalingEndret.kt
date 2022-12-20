@@ -9,12 +9,16 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.utbetaling.LagreOppdragCommand
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.gyldigeStatuser
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.Companion.values
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
+import no.nav.helse.modell.vedtaksperiode.InvaliderUtbetalingForGenerasjonerCommand
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -23,7 +27,6 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,13 +44,14 @@ internal class UtbetalingEndret(
     utbetalingDao: UtbetalingDao,
     opptegnelseDao: OpptegnelseDao,
     oppgaveDao: OppgaveDao,
-    oppgaveMediator: OppgaveMediator
+    oppgaveMediator: OppgaveMediator,
+    generasjonRepository: GenerasjonRepository
 ) : Hendelse, MacroCommand() {
 
     override fun fødselsnummer(): String = fødselsnummer
     override fun vedtaksperiodeId(): UUID? = null
     override fun toJson(): String = json
-    override val commands: List<Command> = listOf(
+    override val commands: List<Command> = mutableListOf(
         LagreOppdragCommand(
             fødselsnummer,
             orgnummer,
@@ -61,8 +65,11 @@ internal class UtbetalingEndret(
             utbetalingDao,
             opptegnelseDao
         ),
-        OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveDao, oppgaveMediator)
-    )
+        OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveDao, oppgaveMediator),
+    ).apply {
+        if (gjeldendeStatus == FORKASTET)
+            add(InvaliderUtbetalingForGenerasjonerCommand(utbetalingId, generasjonRepository))
+    }
 
     internal class River(
         rapidsConnection: RapidsConnection,

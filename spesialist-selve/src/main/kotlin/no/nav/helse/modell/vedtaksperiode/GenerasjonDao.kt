@@ -55,6 +55,20 @@ class GenerasjonDao(private val dataSource: DataSource) {
         }
     }
 
+    internal fun fjernUtbetalingFor(generasjonId: UUID): Generasjon? {
+        @Language("PostgreSQL")
+        val query = """
+            UPDATE selve_vedtaksperiode_generasjon 
+            SET utbetaling_id = null 
+            WHERE unik_id = ?
+            RETURNING id, unik_id, vedtaksperiode_id, utbetaling_id, låst;
+            """
+
+        return sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonId).map(::toGenerasjon).asSingle)
+        }
+    }
+
     internal fun opprettFor(id: UUID, vedtaksperiodeId: UUID, hendelseId: UUID): Generasjon {
         @Language("PostgreSQL")
         val query = """

@@ -13,6 +13,7 @@ internal interface GenerasjonRepository {
     fun utbetalingFor(generasjonId: UUID, utbetalingId: UUID)
     fun sisteFor(vedtaksperiodeId: UUID): Generasjon
     fun tilhørendeFor(utbetalingId: UUID): List<Generasjon>
+    fun fjernUtbetalingFor(generasjonId: UUID)
 }
 
 internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRepository {
@@ -65,6 +66,15 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
             )
     }
 
+    override fun fjernUtbetalingFor(generasjonId: UUID) {
+        dao.fjernUtbetalingFor(generasjonId)
+            ?.loggFjernetUtbetaling()
+            ?: sikkerlogg.error(
+                "Finner ikke generasjon med {}. Utbetaling forsøkt fjernet",
+                keyValue("generasjonId", generasjonId)
+            )
+    }
+
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
         private fun Generasjon.loggFørsteOpprettet(vedtaksperiodeId: UUID) {
@@ -91,6 +101,13 @@ internal class ActualGenerasjonRepository(dataSource: DataSource) : GenerasjonRe
                 "Knyttet {} til utbetaling {}",
                 keyValue("generasjon", this),
                 keyValue("utbetalingId", utbetalingId)
+            )
+        }
+
+        private fun Generasjon.loggFjernetUtbetaling() {
+            sikkerlogg.info(
+                "Fjernet knytning for {} til utbetaling",
+                keyValue("generasjon", this),
             )
         }
     }

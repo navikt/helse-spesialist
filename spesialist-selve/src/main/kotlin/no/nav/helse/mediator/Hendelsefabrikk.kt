@@ -570,7 +570,8 @@ internal class Hendelsefabrikk(
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
             oppgaveDao = oppgaveDao,
-            oppgaveMediator = oppgaveMediator
+            oppgaveMediator = oppgaveMediator,
+            generasjonRepository = generasjonRepository
         )
     }
 

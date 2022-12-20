@@ -143,6 +143,21 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         assertEquals(2, repository.tilhørendeFor(utbetalingId).size)
     }
 
+    @Test
+    fun `Fjern utbetalingId når utbetaling blir forkastet`() {
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+
+        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
+        generasjon?.håndterNyUtbetaling(utbetalingId)
+        assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
+
+        generasjon?.invaliderUtbetaling(utbetalingId)
+        assertEquals(Generasjon(generasjonId, vedtaksperiodeId, null, false, emptySet(), dataSource), generasjon)
+        assertEquals(0, repository.tilhørendeFor(utbetalingId).size)
+    }
+
     private fun assertGenerasjon(vedtaksperiodeId: UUID, hendelseId: UUID) {
         val generasjon = sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
