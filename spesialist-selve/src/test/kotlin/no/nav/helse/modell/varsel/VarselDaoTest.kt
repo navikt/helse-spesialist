@@ -3,8 +3,11 @@ package no.nav.helse.modell.varsel
 import DatabaseIntegrationTest
 import java.time.LocalDateTime
 import java.util.UUID
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -20,7 +23,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID())
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
-        assertEquals(1, varselDao.alleVarslerFor(VEDTAKSPERIODE).size)
+        assertEquals(1, alleVarslerFor(VEDTAKSPERIODE).size)
     }
 
     @Test
@@ -31,7 +34,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID())
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_ANNEN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
-        assertEquals(2, varselDao.alleVarslerFor(VEDTAKSPERIODE).size)
+        assertEquals(2, alleVarslerFor(VEDTAKSPERIODE).size)
     }
 
     @Test
@@ -85,6 +88,25 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(generasjonId, v1, UUID.randomUUID())
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), v1, generasjonId)
-        assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), varselDao.alleVarslerFor(v1))
+        assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), alleVarslerFor(v1))
     }
+
+    private fun alleVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
+        @Language("PostgreSQL")
+        val query = "SELECT unik_id,kode,opprettet FROM selve_varsel WHERE vedtaksperiode_id = ?;"
+
+        sessionOf(dataSource).use { session ->
+            return session.run(
+                queryOf(query, vedtaksperiodeId).map {
+                    Varsel(
+                        it.uuid("unik_id"),
+                        it.string("kode"),
+                        it.localDateTime("opprettet"),
+                        vedtaksperiodeId
+                    )
+                }.asList
+            )
+        }
+    }
+
 }

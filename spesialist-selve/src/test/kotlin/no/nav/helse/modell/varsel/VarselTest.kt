@@ -167,7 +167,6 @@ internal class VarselTest {
             varsler.add(varselkode)
         }
 
-        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> = TODO("Not yet implemented")
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
     }
 

@@ -2,7 +2,6 @@ package no.nav.helse.modell.vedtaksperiode
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.VarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -229,7 +228,6 @@ internal class GenerasjonTest {
             varsler.add(varselkode)
         }
 
-        override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> = TODO("Not yet implemented")
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
     }
 

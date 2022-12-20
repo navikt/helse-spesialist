@@ -10,24 +10,6 @@ import org.intellij.lang.annotations.Language
 
 internal class VarselDao(private val dataSource: DataSource) {
 
-    internal fun alleVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
-        @Language("PostgreSQL")
-        val query = "SELECT unik_id,kode,opprettet FROM selve_varsel WHERE vedtaksperiode_id = ?;"
-
-        sessionOf(dataSource).use { session ->
-            return session.run(
-                queryOf(query, vedtaksperiodeId).map {
-                    Varsel(
-                        it.uuid("unik_id"),
-                        it.string("kode"),
-                        it.localDateTime("opprettet"),
-                        vedtaksperiodeId
-                    )
-                }.asList
-            )
-        }
-    }
-
     internal fun lagreVarsel(
         varselId: UUID,
         varselkode: String,

@@ -10,7 +10,6 @@ import no.nav.helse.tellInaktivtVarsel
 import no.nav.helse.tellVarsel
 
 internal interface VarselRepository {
-    fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel>
     fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?)
     fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?)
     fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?)
@@ -30,10 +29,6 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
 
     private val varselDao = VarselDao(dataSource)
     private val definisjonDao = DefinisjonDao(dataSource)
-
-    override fun finnVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
-        return varselDao.alleVarslerFor(vedtaksperiodeId)
-    }
 
     override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
