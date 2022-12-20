@@ -15,7 +15,6 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
         ident: String,
         env: DataFetchingEnvironment,
     ): Boolean {
-        // TODO tilgangskontroll
         val antallOppdatert = varselRepository.settStatusVurdert(
             UUID.fromString(generasjonId),
             UUID.fromString(definisjonId),
@@ -32,7 +31,6 @@ class VarselMutation(private val varselRepository: ApiVarselRepository) : Mutati
         ident: String,
         env: DataFetchingEnvironment,
     ): Boolean {
-        // TODO tilgangskontroll
         val antallOppdatert = varselRepository.settStatusAktiv(
             UUID.fromString(generasjonId),
             varselkode,
