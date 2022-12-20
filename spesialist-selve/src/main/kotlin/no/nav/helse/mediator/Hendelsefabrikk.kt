@@ -564,6 +564,8 @@ internal class Hendelsefabrikk(
             type = jsonNode.path("type").asText(),
             gjeldendeStatus = Utbetalingsstatus.valueOf(jsonNode.path("gjeldendeStatus").asText()),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
+            arbeidsgiverbeløp = jsonNode.path("arbeidsgiverBeløp").asInt(),
+            personbeløp = jsonNode.path("personBeløp").asInt(),
             arbeidsgiverOppdrag = tilOppdrag(jsonNode.path("arbeidsgiverOppdrag")),
             personOppdrag = tilOppdrag(jsonNode.path("personOppdrag")),
             json = json,

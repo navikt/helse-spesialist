@@ -38,6 +38,8 @@ internal class UtbetalingEndret(
     type: String,
     gjeldendeStatus: Utbetalingsstatus,
     opprettet: LocalDateTime,
+    arbeidsgiverbeløp: Int,
+    personbeløp: Int,
     arbeidsgiverOppdrag: LagreOppdragCommand.Oppdrag,
     personOppdrag: LagreOppdragCommand.Oppdrag,
     private val json: String,
@@ -53,17 +55,19 @@ internal class UtbetalingEndret(
     override fun toJson(): String = json
     override val commands: List<Command> = mutableListOf(
         LagreOppdragCommand(
-            fødselsnummer,
-            orgnummer,
-            utbetalingId,
-            Utbetalingtype.valueOf(type),
-            gjeldendeStatus,
-            opprettet,
-            arbeidsgiverOppdrag,
-            personOppdrag,
-            json,
-            utbetalingDao,
-            opptegnelseDao
+            fødselsnummer = fødselsnummer,
+            orgnummer = orgnummer,
+            utbetalingId = utbetalingId,
+            type = Utbetalingtype.valueOf(type),
+            status = gjeldendeStatus,
+            opprettet = opprettet,
+            arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+            personOppdrag = personOppdrag,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp,
+            json = json,
+            utbetalingDao = utbetalingDao,
+            opptegnelseDao = opptegnelseDao
         ),
         OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveDao, oppgaveMediator),
     ).apply {
@@ -83,7 +87,8 @@ internal class UtbetalingEndret(
                     it.demandValue("@event_name", "utbetaling_endret")
                     it.requireKey(
                         "@id", "fødselsnummer", "organisasjonsnummer",
-                        "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId"
+                        "utbetalingId", "arbeidsgiverOppdrag.fagsystemId", "personOppdrag.fagsystemId",
+                        "arbeidsgiverOppdrag.nettoBeløp", "personOppdrag.nettoBeløp"
                     )
                     it.requireAny("forrigeStatus", gyldigeStatuser.values())
                     it.requireAny("gjeldendeStatus", gyldigeStatuser.values())

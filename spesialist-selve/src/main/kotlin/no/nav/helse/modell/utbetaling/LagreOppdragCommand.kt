@@ -1,15 +1,19 @@
 package no.nav.helse.modell.utbetaling
 
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
-import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
-import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.*
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALING_FEILET
+import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.abonnement.OpptegnelseType
+import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
+import org.slf4j.LoggerFactory
 
 internal class LagreOppdragCommand(
     private val fødselsnummer: String,
@@ -20,6 +24,8 @@ internal class LagreOppdragCommand(
     private val opprettet: LocalDateTime,
     private val arbeidsgiverOppdrag: Oppdrag,
     private val personOppdrag: Oppdrag,
+    private val arbeidsgiverbeløp: Int,
+    private val personbeløp: Int,
     private val json: String,
     private val utbetalingDao: UtbetalingDao,
     private val opptegnelseDao: OpptegnelseDao
@@ -104,7 +110,9 @@ internal class LagreOppdragCommand(
                     type,
                     opprettet,
                     arbeidsgiverFagsystemIdRef,
-                    personFagsystemIdRef
+                    personFagsystemIdRef,
+                    arbeidsgiverbeløp,
+                    personbeløp
                 )
             }
 

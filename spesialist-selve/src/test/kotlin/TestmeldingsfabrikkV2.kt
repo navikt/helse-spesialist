@@ -603,6 +603,7 @@ internal object TestmeldingsfabrikkV2 {
                 "fagområde" to "SPREF",
                 "endringskode" to "NY",
                 "fagsystemId" to arbeidsgiverFagsystemId,
+                "nettoBeløp" to 20000,
                 "sisteArbeidsgiverdag" to "${LocalDate.MIN}",
                 "linjer" to listOf(
                     mapOf(
@@ -642,6 +643,7 @@ internal object TestmeldingsfabrikkV2 {
                 "fagområde" to "SP",
                 "endringskode" to "NY",
                 "fagsystemId" to personFagsystemId,
+                "nettoBeløp" to 0,
                 "linjer" to emptyList<Map<String, Any>>()
             )
         )

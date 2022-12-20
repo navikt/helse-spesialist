@@ -203,6 +203,7 @@ internal object Meldingssender {
                     "mottaker": "$organisasjonsnummer",
                     "fagområde": "SPREF",
                     "endringskode": "NY",
+                    "nettoBeløp": 20000,
                     "fagsystemId": "$arbeidsgiverFagsystemId",
                     "sisteArbeidsgiverdag": "${LocalDate.MIN}",
                     "linjer": [
@@ -242,6 +243,7 @@ internal object Meldingssender {
                     "mottaker": "$fødselsnummer",
                     "fagområde": "SP",
                     "endringskode": "NY",
+                    "nettoBeløp": 0,
                     "fagsystemId": "$personFagsystemId",
                     "linjer": []
                 }
@@ -277,6 +279,7 @@ internal object Meldingssender {
       "mottaker": "$orgnr",
       "fagområde": "SP",
       "endringskode": "NY",
+      "nettoBeløp": 20000,
       "fagsystemId": "$arbeidsgiverFagsystemId",
       "sisteArbeidsgiverdag": "${LocalDate.MIN}",
       "linjer": []
@@ -285,6 +288,7 @@ internal object Meldingssender {
       "mottaker": "$FØDSELSNUMMER",
       "fagområde": "SP",
       "endringskode": "NY",
+      "nettoBeløp": 20000,
       "fagsystemId": "$personFagsystemId",
       "linjer": [{
           "fom": "${LocalDate.now()}",

@@ -335,7 +335,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             type = Utbetalingtype.UTBETALING,
             opprettet = LocalDateTime.now(),
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
-            personFagsystemIdRef = personOppdragId
+            personFagsystemIdRef = personOppdragId,
+            arbeidsgiverbeløp = 2000,
+            personbeløp = 2000
         )
 
     protected fun lagLinje(oppdrag: Long, fom: LocalDate, tom: LocalDate, totalbeløp: Int? = null) {

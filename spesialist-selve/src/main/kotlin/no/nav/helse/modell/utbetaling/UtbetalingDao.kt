@@ -66,12 +66,14 @@ class UtbetalingDao(private val dataSource: DataSource) {
         type: Utbetalingtype,
         opprettet: LocalDateTime,
         arbeidsgiverFagsystemIdRef: Long,
-        personFagsystemIdRef: Long
+        personFagsystemIdRef: Long,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int
     ): Long {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO utbetaling_id (
-                utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref
+                utbetaling_id, person_ref, arbeidsgiver_ref, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, arbeidsgiverbeløp, personbeløp
             ) VALUES (
                 :utbetalingId,
                 (SELECT id FROM person WHERE fodselsnummer = :fodselsnummer),
@@ -79,7 +81,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 CAST(:type as utbetaling_type),
                 :opprettet,
                 :arbeidsgiverFagsystemIdRef,
-                :personFagsystemIdRef
+                :personFagsystemIdRef,
+                :arbeidsgiverbelop,
+                :personbelop
             )
             ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
         """
@@ -94,7 +98,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                             "type" to type.toString(),
                             "opprettet" to opprettet,
                             "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,
-                            "personFagsystemIdRef" to personFagsystemIdRef
+                            "personFagsystemIdRef" to personFagsystemIdRef,
+                            "arbeidsgiverbelop" to arbeidsgiverbeløp,
+                            "personbelop" to personbeløp,
                         )
                     ).asUpdateAndReturnGeneratedKey
                 )
