@@ -119,29 +119,6 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
     }
 
-    private fun nyGenerasjon(
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        generasjonId: UUID = UUID.randomUUID(),
-        utbetalingId: UUID = UUID.randomUUID(),
-        låstTidspunkt: LocalDateTime? = null
-    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        """
-        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), låstTidspunkt, UUID.randomUUID()).asUpdateAndReturnGeneratedKey))
-    }
-
-    private fun nyttVarsel(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID(), kode: String = "EN_KODE", generasjonRef: Long, definisjonRef: Long? = null) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL")
-        val query = """
-            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status_endret_ident, status_endret_tidspunkt) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """
-        session.run(queryOf(query, id, kode, vedtaksperiodeId, generasjonRef, definisjonRef, LocalDateTime.now(), null, null).asExecute)
-    }
-
     private fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->
         @Language("PostgreSQL")
         val query = "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;"

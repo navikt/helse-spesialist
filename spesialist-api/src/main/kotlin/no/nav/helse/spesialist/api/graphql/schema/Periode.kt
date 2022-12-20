@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
 import no.nav.helse.spesialist.api.graphql.enums.Utbetalingtype as GraphQLUtbetalingtype
 
@@ -73,6 +72,13 @@ enum class Utbetalingtype {
     REVURDERING,
     UTBETALING,
     UKJENT
+}
+
+enum class Varselstatus {
+    AKTIV,
+    VURDERT,
+    GODKJENT,
+    AVVIST,
 }
 
 data class Vurdering(

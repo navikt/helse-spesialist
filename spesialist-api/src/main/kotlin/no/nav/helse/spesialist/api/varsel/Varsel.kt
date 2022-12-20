@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO.VarselvurderingDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.INAKTIV
 
 data class Varsel(
     private val generasjonId: UUID,
@@ -18,6 +19,10 @@ data class Varsel(
     internal companion object {
         internal fun List<Varsel>.toDto(): List<VarselDTO> {
             return map { it.toDto() }
+        }
+
+        internal fun List<Varsel>.utenInaktive(): List<Varsel> {
+            return filterNot { it.vurdering?.erInaktiv() ?: false }
         }
 
         internal fun List<Varsel>.antallIkkeVurderte(): Int {
@@ -41,7 +46,15 @@ data class Varsel(
         private val status: Varselstatus,
     ) {
         internal fun erIkkeVurdert() = status == AKTIV
-        internal fun toDto() = VarselvurderingDTO(ident, tidsstempel.toString(), status)
+        internal fun erInaktiv() = status == INAKTIV
+        internal fun toDto(): VarselvurderingDTO {
+            if (status == INAKTIV) throw IllegalStateException("Sende INAKTIV til frontend støttes ikke")
+            return VarselvurderingDTO(
+                ident,
+                tidsstempel.toString(),
+                no.nav.helse.spesialist.api.graphql.schema.Varselstatus.valueOf(status.name)
+            )
+        }
         override fun equals(other: Any?): Boolean =
             this === other || (other is Varselvurdering
                     && javaClass == other.javaClass
@@ -57,6 +70,7 @@ data class Varsel(
     }
 
     enum class Varselstatus {
+        INAKTIV,
         AKTIV,
         VURDERT,
         GODKJENT,

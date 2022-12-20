@@ -110,6 +110,58 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         requireNotNull(session.run(queryOf(query, definisjonId, kode, tittel, null, null, LocalDateTime.now()).asUpdateAndReturnGeneratedKey))
     }
 
+    protected fun nyGenerasjon(
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        generasjonId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        låstTidspunkt: LocalDateTime? = null
+    ): Long = sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO selve_vedtaksperiode_generasjon(vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, låst_tidspunkt, låst_av_hendelse) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        """
+        return requireNotNull(session.run(queryOf(query, vedtaksperiodeId, generasjonId, utbetalingId, UUID.randomUUID(), låstTidspunkt, UUID.randomUUID()).asUpdateAndReturnGeneratedKey))
+    }
+
+    protected fun nyttVarsel(
+        id: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        kode: String = "EN_KODE",
+        generasjonRef: Long,
+        definisjonRef: Long? = null,
+    ) = nyttVarsel(id, vedtaksperiodeId, kode, generasjonRef, definisjonRef, "AKTIV", null)
+
+    protected fun nyttVarsel(
+        id: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        kode: String = "EN_KODE",
+        generasjonRef: Long,
+        definisjonRef: Long? = null,
+        status: String,
+        endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
+    ) = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = """
+            INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        session.run(
+            queryOf(
+                query,
+                id,
+                kode,
+                vedtaksperiodeId,
+                generasjonRef,
+                definisjonRef,
+                LocalDateTime.now(),
+                status,
+                if (endretTidspunkt != null) "EN_IDENT" else null,
+                endretTidspunkt
+            ).asExecute
+        )
+    }
+
     protected fun klargjørVedtak(
         vedtakId: Long,
         utbetlingId: UUID? = null,
