@@ -15,7 +15,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id; 
+                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id AND sv.status != 'INAKTIV'; 
         """
     ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "utbetaling_id" to utbetalingId)) { mapVarsel(it) }
 
