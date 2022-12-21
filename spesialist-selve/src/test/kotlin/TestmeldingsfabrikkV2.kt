@@ -588,6 +588,8 @@ internal object TestmeldingsfabrikkV2 {
         gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
         arbeidsgiverFagsystemId: String = "LWCBIQLHLJISGREBICOHAU",
         personFagsystemId: String = "ASJKLD90283JKLHAS3JKLF",
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
         id: UUID,
     ) = nyHendelse(
         id, "utbetaling_endret", mapOf(
@@ -603,7 +605,7 @@ internal object TestmeldingsfabrikkV2 {
                 "fagområde" to "SPREF",
                 "endringskode" to "NY",
                 "fagsystemId" to arbeidsgiverFagsystemId,
-                "nettoBeløp" to 20000,
+                "nettoBeløp" to arbeidsgiverbeløp,
                 "sisteArbeidsgiverdag" to "${LocalDate.MIN}",
                 "linjer" to listOf(
                     mapOf(
@@ -643,7 +645,7 @@ internal object TestmeldingsfabrikkV2 {
                 "fagområde" to "SP",
                 "endringskode" to "NY",
                 "fagsystemId" to personFagsystemId,
-                "nettoBeløp" to 0,
+                "nettoBeløp" to personbeløp,
                 "linjer" to emptyList<Map<String, Any>>()
             )
         )

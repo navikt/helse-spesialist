@@ -163,6 +163,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
         type: String = "UTBETALING",
         forrigeStatus: Utbetalingsstatus = NY,
         gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             meldingsfabrikk.lagUtbetalingEndret(
@@ -173,6 +175,8 @@ internal class MeldingssenderV2(private val testRapid: TestRapid) {
                 forrigeStatus = forrigeStatus,
                 gjeldendeStatus = gjeldendeStatus,
                 type = type,
+                arbeidsgiverbeløp = arbeidsgiverbeløp,
+                personbeløp = personbeløp,
                 id = id
             )
         )

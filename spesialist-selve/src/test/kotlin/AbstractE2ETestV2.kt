@@ -312,13 +312,23 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEtterspurteBehov("ÅpneOppgaver")
     }
 
-    private fun håndterUtbetalingOpprettet(
+    protected fun håndterUtbetalingOpprettet(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         utbetalingtype: String = "UTBETALING",
+        arbeidsgiverbeløp: Int = 20000,
+        personbeløp: Int = 0,
     ) {
-        meldingssenderV2.sendUtbetalingEndret(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId, utbetalingtype)
+        meldingssenderV2.sendUtbetalingEndret(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingId = utbetalingId,
+            type = utbetalingtype,
+            arbeidsgiverbeløp = arbeidsgiverbeløp,
+            personbeløp = personbeløp
+        )
     }
 
     protected fun håndterUtbetalingForkastet(
@@ -705,6 +715,19 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         assertEquals(behov.toList(), etterspurteBehov) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
             "Følgende behov ble ikke etterspurt: $ikkeEtterspurt\nEtterspurte behov: $etterspurteBehov\n"
+        }
+    }
+
+    protected fun assertUtbetaling(arbeidsgiverbeløp: Int, personbeløp: Int) {
+        assertEquals(arbeidsgiverbeløp, finnbeløp("arbeidsgiver"))
+        assertEquals(personbeløp, finnbeløp("person"))
+    }
+
+    private fun finnbeløp(type: String): Int? {
+        @Language("PostgreSQL")
+        val query = "SELECT ${type}beløp FROM utbetaling_id WHERE utbetaling_id = ?"
+        return sessionOf(dataSource).use {
+            it.run(queryOf(query, utbetalingId).map { it.intOrNull("${type}beløp") }.asSingle)
         }
     }
 
