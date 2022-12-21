@@ -13,6 +13,7 @@ import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringTidslinjeCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
+import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -45,6 +46,7 @@ internal class OverstyringTidslinje(
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
+    oppgaveDao: OppgaveDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
@@ -67,7 +69,7 @@ internal class OverstyringTidslinje(
             overstyringDao = overstyringDao,
             opprettet = opprettet,
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, oppgaveDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_tidslinje",
             hendelseId = id,
