@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.utbetaling
 
-import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Session
 import kotliquery.queryOf
@@ -31,7 +30,7 @@ ORDER BY ui.id, u.opprettet DESC
                         val arbeidsgiveroppdrag = findOppdrag(session, row.long("arbeidsgiver_fagsystem_id_ref"))
 
                         UtbetalingApiDto(
-                            id = UUID.fromString(row.string("utbetaling_id")),
+                            id = row.uuid("utbetaling_id"),
                             type = row.string("type"),
                             status = Utbetalingsstatus.valueOf(row.string("status")),
                             personoppdrag = personoppdrag,

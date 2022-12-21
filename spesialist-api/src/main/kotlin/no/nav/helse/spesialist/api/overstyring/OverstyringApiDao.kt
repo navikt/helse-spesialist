@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.overstyring
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -25,7 +24,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 .map { overstyringRow ->
                     val id = overstyringRow.long("id")
                     OverstyringDto(
-                        hendelseId = UUID.fromString(overstyringRow.string("hendelse_ref")),
+                        hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         begrunnelse = overstyringRow.string("begrunnelse"),
@@ -70,7 +69,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
                 queryOf(finnOverstyringQuery, fødselsnummer.toLong(), organisasjonsnummer.toLong())
                     .map { overstyringRow ->
                         OverstyringInntektDto(
-                            hendelseId = UUID.fromString(overstyringRow.string("hendelse_ref")),
+                            hendelseId = overstyringRow.uuid("hendelse_ref"),
                             fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                             organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                             begrunnelse = overstyringRow.string("begrunnelse"),
@@ -108,7 +107,7 @@ class OverstyringApiDao(private val dataSource: DataSource) {
             queryOf(finnOverstyringQuery, fødselsnummer.toLong(), orgnummer.toLong())
                 .map { overstyringRow ->
                     OverstyringArbeidsforholdDto(
-                        hendelseId = UUID.fromString(overstyringRow.string("hendelse_ref")),
+                        hendelseId = overstyringRow.uuid("hendelse_ref"),
                         fødselsnummer = overstyringRow.long("fodselsnummer").toFødselsnummer(),
                         organisasjonsnummer = overstyringRow.int("orgnummer").toString(),
                         begrunnelse = overstyringRow.string("begrunnelse"),

@@ -109,7 +109,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 id = oppgaveId,
                 type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
-                vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
@@ -141,7 +141,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
                 id = row.long("id"),
                 type = enumValueOf(row.string("type")),
                 status = enumValueOf(row.string("status")),
-                vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 utbetalingId = row.stringOrNull("utbetaling_id")?.let(UUID::fromString),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.stringOrNull("ferdigstilt_av_oid")?.let(UUID::fromString)
@@ -153,7 +153,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             FROM vedtak v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-        """.single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("vedtaksperiode_id")) })
+        """.single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("vedtaksperiode_id") })
 
     fun opprettOppgave(commandContextId: UUID, oppgavetype: Oppgavetype, vedtaksperiodeId: UUID, utbetalingId: UUID) =
         requireNotNull(sessionOf(dataSource, returnGeneratedKey = true).use {
@@ -252,7 +252,7 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
 
     fun finnHendelseId(oppgaveId: Long) = requireNotNull(
         """SELECT DISTINCT hendelse_id FROM command_context WHERE context_id = (SELECT command_context_id FROM oppgave WHERE id = :oppgaveId)"""
-            .single(mapOf("oppgaveId" to oppgaveId)) { row -> UUID.fromString(row.string("hendelse_id")) })
+            .single(mapOf("oppgaveId" to oppgaveId)) { row -> row.uuid("hendelse_id") })
 
     fun harGyldigOppgave(utbetalingId: UUID) = requireNotNull(
         """ SELECT COUNT(1) AS oppgave_count FROM oppgave

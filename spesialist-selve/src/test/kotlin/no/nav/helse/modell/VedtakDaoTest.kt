@@ -151,14 +151,14 @@ internal class VedtakDaoTest : DatabaseIntegrationTest() {
     private fun finnKobling(hendelseId: UUID) = sessionOf(dataSource).use {
         it.run(
             queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                .map { row -> UUID.fromString(row.string(1)) }.asSingle
+                .map { row -> row.uuid("vedtaksperiode_id") }.asSingle
         )
     }
 
     private fun vedtak() = sessionOf(dataSource).use {
         it.run(queryOf("SELECT vedtaksperiode_id, fom, tom, person_ref, arbeidsgiver_ref, snapshot_ref FROM vedtak").map { row ->
             Vedtak(
-                vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 fom = row.localDate("fom"),
                 tom = row.localDate("tom"),
                 personRef = row.long("person_ref"),

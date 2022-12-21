@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
+import java.util.*
+import javax.sql.DataSource
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource) {
     fun opprettSaksbehandler(oid: UUID, navn: String, epost: String, ident: String) =
@@ -30,7 +30,7 @@ class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource)
         """ SELECT * FROM saksbehandler WHERE epost = :epost LIMIT 1"""
             .single(mapOf("epost" to epost)) { row ->
             SaksbehandlerDto(
-                oid = UUID.fromString(row.string("oid")),
+                oid = row.uuid("oid"),
                 navn = row.string("navn"),
                 epost = row.string("epost"),
                 ident = row.string("ident"))}

@@ -2,14 +2,14 @@ package no.nav.helse.modell.risiko
 
 import DatabaseIntegrationTest
 import com.fasterxml.jackson.databind.JsonNode
-import kotliquery.queryOf
-import kotliquery.sessionOf
-import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
 
@@ -78,7 +78,7 @@ internal class RisikovurderingDaoTest : DatabaseIntegrationTest() {
             val statement = "SELECT * FROM risikovurdering_2021 ORDER BY id DESC"
             it.run(queryOf(statement).map { row ->
                 RisikovurderingAssertions(
-                    vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                     kanGodkjennesAutomatisk = row.boolean("kan_godkjennes_automatisk"),
                     kreverSupersaksbehandler = row.boolean("krever_supersaksbehandler"),
                     data = objectMapper.readTree(row.string("data")),
