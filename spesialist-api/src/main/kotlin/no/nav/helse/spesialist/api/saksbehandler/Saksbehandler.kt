@@ -1,11 +1,9 @@
-package no.nav.helse.mediator.api.modell
+package no.nav.helse.spesialist.api.saksbehandler
 
 import io.ktor.server.auth.jwt.JWTPrincipal
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
-import java.util.*
+import java.util.UUID
 
-internal class Saksbehandler(
+class Saksbehandler(
     private val epostadresse: String,
     private val oid: UUID,
     private val navn: String,
@@ -20,11 +18,11 @@ internal class Saksbehandler(
         )
     }
 
-    internal fun persister(saksbehandlerDao: SaksbehandlerDao) {
+    fun persister(saksbehandlerDao: SaksbehandlerDao) {
         saksbehandlerDao.opprettSaksbehandler(oid = oid, navn = navn, epost = epostadresse, ident = ident)
     }
 
-    internal fun json() = mapOf(
+    fun json() = mapOf(
         "epostaddresse" to epostadresse,
         "oid" to oid,
         "navn" to navn,

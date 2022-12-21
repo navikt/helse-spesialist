@@ -16,9 +16,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {

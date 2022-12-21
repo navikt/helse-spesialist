@@ -16,7 +16,6 @@ import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektKafkaDto
 import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
 import no.nav.helse.mediator.api.Refusjonselement
-import no.nav.helse.mediator.api.modell.Saksbehandler
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
 import no.nav.helse.mediator.meldinger.Godkjenningsbehov
@@ -76,6 +75,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory

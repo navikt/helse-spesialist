@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
@@ -9,7 +9,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.api.modell.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 
 internal fun Route.annulleringApi(hendelseMediator: HendelseMediator) {
     post("/api/annullering") {
