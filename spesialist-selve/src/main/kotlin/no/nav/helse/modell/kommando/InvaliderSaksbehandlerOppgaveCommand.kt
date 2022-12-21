@@ -9,7 +9,7 @@ internal class InvaliderSaksbehandlerOppgaveCommand(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val antall = oppgaveDao.invaliderOppgaveFor(fødselsnummer)
-        sikkerlogger.info("Invaliderte $antall {} for $fødselsnummer", if (antall == 0) "oppgaver" else "oppgave")
+        sikkerlogger.info("Invaliderte $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
         return true
     }
 
