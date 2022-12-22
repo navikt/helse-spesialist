@@ -36,6 +36,7 @@ internal class UtbetalingsfilterTest {
                 inntektskilde = FLERE_ARBEIDSGIVERE,
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
+                harVedtaksperiodePågåendeOverstyring = false,
             ), false
         )
     }
@@ -52,6 +53,7 @@ internal class UtbetalingsfilterTest {
                 inntektskilde = FLERE_ARBEIDSGIVERE,
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
+                harVedtaksperiodePågåendeOverstyring = false,
             ), false
         )
     }
@@ -68,6 +70,7 @@ internal class UtbetalingsfilterTest {
                 inntektskilde = FLERE_ARBEIDSGIVERE,
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
+                harVedtaksperiodePågåendeOverstyring = false,
             ), false
         )
     }
@@ -83,6 +86,7 @@ internal class UtbetalingsfilterTest {
             inntektskilde = EN_ARBEIDSGIVER,
             warnings = emptyList(),
             utbetalingtype = UTBETALING,
+            harVedtaksperiodePågåendeOverstyring = false,
         )
         assertKanIkkeUtbetales(
             utbetalingsfilter(), listOf(
@@ -100,6 +104,14 @@ internal class UtbetalingsfilterTest {
         assertKanIkkeUtbetales(
             utbetalingsfilter(delvisRefusjon = true),
             listOf("Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon")
+        )
+    }
+
+    @Test
+    fun `delvis refusjon kan utbetales dersom vedtaksperioden har pågående overstyring`() {
+        assertKanUtbetales(
+            utbetalingsfilter(delvisRefusjon = true, harVedtaksperiodePågåendeOverstyring = true),
+            true
         )
     }
 
@@ -162,6 +174,7 @@ internal class UtbetalingsfilterTest {
                 inntektskilde = FLERE_ARBEIDSGIVERE,
                 warnings = toWarnings,
                 utbetalingtype = UTBETALING,
+                harVedtaksperiodePågåendeOverstyring = false,
             ), listOf(
                 "Brukerutbetalingsfilter: Utbetalingen består av delvis refusjon",
                 "Brukerutbetalingsfilter: Velges ikke ut som 'to om dagen'",
@@ -185,7 +198,8 @@ internal class UtbetalingsfilterTest {
             periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
             inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
             warnings: List<Warning> = emptyList(),
-            utbetalingstype: Utbetalingtype = UTBETALING
+            utbetalingstype: Utbetalingtype = UTBETALING,
+            harVedtaksperiodePågåendeOverstyring: Boolean = false,
         ) = Utbetalingsfilter(
             fødselsnummer = fødselsnummer,
             delvisRefusjon = delvisRefusjon,
@@ -195,6 +209,7 @@ internal class UtbetalingsfilterTest {
             inntektskilde = inntektskilde,
             warnings = warnings,
             utbetalingtype = utbetalingstype,
+            harVedtaksperiodePågåendeOverstyring = harVedtaksperiodePågåendeOverstyring,
         )
 
         private fun assertKanUtbetales(filter: Utbetalingsfilter, forventetPlukketUtForUtbetalingTilSykmeldt: Boolean) {

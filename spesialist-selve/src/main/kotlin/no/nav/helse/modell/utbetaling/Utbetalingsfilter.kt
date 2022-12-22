@@ -18,15 +18,18 @@ internal class Utbetalingsfilter(
     private val periodetype: Periodetype,
     private val inntektskilde: Inntektskilde,
     private val warnings: List<Warning>,
-    private val utbetalingtype: Utbetalingtype
+    private val utbetalingtype: Utbetalingtype,
+    private val harVedtaksperiodePågåendeOverstyring: Boolean,
 ) {
     private val årsaker = mutableListOf<String>()
     private fun nyÅrsak(årsak: String) = årsaker.add("Brukerutbetalingsfilter: $årsak")
 
     private fun evaluer(): Boolean{
         if (!harUtbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
-        if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
-        if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
+        if (!harVedtaksperiodePågåendeOverstyring) {
+            if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
+            if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
+        }
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
         // Unngå ping-pong om en av de utvalgte utbetalingene til sykmeldt revurderes og får warning
@@ -46,7 +49,7 @@ internal class Utbetalingsfilter(
 
     internal val kanUtbetales by lazy { evaluer() }
     internal val kanIkkeUtbetales get() = !kanUtbetales
-    internal val plukketUtForUtbetalingTilSykmeldt get() = kanUtbetales && harUtbetalingTilSykmeldt && utbetalingtype != REVURDERING
+    internal val plukketUtForUtbetalingTilSykmeldt get() = kanUtbetales && harUtbetalingTilSykmeldt && (utbetalingtype != REVURDERING || harVedtaksperiodePågåendeOverstyring)
 
     internal fun årsaker(): List<String> {
         require(kanIkkeUtbetales) { "Årsaker skal kun brukes for vedtaksperioder vi ikke kan utbetale" }

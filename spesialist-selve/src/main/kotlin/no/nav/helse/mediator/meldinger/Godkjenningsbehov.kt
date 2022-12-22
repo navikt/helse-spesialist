@@ -116,7 +116,8 @@ internal class Godkjenningsbehov(
             warnings = warningDao.finnAktiveWarnings(vedtaksperiodeId),
             periodetype = periodetype,
             inntektskilde = inntektskilde,
-            utbetalingtype = utbetalingtype
+            utbetalingtype = utbetalingtype,
+            harVedtaksperiodePågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
         )
     }
 
