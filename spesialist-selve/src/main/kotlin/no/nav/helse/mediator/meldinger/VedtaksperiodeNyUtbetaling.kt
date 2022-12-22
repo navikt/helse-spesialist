@@ -37,6 +37,7 @@ internal class VedtaksperiodeNyUtbetaling(
             utbetalingDao = utbetalingDao,
         ),
         OpprettKoblingTilGenerasjonCommand(
+            hendelseId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
             generasjonRepository = generasjonRepository,

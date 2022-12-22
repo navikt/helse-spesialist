@@ -85,7 +85,7 @@ internal class GenerasjonDaoTest : DatabaseIntegrationTest() {
             Generasjon(
                 generasjonId,
                 VEDTAKSPERIODE_ID,
-                UUID.randomUUID(),
+                null,
                 false,
                 setOf(
                     Varsel(varselId, "EN_KODE", varselOpprettet, VEDTAKSPERIODE_ID)

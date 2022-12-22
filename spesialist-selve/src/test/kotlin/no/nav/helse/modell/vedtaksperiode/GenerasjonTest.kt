@@ -204,6 +204,29 @@ internal class GenerasjonTest {
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
 
+    @Test
+    fun `forskjellig utbetalingId`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
+        generasjon1.håndterNyUtbetaling(UUID.randomUUID())
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
+        generasjon2.håndterNyUtbetaling(UUID.randomUUID())
+        assertNotEquals(generasjon1, generasjon2)
+        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
+    }
+
+    @Test
+    fun `forskjellig utbetalingId der én generasjon har null`() {
+        val generasjonId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
+        generasjon1.håndterNyUtbetaling(UUID.randomUUID())
+        val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
+        assertNotEquals(generasjon1, generasjon2)
+        assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
+    }
+
     private fun nyGenerasjon(id: UUID = UUID.randomUUID()): Generasjon {
         generasjonId = id
         return Generasjon(generasjonId, UUID.randomUUID(), generasjonRepository).also {

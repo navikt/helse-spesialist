@@ -60,9 +60,9 @@ internal class Generasjon private constructor(
 
     internal fun håndterNyUtbetaling(utbetalingId: UUID) {
         if (låst) return sikkerlogg.error(
-            "Kan ikke legge til ny utbetaling med {} for generasjon med {}, da generasjonen er låst",
+            "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst",
             keyValue("utbetalingId", utbetalingId),
-            keyValue("generasjonId", id)
+            keyValue("generasjon", this)
         )
         this.utbetalingId = utbetalingId
         generasjonRepository.utbetalingFor(id, utbetalingId)
@@ -128,18 +128,20 @@ internal class Generasjon private constructor(
         generasjonRepository.låsFor(id, hendelseId)
     }
 
-    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, låst=$låst"
+    override fun toString(): String = "generasjonId=$id, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, låst=$låst"
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Generasjon
                 && javaClass == other.javaClass
                 && id == other.id
                 && vedtaksperiodeId == other.vedtaksperiodeId
-                && låst == other.låst)
+                && låst == other.låst
+                && utbetalingId == other.utbetalingId)
 
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + vedtaksperiodeId.hashCode()
+        result = 31 * result + utbetalingId.hashCode()
         result = 31 * result + låst.hashCode()
         return result
     }
