@@ -36,7 +36,7 @@ internal class Varsel(
 
     internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
         if (status !in listOf(AKTIV, VURDERT)) return sikkerlogg.info(
-            "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV. Varselet har status=$status",
+            "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV eller VURDERT. Varselet har status=$status",
             keyValue("varselkode", varselkode),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("generasjonId", generasjonId)
