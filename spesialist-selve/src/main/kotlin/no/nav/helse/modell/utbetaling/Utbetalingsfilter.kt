@@ -26,10 +26,8 @@ internal class Utbetalingsfilter(
 
     private fun evaluer(): Boolean{
         if (!harUtbetalingTilSykmeldt) return true // Full refusjon / ingen utbetaling kan alltid utbetales
-        if (!harVedtaksperiodePågåendeOverstyring) {
-            if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
-            if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
-        }
+        if (delvisRefusjon) nyÅrsak("Utbetalingen består av delvis refusjon")
+        if (!fødselsnummer.startsWith("31")) nyÅrsak("Velges ikke ut som 'to om dagen'") // Kvoteregulering
         if (periodetype !in tillatePeriodetyper) nyÅrsak("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (inntektskilde != EN_ARBEIDSGIVER) nyÅrsak("Inntektskilden er ikke for en arbeidsgiver")
         // Unngå ping-pong om en av de utvalgte utbetalingene til sykmeldt revurderes og får warning
@@ -43,6 +41,10 @@ internal class Utbetalingsfilter(
                 return true
             }
             sikkerLogg.info("Kandidat for å beholde hos oss. Avvisningsgrunner: ${årsaker.joinToString()}")
+        }
+        if (årsaker.isNotEmpty() && harVedtaksperiodePågåendeOverstyring) {
+            sikkerLogg.info("Beholdes hos oss da det er en pågående overstyring. Årsaker registrert: ${årsaker.joinToString()}")
+            return true
         }
         return årsaker.isEmpty()
     }
