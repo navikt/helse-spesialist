@@ -2,6 +2,7 @@ package no.nav.helse.modell.varsel
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,6 +37,15 @@ internal class VarselTest {
     @Test
     fun `kan godkjenne aktivt varsel`() {
         val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        varsel.lagre(generasjon, varselRepository)
+        varsel.godkjennFor(UUID.randomUUID(), "EN_IDENT", varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, godkjenteVarsler.size)
+    }
+
+    @Test
+    fun `kan godkjenne vurdert varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID(), status = VURDERT)
         varsel.lagre(generasjon, varselRepository)
         varsel.godkjennFor(UUID.randomUUID(), "EN_IDENT", varselRepository)
         assertEquals(1, varsler.size)

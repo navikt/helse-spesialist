@@ -8,6 +8,7 @@ import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.AVVIST
 import no.nav.helse.modell.varsel.Varsel.Status.GODKJENT
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
+import no.nav.helse.modell.varsel.Varsel.Status.VURDERT
 import no.nav.helse.modell.vedtaksperiode.Generasjon
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.asLocalDateTime
@@ -34,7 +35,7 @@ internal class Varsel(
     }
 
     internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
-        if (status != AKTIV) return sikkerlogg.info(
+        if (status !in listOf(AKTIV, VURDERT)) return sikkerlogg.info(
             "Godkjenner ikke varsel med {}, {}, {} som ikke har status AKTIV. Varselet har status=$status",
             keyValue("varselkode", varselkode),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
