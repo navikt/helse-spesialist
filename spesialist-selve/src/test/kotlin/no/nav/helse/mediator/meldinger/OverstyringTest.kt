@@ -41,7 +41,7 @@ internal class OverstyringTest {
     private val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val oppgaveDao = mockk<OppgaveDao>()
 
     private val hendelsefabrikk = Hendelsefabrikk(
         dataSource = mockk(relaxed = true),
@@ -84,7 +84,6 @@ internal class OverstyringTest {
 
         verify(exactly = 1) { saksbehandlerDao.opprettSaksbehandler(OID, NAVN, EPOST, IDENT) }
         verify(exactly = 1) { reservasjonDao.reserverPerson(OID, FØDSELSNUMMER) }
-        verify(exactly = 1) { oppgaveDao.invaliderOppgaveFor(FØDSELSNUMMER) }
         verify(exactly = 1) { overstyringDao.finnEksternHendelseIdFraHendelseId(ID) }
         verify(exactly = 1) {
             overstyringDao.persisterOverstyringTidslinje(

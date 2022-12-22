@@ -76,7 +76,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -104,7 +103,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -131,7 +129,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -160,7 +157,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -221,6 +217,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLEREPOST,
             ident = SAKSBEHANDLER_IDENT,
+            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             overstyrteArbeidsforhold = listOf(
                 OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt(
                     orgnummer = GHOST_ORGNUMMER,
@@ -229,12 +226,10 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
                     forklaring = FORKLARING
                 )
             ),
-            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             opprettet = OPPRETTET,
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         ))
@@ -284,7 +279,6 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
-            oppgaveDao = oppgaveDao,
             overstyringDao = overstyringDao,
             overstyringMediator = mockk(),
         )

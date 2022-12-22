@@ -1,10 +1,14 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
+import kotliquery.Session
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import org.intellij.lang.annotations.Language
 
-class SaksbehandlerDao(dataSource: DataSource): HelseDao(dataSource) {
+class SaksbehandlerDao(private val dataSource: DataSource): HelseDao(dataSource) {
     fun opprettSaksbehandler(oid: UUID, navn: String, epost: String, ident: String) =
         """ INSERT INTO saksbehandler(oid, navn, epost, ident) VALUES (:oid, :navn, :epost, :ident)
             ON CONFLICT (oid)
@@ -31,4 +35,27 @@ class SaksbehandlerDao(dataSource: DataSource): HelseDao(dataSource) {
                 epost = row.string("epost"),
                 ident = row.string("ident"))}
 
+    fun invaliderSaksbehandleroppgaver(fødselsnummer: String) =
+        sessionOf(dataSource).use { session: Session ->
+            @Language("PostgreSQL")
+            val finnOppgaveIder = """
+                SELECT o.*
+                FROM vedtak v
+                         JOIN oppgave o ON o.vedtak_ref = v.id
+                         JOIN person p ON v.person_ref = p.id
+                WHERE p.fodselsnummer = :fodselsnummer
+                  AND o.status = 'AvventerSaksbehandler'::oppgavestatus;
+            """
+
+            @Language("PostgreSQL")
+            val invaliderOppgave =
+                "UPDATE oppgave SET status = 'Invalidert'::oppgavestatus WHERE id=:id;"
+            session.run(
+                queryOf(
+                    finnOppgaveIder,
+                    mapOf("fodselsnummer" to fødselsnummer.toLong())
+                ).map { it.long("id") }.asList
+            ).forEach { id -> session.run(queryOf(invaliderOppgave, mapOf("id" to id)).asUpdate) }
+        }
 }
+

@@ -15,7 +15,6 @@ import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringInntektCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -53,7 +52,6 @@ internal class OverstyringInntekt(
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
-    oppgaveDao: OppgaveDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
@@ -81,7 +79,7 @@ internal class OverstyringInntekt(
             opprettet = opprettet,
             overstyringDao = overstyringDao
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, oppgaveDao),
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_inntekt",
             hendelseId = id,

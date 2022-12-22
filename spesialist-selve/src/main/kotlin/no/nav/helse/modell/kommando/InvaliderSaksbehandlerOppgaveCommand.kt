@@ -1,20 +1,13 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.modell.oppgave.OppgaveDao
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 
 internal class InvaliderSaksbehandlerOppgaveCommand(
     private val fødselsnummer: String,
-    private val oppgaveDao: OppgaveDao
+    private val saksbehandlerDao: SaksbehandlerDao
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        val antall = oppgaveDao.invaliderOppgaveFor(fødselsnummer)
-        sikkerlogger.info("Invaliderte $antall {} for $fødselsnummer", if (antall == 1) "oppgave" else "oppgaver")
+        saksbehandlerDao.invaliderSaksbehandleroppgaver(fødselsnummer)
         return true
-    }
-
-    private companion object {
-        private val sikkerlogger = LoggerFactory.getLogger("tjenestekall")
-
     }
 }

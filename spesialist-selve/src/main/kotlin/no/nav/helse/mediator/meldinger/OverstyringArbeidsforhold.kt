@@ -14,7 +14,6 @@ import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringArbeidsforholdCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
-import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -40,7 +39,6 @@ internal class OverstyringArbeidsforhold(
     private val json: String,
     reservasjonDao: ReservasjonDao,
     saksbehandlerDao: SaksbehandlerDao,
-    oppgaveDao: OppgaveDao,
     overstyringDao: OverstyringDao,
     overstyringMediator: OverstyringMediator,
 ) : Hendelse, MacroCommand() {
@@ -62,7 +60,7 @@ internal class OverstyringArbeidsforhold(
             overstyringDao = overstyringDao,
             opprettet = opprettet
         ),
-        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, oppgaveDao),
+        InvaliderSaksbehandlerOppgaveCommand(fødselsnummer, saksbehandlerDao),
         PubliserOverstyringCommand(
             eventName = "overstyr_arbeidsforhold",
             hendelseId = id,
