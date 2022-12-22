@@ -328,15 +328,16 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             )
         }
 
-    fun invaliderOppgaveFor(fødselsnummer: String) = """
-        UPDATE oppgave
+    fun invaliderOppgaveFor(fødselsnummer: String) = queryize("""
+        UPDATE oppgave o
         SET status = 'Invalidert'
         FROM oppgave o2
         JOIN vedtak v on v.id = o2.vedtak_ref
         JOIN person p on v.person_ref = p.id
         WHERE p.fodselsnummer = :fodselsnummer
-        AND o2.status = 'AvventerSaksbehandler'::oppgavestatus; 
-    """.trimMargin().update(mapOf("fodselsnummer" to fødselsnummer.toLong()))
+        and o.id = o2.id
+        AND o.status = 'AvventerSaksbehandler'::oppgavestatus; 
+    """).update(mapOf("fodselsnummer" to fødselsnummer.toLong()))
 
 
     private fun Long.toFødselsnummer() = if (this < 10000000000) "0$this" else this.toString()

@@ -320,6 +320,39 @@ class OppgaveDaoTest : DatabaseIntegrationTest() {
         assertTrue(oppgaveDao.erRiskoppgave(oppgaveId))
     }
 
+    @Test
+    fun `invaliderer oppgaver`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
+        val oppgaveId1 = oppgaveId
+
+        val fnr2 = "12312312312"
+        val aktørId2 = "43"
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        opprettPerson(fødselsnummer = fnr2, aktørId2)
+        opprettArbeidsgiver("999111888", "en annen bedrift")
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2)
+        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId2, utbetalingId = UUID.randomUUID())
+        val oppgaveId2 = oppgaveId
+
+        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
+
+        assertOppgaveStatus(oppgaveId1, "Invalidert")
+        assertOppgaveStatus(oppgaveId2, "AvventerSaksbehandler")
+    }
+
+    private fun assertOppgaveStatus(oppgaveId: Long, forventetStatus: String) {
+        val status = sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf("SELECT * FROM oppgave where id = :id", mapOf("id" to oppgaveId))
+                    .map { it.string("status") }.asSingle
+            )
+        }
+        assertEquals(forventetStatus, status)
+    }
+
     private fun trengerTotrinnsvurdering(): Boolean = sessionOf(dataSource).use {
         it.run(
             queryOf(
