@@ -25,6 +25,7 @@ internal class Varsel(
         AKTIV,
         INAKTIV,
         GODKJENT,
+        VURDERT,
         AVVIST
     }
 
