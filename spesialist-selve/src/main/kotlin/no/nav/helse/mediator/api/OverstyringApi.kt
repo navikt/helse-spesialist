@@ -59,7 +59,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        val harOverstyringAvRefusjonTilgang = saksbehandler.toDto().ident == "N115007"
+        val harOverstyringAvRefusjonTilgang = listOf("G103083", "N115007", "C117102").contains(saksbehandler.toDto().ident)
 
         val message = OverstyrInntektKafkaDto(
             organisasjonsnummer = overstyring.organisasjonsnummer,
