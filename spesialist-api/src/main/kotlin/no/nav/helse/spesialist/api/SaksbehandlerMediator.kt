@@ -9,13 +9,13 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import org.slf4j.LoggerFactory
 
-internal class Mediator(
+class SaksbehandlerMediator(
     dataSource: DataSource,
     private val rapidsConnection: RapidsConnection
 ) {
     private val saksbehandlerDao = SaksbehandlerDao(dataSource)
 
-    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
+    fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
         tellAnnullering()
         saksbehandler.persister(saksbehandlerDao)
 

@@ -6,35 +6,36 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import java.util.*
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
-import java.util.*
-import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(PER_CLASS)
 internal class AnnulleringApiTest : AbstractApiTest() {
 
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
 
-    private lateinit var hendelseMediator: HendelseMediator
+    private lateinit var saksbehandlerMediator: SaksbehandlerMediator
 
     @BeforeAll
     fun setupTildeling() {
-        hendelseMediator = mockk(relaxed = true)
+        saksbehandlerMediator = mockk(relaxed = true)
         setupServer {
-            annulleringApi(hendelseMediator)
+            annulleringApi(saksbehandlerMediator)
         }
     }
 
     @AfterEach
     fun tearDownEach() {
-        clearMocks(hendelseMediator)
+        clearMocks(saksbehandlerMediator)
     }
 
     @Test
@@ -58,7 +59,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            hendelseMediator.håndter(capture(clot), any())
+            saksbehandlerMediator.håndter(capture(clot), any())
         }
         assertEquals("Russekort", clot.captured.kommentar)
         assertEquals(listOf("Ingen liker fisk", "En giraff!!"), clot.captured.begrunnelser)
@@ -83,7 +84,7 @@ internal class AnnulleringApiTest : AbstractApiTest() {
         }
         assertTrue(response.status.isSuccess(), "HTTP response burde returnere en OK verdi, fikk ${response.status}")
         verify(exactly = 1) {
-            hendelseMediator.håndter(capture(clot), any())
+            saksbehandlerMediator.håndter(capture(clot), any())
         }
         assertEquals(null, clot.captured.kommentar)
         assertEquals(emptyList<String>(), clot.captured.begrunnelser)

@@ -7,8 +7,6 @@ import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.annulleringsteller
-import no.nav.helse.mediator.api.AnnulleringDto
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
@@ -75,8 +73,6 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
@@ -91,7 +87,6 @@ internal class HendelseMediator(
     private val hendelseDao: HendelseDao = HendelseDao(dataSource),
     private val tildelingDao: TildelingDao = TildelingDao(dataSource),
     private val reservasjonDao: ReservasjonDao = ReservasjonDao(dataSource),
-    private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val feilendeMeldingerDao: FeilendeMeldingerDao = FeilendeMeldingerDao(dataSource),
     private val periodehistorikkDao: PeriodehistorikkDao = PeriodehistorikkDao(dataSource),
     private val opptegnelseDao: OpptegnelseDao,
@@ -650,32 +645,6 @@ internal class HendelseMediator(
         }
 
         rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
-    }
-
-    internal fun håndter(annulleringDto: AnnulleringDto, saksbehandler: Saksbehandler) {
-        annulleringsteller.inc()
-        saksbehandler.persister(saksbehandlerDao)
-
-        val annulleringMessage = JsonMessage.newMessage("annullering", mutableMapOf(
-            "fødselsnummer" to annulleringDto.fødselsnummer,
-            "organisasjonsnummer" to annulleringDto.organisasjonsnummer,
-            "aktørId" to annulleringDto.aktørId,
-            "saksbehandler" to saksbehandler.json().toMutableMap()
-                .apply { put("ident", annulleringDto.saksbehandlerIdent) },
-            "fagsystemId" to annulleringDto.fagsystemId,
-            "begrunnelser" to annulleringDto.begrunnelser,
-            "gjelderSisteSkjæringstidspunkt" to annulleringDto.gjelderSisteSkjæringstidspunkt
-        ).apply {
-            compute("kommentar") { _, _ -> annulleringDto.kommentar }
-        })
-
-        rapidsConnection.publish(annulleringDto.fødselsnummer, annulleringMessage.toJson().also {
-            sikkerLogg.info(
-                "sender annullering for {}, {}\n\t$it",
-                keyValue("fødselsnummer", annulleringDto.fødselsnummer),
-                keyValue("organisasjonsnummer", annulleringDto.organisasjonsnummer)
-            )
-        })
     }
 
     fun håndter(oppdaterPersonsnapshotDto: OppdaterPersonsnapshotDto) {

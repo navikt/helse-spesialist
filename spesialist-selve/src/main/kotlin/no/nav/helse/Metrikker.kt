@@ -6,9 +6,6 @@ internal val overstyringsteller = Counter.build("overstyringer", "Teller antall 
     .labelNames("opplysningstype", "type")
     .register()
 
-internal val annulleringsteller = Counter.build("annulleringer", "Teller antall annulleringer")
-    .register()
-
 internal val automatiseringsteller = Counter.build("automatiseringer", "Teller antall automatiseringer")
     .register()
 

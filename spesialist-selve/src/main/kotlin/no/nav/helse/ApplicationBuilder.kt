@@ -65,6 +65,7 @@ import no.nav.helse.modell.vedtaksperiode.ActualGenerasjonRepository
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseMediator
 import no.nav.helse.spesialist.api.abonnement.opptegnelseApi
@@ -175,6 +176,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     }
     private val httpTraceLog = LoggerFactory.getLogger("tjenestekall")
     private lateinit var hendelseMediator: HendelseMediator
+    private lateinit var saksbehandlerMediator: SaksbehandlerMediator
     private lateinit var tildelingService: TildelingService
 
     private val personDao = PersonDao(dataSource)
@@ -304,7 +306,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     )
                     overstyringApi(hendelseMediator)
                     tildelingApi(tildelingService)
-                    annulleringApi(hendelseMediator)
+                    annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))
                     leggPåVentApi(LeggPåVentService(tildelingDao, hendelseMediator), notatMediator)
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
@@ -354,6 +356,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
             oppgaveMediator = oppgaveMediator,
             hendelsefabrikk = hendelsefabrikk
         )
+        saksbehandlerMediator = SaksbehandlerMediator(dataSource, rapidsConnection)
         tildelingService = TildelingService(
             saksbehandlerDao,
             tildelingDao,

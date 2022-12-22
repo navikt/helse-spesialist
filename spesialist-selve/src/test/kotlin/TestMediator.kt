@@ -67,10 +67,10 @@ internal class TestMediator(
     init {
         HendelseMediator(
             dataSource = dataSource,
-            hendelsefabrikk = hendelsefabrikk,
+            rapidsConnection = testRapid,
             opptegnelseDao = opptegnelseDao,
             oppgaveMediator = oppgaveMediator,
-            rapidsConnection = testRapid
+            hendelsefabrikk = hendelsefabrikk
         )
     }
 }
