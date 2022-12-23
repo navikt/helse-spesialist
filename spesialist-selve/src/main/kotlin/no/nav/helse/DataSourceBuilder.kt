@@ -44,7 +44,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         username = databaseUsername
         password = databasePassword
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
-        maximumPoolSize = 1
+        maximumPoolSize = 2
     }
 
     private fun runMigration(dataSource: DataSource) =
