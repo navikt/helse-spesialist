@@ -2,7 +2,7 @@ val junitJupiterVersion = "5.9.0"
 val ktorVersion = "2.1.1"
 val graphqlKotlinVersion = "6.2.5"
 val jvmTargetVersion = "17"
-val rapidsAndRiversVersion = "2022092314391663936769.9d5d33074875"
+val rapidsAndRiversVersion = "2022122313141671797650.f806f770805a"
 val logbackSyslog4jVersion = "1.0.0"
 val hikariCPVersion = "5.0.1"
 val flywayCoreVersion = "9.10.2"
@@ -15,12 +15,21 @@ plugins {
     kotlin("jvm") version "1.6.21"
 }
 
+val githubUser: String by project
+val githubPassword: String by project
+
 allprojects {
     group = "no.nav.helse"
 
     repositories {
         mavenCentral()
-        maven("https://jitpack.io")
+        maven {
+            url = uri("https://maven.pkg.github.com/navikt/*")
+            credentials {
+                username = githubUser
+                password = githubPassword
+            }
+        }
     }
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
