@@ -2,7 +2,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 val testcontainersVersion = "1.17.3"
 val graphQLKotlinVersion = "6.2.5"
-val ktorVersion = "2.0.1"
+val ktorVersion = "2.2.1"
 
 plugins {
     kotlin("plugin.serialization") version "1.6.21"
