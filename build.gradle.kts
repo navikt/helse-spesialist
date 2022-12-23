@@ -9,7 +9,7 @@ val flywayCoreVersion = "9.10.2"
 val kotliqueryVersion = "1.9.0"
 val kotlinTestVersion = "1.6.21"
 val mockkVersion = "1.12.8"
-val postgressqlVersion = "42.5.0"
+val postgresqlVersion = "42.5.1"
 
 plugins {
     kotlin("jvm") version "1.6.21"
@@ -37,7 +37,7 @@ allprojects {
     dependencies {
         implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
         implementation("io.ktor:ktor-server-cio:$ktorVersion")
-        implementation("org.postgresql:postgresql:$postgressqlVersion")
+        implementation("org.postgresql:postgresql:$postgresqlVersion")
         implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") //August, 2014
         {
             exclude(group = "ch.qos.logback")
