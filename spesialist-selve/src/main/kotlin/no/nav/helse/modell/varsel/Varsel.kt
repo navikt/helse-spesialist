@@ -31,7 +31,7 @@ internal class Varsel(
     }
 
     internal fun lagre(generasjon: Generasjon, varselRepository: VarselRepository) {
-        generasjon.håndterNyttVarsel(id, varselkode, opprettet, varselRepository)
+        generasjon.håndterVarsel(id, varselkode, opprettet, varselRepository)
     }
 
     internal fun godkjennFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
@@ -45,9 +45,20 @@ internal class Varsel(
         varselRepository.godkjennFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
     }
 
+    internal fun avvisFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
+        if (status != AKTIV) return sikkerlogg.info(
+            "Avviser ikke varsel med {}, {}, {} som ikke har status $AKTIV. Varselet har status=$status",
+            keyValue("varselkode", varselkode),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+            keyValue("generasjonId", generasjonId)
+        )
+        status = AVVIST
+        varselRepository.avvisFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
+    }
+
     internal fun deaktiverFor(generasjonId: UUID, varselRepository: VarselRepository) {
         if (status != AKTIV) return sikkerlogg.info(
-            "Deaktiverer ikke varsel med {}, {}, {} som ikke har status AKTIV",
+            "Deaktiverer ikke varsel med {}, {}, {} som ikke har status $AKTIV. Varselet har status=$status",
             keyValue("varselkode", varselkode),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("generasjonId", generasjonId)
@@ -56,15 +67,15 @@ internal class Varsel(
         varselRepository.deaktiverFor(vedtaksperiodeId, generasjonId, varselkode, null)
     }
 
-    internal fun avvisFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
-        if (status != AKTIV) return sikkerlogg.info(
-            "Avviser ikke varsel med {}, {}, {} som ikke har status AKTIV. Varselet har status=$status",
+    internal fun reaktiverFor(generasjonId: UUID, varselRepository: VarselRepository) {
+        if (status != INAKTIV) return sikkerlogg.info(
+            "Reaktiverer ikke varsel med {}, {}, {} som ikke har status $INAKTIV. Varselet har status=$status",
             keyValue("varselkode", varselkode),
             keyValue("vedtaksperiodeId", vedtaksperiodeId),
             keyValue("generasjonId", generasjonId)
         )
-        status = AVVIST
-        varselRepository.avvisFor(vedtaksperiodeId, generasjonId, varselkode, ident, null)
+        this.status = AKTIV
+        varselRepository.reaktiverFor(vedtaksperiodeId, generasjonId, varselkode)
     }
 
     override fun equals(other: Any?): Boolean =
@@ -112,6 +123,10 @@ internal class Varsel(
             find { it.varselkode == varselkode }?.deaktiverFor(generasjonId, varselRepository)
         }
 
+        internal fun List<Varsel>.reaktiverFor(generasjonId: UUID, varselkode: String, varselRepository: VarselRepository): Varsel? {
+            return find { it.varselkode == varselkode }?.also { it.reaktiverFor(generasjonId, varselRepository) }
+        }
+
         internal fun List<Varsel>.godkjennAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
             forEach { it.godkjennFor(generasjonId, ident, varselRepository) }
         }
@@ -119,8 +134,6 @@ internal class Varsel(
         internal fun List<Varsel>.avvisAlleFor(generasjonId: UUID, ident: String, varselRepository: VarselRepository) {
             forEach { it.avvisFor(generasjonId, ident, varselRepository) }
         }
-
-        internal fun List<Varsel>.harVarsel(varselkode: String) = find { it.varselkode == varselkode } != null
 
         internal fun JsonNode.varsler(): List<Varsel> {
             return this

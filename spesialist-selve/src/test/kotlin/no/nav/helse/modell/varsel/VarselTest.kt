@@ -16,6 +16,7 @@ internal class VarselTest {
     private val godkjenteVarsler = mutableListOf<String>()
     private val avvisteVarsler = mutableListOf<String>()
     private val deaktiverteVarsler = mutableListOf<String>()
+    private val reaktiverteVarsler = mutableListOf<String>()
     private val generasjon = Generasjon(UUID.randomUUID(), UUID.randomUUID(), generasjonRepository)
 
     @BeforeEach
@@ -143,6 +144,29 @@ internal class VarselTest {
     }
 
     @Test
+    fun `kan reaktivere deaktivert varsel`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.deaktiverFor(enGenerasjonId, varselRepository)
+        varsel.reaktiverFor(enGenerasjonId, varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(1, deaktiverteVarsler.size)
+        assertEquals(1, reaktiverteVarsler.size)
+    }
+
+    @Test
+    fun `kan ikke reaktivere varsel som ikke er inaktivt`() {
+        val varsel = Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID())
+        val enGenerasjonId = UUID.randomUUID()
+        varsel.lagre(generasjon, varselRepository)
+        varsel.reaktiverFor(enGenerasjonId, varselRepository)
+        assertEquals(1, varsler.size)
+        assertEquals(0, deaktiverteVarsler.size)
+        assertEquals(0, reaktiverteVarsler.size)
+    }
+
+    @Test
     fun equals() {
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
@@ -164,6 +188,10 @@ internal class VarselTest {
     private val varselRepository = object : VarselRepository {
         override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
             deaktiverteVarsler.add(varselkode)
+        }
+
+        override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
+            reaktiverteVarsler.add(varselkode)
         }
 
         override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {

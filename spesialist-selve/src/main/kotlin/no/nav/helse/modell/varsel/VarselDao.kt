@@ -26,23 +26,39 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterVarsel(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String, definisjonId: UUID) {
+    internal fun oppdaterVarsel(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String?, definisjonId: UUID?) {
         @Language("PostgreSQL")
         val query =
             """
                 UPDATE selve_varsel 
                 SET 
-                    status = ?,
-                    status_endret_tidspunkt = ?,
-                    status_endret_ident = ?, 
-                    definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = ?) 
-                WHERE vedtaksperiode_id = ? 
-                AND generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = ?) 
-                AND kode = ?;
+                    status = :status,
+                    status_endret_tidspunkt = :endretTidspunkt,
+                    status_endret_ident = :ident, 
+                    definisjon_ref = case :definisjonId 
+                                when NULL then NULL 
+                                else (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjonId) 
+                    end
+                WHERE vedtaksperiode_id = :vedtaksperiodeId
+                AND generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjonId) 
+                AND kode = :varselkode;
             """
 
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(query, status.name, LocalDateTime.now(), ident, definisjonId, vedtaksperiodeId, generasjonId, varselkode).asUpdate)
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "status" to status.name,
+                        "endretTidspunkt" to LocalDateTime.now(),
+                        "ident" to ident,
+                        "definisjonId" to definisjonId,
+                        "vedtaksperiodeId" to vedtaksperiodeId,
+                        "generasjonId" to generasjonId,
+                        "varselkode" to varselkode
+                    )
+                ).asUpdate
+            )
         }
     }
 

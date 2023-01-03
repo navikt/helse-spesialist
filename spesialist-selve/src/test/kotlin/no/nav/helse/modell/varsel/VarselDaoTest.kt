@@ -9,6 +9,7 @@ import no.nav.helse.modell.varsel.Varsel.Status.AKTIV
 import no.nav.helse.modell.varsel.Varsel.Status.INAKTIV
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
@@ -58,6 +59,24 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Kan nullstille definisjon-ref og ident i oppdatering av varsel`() {
+        val generasjonId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
+        generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID())
+        varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
+        varselDao.oppdaterVarsel(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "ident", definisjonId)
+
+        assertDefinisjonFor(varselId, forventetFinnes = true)
+        assertIdentFor(varselId, forventetFinnes = true)
+
+        varselDao.oppdaterVarsel(VEDTAKSPERIODE, generasjonId, "EN_KODE", AKTIV, null, null)
+        assertDefinisjonFor(varselId, forventetFinnes = false)
+        assertIdentFor(varselId, forventetFinnes = false)
+    }
+
+    @Test
     fun `endring av en varselstatus for en vedtaksperiode endrer ikke status for en annen`() {
         val definisjonId = UUID.randomUUID()
         definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
@@ -89,6 +108,26 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         generasjonDao.opprettFor(generasjonId, v1, UUID.randomUUID())
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), v1, generasjonId)
         assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), alleVarslerFor(v1))
+    }
+
+    private fun assertDefinisjonFor(varselId: UUID, forventetFinnes: Boolean) {
+        @Language("PostgreSQL")
+        val query = "SELECT definisjon_ref FROM selve_varsel WHERE unik_id = ?"
+        val definisjon = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, varselId).map { it.longOrNull("definisjon_ref") }.asSingle)
+        }
+        if (!forventetFinnes) return assertNull(definisjon)
+        assertNotNull(definisjon)
+    }
+
+    private fun assertIdentFor(varselId: UUID, forventetFinnes: Boolean) {
+        @Language("PostgreSQL")
+        val query = "SELECT status_endret_ident FROM selve_varsel WHERE unik_id = ?"
+        val statusEndretIdent = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, varselId).map { it.stringOrNull("status_endret_ident") }.asSingle)
+        }
+        if (!forventetFinnes) return assertNull(statusEndretIdent)
+        assertNotNull(statusEndretIdent)
     }
 
     private fun alleVarslerFor(vedtaksperiodeId: UUID): List<Varsel> {
