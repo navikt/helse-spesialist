@@ -26,7 +26,7 @@ data class Varsel(
         }
 
         internal fun List<Varsel>.antallIkkeVurderte(): Int {
-            return filter { it.vurdering?.erIkkeVurdert() ?: false }.size
+            return filter { !it.erVurdert() && !it.erBeslutterVarsel() }.size
         }
     }
 
@@ -39,6 +39,14 @@ data class Varsel(
         handling,
         vurdering?.toDto()
     )
+
+    private fun erBeslutterVarsel(): Boolean {
+        return kode.startsWith("SB_BO_")
+    }
+
+    private fun erVurdert(): Boolean {
+        return vurdering?.erIkkeVurdert() == false
+    }
 
     data class Varselvurdering(
         private val ident: String,

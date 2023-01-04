@@ -16,8 +16,12 @@ class ApiVarselRepository(dataSource: DataSource) {
     }
 
     fun ikkeVurderteVarslerFor(oppgaveId: Long): Int {
-        val alleVarsler = varselDao.finnVarslerFor(oppgaveId) ?: throw IllegalArgumentException("Ugyldig oppgaveId")
+        val alleVarsler = varselDao.finnVarslerFor(oppgaveId)
         return alleVarsler.antallIkkeVurderte()
+    }
+
+    fun godkjennVarslerFor(oppgaveId: Long) {
+        varselDao.godkjennVarslerFor(oppgaveId)
     }
 
     fun settStatusVurdert(
@@ -27,6 +31,10 @@ class ApiVarselRepository(dataSource: DataSource) {
         ident: String,
     ): Int {
         return varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)
+    }
+
+    fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String) {
+        varselDao.settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId, ident)
     }
 
     fun settStatusAktiv(

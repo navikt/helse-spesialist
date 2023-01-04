@@ -75,20 +75,6 @@ internal fun Route.personApi(
             return@post
         }
 
-        val antallIkkeVurderteVarsler =
-            if (Toggle.VurderingAvVarsler.enabled) varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
-            else 0
-        if (antallIkkeVurderteVarsler > 0 ) {
-            call.respond(
-                status = HttpStatusCode.BadRequest,
-                mapOf(
-                    "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
-                    "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
-                )
-            )
-            return@post
-        }
-
         val erBeslutteroppgave = oppgaveMediator.erBeslutteroppgave(godkjenning.oppgavereferanse)
         if (erBeslutteroppgave) {
             // Midlertidig logging. Slik at vi vet når vi kan skru av totrinnsmerking i Speil
@@ -112,6 +98,24 @@ internal fun Route.personApi(
                 )
                 return@post
             }
+
+            if (Toggle.VurderingAvVarsler.enabled) varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
+        }
+
+        if (Toggle.VurderingAvVarsler.enabled) {
+            val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
+            if (antallIkkeVurderteVarsler > 0) {
+                call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    mapOf(
+                        "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
+                        "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
+                    )
+                )
+                return@post
+            }
+
+            varselRepository.godkjennVarslerFor(godkjenning.oppgavereferanse)
         }
 
         withContext(Dispatchers.IO) { hendelseMediator.håndter(godkjenning, epostadresse, oid) }

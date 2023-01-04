@@ -5,7 +5,9 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselvurdering
 import org.intellij.lang.annotations.Language
@@ -51,8 +53,74 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
         val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
 
-        checkNotNull(varsler)
         assertEquals(forventetVarsel, varsler.single())
+    }
+
+    @Test
+    fun `Finner alle varsler med samme utbetalingId gitt oppgaveId`() {
+        val definisjonId = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId)
+        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId1, utbetalingId = utbetalingId)
+        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId2, utbetalingId = utbetalingId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        val forventetVarsel1 = Varsel(generasjonId1, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
+        val forventetVarsel2 = Varsel(generasjonId2, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
+        val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
+
+        assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
+    }
+
+    @Test
+    fun `Godkjenner alle varsler med samme utbetalingId gitt oppgaveId`() {
+        val definisjonId1 = UUID.randomUUID()
+        val definisjonId2 = UUID.randomUUID()
+        val generasjonId1 = UUID.randomUUID()
+        val generasjonId2 = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId1)
+        opprettVarseldefinisjon(kode = "SB_BO_1234", definisjonId = definisjonId2)
+        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId1, utbetalingId = utbetalingId)
+        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, generasjonId = generasjonId2, utbetalingId = utbetalingId)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
+        nyttVarsel(kode = "SB_BO_1234", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        apiVarselDao.settStatusVurdert(generasjonId1, definisjonId1, "EN_KODE", "EN_IDENT")
+        apiVarselDao.settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId, "EN_IDENT")
+        val forventetVarsel1 = Varsel(generasjonId1, definisjonId1,"EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
+        val forventetVarsel2 = Varsel(generasjonId2, definisjonId2,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
+        apiVarselDao.godkjennVarslerFor(oppgaveId)
+        val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
+
+        assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
+    }
+
+    @Test
+    fun `Godkjenner ikke varsler med ulik utbetalingId gitt oppgaveId`() {
+        val definisjonId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        opprettVarseldefinisjon(kode = "EN_KODE", definisjonId = definisjonId)
+        val generasjonRef1 = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
+        val generasjonRef2 = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = UUID.randomUUID())
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef1)
+        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
+        apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        apiVarselDao.godkjennVarslerFor(oppgaveId)
+        val antallGodkjenteVarsler = finnVarslerFor(GODKJENT)
+
+        assertEquals(1, antallGodkjenteVarsler)
     }
 
     @Test
@@ -104,6 +172,20 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `setter status til VURDERT for beslutteroppgavevarsler`() {
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = UUID.randomUUID(), utbetalingId = utbetalingId)
+        nyttVarsel(kode = "SB_BO_1234", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "NOE_ANNET", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
+        apiVarselDao.settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId, "EN_IDENT")
+        val antallVurderteVarsler = finnVarslerFor(VURDERT)
+
+        assertEquals(1, antallVurderteVarsler)
+    }
+
+    @Test
     fun `setter status til AKTIV`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val definisjonId = UUID.randomUUID()
@@ -117,6 +199,12 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT")
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
+    }
+
+    private fun finnVarslerFor(status: Varselstatus): Int = sessionOf(dataSource).use { session ->
+        @Language("PostgreSQL")
+        val query = "SELECT count(1) FROM selve_varsel WHERE status = :status;"
+        return requireNotNull(session.run(queryOf(query, mapOf("status" to status.name)).map { it.int(1) }.asSingle))
     }
 
     private fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = sessionOf(dataSource).use { session ->

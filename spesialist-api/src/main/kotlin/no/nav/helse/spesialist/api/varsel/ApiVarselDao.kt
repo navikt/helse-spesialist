@@ -19,17 +19,48 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "utbetaling_id" to utbetalingId)) { mapVarsel(it) }
 
-    internal fun finnVarslerFor(oppgaveId: Long): List<Varsel>? {
-        val data = queryize(
+    internal fun finnVarslerFor(oppgaveId: Long): List<Varsel> {
+        return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerFor) ?: emptyList()
+    }
+
+    internal fun godkjennVarslerFor(oppgaveId: Long) {
+        val utbetalingId = finnUtbetalingIdFor(oppgaveId)
+        queryize(
             """
-            SELECT vedtaksperiode_id, utbetaling_id FROM oppgave 
-                JOIN vedtak v ON oppgave.vedtak_ref = v.id
-                WHERE oppgave.id = :oppgave_id;
-        """
-        ).single(mapOf("oppgave_id" to oppgaveId)) { it.uuid("vedtaksperiode_id") to it.uuid("utbetaling_id") }
-            ?: return null
-        val (vedtaksperiodeId, utbetalingId) = data
-        return finnVarslerFor(vedtaksperiodeId, utbetalingId)
+                UPDATE selve_varsel 
+                SET status = :status_godkjent 
+                WHERE status = :status_vurdert 
+                AND generasjon_ref IN (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id);
+            """
+        ).update(
+            mapOf(
+                "status_godkjent" to Varselstatus.GODKJENT.name,
+                "status_vurdert" to Varselstatus.VURDERT.name,
+                "utbetaling_id" to utbetalingId,
+            )
+        )
+    }
+
+    internal fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String){
+        val utbetalingId = finnUtbetalingIdFor(oppgaveId)
+        queryize(
+            """
+                UPDATE selve_varsel 
+                SET 
+                    status = :status,
+                    status_endret_tidspunkt = :endret_tidspunkt,
+                    status_endret_ident = :endret_ident
+                WHERE generasjon_ref in (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id)
+                AND kode like 'SB_BO_%';
+            """
+        ).update(
+            mapOf(
+                "status" to Varselstatus.VURDERT.name,
+                "endret_tidspunkt" to LocalDateTime.now(),
+                "endret_ident" to ident,
+                "utbetaling_id" to utbetalingId,
+            )
+        )
     }
 
     internal fun settStatusVurdert(
@@ -83,6 +114,19 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             "kode" to varselkode
         )
     )
+
+    private fun finnVarslerFor(utbetalingId: UUID): List<Varsel> = queryize(
+        """
+            SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
+                INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
+                INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
+                WHERE svg.utbetaling_id = :utbetaling_id; 
+        """
+    ).list(mapOf("utbetaling_id" to utbetalingId)) { mapVarsel(it) }
+
+    private fun finnUtbetalingIdFor(oppgaveId: Long) = queryize(
+        "SELECT utbetaling_id FROM oppgave WHERE oppgave.id = :oppgave_id;"
+    ).single(mapOf("oppgave_id" to oppgaveId)) { it.uuid("utbetaling_id") }
 
     private fun mapVarsel(it: Row): Varsel = Varsel(
         generasjonId = it.uuid("generasjon_id"),
