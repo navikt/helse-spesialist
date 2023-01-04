@@ -23,7 +23,7 @@ class SaksbehandlerDao(dataSource: DataSource): HelseDao(dataSource) {
                     ident = row.string("ident"))}
 
     fun finnSaksbehandler(epost: String) =
-        """ SELECT * FROM saksbehandler WHERE epost = :epost LIMIT 1"""
+        """ SELECT * FROM saksbehandler WHERE epost ILIKE :epost LIMIT 1"""
             .single(mapOf("epost" to epost)) { row ->
             SaksbehandlerDto(
                 oid = row.uuid("oid"),

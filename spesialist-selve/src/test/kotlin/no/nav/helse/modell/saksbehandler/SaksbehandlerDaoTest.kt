@@ -1,10 +1,10 @@
 package no.nav.helse.modell.saksbehandler
 
 import DatabaseIntegrationTest
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
 
@@ -44,6 +44,20 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
             )
         )
         assertSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+    }
+
+    @Test
+    fun `finner saksbehandler vha epost`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+        val saksbehandler = saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLEREPOST)
+        assertNotNull(saksbehandler)
+    }
+
+    @Test
+    fun `finner saksbehandler vha epost uavhengig av store bokstaver`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST.uppercase(), SAKSBEHANDLER_IDENT)
+        val saksbehandler = saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLEREPOST.lowercase())
+        assertNotNull(saksbehandler)
     }
 
     private fun saksbehandler(oid: UUID) = saksbehandlerDao.finnSaksbehandler(oid)
