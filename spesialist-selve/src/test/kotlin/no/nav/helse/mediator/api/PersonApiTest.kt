@@ -34,6 +34,7 @@ import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -47,6 +48,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
 
+    private val saksbehandlerDao: SaksbehandlerDao = mockk(relaxed = true)
     private val apiVarselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
@@ -299,6 +301,7 @@ internal class PersonApiTest {
             routing {
                 authenticate("oidc") {
                     personApi(
+                        saksbehandlerDao,
                         apiVarselRepository,
                         hendelseMediator,
                         oppgaveMediator,

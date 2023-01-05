@@ -15,6 +15,7 @@ import java.util.UUID
 import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
+import no.nav.helse.mediator.kanVurdereVarsler
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -37,8 +38,9 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
+        val saksbehandlerIdent = getSaksbehandlerIdent()
 
-        if (Toggle.VurderingAvVarsler.enabled) {
+        if (Toggle.VurderingAvVarsler.enabled || kanVurdereVarsler(saksbehandlerIdent, saksbehandlerIdent)) {
             val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
             if (antallIkkeVurderteVarsler > 0) {
                 call.respond(
@@ -51,7 +53,7 @@ internal fun Route.totrinnsvurderingApi(
                 return@post
             }
         } else {
-            varselRepository.settStatusVurdertFor(totrinnsvurdering.oppgavereferanse, getSaksbehandlerIdent())
+            varselRepository.settStatusVurdertFor(totrinnsvurdering.oppgavereferanse, saksbehandlerIdent)
         }
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")

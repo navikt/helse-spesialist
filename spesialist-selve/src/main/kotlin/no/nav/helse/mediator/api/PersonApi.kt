@@ -18,12 +18,15 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.Toggle
+import no.nav.helse.mediator.kanVurdereVarsler
 import no.nav.helse.modell.oppgave.OppgaveMediator
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
 import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(
+    saksbehandlerDao: SaksbehandlerDao,
     varselRepository: ApiVarselRepository,
     hendelseMediator: HendelseMediator,
     oppgaveMediator: OppgaveMediator,
@@ -99,10 +102,12 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if (Toggle.VurderingAvVarsler.enabled) varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
+            varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
         }
 
-        if (Toggle.VurderingAvVarsler.enabled) {
+        val kanskjeTidligereSaksbehandlerIdent = oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse)?.let(saksbehandlerDao::finnSaksbehandler)?.ident ?: godkjenning.saksbehandlerIdent
+
+        if (Toggle.VurderingAvVarsler.enabled || kanVurdereVarsler(kanskjeTidligereSaksbehandlerIdent, godkjenning.saksbehandlerIdent)) {
             val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
             if (antallIkkeVurderteVarsler > 0) {
                 call.respond(
