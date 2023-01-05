@@ -97,4 +97,4 @@ spec:
     - name: VEDTAKSPERIODE_GENERASJONER
       value: "true"
     - name: VURDERING_AV_VARSLER
-      value: "false"
+      value: "true"
