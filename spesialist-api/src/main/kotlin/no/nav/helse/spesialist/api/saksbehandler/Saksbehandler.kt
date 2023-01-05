@@ -9,6 +9,7 @@ class Saksbehandler(
     private val navn: String,
     private val ident: String
 ) {
+    private val observere: MutableList<SaksbehandlerObserver> = mutableListOf()
     companion object {
         fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal) = Saksbehandler(
             epostadresse = jwtPrincipal.payload.getClaim("preferred_username").asString(),
@@ -18,8 +19,25 @@ class Saksbehandler(
         )
     }
 
-    fun persister(saksbehandlerDao: SaksbehandlerDao) {
-        saksbehandlerDao.opprettSaksbehandler(oid = oid, navn = navn, epost = epostadresse, ident = ident)
+    internal fun register(observer: SaksbehandlerObserver) {
+        observere.add(observer)
+    }
+
+    internal fun annuller(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        fagsystemId: String,
+        begrunnelser: List<String>,
+        kommentar: String?
+    ) {
+        observere.notify {
+            annulleringEvent(aktørId, fødselsnummer, organisasjonsnummer, json(), fagsystemId, begrunnelser, kommentar)
+        }
+    }
+
+    private fun List<SaksbehandlerObserver>.notify(hendelse: SaksbehandlerObserver.() -> Unit) {
+        forEach { it.hendelse() }
     }
 
     fun json() = mapOf(

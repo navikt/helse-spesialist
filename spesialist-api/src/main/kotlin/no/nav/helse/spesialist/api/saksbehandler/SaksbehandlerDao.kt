@@ -31,4 +31,24 @@ class SaksbehandlerDao(dataSource: DataSource): HelseDao(dataSource) {
                 epost = row.string("epost"),
                 ident = row.string("ident"))}
 
+    internal fun finnSaksbehandlerFor(oid: UUID): Saksbehandler? {
+        return queryize("SELECT * FROM saksbehandler WHERE oid = :oid").single(mapOf("oid" to oid)) {
+            Saksbehandler(
+                it.string("epost"),
+                it.uuid("oid"),
+                it.string("navn"),
+                it.string("ident")
+            )
+        }
+    }
+
+    internal fun opprettFra(saksbehandlerDto: SaksbehandlerDto): Saksbehandler {
+        val epostadresse = saksbehandlerDto.epost
+        val oid = saksbehandlerDto.oid
+        val navn = saksbehandlerDto.navn
+        val ident = saksbehandlerDto.ident
+
+        opprettSaksbehandler(oid, navn, epostadresse, ident)
+        return Saksbehandler(epostadresse, oid, navn, ident)
+    }
 }

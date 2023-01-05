@@ -3,11 +3,12 @@ package no.nav.helse.spesialist.api
 import java.util.UUID
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
-import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.api.utbetaling.AnnulleringDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.utbetaling.Annullering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
     private val testRapid = TestRapid()
@@ -22,7 +23,7 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
     fun `håndterer annullering`() {
         val oid = UUID.randomUUID()
         val navn = "ET_NAVN"
-        mediator.håndter(annullering(), Saksbehandler("epost@nav.no", oid, navn, "EN_IDENT"))
+        mediator.håndter(annullering(saksbehandlerOid = oid), SaksbehandlerDto(oid, navn, "epost@nav.no", "EN_IDENT"))
 
         assertEquals(1, testRapid.inspektør.size)
         val melding = testRapid.inspektør.message(0)
@@ -43,7 +44,7 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
     fun `håndterer annullering uten kommentar og begrunnelser`() {
         val oid = UUID.randomUUID()
         val navn = "ET_NAVN"
-        mediator.håndter(annullering(emptyList(), null), Saksbehandler("epost@nav.no", oid, navn, "EN_IDENT"))
+        mediator.håndter(annullering(emptyList(), null, oid), SaksbehandlerDto(oid, navn, "epost@nav.no", "EN_IDENT"))
 
         val melding = testRapid.inspektør.message(0)
 
@@ -59,16 +60,28 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
     }
 
+    @Test
+    fun `Kast exception dersom saksbehandlers oid ikke er lik oid til den som har utført saksbehandler-handlingen`() {
+        val oid = UUID.randomUUID()
+        val otherOid = UUID.randomUUID()
+        val navn = "ET_NAVN"
+        assertThrows<IllegalStateException> {
+            mediator.håndter(annullering(emptyList(), null, oid), SaksbehandlerDto(otherOid, navn, "epost@nav.no", "EN_IDENT"))
+        }
+    }
+
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
-    ) = AnnulleringDto(
+        saksbehandlerOid: UUID = UUID.randomUUID()
+    ) = Annullering(
         aktørId = "EN_AKTØR",
         fødselsnummer = "ET_FØDSELSNUMMER",
         organisasjonsnummer = "ET_ORGANISASJONSNUMMER",
         fagsystemId = "EN_FAGSYSTEMID",
         saksbehandlerIdent = "EN_IDENT",
         begrunnelser = begrunnelser,
-        kommentar = kommentar
+        kommentar = kommentar,
+        saksbehandlerOid = saksbehandlerOid
     )
 }
