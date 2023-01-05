@@ -47,11 +47,12 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         val utbetalingId = finnUtbetalingIdFor(oppgaveId)
         queryize(
             """
-                UPDATE selve_varsel 
+                UPDATE selve_varsel sv
                 SET 
                     status = :status,
                     status_endret_tidspunkt = :endret_tidspunkt,
-                    status_endret_ident = :endret_ident
+                    status_endret_ident = :endret_ident,
+                    definisjon_ref = (SELECT id from api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1)
                 WHERE generasjon_ref in (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id)
                 AND kode like 'SB_BO_%';
             """

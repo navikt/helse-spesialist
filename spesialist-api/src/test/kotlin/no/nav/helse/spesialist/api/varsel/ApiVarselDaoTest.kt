@@ -103,6 +103,26 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
     }
 
     @Test
+    fun `Lagrer vurdert besluttervarsel med siste definisjon for varselkoden`() {
+        val definisjonId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettVedtaksperiode(personId = opprettPerson(), arbeidsgiverId = opprettArbeidsgiver(), utbetlingId = utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+        opprettVarseldefinisjon(kode = "SB_BO_1234", definisjonId = definisjonId)
+        val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
+        nyttVarsel(kode = "SB_BO_1234", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        apiVarselDao.settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId, "EN_IDENT")
+        opprettVarseldefinisjon(kode = "SB_BO_1234")
+        val forventetVarsel = Varsel(generasjonId, definisjonId,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
+        apiVarselDao.godkjennVarslerFor(oppgaveId)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
+
+        assertEquals(listOf(forventetVarsel), varsler)
+    }
+
+    @Test
     fun `Godkjenner ikke varsler med ulik utbetalingId gitt oppgaveId`() {
         val definisjonId = UUID.randomUUID()
         val generasjonId = UUID.randomUUID()
