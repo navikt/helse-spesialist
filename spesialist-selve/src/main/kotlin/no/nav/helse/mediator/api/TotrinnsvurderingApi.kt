@@ -50,6 +50,8 @@ internal fun Route.totrinnsvurderingApi(
                 )
                 return@post
             }
+        } else {
+            varselRepository.settStatusVurdertFor(totrinnsvurdering.oppgavereferanse, getSaksbehandlerIdent())
         }
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
@@ -110,6 +112,11 @@ internal fun Route.totrinnsvurderingApi(
 private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return UUID.fromString(accessToken.payload.getClaim("oid").asString())
+}
+
+private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerIdent(): String {
+    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
+    return accessToken.payload.getClaim("NAVident").asString()
 }
 
 @JsonIgnoreProperties

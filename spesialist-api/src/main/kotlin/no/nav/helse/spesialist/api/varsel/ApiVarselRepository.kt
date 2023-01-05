@@ -42,6 +42,10 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId, ident)
     }
 
+    fun settStatusVurdertFor(oppgaveId: Long, ident: String) {
+        varselDao.settStatusVurdertFor(oppgaveId, ident)
+    }
+
     fun settStatusAktiv(
         generasjonId: UUID,
         varselkode: String,
