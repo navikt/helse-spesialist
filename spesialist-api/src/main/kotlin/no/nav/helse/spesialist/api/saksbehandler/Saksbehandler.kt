@@ -40,7 +40,7 @@ class Saksbehandler(
         forEach { it.hendelse() }
     }
 
-    fun json() = mapOf(
+    private fun json() = mapOf(
         "epostaddresse" to epostadresse,
         "oid" to oid,
         "navn" to navn,
@@ -48,4 +48,20 @@ class Saksbehandler(
     )
 
     fun toDto() = SaksbehandlerDto(oid = oid, navn = navn, epost = epostadresse, ident = ident)
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is Saksbehandler &&
+                epostadresse == other.epostadresse &&
+                oid == other.oid &&
+                navn == other.navn &&
+                ident == other.ident)
+
+    override fun hashCode(): Int {
+        var result = epostadresse.hashCode()
+        result = 31 * result + oid.hashCode()
+        result = 31 * result + navn.hashCode()
+        result = 31 * result + ident.hashCode()
+        result = 31 * result + observere.hashCode()
+        return result
+    }
 }

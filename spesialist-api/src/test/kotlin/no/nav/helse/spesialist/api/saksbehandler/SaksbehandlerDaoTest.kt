@@ -1,9 +1,10 @@
-package no.nav.helse.modell.saksbehandler
+package no.nav.helse.spesialist.api.saksbehandler
 
-import DatabaseIntegrationTest
 import java.util.UUID
+import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
@@ -11,6 +12,10 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
     private companion object {
         private const val IS_UPDATED = 1
         private const val IS_NOT_UPDATED = 0
+        private val SAKSBEHANDLER_OID = UUID.randomUUID()
+        private const val SAKSBEHANDLEREPOST = "saksbehandlerepost@nav.no"
+        private const val SAKSBEHANDLER_IDENT = "S123456"
+        private const val SAKSBEHANDLER_NAVN = "Fornavn Mellomnavn Etternavn"
     }
 
     @Test
@@ -51,6 +56,20 @@ internal class SaksbehandlerDaoTest : DatabaseIntegrationTest() {
         saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
         val saksbehandler = saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLEREPOST)
         assertNotNull(saksbehandler)
+    }
+
+    @Test
+    fun `finner ikke noen saksbehandler hvis det ikke finnes noen`() {
+        val saksbehandler = saksbehandlerDao.finnSaksbehandlerFor(UUID.randomUUID())
+        assertNull(saksbehandler)
+    }
+
+    @Test
+    fun `henter ut saksbehandler vha oid`() {
+        saksbehandlerDao.opprettSaksbehandler(SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLEREPOST, SAKSBEHANDLER_IDENT)
+        val saksbehandler = saksbehandlerDao.finnSaksbehandlerFor(SAKSBEHANDLER_OID)
+        assertNotNull(saksbehandler)
+        assertEquals(Saksbehandler(SAKSBEHANDLEREPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT), saksbehandler)
     }
 
     @Test
