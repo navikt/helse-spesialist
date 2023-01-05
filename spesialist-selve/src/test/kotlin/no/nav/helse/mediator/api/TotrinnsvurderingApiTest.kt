@@ -1,5 +1,8 @@
 package no.nav.helse.mediator.api
 
+import ToggleHelpers.disable
+import ToggleHelpers.enable
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.request.accept
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
@@ -7,11 +10,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.objectMapper
@@ -19,6 +24,7 @@ import no.nav.helse.spesialist.api.graphql.schema.NotatType
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -28,6 +34,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
+    private val apiVarselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val oppgaveMediator = mockk<OppgaveMediator>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val notatMediator = mockk<NotatMediator>(relaxed = true)
@@ -48,13 +55,47 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     @BeforeAll
     fun setupTotrinnsvurdering() {
         setupServer {
-            totrinnsvurderingApi(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
+            totrinnsvurderingApi(apiVarselRepository, oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
         }
     }
 
     @BeforeEach
     fun setup() {
         clearMocks(oppgaveMediator, periodehistorikkDao, notatMediator, tildelingService, hendelseMediator)
+    }
+
+    @Test
+    fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
+        Toggle.VurderingAvVarsler.enable()
+        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { apiVarselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
+        val response = runBlocking {
+            client.preparePost("/api/totrinnsvurdering") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
+                authentication(saksbehandler_oid)
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        Toggle.VurderingAvVarsler.disable()
+    }
+
+    @Test
+    fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
+        Toggle.VurderingAvVarsler.enable()
+        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { apiVarselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 1
+        val response = runBlocking {
+            client.preparePost("/api/totrinnsvurdering") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
+                authentication(saksbehandler_oid)
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test

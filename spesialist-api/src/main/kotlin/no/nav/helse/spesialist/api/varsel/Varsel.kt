@@ -22,6 +22,10 @@ data class Varsel(
         }
 
         internal fun List<Varsel>.antallIkkeVurderte(): Int {
+            return filter { !it.erVurdert() }.size
+        }
+
+        internal fun List<Varsel>.antallIkkeVurderteEkskludertBesluttervarsler(): Int {
             return filter { !it.erVurdert() && !it.erBeslutterVarsel() }.size
         }
     }

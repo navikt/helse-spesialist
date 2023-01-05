@@ -4,6 +4,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
+import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderteEkskludertBesluttervarsler
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
 
 class ApiVarselRepository(dataSource: DataSource) {
@@ -17,6 +18,11 @@ class ApiVarselRepository(dataSource: DataSource) {
     fun ikkeVurderteVarslerFor(oppgaveId: Long): Int {
         val alleVarsler = varselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
         return alleVarsler.antallIkkeVurderte()
+    }
+
+    fun ikkeVurderteVarslerEkskludertBesluttervarslerFor(oppgaveId: Long): Int {
+        val alleVarsler = varselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
+        return alleVarsler.antallIkkeVurderteEkskludertBesluttervarsler()
     }
 
     fun godkjennVarslerFor(oppgaveId: Long) {

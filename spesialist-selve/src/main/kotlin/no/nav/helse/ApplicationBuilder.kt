@@ -312,6 +312,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                     behandlingsstatistikkApi(BehandlingsstatistikkMediator(behandlingsstatistikkDao))
                     notaterApi(notatMediator)
                     totrinnsvurderingApi(
+                        apiVarselRepository,
                         oppgaveMediator,
                         periodehistorikkDao,
                         notatMediator,

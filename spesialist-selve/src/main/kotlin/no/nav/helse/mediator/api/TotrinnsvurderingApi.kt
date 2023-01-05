@@ -14,17 +14,20 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
+import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.notat.NotatMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
 private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
 
 internal fun Route.totrinnsvurderingApi(
+    varselRepository: ApiVarselRepository,
     oppgaveMediator: OppgaveMediator,
     periodehistorikkDao: PeriodehistorikkDao,
     notatMediator: NotatMediator,
@@ -34,6 +37,20 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
+
+        if (Toggle.VurderingAvVarsler.enabled) {
+            val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
+            if (antallIkkeVurderteVarsler > 0) {
+                call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    mapOf(
+                        "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
+                        "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
+                    )
+                )
+                return@post
+            }
+        }
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
 
