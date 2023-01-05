@@ -7,6 +7,7 @@ import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.INAKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselvurdering
 
@@ -17,9 +18,15 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id AND sv.status != 'INAKTIV'; 
+                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv; 
         """
-    ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "utbetaling_id" to utbetalingId)) { mapVarsel(it) }
+    ).list(
+        mapOf(
+            "vedtaksperiode_id" to vedtaksperiodeId,
+            "utbetaling_id" to utbetalingId,
+            "status_inaktiv" to INAKTIV.name
+        )
+    ) { mapVarsel(it) }
 
     internal fun finnVarslerSomIkkeErInaktiveFor(oppgaveId: Long): List<Varsel> {
         return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerSomIkkeErInaktiveFor) ?: emptyList()
@@ -43,7 +50,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    internal fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String){
+    internal fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String) {
         val utbetalingId = finnUtbetalingIdFor(oppgaveId)
         queryize(
             """
@@ -66,21 +73,23 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     }
 
-    internal fun settStatusVurdertFor(oppgaveId: Long, ident: String){
+    internal fun settStatusVurdertFor(oppgaveId: Long, ident: String) {
         val utbetalingId = finnUtbetalingIdFor(oppgaveId)
         queryize(
             """
                 UPDATE selve_varsel sv
                 SET 
-                    status = :status,
+                    status = :status_vurdert,
                     status_endret_tidspunkt = :endret_tidspunkt,
                     status_endret_ident = :endret_ident,
                     definisjon_ref = (SELECT id from api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1)
-                WHERE generasjon_ref in (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id);
+                WHERE generasjon_ref in (SELECT id FROM selve_vedtaksperiode_generasjon WHERE utbetaling_id = :utbetaling_id)
+                AND status != :status_inaktiv;
             """
         ).update(
             mapOf(
-                "status" to VURDERT.name,
+                "status_vurdert" to VURDERT.name,
+                "status_inaktiv" to INAKTIV.name,
                 "endret_tidspunkt" to LocalDateTime.now(),
                 "endret_ident" to ident,
                 "utbetaling_id" to utbetalingId,
@@ -145,9 +154,9 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE svg.utbetaling_id = :utbetaling_id AND sv.status != 'INAKTIV';
+                WHERE svg.utbetaling_id = :utbetaling_id AND sv.status != :status_inaktiv;
         """
-    ).list(mapOf("utbetaling_id" to utbetalingId)) { mapVarsel(it) }
+    ).list(mapOf("utbetaling_id" to utbetalingId, "status_inaktiv" to INAKTIV.name)) { mapVarsel(it) }
 
     private fun finnUtbetalingIdFor(oppgaveId: Long) = queryize(
         "SELECT utbetaling_id FROM oppgave WHERE oppgave.id = :oppgave_id;"
