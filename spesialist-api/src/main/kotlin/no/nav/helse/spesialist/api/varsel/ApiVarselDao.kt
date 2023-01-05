@@ -6,21 +6,23 @@ import javax.sql.DataSource
 import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselvurdering
 
 internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
 
-    internal fun finnVarslerFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<Varsel> = queryize(
+    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<Varsel> = queryize(
         """
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id; 
+                WHERE sv.vedtaksperiode_id = :vedtaksperiode_id AND svg.utbetaling_id = :utbetaling_id AND sv.status != 'INAKTIV'; 
         """
     ).list(mapOf("vedtaksperiode_id" to vedtaksperiodeId, "utbetaling_id" to utbetalingId)) { mapVarsel(it) }
 
-    internal fun finnVarslerFor(oppgaveId: Long): List<Varsel> {
-        return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerFor) ?: emptyList()
+    internal fun finnVarslerSomIkkeErInaktiveFor(oppgaveId: Long): List<Varsel> {
+        return finnUtbetalingIdFor(oppgaveId)?.let(::finnVarslerSomIkkeErInaktiveFor) ?: emptyList()
     }
 
     internal fun godkjennVarslerFor(oppgaveId: Long) {
@@ -34,8 +36,8 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             """
         ).update(
             mapOf(
-                "status_godkjent" to Varselstatus.GODKJENT.name,
-                "status_vurdert" to Varselstatus.VURDERT.name,
+                "status_godkjent" to GODKJENT.name,
+                "status_vurdert" to VURDERT.name,
                 "utbetaling_id" to utbetalingId,
             )
         )
@@ -55,7 +57,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
             """
         ).update(
             mapOf(
-                "status" to Varselstatus.VURDERT.name,
+                "status" to VURDERT.name,
                 "endret_tidspunkt" to LocalDateTime.now(),
                 "endret_ident" to ident,
                 "utbetaling_id" to utbetalingId,
@@ -81,7 +83,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).update(
         mapOf(
-            "status" to Varselstatus.VURDERT.name,
+            "status" to VURDERT.name,
             "endret_tidspunkt" to LocalDateTime.now(),
             "endret_ident" to ident,
             "definisjon_id" to definisjonId,
@@ -115,12 +117,12 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         )
     )
 
-    private fun finnVarslerFor(utbetalingId: UUID): List<Varsel> = queryize(
+    private fun finnVarslerSomIkkeErInaktiveFor(utbetalingId: UUID): List<Varsel> = queryize(
         """
             SELECT svg.unik_id as generasjon_id, sv.kode, sv.status_endret_ident, sv.status_endret_tidspunkt, sv.status, av.unik_id as definisjon_id, av.tittel, av.forklaring, av.handling FROM selve_varsel sv 
                 INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                 INNER JOIN api_varseldefinisjon av ON av.id = COALESCE(sv.definisjon_ref, (SELECT id FROM api_varseldefinisjon WHERE kode = sv.kode ORDER BY opprettet DESC LIMIT 1))
-                WHERE svg.utbetaling_id = :utbetaling_id; 
+                WHERE svg.utbetaling_id = :utbetaling_id AND sv.status != 'INAKTIV';
         """
     ).list(mapOf("utbetaling_id" to utbetalingId)) { mapVarsel(it) }
 
@@ -128,17 +130,20 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         "SELECT utbetaling_id FROM oppgave WHERE oppgave.id = :oppgave_id;"
     ).single(mapOf("oppgave_id" to oppgaveId)) { it.uuid("utbetaling_id") }
 
-    private fun mapVarsel(it: Row): Varsel = Varsel(
-        generasjonId = it.uuid("generasjon_id"),
-        definisjonId = it.uuid("definisjon_id"),
-        kode = it.string("kode"),
-        tittel = it.string("tittel"),
-        forklaring = it.stringOrNull("forklaring"),
-        handling = it.stringOrNull("handling"),
-        vurdering = if (it.localDateTimeOrNull("status_endret_tidspunkt") != null) Varselvurdering(
-            it.string("status_endret_ident"),
-            it.localDateTime("status_endret_tidspunkt"),
-            Varselstatus.valueOf(it.string("status")),
-        ) else null
-    )
+    private fun mapVarsel(it: Row): Varsel {
+        val status = Varselstatus.valueOf(it.string("status"))
+        return Varsel(
+            generasjonId = it.uuid("generasjon_id"),
+            definisjonId = it.uuid("definisjon_id"),
+            kode = it.string("kode"),
+            tittel = it.string("tittel"),
+            forklaring = it.stringOrNull("forklaring"),
+            handling = it.stringOrNull("handling"),
+            vurdering = if (status in listOf(VURDERT, GODKJENT)) Varselvurdering(
+                it.string("status_endret_ident"),
+                it.localDateTime("status_endret_tidspunkt"),
+                Varselstatus.valueOf(it.string("status")),
+            ) else null
+        )
+    }
 }

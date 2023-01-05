@@ -6,7 +6,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
-import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselvurdering
@@ -21,7 +20,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Tom liste ved manglende varsler`() {
-        assertTrue(apiVarselDao.finnVarslerFor(PERIODE.id, UUID.randomUUID()).isEmpty())
+        assertTrue(apiVarselDao.finnVarslerSomIkkeErInaktiveFor(PERIODE.id, UUID.randomUUID()).isEmpty())
     }
 
     @Test
@@ -34,7 +33,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
-        val varsler = apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId)
 
         assertTrue(varsler.isNotEmpty())
         assertEquals(2, varsler.size)
@@ -51,7 +50,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = PERIODE.id, generasjonId = generasjonId, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, generasjonRef = generasjonRef)
         val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
-        val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
         assertEquals(forventetVarsel, varsler.single())
     }
@@ -72,7 +71,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef2)
         val forventetVarsel1 = Varsel(generasjonId1, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
         val forventetVarsel2 = Varsel(generasjonId2, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
-        val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
         assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
     }
@@ -98,7 +97,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel1 = Varsel(generasjonId1, definisjonId1,"EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
         val forventetVarsel2 = Varsel(generasjonId2, definisjonId2,"SB_BO_1234", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT))
         apiVarselDao.godkjennVarslerFor(oppgaveId)
-        val varsler = apiVarselDao.finnVarslerFor(oppgaveId)
+        val varsler = apiVarselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
 
         assertEquals(listOf(forventetVarsel1, forventetVarsel2), varsler)
     }
@@ -136,7 +135,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
         val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_NY_TITTEL", null, null, null)
 
-        assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
+        assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
 
     @Test
@@ -152,7 +151,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
         val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
 
-        assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
+        assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
 
     @Test
@@ -168,7 +167,7 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), VURDERT))
         apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
 
-        assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
+        assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
 
     @Test
@@ -195,10 +194,10 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
-        val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), AKTIV))
+        val forventetVarsel = Varsel(generasjonId, definisjonId,"EN_KODE", "EN_TITTEL", null, null, null)
         apiVarselDao.settStatusAktiv(generasjonId, "EN_KODE", "EN_IDENT")
 
-        assertEquals(forventetVarsel, apiVarselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).single())
+        assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
     }
 
     private fun finnVarslerFor(status: Varselstatus): Int = sessionOf(dataSource).use { session ->

@@ -480,7 +480,7 @@ data class BeregnetPeriode(
 
     fun varsler(): List<String> = varselDao.finnAktiveVarsler(UUID.fromString(vedtaksperiodeId())).distinct()
 
-    fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerFor(
+    fun varslerForGenerasjon(): List<VarselDTO> = varselRepository.finnVarslerSomIkkeErInaktiveFor(
         UUID.fromString(vedtaksperiodeId()),
         UUID.fromString(periode.utbetaling.id)
     )

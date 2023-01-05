@@ -21,10 +21,6 @@ data class Varsel(
             return map { it.toDto() }
         }
 
-        internal fun List<Varsel>.utenInaktive(): List<Varsel> {
-            return filterNot { it.vurdering?.erInaktiv() ?: false }
-        }
-
         internal fun List<Varsel>.antallIkkeVurderte(): Int {
             return filter { !it.erVurdert() && !it.erBeslutterVarsel() }.size
         }
@@ -54,7 +50,7 @@ data class Varsel(
         private val status: Varselstatus,
     ) {
         internal fun erIkkeVurdert() = status == AKTIV
-        internal fun erInaktiv() = status == INAKTIV
+
         internal fun toDto(): VarselvurderingDTO {
             if (status == INAKTIV) throw IllegalStateException("Sende INAKTIV til frontend støttes ikke")
             return VarselvurderingDTO(

@@ -5,18 +5,17 @@ import javax.sql.DataSource
 import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
-import no.nav.helse.spesialist.api.varsel.Varsel.Companion.utenInaktive
 
 class ApiVarselRepository(dataSource: DataSource) {
 
     private val varselDao = ApiVarselDao(dataSource)
 
-    internal fun finnVarslerFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<VarselDTO> {
-        return varselDao.finnVarslerFor(vedtaksperiodeId, utbetalingId).utenInaktive().toDto()
+    internal fun finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId: UUID, utbetalingId: UUID): List<VarselDTO> {
+        return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).toDto()
     }
 
     fun ikkeVurderteVarslerFor(oppgaveId: Long): Int {
-        val alleVarsler = varselDao.finnVarslerFor(oppgaveId)
+        val alleVarsler = varselDao.finnVarslerSomIkkeErInaktiveFor(oppgaveId)
         return alleVarsler.antallIkkeVurderte()
     }
 

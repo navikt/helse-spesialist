@@ -18,7 +18,7 @@ internal class ApiVarselRepositoryTest: DatabaseIntegrationTest() {
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "INAKTIV")
-        val varsler = apiVarselRepository.finnVarslerFor(vedtaksperiodeId, utbetalingId)
+        val varsler = apiVarselRepository.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId)
 
         assertTrue(varsler.isNotEmpty())
         assertEquals(1, varsler.size)
