@@ -55,6 +55,7 @@ internal class PersonApiTest {
     private val saksbehandlerIdent = "1234"
     private val SAKSBEHANDLER_OID = UUID.randomUUID()
     private val godkjenning = GodkjenningDTO(1L, true, saksbehandlerIdent, null, null, null)
+    private val avvisning = GodkjenningDTO(1L, false, saksbehandlerIdent, "Avvist", null, null)
     private val riskQaGruppe = UUID.randomUUID()
 
     @Test
@@ -114,6 +115,23 @@ internal class PersonApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
+        Toggle.VurderingAvVarsler.disable()
+    }
+
+    @Test
+    fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() {
+        Toggle.VurderingAvVarsler.enable()
+        every { oppgaveMediator.erAktivOppgave(1L) } returns true
+        every { oppgaveMediator.erRiskoppgave(1L) } returns false
+        every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 1
+        val response = runBlocking {
+            client.preparePost("/api/vedtak") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(avvisning))
+                authentication(SAKSBEHANDLER_OID)
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Created, response.status)
         Toggle.VurderingAvVarsler.disable()
     }
 

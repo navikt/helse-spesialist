@@ -107,7 +107,7 @@ internal fun Route.personApi(
 
         val kanskjeTidligereSaksbehandlerIdent = oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse)?.let(saksbehandlerDao::finnSaksbehandler)?.ident ?: godkjenning.saksbehandlerIdent
 
-        if (Toggle.VurderingAvVarsler.enabled || kanVurdereVarsler(kanskjeTidligereSaksbehandlerIdent, godkjenning.saksbehandlerIdent)) {
+        if (godkjenning.godkjent && (Toggle.VurderingAvVarsler.enabled || kanVurdereVarsler(kanskjeTidligereSaksbehandlerIdent, godkjenning.saksbehandlerIdent))) {
             val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
             if (antallIkkeVurderteVarsler > 0) {
                 call.respond(
