@@ -6,6 +6,7 @@ import javax.sql.DataSource
 import kotliquery.Row
 import no.nav.helse.HelseDao
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.GODKJENT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.INAKTIV
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
@@ -106,16 +107,16 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
             UPDATE selve_varsel 
             SET 
-                status = :status,
+                status = :status_vurdert,
                 status_endret_tidspunkt = :endret_tidspunkt,
                 status_endret_ident = :endret_ident, 
                 definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjon_id) 
             WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)
-            AND kode = :kode;
+            AND kode = :kode AND status != :status_vurdert;
         """
     ).update(
         mapOf(
-            "status" to VURDERT.name,
+            "status_vurdert" to VURDERT.name,
             "endret_tidspunkt" to LocalDateTime.now(),
             "endret_ident" to ident,
             "definisjon_id" to definisjonId,
@@ -132,7 +133,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
             UPDATE selve_varsel 
             SET 
-                status = :status,
+                status = :status_aktiv,
                 status_endret_tidspunkt = :endret_tidspunkt,
                 status_endret_ident = :endret_ident, 
                 definisjon_ref = null 
@@ -141,7 +142,7 @@ internal class ApiVarselDao(dataSource: DataSource) : HelseDao(dataSource) {
         """
     ).update(
         mapOf(
-            "status" to Varselstatus.AKTIV.name,
+            "status_aktiv" to AKTIV.name,
             "endret_tidspunkt" to LocalDateTime.now(),
             "endret_ident" to ident,
             "generasjon_id" to generasjonId,
