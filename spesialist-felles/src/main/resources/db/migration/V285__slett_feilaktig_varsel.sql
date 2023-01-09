@@ -1,0 +1,1 @@
+DELETE FROM selve_varsel sv WHERE kode = 'RV_OO_2' AND sv.status = 'AKTIV' AND opprettet >= '2022-11-20 00:00:00'::timestamp AND opprettet < '2022-12-01 00:00:00'::timestamp;
