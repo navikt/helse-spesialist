@@ -40,7 +40,7 @@ class SaksbehandlerMediator(
         begrunnelser: List<String>,
         kommentar: String?
     ) {
-        val annulleringMessage = JsonMessage.newMessage("annullering", mutableMapOf(
+        val verdier = mutableMapOf(
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,
             "aktørId" to aktørId,
@@ -49,14 +49,20 @@ class SaksbehandlerMediator(
             "begrunnelser" to begrunnelser,
         ).apply {
             compute("kommentar") { _, _ -> kommentar }
-        })
+        }
 
-        rapidsConnection.publish(fødselsnummer, annulleringMessage.toJson().also {
+        nyMelding(aktørId, fødselsnummer, organisasjonsnummer, "annullering", verdier)
+    }
+
+    private fun nyMelding(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, eventName: String, verdier: Map<String, Any>) {
+        JsonMessage.newMessage(eventName, verdier).toJson().also {
+            rapidsConnection.publish(fødselsnummer, it)
             sikkerlogg.info(
-                "sender annullering for {}, {}\n\t$it",
+                "sender $eventName for {}, {}, {}\n\t$it",
+                keyValue("aktørId", aktørId),
                 keyValue("fødselsnummer", fødselsnummer),
                 keyValue("organisasjonsnummer", organisasjonsnummer)
             )
-        })
+        }
     }
 }
