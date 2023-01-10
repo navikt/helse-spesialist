@@ -10,7 +10,6 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.UtbetalingsgodkjenningCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -79,6 +78,7 @@ internal class Saksbehandlerløsning(
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
                         it.interestedIn("årsak", "begrunnelser", "kommentar")
+                        it.rejectValue("@id", "a652a3aa-9990-4cb1-9fbe-d1183cd816a5")
                     }
                 }.register(this)
         }
