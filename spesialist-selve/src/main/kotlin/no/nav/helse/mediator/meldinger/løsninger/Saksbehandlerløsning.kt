@@ -78,7 +78,6 @@ internal class Saksbehandlerløsning(
                         it.requireKey("godkjent", "saksbehandlerident", "saksbehandleroid", "saksbehandlerepost")
                         it.require("godkjenttidspunkt", JsonNode::asLocalDateTime)
                         it.interestedIn("årsak", "begrunnelser", "kommentar")
-                        it.rejectValue("@id", "a652a3aa-9990-4cb1-9fbe-d1183cd816a5")
                     }
                 }.register(this)
         }
