@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.saksbehandler
 
 import io.ktor.server.auth.jwt.JWTPrincipal
 import java.util.UUID
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinje.Overstyringdag
 
 class Saksbehandler(
     private val epostadresse: String,
@@ -36,12 +37,25 @@ class Saksbehandler(
         }
     }
 
+    internal fun overstyrTidslinje(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        dager: List<Overstyringdag>,
+        begrunnelse: String,
+    ) {
+        observere.notify {
+            overstyrTidslinjeEvent(aktørId, fødselsnummer, organisasjonsnummer, json(), begrunnelse, dager)
+        }
+    }
+
     private fun List<SaksbehandlerObserver>.notify(hendelse: SaksbehandlerObserver.() -> Unit) {
         forEach { it.hendelse() }
     }
 
     private fun json() = mapOf(
         "epostaddresse" to epostadresse,
+        "epost" to epostadresse,
         "oid" to oid,
         "navn" to navn,
         "ident" to ident,

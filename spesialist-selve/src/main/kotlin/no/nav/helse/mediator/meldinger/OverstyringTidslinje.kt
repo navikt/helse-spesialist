@@ -99,10 +99,7 @@ internal class OverstyringTidslinje(
                     it.requireKey("organisasjonsnummer")
                     it.requireKey("dager")
                     it.requireKey("@id")
-                    it.requireKey("saksbehandlerOid")
-                    it.requireKey("saksbehandlerNavn")
-                    it.requireKey("saksbehandlerIdent")
-                    it.requireKey("saksbehandlerEpost")
+                    it.requireKey("saksbehandler.oid", "saksbehandler.navn", "saksbehandler.epost", "saksbehandler.ident")
                     it.requireKey("begrunnelse")
                 }
             }.register(this)
@@ -122,10 +119,10 @@ internal class OverstyringTidslinje(
             mediator.overstyringTidslinje(
                 id = UUID.fromString(packet["@id"].asText()),
                 fødselsnummer = packet["fødselsnummer"].asText(),
-                oid = UUID.fromString(packet["saksbehandlerOid"].asText()),
-                navn = packet["saksbehandlerNavn"].asText(),
-                ident = packet["saksbehandlerIdent"].asText(),
-                epost = packet["saksbehandlerEpost"].asText(),
+                oid = UUID.fromString(packet["saksbehandler.oid"].asText()),
+                navn = packet["saksbehandler.navn"].asText(),
+                ident = packet["saksbehandler.ident"].asText(),
+                epost = packet["saksbehandler.epost"].asText(),
                 orgnummer = packet["organisasjonsnummer"].asText(),
                 begrunnelse = packet["begrunnelse"].asText(),
                 overstyrteDager = packet["dager"].toOverstyrteDagerDto(),

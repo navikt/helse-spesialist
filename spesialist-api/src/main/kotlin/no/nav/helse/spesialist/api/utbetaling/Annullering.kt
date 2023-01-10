@@ -23,4 +23,3 @@ data class Annullering(
         saksbehandler.annuller(aktørId, fødselsnummer, organisasjonsnummer, fagsystemId, begrunnelser, kommentar)
     }
 }
-

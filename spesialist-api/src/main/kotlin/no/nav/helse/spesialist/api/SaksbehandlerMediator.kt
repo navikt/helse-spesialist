@@ -4,6 +4,7 @@ import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinje.Overstyringdag
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerHendelse
@@ -50,8 +51,31 @@ class SaksbehandlerMediator(
         ).apply {
             compute("kommentar") { _, _ -> kommentar }
         }
-
         nyMelding(aktørId, fødselsnummer, organisasjonsnummer, "annullering", verdier)
+    }
+
+    override fun overstyrTidslinjeEvent(
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        saksbehandler: Map<String, Any>,
+        begrunnelse: String,
+        dager: List<Overstyringdag>
+    ) {
+        nyMelding(
+            aktørId,
+            fødselsnummer,
+            organisasjonsnummer,
+            "saksbehandler_overstyrer_tidslinje",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "dager" to dager.map(Overstyringdag::toJson),
+                "begrunnelse" to begrunnelse,
+                "saksbehandler" to saksbehandler,
+            )
+        )
     }
 
     private fun nyMelding(aktørId: String, fødselsnummer: String, organisasjonsnummer: String, eventName: String, verdier: Map<String, Any>) {

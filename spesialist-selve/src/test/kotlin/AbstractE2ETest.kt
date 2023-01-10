@@ -69,6 +69,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vergemal.VergemålDao
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.abonnement.AbonnementDao
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
@@ -177,6 +178,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         oppgaveMediator = oppgaveMediator,
         hendelsefabrikk = hendelsefabrikk
     )
+
+    internal val saksbehandlerMediator = SaksbehandlerMediator(dataSource, testRapid)
 
     internal val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)
 

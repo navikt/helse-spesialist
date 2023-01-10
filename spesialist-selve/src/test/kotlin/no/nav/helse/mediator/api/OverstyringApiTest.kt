@@ -1,18 +1,24 @@
 package no.nav.helse.mediator.api
 
 import AbstractE2ETest
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.accept
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.testApplication
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -29,37 +35,46 @@ import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 internal class OverstyringApiTest : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
-        with(TestApplicationEngine()) {
-            setUpApplication()
-            val overstyring = OverstyrTidslinjeDTO(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
-                )
-            )
-
-            val response = runBlocking {
-                client.post("/api/overstyr/dager") {
-                    header(HttpHeaders.ContentType, "application/json")
+        testApplication {
+            val response = execute {
+                post("/api/overstyr/dager") {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
                     authentication(
                         oid = SAKSBEHANDLER_OID,
                         epost = SAKSBEHANDLER_EPOST,
                         navn = SAKSBEHANDLER_NAVN,
                         ident = SAKSBEHANDLER_IDENT
                     )
-                    setBody(objectMapper.writeValueAsString(overstyring))
+                    setBody(
+                        mapOf(
+                            "aktørId" to AKTØR,
+                            "fødselsnummer" to FØDSELSNUMMER,
+                            "organisasjonsnummer" to ORGNR,
+                            "begrunnelse" to "en begrunnelse",
+                            "dager" to listOf(
+                                mapOf(
+                                    "dato" to 10.januar,
+                                    "type" to "Feriedag",
+                                    "fraType" to "Sykedag",
+                                    "grad" to null,
+                                    "fraGrad" to 100
+                                )
+                            ),
+                            "saksbehandlerOid" to SAKSBEHANDLER_OID
+                        )
+                    )
                 }
             }
 
@@ -72,13 +87,14 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     fun `overstyr tidslinje til arbeidsdag`() {
         with(TestApplicationEngine()) {
             setUpApplication()
-            val overstyring = OverstyrTidslinjeDTO(
+            val overstyring = OverstyrTidslinje(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
+                saksbehandlerOid = SAKSBEHANDLER_OID,
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
+                    OverstyrTidslinje.Overstyringdag(dato = 10.januar, type = "Arbeidsdag", fraType = "Sykedag", grad = null, fraGrad = 100)
                 )
             )
 
@@ -104,13 +120,14 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     fun `overstyr tidslinje fra arbeidsdag`() {
         with(TestApplicationEngine()) {
             setUpApplication()
-            val overstyring = OverstyrTidslinjeDTO(
+            val overstyring = OverstyrTidslinje(
                 organisasjonsnummer = ORGNR,
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØR,
                 begrunnelse = "en begrunnelse",
+                saksbehandlerOid = SAKSBEHANDLER_OID,
                 dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
+                    OverstyrTidslinje.Overstyringdag(dato = 10.januar, type = "Sykedag", fraType = "Arbeidsdag", grad = null, fraGrad = 100)
                 )
             )
 
@@ -326,7 +343,7 @@ internal class OverstyringApiTest : AbstractE2ETest() {
     }
 
     private fun TestApplicationEngine.setUpApplication() {
-        application.install(ContentNegotiation) {
+        application.install(ContentNegotiationServer) {
             register(
                 ContentType.Application.Json,
                 JacksonConverter(objectMapper)
@@ -335,8 +352,35 @@ internal class OverstyringApiTest : AbstractE2ETest() {
         application.azureAdAppAuthentication(azureAdAppConfig)
         application.routing {
             authenticate("oidc") {
-                overstyringApi(hendelseMediator)
+                overstyringApi(saksbehandlerMediator, hendelseMediator)
             }
+        }
+    }
+
+    private fun ApplicationTestBuilder.execute(execute: suspend HttpClient.() -> HttpResponse): HttpResponse {
+        application {
+            azureAdAppAuthentication(azureAdAppConfig)
+            install(ContentNegotiationServer) {
+                register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            }
+            routing {
+                authenticate("oidc") {
+                    overstyringApi(saksbehandlerMediator, hendelseMediator)
+                }
+            }
+        }
+
+        val client = createClient {
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(no.nav.helse.objectMapper)
+                )
+            }
+        }
+
+        return runBlocking {
+            execute(client)
         }
     }
 }

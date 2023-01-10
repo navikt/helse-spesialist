@@ -17,39 +17,22 @@ import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.spesialist.api.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.overstyring.OverstyrTidslinje
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto.Companion.fraOnBehalfOfToken
 
-internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
+internal fun Route.overstyringApi(saksbehandlerMediator: SaksbehandlerMediator, hendelseMediator: HendelseMediator) {
     post("/api/overstyr/dager") {
-        val overstyring = call.receive<OverstyrTidslinjeDTO>()
-
-        val accessToken = requireNotNull(call.principal<JWTPrincipal>())
-        val oid = UUID.fromString(accessToken.payload.getClaim("oid").asString())
-        val epostadresse = accessToken.payload.getClaim("preferred_username").asString()
-        val saksbehandlerNavn = accessToken.payload.getClaim("name").asString()
-        val saksbehandlerIdent = accessToken.payload.getClaim("NAVident").asString()
-
-        val message = OverstyrTidslinjeKafkaDto(
-            saksbehandlerEpost = epostadresse,
-            saksbehandlerOid = oid,
-            saksbehandlerNavn = saksbehandlerNavn,
-            saksbehandlerIdent = saksbehandlerIdent,
-            organisasjonsnummer = overstyring.organisasjonsnummer,
-            fødselsnummer = overstyring.fødselsnummer,
-            aktørId = overstyring.aktørId,
-            begrunnelse = overstyring.begrunnelse,
-            dager = overstyring.dager.map {
-                OverstyrTidslinjeKafkaDto.Dag(
-                    dato = it.dato,
-                    type = enumValueOf(it.type),
-                    fraType = enumValueOf(it.fraType),
-                    grad = it.grad,
-                    fraGrad = it.fraGrad
-                )
-            }
-        )
-        withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
+        val jwtPrincipal = requireNotNull(call.principal<JWTPrincipal>())
+        val hendelse = call.receive<OverstyrTidslinje>()
+        withContext(Dispatchers.IO) {
+            saksbehandlerMediator.håndter(
+                hendelse,
+                fraOnBehalfOfToken(jwtPrincipal)
+            )
+        }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
 
@@ -83,25 +66,6 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
         withContext(Dispatchers.IO) { hendelseMediator.håndter(message) }
         call.respond(HttpStatusCode.OK, mapOf("status" to "OK"))
     }
-}
-
-
-@JsonIgnoreProperties
-class OverstyrTidslinjeDTO(
-    val organisasjonsnummer: String,
-    val fødselsnummer: String,
-    val aktørId: String,
-    val begrunnelse: String,
-    val dager: List<OverstyringdagDTO>
-) {
-    @JsonIgnoreProperties
-    class OverstyringdagDTO(
-        val dato: LocalDate,
-        val type: String,
-        val fraType: String,
-        val grad: Int?,
-        val fraGrad: Int?
-    )
 }
 
 data class OverstyrTidslinjeKafkaDto(

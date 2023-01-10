@@ -1,9 +1,11 @@
 package no.nav.helse.integrationtest
 
 import AbstractE2ETest
+import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -12,7 +14,9 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.routing.routing
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -29,7 +33,6 @@ import no.nav.helse.januar
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.authentication
 import no.nav.helse.mediator.api.AbstractApiTest.Companion.azureAdAppConfig
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
-import no.nav.helse.mediator.api.OverstyrTidslinjeDTO
 import no.nav.helse.mediator.api.overstyringApi
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -43,22 +46,11 @@ internal class OverstyringIT : AbstractE2ETest() {
 
     @Test
     fun `overstyr tidslinje`() {
-        with(TestApplicationEngine()) {
-            setUpApplication()
+        testApplication {
             settOppBruker()
             assertOppgaver(1)
-            val overstyring = OverstyrTidslinjeDTO(
-                organisasjonsnummer = ORGNR,
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                begrunnelse = "en begrunnelse",
-                dager = listOf(
-                    OverstyrTidslinjeDTO.OverstyringdagDTO(dato = 10.januar, type = "Feriedag", fraType = "Sykedag", grad = null, fraGrad = 100)
-                ),
-            )
-
-            val response = runBlocking {
-                client.post("/api/overstyr/dager") {
+            val response = execute {
+                post("/api/overstyr/dager") {
                     header(HttpHeaders.ContentType, "application/json")
                     authentication(
                         oid = SAKSBEHANDLER_OID,
@@ -66,7 +58,24 @@ internal class OverstyringIT : AbstractE2ETest() {
                         navn = SAKSBEHANDLER_NAVN,
                         ident = SAKSBEHANDLER_IDENT,
                     )
-                    setBody(objectMapper.writeValueAsString(overstyring))
+                    setBody(
+                        mapOf(
+                            "aktørId" to AKTØR,
+                            "fødselsnummer" to FØDSELSNUMMER,
+                            "organisasjonsnummer" to ORGNR,
+                            "begrunnelse" to "en begrunnelse",
+                            "dager" to listOf(
+                                mapOf(
+                                    "dato" to 10.januar,
+                                    "type" to "Feriedag",
+                                    "fraType" to "Sykedag",
+                                    "grad" to null,
+                                    "fraGrad" to 100
+                                )
+                            ),
+                            "saksbehandlerOid" to SAKSBEHANDLER_OID
+                        )
+                    )
                 }
             }
 
@@ -264,8 +273,35 @@ internal class OverstyringIT : AbstractE2ETest() {
         application.azureAdAppAuthentication(azureAdAppConfig)
         application.routing {
             authenticate("oidc") {
-                overstyringApi(hendelseMediator)
+                overstyringApi(saksbehandlerMediator, hendelseMediator)
             }
+        }
+    }
+
+    private fun ApplicationTestBuilder.execute(execute: suspend HttpClient.() -> HttpResponse): HttpResponse {
+        application {
+            azureAdAppAuthentication(azureAdAppConfig)
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            }
+            routing {
+                authenticate("oidc") {
+                    overstyringApi(saksbehandlerMediator, hendelseMediator)
+                }
+            }
+        }
+
+        val client = createClient {
+            install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(no.nav.helse.objectMapper)
+                )
+            }
+        }
+
+        return runBlocking {
+            execute(client)
         }
     }
 }

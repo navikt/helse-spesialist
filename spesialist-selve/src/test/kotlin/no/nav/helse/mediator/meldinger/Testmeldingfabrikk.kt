@@ -575,10 +575,12 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "organisasjonsnummer" to organisasjonsnummer,
             "dager" to dager,
             "begrunnelse" to begrunnelse,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost
+            "saksbehandler" to mapOf(
+                "oid" to saksbehandleroid,
+                "navn" to saksbehandlernavn,
+                "epost" to saksbehandlerepost,
+                "ident" to saksbehandlerident
+            )
         )
     )
 

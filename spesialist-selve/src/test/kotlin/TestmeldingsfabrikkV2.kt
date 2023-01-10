@@ -492,10 +492,12 @@ internal object TestmeldingsfabrikkV2 {
             "organisasjonsnummer" to organisasjonsnummer,
             "dager" to dager,
             "begrunnelse" to begrunnelse,
-            "saksbehandlerOid" to saksbehandleroid,
-            "saksbehandlerIdent" to saksbehandlerident,
-            "saksbehandlerNavn" to saksbehandlernavn,
-            "saksbehandlerEpost" to saksbehandlerepost
+            "saksbehandler" to mapOf(
+                "oid" to saksbehandleroid,
+                "navn" to saksbehandlernavn,
+                "ident" to saksbehandlerident,
+                "epost" to saksbehandlerepost
+            ),
         )
     )
 

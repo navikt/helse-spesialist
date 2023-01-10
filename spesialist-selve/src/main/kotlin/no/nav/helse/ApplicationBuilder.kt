@@ -308,7 +308,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                         oppgaveMediator = oppgaveMediator,
                         tilgangsgrupper = tilgangsgrupper,
                     )
-                    overstyringApi(hendelseMediator)
+                    overstyringApi(saksbehandlerMediator, hendelseMediator)
                     tildelingApi(tildelingService)
                     annulleringApi(saksbehandlerMediator)
                     opptegnelseApi(OpptegnelseMediator(opptegnelseApiDao, abonnementDao))

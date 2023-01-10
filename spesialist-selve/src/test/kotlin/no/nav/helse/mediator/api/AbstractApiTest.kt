@@ -60,11 +60,11 @@ abstract class AbstractApiTest {
                 "Authorization",
                 "Bearer ${
                     jwtStub.getToken(
-                        listOfNotNull(requiredGroup.toString(), group),
-                        oid.toString(),
-                        epostadresse,
-                        clientId,
-                        issuer
+                        groups = listOfNotNull(requiredGroup.toString(), group),
+                        oid = oid.toString(),
+                        epostadresse = epostadresse,
+                        clientId = clientId,
+                        issuer = issuer
                     )
                 }"
             )
