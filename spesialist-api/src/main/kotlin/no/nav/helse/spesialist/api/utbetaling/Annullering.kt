@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.utbetaling
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.UUID
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerHendelse
 
 @JsonIgnoreProperties
 data class Annullering(
@@ -23,8 +24,3 @@ data class Annullering(
     }
 }
 
-internal sealed interface SaksbehandlerHendelse {
-    fun tellernavn(): String
-    fun saksbehandlerOid(): UUID
-    fun håndter(saksbehandler: Saksbehandler)
-}

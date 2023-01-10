@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api
 
 import io.prometheus.client.Counter
-import no.nav.helse.spesialist.api.utbetaling.SaksbehandlerHendelse
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerHendelse
 
 //private val overstyringsteller = Counter.build("overstyringer", "Teller antall overstyringer")
 //    .labelNames("opplysningstype", "type")

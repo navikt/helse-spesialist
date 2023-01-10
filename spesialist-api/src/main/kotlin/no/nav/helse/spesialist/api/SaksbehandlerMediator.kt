@@ -6,8 +6,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerHendelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerObserver
-import no.nav.helse.spesialist.api.utbetaling.SaksbehandlerHendelse
 import org.slf4j.LoggerFactory
 
 class SaksbehandlerMediator(
