@@ -5,11 +5,11 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class TildelingDaoTest : DatabaseIntegrationTest() {
 
@@ -20,6 +20,20 @@ internal class TildelingDaoTest : DatabaseIntegrationTest() {
         saksbehandlerDao.opprettSaksbehandler(saksbehandleroid, "Navn Navnesen", "navn@navnesen.no", "Z999999")
         tildelingDao.opprettTildeling(oppgaveId, saksbehandleroid)
         assertTildeling(oppgaveId, saksbehandleroid)
+    }
+
+    @Test
+    fun `Tildeler oppgave til saksbehandler selvom status er invalidert`() {
+        nyPerson()
+        val saksbehandlerOid = UUID.randomUUID()
+        saksbehandlerDao.opprettSaksbehandler(saksbehandlerOid, "A", "a@nav.no", "A999999")
+
+
+        oppgaveDao.invaliderOppgaveFor(FNR)
+        tildelingDao.opprettTildeling(oppgaveId, saksbehandlerOid)
+        val tildeltSaksbehandler = tildelingDao.tildelingForPerson(FNR)
+
+        assertEquals(saksbehandlerOid, tildeltSaksbehandler?.oid)
     }
 
     @Test
