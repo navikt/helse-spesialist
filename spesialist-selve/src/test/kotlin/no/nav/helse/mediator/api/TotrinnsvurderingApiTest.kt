@@ -65,6 +65,19 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
     }
 
     @Test
+    fun `Kan ikke gjøres til beslutteroppgave hvis den allerede er beslutteroppgave`() {
+        every { oppgaveMediator.erBeslutteroppgave(1L) } returns true
+        val response = runBlocking {
+            client.preparePost("/api/totrinnsvurdering") {
+                contentType(ContentType.Application.Json)
+                setBody<JsonNode>(objectMapper.valueToTree(totrinnsvurderingDto))
+                authentication(saksbehandler_oid)
+            }.execute()
+        }
+        assertEquals(HttpStatusCode.Conflict, response.status)
+    }
+
+    @Test
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
         Toggle.VurderingAvVarsler.enable()
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
