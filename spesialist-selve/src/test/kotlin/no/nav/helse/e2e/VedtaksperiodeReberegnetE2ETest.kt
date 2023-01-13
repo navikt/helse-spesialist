@@ -3,9 +3,6 @@ package no.nav.helse.e2e
 import AbstractE2ETest
 import io.mockk.every
 import java.util.UUID
-import kotliquery.Row
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.Meldingssender.sendArbeidsforholdløsningOld
 import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
@@ -17,7 +14,6 @@ import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVedtaksperiodeEndret
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
 import no.nav.helse.Meldingssender.sendÅpneGosysOppgaverløsningOld
-import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.Testdata.AKTØR
 import no.nav.helse.Testdata.FØDSELSNUMMER
 import no.nav.helse.Testdata.ORGNR
@@ -26,13 +22,10 @@ import no.nav.helse.Testdata.SNAPSHOT_UTEN_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
-    private val OPPGAVEID get() = testRapid.inspektør.oppgaveId()
-
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_MED_WARNINGS
@@ -114,54 +107,6 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             "FERDIG"
         )
         assertOppgavestatuser(0, Oppgavestatus.AvventerSaksbehandler, Oppgavestatus.Invalidert)
-    }
-
-    @Test
-    fun `tildeler andre rundes oppgave til saksbehandler`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val saksbehandlerOid = UUID.randomUUID()
-
-        vedtaksperiodeTilGodkjenning()
-        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
-        tildelOppgave(saksbehandlerOid)
-
-        sendVedtaksperiodeEndret(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = "AVVENTER_HISTORIKK"
-        )
-        testRapid.reset()
-        vedtaksperiodeTilGodkjenning()
-
-        assertEquals(saksbehandlerOid, finnOidForTildeling(OPPGAVEID))
-    }
-
-    @Test
-    fun `beholder påVent-flagget ved gjentildeling`() {
-        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns SNAPSHOT_UTEN_WARNINGS
-        val saksbehandlerOid = UUID.randomUUID()
-
-        vedtaksperiodeTilGodkjenning()
-        opprettSaksbehandler(saksbehandlerOid, "Behandler, Saks", "saks.behandler@nav.no")
-        tildelOppgave(saksbehandlerOid, påVent = true)
-
-        sendVedtaksperiodeEndret(
-            aktørId = AKTØR,
-            fødselsnummer = FØDSELSNUMMER,
-            organisasjonsnummer = ORGNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = "AVVENTER_HISTORIKK"
-        )
-        testRapid.reset()
-        vedtaksperiodeTilGodkjenning()
-
-        val (oid, påVent) = finnOidOgPåVentForTildeling(OPPGAVEID)!!
-        assertEquals(saksbehandlerOid, oid)
-        assertEquals(true, påVent) { "Ny oppgave skal være lagt på vent etter reberegning" }
     }
 
     @Test
@@ -350,56 +295,5 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         )
         sendInntektløsningOld(godkjenningsmeldingId = godkjenningsmeldingId1)
         return godkjenningsmeldingId1
-    }
-
-    private fun tildelOppgave(saksbehandlerOid: UUID, påVent: Boolean = false) {
-        sessionOf(dataSource).use {
-            it.run(
-                queryOf(
-                    "INSERT INTO tildeling(oppgave_id_ref, saksbehandler_ref, på_vent) VALUES(:oppgave_id_ref, :saksbehandler_ref, :paa_vent);",
-                    mapOf(
-                        "oppgave_id_ref" to OPPGAVEID,
-                        "saksbehandler_ref" to saksbehandlerOid,
-                        "paa_vent" to påVent,
-                    )
-                ).asUpdate
-            )
-        }
-    }
-
-    private fun finnOidForTildeling(oppgaveId: Long) = hentFraTildeling<UUID?>(oppgaveId) {
-        it.uuid("saksbehandler_ref")
-    }
-
-    private fun finnOidOgPåVentForTildeling(oppgaveId: Long) =
-        hentFraTildeling<Pair<UUID, Boolean>?>(oppgaveId) {
-            it.uuid("saksbehandler_ref") to it.boolean("på_vent")
-        }
-
-    private fun <T> hentFraTildeling(oppgaveId: Long, mapping: (Row) -> T) =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT * FROM tildeling WHERE oppgave_id_ref=?;", oppgaveId
-                ).map(mapping).asSingle
-            )
-        }
-
-    private fun opprettSaksbehandler(
-        oid: UUID,
-        navn: String,
-        epost: String
-    ) {
-        sessionOf(dataSource).use {
-            val opprettSaksbehandlerQuery = "INSERT INTO saksbehandler(oid, navn, epost) VALUES (:oid, :navn, :epost)"
-            it.run(
-                queryOf(
-                    opprettSaksbehandlerQuery,
-                    mapOf<String, Any>(
-                        "oid" to oid, "navn" to navn, "epost" to epost
-                    )
-                ).asUpdate
-            )
-        }
     }
 }

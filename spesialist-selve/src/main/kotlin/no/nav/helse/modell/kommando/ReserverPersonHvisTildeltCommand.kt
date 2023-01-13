@@ -8,7 +8,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 internal class ReserverPersonHvisTildeltCommand(
-    private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val reservasjonDao: ReservasjonDao,
     private val tildelingDao: TildelingDao,
@@ -20,9 +19,9 @@ internal class ReserverPersonHvisTildeltCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
-        val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(vedtaksperiodeId)
+        val erBeslutteroppgave = oppgaveDao.erBeslutteroppgave(fødselsnummer)
         val saksbehandlerOid: UUID =
-            if (erBeslutteroppgave) oppgaveDao.finnOppgaveId(vedtaksperiodeId)?.let {
+            if (erBeslutteroppgave) oppgaveDao.finnOppgaveId(fødselsnummer)?.let {
                 oppgaveDao.finnTidligereSaksbehandler(it)
             } ?: tildeltSaksbehandler.oid
             else tildeltSaksbehandler.oid

@@ -575,6 +575,8 @@ internal class Hendelsefabrikk(
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao,
             oppgaveDao = oppgaveDao,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
             oppgaveMediator = oppgaveMediator,
             generasjonRepository = generasjonRepository
         )
@@ -668,10 +670,7 @@ internal class Hendelsefabrikk(
             json = json,
             commandContextDao = commandContextDao,
             oppgaveMediator = oppgaveMediator,
-            reservasjonDao = reservasjonDao,
-            tildelingDao = tildelingDao,
             periodehistorikkDao = periodehistorikkDao,
-            oppgaveDao = oppgaveDao,
             utbetalingDao = utbetalingDao,
         )
     }

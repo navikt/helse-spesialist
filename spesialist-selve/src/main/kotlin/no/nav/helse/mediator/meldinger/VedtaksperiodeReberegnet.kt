@@ -6,18 +6,14 @@ import no.nav.helse.modell.CommandContextDao
 import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
-import no.nav.helse.modell.oppgave.OppgaveDao
+import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.utbetaling.UtbetalingDao
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDao
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
-import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.LoggerFactory
 
 internal class VedtaksperiodeReberegnet(
@@ -27,10 +23,7 @@ internal class VedtaksperiodeReberegnet(
     commandContextDao: CommandContextDao,
     private val json: String,
     oppgaveMediator: OppgaveMediator,
-    reservasjonDao: ReservasjonDao,
-    tildelingDao: TildelingDao,
     periodehistorikkDao: PeriodehistorikkDao,
-    oppgaveDao: OppgaveDao,
     utbetalingDao: UtbetalingDao,
 ) : Hendelse, MacroCommand() {
 
@@ -38,13 +31,6 @@ internal class VedtaksperiodeReberegnet(
     override fun toJson(): String = json
 
     override val commands: List<Command> = listOf(
-        ReserverPersonHvisTildeltCommand(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fødselsnummer = fødselsnummer,
-            reservasjonDao = reservasjonDao,
-            tildelingDao = tildelingDao,
-            oppgaveDao = oppgaveDao
-        ),
         VedtaksperiodeReberegnetPeriodehistorikk(
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingDao = utbetalingDao,

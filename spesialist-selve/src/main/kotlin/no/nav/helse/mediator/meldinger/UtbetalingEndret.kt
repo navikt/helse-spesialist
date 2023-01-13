@@ -7,6 +7,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
+import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.oppgave.OppgaveMediator
@@ -27,6 +28,8 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.River.PacketListener
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spesialist.api.abonnement.OpptegnelseDao
+import no.nav.helse.spesialist.api.reservasjon.ReservasjonDao
+import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -46,6 +49,8 @@ internal class UtbetalingEndret(
     utbetalingDao: UtbetalingDao,
     opptegnelseDao: OpptegnelseDao,
     oppgaveDao: OppgaveDao,
+    reservasjonDao: ReservasjonDao,
+    tildelingDao: TildelingDao,
     oppgaveMediator: OppgaveMediator,
     generasjonRepository: GenerasjonRepository
 ) : Hendelse, MacroCommand() {
@@ -68,6 +73,12 @@ internal class UtbetalingEndret(
             json = json,
             utbetalingDao = utbetalingDao,
             opptegnelseDao = opptegnelseDao
+        ),
+        ReserverPersonHvisTildeltCommand(
+            fødselsnummer = fødselsnummer,
+            reservasjonDao = reservasjonDao,
+            tildelingDao = tildelingDao,
+            oppgaveDao = oppgaveDao
         ),
         OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveDao, oppgaveMediator),
     ).apply {

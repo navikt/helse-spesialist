@@ -26,12 +26,13 @@ class OppgaveDao(private val dataSource: DataSource) : HelseDao(dataSource) {
             AND status = 'AvventerSaksbehandler'::oppgavestatus   
         """.single(mapOf("oppgaveId" to oppgaveId)) { it.boolean("er_totrinnsoppgave") } ?: false
 
-    fun erBeslutteroppgave(vedtaksperiodeId: UUID): Boolean =
-        """ SELECT er_beslutteroppgave FROM oppgave
-            WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-            AND status = 'AvventerSaksbehandler'::oppgavestatus  
-        """.single(mapOf("vedtaksperiodeId" to vedtaksperiodeId)) { it.boolean("er_beslutteroppgave") } ?: false
+    fun erBeslutteroppgave(fødselsnummer: String): Boolean =
+        """ SELECT er_beslutteroppgave FROM oppgave o
+                JOIN vedtak v ON v.id = o.vedtak_ref
+                JOIN person p ON v.person_ref = p.id
+            WHERE p.fodselsnummer = :fodselsnummer
+            AND o.status = 'AvventerSaksbehandler'::oppgavestatus  
+        """.single(mapOf("fodselsnummer" to fødselsnummer.toLong())) { it.boolean("er_beslutteroppgave") } ?: false
 
     fun erBeslutteroppgave(oppgaveId: Long): Boolean =
         """ SELECT er_beslutteroppgave FROM oppgave
