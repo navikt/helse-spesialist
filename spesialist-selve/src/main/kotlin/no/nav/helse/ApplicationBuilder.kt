@@ -243,6 +243,7 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
                 allowHost("spesialist.dev.intern.nav.no", listOf("https"))
             }
             install(CallId) {
+                retrieveFromHeader(HttpHeaders.XRequestId)
                 generate {
                     UUID.randomUUID().toString()
                 }
