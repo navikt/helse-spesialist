@@ -34,7 +34,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
-    <logger name="tjenestekall" level="DEBUG" additivity="false">
+    <logger name="tjenestekall" level="TRACE" additivity="false">
         <appender-ref ref="secureLog" />
     </logger>
     <logger name="io.ktor.auth.jwt" level="trace" />
