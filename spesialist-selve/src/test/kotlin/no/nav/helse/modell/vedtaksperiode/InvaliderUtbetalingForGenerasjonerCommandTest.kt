@@ -16,7 +16,7 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
     @Test
     fun `invaliderer utbetalingId`() {
         val generasjon = generasjonRepository.opprettFørste(UUID.randomUUID(), UUID.randomUUID())
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         assertEquals(1, generasjonerMedUtbetaling.size)
         command.execute(CommandContext(UUID.randomUUID()))
         assertEquals(0, generasjonerMedUtbetaling.size)
@@ -26,8 +26,8 @@ class InvaliderUtbetalingForGenerasjonerCommandTest {
     fun `invaliderer utbetalingId for flere generasjoner`() {
         val generasjon1 = generasjonRepository.opprettFørste(UUID.randomUUID(), UUID.randomUUID())
         val generasjon2 = generasjonRepository.opprettFørste(UUID.randomUUID(), UUID.randomUUID())
-        generasjon1.håndterNyUtbetaling(utbetalingId)
-        generasjon2.håndterNyUtbetaling(utbetalingId)
+        generasjon1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        generasjon2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         assertEquals(2, generasjonerMedUtbetaling.size)
         command.execute(CommandContext(UUID.randomUUID()))
         assertEquals(0, generasjonerMedUtbetaling.size)

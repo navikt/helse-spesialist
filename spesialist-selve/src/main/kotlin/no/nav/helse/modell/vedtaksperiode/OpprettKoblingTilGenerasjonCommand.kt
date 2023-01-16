@@ -26,7 +26,7 @@ internal class OpprettKoblingTilGenerasjonCommand(
             generasjonRepository.opprettFørste(vedtaksperiodeId, hendelseId) ?: throw IllegalStateException("Klarte ikke å opprette generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         }
 
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        generasjon.håndterNyUtbetaling(hendelseId, utbetalingId)
         return true
     }
 

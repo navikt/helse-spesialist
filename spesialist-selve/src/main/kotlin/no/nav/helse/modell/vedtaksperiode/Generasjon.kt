@@ -58,12 +58,21 @@ internal class Generasjon private constructor(
         return generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId)
     }
 
-    internal fun håndterNyUtbetaling(utbetalingId: UUID) {
-        if (låst) return sikkerlogg.error(
-            "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst",
-            keyValue("utbetalingId", utbetalingId),
-            keyValue("generasjon", this)
-        )
+    internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID) {
+        if (låst) return run {
+            val nyGenerasjonId = UUID.randomUUID()
+            sikkerlogg.info(
+                "Kan ikke legge til ny utbetaling med {} for {}, da generasjonen er låst. Oppretter ny generasjon med {}",
+                keyValue("utbetalingId", utbetalingId),
+                keyValue("generasjon", this),
+                keyValue("generasjonId", nyGenerasjonId)
+            )
+            håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+        }
+        håndterNyUtbetaling(utbetalingId)
+    }
+
+    private fun håndterNyUtbetaling(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
         generasjonRepository.utbetalingFor(id, utbetalingId)
     }

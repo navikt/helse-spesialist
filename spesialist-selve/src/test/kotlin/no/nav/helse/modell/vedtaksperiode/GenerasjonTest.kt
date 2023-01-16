@@ -49,7 +49,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     @Test
     fun `godkjenner alle varsler når generasjonen blir godkjent`() {
         val generasjon = nyGenerasjon()
-        generasjon.håndterNyUtbetaling(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         generasjon.håndterVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjon.håndterVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), varselRepository)
         generasjon.håndterGodkjentAvSaksbehandler("EN_IDENT", varselRepository)
@@ -112,7 +112,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `Generasjon kan motta ny utbetalingId`() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
     }
 
     @Test
@@ -120,8 +120,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = nyGenerasjon()
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(gammelUtbetalingId)
-        generasjon.håndterNyUtbetaling(nyUtbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
 
         assertIkkeUtbetaling(generasjonId, gammelUtbetalingId)
         assertUtbetaling(generasjonId, nyUtbetalingId)
@@ -132,9 +132,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = nyGenerasjon()
         val gammelUtbetalingId = UUID.randomUUID()
         val nyUtbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(gammelUtbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterNyUtbetaling(nyUtbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
 
         assertUtbetaling(generasjonId, gammelUtbetalingId)
         assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
@@ -145,15 +145,31 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjon = nyGenerasjon()
         val nyUtbetalingId = UUID.randomUUID()
         generasjon.håndterVedtakFattet(UUID.randomUUID())
-        generasjon.håndterNyUtbetaling(nyUtbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
         assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
+    }
+
+    @Test
+    fun `oppretter ny generasjon for vedtaksperiodeId ved ny utbetaling dersom gjeldende generasjon er låst`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjon = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
+        val gammelUtbetalingId = UUID.randomUUID()
+        val nyUtbetalingId = UUID.randomUUID()
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), gammelUtbetalingId)
+        generasjon.håndterVedtakFattet(UUID.randomUUID())
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), nyUtbetalingId)
+
+        assertUtbetaling(generasjonId, gammelUtbetalingId)
+        assertIkkeUtbetaling(generasjonId, nyUtbetalingId)
+        assertGenerasjonFor(gammelUtbetalingId, vedtaksperiodeId)
+        assertGenerasjonFor(nyUtbetalingId, vedtaksperiodeId)
     }
 
     @Test
     fun `kan fjerne utbetalingId fra ulåst generasjon`() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         assertUtbetaling(generasjonId, utbetalingId)
         generasjon.invaliderUtbetaling(utbetalingId)
         assertIkkeUtbetaling(generasjonId, utbetalingId)
@@ -163,7 +179,7 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
     fun `kan ikke fjerne utbetalingId fra låst generasjon`() {
         val generasjon = nyGenerasjon()
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        generasjon.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         generasjon.håndterVedtakFattet(UUID.randomUUID())
         assertUtbetaling(generasjonId, utbetalingId)
         generasjon.invaliderUtbetaling(utbetalingId)
@@ -177,8 +193,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonV1 = nyGenerasjon(generasjonIdV1)
         val generasjonV2 = nyGenerasjon(generasjonIdV2)
         val utbetalingId = UUID.randomUUID()
-        generasjonV1.håndterNyUtbetaling(utbetalingId)
-        generasjonV2.håndterNyUtbetaling(utbetalingId)
+        generasjonV1.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        generasjonV2.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         generasjonV1.håndterVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), varselRepository)
         generasjonV2.håndterVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), varselRepository)
 
@@ -245,9 +261,9 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
-        generasjon1.håndterNyUtbetaling(UUID.randomUUID())
+        generasjon1.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
-        generasjon2.håndterNyUtbetaling(UUID.randomUUID())
+        generasjon2.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
@@ -257,15 +273,15 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
-        generasjon1.håndterNyUtbetaling(UUID.randomUUID())
+        generasjon1.håndterNyUtbetaling(UUID.randomUUID(), UUID.randomUUID())
         val generasjon2 = Generasjon(generasjonId, vedtaksperiodeId, generasjonRepository)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
     }
 
-    private fun nyGenerasjon(id: UUID = UUID.randomUUID()): Generasjon {
+    private fun nyGenerasjon(id: UUID = UUID.randomUUID(), vedtaksperiodeId: UUID = UUID.randomUUID()): Generasjon {
         generasjonId = id
-        return requireNotNull(generasjonRepository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonId))
+        return requireNotNull(generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId))
     }
 
     private fun assertVarsler(generasjonId: UUID, forventetAntall: Int, status: Varsel.Varselstatus, varselkode: Varselkode) {
@@ -274,8 +290,8 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             """SELECT COUNT(1) FROM selve_varsel sv INNER JOIN selve_vedtaksperiode_generasjon svg ON sv.generasjon_ref = svg.id
                WHERE svg.unik_id = ? AND sv.status = ? AND sv.kode = ?
             """
-        val antall = sessionOf(dataSource).use {
-            it.run(queryOf(query, generasjonId, status.name, varselkode.name).map { it.int(1) }.asSingle)
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, generasjonId, status.name, varselkode.name).map { it.int(1) }.asSingle)
         }
         assertEquals(forventetAntall, antall)
     }
@@ -300,6 +316,17 @@ internal class GenerasjonTest: AbstractDatabaseTest() {
             session.run(queryOf(query, generasjonId, utbetalingId).map { it.int(1) }.asSingle)
         }
         assertEquals(0, antall)
+    }
+
+    private fun assertGenerasjonFor(utbetalingId: UUID, vedtaksperiodeId: UUID) {
+        @Language("PostgreSQL")
+        val query =
+            """SELECT COUNT(1) FROM selve_vedtaksperiode_generasjon svg WHERE svg.vedtaksperiode_id = ? AND utbetaling_id = ?
+            """
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, vedtaksperiodeId, utbetalingId).map { it.int(1) }.asSingle)
+        }
+        assertEquals(1, antall)
     }
 
     private fun lagVarseldefinisjoner() {

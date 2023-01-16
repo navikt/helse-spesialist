@@ -75,7 +75,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val utbetalingId = UUID.randomUUID()
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterNyUtbetaling(utbetalingId)
+        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
 
         assertUtbetaling(generasjonId, utbetalingId)
     }
@@ -88,7 +88,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
         generasjon?.håndterVedtakFattet(UUID.randomUUID())
-        generasjon?.håndterNyUtbetaling(utbetalingId)
+        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
 
         assertUtbetaling(generasjonId, null)
     }
@@ -101,9 +101,9 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val ny = UUID.randomUUID()
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterNyUtbetaling(gammel)
+        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), gammel)
         generasjon?.håndterVedtakFattet(UUID.randomUUID())
-        generasjon?.håndterNyUtbetaling(ny)
+        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), ny)
 
         assertUtbetaling(generasjonId, gammel)
     }
@@ -137,8 +137,8 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
 
         val generasjonV1 = repository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonIdV1)
         val generasjonV2 = repository.opprettFørste(UUID.randomUUID(), UUID.randomUUID(), generasjonIdV2)
-        generasjonV1?.håndterNyUtbetaling(utbetalingId)
-        generasjonV2?.håndterNyUtbetaling(utbetalingId)
+        generasjonV1?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
+        generasjonV2?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
 
         assertEquals(2, repository.tilhørendeFor(utbetalingId).size)
     }
@@ -150,7 +150,7 @@ internal class GenerasjonRepositoryTest : AbstractDatabaseTest() {
         val vedtaksperiodeId = UUID.randomUUID()
 
         val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID(), generasjonId)
-        generasjon?.håndterNyUtbetaling(utbetalingId)
+        generasjon?.håndterNyUtbetaling(UUID.randomUUID(), utbetalingId)
         assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
 
         generasjon?.invaliderUtbetaling(utbetalingId)
