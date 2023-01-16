@@ -15,6 +15,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import java.time.Duration
 import java.util.UUID
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverApiDao
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkMediator
@@ -33,6 +34,8 @@ import no.nav.helse.spesialist.api.tildeling.TildelingDao
 import no.nav.helse.spesialist.api.utbetaling.UtbetalingApiDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.spesialist.api.vedtaksperiode.VarselDao
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 fun Application.graphQLApi(
     personApiDao: PersonApiDao,
@@ -106,14 +109,22 @@ fun Application.graphQLApi(
 
 internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
     post {
+        sikkerLogg.trace("Starter behandling av graphql-kall")
+        val start = System.nanoTime()
         val result = server.execute(call.request)
+        sikkerLogg.trace("Data hentet etter ${tidBrukt(start).toMillis()} ms, starter mapping")
 
         if (result != null) {
             val json = objectMapper.writeValueAsString(result)
+            sikkerLogg.trace("Respons mappet etter ${tidBrukt(start).toMillis()} ms")
             call.respond(json)
         }
     }
 }
+
+private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+
+private fun tidBrukt(start: Long): Duration = Duration.ofNanos(System.nanoTime() - start)
 
 internal fun Route.playground() {
     get("playground") {
