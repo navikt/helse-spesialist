@@ -6,6 +6,8 @@ import graphql.schema.DataFetchingEnvironment
 import java.time.Duration
 import java.time.LocalDate
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.FerdigstiltOppgave
 import no.nav.helse.spesialist.api.graphql.schema.OppgaveForOversiktsvisning
@@ -41,10 +43,12 @@ class OppgaverQuery(private val oppgaveApiDao: OppgaveApiDao, private val oppgav
     }
 
     @Suppress("unused")
-    fun alleOppgaver(env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveForOversiktsvisning>> {
+    suspend fun alleOppgaver(env: DataFetchingEnvironment): DataFetcherResult<List<OppgaveForOversiktsvisning>> {
         val start = startSporing(env)
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>("tilganger")
-        val oppgaver = oppgaveApiDao.finnOppgaver(tilganger)
+        val oppgaver = withContext(Dispatchers.IO) {
+            oppgaveApiDao.finnOppgaver(tilganger)
+        }
         avsluttSporing(start)
 
         return DataFetcherResult.newResult<List<OppgaveForOversiktsvisning>>().data(oppgaver).build()
