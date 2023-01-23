@@ -34,7 +34,6 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
         assertEquals("EN_IDENT", melding["saksbehandler"]["ident"].asText())
 
         assertEquals("EN_FAGSYSTEMID", melding["fagsystemId"].asText())
-        assertEquals(true, melding["gjelderSisteSkjæringstidspunkt"].asBoolean())
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
         assertEquals(1, melding["begrunnelser"].map { it.asText() }.size)
         assertEquals("EN_BEGRUNNELSE", melding["begrunnelser"][0].asText())
@@ -56,7 +55,6 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
         assertEquals("EN_IDENT", melding["saksbehandler"]["ident"].asText())
 
         assertEquals("EN_FAGSYSTEMID", melding["fagsystemId"].asText())
-        assertEquals(true, melding["gjelderSisteSkjæringstidspunkt"].asBoolean())
         assertEquals(null, melding["kommentar"]?.asText())
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
     }
@@ -71,7 +69,6 @@ class SaksbehandlerMediatorTest: AbstractDatabaseTest() {
         fagsystemId = "EN_FAGSYSTEMID",
         saksbehandlerIdent = "EN_IDENT",
         begrunnelser = begrunnelser,
-        gjelderSisteSkjæringstidspunkt = true,
         kommentar = kommentar
     )
 }
