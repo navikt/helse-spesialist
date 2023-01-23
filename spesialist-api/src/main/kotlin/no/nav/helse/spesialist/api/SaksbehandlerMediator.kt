@@ -27,6 +27,7 @@ class SaksbehandlerMediator(
                 .apply { put("ident", annulleringDto.saksbehandlerIdent) },
             "fagsystemId" to annulleringDto.fagsystemId,
             "begrunnelser" to annulleringDto.begrunnelser,
+            "gjelderSisteSkjæringstidspunkt" to annulleringDto.gjelderSisteSkjæringstidspunkt
         ).apply {
             compute("kommentar") { _, _ -> annulleringDto.kommentar }
         })
