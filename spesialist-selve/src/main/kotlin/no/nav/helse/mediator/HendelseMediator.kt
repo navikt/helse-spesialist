@@ -12,6 +12,7 @@ import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdKafkaDto
 import no.nav.helse.mediator.api.OverstyrInntektKafkaDto
+import no.nav.helse.mediator.api.OverstyrInntektOgRefusjonKafkaDto
 import no.nav.helse.mediator.api.OverstyrTidslinjeKafkaDto
 import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
@@ -629,6 +630,16 @@ internal class HendelseMediator(
 
     fun håndter(overstyringMessage: OverstyrInntektKafkaDto) {
         overstyringsteller.labels("opplysningstype", "inntekt").inc()
+
+        val overstyring = overstyringMessage.somKafkaMessage().also {
+            sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")
+        }
+
+        rapidsConnection.publish(overstyringMessage.fødselsnummer, overstyring.toJson())
+    }
+
+    fun håndter(overstyringMessage: OverstyrInntektOgRefusjonKafkaDto) {
+        overstyringsteller.labels("opplysningstype", "inntektogrefusjon").inc()
 
         val overstyring = overstyringMessage.somKafkaMessage().also {
             sikkerLogg.info("Publiserer overstyring fra api:\n${it.toJson()}")

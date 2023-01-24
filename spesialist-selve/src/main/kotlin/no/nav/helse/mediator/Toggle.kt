@@ -12,6 +12,7 @@ abstract class Toggle(private var _enabled: Boolean) {
     object VurderingAvVarsler : Toggle("VURDERING_AV_VARSLER")
     object Inntekter : Toggle("INNTEKTER", true)
     object Refusjonsendringer : Toggle("REFUSJONSENDRINGER", erDev())
+    object OverstyrInntektOgRefusjon : Toggle("OVERSTYR_INNTEKT_OG_REFUSJON")
     object AutomatiserRevuderinger : Toggle("AUTOMATISER_REVURDERINGER", erDev())
 }
 

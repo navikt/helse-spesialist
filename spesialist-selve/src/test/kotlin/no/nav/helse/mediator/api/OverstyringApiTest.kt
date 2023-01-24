@@ -34,6 +34,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverstyringApiTest : AbstractE2ETest() {
@@ -196,6 +197,147 @@ internal class OverstyringApiTest : AbstractE2ETest() {
             assertEquals("2018-01-31", event["refusjonsopplysninger"].first()["tom"].asText())
             assertEquals(25000.0, event["refusjonsopplysninger"].first()["beløp"].asDouble())
             assertNull(event["fraRefusjonsopplysninger"])
+        }
+    }
+
+    @Test
+    fun `overstyr inntekt og refusjon`() {
+        Toggle.OverstyrInntektOgRefusjon.enable()
+        with(TestApplicationEngine()) {
+            setUpApplication()
+
+            val json = """
+                {
+                    "fødselsnummer": $FØDSELSNUMMER,
+                    "aktørId": $AKTØR,
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsgivere": [{
+                        "organisasjonsnummer": $ORGNR,
+                        "månedligInntekt": 25000.0,
+                        "fraMånedligInntekt": 25001.0,
+                        "refusjonsopplysninger": [
+                            {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 25000.0
+                            },
+                            {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 24000.0
+                            }
+                        ],                        
+                        "fraRefusjonsopplysninger": [
+                            {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 24000.0
+                            },
+                            {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 23000.0
+                            }
+                        ],
+                        "begrunnelse": "en begrunnelse",
+                        "forklaring": "en forklaring",
+                        "subsumsjon": {
+                            "paragraf": "8-28",
+                            "ledd": "3",
+                            "bokstav": null
+                        }
+                    },{
+                        "organisasjonsnummer": "666",
+                        "månedligInntekt": 21000.0,
+                        "fraMånedligInntekt": 25001.0,
+                        "refusjonsopplysninger": [
+                            {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 21000.0
+                            },
+                            {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 22000.0
+                            }
+                        ],                        
+                        "fraRefusjonsopplysninger": [
+                            {
+                            "fom": "2018-01-01",
+                            "tom": "2018-01-31",
+                            "beløp": 22000.0
+                            },
+                            {
+                            "fom": "2018-02-01",
+                            "tom": null,
+                            "beløp": 23000.0
+                            }
+                        ],
+                        "begrunnelse": "en begrunnelse 2",
+                        "forklaring": "en forklaring 2",
+                        "subsumsjon": {
+                            "paragraf": "8-28",
+                            "ledd": "3",
+                            "bokstav": null
+                        }
+                    }]
+                }
+            """.trimIndent()
+
+            val response = runBlocking {
+                client.post("/api/overstyr/inntektogrefusjon") {
+                    header(HttpHeaders.ContentType, "application/json")
+                    authentication(
+                        oid = SAKSBEHANDLER_OID,
+                        epost = SAKSBEHANDLER_EPOST,
+                        navn = SAKSBEHANDLER_NAVN,
+                        ident = SAKSBEHANDLER_IDENT
+                    )
+                    setBody(json)
+                }
+            }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            assertEquals(1, testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").size)
+            val event = testRapid.inspektør.hendelser("saksbehandler_overstyrer_inntekt_og_refusjon").first()
+
+            assertNotNull(event["@id"].asText())
+            assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
+            assertEquals(SAKSBEHANDLER_OID, event["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+            assertEquals(SAKSBEHANDLER_NAVN, event["saksbehandlerNavn"].asText())
+            assertEquals(SAKSBEHANDLER_IDENT, event["saksbehandlerIdent"].asText())
+            assertEquals(SAKSBEHANDLER_EPOST, event["saksbehandlerEpost"].asText())
+            assertEquals(1.januar, event["skjæringstidspunkt"].asLocalDate())
+            event["arbeidsgivere"].first().let {
+                assertEquals(ORGNR, it["organisasjonsnummer"].asText())
+                assertEquals("en begrunnelse", it["begrunnelse"].asText())
+                assertEquals("en forklaring", it["forklaring"].asText())
+                assertEquals(25000.0, it["månedligInntekt"].asDouble())
+                assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
+                assertEquals("3", it["subsumsjon"]["ledd"].asText())
+                assertTrue(it["subsumsjon"]["bokstav"].isNull)
+                assertEquals(2, it["refusjonsopplysninger"].size())
+                assertEquals("2018-01-01", it["refusjonsopplysninger"].first()["fom"].asText())
+                assertEquals("2018-01-31", it["refusjonsopplysninger"].first()["tom"].asText())
+                assertEquals(25000.0, it["refusjonsopplysninger"].first()["beløp"].asDouble())
+                assertEquals(24000.0, it["fraRefusjonsopplysninger"].first()["beløp"].asDouble())
+            }
+            event["arbeidsgivere"].last().let {
+                assertEquals("666", it["organisasjonsnummer"].asText())
+                assertEquals("en begrunnelse 2", it["begrunnelse"].asText())
+                assertEquals("en forklaring 2", it["forklaring"].asText())
+                assertEquals(21000.0, it["månedligInntekt"].asDouble())
+                assertEquals("8-28", it["subsumsjon"]["paragraf"].asText())
+                assertEquals("3", it["subsumsjon"]["ledd"].asText())
+                assertTrue(it["subsumsjon"]["bokstav"].isNull)
+                assertEquals(2, it["refusjonsopplysninger"].size())
+                assertEquals("2018-01-01", it["refusjonsopplysninger"].first()["fom"].asText())
+                assertEquals("2018-01-31", it["refusjonsopplysninger"].first()["tom"].asText())
+                assertEquals(21000.0, it["refusjonsopplysninger"].first()["beløp"].asDouble())
+                assertEquals(22000.0, it["fraRefusjonsopplysninger"].first()["beløp"].asDouble())
+            }
         }
     }
 
