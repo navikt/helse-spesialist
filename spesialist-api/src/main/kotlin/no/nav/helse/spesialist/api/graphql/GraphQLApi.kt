@@ -86,7 +86,7 @@ fun Application.graphQLApi(
             beslutterSaksbehandlergruppe = beslutterGruppeId,
             riskSaksbehandlergruppe = riskGruppeId,
         ),
-        requestHandler = GraphQLRequestHandler(
+        requestHandler = LoggingGraphQLRequestHandler(
             GraphQL.newGraphQL(schema).build()
         )
     )
@@ -112,13 +112,15 @@ internal fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
         sikkerLogg.trace("Starter behandling av graphql-kall")
         val start = System.nanoTime()
         val result = server.execute(call.request)
-        sikkerLogg.trace("Data hentet etter ${tidBrukt(start).toMillis()} ms, starter mapping")
+        val tidslogging = "Kall behandlet etter ${tidBrukt(start).toMillis()} ms"
 
         if (result != null) {
+            sikkerLogg.trace("$tidslogging, starter mapping")
             val json = objectMapper.writeValueAsString(result)
             sikkerLogg.trace("Respons mappet etter ${tidBrukt(start).toMillis()} ms")
             call.respond(json)
-        }
+        } else
+            sikkerLogg.trace("$tidslogging, men noe gikk galt")
     }
 }
 
