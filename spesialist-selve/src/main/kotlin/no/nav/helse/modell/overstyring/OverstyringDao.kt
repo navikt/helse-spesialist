@@ -7,6 +7,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.HelseDao
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -196,6 +197,63 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                         "overstyring_ref" to overstyringRef,
                         "refusjonsopplysninger" to refusjonsopplysninger?.let { objectMapper.writeValueAsString(refusjonsopplysninger) },
                         "fra_refusjonsopplysninger" to fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(fraRefusjonsopplysninger) }
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
+    fun persisterOverstyringInntektOgRefusjon(
+        hendelseId: UUID,
+        eksternHendelseId: UUID,
+        fødselsnummer: String,
+        arbeidsgiver: List<Arbeidsgiver>,
+        saksbehandlerRef: UUID,
+        skjæringstidspunkt: LocalDate,
+        tidspunkt: LocalDateTime,
+    ) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            @Language("PostgreSQL")
+            val opprettOverstyringQuery = """
+                INSERT INTO overstyring(hendelse_ref, ekstern_hendelse_id, person_ref, arbeidsgiver_ref, begrunnelse, saksbehandler_ref, tidspunkt)
+                SELECT :hendelse_id, :ekstern_hendelse_id, p.id, ag.id, :begrunnelse, :saksbehandler_ref, :tidspunkt
+                FROM arbeidsgiver ag,
+                     person p
+                WHERE p.fodselsnummer = :fodselsnummer
+                  AND ag.orgnummer = :orgnr
+            """.trimIndent()
+
+            @Language("PostgreSQL")
+            val opprettOverstyringInntektQuery = """
+                INSERT INTO overstyring_inntekt(forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger)
+                VALUES (:forklaring, :manedlig_inntekt, :fra_manedlig_inntekt, :skjaeringstidspunkt, :overstyring_ref, :refusjonsopplysninger::json, :fra_refusjonsopplysninger::json)
+            """.trimIndent()
+
+            val overstyringRef = session.run(
+                queryOf(
+                    opprettOverstyringQuery,
+                    mapOf(
+                        "hendelse_id" to hendelseId,
+                        "ekstern_hendelse_id" to eksternHendelseId,
+                        "begrunnelse" to arbeidsgiver.first().begrunnelse,
+                        "saksbehandler_ref" to saksbehandlerRef,
+                        "tidspunkt" to tidspunkt,
+                        "fodselsnummer" to fødselsnummer.toLong(),
+                        "orgnr" to arbeidsgiver.first().organisasjonsnummer.toLong())
+                ).asUpdateAndReturnGeneratedKey
+            )
+
+            session.run(
+                queryOf(
+                    opprettOverstyringInntektQuery,
+                    mapOf(
+                        "forklaring" to arbeidsgiver.first().forklaring,
+                        "manedlig_inntekt" to arbeidsgiver.first().månedligInntekt,
+                        "fra_manedlig_inntekt" to arbeidsgiver.first().fraMånedligInntekt,
+                        "skjaeringstidspunkt" to skjæringstidspunkt,
+                        "overstyring_ref" to overstyringRef,
+                        "refusjonsopplysninger" to arbeidsgiver.first().refusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.first().refusjonsopplysninger) },
+                        "fra_refusjonsopplysninger" to arbeidsgiver.first().fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.first().fraRefusjonsopplysninger) }
                     )
                 ).asUpdate
             )

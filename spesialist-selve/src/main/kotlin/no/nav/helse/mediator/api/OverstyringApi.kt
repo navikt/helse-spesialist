@@ -294,6 +294,30 @@ internal fun JsonNode.refusjonselementer(): List<Refusjonselement>? {
         )
     }
 }
+
+internal fun JsonNode.subsumsjonelementer(): SubsumsjonDto? {
+    if (this.isNull) return null
+    return SubsumsjonDto(
+        paragraf = this["paragraf"].asText(),
+        ledd = if (this["ledd"].isNull) null else this["ledd"].asText(),
+        bokstav = if (this["bokstav"].isNull) null else this["bokstav"].asText(),
+    )
+}
+
+internal fun JsonNode.arbeidsgiverelementer(): List<Arbeidsgiver> {
+    return this.map { jsonNode ->
+        Arbeidsgiver(
+            organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
+            månedligInntekt = jsonNode["månedligInntekt"].asDouble(),
+            fraMånedligInntekt = jsonNode["fraMånedligInntekt"].asDouble(),
+            refusjonsopplysninger = jsonNode["refusjonsopplysninger"].refusjonselementer(),
+            fraRefusjonsopplysninger = jsonNode["fraRefusjonsopplysninger"].refusjonselementer(),
+            begrunnelse = jsonNode["begrunnelse"].asText(),
+            forklaring = jsonNode["forklaring"].asText(),
+            subsumsjon = jsonNode["subsumsjon"].subsumsjonelementer()
+        )
+    }
+}
 @JvmName("Refusjonselement")
 fun List<Refusjonselement>.toMap(): List<Map<String, Any?>> = this.map { it.toMap() }
 @JvmName("Arbeidsgivere")

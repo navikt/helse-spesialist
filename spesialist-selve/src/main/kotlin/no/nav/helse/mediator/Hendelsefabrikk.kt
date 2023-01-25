@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.mediator.api.refusjonselementer
@@ -17,6 +18,7 @@ import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.SøknadSendt
@@ -381,7 +383,34 @@ internal class Hendelsefabrikk(
         overstyringDao = overstyringDao,
         overstyringMediator = overstyringMediator,
     )
-
+    fun overstyringInntektOgRefusjon(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        arbeidsgiver: List<Arbeidsgiver>,
+        skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
+        json: String,
+    ) = OverstyringInntektOgRefusjon(
+        id = id,
+        fødselsnummer = fødselsnummer,
+        oid = oid,
+        navn = navn,
+        ident = ident,
+        epost = epost,
+        arbeidsgiver = arbeidsgiver,
+        skjæringstidspunkt = skjæringstidspunkt,
+        opprettet = opprettet,
+        json = json,
+        reservasjonDao = reservasjonDao,
+        saksbehandlerDao = saksbehandlerDao,
+        oppgaveDao = oppgaveDao,
+        overstyringDao = overstyringDao,
+        overstyringMediator = overstyringMediator,
+    )
     fun overstyringArbeidsforhold(
         id: UUID,
         fødselsnummer: String,

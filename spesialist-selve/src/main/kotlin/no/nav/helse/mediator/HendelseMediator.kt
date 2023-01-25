@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.GodkjenningDTO
 import no.nav.helse.mediator.api.OppdaterPersonsnapshotDto
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
@@ -24,6 +25,7 @@ import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.SøknadSendt
@@ -120,6 +122,7 @@ internal class HendelseMediator(
             AdressebeskyttelseEndret.AdressebeskyttelseEndretRiver(it, this)
             OverstyringTidslinje.OverstyringTidslinjeRiver(it, this)
             OverstyringInntekt.OverstyringInntektRiver(it, this)
+            OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
@@ -488,6 +491,35 @@ internal class HendelseMediator(
                 skjæringstidspunkt = skjæringstidspunkt,
                 refusjonsopplysninger = refusjonsopplysninger,
                 fraRefusjonsopplysninger = fraRefusjonsopplysninger,
+                opprettet = opprettet,
+                json = json
+            ), context
+        )
+    }
+
+    fun overstyringInntektOgRefusjon(
+        id: UUID,
+        fødselsnummer: String,
+        oid: UUID,
+        navn: String,
+        ident: String,
+        epost: String,
+        arbeidsgiver: List<Arbeidsgiver>,
+        skjæringstidspunkt: LocalDate,
+        opprettet: LocalDateTime,
+        json: String,
+        context: MessageContext,
+    ) {
+        utfør(
+            fødselsnummer, hendelsefabrikk.overstyringInntektOgRefusjon(
+                id = id,
+                fødselsnummer = fødselsnummer,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+                epost = epost,
+                arbeidsgiver = arbeidsgiver,
+                skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
                 json = json
             ), context
