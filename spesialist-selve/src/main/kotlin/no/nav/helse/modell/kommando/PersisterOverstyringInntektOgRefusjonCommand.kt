@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.api.Arbeidsgiver
-import no.nav.helse.mediator.api.Refusjonselement
 import no.nav.helse.modell.overstyring.OverstyringDao
 
 internal class PersisterOverstyringInntektOgRefusjonCommand(
@@ -12,7 +11,7 @@ internal class PersisterOverstyringInntektOgRefusjonCommand(
     private val hendelseId: UUID,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
-    private val arbeidsgiver: List<Arbeidsgiver>,
+    private val arbeidsgivere: List<Arbeidsgiver>,
     private val opprettet: LocalDateTime,
     private val overstyringDao: OverstyringDao
 ) : Command {
@@ -21,7 +20,7 @@ internal class PersisterOverstyringInntektOgRefusjonCommand(
             hendelseId = hendelseId,
             eksternHendelseId = UUID.randomUUID(),
             fødselsnummer = fødselsnummer,
-            arbeidsgiver = arbeidsgiver,
+            arbeidsgivere = arbeidsgivere,
             saksbehandlerRef = oid,
             skjæringstidspunkt = skjæringstidspunkt,
             tidspunkt = opprettet,

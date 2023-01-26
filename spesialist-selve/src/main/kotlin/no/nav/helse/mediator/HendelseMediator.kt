@@ -504,7 +504,7 @@ internal class HendelseMediator(
         navn: String,
         ident: String,
         epost: String,
-        arbeidsgiver: List<Arbeidsgiver>,
+        arbeidsgivere: List<Arbeidsgiver>,
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
         json: String,
@@ -518,7 +518,7 @@ internal class HendelseMediator(
                 navn = navn,
                 ident = ident,
                 epost = epost,
-                arbeidsgiver = arbeidsgiver,
+                arbeidsgivere = arbeidsgivere,
                 skjæringstidspunkt = skjæringstidspunkt,
                 opprettet = opprettet,
                 json = json

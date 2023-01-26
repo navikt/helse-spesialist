@@ -7,15 +7,11 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.HendelseMediator
 import no.nav.helse.mediator.OverstyringMediator
 import no.nav.helse.mediator.api.Arbeidsgiver
-import no.nav.helse.mediator.api.Refusjonselement
-import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.api.arbeidsgiverelementer
-import no.nav.helse.mediator.api.refusjonselementer
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.InvaliderSaksbehandlerOppgaveCommand
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandlerCommand
-import no.nav.helse.modell.kommando.PersisterOverstyringInntektCommand
 import no.nav.helse.modell.kommando.PersisterOverstyringInntektOgRefusjonCommand
 import no.nav.helse.modell.kommando.PubliserOverstyringCommand
 import no.nav.helse.modell.kommando.ReserverPersonCommand
@@ -45,7 +41,7 @@ internal class OverstyringInntektOgRefusjon(
     navn: String,
     epost: String,
     ident: String,
-    arbeidsgiver: List<Arbeidsgiver>,
+    arbeidsgivere: List<Arbeidsgiver>,
     skjæringstidspunkt: LocalDate,
     opprettet: LocalDateTime,
     private val json: String,
@@ -68,7 +64,7 @@ internal class OverstyringInntektOgRefusjon(
             oid = oid,
             hendelseId = id,
             fødselsnummer = fødselsnummer,
-            arbeidsgiver = arbeidsgiver,
+            arbeidsgivere = arbeidsgivere,
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = opprettet,
             overstyringDao = overstyringDao
@@ -100,7 +96,7 @@ internal class OverstyringInntektOgRefusjon(
                     it.requireKey("@opprettet")
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")
-                    it.requireKey("arbeidsgiver")
+                    it.requireKey("arbeidsgivere")
                     it.requireKey("skjæringstidspunkt")
                     it.requireKey("saksbehandlerIdent")
                     it.requireKey("saksbehandlerOid")
@@ -130,7 +126,7 @@ internal class OverstyringInntektOgRefusjon(
                 navn = packet["saksbehandlerNavn"].asText(),
                 ident = packet["saksbehandlerIdent"].asText(),
                 epost = packet["saksbehandlerEpost"].asText(),
-                arbeidsgiver = packet["arbeidsgiver"].arbeidsgiverelementer(),
+                arbeidsgivere = packet["arbeidsgivere"].arbeidsgiverelementer(),
                 skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate(),
                 opprettet = packet["@opprettet"].asLocalDateTime(),
                 json = packet.toJson(),

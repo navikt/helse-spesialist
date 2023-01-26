@@ -8,9 +8,9 @@ import no.nav.helse.Meldingssender.sendArbeidsgiverinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendDigitalKontaktinformasjonløsningOld
 import no.nav.helse.Meldingssender.sendEgenAnsattløsningOld
 import no.nav.helse.Meldingssender.sendGodkjenningsbehov
+import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
-import no.nav.helse.Meldingssender.sendOverstyrTidslinje
 import no.nav.helse.Meldingssender.sendOverstyrtInntektOgRefusjon
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
@@ -142,7 +142,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         val hendelseId = sendOverstyrtInntektOgRefusjon(
             aktørId = AKTØR,
             fødselsnummer = FØDSELSNUMMER,
-            arbeidsgiver = listOf(
+            arbeidsgivere = listOf(
                 Arbeidsgiver(
                 organisasjonsnummer = ORGNR,
                 månedligInntekt = 25000.0,

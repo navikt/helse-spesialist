@@ -4,13 +4,13 @@ import DatabaseIntegrationTest
 import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
-import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -339,7 +339,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLEREPOST,
             ident = SAKSBEHANDLER_IDENT,
-            arbeidsgiver = listOf(
+            arbeidsgivere = listOf(
                 Arbeidsgiver(
                     organisasjonsnummer = ORGNUMMER,
                     begrunnelse = BEGRUNNELSE,

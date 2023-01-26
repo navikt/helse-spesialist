@@ -207,7 +207,7 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
         hendelseId: UUID,
         eksternHendelseId: UUID,
         fødselsnummer: String,
-        arbeidsgiver: List<Arbeidsgiver>,
+        arbeidsgivere: List<Arbeidsgiver>,
         saksbehandlerRef: UUID,
         skjæringstidspunkt: LocalDate,
         tidspunkt: LocalDateTime,
@@ -235,11 +235,11 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                     mapOf(
                         "hendelse_id" to hendelseId,
                         "ekstern_hendelse_id" to eksternHendelseId,
-                        "begrunnelse" to arbeidsgiver.first().begrunnelse,
+                        "begrunnelse" to arbeidsgivere.first().begrunnelse,
                         "saksbehandler_ref" to saksbehandlerRef,
                         "tidspunkt" to tidspunkt,
                         "fodselsnummer" to fødselsnummer.toLong(),
-                        "orgnr" to arbeidsgiver.first().organisasjonsnummer.toLong())
+                        "orgnr" to arbeidsgivere.first().organisasjonsnummer.toLong())
                 ).asUpdateAndReturnGeneratedKey
             )
 
@@ -247,13 +247,13 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
                 queryOf(
                     opprettOverstyringInntektQuery,
                     mapOf(
-                        "forklaring" to arbeidsgiver.first().forklaring,
-                        "manedlig_inntekt" to arbeidsgiver.first().månedligInntekt,
-                        "fra_manedlig_inntekt" to arbeidsgiver.first().fraMånedligInntekt,
+                        "forklaring" to arbeidsgivere.first().forklaring,
+                        "manedlig_inntekt" to arbeidsgivere.first().månedligInntekt,
+                        "fra_manedlig_inntekt" to arbeidsgivere.first().fraMånedligInntekt,
                         "skjaeringstidspunkt" to skjæringstidspunkt,
                         "overstyring_ref" to overstyringRef,
-                        "refusjonsopplysninger" to arbeidsgiver.first().refusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.first().refusjonsopplysninger) },
-                        "fra_refusjonsopplysninger" to arbeidsgiver.first().fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgiver.first().fraRefusjonsopplysninger) }
+                        "refusjonsopplysninger" to arbeidsgivere.first().refusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgivere.first().refusjonsopplysninger) },
+                        "fra_refusjonsopplysninger" to arbeidsgivere.first().fraRefusjonsopplysninger?.let { objectMapper.writeValueAsString(arbeidsgivere.first().fraRefusjonsopplysninger) }
                     )
                 ).asUpdate
             )

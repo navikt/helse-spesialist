@@ -180,7 +180,7 @@ internal object Meldingssender {
         aktørId: String,
         fødselsnummer: String,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
-        arbeidsgiver: List<Arbeidsgiver> = listOf(
+        arbeidsgivere: List<Arbeidsgiver> = listOf(
             Arbeidsgiver(
                 organisasjonsnummer = ORGNR,
                 månedligInntekt = 25000.0,
@@ -197,7 +197,7 @@ internal object Meldingssender {
                 meldingsfabrikk.lagOverstyringInntektOgRefusjon(
                     aktørId = aktørId,
                     fødselsnummer = fødselsnummer,
-                    arbeidsgiver = arbeidsgiver,
+                    arbeidsgivere = arbeidsgivere,
                     skjæringstidspunkt = skjæringstidspunkt,
                     saksbehandlerepost = SAKSBEHANDLER_EPOST,
                     id = id

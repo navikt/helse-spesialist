@@ -651,7 +651,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
     fun lagOverstyringInntektOgRefusjon(
         aktørId: String,
         fødselsnummer: String,
-        arbeidsgiver: List<Arbeidsgiver> = listOf(
+        arbeidsgivere: List<Arbeidsgiver> = listOf(
             Arbeidsgiver(
             organisasjonsnummer = Testdata.ORGNR,
             månedligInntekt = 25000.0,
@@ -672,7 +672,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf<String, Any>(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
-            "arbeidsgiver" to arbeidsgiver,
+            "arbeidsgivere" to arbeidsgivere,
             "saksbehandlerOid" to saksbehandleroid,
             "saksbehandlerIdent" to saksbehandlerident,
             "saksbehandlerNavn" to saksbehandlernavn,
