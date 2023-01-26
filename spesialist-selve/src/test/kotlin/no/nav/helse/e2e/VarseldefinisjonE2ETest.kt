@@ -17,30 +17,6 @@ internal class VarseldefinisjonE2ETest : AbstractE2ETest() {
 
     private val definisjonDao = DefinisjonDao(dataSource)
 
-    // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
-    @Test
-    fun `oppdaterer opprettet-tidspunkt`() {
-        val unikId = UUID.randomUUID()
-        val opprettet = LocalDateTime.parse("2022-12-12T12:00:00")
-
-        sendVarseldefinisjonerEndret(
-            listOf(
-                meldingsfabrikkUtenFnr.lagVarseldefinisjon(id = unikId, opprettet = opprettet)
-            )
-        )
-        val definisjon = definisjonDao.definisjonFor(unikId)
-        assertEquals(true, definisjon.opprettetIs(opprettet))
-
-        val nyOpprettet = LocalDateTime.parse("2023-01-01T12:00:00")
-        sendVarseldefinisjonerEndret(
-            listOf(
-                meldingsfabrikkUtenFnr.lagVarseldefinisjon(id = unikId, opprettet = nyOpprettet)
-            )
-        )
-        val oppdatertDefinisjon = definisjonDao.definisjonFor(unikId)
-        assertEquals(true, oppdatertDefinisjon.opprettetIs(nyOpprettet))
-    }
-
     @Test
     fun `lagrer varseldefinisjoner når vi mottar varseldefinisjoner_endret`() {
         sendVarseldefinisjonerEndret()

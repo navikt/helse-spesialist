@@ -206,7 +206,6 @@ internal class VarselTest {
         }
 
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
-        override fun oppdaterOpprettetTidspunkt(id: UUID, opprettet: LocalDateTime):Unit = TODO("Not yet implemented")
     }
 
     private val generasjonRepository get() = object : GenerasjonRepository {

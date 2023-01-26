@@ -30,13 +30,6 @@ internal class Varseldefinisjon(
         varselRepository.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
     }
 
-    // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
-    internal fun oppdaterOpprettetTidspunkt(varselRepository: VarselRepository) {
-        varselRepository.oppdaterOpprettetTidspunkt(id, opprettet)
-    }
-
-    internal fun opprettetIs(opprettet: LocalDateTime): Boolean = this.opprettet == opprettet
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -79,11 +72,6 @@ internal class Varseldefinisjon(
 
         internal fun List<Varseldefinisjon>.lagre(varselRepository: VarselRepository) {
             forEach { it.lagre(varselRepository) }
-        }
-
-        // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
-        internal fun List<Varseldefinisjon>.oppdaterOpprettetTidspunkt(varselRepository: VarselRepository) {
-            forEach { it.oppdaterOpprettetTidspunkt(varselRepository) }
         }
 
         internal fun JsonNode.definisjoner(): List<Varseldefinisjon> {
@@ -131,9 +119,6 @@ internal class Varseldefinisjon(
             val definisjoner = packet["definisjoner"].definisjoner()
 
             definisjoner.lagre(varselRepository)
-
-            // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
-            definisjoner.oppdaterOpprettetTidspunkt(varselRepository)
         }
     }
 }

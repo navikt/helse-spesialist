@@ -25,8 +25,6 @@ internal interface VarselRepository {
         avviklet: Boolean,
         opprettet: LocalDateTime,
     )
-    // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
-    fun oppdaterOpprettetTidspunkt(id: UUID, opprettet: LocalDateTime)
 }
 
 internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository {
@@ -70,11 +68,6 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         opprettet: LocalDateTime,
     ) {
         definisjonDao.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
-    }
-
-    // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
-    override fun oppdaterOpprettetTidspunkt(id: UUID, opprettet: LocalDateTime) {
-        definisjonDao.oppdaterOpprettetTidspunkt(id, opprettet)
     }
 
 }
