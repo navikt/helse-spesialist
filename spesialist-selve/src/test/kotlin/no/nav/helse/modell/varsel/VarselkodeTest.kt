@@ -52,6 +52,7 @@ internal class VarselkodeTest {
         override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?): Unit = TODO("Not yet implemented")
         override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?): Unit = TODO("Not yet implemented")
         override fun lagreDefinisjon(id: UUID, varselkode: String, tittel: String, forklaring: String?, handling: String?, avviklet: Boolean, opprettet: LocalDateTime): Unit = TODO("Not yet implemented")
+        override fun oppdaterOpprettetTidspunkt(id: UUID, opprettet: LocalDateTime):Unit = TODO("Not yet implemented")
     }
 
     private val generasjonRepository = object : GenerasjonRepository {

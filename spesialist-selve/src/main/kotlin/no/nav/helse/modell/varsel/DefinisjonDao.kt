@@ -57,6 +57,20 @@ class DefinisjonDao(private val dataSource: DataSource) {
         }
     }
 
+    // Midlertidig - Oppdater opprettet-tidspunkt for eksisterende definisjoner
+    internal fun oppdaterOpprettetTidspunkt(
+        unikId: UUID,
+        opprettet: LocalDateTime,
+    ) {
+        @Language("PostgreSQL")
+        val query =
+            "UPDATE api_varseldefinisjon SET opprettet = :opprettet WHERE unik_id = :unik_id;"
+
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, mapOf("opprettet" to opprettet, "unik_id" to unikId)).asUpdate)
+        }
+    }
+
     private fun mapToDefinisjon(row: Row): Varseldefinisjon {
         return Varseldefinisjon(
             id = row.uuid("unik_id"),

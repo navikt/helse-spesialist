@@ -33,7 +33,8 @@ internal class TestmeldingfabrikkUtenFnr() {
         kode: String = "EN_KODE",
         tittel: String = "EN_TITTEL",
         forklaring: String = "EN_FORKLARING",
-        handling: String = "EN_HANDLING"
+        handling: String = "EN_HANDLING",
+        opprettet: LocalDateTime = LocalDateTime.now(),
     ): Map<String, Any> = mapOf(
         "id" to id,
         "kode" to kode,
@@ -41,6 +42,6 @@ internal class TestmeldingfabrikkUtenFnr() {
         "forklaring" to forklaring,
         "handling" to handling,
         "avviklet" to false,
-        "opprettet" to LocalDateTime.now()
+        "opprettet" to opprettet,
     )
 }
