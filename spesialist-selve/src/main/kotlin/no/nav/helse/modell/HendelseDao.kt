@@ -15,6 +15,7 @@ import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
 import no.nav.helse.mediator.meldinger.RevurderingAvvist
 import no.nav.helse.mediator.meldinger.SøknadSendt
@@ -36,6 +37,7 @@ import no.nav.helse.modell.HendelseDao.Hendelsetype.OPPDATER_PERSONSNAPSHOT
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_ARBEIDSFORHOLD
 import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT
+import no.nav.helse.modell.HendelseDao.Hendelsetype.OVERSTYRING_INNTEKT_OG_REFUSJON
 import no.nav.helse.modell.HendelseDao.Hendelsetype.REVURDERING_AVVIST
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SAKSBEHANDLERLØSNING
 import no.nav.helse.modell.HendelseDao.Hendelsetype.SØKNAD_SENDT
@@ -142,6 +144,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
             GODKJENNING -> hendelsefabrikk.godkjenning(json)
             OVERSTYRING -> hendelsefabrikk.overstyringTidslinje(json)
             OVERSTYRING_INNTEKT -> hendelsefabrikk.overstyringInntekt(json)
+            OVERSTYRING_INNTEKT_OG_REFUSJON -> hendelsefabrikk.overstyringInntektOgRefusjon(json)
             OVERSTYRING_ARBEIDSFORHOLD -> hendelsefabrikk.overstyringArbeidsforhold(json)
             SAKSBEHANDLERLØSNING -> hendelsefabrikk.saksbehandlerløsning(json)
             UTBETALING_ANNULLERT -> hendelsefabrikk.utbetalingAnnullert(json)
@@ -165,6 +168,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         is Godkjenningsbehov -> GODKJENNING
         is OverstyringTidslinje -> OVERSTYRING
         is OverstyringInntekt -> OVERSTYRING_INNTEKT
+        is OverstyringInntektOgRefusjon -> OVERSTYRING_INNTEKT_OG_REFUSJON
         is OverstyringArbeidsforhold -> OVERSTYRING_ARBEIDSFORHOLD
         is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
         is UtbetalingAnnullert -> UTBETALING_ANNULLERT
@@ -185,7 +189,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     private enum class Hendelsetype {
         ADRESSEBESKYTTELSE_ENDRET, VEDTAKSPERIODE_ENDRET, VEDTAKSPERIODE_FORKASTET, GODKJENNING, OVERSTYRING,
         SAKSBEHANDLERLØSNING, UTBETALING_ANNULLERT, OPPDATER_PERSONSNAPSHOT, UTBETALING_ENDRET,
-        VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
+        VEDTAKSPERIODE_REBEREGNET, OVERSTYRING_INNTEKT, OVERSTYRING_INNTEKT_OG_REFUSJON, OVERSTYRING_ARBEIDSFORHOLD, REVURDERING_AVVIST,
         GOSYS_OPPGAVE_ENDRET, ENDRET_SKJERMETINFO, VEDTAK_FATTET, NYE_VARSLER, VEDTAKSPERIODE_OPPRETTET, SØKNAD_SENDT,
         VEDTAKSPERIODE_NY_UTBETALING
     }

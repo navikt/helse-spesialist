@@ -6,7 +6,10 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Testdata
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -643,6 +646,39 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
                 }
             }
         }
+    )
+
+    fun lagOverstyringInntektOgRefusjon(
+        aktørId: String,
+        fødselsnummer: String,
+        arbeidsgiver: List<Arbeidsgiver> = listOf(
+            Arbeidsgiver(
+            organisasjonsnummer = Testdata.ORGNR,
+            månedligInntekt = 25000.0,
+            fraMånedligInntekt = 25001.0,
+            forklaring = "testbortforklaring",
+            subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+            refusjonsopplysninger = null,
+            fraRefusjonsopplysninger = null,
+            begrunnelse = "en begrunnelse")
+        ),
+        skjæringstidspunkt: LocalDate,
+        saksbehandleroid: UUID = UUID.randomUUID(),
+        saksbehandlernavn: String = "saksbehandler",
+        saksbehandlerepost: String = "saksbehandler@nav.no",
+        saksbehandlerident: String = "saksbehandlerIdent",
+        id: UUID = UUID.randomUUID()
+    ) = nyHendelse(
+        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf<String, Any>(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "arbeidsgiver" to arbeidsgiver,
+            "saksbehandlerOid" to saksbehandleroid,
+            "saksbehandlerIdent" to saksbehandlerident,
+            "saksbehandlerNavn" to saksbehandlernavn,
+            "saksbehandlerEpost" to saksbehandlerepost,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+        )
     )
 
     fun lagOverstyringArbeidsforhold(

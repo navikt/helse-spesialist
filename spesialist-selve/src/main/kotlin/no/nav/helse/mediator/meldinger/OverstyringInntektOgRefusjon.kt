@@ -96,7 +96,7 @@ internal class OverstyringInntektOgRefusjon(
         init {
             River(rapidsConnection).apply {
                 validate {
-                    it.demandValue("@event_name", "saksbehandler_overstyrer_inntekt")
+                    it.demandValue("@event_name", "saksbehandler_overstyrer_inntekt_og_refusjon")
                     it.requireKey("@opprettet")
                     it.requireKey("aktørId")
                     it.requireKey("fødselsnummer")

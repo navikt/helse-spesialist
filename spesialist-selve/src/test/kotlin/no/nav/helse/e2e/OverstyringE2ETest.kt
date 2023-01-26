@@ -11,6 +11,7 @@ import no.nav.helse.Meldingssender.sendGodkjenningsbehov
 import no.nav.helse.Meldingssender.sendOverstyrtArbeidsforhold
 import no.nav.helse.Meldingssender.sendOverstyrtInntekt
 import no.nav.helse.Meldingssender.sendOverstyrTidslinje
+import no.nav.helse.Meldingssender.sendOverstyrtInntektOgRefusjon
 import no.nav.helse.Meldingssender.sendPersoninfoløsningComposite
 import no.nav.helse.Meldingssender.sendRisikovurderingløsningOld
 import no.nav.helse.Meldingssender.sendVergemålløsningOld
@@ -26,7 +27,9 @@ import no.nav.helse.Testdata.SNAPSHOT_MED_WARNINGS
 import no.nav.helse.Testdata.UTBETALING_ID
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
 import no.nav.helse.januar
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.schema.Arbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.Dagoverstyring
@@ -112,6 +115,58 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
         assertEquals("begrunnelse", overstyringer.first().begrunnelse)
         assertEquals("vår egen forklaring", overstyringer.first().forklaring)
+
+        assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
+
+        assertIngenOppgaver(testRapid.inspektør.oppgaveId(godkjenningsbehovId))
+
+        val nyttGodkjenningsbehov = sendGodkjenningsbehov(
+            organisasjonsnummer = ORGNR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            utbetalingId = UTBETALING_ID,
+            periodeFom = 1.januar,
+            periodeTom = 31.januar,
+            skjæringstidspunkt = 1.januar
+        )
+
+        klargjørForGodkjenning(nyttGodkjenningsbehov)
+
+        val oppgave = requireNotNull(oppgaveApiDao.finnOppgaver(SAKSBEHANDLERTILGANGER_UTEN_TILGANGER)
+            .find { it.fodselsnummer == FØDSELSNUMMER })
+        assertEquals(SAKSBEHANDLER_EPOST, oppgave.tildeling?.epost)
+    }
+
+    @Test
+    fun `saksbehandler overstyrer inntekt og refusjon`() {
+        val godkjenningsbehovId = settOppBruker()
+        val hendelseId = sendOverstyrtInntektOgRefusjon(
+            aktørId = AKTØR,
+            fødselsnummer = FØDSELSNUMMER,
+            arbeidsgiver = listOf(
+                Arbeidsgiver(
+                organisasjonsnummer = ORGNR,
+                månedligInntekt = 25000.0,
+                fraMånedligInntekt = 25001.0,
+                forklaring = "testbortforklaring",
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                refusjonsopplysninger = null,
+                fraRefusjonsopplysninger = null,
+                begrunnelse = "begrunnelse")
+            ),
+            skjæringstidspunkt = 1.januar,
+        )
+
+        val overstyringer = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FØDSELSNUMMER, ORGNR)
+        assertEquals(1, overstyringer.size)
+        assertEquals(FØDSELSNUMMER, overstyringer.first().fødselsnummer)
+        assertEquals(ORGNR, overstyringer.first().organisasjonsnummer)
+        assertEquals(hendelseId, overstyringer.first().hendelseId)
+        assertEquals("saksbehandlerIdent", overstyringer.first().saksbehandlerIdent)
+        assertEquals("saksbehandler", overstyringer.first().saksbehandlerNavn)
+        assertEquals(25000.0, overstyringer.first().månedligInntekt)
+        assertEquals(1.januar, overstyringer.first().skjæringstidspunkt)
+        assertEquals("begrunnelse", overstyringer.first().begrunnelse)
+        assertEquals("testbortforklaring", overstyringer.first().forklaring)
 
         assertEquals(1, overstyringApiDao.finnOverstyringerAvInntekt(FØDSELSNUMMER, ORGNR).size)
 

@@ -9,6 +9,7 @@ import javax.sql.DataSource
 import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
 import no.nav.helse.mediator.api.Refusjonselement
+import no.nav.helse.mediator.api.arbeidsgiverelementer
 import no.nav.helse.mediator.api.refusjonselementer
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.EndretSkjermetinfo
@@ -480,6 +481,22 @@ internal class Hendelsefabrikk(
             skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
             refusjonsopplysninger = jsonNode.path("refusjonsopplysninger").refusjonselementer(),
             fraRefusjonsopplysninger = jsonNode.path("fraRefusjonsopplysninger").refusjonselementer(),
+            opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
+            json = json
+        )
+    }
+
+    fun overstyringInntektOgRefusjon(json: String): OverstyringInntektOgRefusjon {
+        val jsonNode = mapper.readTree(json)
+        return overstyringInntektOgRefusjon(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            oid = UUID.fromString(jsonNode.path("saksbehandlerOid").asText()),
+            navn = jsonNode.path("saksbehandlerNavn").asText(),
+            ident = jsonNode.path("saksbehandlerIdent").asText(),
+            epost = jsonNode.path("saksbehandlerEpost").asText(),
+            arbeidsgiver = jsonNode.path("arbeidsgiver").arbeidsgiverelementer(),
+            skjæringstidspunkt = jsonNode.path("skjæringstidspunkt").asLocalDate(),
             opprettet = jsonNode.path("@opprettet").asLocalDateTime(),
             json = json
         )

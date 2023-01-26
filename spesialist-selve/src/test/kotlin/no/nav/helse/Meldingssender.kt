@@ -13,7 +13,9 @@ import no.nav.helse.Testdata.SAKSBEHANDLER_OID
 import no.nav.helse.Testdata.VARSEL_KODE_1
 import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.Testdata.VEDTAKSPERIODE_ID
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto.ArbeidsforholdOverstyrt
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -168,6 +170,35 @@ internal object Meldingssender {
                     skjæringstidspunkt = skjæringstidspunkt,
                     forklaring = forklaring,
                     subsumsjon = subsumsjon,
+                    saksbehandlerepost = SAKSBEHANDLER_EPOST,
+                    id = id
+                )
+            )
+        }
+
+    fun sendOverstyrtInntektOgRefusjon(
+        aktørId: String,
+        fødselsnummer: String,
+        skjæringstidspunkt: LocalDate = 1.januar(1970),
+        arbeidsgiver: List<Arbeidsgiver> = listOf(
+            Arbeidsgiver(
+                organisasjonsnummer = ORGNR,
+                månedligInntekt = 25000.0,
+                fraMånedligInntekt = 25001.0,
+                forklaring = "testbortforklaring",
+                subsumsjon = SubsumsjonDto("8-28", "LEDD_1", "BOKSTAV_A"),
+                refusjonsopplysninger = null,
+                fraRefusjonsopplysninger = null,
+                begrunnelse = "en begrunnelse")
+        )
+    ): UUID =
+        uuid.also { id ->
+            testRapid.sendTestMessage(
+                meldingsfabrikk.lagOverstyringInntektOgRefusjon(
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    arbeidsgiver = arbeidsgiver,
+                    skjæringstidspunkt = skjæringstidspunkt,
                     saksbehandlerepost = SAKSBEHANDLER_EPOST,
                     id = id
                 )

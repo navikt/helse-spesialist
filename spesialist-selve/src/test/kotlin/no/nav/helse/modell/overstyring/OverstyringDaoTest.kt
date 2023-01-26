@@ -5,9 +5,12 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.mediator.api.OverstyrArbeidsforholdDto
+import no.nav.helse.mediator.api.SubsumsjonDto
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
+import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
+import no.nav.helse.mediator.api.Arbeidsgiver
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
 import no.nav.helse.spesialist.api.person.Kjønn
@@ -264,6 +267,44 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
         assertEquals(OPPRETTET, hentetOverstyring.timestamp)
     }
 
+    @Test
+    fun `Finner opprettede inntekt- og refusjonsoverstyringer`() {
+        opprettPerson()
+        overstyrInntektOgRefusjon(ID)
+        overstyringDao.persisterOverstyringInntektOgRefusjon(
+            ID,
+            EKSTERN_HENDELSE_ID,
+            FØDSELSNUMMER,
+            listOf(
+                Arbeidsgiver(
+                    organisasjonsnummer = ORGNUMMER,
+                    begrunnelse = BEGRUNNELSE,
+                    forklaring = FORKLARING,
+                    månedligInntekt = INNTEKT,
+                    fraMånedligInntekt = INNTEKT + 1,
+                    refusjonsopplysninger = null,
+                    fraRefusjonsopplysninger = null,
+                    subsumsjon = SubsumsjonDto(paragraf = "87494")
+                )
+            ),
+            OID,
+            SKJÆRINGSTIDSPUNKT,
+            OPPRETTET
+        )
+        val hentetOverstyring = overstyringApiDao.finnOverstyringerAvInntektOgRefusjon(FØDSELSNUMMER, ORGNUMMER).first()
+
+        assertEquals(ID, hentetOverstyring.hendelseId)
+        assertEquals(FØDSELSNUMMER, hentetOverstyring.fødselsnummer)
+        assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
+        assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
+        assertEquals(FORKLARING, hentetOverstyring.forklaring)
+        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
+        assertEquals(INNTEKT, hentetOverstyring.månedligInntekt)
+        assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
+        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+    }
+
     private fun overstyrInntekt(hendelseId: UUID) = hendelseDao.opprett(
         OverstyringInntekt(
             id = hendelseId,
@@ -281,6 +322,37 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             refusjonsopplysninger = null,
             fraRefusjonsopplysninger = null,
             opprettet = OPPRETTET,
+            json = "{}",
+            reservasjonDao = reservasjonDao,
+            saksbehandlerDao = saksbehandlerDao,
+            oppgaveDao = oppgaveDao,
+            overstyringDao = overstyringDao,
+            overstyringMediator = mockk(),
+        )
+    )
+
+    private fun overstyrInntektOgRefusjon(hendelseId: UUID) = hendelseDao.opprett(
+        OverstyringInntektOgRefusjon(
+            id = hendelseId,
+            fødselsnummer = FØDSELSNUMMER,
+            oid = OID,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLEREPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            arbeidsgiver = listOf(
+                Arbeidsgiver(
+                    organisasjonsnummer = ORGNUMMER,
+                    begrunnelse = BEGRUNNELSE,
+                    forklaring = FORKLARING,
+                    månedligInntekt = INNTEKT,
+                    fraMånedligInntekt = INNTEKT + 1,
+                    refusjonsopplysninger = null,
+                    fraRefusjonsopplysninger = null,
+                    subsumsjon = SubsumsjonDto(paragraf = "87494")
+                )
+            ),
+            opprettet = OPPRETTET,
+            skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
             json = "{}",
             reservasjonDao = reservasjonDao,
             saksbehandlerDao = saksbehandlerDao,
