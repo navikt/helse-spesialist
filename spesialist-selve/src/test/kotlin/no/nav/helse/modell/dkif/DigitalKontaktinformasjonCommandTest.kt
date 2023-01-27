@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mediator.meldinger.løsninger.DigitalKontaktinformasjonløsning
 import no.nav.helse.modell.kommando.CommandContext
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -31,9 +30,9 @@ internal class DigitalKontaktinformasjonCommandTest {
     }
 
     @Test
-    fun `Ber om digital kontaktinformasjon`() {
-        assertFalse(command.execute(context))
-        assertEquals(listOf("DigitalKontaktinformasjon"), context.behov().keys.toList())
+    fun `Ber ikke om digital kontaktinformasjon lenger`() {
+        assertTrue(command.execute(context))
+        assertTrue(context.behov().isEmpty())
     }
 
     @Test

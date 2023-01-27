@@ -95,7 +95,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
         håndterEgenansattløsning()
         håndterVergemålløsning(fullmakter = fullmakter)
-        håndterDigitalKontaktinformasjonløsning()
     }
 
     private fun forlengelseFremTilÅpneOppgaver(
@@ -135,7 +134,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
 
         håndterEgenansattløsning()
         håndterVergemålløsning(fullmakter = fullmakter)
-        håndterDigitalKontaktinformasjonløsning()
     }
 
     protected fun fremTilSaksbehandleroppgave(
@@ -485,13 +483,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fullmakter: List<Fullmakt> = emptyList(),
     ) {
         meldingssenderV2.sendVergemålløsning(aktørId, fødselsnummer, fullmakter)
-    }
-
-    protected fun håndterDigitalKontaktinformasjonløsning(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-    ) {
-        meldingssenderV2.sendDigitalKontaktinformasjonløsning(aktørId, fødselsnummer)
     }
 
     protected fun håndterInntektløsning(

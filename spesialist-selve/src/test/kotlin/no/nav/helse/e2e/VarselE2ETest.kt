@@ -75,7 +75,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterOverstyrTidslinje()
         håndterEgenansattløsning()
         håndterVergemålløsning()
-        håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
 
         assertVarsel(SB_BO_2, VEDTAKSPERIODE_ID, AKTIV)
@@ -87,7 +86,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterOverstyrInntekt()
         håndterEgenansattløsning()
         håndterVergemålløsning()
-        håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
 
         assertVarsel(SB_BO_3, VEDTAKSPERIODE_ID, AKTIV)
@@ -99,7 +97,6 @@ internal class VarselE2ETest : AbstractE2ETestV2() {
         håndterOverstyrArbeidsforhold(organisasjonsnummer = Testdata.ORGNR_GHOST)
         håndterEgenansattløsning()
         håndterVergemålløsning()
-        håndterDigitalKontaktinformasjonløsning()
         håndterÅpneOppgaverløsning()
 
         assertVarsel(SB_BO_4, VEDTAKSPERIODE_ID, AKTIV)

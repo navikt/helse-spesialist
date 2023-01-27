@@ -13,7 +13,7 @@ internal class DigitalKontaktinformasjonCommand(
         private val logg = LoggerFactory.getLogger(DigitalKontaktinformasjonCommand::class.java)
     }
 
-    override fun execute(context: CommandContext) = behandle(context)
+    override fun execute(context: CommandContext) = true
 
     override fun resume(context: CommandContext) = behandle(context)
 
