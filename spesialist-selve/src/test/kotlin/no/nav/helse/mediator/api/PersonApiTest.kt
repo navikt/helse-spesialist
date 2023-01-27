@@ -1,7 +1,5 @@
 package no.nav.helse.mediator.api
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -31,10 +29,8 @@ import no.nav.helse.AzureConfig
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.azureAdAppAuthentication
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -48,7 +44,6 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 @TestInstance(PER_CLASS)
 internal class PersonApiTest {
 
-    private val saksbehandlerDao: SaksbehandlerDao = mockk(relaxed = true)
     private val apiVarselRepository: ApiVarselRepository = mockk(relaxed = true)
     private val hendelseMediator: HendelseMediator = mockk(relaxed = true)
     private val oppgaveMediator: OppgaveMediator = mockk(relaxed = true)
@@ -86,7 +81,6 @@ internal class PersonApiTest {
 
     @Test
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
-        Toggle.VurderingAvVarsler.enable()
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 0
@@ -98,12 +92,10 @@ internal class PersonApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.Created, response.status)
-        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
-        Toggle.VurderingAvVarsler.enable()
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 1
@@ -115,12 +107,10 @@ internal class PersonApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test
     fun `en vedtaksperiode kan avvises selv om det finnes uvurderte varsler`() {
-        Toggle.VurderingAvVarsler.enable()
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { apiVarselRepository.ikkeVurderteVarslerFor(1L) } returns 1
@@ -132,7 +122,6 @@ internal class PersonApiTest {
             }.execute()
         }
         assertEquals(HttpStatusCode.Created, response.status)
-        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test
@@ -319,7 +308,6 @@ internal class PersonApiTest {
             routing {
                 authenticate("oidc") {
                     personApi(
-                        saksbehandlerDao,
                         apiVarselRepository,
                         hendelseMediator,
                         oppgaveMediator,

@@ -103,5 +103,3 @@ spec:
       value: "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
     - name: VEDTAKSPERIODE_GENERASJONER
       value: "true"
-    - name: VURDERING_AV_VARSLER
-      value: "true"

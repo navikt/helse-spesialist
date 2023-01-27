@@ -15,8 +15,6 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import no.nav.helse.gruppemedlemskap
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.kanVurdereVarsler
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.spesialist.api.notat.NotatMediator
@@ -39,7 +37,6 @@ internal fun Route.totrinnsvurderingApi(
     post("/api/totrinnsvurdering") {
         val totrinnsvurdering = call.receive<TotrinnsvurderingDto>()
         val saksbehandlerOid = getSaksbehandlerOid()
-        val saksbehandlerIdent = getSaksbehandlerIdent()
 
         if (oppgaveMediator.erBeslutteroppgave(totrinnsvurdering.oppgavereferanse)) {
             call.respondText("Denne oppgaven har allerede blitt sendt til godkjenning.",
@@ -48,20 +45,16 @@ internal fun Route.totrinnsvurderingApi(
             return@post
         }
 
-        if (Toggle.VurderingAvVarsler.enabled || kanVurdereVarsler(saksbehandlerIdent, saksbehandlerIdent)) {
-            val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
-            if (antallIkkeVurderteVarsler > 0) {
-                call.respond(
-                    status = HttpStatusCode.BadRequest,
-                    mapOf(
-                        "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
-                        "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
-                    )
+        val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(totrinnsvurdering.oppgavereferanse)
+        if (antallIkkeVurderteVarsler > 0) {
+            call.respond(
+                status = HttpStatusCode.BadRequest,
+                mapOf(
+                    "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
+                    "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
                 )
-                return@post
-            }
-        } else {
-            varselRepository.settStatusVurdertFor(totrinnsvurdering.oppgavereferanse, saksbehandlerIdent)
+            )
+            return@post
         }
 
         sikkerLog.info("OppgaveId ${totrinnsvurdering.oppgavereferanse} sendes til godkjenning av $saksbehandlerOid")
@@ -122,11 +115,6 @@ internal fun Route.totrinnsvurderingApi(
 private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerOid(): UUID {
     val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
     return UUID.fromString(accessToken.payload.getClaim("oid").asString())
-}
-
-private fun PipelineContext<Unit, ApplicationCall>.getSaksbehandlerIdent(): String {
-    val accessToken = requireNotNull(call.principal<JWTPrincipal>()) { "mangler access token" }
-    return accessToken.payload.getClaim("NAVident").asString()
 }
 
 @JsonIgnoreProperties

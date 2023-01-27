@@ -1,7 +1,5 @@
 package no.nav.helse.mediator.api
 
-import ToggleHelpers.disable
-import ToggleHelpers.enable
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.request.accept
 import io.ktor.client.request.preparePost
@@ -16,7 +14,6 @@ import io.mockk.verify
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.oppgave.OppgaveMediator
 import no.nav.helse.modell.tildeling.TildelingService
 import no.nav.helse.objectMapper
@@ -79,7 +76,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
 
     @Test
     fun `en vedtaksperiode kan godkjennes hvis alle varsler er vurdert`() {
-        Toggle.VurderingAvVarsler.enable()
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { apiVarselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 0
@@ -91,12 +87,10 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
         assertEquals(HttpStatusCode.OK, response.status)
-        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test
     fun `en vedtaksperiode kan ikke godkjennes hvis det fins aktive varsler`() {
-        Toggle.VurderingAvVarsler.enable()
         every { oppgaveMediator.erAktivOppgave(1L) } returns true
         every { oppgaveMediator.erRiskoppgave(1L) } returns false
         every { apiVarselRepository.ikkeVurderteVarslerEkskludertBesluttervarslerFor(1L) } returns 1
@@ -108,7 +102,6 @@ internal class TotrinnsvurderingApiTest : AbstractApiTest() {
             }.execute()
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
-        Toggle.VurderingAvVarsler.disable()
     }
 
     @Test

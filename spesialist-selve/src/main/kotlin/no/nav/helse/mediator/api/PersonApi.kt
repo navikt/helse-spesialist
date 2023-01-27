@@ -17,16 +17,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.Tilgangsgrupper
 import no.nav.helse.mediator.HendelseMediator
-import no.nav.helse.mediator.Toggle
-import no.nav.helse.mediator.kanVurdereVarsler
 import no.nav.helse.modell.oppgave.OppgaveMediator
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDao
 import no.nav.helse.spesialist.api.varsel.ApiVarselRepository
 import no.nav.helse.tilganger
 import org.slf4j.LoggerFactory
 
 internal fun Route.personApi(
-    saksbehandlerDao: SaksbehandlerDao,
     varselRepository: ApiVarselRepository,
     hendelseMediator: HendelseMediator,
     oppgaveMediator: OppgaveMediator,
@@ -93,8 +89,7 @@ internal fun Route.personApi(
                 return@post
             }
 
-            if (oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid && !erDev()
-            ) {
+            if (oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse) == oid && !erDev()) {
                 call.respondText(
                     "Kan ikke beslutte egne oppgaver.",
                     status = HttpStatusCode.Unauthorized
@@ -105,9 +100,7 @@ internal fun Route.personApi(
             varselRepository.settStatusVurdertPåBeslutteroppgavevarsler(godkjenning.oppgavereferanse, godkjenning.saksbehandlerIdent)
         }
 
-        val kanskjeTidligereSaksbehandlerIdent = oppgaveMediator.finnTidligereSaksbehandler(godkjenning.oppgavereferanse)?.let(saksbehandlerDao::finnSaksbehandler)?.ident ?: godkjenning.saksbehandlerIdent
-
-        if (godkjenning.godkjent && (Toggle.VurderingAvVarsler.enabled || kanVurdereVarsler(kanskjeTidligereSaksbehandlerIdent, godkjenning.saksbehandlerIdent))) {
+        if (godkjenning.godkjent) {
             val antallIkkeVurderteVarsler = varselRepository.ikkeVurderteVarslerFor(godkjenning.oppgavereferanse)
             if (antallIkkeVurderteVarsler > 0) {
                 call.respond(

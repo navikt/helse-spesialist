@@ -9,15 +9,8 @@ abstract class Toggle(private var _enabled: Boolean) {
 
     object BeholdForlengelseMedOvergangTilUTS : Toggle("BEHOLD_FORELENGELSER_TIL_UTS")
     object VedtaksperiodeGenerasjoner : Toggle("VEDTAKSPERIODE_GENERASJONER")
-    object VurderingAvVarsler : Toggle("VURDERING_AV_VARSLER")
     object Inntekter : Toggle("INNTEKTER", true)
     object Refusjonsendringer : Toggle("REFUSJONSENDRINGER", erDev())
     object OverstyrInntektOgRefusjon : Toggle("OVERSTYR_INNTEKT_OG_REFUSJON")
     object AutomatiserRevuderinger : Toggle("AUTOMATISER_REVURDERINGER", erDev())
-}
-
-private val saksbehandlereSomKanVurdereVarsler = listOf("G103083", "N115007", "C117102", "T166629", "S157803")
-
-internal fun kanVurdereVarsler(vurderendeSaksbehandler: String, besluttendeSaksbehandler: String): Boolean {
-    return vurderendeSaksbehandler in saksbehandlereSomKanVurdereVarsler && besluttendeSaksbehandler in saksbehandlereSomKanVurdereVarsler
 }
