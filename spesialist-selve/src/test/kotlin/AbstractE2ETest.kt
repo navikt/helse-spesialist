@@ -152,7 +152,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         snapshotClient = snapshotClient,
         oppgaveMediator = oppgaveMediator,
         godkjenningMediator = GodkjenningMediator(warningDao, vedtakDao, opptegnelseDao, varselRepository, generasjonRepository),
-        overstyringMediator = OverstyringMediator(testRapid),
         automatisering = Automatisering(
             warningDao = warningDao,
             risikovurderingDao = risikovurderingDao,
@@ -165,6 +164,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             snapshotMediator = snapshotMediator,
             overstyringDao = overstyringDao,
         ) { false },
+        overstyringMediator = OverstyringMediator(testRapid),
         snapshotMediator = snapshotMediator
     )
     internal val hendelseMediator = HendelseMediator(

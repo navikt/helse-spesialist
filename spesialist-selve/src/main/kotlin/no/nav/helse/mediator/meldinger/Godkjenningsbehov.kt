@@ -17,8 +17,6 @@ import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.AutomatiseringCommand
 import no.nav.helse.modell.automatisering.AutomatiskAvvisningCommand
 import no.nav.helse.modell.delvisRefusjon
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonCommand
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattCommand
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverCommand
@@ -88,7 +86,6 @@ internal class Godkjenningsbehov(
     snapshotDao: SnapshotDao,
     commandContextDao: CommandContextDao,
     risikovurderingDao: RisikovurderingDao,
-    digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao,
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     egenAnsattDao: EgenAnsattDao,
     arbeidsforholdDao: ArbeidsforholdDao,
@@ -180,9 +177,6 @@ internal class Godkjenningsbehov(
             varselRepository = varselRepository,
             generasjonRepository = generasjonRepository,
             vedtaksperiodeId = vedtaksperiodeId
-        ),
-        DigitalKontaktinformasjonCommand(
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao
         ),
         ÅpneGosysOppgaverCommand(
             aktørId = aktørId,

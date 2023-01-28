@@ -41,7 +41,6 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.Automatisering
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.oppgave.OppgaveDao
@@ -90,7 +89,6 @@ internal class Hendelsefabrikk(
     private val saksbehandlerDao: SaksbehandlerDao = SaksbehandlerDao(dataSource),
     private val overstyringDao: OverstyringDao = OverstyringDao(dataSource),
     private val risikovurderingDao: RisikovurderingDao = RisikovurderingDao(dataSource),
-    private val digitalKontaktinformasjonDao: DigitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource),
     private val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource),
     private val snapshotDao: SnapshotDao = SnapshotDao(dataSource),
     private val egenAnsattDao: EgenAnsattDao = EgenAnsattDao(dataSource),
@@ -168,7 +166,6 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             commandContextDao = commandContextDao,
             risikovurderingDao = risikovurderingDao,
-            digitalKontaktinformasjonDao = digitalKontaktinformasjonDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
             egenAnsattDao = egenAnsattDao,
             arbeidsforholdDao = arbeidsforholdDao,

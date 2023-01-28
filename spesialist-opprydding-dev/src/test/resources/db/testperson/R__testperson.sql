@@ -45,8 +45,6 @@ INSERT INTO egen_ansatt(person_ref, er_egen_ansatt, opprettet)
 VALUES (${sequence_number}, false, now());
 INSERT INTO vergemal(person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, opprettet)
 VALUES (${sequence_number}, false, false, false, now());
-INSERT INTO digital_kontaktinformasjon(person_ref, er_digital, opprettet)
-VALUES (${sequence_number}, true, now());
 INSERT INTO gosysoppgaver(person_ref, antall, oppslag_feilet, opprettet)
 VALUES (${sequence_number}, 0, false, now());
 INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, krever_supersaksbehandler, data,

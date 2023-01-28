@@ -29,7 +29,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettSnapshot(personId)
                 it.slettGosysoppgaver(personId)
                 it.slettEgenAnsatt(personId)
-                it.slettDigitalKontaktinformasjon(personId)
                 it.slettVergemål(personId)
                 it.slettHendelse(fødselsnummer)
                 it.slettInntekt(personId)
@@ -291,12 +290,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
     private fun TransactionalSession.slettGosysoppgaver(personRef: Int) {
         @Language("PostgreSQL")
         val query = "DELETE FROM gosysoppgaver WHERE person_ref = ?"
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettDigitalKontaktinformasjon(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM digital_kontaktinformasjon WHERE person_ref = ?"
         run(queryOf(query, personRef).asExecute)
     }
 

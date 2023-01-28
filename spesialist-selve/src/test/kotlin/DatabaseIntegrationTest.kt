@@ -19,7 +19,6 @@ import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.arbeidsforhold.ArbeidsforholdDao
 import no.nav.helse.modell.arbeidsgiver.ArbeidsgiverDao
 import no.nav.helse.modell.automatisering.AutomatiseringDao
-import no.nav.helse.modell.dkif.DigitalKontaktinformasjonDao
 import no.nav.helse.modell.egenansatt.EgenAnsattDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.TestHendelse
@@ -160,7 +159,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val hendelseDao = HendelseDao(dataSource)
     internal val risikovurderingDao = RisikovurderingDao(dataSource)
     internal val automatiseringDao = AutomatiseringDao(dataSource)
-    internal val digitalKontaktinformasjonDao = DigitalKontaktinformasjonDao(dataSource)
     internal val åpneGosysOppgaverDao = ÅpneGosysOppgaverDao(dataSource)
     internal val egenAnsattDao = EgenAnsattDao(dataSource)
     internal val opptegnelseDao = OpptegnelseDao(dataSource)

@@ -32,8 +32,8 @@ internal class HendelseDaoTest : DatabaseIntegrationTest() {
             snapshotClient = graphQLClient,
             oppgaveMediator = mockk(),
             godkjenningMediator = mockk(relaxed = true),
-            overstyringMediator = mockk(),
             automatisering = mockk(relaxed = true),
+            overstyringMediator = mockk(),
             snapshotMediator = mockk(relaxed = true),
         )
     }
