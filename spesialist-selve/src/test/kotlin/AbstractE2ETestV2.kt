@@ -43,7 +43,10 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     private val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val testRapid = TestRapid()
     private val meldingssenderV2 = MeldingssenderV2(testRapid)
-    private val testMediator = TestMediator(testRapid, snapshotClient, dataSource)
+
+    init {
+        TestMediator(testRapid, snapshotClient, dataSource)
+    }
 
     @BeforeEach
     internal fun resetTestSetup() {
@@ -90,7 +93,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
             håndterInfotrygdutbetalingerløsning(vedtaksperiodeId = vedtaksperiodeId)
             if (andreArbeidsforhold.isNotEmpty()) håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = vedtaksperiodeId)
             håndterArbeidsgiverinformasjonløsning(vedtaksperiodeId = vedtaksperiodeId)
-            håndterArbeidsforholdløsning(regelverksvarsler = regelverksvarsler, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+            håndterArbeidsforholdløsning(vedtaksperiodeId = vedtaksperiodeId)
         }
         verify { snapshotClient.hentSnapshot(FØDSELSNUMMER) }
 
@@ -468,8 +471,6 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        utbetalingId: UUID = UTBETALING_ID,
-        regelverksvarsler: List<String> = emptyList(),
     ) {
         meldingssenderV2.sendArbeidsforholdløsning(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId)
     }
@@ -725,6 +726,7 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
     }
 
     private fun finnbeløp(type: String): Int? {
+        @Suppress("SqlResolve")
         @Language("PostgreSQL")
         val query = "SELECT ${type}beløp FROM utbetaling_id WHERE utbetaling_id = ?"
         return sessionOf(dataSource).use {
@@ -787,3 +789,4 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         }
     }
 }
+

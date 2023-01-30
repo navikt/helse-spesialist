@@ -7,5 +7,4 @@ data class RisikovurderingApiDto(
     val kontrollertOk: List<JsonNode>,
 ) {
     val arbeidsuførhetvurdering: List<String> = funn.map { it["beskrivelse"].asText() }
-    val ufullstendig: Boolean = false
 }

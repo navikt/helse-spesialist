@@ -50,7 +50,7 @@ internal fun Route.totrinnsvurderingApi(
             call.respond(
                 status = HttpStatusCode.BadRequest,
                 mapOf(
-                    "melding" to "Alle varsler må vurderes før godkjenning - ${antallIkkeVurderteVarsler} varsler er ikke vurdert",
+                    "melding" to "Alle varsler må vurderes før godkjenning - $antallIkkeVurderteVarsler varsler er ikke vurdert",
                     "feilkode" to "IkkeVurderteVarslerVedGodkjenning"
                 )
             )

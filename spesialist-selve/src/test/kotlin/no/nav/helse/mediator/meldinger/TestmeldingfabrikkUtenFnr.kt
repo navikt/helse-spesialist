@@ -6,7 +6,7 @@ import no.nav.helse.Testdata.VARSEL_KODE_1
 import no.nav.helse.Testdata.VARSEL_KODE_2
 import no.nav.helse.rapids_rivers.JsonMessage
 
-internal class TestmeldingfabrikkUtenFnr() {
+internal class TestmeldingfabrikkUtenFnr {
 
     internal fun lagVarseldefinisjonerEndret(
         id: UUID,

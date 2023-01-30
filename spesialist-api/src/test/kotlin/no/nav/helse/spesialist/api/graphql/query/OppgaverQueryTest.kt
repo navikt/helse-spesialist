@@ -282,7 +282,7 @@ internal class OppgaverQueryTest : AbstractGraphQLApiTest() {
         assertEquals(2, paginering["elementerPerSide"].asInt())
     }
 
-    @Disabled()
+    @Disabled
     @Test
     fun `sorterer ascending`() {
         val personId = opprettPerson()

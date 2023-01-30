@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql
 
-import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import graphql.GraphQL
 import io.ktor.http.ContentType

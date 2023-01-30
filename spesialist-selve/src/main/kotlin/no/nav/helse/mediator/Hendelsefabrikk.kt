@@ -115,7 +115,7 @@ internal class Hendelsefabrikk(
             map {
                 OverstyringDagDto(
                     dato = it.path("dato").asLocalDate(),
-                    type = enumValueOf<Dagtype>(it.path("type").asText()),
+                    type = enumValueOf(it.path("type").asText()),
                     fraType = enumValueOf<Dagtype>(it.path("fraType").asText()),
                     grad = it.path("grad").asInt(),
                     fraGrad = it.path("fraGrad").asInt()

@@ -49,7 +49,5 @@ internal class Utbetaling(
         internal val tidspunkt: LocalDateTime,
         internal val automatiskBehandling: Boolean,
         internal val godkjent: Boolean,
-    ) {
-
-    }
+    )
 }

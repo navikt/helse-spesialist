@@ -4,8 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsgiverDto
-import no.nav.helse.spesialist.api.graphql.schema.Arbeidsgiver
 import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 

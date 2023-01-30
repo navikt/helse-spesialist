@@ -698,7 +698,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         saksbehandlerident: String = "saksbehandlerIdent",
         id: UUID = UUID.randomUUID()
     ) = nyHendelse(
-        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf<String, Any>(
+        id, "saksbehandler_overstyrer_inntekt_og_refusjon", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "arbeidsgivere" to arbeidsgivere,

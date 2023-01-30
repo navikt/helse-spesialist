@@ -5,7 +5,6 @@ import no.nav.helse.modell.HendelseDao
 import no.nav.helse.modell.oppgave.OppgaveDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import org.slf4j.LoggerFactory
 
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val fødselsnummer: String,
