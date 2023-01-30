@@ -570,7 +570,8 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             personDao = personDao,
-            generasjonRepository = generasjonRepository
+            generasjonRepository = generasjonRepository,
+            varselRepository = varselRepository,
         )
     }
 
@@ -673,6 +674,7 @@ internal class Hendelsefabrikk(
             json,
             utbetalingDao,
             generasjonRepository,
+            varselRepository,
         )
     }
 

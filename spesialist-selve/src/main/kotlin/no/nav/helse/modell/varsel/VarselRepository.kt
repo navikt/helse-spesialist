@@ -25,6 +25,8 @@ internal interface VarselRepository {
         avviklet: Boolean,
         opprettet: LocalDateTime,
     )
+
+    fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID)
 }
 
 internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository {
@@ -33,24 +35,24 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
     private val definisjonDao = DefinisjonDao(dataSource)
 
     override fun reaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String) {
-        varselDao.oppdaterVarsel(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
+        varselDao.oppdaterStatus(vedtaksperiodeId, generasjonId, varselkode, AKTIV, null, null)
         if (varselkode.matches(varselkodeformat.toRegex())) tellVarsel(varselkode)
     }
 
     override fun deaktiverFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, INAKTIV, "Spesialist", varselDao::oppdaterVarsel)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, INAKTIV, "Spesialist", varselDao::oppdaterStatus)
         if (varselkode.matches(varselkodeformat.toRegex())) tellInaktivtVarsel(varselkode)
     }
 
     override fun godkjennFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, GODKJENT, ident, varselDao::oppdaterVarsel)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, GODKJENT, ident, varselDao::oppdaterStatus)
     }
 
     override fun avvisFor(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, ident: String, definisjonId: UUID?) {
         val definisjon = definisjonId?.let(definisjonDao::definisjonFor) ?: definisjonDao.sisteDefinisjonFor(varselkode)
-        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, AVVIST, ident, varselDao::oppdaterVarsel)
+        definisjon.oppdaterVarsel(vedtaksperiodeId, generasjonId, AVVIST, ident, varselDao::oppdaterStatus)
     }
 
     override fun lagreVarsel(id: UUID, generasjonId: UUID, varselkode: String, opprettet: LocalDateTime, vedtaksperiodeId: UUID) {
@@ -68,6 +70,10 @@ internal class ActualVarselRepository(dataSource: DataSource) : VarselRepository
         opprettet: LocalDateTime,
     ) {
         definisjonDao.lagreDefinisjon(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
+    }
+
+    override fun oppdaterGenerasjonFor(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
+        varselDao.oppdaterGenerasjon(id, gammelGenerasjonId, nyGenerasjonId)
     }
 
 }

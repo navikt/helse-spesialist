@@ -54,7 +54,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         val generasjonId = UUID.randomUUID()
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID())
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
-        varselDao.oppdaterVarsel(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
+        varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
         assertEquals(INAKTIV, varselDao.finnVarselstatus(VEDTAKSPERIODE, "EN_KODE"))
     }
 
@@ -66,12 +66,12 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         definisjonDao.lagreDefinisjon(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
         generasjonDao.opprettFor(generasjonId, VEDTAKSPERIODE, UUID.randomUUID())
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), VEDTAKSPERIODE, generasjonId)
-        varselDao.oppdaterVarsel(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "ident", definisjonId)
+        varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", INAKTIV, "ident", definisjonId)
 
         assertDefinisjonFor(varselId, forventetFinnes = true)
         assertIdentFor(varselId, forventetFinnes = true)
 
-        varselDao.oppdaterVarsel(VEDTAKSPERIODE, generasjonId, "EN_KODE", AKTIV, null, null)
+        varselDao.oppdaterStatus(VEDTAKSPERIODE, generasjonId, "EN_KODE", AKTIV, null, null)
         assertDefinisjonFor(varselId, forventetFinnes = false)
         assertIdentFor(varselId, forventetFinnes = false)
     }
@@ -88,7 +88,7 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         generasjonDao.opprettFor(generasjonIdv2, v2, UUID.randomUUID())
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v1, generasjonIdv1)
         varselDao.lagreVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), v2, generasjonIdv2)
-        varselDao.oppdaterVarsel(v1, generasjonIdv1, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
+        varselDao.oppdaterStatus(v1, generasjonIdv1, "EN_KODE", INAKTIV, "EN_IDENT", definisjonId)
         assertEquals(INAKTIV, varselDao.finnVarselstatus(v1, "EN_KODE"))
         assertEquals(AKTIV, varselDao.finnVarselstatus(v2, "EN_KODE"))
     }
@@ -108,6 +108,21 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
         generasjonDao.opprettFor(generasjonId, v1, UUID.randomUUID())
         varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), v1, generasjonId)
         assertEquals(listOf(Varsel(varselId, "EN_KODE", opprettet, v1)), alleVarslerFor(v1))
+    }
+
+    @Test
+    fun `flytter aktive varsler til neste generasjon`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val generasjonIdv1 = UUID.randomUUID()
+        val generasjonIdv2 = UUID.randomUUID()
+        generasjonDao.opprettFor(generasjonIdv1, vedtaksperiodeId, UUID.randomUUID())
+        generasjonDao.opprettFor(generasjonIdv2, vedtaksperiodeId, UUID.randomUUID())
+        val varselId = UUID.randomUUID()
+        varselDao.lagreVarsel(varselId, "EN_KODE", LocalDateTime.now(), vedtaksperiodeId, generasjonIdv1)
+        varselDao.oppdaterGenerasjon(varselId, generasjonIdv1, generasjonIdv2)
+
+        assertVarslerFor(generasjonIdv1, 0)
+        assertVarslerFor(generasjonIdv2, 1)
     }
 
     private fun assertDefinisjonFor(varselId: UUID, forventetFinnes: Boolean) {
@@ -146,6 +161,20 @@ internal class VarselDaoTest : DatabaseIntegrationTest() {
                 }.asList
             )
         }
+    }
+
+    private fun assertVarslerFor(generasjonId: UUID, forventetAntall: Int) {
+        @Language("PostgreSQL")
+        val query =
+            """SELECT count(1) FROM selve_varsel WHERE generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :generasjon_id)"""
+
+        val antall = sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(query, mapOf("generasjon_id" to generasjonId)).map { it.int(1) }.asSingle
+            )
+        }
+
+        assertEquals(antall, forventetAntall)
     }
 
 }

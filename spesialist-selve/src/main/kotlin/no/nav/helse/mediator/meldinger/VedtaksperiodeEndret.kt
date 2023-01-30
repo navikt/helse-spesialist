@@ -11,6 +11,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeGenerasjonCommand
 import no.nav.helse.modell.person.PersonDao
+import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -34,6 +35,7 @@ internal class VedtaksperiodeEndret(
     snapshotClient: SnapshotClient,
     personDao: PersonDao,
     generasjonRepository: GenerasjonRepository,
+    varselRepository: VarselRepository,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
         OppdaterSnapshotCommand(
@@ -51,6 +53,7 @@ internal class VedtaksperiodeEndret(
                 vedtaksperiodeId = vedtaksperiodeId,
                 vedtaksperiodeEndretHendelseId = forårsaketAvId,
                 generasjonRepository = generasjonRepository,
+                varselRepository = varselRepository,
                 forrigeTilstand = forrigeTilstand,
                 gjeldendeTilstand = gjeldendeTilstand
             )

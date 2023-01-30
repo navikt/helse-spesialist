@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.ActualVarselRepository
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -16,39 +17,40 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class OpprettKoblingTilGenerasjonCommandTest: AbstractDatabaseTest() {
-    private val repository = ActualGenerasjonRepository(dataSource)
+    private val generasjonRepository = ActualGenerasjonRepository(dataSource)
+    private val varselRepository = ActualVarselRepository(dataSource)
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
-    private val command = OpprettKoblingTilGenerasjonCommand(hendelseId, vedtaksperiodeId, utbetalingId, repository)
+    private val command = OpprettKoblingTilGenerasjonCommand(hendelseId, vedtaksperiodeId, utbetalingId, generasjonRepository, varselRepository)
     @Test
     fun `Opprett generasjon dersom det ikke finnes noen generasjon`() {
         command.execute(CommandContext(UUID.randomUUID()))
-        assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
+        assertEquals(1, generasjonRepository.tilhørendeFor(utbetalingId).size)
         assertGenerasjonerFor(vedtaksperiodeId, 1)
         assertDoesNotThrow {
-            repository.sisteFor(vedtaksperiodeId)
+            generasjonRepository.sisteFor(vedtaksperiodeId)
         }
     }
 
     @Test
     fun `Oppretter ikke noen ny generasjon dersom det eksisterer en generasjon fra før av og denne er ulåst`() {
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID())
-        generasjon?.håndterNyUtbetaling(hendelseId, utbetalingId)
+        val generasjon = generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID())
+        generasjon?.håndterNyUtbetaling(hendelseId, utbetalingId, varselRepository)
         command.execute(CommandContext(UUID.randomUUID()))
-        assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
-        assertEquals(generasjon, repository.sisteFor(vedtaksperiodeId))
+        assertEquals(1, generasjonRepository.tilhørendeFor(utbetalingId).size)
+        assertEquals(generasjon, generasjonRepository.sisteFor(vedtaksperiodeId))
         assertGenerasjonerFor(vedtaksperiodeId, 1)
     }
 
     @Test
     fun `Oppretter ny generasjon dersom det eksisterer en generasjon fra før av og denne er låst`() {
-        val generasjon = repository.opprettFørste(vedtaksperiodeId, UUID.randomUUID())
+        val generasjon = generasjonRepository.opprettFørste(vedtaksperiodeId, UUID.randomUUID())
         generasjon?.håndterVedtakFattet(UUID.randomUUID())
         command.execute(CommandContext(UUID.randomUUID()))
-        assertEquals(1, repository.tilhørendeFor(utbetalingId).size)
-        assertNotEquals(generasjon, repository.sisteFor(vedtaksperiodeId))
-        assertEquals(repository.tilhørendeFor(utbetalingId).last(), repository.sisteFor(vedtaksperiodeId))
+        assertEquals(1, generasjonRepository.tilhørendeFor(utbetalingId).size)
+        assertNotEquals(generasjon, generasjonRepository.sisteFor(vedtaksperiodeId))
+        assertEquals(generasjonRepository.tilhørendeFor(utbetalingId).last(), generasjonRepository.sisteFor(vedtaksperiodeId))
         assertGenerasjonerFor(vedtaksperiodeId, 2)
     }
 

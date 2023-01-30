@@ -5,6 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.varsel.VarselRepository
 import org.slf4j.LoggerFactory
 
 internal class OpprettKoblingTilGenerasjonCommand(
@@ -12,6 +13,7 @@ internal class OpprettKoblingTilGenerasjonCommand(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
     private val generasjonRepository: GenerasjonRepository,
+    private val varselRepository: VarselRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         if (!Toggle.VedtaksperiodeGenerasjoner.enabled) return true
@@ -26,7 +28,7 @@ internal class OpprettKoblingTilGenerasjonCommand(
             generasjonRepository.opprettFørste(vedtaksperiodeId, hendelseId) ?: throw IllegalStateException("Klarte ikke å opprette generasjon for vedtaksperiodeId=$vedtaksperiodeId")
         }
 
-        generasjon.håndterNyUtbetaling(hendelseId, utbetalingId)
+        generasjon.håndterNyUtbetaling(hendelseId, utbetalingId, varselRepository)
         return true
     }
 

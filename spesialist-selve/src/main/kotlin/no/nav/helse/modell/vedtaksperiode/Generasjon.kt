@@ -4,9 +4,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.varsel.Varsel
 import no.nav.helse.modell.varsel.Varsel.Companion.avvisAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.deaktiverFor
+import no.nav.helse.modell.varsel.Varsel.Companion.flyttVarslerFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennAlleFor
 import no.nav.helse.modell.varsel.Varsel.Companion.godkjennFor
 import no.nav.helse.modell.varsel.Varsel.Companion.reaktiverFor
@@ -46,6 +48,7 @@ internal class Generasjon private constructor(
     internal fun håndterNyGenerasjon(
         hendelseId: UUID,
         id: UUID = UUID.randomUUID(),
+        varselRepository: VarselRepository,
     ): Generasjon? {
         if (!låst) {
             sikkerlogg.info(
@@ -55,10 +58,26 @@ internal class Generasjon private constructor(
             )
             return null
         }
-        return generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId)
+
+        val nesteGenerasjon = generasjonRepository.opprettNeste(id, vedtaksperiodeId, hendelseId)
+        flyttAktiveVarsler(nesteGenerasjon, varselRepository)
+        return nesteGenerasjon
     }
 
-    internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID) {
+    private fun flyttAktiveVarsler(nyGenerasjon: Generasjon, varselRepository: VarselRepository) {
+        val aktiveVarsler = varsler.filter(Varsel::erAktiv)
+        aktiveVarsler.flyttVarslerFor(this.id, nyGenerasjon.id, varselRepository)
+        this.varsler.removeAll(aktiveVarsler)
+        nyGenerasjon.varsler.addAll(aktiveVarsler)
+        sikkerlogg.info(
+            "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel generasjon har {}",
+            kv("gammel_generasjon", this.id),
+            kv("ny_generasjon", nyGenerasjon.id),
+            kv("utbetalingId", this.utbetalingId),
+        )
+    }
+
+    internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID, varselRepository: VarselRepository) {
         if (låst) return run {
             val nyGenerasjonId = UUID.randomUUID()
             sikkerlogg.info(
@@ -67,7 +86,7 @@ internal class Generasjon private constructor(
                 keyValue("generasjon", this),
                 keyValue("generasjonId", nyGenerasjonId)
             )
-            håndterNyGenerasjon(hendelseId, nyGenerasjonId)?.håndterNyUtbetaling(utbetalingId)
+            håndterNyGenerasjon(hendelseId, nyGenerasjonId, varselRepository)?.håndterNyUtbetaling(utbetalingId)
         }
         håndterNyUtbetaling(utbetalingId)
     }

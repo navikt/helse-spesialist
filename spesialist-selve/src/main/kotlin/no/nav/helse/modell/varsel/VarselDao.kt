@@ -26,7 +26,7 @@ internal class VarselDao(private val dataSource: DataSource) {
         }
     }
 
-    internal fun oppdaterVarsel(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String?, definisjonId: UUID?) {
+    internal fun oppdaterStatus(vedtaksperiodeId: UUID, generasjonId: UUID, varselkode: String, status: Status, ident: String?, definisjonId: UUID?) {
         @Language("PostgreSQL")
         val query =
             """
@@ -56,6 +56,29 @@ internal class VarselDao(private val dataSource: DataSource) {
                         "vedtaksperiodeId" to vedtaksperiodeId,
                         "generasjonId" to generasjonId,
                         "varselkode" to varselkode
+                    )
+                ).asUpdate
+            )
+        }
+    }
+
+    internal fun oppdaterGenerasjon(id: UUID, gammelGenerasjonId: UUID, nyGenerasjonId: UUID) {
+        @Language("PostgreSQL")
+        val query = """
+           UPDATE selve_varsel 
+           SET generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :ny_generasjon_id) 
+           WHERE unik_id = :id 
+           AND generasjon_ref = (SELECT id FROM selve_vedtaksperiode_generasjon WHERE unik_id = :gammel_generasjon_id)
+        """
+
+        sessionOf(dataSource).use { session ->
+            session.run(
+                queryOf(
+                    query,
+                    mapOf(
+                        "ny_generasjon_id" to nyGenerasjonId,
+                        "gammel_generasjon_id" to gammelGenerasjonId,
+                        "id" to id,
                     )
                 ).asUpdate
             )

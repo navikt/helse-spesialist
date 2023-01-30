@@ -30,6 +30,8 @@ internal class Varsel(
         AVVIST
     }
 
+    internal fun erAktiv(): Boolean = this.status == AKTIV
+
     internal fun lagre(generasjon: Generasjon, varselRepository: VarselRepository) {
         generasjon.håndterVarsel(id, varselkode, opprettet, varselRepository)
     }
@@ -78,6 +80,10 @@ internal class Varsel(
         varselRepository.reaktiverFor(vedtaksperiodeId, generasjonId, varselkode)
     }
 
+    private fun oppdaterGenerasjon(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
+        varselRepository.oppdaterGenerasjonFor(this.id, gammelGenerasjonId, nyGenerasjonId)
+    }
+
     override fun equals(other: Any?): Boolean =
         this === other || (other is Varsel
         && javaClass == other.javaClass
@@ -96,6 +102,10 @@ internal class Varsel(
 
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun List<Varsel>.flyttVarslerFor(gammelGenerasjonId: UUID, nyGenerasjonId: UUID, varselRepository: VarselRepository) {
+            forEach { it.oppdaterGenerasjon(gammelGenerasjonId, nyGenerasjonId, varselRepository) }
+        }
 
         internal fun List<Varsel>.lagre(varselRepository: VarselRepository, generasjonRepository: GenerasjonRepository) {
             groupBy { it.vedtaksperiodeId }.forEach { (vedtaksperiodeId, varsler) ->
