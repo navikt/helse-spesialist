@@ -71,6 +71,30 @@ internal object Meldingssender {
         )
     }
 
+    fun sendOverstyringIgangsatt(
+        aktørId: String,
+        fødselsnummer: String,
+        berørtePerioder: List<Map<String, String>> = listOf(mapOf(
+            "vedtaksperiodeId" to "$VEDTAKSPERIODE_ID",
+            "skjæringstidspunkt" to "2022-01-01",
+            "periodeFom" to "2022-01-01",
+            "periodeTom" to "2022-01-31",
+            "orgnummer" to ORGNR,
+            "typeEndring" to "REVURDERING"
+        )),
+        kilde: UUID = UUID.randomUUID(),
+    ): UUID = uuid.also { id ->
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagOverstyringIgangsatt(
+                id = id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                berørtePerioder = berørtePerioder,
+                kilde = kilde,
+            )
+        )
+    }
+
     fun sendVedtaksperiodeForkastet(orgnr: String, vedtaksperiodeId: UUID): UUID =
         uuid.also { id ->
             testRapid.sendTestMessage(meldingsfabrikk.lagVedtaksperiodeForkastet(id, vedtaksperiodeId, orgnr))

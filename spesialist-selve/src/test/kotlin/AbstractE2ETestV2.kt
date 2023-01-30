@@ -8,6 +8,7 @@ import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.AbstractDatabaseTest
+import no.nav.helse.Meldingssender
 import no.nav.helse.MeldingssenderV2
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.hendelser
@@ -604,7 +605,16 @@ internal abstract class AbstractE2ETestV2 : AbstractDatabaseTest() {
         val overstyring = hendelser.single()
         val hendelseId = UUID.fromString(overstyring["@id"].asText())
         håndterUtbetalingForkastet(aktørId, fødselsnummer, organisasjonsnummer)
-        håndterVedtaksperiodeEndret(forårsaketAvId = hendelseId)
+        Meldingssender.sendOverstyringIgangsatt(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            berørtePerioder = listOf(
+                mapOf(
+                    "vedtaksperiodeId" to "$VEDTAKSPERIODE_ID"
+                )
+            ),
+            kilde = hendelseId
+        )
         håndterGodkjenningsbehov(harOppdatertMetainfo = true)
     }
 

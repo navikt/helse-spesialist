@@ -7,11 +7,9 @@ import no.nav.helse.mediator.Toggle
 import no.nav.helse.modell.SnapshotDao
 import no.nav.helse.modell.WarningDao
 import no.nav.helse.modell.kommando.Command
-import no.nav.helse.modell.kommando.KobleVedtaksperiodeTilOverstyring
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterSnapshotCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeGenerasjonCommand
-import no.nav.helse.modell.overstyring.OverstyringDao
 import no.nav.helse.modell.person.PersonDao
 import no.nav.helse.modell.vedtaksperiode.GenerasjonRepository
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -35,7 +33,6 @@ internal class VedtaksperiodeEndret(
     snapshotDao: SnapshotDao,
     snapshotClient: SnapshotClient,
     personDao: PersonDao,
-    overstyringDao: OverstyringDao,
     generasjonRepository: GenerasjonRepository,
 ) : Hendelse, MacroCommand() {
     override val commands: List<Command> = listOf(
@@ -47,11 +44,6 @@ internal class VedtaksperiodeEndret(
             warningDao = warningDao,
             personDao = personDao,
             json = json
-        ),
-        KobleVedtaksperiodeTilOverstyring(
-            vedtaksperiodeId = vedtaksperiodeId,
-            forårsaketAvId = forårsaketAvId,
-            overstyringDao = overstyringDao,
         )
     ).let {
         if (Toggle.VedtaksperiodeGenerasjoner.enabled) {

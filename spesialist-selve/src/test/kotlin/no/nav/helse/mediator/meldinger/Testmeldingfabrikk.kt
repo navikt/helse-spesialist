@@ -77,6 +77,35 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             )
         )
 
+    fun lagOverstyringIgangsatt(
+        id: UUID = UUID.randomUUID(),
+        aktørId: String,
+        fødselsnummer: String,
+        berørtePerioder: List<Map<String, String>> = listOf(mapOf(
+            "vedtaksperiodeId" to "${UUID.randomUUID()}",
+            "skjæringstidspunkt" to "2022-01-01",
+            "periodeFom" to "2022-01-01",
+            "periodeTom" to "2022-01-31",
+            "orgnummer" to "orgnr",
+            "typeEndring" to "REVURDERING"
+        )),
+        kilde: UUID = UUID.randomUUID()
+    ) =
+        nyHendelse(
+            id, "overstyring_igangsatt", mapOf(
+                "revurderingId" to "${UUID.randomUUID()}",
+                "kilde" to "$kilde",
+                "skjæringstidspunkt" to "2022-01-01",
+                "periodeForEndringFom" to "2022-01-01",
+                "periodeForEndringTom" to "2022-01-01",
+                "årsak" to "KORRIGERT_INNTEKTSMELDING",
+                "typeEndring" to "REVURDERING",
+                "berørtePerioder" to berørtePerioder,
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer
+            )
+        )
+
     fun lagVedtaksperiodeForkastet(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),

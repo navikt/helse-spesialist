@@ -18,6 +18,7 @@ import no.nav.helse.mediator.meldinger.GosysOppgaveEndret
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
@@ -213,6 +214,36 @@ internal class Hendelsefabrikk(
             json = json,
             personDao = personDao,
             arbeidsgiverDao = arbeidsgiverDao
+        )
+    }
+    fun overstyringIgangsatt(
+        json: String,
+    ): OverstyringIgangsatt {
+        val jsonNode = mapper.readTree(json)
+        return OverstyringIgangsatt(
+            id = UUID.fromString(jsonNode.path("@id").asText()),
+            fødselsnummer = jsonNode.path("fødselsnummer").asText(),
+            kilde = UUID.fromString(jsonNode.path("kilde").asText()),
+            berørteVedtaksperiodeIder = jsonNode.path("berørtePerioder").map { UUID.fromString(it["vedtaksperiodeId"].asText()) },
+            json = json,
+            overstyringDao = overstyringDao,
+        )
+    }
+
+    fun overstyringIgangsatt(
+        id: UUID,
+        fødselsnummer: String,
+        kilde: UUID,
+        berørteVedtaksperiodeIder: List<UUID>,
+        json: String,
+    ): OverstyringIgangsatt {
+        return OverstyringIgangsatt(
+            id = id,
+            fødselsnummer = fødselsnummer,
+            kilde = kilde,
+            berørteVedtaksperiodeIder = berørteVedtaksperiodeIder,
+            json = json,
+            overstyringDao = overstyringDao
         )
     }
 
@@ -539,7 +570,6 @@ internal class Hendelsefabrikk(
             snapshotDao = snapshotDao,
             snapshotClient = snapshotClient,
             personDao = personDao,
-            overstyringDao = overstyringDao,
             generasjonRepository = generasjonRepository
         )
     }

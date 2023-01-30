@@ -47,18 +47,33 @@ class OverstyringDao(private val dataSource: DataSource): HelseDao(dataSource) {
             )
         )
 
-    fun kobleOverstyringOgVedtaksperiode(vedtaksperiodeId: UUID, overstyringHendelseId: UUID) =
-        """ INSERT INTO overstyringer_for_vedtaksperioder (vedtaksperiode_id, overstyring_ref)
-            SELECT :vedtaksperiode_id, o.id
-            FROM overstyring o
-            WHERE o.ekstern_hendelse_id = :overstyring_hendelse_id
-            ON CONFLICT DO NOTHING
-        """.update(
-            mapOf(
-                "vedtaksperiode_id" to vedtaksperiodeId,
-                "overstyring_hendelse_id" to overstyringHendelseId,
-            )
-        )
+    fun kobleOverstyringOgVedtaksperiode(vedtaksperiodeIder: List<UUID>, overstyringHendelseId: UUID) {
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+
+            @Language("PostgreSQL")
+            val kobleOverstyringOgVedtaksperiodeQuery = """
+                INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
+                SELECT :vedtaksperiode_id, o.id
+                FROM overstyring o
+                WHERE o.ekstern_hendelse_id = :overstyring_hendelse_id
+                ON CONFLICT DO NOTHING
+            """.trimIndent()
+
+            session.transaction { transactionalSession ->
+                vedtaksperiodeIder.forEach { vedtaksperiodeId ->
+                    transactionalSession.run(
+                        queryOf(
+                            kobleOverstyringOgVedtaksperiodeQuery,
+                            mapOf(
+                                "vedtaksperiode_id" to vedtaksperiodeId,
+                                "overstyring_hendelse_id" to overstyringHendelseId
+                            )
+                        ).asUpdate
+                    )
+                }
+            }
+        }
+    }
 
     fun harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId: UUID): Boolean =
         """ SELECT 1 FROM overstyringer_for_vedtaksperioder ofv

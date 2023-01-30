@@ -84,7 +84,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
-        overstyringDao.kobleOverstyringOgVedtaksperiode(VEDTAKSPERIODE, EKSTERN_HENDELSE_ID)
+        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
         assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
         assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(UUID.randomUUID()))
@@ -139,7 +139,7 @@ internal class OverstyringDaoTest : DatabaseIntegrationTest() {
             overstyringMediator = mockk(),
         ))
         overstyringDao.persisterOverstyringTidslinje(ID, EKSTERN_HENDELSE_ID, FØDSELSNUMMER, ORGNUMMER, BEGRUNNELSE, OVERSTYRTE_DAGER, OID, OPPRETTET)
-        overstyringDao.kobleOverstyringOgVedtaksperiode(VEDTAKSPERIODE, EKSTERN_HENDELSE_ID)
+        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
 
         assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
         overstyringDao.ferdigstillOverstyringerForVedtaksperiode(VEDTAKSPERIODE)

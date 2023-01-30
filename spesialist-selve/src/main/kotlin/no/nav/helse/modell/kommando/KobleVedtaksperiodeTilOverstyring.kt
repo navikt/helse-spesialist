@@ -4,14 +4,14 @@ import java.util.UUID
 import no.nav.helse.modell.overstyring.OverstyringDao
 
 internal class KobleVedtaksperiodeTilOverstyring(
-    val vedtaksperiodeId: UUID,
-    val forårsaketAvId: UUID,
+    val berørteVedtaksperiodeIder: List<UUID>,
+    val kilde: UUID,
     val overstyringDao: OverstyringDao,
 ): Command {
 
     override fun execute(context: CommandContext): Boolean {
-        if (overstyringDao.finnesEksternHendelseId(forårsaketAvId)) {
-            overstyringDao.kobleOverstyringOgVedtaksperiode(vedtaksperiodeId, forårsaketAvId)
+        if (overstyringDao.finnesEksternHendelseId(kilde)) {
+            overstyringDao.kobleOverstyringOgVedtaksperiode(berørteVedtaksperiodeIder, kilde)
         }
 
         return true

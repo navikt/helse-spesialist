@@ -24,6 +24,7 @@ import no.nav.helse.mediator.meldinger.Hendelse
 import no.nav.helse.mediator.meldinger.NyeVarsler
 import no.nav.helse.mediator.meldinger.OppdaterPersonsnapshot
 import no.nav.helse.mediator.meldinger.OverstyringArbeidsforhold
+import no.nav.helse.mediator.meldinger.OverstyringIgangsatt
 import no.nav.helse.mediator.meldinger.OverstyringInntekt
 import no.nav.helse.mediator.meldinger.OverstyringInntektOgRefusjon
 import no.nav.helse.mediator.meldinger.OverstyringTidslinje
@@ -124,6 +125,7 @@ internal class HendelseMediator(
             OverstyringInntekt.OverstyringInntektRiver(it, this)
             OverstyringInntektOgRefusjon.OverstyringInntektOgRefusjonRiver(it, this)
             OverstyringArbeidsforhold.OverstyringArbeidsforholdRiver(it, this)
+            OverstyringIgangsatt.OverstyringIgangsattRiver(it, this)
             DigitalKontaktinformasjonløsning.DigitalKontaktinformasjonRiver(it, this)
             EgenAnsattløsning.EgenAnsattRiver(it, this)
             Vergemålløsning.VergemålRiver(it, this)
@@ -385,6 +387,25 @@ internal class HendelseMediator(
                 fødselsnummer,
                 aktørId,
                 organisasjonsnummer,
+                message.toJson()
+            ), context
+        )
+    }
+
+    fun overstyringIgangsatt(
+        message: JsonMessage,
+        id: UUID,
+        fødselsnummer: String,
+        kilde: UUID,
+        berørteVedtaksperiodeIder: List<UUID>,
+        context: MessageContext,
+    ) {
+        utfør(
+            hendelsefabrikk.overstyringIgangsatt(
+                id,
+                fødselsnummer,
+                kilde,
+                berørteVedtaksperiodeIder,
                 message.toJson()
             ), context
         )
