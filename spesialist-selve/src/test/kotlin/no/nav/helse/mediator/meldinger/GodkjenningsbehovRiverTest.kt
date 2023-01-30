@@ -59,7 +59,6 @@ internal class GodkjenningsbehovRiverTest {
             FOM,
             VEDTAKSPERIODE,
             UTBETALING_ID,
-            null,
             Periodetype.FØRSTEGANGSBEHANDLING,
             true,
             Utbetalingtype.UTBETALING,

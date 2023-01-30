@@ -132,7 +132,6 @@ internal class Hendelsefabrikk(
         periodeTom: LocalDate,
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-        arbeidsforholdId: String?,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
@@ -258,8 +257,6 @@ internal class Hendelsefabrikk(
             periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
             vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
             utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-            arbeidsforholdId = jsonNode.path("Godkjenning").path("arbeidsforholdId")
-                .takeUnless(JsonNode::isMissingOrNull)?.asText(),
             skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
             periodetype = periodetype,
             førstegangsbehandling = førstegangsbehandling,

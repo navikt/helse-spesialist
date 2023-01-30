@@ -277,7 +277,7 @@ internal class Godkjenningsbehov(
                         "Godkjenning.inntektskilde"
                     )
                     it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
-                    it.interestedIn("Godkjenning.arbeidsforholdId", "Godkjenning.orgnummereMedRelevanteArbeidsforhold")
+                    it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
                 }
             }.register(this)
         }
@@ -308,7 +308,6 @@ internal class Godkjenningsbehov(
                 skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
                 vedtaksperiodeId = UUID.fromString(packet["vedtaksperiodeId"].asText()),
                 utbetalingId = UUID.fromString(packet["utbetalingId"].asText()),
-                arbeidsforholdId = packet["Godkjenning.arbeidsforholdId"].takeUnless(JsonNode::isMissingOrNull)?.asText(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
