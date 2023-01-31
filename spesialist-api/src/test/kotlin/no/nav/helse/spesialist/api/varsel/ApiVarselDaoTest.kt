@@ -11,6 +11,8 @@ import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.VURDERT
 import no.nav.helse.spesialist.api.varsel.Varsel.Varselvurdering
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -213,6 +215,51 @@ internal class ApiVarselDaoTest: DatabaseIntegrationTest() {
         apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
 
         assertEquals(forventetVarsel, apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single())
+    }
+
+    @Test
+    fun `kan ikke sette varsel til vurdert dersom det allerede er vurdert`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+
+        assertNotNull(oppdatertVarsel)
+        assertEquals(
+            Varsel(generasjonId, definisjonId, "EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), VURDERT)),
+            apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single()
+        )
+        assertNull(forsøktOppdatertVarsel)
+    }
+
+    @Test
+    fun `kan ikke sette varsel til vurdert dersom det er godkjent`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val definisjonId = UUID.randomUUID()
+        val generasjonId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver(), utbetalingId)
+        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
+
+        val definisjonRef = opprettVarseldefinisjon(definisjonId = definisjonId)
+        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId, utbetalingId = utbetalingId)
+        nyttVarsel(vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, definisjonRef = definisjonRef)
+        val oppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+        apiVarselDao.godkjennVarslerFor(oppgaveId)
+        val forsøktOppdatertVarsel = apiVarselDao.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
+
+        assertNotNull(oppdatertVarsel)
+        assertEquals(
+            Varsel(generasjonId, definisjonId, "EN_KODE", "EN_TITTEL", null, null, Varselvurdering("EN_IDENT", LocalDateTime.now(), GODKJENT)),
+            apiVarselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId).single()
+        )
+        assertNull(forsøktOppdatertVarsel)
     }
 
     @Test
