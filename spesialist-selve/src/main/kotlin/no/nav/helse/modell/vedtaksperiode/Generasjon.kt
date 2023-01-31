@@ -69,12 +69,13 @@ internal class Generasjon private constructor(
         aktiveVarsler.flyttVarslerFor(this.id, nyGenerasjon.id, varselRepository)
         this.varsler.removeAll(aktiveVarsler)
         nyGenerasjon.varsler.addAll(aktiveVarsler)
-        sikkerlogg.info(
-            "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel generasjon har {}",
-            kv("gammel_generasjon", this.id),
-            kv("ny_generasjon", nyGenerasjon.id),
-            kv("utbetalingId", this.utbetalingId),
-        )
+        if (aktiveVarsler.isNotEmpty())
+            sikkerlogg.info(
+                "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel generasjon har {}",
+                kv("gammel_generasjon", this.id),
+                kv("ny_generasjon", nyGenerasjon.id),
+                kv("utbetalingId", this.utbetalingId),
+            )
     }
 
     internal fun håndterNyUtbetaling(hendelseId: UUID, utbetalingId: UUID, varselRepository: VarselRepository) {
