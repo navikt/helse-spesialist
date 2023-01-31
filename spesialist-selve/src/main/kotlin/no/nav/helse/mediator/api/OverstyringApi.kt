@@ -21,8 +21,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spesialist.api.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerDto
 
-val tilgangTilOverstyringAvRefusjon = listOf("G103083", "N115007", "C117102", "J153777", "F131883", "K104953", "V149621", "S160466", "O123659", "B164848", "K162139", "M136300", "S108267", "G157538")
-
 internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
     post("/api/overstyr/dager") {
         val overstyring = call.receive<OverstyrTidslinjeDTO>()
@@ -61,7 +59,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        val harOverstyringAvRefusjonTilgang = tilgangTilOverstyringAvRefusjon.contains(saksbehandler.toDto().ident)
+        val harOverstyringAvRefusjonTilgang = listOf("G103083", "N115007", "C117102", "J153777", "F131883", "K104953", "V149621", "S160466", "O123659", "B164848", "K162139", "M136300", "S108267", "G157538").contains(saksbehandler.toDto().ident)
 
         val message = OverstyrInntektKafkaDto(
             organisasjonsnummer = overstyring.organisasjonsnummer,
@@ -86,7 +84,7 @@ internal fun Route.overstyringApi(hendelseMediator: HendelseMediator) {
 
         val saksbehandler = Saksbehandler.fraOnBehalfOfToken(requireNotNull(call.principal()))
 
-        val harOverstyringAvInntektOgRefusjonTilgang = tilgangTilOverstyringAvRefusjon.contains(saksbehandler.toDto().ident)
+        val harOverstyringAvInntektOgRefusjonTilgang = listOf("G103083", "N115007", "C117102").contains(saksbehandler.toDto().ident)
 
         if (!Toggle.OverstyrInntektOgRefusjon.enabled) return@post
 
