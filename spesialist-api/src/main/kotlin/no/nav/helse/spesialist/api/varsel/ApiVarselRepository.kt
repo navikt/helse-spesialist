@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.api.graphql.schema.VarselDTO
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderte
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.antallIkkeVurderteEkskludertBesluttervarsler
 import no.nav.helse.spesialist.api.varsel.Varsel.Companion.toDto
+import no.nav.helse.spesialist.api.varsel.Varsel.Varselstatus.AKTIV
 
 class ApiVarselRepository(dataSource: DataSource) {
 
@@ -29,13 +30,19 @@ class ApiVarselRepository(dataSource: DataSource) {
         varselDao.godkjennVarslerFor(oppgaveId)
     }
 
+    fun erAktiv(varselkode: String, generasjonId: UUID): Boolean {
+        val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId)
+            ?: throw IllegalStateException("Forventet å finne status for varsel med varselkode=$varselkode, generasjonId=$generasjonId")
+        return varselstatus == AKTIV
+    }
+
     fun settStatusVurdert(
         generasjonId: UUID,
         definisjonId: UUID,
         varselkode: String,
         ident: String,
-    ): Int {
-        return varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)
+    ): VarselDTO? {
+        return varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)?.toDto()
     }
 
     fun settStatusVurdertPåBeslutteroppgavevarsler(oppgaveId: Long, ident: String) {
