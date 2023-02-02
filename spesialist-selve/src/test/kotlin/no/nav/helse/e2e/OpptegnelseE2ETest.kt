@@ -28,7 +28,7 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
     private val SAKSBEHANDLER_ID = UUID.randomUUID()
 
     @Test
-    suspend fun `Ved abonnering får du et nytt abonnement`() {
+    fun `Ved abonnering får du et nytt abonnement`() {
         val utbetalingId = UUID.randomUUID()
         setupPerson()
         setupArbeidsgiver()
@@ -42,8 +42,8 @@ private class OpptegnelseE2ETest : AbstractE2ETest() {
                         contentType(ContentType.Application.Json)
                         accept(ContentType.Application.Json)
                         authentication(SAKSBEHANDLER_ID)
-                    }
-                }.execute()
+                    }.execute()
+                }
 
         assertEquals(HttpStatusCode.OK, respons.status)
 

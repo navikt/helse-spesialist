@@ -771,7 +771,8 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
         mottaker: String = "mottaker",
         endringskode: String = "ENDR",
         sisteArbeidsgiverdag: LocalDate = now(),
-        linjer: List<Map<String, Any>> = listOf(lagOppdragLinje())
+        nettoBeløp: Int = 20,
+        linjer: List<Map<String, Any>> = listOf(lagOppdragLinje()),
     ) =
         mapOf(
             "fagsystemId" to fagsystemId,
@@ -779,6 +780,7 @@ internal class Testmeldingfabrikk(private val fødselsnummer: String, private va
             "mottaker" to mottaker,
             "endringskode" to endringskode,
             "sisteArbeidsgiverdag" to sisteArbeidsgiverdag,
+            "nettoBeløp" to nettoBeløp,
             "linjer" to linjer,
         )
 
